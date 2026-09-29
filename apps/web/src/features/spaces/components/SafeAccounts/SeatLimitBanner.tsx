@@ -4,8 +4,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 
 /** Shown once the Workspace holds as many Safes as its plan covers: upgrade when a bigger plan is offered, else sales. */
 export default function SeatLimitBanner({
@@ -35,7 +35,7 @@ export default function SeatLimitBanner({
         upgradePlanName ? (
           <NextLink href={plansHref} />
         ) : (
-          <a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />
+          <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />
         )
       }
     >

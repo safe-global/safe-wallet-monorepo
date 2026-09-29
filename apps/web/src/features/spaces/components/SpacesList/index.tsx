@@ -33,6 +33,7 @@ import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
 import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
@@ -151,7 +152,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                   and{' '}
                   <Link
                     variant="muted"
-                    href={AppRoutes.privacy}
+                    href={PRIVACY_URL}
                     target="_blank"
                     rel="noreferrer noopener"
                     className={cn(termsLinkClassName, 'whitespace-nowrap')}
@@ -168,19 +169,25 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
           {!isSafePro && (
             <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
               By continuing, you agree to the{' '}
-              <NextLink
-                href={AppRoutes.terms}
-                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              <Link
+                variant="muted"
+                href={TERMS_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
               >
                 Terms
-              </NextLink>{' '}
+              </Link>{' '}
               and{' '}
-              <NextLink
-                href={AppRoutes.privacy}
-                className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              <Link
+                variant="muted"
+                href={PRIVACY_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
               >
                 Privacy Policy
-              </NextLink>
+              </Link>
               .
             </p>
           )}

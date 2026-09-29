@@ -10,7 +10,7 @@
 declare module 'remark-heading-id'
 
 // @mdx-js/rollup compiles `*.md`/`*.mdx` imports to a React component (default
-// export). Used by the terms/cookie/privacy pages.
+// export). Used by the cookie page.
 declare module '*.md' {
   const MDXComponent: React.FC<Record<string, unknown>>
   export default MDXComponent

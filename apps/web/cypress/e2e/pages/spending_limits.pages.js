@@ -4,9 +4,12 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
+import { plans, signInToSpaces, stubWorkspacePlan } from '../../support/spaces-login.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
+export const safeProLock = '[data-testid="safe-pro-lock"]'
 const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
@@ -75,10 +78,6 @@ export function verifyOldValuesAreDisplayed() {
 
 export function verifyActionNamesAreDisplayed(names) {
   main.verifyValuesExist(actionItem, names)
-}
-
-export function verifySpendingLimitBtnIsDisabled() {
-  cy.get(newSpendingLimitBtn).should('be.disabled')
 }
 
 export function verifySpendingLimitsIcons() {
@@ -246,4 +245,13 @@ export function verifyDecodedTxSummary(names) {
 export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
+}
+
+/** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
+export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
+
+/** Signs the wallet in to Workspaces with the Workspace on `plan`. Business includes policies, Starter does not. */
+export function signInOnPlan(signer, plan) {
+  stubWorkspacePlan(plan, [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }])
+  signInToSpaces(signer)
 }

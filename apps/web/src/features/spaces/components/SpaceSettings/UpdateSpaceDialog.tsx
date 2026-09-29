@@ -2,7 +2,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import UpdateSpaceForm from './UpdateSpaceForm'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Typography } from '@/components/ui/typography'
-import { AppRoutes } from '@/config/routes'
+import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -16,7 +16,7 @@ const UpdateSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse; onClos
         <div className="mt-4 px-6 pb-6">
           <Typography className="mb-4">
             The Workspace name is visible in the sidebar menu, headings to all its members. Usually it&apos;s a name of
-            the company or a business. <ExternalLink href={AppRoutes.privacy}>How is this data stored?</ExternalLink>
+            the company or a business. <ExternalLink href={PRIVACY_URL}>How is this data stored?</ExternalLink>
           </Typography>
           <UpdateSpaceForm space={space} onClose={onClose} />
         </div>
