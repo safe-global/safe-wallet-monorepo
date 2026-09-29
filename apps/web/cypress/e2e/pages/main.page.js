@@ -74,6 +74,27 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
   }
 }
 
+/**
+ * Like `injectChainFeature`, for several flags at once: two intercepts on the chains endpoint would not both apply.
+ *
+ * @param {object} options
+ * @param {string} options.chainId  - The chain to target (e.g. constants.networkKeys.sepolia)
+ * @param {string[]} options.flags  - Feature flags to add
+ */
+export function injectChainFeatures({ chainId, flags }) {
+  cy.intercept('GET', '**/v2/chains**', (req) => {
+    req.continue((res) => {
+      const applyFlags = (chain) => ({ ...chain, features: [...new Set([...(chain.features || []), ...flags])] })
+
+      if (res.body?.results && Array.isArray(res.body.results)) {
+        res.body.results = res.body.results.map((chain) => (chain.chainId === chainId ? applyFlags(chain) : chain))
+      } else if (res.body?.chainId === chainId) {
+        res.body = applyFlags(res.body)
+      }
+    })
+  })
+}
+
 export function checkElementBackgroundColor(element, color) {
   cy.get(element).should('have.css', 'background-color', color)
 }

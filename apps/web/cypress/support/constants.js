@@ -123,6 +123,7 @@ export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
 export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
+export const spacesEntitlementsEndpoint = '**/v1/spaces/*/entitlements'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
@@ -311,6 +312,8 @@ export const chainFeatures = {
   staking: 'STAKING',
   earn: 'EARN',
   spaces: 'SPACES',
+  safePro: 'SAFE_PRO',
+  spendingLimitGating: 'SPENDING_LIMIT_GATING',
 }
 
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.env('CURRENT_COOKIE_TERMS_VERSION')

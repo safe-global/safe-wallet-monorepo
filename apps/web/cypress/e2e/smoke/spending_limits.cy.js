@@ -4,6 +4,8 @@ import * as spendinglimit from '../pages/spending_limits.pages'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import * as space from '../pages/spaces.page.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -14,55 +16,88 @@ describe('[SMOKE] Spending limits tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
+  // The plan gate reads the active Workspace's entitlements, so the wallet signs in and the Safe opens in a Workspace.
   beforeEach(() => {
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
-    owner.waitForConnectionStatus()
-    cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
-    spendinglimit.clickOnNewSpendingLimitBtn()
-  })
-
-  it('Verify A valid ENS name is resolved successfully', () => {
-    cy.fixture('ens_e2etestsafe').then((results) => {
-      cy.intercept('POST', '**', (req) => {
-        const result = results[req.body?.params?.[0]?.to?.toLowerCase()]
-        if (result) req.reply({ body: { jsonrpc: '2.0', id: req.body.id, result } })
-      })
+    main.injectChainFeatures({
+      chainId: constants.networkKeys.sepolia,
+      flags: [constants.chainFeatures.safePro, constants.chainFeatures.spendingLimitGating],
     })
-    spendinglimit.enterBeneficiaryAddress(constants.ENS_TEST_SEPOLIA)
-    spendinglimit.checkBeneficiaryENS(staticSafes.SEP_STATIC_SAFE_6)
+    wallet.connectSignerViaStorage(signer, constants.spacesUrl)
+    space.clickOnSignInBtn()
+    space.waitForSpacesWelcomeReady()
   })
 
-  it('Verify writing a valid address shows no errors', () => {
-    spendinglimit.enterBeneficiaryAddress(staticSafes.SEP_STATIC_SAFE_6)
-    spendinglimit.verifyValidAddressShowsNoErrors()
+  describe('On a plan that includes policies', () => {
+    beforeEach(() => {
+      spendinglimit.mockWorkspacePlan({ includesPolicies: true })
+      wallet.connectSignerViaStorage(
+        signer,
+        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + '&spaceId=' + staticSpaces.dashboardWithSafes.uuid,
+      )
+      owner.waitForConnectionStatus()
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+      spendinglimit.clickOnNewSpendingLimitBtn()
+    })
+
+    it('Verify A valid ENS name is resolved successfully', () => {
+      cy.fixture('ens_e2etestsafe').then((results) => {
+        cy.intercept('POST', '**', (req) => {
+          const result = results[req.body?.params?.[0]?.to?.toLowerCase()]
+          if (result) req.reply({ body: { jsonrpc: '2.0', id: req.body.id, result } })
+        })
+      })
+      spendinglimit.enterBeneficiaryAddress(constants.ENS_TEST_SEPOLIA)
+      spendinglimit.checkBeneficiaryENS(staticSafes.SEP_STATIC_SAFE_6)
+    })
+
+    it('Verify writing a valid address shows no errors', () => {
+      spendinglimit.enterBeneficiaryAddress(staticSafes.SEP_STATIC_SAFE_6)
+      spendinglimit.verifyValidAddressShowsNoErrors()
+    })
+
+    it('Verify Amount input cannot be 0', () => {
+      spendinglimit.enterSpendingLimitAmount('0')
+      spendinglimit.verifyNumberErrorValidation()
+    })
+
+    it('Verify Amount input cannot be a negative number', () => {
+      spendinglimit.enterSpendingLimitAmount('-1')
+      spendinglimit.verifyNumberAmountEntered('1')
+    })
+
+    it('Verify Amount input cannot be characters', () => {
+      spendinglimit.enterSpendingLimitAmount('abc')
+      spendinglimit.verifyNumberAmountEntered('')
+    })
+
+    it('Verify any positive number can be set in the amount input', () => {
+      spendinglimit.enterSpendingLimitAmount(1)
+      spendinglimit.verifyValidAddressShowsNoErrors()
+    })
+
+    it('Verify the reset time is "One time" by default', () => {
+      spendinglimit.verifyDefaultTimeIsSet()
+    })
+
+    it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr, 1 day, 1 week, 1 month', () => {
+      spendinglimit.clickOnTimePeriodDropdown()
+      spendinglimit.checkTimeDropdownOptions()
+    })
   })
 
-  it('Verify Amount input cannot be 0', () => {
-    spendinglimit.enterSpendingLimitAmount('0')
-    spendinglimit.verifyNumberErrorValidation()
-  })
+  describe('On a plan that does not include policies', () => {
+    beforeEach(() => {
+      spendinglimit.mockWorkspacePlan({ includesPolicies: false })
+      wallet.connectSignerViaStorage(
+        signer,
+        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + '&spaceId=' + staticSpaces.dashboardWithSafes.uuid,
+      )
+      owner.waitForConnectionStatus()
+      cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+    })
 
-  it('Verify Amount input cannot be a negative number', () => {
-    spendinglimit.enterSpendingLimitAmount('-1')
-    spendinglimit.verifyNumberAmountEntered('1')
-  })
-
-  it('Verify Amount input cannot be characters', () => {
-    spendinglimit.enterSpendingLimitAmount('abc')
-    spendinglimit.verifyNumberAmountEntered('')
-  })
-
-  it('Verify any positive number can be set in the amount input', () => {
-    spendinglimit.enterSpendingLimitAmount(1)
-    spendinglimit.verifyValidAddressShowsNoErrors()
-  })
-
-  it('Verify the reset time is "One time" by default', () => {
-    spendinglimit.verifyDefaultTimeIsSet()
-  })
-
-  it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr, 1 day, 1 week, 1 month', () => {
-    spendinglimit.clickOnTimePeriodDropdown()
-    spendinglimit.checkTimeDropdownOptions()
+    it('Verify the Safe Pro lock replaces the New spending limit button', () => {
+      spendinglimit.verifySafeProLockReplacesNewSpendingLimitBtn()
+    })
   })
 })

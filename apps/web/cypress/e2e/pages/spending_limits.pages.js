@@ -7,6 +7,8 @@ import { tokenSelector } from './create_tx.pages'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
+const safeProLock = '[data-testid="safe-pro-lock"]'
+const safeProLockTitle = 'Adding spending limits requires Safe Pro'
 const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
@@ -246,4 +248,17 @@ export function verifyDecodedTxSummary(names) {
 export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
+}
+
+/** Answers the Workspace entitlements request with a Business plan (policies included) or a Starter plan (without). */
+export function mockWorkspacePlan({ includesPolicies }) {
+  cy.intercept('GET', constants.spacesEntitlementsEndpoint, {
+    plan: { id: 'plan', name: includesPolicies ? 'Business' : 'Starter', cycleEndsAt: '2099-01-01T00:00:00Z' },
+    entitlements: [{ feature: 'policies', type: 'binary', enabled: includesPolicies }],
+  })
+}
+
+export function verifySafeProLockReplacesNewSpendingLimitBtn() {
+  cy.get(safeProLock).should('be.visible').and('contain', safeProLockTitle)
+  cy.get(newSpendingLimitBtn).should('not.exist')
 }
