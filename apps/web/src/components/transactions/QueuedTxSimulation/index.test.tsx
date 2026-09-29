@@ -136,6 +136,7 @@ describe('QueuedTxSimulation gating', () => {
 
     const link = await screen.findByTestId('queued-tx-simulation-setup')
     expect(link.getAttribute('href')).toContain('/settings/environment-variables')
+    expect(link).toHaveTextContent('Set up simulation')
     expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
     expect(mockSimulateTransaction).not.toHaveBeenCalled()
   })

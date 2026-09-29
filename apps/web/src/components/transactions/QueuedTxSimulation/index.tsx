@@ -82,7 +82,7 @@ const SimulationSetupLink = () => {
             className="flex flex-row items-center gap-1 rounded-lg bg-[var(--color-background-main)] px-2 py-1 no-underline"
           >
             <TenderlyIcon className="h-4" />
-            <Typography variant="paragraph-small-bold">Simulate</Typography>
+            <Typography variant="paragraph-small-bold">Set up simulation</Typography>
           </NextLink>
         }
       />
