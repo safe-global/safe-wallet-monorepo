@@ -4,6 +4,7 @@ import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/comm
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
+import { NestedSafeGrantNotice, type NestedSafeGrantNoticeProps } from './components/NestedSafeGrantNotice'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
 import { getProposerStatusColor, getProposerStatusLabel } from './utils'
 import { ProposerVariantContent } from './variants'
@@ -15,6 +16,8 @@ type ProposerDrawerActionProps = {
   actionHint?: string
   actionVariant?: 'default' | 'secondary'
   actionDisabled?: boolean
+  /** Set when a parent Safe granted the role: removing it needs that Safe, which the drawer cannot connect. */
+  nestedSafeGrant?: NestedSafeGrantNoticeProps
 }
 
 /** Everything the drawer shows once loaded: the status variant and its action. */
@@ -50,7 +53,16 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
           </Badge>
         )}
       </DrawerHeader>
-      <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
+      <DrawerBody>
+        {props.isLoading ? (
+          <ProposerOverviewSkeleton />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {props.nestedSafeGrant && <NestedSafeGrantNotice {...props.nestedSafeGrant} />}
+            <ProposerVariantContent {...props} />
+          </div>
+        )}
+      </DrawerBody>
       {props.isLoading ? (
         <PolicyDrawerActionsSkeleton />
       ) : (
