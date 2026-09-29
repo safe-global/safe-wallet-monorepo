@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
+import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '../utils/policyIcon'
@@ -9,6 +9,7 @@ import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
+import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyStatus, type PendingSpendingLimitPolicy } from '../types'
 import { resolveSpendingLimitDrawerState, type ActiveDrawerPolicy, type Viewer } from './resolveState'
@@ -59,15 +60,9 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
-      <DrawerHeader>
-        <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
-          <Icon className="size-4 text-success-strong" />
-        </div>
-        <DrawerTitle size="lg">{getPolicyLabel(policy)}</DrawerTitle>
-        <div className="ml-auto">
-          <PolicyStatusChip status={getPolicyStatus(policy)} />
-        </div>
-      </DrawerHeader>
+      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)}>
+        <PolicyStatusChip status={getPolicyStatus(policy)} />
+      </PolicyDrawerHeader>
 
       <DrawerBody>
         <div className="flex flex-col gap-6">

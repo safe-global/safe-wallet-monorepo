@@ -1,9 +1,10 @@
 import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
-import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
+import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
+import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
 import { getProposerStatusColor, getProposerStatusLabel } from './utils'
 import { ProposerVariantContent } from './variants'
@@ -36,20 +37,16 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
-      <DrawerHeader>
-        <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
-          <UserRoundPen className="size-4 text-success-strong" />
-        </div>
-        <DrawerTitle size="lg">Proposer role</DrawerTitle>
+      <PolicyDrawerHeader icon={UserRoundPen} title="Proposer role">
         {props.isLoading ? (
-          <Skeleton className="ml-auto h-6 w-24 rounded-lg" data-testid="proposer-status-skeleton" />
+          <Skeleton className="h-6 w-24 rounded-lg" data-testid="proposer-status-skeleton" />
         ) : (
-          <Badge variant={getProposerStatusColor(props.status)} size="status" shape="status" className="ml-auto">
+          <Badge variant={getProposerStatusColor(props.status)} size="status" shape="status">
             <BadgeDot />
             {getProposerStatusLabel(props.status)}
           </Badge>
         )}
-      </DrawerHeader>
+      </PolicyDrawerHeader>
       <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
       {props.isLoading ? (
         <PolicyDrawerActionsSkeleton />
