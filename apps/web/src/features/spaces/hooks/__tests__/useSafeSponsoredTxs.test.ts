@@ -18,7 +18,7 @@ let mockCurrentSpaceId: string | null = null
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 
 const SAFE = { safe: { chainId: '1' }, safeAddress: '0xAbC' }
-const holding = (safes: Record<string, string[]>) => ({ currentData: { safes }, isLoading: false })
+const holding = (safes: Record<string, string[]>) => ({ currentData: { safes }, isFetching: false })
 const meter = { used: 20, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
 describe('useSafeSponsoredTxs', () => {
@@ -135,8 +135,17 @@ describe('useSafeSponsoredTxs', () => {
     })
   })
 
+  it('keeps loading after a Workspace switch instead of reporting "not sponsored"', () => {
+    // RTK Query's `isLoading` stays false on later fetches; only `isFetching` tells the new Workspace is in flight.
+    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: false, isFetching: true })
+    const { result } = renderHook(() => useSafeSponsoredTxs())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.canSponsor).toBe(false)
+  })
+
   it("reports loading while the Workspace's Safes or the plan resolve", () => {
-    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: true })
+    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: true })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
 
     mockIsSignedIn.mockReturnValue(true)

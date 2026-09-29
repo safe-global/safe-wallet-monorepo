@@ -5,7 +5,7 @@ import {
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { _mapWithConcurrency, useSafeSpaces } from '@/hooks/useSafeSpaces'
+import { useSafeSpaces } from '@/hooks/useSafeSpaces'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: jest.fn(),
@@ -120,26 +120,5 @@ describe('useSafeSpaces', () => {
     expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
     expect(mockUseUsersGetWithWalletsV1Query).toHaveBeenCalledWith(undefined, { skip: true })
     await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
-  })
-})
-
-describe('_mapWithConcurrency', () => {
-  it('never runs more than the limit at once and keeps the input order', async () => {
-    let inFlight = 0
-    let maxInFlight = 0
-    const results = await _mapWithConcurrency([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 4, async (n) => {
-      inFlight++
-      maxInFlight = Math.max(maxInFlight, inFlight)
-      await new Promise((resolve) => setTimeout(resolve, 10 - n))
-      inFlight--
-      return n * 2
-    })
-
-    expect(maxInFlight).toBe(4)
-    expect(results).toEqual([2, 4, 6, 8, 10, 12, 14, 16, 18, 20])
-  })
-
-  it('resolves to an empty list for no items', async () => {
-    await expect(_mapWithConcurrency([], 4, async (n) => n)).resolves.toEqual([])
   })
 })

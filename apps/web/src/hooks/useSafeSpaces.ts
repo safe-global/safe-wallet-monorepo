@@ -16,27 +16,11 @@ export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
 /** Chain-qualified key for the reverse lookup. Matches the accounts table's row keys. */
 export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
-const MAX_CONCURRENT_REQUESTS = 4
-
-/** Like `Promise.all(items.map(fn))`, but with at most `limit` calls in flight; results keep the input order. */
-export const _mapWithConcurrency = async <T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>) => {
-  const results: R[] = new Array(items.length)
-  let next = 0
-  const worker = async () => {
-    while (next < items.length) {
-      const index = next++
-      results[index] = await fn(items[index])
-    }
-  }
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
-  return results
-}
-
 /**
  * Builds a reverse lookup from a chain-qualified Safe key to the Spaces it belongs to.
  *
  * The gateway only exposes space → safes, so this fetches the signed-in user's spaces and
- * each joined space's safes (a few at a time), then indexes them by `${chainId}:${address}`. Keying by chain (not
+ * each joined space's safes, then indexes them by `${chainId}:${address}`. Keying by chain (not
  * address alone) keeps a Safe that shares an address across chains from inheriting another
  * chain's workspace membership. Signed-out users belong to no space, so the map is empty and
  * the "Workspaces" column simply renders nothing.
@@ -70,11 +54,13 @@ export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoad
     let cancelled = false
     setIsResolving(true)
 
-    _mapWithConcurrency(joinedSpaces, MAX_CONCURRENT_REQUESTS, (space) =>
-      triggerSpaceSafes({ spaceId: space.uuid }, true)
-        .unwrap()
-        .then((response) => ({ space, safes: response.safes }))
-        .catch(() => null),
+    Promise.all(
+      joinedSpaces.map((space) =>
+        triggerSpaceSafes({ spaceId: space.uuid }, true)
+          .unwrap()
+          .then((response) => ({ space, safes: response.safes }))
+          .catch(() => null),
+      ),
     ).then((results) => {
       if (cancelled) return
 

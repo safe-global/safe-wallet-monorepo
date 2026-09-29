@@ -31,10 +31,11 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
   const currentSpaceId = useCurrentSpaceId()
   // Only the current Workspace counts, whatever other Workspaces hold the Safe: one lookup, not one per Workspace.
   const shouldLookup = isEnabled && isSignedIn && Boolean(currentSpaceId && safeAddress && safe.chainId)
-  const { currentData: spaceSafes, isLoading: isSafesLoading } = useSpaceSafesGetV1Query(
+  const { currentData: spaceSafes, isFetching: isSafesFetching } = useSpaceSafesGetV1Query(
     { spaceId: currentSpaceId ?? '' },
     { skip: !shouldLookup },
   )
+  const isSafesLoading = shouldLookup && isSafesFetching && !spaceSafes
   const isSafeInSpace = useMemo(
     () => (spaceSafes?.safes[safe.chainId] ?? []).some((address) => sameAddress(address, safeAddress)),
     [spaceSafes, safe.chainId, safeAddress],
