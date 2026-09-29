@@ -10,6 +10,10 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
 const renderAt = (pathname: string) => render(<Footer />, { routerProps: { pathname } })
 
 describe('Footer', () => {
+  beforeEach(() => {
+    ;(useIsOfficialHost as jest.Mock).mockReturnValue(false)
+  })
+
   it('renders on the welcome accounts page', () => {
     renderAt(AppRoutes.welcome.accounts)
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()

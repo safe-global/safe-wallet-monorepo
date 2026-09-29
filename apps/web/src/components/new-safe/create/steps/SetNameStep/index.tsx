@@ -157,11 +157,11 @@ function SetNameStep({
           </div>
           <Typography variant="paragraph-small" className="mt-4 block">
             By continuing, you agree to our{' '}
-            <ExternalLink href={TERMS_URL} noIcon>
+            <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
               terms of use
             </ExternalLink>{' '}
             and{' '}
-            <ExternalLink href={PRIVACY_URL} noIcon>
+            <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
               privacy policy
             </ExternalLink>
             .

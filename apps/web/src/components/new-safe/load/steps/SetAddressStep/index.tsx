@@ -146,11 +146,11 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
           <Typography className="mt-8 block">
             By continuing you consent to the{' '}
-            <ExternalLink href={TERMS_URL} noIcon>
+            <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
               terms of use
             </ExternalLink>{' '}
             and{' '}
-            <ExternalLink href={PRIVACY_URL} noIcon>
+            <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
               privacy policy
             </ExternalLink>
             .

@@ -12,7 +12,7 @@ const Custom403: NextPage = () => {
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>403 – Access Restricted</h1>
       <p>
         Safe{'{Wallet}'} is not available in your region. See our{' '}
-        <ExternalLink href={TERMS_URL} noIcon>
+        <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
           terms
         </ExternalLink>{' '}
         for details.
