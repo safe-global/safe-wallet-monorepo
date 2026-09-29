@@ -80,7 +80,7 @@ jobs:
           for dir in shards/*/; do mv "${dir}coverage-final.json" "${dir%/}.json"; done
           test "$(ls shards/*.json | wc -l)" -eq 4
           yarn nyc merge shards .nyc_output/coverage.json
-          yarn nyc report --temp-dir .nyc_output --reporter=lcov --report-dir coverage
+          yarn nyc report --temp-dir .nyc_output --reporter=lcov --reporter=text-summary --report-dir coverage
           yarn nyc check-coverage --temp-dir .nyc_output --branches 56 --functions 62 --lines 78 --statements 76
 
       - name: Upload coverage to Datadog
