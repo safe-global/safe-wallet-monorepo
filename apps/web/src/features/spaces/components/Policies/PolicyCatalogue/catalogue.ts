@@ -2,6 +2,9 @@ import { MessageSquarePlus, UserRoundPen, WalletCards, type LucideIcon } from 'l
 
 export type PolicyCatalogueId = 'spending-limit' | 'proposer' | 'suggestion'
 
+/** The tiles that stand for a policy, as opposed to the suggestion tile. */
+export type PolicyId = Exclude<PolicyCatalogueId, 'suggestion'>
+
 export interface PolicyCatalogueEntry {
   id: PolicyCatalogueId
   title: string

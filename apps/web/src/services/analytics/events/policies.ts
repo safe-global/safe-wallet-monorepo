@@ -7,6 +7,10 @@ export const POLICY_EVENTS = {
     action: 'Policy catalogue tile clicked',
     category: POLICY_CATEGORY,
   },
+  POLICY_UPSELL_UPGRADE_CLICKED: {
+    action: 'Policy upsell upgrade clicked',
+    category: POLICY_CATEGORY,
+  },
   /** Same action and label wording as the Safe-level `SETTINGS_EVENTS.SPENDING_LIMIT.RESET_PERIOD`, so the two compare. */
   SPENDING_LIMIT_RESET_PERIOD: {
     event: EventType.META,
