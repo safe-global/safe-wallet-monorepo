@@ -8,7 +8,13 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { useSafeShield } from '../SafeShieldContext'
-import { useHypernativeOAuth, useIsHypernativeEligible, type HypernativeEligibility } from '@/features/hypernative'
+import {
+  useHypernativeOAuth,
+  useIsHypernativeEligible,
+  type HypernativeAuthStatus,
+  type HypernativeEligibility,
+} from '@/features/hypernative'
+import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 
 jest.mock('../SafeShieldContext')
@@ -27,19 +33,9 @@ jest.mock('@/features/__core__', () => ({
       hypernativeAuth,
       showActiveStatus = true,
     }: {
-      hypernativeAuth?: { isAuthenticated: boolean; isTokenExpired: boolean; initiateLogin: () => void }
+      hypernativeAuth?: HypernativeAuthStatus
       showActiveStatus?: boolean
-    }) => {
-      if (!hypernativeAuth) return null
-      const showLoginCard = !hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired
-      if (!showActiveStatus && !showLoginCard) return null
-      return (
-        <div>
-          {showActiveStatus && <span>Hypernative Guardian is active</span>}
-          {showLoginCard && <span>Log in to Hypernative to view the full analysis.</span>}
-        </div>
-      )
-    },
+    }) => (hypernativeAuth && showActiveStatus ? <span>Hypernative Guardian is active</span> : null),
     HnCustomChecksCard: () => null,
     SafenetChecksSection: () => null,
   })),
@@ -62,6 +58,7 @@ const makeEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hyper
   loading: false,
   ...overrides,
 })
+const guardEligibility = makeEligibility({ isHypernativeEligible: true, isHypernativeGuard: true })
 
 describe('SafeShieldWidget', () => {
   beforeEach(() => {
@@ -82,35 +79,28 @@ describe('SafeShieldWidget', () => {
       hasProFeatures: true,
       isSafePro: true,
     })
-    mockUseHypernativeOAuth.mockReturnValue({
-      isAuthenticated: false,
-      isTokenExpired: false,
-      initiateLogin: jest.fn(),
-      logout: jest.fn(),
-    })
+    mockUseHypernativeOAuth.mockReturnValue(hypernativeAuthStatusBuilder().build())
     mockUseIsHypernativeEligible.mockReturnValue(makeEligibility())
     mockUseCheckSimulation.mockReturnValue({ hasSimulationError: false, isSimulationSuccess: false })
   })
 
-  it('does not show Hypernative info when Safe is ineligible', () => {
+  it('shows neither the guardian status nor the Hypernative login when the Safe is not eligible', () => {
     render(<SafeShieldWidget />)
 
     expect(screen.queryByText('Hypernative Guardian is active')).not.toBeInTheDocument()
-    expect(screen.queryByText('Log in to Hypernative to view the full analysis.')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
   })
 
-  it('shows Hypernative login CTA with guardian status when Safe has the guard installed', () => {
-    mockUseIsHypernativeEligible.mockReturnValue(
-      makeEligibility({ isHypernativeEligible: true, isHypernativeGuard: true }),
-    )
+  it('shows the guardian status and the Hypernative login when the Safe has the guard', () => {
+    mockUseIsHypernativeEligible.mockReturnValue(guardEligibility)
 
     render(<SafeShieldWidget />)
 
     expect(screen.getByText('Hypernative Guardian is active')).toBeInTheDocument()
-    expect(screen.getByText('Log in to Hypernative to view the full analysis.')).toBeInTheDocument()
+    expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
   })
 
-  it('shows Hypernative login CTA without guardian status when Safe is eligible via outreach only', () => {
+  it('shows the Hypernative login without the guardian status when the Safe is allowlisted only', () => {
     mockUseIsHypernativeEligible.mockReturnValue(
       makeEligibility({ isHypernativeEligible: true, isAllowlistedSafe: true }),
     )
@@ -118,14 +108,54 @@ describe('SafeShieldWidget', () => {
     render(<SafeShieldWidget />)
 
     expect(screen.queryByText('Hypernative Guardian is active')).not.toBeInTheDocument()
-    expect(screen.getByText('Log in to Hypernative to view the full analysis.')).toBeInTheDocument()
+    expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
   })
 
-  it('does not show Hypernative info while eligibility is loading', () => {
-    mockUseIsHypernativeEligible.mockReturnValue(makeEligibility({ isHypernativeEligible: true, loading: true }))
+  it.each([
+    { hasProFeatures: true, isSafePro: true },
+    { hasProFeatures: false, isSafePro: true },
+    { hasProFeatures: true, isSafePro: false },
+  ])(
+    'offers the Hypernative login to an eligible Safe with or without Safe Pro (%o)',
+    ({ hasProFeatures, isSafePro }) => {
+      mockUseSafeShield.mockReturnValue({ ...mockUseSafeShield(), hasProFeatures, isSafePro })
+      mockUseIsHypernativeEligible.mockReturnValue(guardEligibility)
+
+      render(<SafeShieldWidget />)
+
+      expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
+    },
+  )
+
+  it('shows neither the guardian status nor the Hypernative login while eligibility is loading', () => {
+    mockUseIsHypernativeEligible.mockReturnValue(
+      makeEligibility({ isHypernativeEligible: true, isHypernativeGuard: true, loading: true }),
+    )
 
     render(<SafeShieldWidget />)
 
     expect(screen.queryByText('Hypernative Guardian is active')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
+  })
+
+  it('hides the Hypernative login once the user is authenticated, keeping the guardian status', () => {
+    mockUseHypernativeOAuth.mockReturnValue(hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build())
+    mockUseIsHypernativeEligible.mockReturnValue(guardEligibility)
+
+    render(<SafeShieldWidget />)
+
+    expect(screen.getByText('Hypernative Guardian is active')).toBeInTheDocument()
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
+  })
+
+  it('offers the Hypernative login again when the token expired', () => {
+    mockUseHypernativeOAuth.mockReturnValue(
+      hypernativeAuthStatusBuilder().with({ isAuthenticated: true, isTokenExpired: true }).build(),
+    )
+    mockUseIsHypernativeEligible.mockReturnValue(guardEligibility)
+
+    render(<SafeShieldWidget />)
+
+    expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
   })
 })

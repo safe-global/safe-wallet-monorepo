@@ -178,11 +178,11 @@ export const SafeShieldContent = ({
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
-
-              {!hasProFeatures && <HypernativeLoginLine />}
             </div>
           </div>
         )}
+
+        {shouldShowContent && <HypernativeLoginLine hypernativeAuth={hypernativeAuth} />}
       </div>
     </div>
   )
