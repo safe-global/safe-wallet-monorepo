@@ -4,12 +4,13 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
+import { trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { PolicyLock } from '../policyLock'
 
 type PolicyUpsellBannerProps = Pick<PolicyLock, 'planName' | 'workspaceName' | 'onUpgrade'>
 
-/** Shown above the catalogue when the workspace's plan does not include policies. */
 const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsellBannerProps) => (
   <Card radius="xl" data-testid="policy-upsell-banner">
     <CardContent>
@@ -36,7 +37,13 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
           </Typography>
         </div>
 
-        <Button onClick={onUpgrade} className="shrink-0 font-semibold">
+        <Button
+          onClick={() => {
+            trackEvent(POLICY_EVENTS.POLICY_UPSELL_UPGRADE_CLICKED)
+            onUpgrade()
+          }}
+          className="shrink-0 font-semibold"
+        >
           Upgrade to Business
           <ArrowRight aria-hidden className="text-[var(--color-static-text-brand)]" />
         </Button>
