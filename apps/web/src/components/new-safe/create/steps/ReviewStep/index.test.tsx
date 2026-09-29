@@ -435,10 +435,10 @@ describe('ReviewStep', () => {
   })
 
   describe('at the Workspace seat limit', () => {
-    const spaceReduxState = { auth: { ...authReduxState.auth, lastUsedSpace: MOCK_SPACE_UUID } }
+    const inSpace = { initialReduxState: authReduxState, routerProps: { query: { spaceId: MOCK_SPACE_UUID } } }
     const chainWithFeatures = { ...mockChain, features: [] } as Chain
 
-    // Earlier renders persist `auth` (lastUsedSpace: null); hydration would otherwise override the initial state.
+    // Earlier renders persist `auth`; hydration would otherwise override the initial state.
     beforeEach(() => window.localStorage.clear())
 
     const mockCreation = () => {
@@ -470,9 +470,10 @@ describe('ReviewStep', () => {
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       const persistSpy = mockCreation()
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: spaceReduxState,
-      })
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       expect(screen.getByTestId('space-seat-limit-notice')).toHaveTextContent(
         'This Workspace is at its limit of 20 Safe accounts. The new Safe will be created in My accounts, outside the Workspace.',
@@ -493,9 +494,10 @@ describe('ReviewStep', () => {
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: spaceReduxState,
-      })
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
     })
@@ -506,9 +508,10 @@ describe('ReviewStep', () => {
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: spaceReduxState,
-      })
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
     })
@@ -519,15 +522,54 @@ describe('ReviewStep', () => {
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
       mockCreation()
 
-      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: spaceReduxState,
-      })
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
 
       act(() => {
         fireEvent.click(screen.getByText('Pay now'))
       })
 
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
+    it('opens the new Safe in the Workspace of the URL', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockCreation()
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(push).toHaveBeenCalledWith({
+        pathname: '/home',
+        query: {
+          safe: `${chainWithFeatures.shortName}:0x0000000000000000000000000000000000000001`,
+          spaceId: MOCK_SPACE_UUID,
+        },
+      })
+    })
+
+    it('ignores a Workspace stored by another tab when the URL has none', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: { auth: { ...authReduxState.auth, lastUsedSpace: MOCK_SPACE_UUID } },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null }))
     })
   })
 })
