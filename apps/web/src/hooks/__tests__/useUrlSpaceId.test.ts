@@ -38,6 +38,12 @@ describe('useUrlSpaceId', () => {
     expect(result.current).toBeNull()
   })
 
+  it('accepts a legacy numeric id, which old links still carry', () => {
+    const { result } = renderWithQuery({ spaceId: '12' })
+
+    expect(result.current).toBe('12')
+  })
+
   it('returns null for a repeated spaceId param', () => {
     const { result } = renderWithQuery({ spaceId: [SPACE_UUID, SPACE_UUID] })
 

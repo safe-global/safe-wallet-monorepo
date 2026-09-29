@@ -2,8 +2,10 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/compat/router'
 import type { NextRouter } from 'next/router'
 import { parse } from 'querystring'
+import { useIsHydrated } from './useIsHydrated'
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+// A Workspace UUID, or a legacy numeric id that old links still carry (the backend accepts both)
+const SPACE_ID_PATTERN = /^([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|\d+)$/i
 
 // Next.js router.query is empty during static-export hydration
 const getLocationSpaceId = (): unknown => {
@@ -11,9 +13,9 @@ const getLocationSpaceId = (): unknown => {
   return parse(location.search.slice(1)).spaceId
 }
 
-/** A Workspace UUID, or null for a missing, repeated (`string[]`) or malformed value. */
+/** A Workspace id, or null for a missing, repeated (`string[]`) or malformed value. */
 export const parseSpaceId = (value: unknown): string | null =>
-  typeof value === 'string' && UUID_PATTERN.test(value) ? value : null
+  typeof value === 'string' && SPACE_ID_PATTERN.test(value) ? value : null
 
 /**
  * The Workspace of this tab: the `spaceId` query param, or null. It never falls back to stored
@@ -22,7 +24,9 @@ export const parseSpaceId = (value: unknown): string | null =>
 export const useUrlSpaceId = (): string | null => {
   // Like useSafeQueryParam: the compat router is null when no router is mounted
   const query = useRouter()?.query ?? {}
-  return parseSpaceId(query.spaceId ?? getLocationSpaceId())
+  // Like useSafeAddressFromUrl: the location differs from the build-time HTML until mount (React #418)
+  const isHydrated = useIsHydrated()
+  return parseSpaceId(query.spaceId ?? (isHydrated ? getLocationSpaceId() : undefined))
 }
 
 export type SpaceIdQuery = { spaceId?: string }
