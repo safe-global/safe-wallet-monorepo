@@ -44,19 +44,20 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, ''))
 
-    expect(result.current).toBe(policies)
+    expect(result.current.policies).toBe(policies)
+    expect(result.current.matchedSpenderNames.size).toBe(0)
   })
 
   it('should, when the query is a rule name, return nothing: the type filter selects on the rule', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Proposer'))
 
-    expect(result.current).toHaveLength(0)
+    expect(result.current.policies).toHaveLength(0)
   })
 
   it('should, when the query is a rule summary, return nothing', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'spender'))
 
-    expect(result.current).toHaveLength(0)
+    expect(result.current.policies).toHaveLength(0)
   })
 
   it('should, when the query is a Safe name in the address book, return the policies on that Safe', () => {
@@ -64,8 +65,8 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Act3'))
 
-    expect(result.current.length).toBeGreaterThan(0)
-    expect(result.current.every((policy) => policy.safe.address === MOCK_SAFES.grants.address)).toBe(true)
+    expect(result.current.policies.length).toBeGreaterThan(0)
+    expect(result.current.policies.every((policy) => policy.safe.address === MOCK_SAFES.grants.address)).toBe(true)
   })
 
   it('should, when the query is a spender name in the address book, return the policy that grants it', () => {
@@ -74,8 +75,27 @@ describe('usePolicySearch', () => {
     const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(mockProposerPolicy())]
     const { result } = renderHook(() => usePolicySearch(policies, 'Act1'))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].type).toBe('spending-limit')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].type).toBe('spending-limit')
+  })
+
+  it('should, when the query hits a spender name, report that name for the policy', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_ADDRESSES.alice ? 'Act1' : ''))
+
+    const policy = asActivePolicy(mockSpendingLimitPolicy())
+    const { result } = renderHook(() => usePolicySearch([policy], 'Act1'))
+
+    expect(result.current.matchedSpenderNames.get(policy.id)).toBe('Act1')
+  })
+
+  it('should, when the query hits the Safe name rather than a spender, report no spender name', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_SAFES.treasury.address ? 'Act3' : ''))
+
+    const policy = asActivePolicy(mockSpendingLimitPolicy())
+    const { result } = renderHook(() => usePolicySearch([policy], 'Act3'))
+
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.matchedSpenderNames.size).toBe(0)
   })
 
   it('should, when the query is a proposer name in the address book, return the grant naming it', () => {
@@ -84,8 +104,8 @@ describe('usePolicySearch', () => {
     const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(mockProposerPolicy())]
     const { result } = renderHook(() => usePolicySearch(policies, 'Act2'))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].type).toBe('proposer')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].type).toBe('proposer')
   })
 
   it('should, when the query is the label CGW returns on a proposer grant, return that grant', () => {
@@ -93,14 +113,14 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, 'Bob'))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].type).toBe('proposer')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].type).toBe('proposer')
   })
 
   it('should, when no address resolves to a name, not match every policy on the empty name', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Act3'))
 
-    expect(result.current).toHaveLength(0)
+    expect(result.current.policies).toHaveLength(0)
   })
 
   it('should, when the query is part of a Safe address, return the policies on that Safe', () => {
@@ -115,8 +135,8 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, '0x1F2504De'))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].safe.address).toBe('0x1F2504De05f5167650bE5B28c472601Be434b60A')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].safe.address).toBe('0x1F2504De05f5167650bE5B28c472601Be434b60A')
   })
 
   it('should, when the query is a spender address, return the policy that grants it', () => {
@@ -128,8 +148,8 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, SPENDER))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].type).toBe('spending-limit')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].type).toBe('spending-limit')
   })
 
   it('should, when the query is a proposer address, return the grant naming it', () => {
@@ -140,22 +160,22 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, PROPOSER))
 
-    expect(result.current).toHaveLength(1)
-    expect(result.current[0].type).toBe('proposer')
+    expect(result.current.policies).toHaveLength(1)
+    expect(result.current.policies[0].type).toBe('proposer')
   })
 
   it('should, when the query is a token symbol, return the spending limits on that token', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'USDC'))
 
-    expect(result.current.length).toBeGreaterThan(0)
-    expect(result.current.every((policy) => policy.type === 'spending-limit')).toBe(true)
+    expect(result.current.policies.length).toBeGreaterThan(0)
+    expect(result.current.policies.every((policy) => policy.type === 'spending-limit')).toBe(true)
   })
 
   it('should, when the query is a network name, return the policies on that chain', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Polygon'))
 
-    expect(result.current.length).toBeGreaterThan(0)
-    expect(new Set(chainIdsOf(result.current))).toEqual(new Set(['137']))
+    expect(result.current.policies.length).toBeGreaterThan(0)
+    expect(new Set(chainIdsOf(result.current.policies))).toEqual(new Set(['137']))
   })
 
   it('should, when the query is a chain id, return the policies on that chain', () => {
@@ -176,7 +196,7 @@ describe('usePolicySearch', () => {
 
     const { result } = renderHook(() => usePolicySearch(policies, '137'))
 
-    expect(chainIdsOf(result.current)).toEqual(['137'])
+    expect(chainIdsOf(result.current.policies)).toEqual(['137'])
   })
 
   it('should, when the query changes, return the matches for the new query', () => {
@@ -185,10 +205,10 @@ describe('usePolicySearch', () => {
       initialProps: { query: 'USDC' },
     })
 
-    expect(result.current.length).toBeGreaterThan(0)
+    expect(result.current.policies.length).toBeGreaterThan(0)
 
     rerender({ query: 'zzzznothing' })
 
-    expect(result.current).toHaveLength(0)
+    expect(result.current.policies).toHaveLength(0)
   })
 })

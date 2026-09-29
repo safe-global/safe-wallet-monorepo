@@ -63,6 +63,20 @@ describe('PoliciesTable', () => {
     expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByTestId('policy-tokens')).toBeInTheDocument()
   })
 
+  it('should, when the search hit a spender name, show that name under the tokens', () => {
+    const policy = asActivePolicy(mockMultiSpenderPolicy())
+
+    render(<PoliciesTable policies={[policy]} matchedSpenderNames={new Map([[policy.id, 'Act1']])} />)
+
+    expect(screen.getByTestId('policy-matched-spender')).toHaveTextContent('Spender: Act1')
+  })
+
+  it('should, when the search did not hit a spender name, show no spender line', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} matchedSpenderNames={new Map()} />)
+
+    expect(screen.queryByTestId('policy-matched-spender')).not.toBeInTheDocument()
+  })
+
   it('should, when a spending limit holds three spenders, render one row rather than three', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
 
