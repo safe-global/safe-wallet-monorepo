@@ -16,9 +16,7 @@ import type { FooterProps } from './footer.type'
 const footerPages = [
   AppRoutes.settings.index,
   AppRoutes.imprint,
-  AppRoutes.privacy,
   AppRoutes.cookie,
-  AppRoutes.terms,
   AppRoutes.licenses,
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,

@@ -17,9 +17,7 @@ const NO_SIDEBAR_ROUTES = [
   AppRoutes.welcome.inviteMembers,
   AppRoutes.spaces.createSpace,
   AppRoutes.imprint,
-  AppRoutes.privacy,
   AppRoutes.cookie,
-  AppRoutes.terms,
   AppRoutes.licenses,
   AppRoutes.spaces.index,
 ]
