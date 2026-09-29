@@ -14289,6 +14289,7 @@ __metadata:
     next: "patch:next@npm%3A15.5.21#~/.yarn/patches/next-npm-15.5.21-4cacf356e0.patch"
     next-rspack: "npm:^16.0.1"
     next-themes: "npm:^0.4.6"
+    nyc: "npm:^15.1.0"
     papaparse: "npm:^5.3.2"
     postcss: "npm:^8.5.18"
     prettier: "npm:^3.6.2"
