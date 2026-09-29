@@ -1,4 +1,5 @@
 import {
+  COMPARE_SECTIONS_V2,
   ENTERPRISE_TIER,
   getPlanContentV2,
   PLAN_CONTENT_V2,
@@ -52,6 +53,7 @@ describe('PLAN_CONTENT_V2', () => {
   })
 
   it('keeps every launch card feature, counting what each plan inherits', () => {
+    const SPONSORSHIP = /sponsored transactions/
     const renamed: Record<string, string> = {
       '10 sponsored transactions / month': '10 sponsored transactions per month',
       '50 sponsored transactions / month': '50 sponsored transactions per month',
@@ -65,8 +67,25 @@ describe('PLAN_CONTENT_V2', () => {
       PLAN_FEATURES[plan].forEach((launchFeature) => {
         const feature = renamed[launchFeature] ?? launchFeature
         // A sponsorship quota replaces the inherited one, so each plan must state its own.
-        expect(/sponsored transactions/.test(feature) ? own : inherited).toContain(feature)
+        expect(SPONSORSHIP.test(feature) ? own : inherited).toContain(feature)
       })
+    })
+  })
+
+  it('agrees with the comparison table on what each plan includes', () => {
+    const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
+    const listed = new Set(Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures))
+
+    PLAN_ORDER.forEach((plan, index) => {
+      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].additionalFeatures)
+      const value = (feature: string) => rows.find((row) => row.feature === feature)?.values?.[plan]
+      rows
+        .filter((row) => listed.has(row.feature))
+        .forEach((row) => expect(row.values?.[plan]).toBe(inherited.includes(row.feature)))
+
+      const own = PLAN_CONTENT_V2[plan].additionalFeatures
+      expect(own).toContainEqual(expect.stringContaining(`${value('Sponsored transactions per month')} sponsored`))
+      expect(own).toContain(`${value('API access')} API access`)
     })
   })
 

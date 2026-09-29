@@ -15,6 +15,13 @@ const sectionTitles = () =>
     .map((cell) => cell.textContent)
 
 describe('CompareFeaturesCard', () => {
+  const originalResizeObserver = window.ResizeObserver
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    window.ResizeObserver = originalResizeObserver
+  })
+
   it('shows only the Every Pro plan section while collapsed', () => {
     render(<Harness />)
 
@@ -112,13 +119,11 @@ describe('CompareFeaturesCard', () => {
       ['table-container', 400],
       ['table', 400],
     ])
-    const height = jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
-      this: HTMLElement,
-    ) {
+    jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
       if (this.tagName === 'TBODY') return 100
       return heights.get(this.dataset.slot ?? '') ?? 0
     })
-    const top = jest.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(() => 50)
+    jest.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(() => 50)
     render(<Harness />)
 
     const table = screen.getByTestId('compare-features-table')
@@ -127,21 +132,16 @@ describe('CompareFeaturesCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show all features' }))
 
     expect(table).toHaveStyle({ height: '400px' })
-    height.mockRestore()
-    top.mockRestore()
   })
 
   it('measures the unconstrained content on expand, so growth while collapsed never clips, even before the observer fires', () => {
     const heights = new Map<string, number>([['table-container', 400]])
-    const height = jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (
-      this: HTMLElement,
-    ) {
+    jest.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
       if (this.tagName === 'TBODY') return 100
       if (this.dataset.testid === 'compare-features-table') return Number.parseFloat(this.style.height) || 0
       return heights.get(this.dataset.slot ?? '') ?? 0
     })
-    const top = jest.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(() => 50)
-    const original = window.ResizeObserver
+    jest.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(() => 50)
     window.ResizeObserver = class {
       observe() {}
       unobserve() {}
@@ -154,8 +154,5 @@ describe('CompareFeaturesCard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Show all features' }))
 
     expect(table).toHaveStyle({ height: '520px' })
-    window.ResizeObserver = original
-    height.mockRestore()
-    top.mockRestore()
   })
 })

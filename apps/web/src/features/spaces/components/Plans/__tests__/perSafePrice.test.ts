@@ -1,4 +1,10 @@
-import { _roundHalfUp, formatMinorAmount, getPerSafeMonthlyMinor, getPlanPriceV2, toMinorUnits } from '../perSafePrice'
+import {
+  _roundHalfUp,
+  _formatMinorAmount,
+  _getPerSafeMonthlyMinor,
+  getPlanPriceV2,
+  _toMinorUnits,
+} from '../perSafePrice'
 import type { PlanSeatOption, PlanTier } from '../types'
 
 const tier = (overrides: Partial<PlanTier> = {}): PlanTier => ({
@@ -41,7 +47,7 @@ describe('perSafePrice', () => {
   ] as const)(
     'prices %i minor units over %i Safes per %s at %i per Safe per month',
     (total, safes, cycle, expected) => {
-      expect(getPerSafeMonthlyMinor(total, safes, cycle)).toBe(expected)
+      expect(_getPerSafeMonthlyMinor(total, safes, cycle)).toBe(expected)
     },
   )
 
@@ -51,14 +57,16 @@ describe('perSafePrice', () => {
     [14_900, 'eur', '€149'],
     [166_900, 'eur', '€1,669'],
     [9_450, 'usd', '$94.50'],
+    [1_500, 'jpy', '¥1,500'],
   ])('formats %i %s as %s', (amount, currency, expected) => {
-    expect(formatMinorAmount(amount, currency)).toBe(expected)
+    expect(_formatMinorAmount(amount, currency)).toBe(expected)
   })
 
   it('converts whole units to minor units without float drift', () => {
-    expect(toMinorUnits(1669, 'eur')).toBe(166_900)
-    expect(toMinorUnits(94.5, 'eur')).toBe(9_450)
-    expect(toMinorUnits(0.29, 'usd')).toBe(29)
+    expect(_toMinorUnits(1669, 'eur')).toBe(166_900)
+    expect(_toMinorUnits(94.5, 'eur')).toBe(9_450)
+    expect(_toMinorUnits(0.29, 'usd')).toBe(29)
+    expect(_toMinorUnits(1500, 'jpy')).toBe(1_500)
   })
 
   it('shows the per-Safe price and the monthly amount charged', () => {
@@ -109,6 +117,14 @@ describe('perSafePrice', () => {
       headline: '€1,251.75',
       suffix: '/mo',
       line: '€1,251.75/mo · €15,021 billed yearly',
+    })
+  })
+
+  it('rounds the monthly equivalent of an uneven yearly total half up', () => {
+    expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ seats: null, amountMinor: 100_007 }))).toEqual({
+      headline: '€83.34',
+      suffix: '/mo',
+      line: '€83.34/mo · €1,000.07 billed yearly',
     })
   })
 

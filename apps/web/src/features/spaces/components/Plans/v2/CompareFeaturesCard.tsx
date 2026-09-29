@@ -18,6 +18,7 @@ import { FeatureCheck } from './FeatureCheck'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
 const TABLE_ID = `${COMPARE_FEATURES_ID}-table`
+const TITLE_ID = `${COMPARE_FEATURES_ID}-title`
 const PLANS = PLAN_ORDER
 
 const tint = (isCurrent: boolean) => isCurrent && 'bg-mint/25'
@@ -70,7 +71,7 @@ const CompareRow = ({ row, currentPlan }: { row: CompareRowV2; currentPlan?: str
 
 const HEIGHT_TRANSITION = {
   expand: 'transition-[height] duration-[420ms] ease-soft',
-  collapse: 'transition-[height] duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
+  collapse: 'transition-[height] duration-[320ms] ease-in-out',
 }
 const SECTION_STAGGER_MS = 45
 
@@ -199,7 +200,7 @@ export default function CompareFeaturesCard({
       ref={ref}
       id={COMPARE_FEATURES_ID}
       tabIndex={-1}
-      aria-labelledby={`${COMPARE_FEATURES_ID}-title`}
+      aria-labelledby={TITLE_ID}
       className="scroll-mt-6 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       data-testid="compare-features"
     >
@@ -214,7 +215,7 @@ export default function CompareFeaturesCard({
               className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="flex flex-col gap-0.5">
-                <Typography variant="h4" id={`${COMPARE_FEATURES_ID}-title`}>
+                <Typography variant="h4" id={TITLE_ID}>
                   {COMPARE_COPY_V2.title}
                 </Typography>
                 <Typography variant="paragraph-small" color="muted">

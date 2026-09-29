@@ -1,11 +1,21 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import type { PlanGroup, PlanOffer } from '../../../../hooks/billing/types'
 import { buildPlanTiers } from '../../planTiers'
 import PlansV2 from '../PlansV2'
-import { trackPlansV2Click } from '../trackPlansV2Click'
 
-jest.mock('../trackPlansV2Click', () => ({ trackPlansV2Click: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
+const expectPlansClick = (location: SAFE_PRO_PLANS_LABELS) =>
+  expect(trackEvent).toHaveBeenCalledWith(
+    { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location },
+    { [MixpanelEventParams.LOCATION]: location },
+  )
 
 const offer = (planName: string, seats: number, amountMinor: number): PlanOffer => ({
   paymentLinkId: `pl_${planName}_${seats}`,
@@ -35,16 +45,22 @@ const mockMatchMedia = (reduce: boolean) =>
   })
 
 describe('PlansV2', () => {
-  const scrollIntoView = jest.fn()
+  const originalMatchMedia = window.matchMedia
+  let scrollIntoView: jest.SpyInstance
 
   beforeEach(() => {
     jest.clearAllMocks()
-    Element.prototype.scrollIntoView = scrollIntoView
+    scrollIntoView = jest.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
     jest.spyOn(window, 'requestAnimationFrame').mockImplementation((callback: FrameRequestCallback) => {
       callback(0)
       return 0
     })
     mockMatchMedia(false)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+    Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: originalMatchMedia })
   })
 
   it('opens the comparison from the link at the top, scrolling to it smoothly and moving focus there', () => {
@@ -55,7 +71,7 @@ describe('PlansV2', () => {
     expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'true')
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
     expect(screen.getByTestId('compare-features')).toHaveFocus()
-    expect(trackPlansV2Click).toHaveBeenCalledWith('compare_features')
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.compare_features)
   })
 
   it('jumps without animation when the system asks for reduced motion', () => {
@@ -81,8 +97,8 @@ describe('PlansV2', () => {
 
     fireEvent.click(requestUpdates)
     fireEvent.click(discussAddOn)
-    expect(trackPlansV2Click).toHaveBeenCalledWith('request_updates')
-    expect(trackPlansV2Click).toHaveBeenCalledWith('discuss_add_on')
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.request_updates)
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
   })
 
   it('tracks Talk to sales on the Enterprise card', () => {
@@ -90,7 +106,7 @@ describe('PlansV2', () => {
 
     fireEvent.click(screen.getByRole('link', { name: 'Talk to sales' }))
 
-    expect(trackPlansV2Click).toHaveBeenCalledWith('talk_to_sales')
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.talk_to_sales)
   })
 
   it('keeps the support links for a member who is not an admin, without plan buttons', () => {
@@ -132,4 +148,12 @@ describe('PlansV2', () => {
       expect(screen.queryAllByRole('button', { name: 'Manage plan' })).toHaveLength(shown ? 1 : 0)
     },
   )
+
+  it('marks the current tier as the current column of the comparison', () => {
+    const tiers = buildPlanTiers(PLANS).map((tier) => (tier.name === 'Business' ? { ...tier, isCurrent: true } : tier))
+    render(<PlansV2 plan={null} safeAccounts={null} sponsoredTxs={null} tiers={tiers} />)
+
+    const header = screen.getByRole('columnheader', { name: /^Business/ })
+    expect(within(header).getByText('Current')).toBeInTheDocument()
+  })
 })

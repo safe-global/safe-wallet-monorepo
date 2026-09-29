@@ -1,11 +1,12 @@
 import { useCallback, useRef, useState, type ComponentProps } from 'react'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import type Plans from '../index'
 import PlanStatusCard from '../PlanStatusCard'
 import CompareFeaturesCard from './CompareFeaturesCard'
 import PlanCatalogV2 from './PlanCatalogV2'
 import PlanExtrasV2 from './PlanExtrasV2'
 import { canManageV2 } from './planCardsV2'
-import { trackPlansV2Click } from './trackPlansV2Click'
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
@@ -27,7 +28,10 @@ export default function PlansV2({
   const currentPlanName = tiers.find((tier) => tier.isCurrent)?.name
 
   const openCompare = useCallback(() => {
-    trackPlansV2Click('compare_features')
+    trackEvent(
+      { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: SAFE_PRO_PLANS_LABELS.compare_features },
+      { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.compare_features },
+    )
     setCompareExpanded(true)
     // Wait a frame so the expanded rows are laid out before scrolling to the card.
     requestAnimationFrame(() => {

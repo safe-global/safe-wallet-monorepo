@@ -1,12 +1,22 @@
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { ENTERPRISE_TIER, PLAN_CONTENT_V2 } from '../../planCatalog'
 import type { PlanSeatOption, PlanTier } from '../../types'
 import type { CurrentPlan } from '../../types'
 import { PlanCardV2 } from '../PlanCardV2'
-import { trackPlansV2Click } from '../trackPlansV2Click'
 
-jest.mock('../trackPlansV2Click', () => ({ trackPlansV2Click: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
+const expectPlansClick = (location: SAFE_PRO_PLANS_LABELS) =>
+  expect(trackEvent).toHaveBeenCalledWith(
+    { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location },
+    { [MixpanelEventParams.LOCATION]: location },
+  )
 
 const businessPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
   name: 'Business',
@@ -250,6 +260,6 @@ describe('PlanCardV2', () => {
 
     fireEvent.click(screen.getByRole('link', { name: 'Change via your account team' }))
 
-    expect(trackPlansV2Click).toHaveBeenCalledWith('account_team')
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.account_team)
   })
 })

@@ -86,8 +86,10 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   },
 }
 
+const isPlanNameV2 = (name: string): name is PlanNameV2 => PLAN_ORDER.some((plan) => plan === name)
+
 export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
-  Object.hasOwn(PLAN_CONTENT_V2, name) ? PLAN_CONTENT_V2[name as PlanNameV2] : undefined
+  isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
   yearlySavings: `Save ~${YEARLY_SAVINGS_PERCENT}%`,

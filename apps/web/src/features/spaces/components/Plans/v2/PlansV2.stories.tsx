@@ -4,6 +4,7 @@ import { createMockStory } from '@/stories/mocks'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
 import { buildPlanTiers, toCurrentPlan } from '../planTiers'
 import type { PlanSummary } from '../types'
+import CompareFeaturesCard from './CompareFeaturesCard'
 import PlansV2 from './PlansV2'
 
 const setup = createMockStory({ scenario: 'efSafe', layout: 'paper', shadcn: true })
@@ -35,22 +36,30 @@ const BUSINESS: PlanGroup = {
   ],
 }
 
-const businessSubscription = (status: 'trialing' | 'active'): Subscription =>
-  ({
-    id: 'sub_1',
-    status,
-    hasPaymentMethod: false,
-    metadata: { planName: 'Business', FEATURE_SAFE_SEATS: '20' },
-    plan: {
-      id: 'price_Business_20_month',
-      name: 'Business',
-      currentPrice: 1669,
-      originalPrice: null,
-      currency: 'eur',
-      billingCycle: 'month',
-      features: [],
-    },
-  }) as unknown as Subscription
+const businessSubscription = (status: 'trialing' | 'active'): Subscription => ({
+  id: 'sub_1',
+  customerId: 'cus_1',
+  upstreamCustomerId: 'cus_upstream_1',
+  status,
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+  hasPaymentMethod: false,
+  metadata: { planName: 'Business', FEATURE_SAFE_SEATS: '20' },
+  plan: {
+    id: 'price_Business_20_month',
+    name: 'Business',
+    currentPrice: 1669,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'eur',
+    billingCycle: 'month',
+    features: [],
+    type: 'standard',
+    product: null,
+  },
+})
 
 const TRIAL: PlanSummary = { name: 'Business', status: 'trialing', periodEndsAt: '2026-12-05T00:00:00Z', daysLeft: 14 }
 
@@ -90,3 +99,8 @@ export const NoPlan: Story = {
 
 /** A member who is not an admin sees the plans without any button. */
 export const MemberReadOnly: Story = { args: { readOnly: true } }
+
+/** The comparison with every section open and the Business column marked current. */
+export const CompareExpanded: Story = {
+  render: () => <CompareFeaturesCard currentPlan="Business" isExpanded onExpandedChange={() => {}} />,
+}

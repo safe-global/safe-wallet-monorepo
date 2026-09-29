@@ -16,6 +16,7 @@ import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
 import { POLICY_EVENTS } from './events/policies'
+import { SAFE_PRO_EVENTS } from './events/safe-pro'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -86,6 +87,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED.action]: MixpanelEvent.WORKSPACE_SAFE_UNLINKED,
   [SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED.action]: MixpanelEvent.ACCOUNTS_WIDGET_CLICKED,
   [SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action]: MixpanelEvent.PENDING_TX_WIDGET_CLICKED,
+  [SAFE_PRO_EVENTS.PLANS_CLICKED.action]: MixpanelEvent.SAFE_PRO_PLANS_CLICKED,
   [SPACE_EVENTS.WALLET_SWITCHED.action]: MixpanelEvent.WALLET_SWITCHED,
   [SPACE_EVENTS.WALLET_DISCONNECTED.action]: MixpanelEvent.WALLET_DISCONNECTED,
   [SPACE_EVENTS.WORKSPACE_CREATE_STARTED.action]: MixpanelEvent.WORKSPACE_CREATE_STARTED,
@@ -118,7 +120,6 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.ADDRESS_REQUEST_APPROVED.action]: MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_APPROVED,
   [SPACE_EVENTS.ADDRESS_REQUEST_REJECTED.action]: MixpanelEvent.WORKSPACE_ADDRESS_REQUEST_REJECTED,
   [SPACE_EVENTS.LOCAL_CONTACT_ADDED.action]: MixpanelEvent.WORKSPACE_LOCAL_CONTACT_ADDED,
-  [SPACE_EVENTS.SAFE_PRO_PLANS_CLICKED.action]: MixpanelEvent.SAFE_PRO_PLANS_CLICKED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

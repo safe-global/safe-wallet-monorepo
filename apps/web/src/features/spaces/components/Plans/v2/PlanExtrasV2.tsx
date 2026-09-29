@@ -5,10 +5,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Typography } from '@/components/ui/typography'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { PLAN_EXTRAS_V2 } from '../planCatalog'
 import { CtaArrow } from './CtaArrow'
 import { FeatureCheck } from './FeatureCheck'
-import { trackPlansV2Click, type PlansV2ClickLocation } from './trackPlansV2Click'
 
 const ExtraCard = ({
   tag,
@@ -21,7 +22,7 @@ const ExtraCard = ({
   tag: string
   title: string
   action: string
-  location: PlansV2ClickLocation
+  location: SAFE_PRO_PLANS_LABELS
   children: ReactNode
   testId: string
 }) => (
@@ -41,7 +42,12 @@ const ExtraCard = ({
           weight="semibold"
           className="self-start"
           render={<a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />}
-          onClick={() => trackPlansV2Click(location)}
+          onClick={() =>
+            trackEvent(
+              { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location },
+              { [MixpanelEventParams.LOCATION]: location },
+            )
+          }
         >
           {action}
           <CtaArrow variant="reveal" external />
@@ -60,7 +66,7 @@ export default function PlanExtrasV2() {
         tag={comingSoon.tag}
         title={comingSoon.title}
         action={comingSoon.action}
-        location="request_updates"
+        location={SAFE_PRO_PLANS_LABELS.request_updates}
         testId="plans-coming-soon"
       >
         <List className="gap-3">
@@ -77,7 +83,7 @@ export default function PlanExtrasV2() {
         tag={addOn.tag}
         title={addOn.title}
         action={addOn.action}
-        location="discuss_add_on"
+        location={SAFE_PRO_PLANS_LABELS.discuss_add_on}
         testId="plans-add-on"
       >
         <Typography variant="paragraph-small" color="muted">

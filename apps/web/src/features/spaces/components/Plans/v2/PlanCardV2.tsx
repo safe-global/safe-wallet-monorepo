@@ -5,13 +5,15 @@ import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Separator } from '@/components/ui/separator'
 import { Typography } from '@/components/ui/typography'
 import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
+import { cn } from '@/utils/cn'
 import { Seats } from '../PlanCards'
 import { getPlanContentV2, PLAN_CARD_COPY_V2, RECOMMENDED_PLAN } from '../planCatalog'
 import { getPlanPriceV2 } from '../perSafePrice'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from '../types'
 import { CtaArrow } from './CtaArrow'
 import { FeatureCheck } from './FeatureCheck'
-import { trackPlansV2Click } from './trackPlansV2Click'
 import { getPlanCtaV2 } from './planCardsV2'
 
 export type PlanCardV2Actions = {
@@ -27,6 +29,13 @@ const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLi
 
 const salesLink = <a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />
 
+/** Mint underline behind the support level that draws in while the card is hovered or focused. */
+const SUPPORT_HIGHLIGHT_CLASSES = [
+  'absolute -inset-x-[0.08em] bottom-[calc(6px-0.06em)] -z-10 h-1 origin-left bg-mint dark:bg-mint/40',
+  'scale-x-0 transition-transform duration-[450ms] ease-soft motion-reduce:transition-none',
+  'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
+]
+
 const PlanCtaV2 = ({
   pick,
   isPrimary,
@@ -39,19 +48,6 @@ const PlanCtaV2 = ({
 
   switch (cta.kind) {
     case 'sales':
-      return (
-        <Button
-          variant="outline"
-          size="lg"
-          weight="semibold"
-          className="w-full"
-          render={salesLink}
-          onClick={() => trackPlansV2Click('talk_to_sales')}
-        >
-          {cta.label}
-          <CtaArrow variant="reveal" external />
-        </Button>
-      )
     case 'account-team':
       return (
         <Button
@@ -60,7 +56,11 @@ const PlanCtaV2 = ({
           weight="semibold"
           className="w-full"
           render={salesLink}
-          onClick={() => trackPlansV2Click('account_team')}
+          onClick={() => {
+            const label =
+              cta.kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
+            trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, { [MixpanelEventParams.LOCATION]: label })
+          }}
         >
           {cta.label}
           <CtaArrow variant="reveal" external />
@@ -89,6 +89,10 @@ const PlanCtaV2 = ({
           <CtaArrow variant={isPrimary ? 'nudge' : 'reveal'} />
         </Button>
       )
+    default: {
+      const _exhaustive: never = cta
+      return _exhaustive
+    }
   }
 }
 
@@ -180,10 +184,7 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
                   <Typography variant="paragraph-medium">{PLAN_CARD_COPY_V2.supportLabel}</Typography>
                   <Typography variant="paragraph-bold" className="relative isolate" data-testid="plan-support-level">
                     {content.support.level}
-                    <span
-                      aria-hidden
-                      className="absolute -inset-x-[0.08em] bottom-[calc(6px-0.06em)] -z-10 h-1 origin-left scale-x-0 bg-mint transition-transform duration-[450ms] ease-soft group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100 motion-reduce:transition-none dark:bg-mint/40"
-                    />
+                    <span aria-hidden className={cn(SUPPORT_HIGHLIGHT_CLASSES)} />
                   </Typography>
                 </div>
                 <Typography variant="paragraph-small" color="muted">
