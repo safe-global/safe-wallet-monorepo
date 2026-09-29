@@ -13,7 +13,12 @@ import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { getPolicyStatus, type PendingSpendingLimitPolicy } from '../types'
-import { resolveSpendingLimitDrawerState, type ActiveDrawerPolicy, type Viewer } from './resolveState'
+import {
+  resolveSpendingLimitDrawerState,
+  type ActiveDrawerPolicy,
+  type PendingTxOutcome,
+  type Viewer,
+} from './resolveState'
 
 type SpendingLimitDrawerBaseProps = {
   open: boolean
@@ -35,7 +40,9 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
   policy: PendingSpendingLimitPolicy & { status: 'pending' }
   transactionLink: string
-  onReviewTransaction: () => void
+  onReviewTransaction?: () => void
+  /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
+  outcome?: PendingTxOutcome
 }
 
 export type SpendingLimitDrawerProps = ActiveSpendingLimitDrawerProps | PendingSpendingLimitDrawerProps
@@ -52,9 +59,9 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
       ? getBlockExplorerLink(chain, policy.enforcement.moduleAddress)?.href
       : undefined
 
-  const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account')
+  const outcome = isPendingDrawer(props) ? props.outcome : undefined
+  const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
-  const isPending = state.kind === 'pending'
   const actions = isPendingDrawer(props)
     ? { pending: { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction } }
     : { onEdit: props.onEdit }
@@ -65,8 +72,12 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
-          {isPending && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
-          {isPending && <PendingSignatures safe={safe} signed={state.signed} required={state.required} />}
+          {(state.kind === 'pending' || state.kind === 'closed') && (
+            <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
+          )}
+          {state.kind === 'pending' && (
+            <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
+          )}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={state.kind === 'active'} />
           <PolicyOverview
             {...overview}

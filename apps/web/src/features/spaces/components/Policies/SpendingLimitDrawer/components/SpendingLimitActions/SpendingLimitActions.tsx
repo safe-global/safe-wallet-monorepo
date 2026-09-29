@@ -6,7 +6,8 @@ import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
   transactionLink: string
-  onReviewTransaction: () => void
+  /** Absent until the queued transaction has loaded: the flow needs its summary. */
+  onReviewTransaction?: () => void
 }
 
 export type SpendingLimitActionsProps = {
@@ -39,11 +40,18 @@ const SpendingLimitActions = ({
 
     case 'review':
       return pending ? (
-        <PolicyDrawerActions actionLabel="Review transaction" onClick={pending.onReviewTransaction} />
+        <PolicyDrawerActions
+          actionLabel="Review transaction"
+          onClick={pending.onReviewTransaction}
+          disabled={!pending.onReviewTransaction}
+        />
       ) : null
 
     case 'copy-link':
       return pending ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
+
+    case 'none':
+      return null
 
     // A new action must pick a branch above rather than silently rendering nothing.
     default: {

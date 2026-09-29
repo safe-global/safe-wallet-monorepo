@@ -9,7 +9,7 @@ import {
 } from '../../mocks/policies'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import type { DrawerPolicy, Viewer } from '../resolveState'
+import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
@@ -24,7 +24,7 @@ const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
 const setup = (
   policy: DrawerPolicy = mockActiveSpendingLimit(),
   viewer: Viewer = MOCK_VIEWERS.signer,
-  { onEdit }: { onEdit?: () => void } = { onEdit: jest.fn() },
+  { onEdit, outcome }: { onEdit?: () => void; outcome?: PendingTxOutcome } = { onEdit: jest.fn() },
 ) => {
   const shared = {
     open: true,
@@ -42,6 +42,7 @@ const setup = (
         policy={policy}
         transactionLink={TRANSACTION_LINK}
         onReviewTransaction={jest.fn()}
+        outcome={outcome}
       />
     ) : (
       <SpendingLimitDrawer {...shared} policy={policy} onEdit={onEdit} />
@@ -52,6 +53,18 @@ const setup = (
 describe('SpendingLimitDrawer', () => {
   afterEach(() => {
     jest.restoreAllMocks()
+  })
+
+  it('drops the signatures and the footer once the transaction has left the queue', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'replaced' })
+
+    expect(
+      screen.getByText('Another transaction used this nonce, so this one can no longer be executed.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /review transaction|copy transaction link|connect wallet/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('titles itself from the policy type rather than a stored name', () => {

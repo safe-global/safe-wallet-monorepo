@@ -15,6 +15,30 @@ const setup = (state: SpendingLimitDrawerState) =>
   )
 
 describe('SpendingLimitActions', () => {
+  it('none: renders no footer for a transaction that has left the queue', () => {
+    const { container } = setup({
+      kind: 'closed',
+      operation: 'create',
+      action: 'none',
+      bannerTitle: 'The transaction was deleted.',
+      bannerLine2: 'Close this panel to see the current policies.',
+    })
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('review: stays disabled until the transaction has loaded', () => {
+    render(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'review', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{ transactionLink: TRANSACTION_LINK }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+  })
+
   it('connect: asks a disconnected viewer to connect and explains why', async () => {
     const onConnectWallet = jest.fn()
     const { user } = renderWithUserEvent(

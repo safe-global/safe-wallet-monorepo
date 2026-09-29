@@ -4,9 +4,11 @@ import {
   CONNECT_TO_SIGN_LINE,
   NOT_A_SIGNER_HELPER,
   PENDING_BANNER_TITLE,
+  PENDING_OUTCOME_TITLE,
   UNENFORCED_HELPER,
   connectHelper,
   executeLine,
+  outcomeLine,
   signedAndWaitingLine,
   signAndExecuteLine,
 } from './copy'
@@ -42,7 +44,22 @@ export type PendingDrawerState = {
   required: number
 }
 
-export type SpendingLimitDrawerState = ActiveDrawerState | UnenforcedDrawerState | PendingDrawerState
+/** What became of a queued transaction that has left the queue. */
+export type PendingTxOutcome = 'executed' | 'failed' | 'replaced' | 'deleted'
+
+export type ClosedDrawerState = {
+  kind: 'closed'
+  operation: PendingPolicyOperation
+  action: 'none'
+  bannerTitle: string
+  bannerLine2: string
+}
+
+export type SpendingLimitDrawerState =
+  | ActiveDrawerState
+  | UnenforcedDrawerState
+  | PendingDrawerState
+  | ClosedDrawerState
 
 export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 
@@ -92,12 +109,23 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
+const resolveClosed = (policy: PendingSpendingLimitPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
+  kind: 'closed',
+  operation: policy.operation,
+  action: 'none',
+  bannerTitle: PENDING_OUTCOME_TITLE[outcome],
+  bannerLine2: outcomeLine(outcome, policy.operation),
+})
+
 export const resolveSpendingLimitDrawerState = (
   policy: DrawerPolicy,
   viewer: Viewer,
   safeName: string,
+  outcome?: PendingTxOutcome,
 ): SpendingLimitDrawerState => {
-  if (policy.status === 'pending') return resolvePending(policy, viewer, safeName)
+  if (policy.status === 'pending') {
+    return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
+  }
 
   return policy.enabled ? resolveActive(viewer) : resolveUnenforced()
 }

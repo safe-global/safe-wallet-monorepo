@@ -173,3 +173,49 @@ describe('activating rows', () => {
     resolve({ ...mockPendingPolicy(), status: 'activating' }, MOCK_VIEWERS.signer)
   })
 })
+
+describe('a transaction that is no longer pending', () => {
+  it.each([
+    ['executed', 'The transaction was executed.'],
+    ['failed', 'The transaction failed and can no longer be executed.'],
+    ['replaced', 'Another transaction used this nonce, so this one can no longer be executed.'],
+    ['deleted', 'The transaction was deleted.'],
+  ] as const)('reports a %s transaction with nothing left to do', (outcome, title) => {
+    const state = resolveSpendingLimitDrawerState(mockPendingPolicy(), MOCK_VIEWERS.signer, MOCK_SAFE_NAME, outcome)
+
+    expect(state).toEqual(expect.objectContaining({ kind: 'closed', action: 'none', bannerTitle: title }))
+  })
+
+  it('outranks a disconnected wallet: there is nothing to connect for', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingPolicy(),
+      MOCK_VIEWERS.disconnected,
+      MOCK_SAFE_NAME,
+      'deleted',
+    )
+
+    expect(state.action).toBe('none')
+  })
+
+  it('tells an executed creation that the limit is being activated', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingPolicy(),
+      MOCK_VIEWERS.nonSigner,
+      MOCK_SAFE_NAME,
+      'executed',
+    )
+
+    expect(state).toEqual(expect.objectContaining({ bannerLine2: 'The spending limit will show as active shortly.' }))
+  })
+
+  it('tells an executed removal that the limit is about to go', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingRemoval(),
+      MOCK_VIEWERS.nonSigner,
+      MOCK_SAFE_NAME,
+      'executed',
+    )
+
+    expect(state).toEqual(expect.objectContaining({ bannerLine2: 'The spending limit will disappear shortly.' }))
+  })
+})
