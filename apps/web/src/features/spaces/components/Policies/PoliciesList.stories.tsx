@@ -2,9 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import {
   asActivePolicy,
+  mockActiveSpendingLimit,
   mockLongPolicyList,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
+  mockPendingRemoval,
+  mockPendingUpdate,
   mockPolicies,
   mockProposerPolicy,
   mockRecoveryPolicy,
@@ -40,6 +43,13 @@ export const Unenforced: Story = {
 
 export const PendingSpendingLimit: Story = {
   args: { policies: [mockPendingPolicy()] },
+}
+
+/** An active limit alongside a queued edit and removal of it, plus an unrelated queued creation. */
+export const WithQueuedChanges: Story = {
+  args: {
+    policies: [mockActiveSpendingLimit(), mockPendingUpdate(), mockPendingRemoval(), mockPendingPolicy()],
+  },
 }
 
 /** Off-chain access, not an on-chain policy — so no token icons and no module. */

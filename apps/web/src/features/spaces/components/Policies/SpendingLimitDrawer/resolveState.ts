@@ -46,7 +46,7 @@ export type SpendingLimitDrawerState = ActiveDrawerState | UnenforcedDrawerState
 
 export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 
-export type DrawerPolicy = ActiveDrawerPolicy | PendingSpendingLimitPolicy
+export type DrawerPolicy = ActiveDrawerPolicy | (PendingSpendingLimitPolicy & { status: 'pending' })
 
 /** A module that is present but not enabled enforces nothing, so no wallet makes this limit manageable. */
 const resolveUnenforced = (): UnenforcedDrawerState => ({
