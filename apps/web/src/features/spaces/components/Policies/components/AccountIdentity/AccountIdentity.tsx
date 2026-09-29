@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { blo } from 'blo'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
+import CopyAddressButton from '@/components/common/CopyAddressButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -9,9 +11,10 @@ import { Typography } from '@/components/ui/typography'
 export type AccountIdentityProps = {
   address: string
   name?: string
+  showCopyButton?: boolean
 }
 
-const AccountIdentity = ({ address, name }: AccountIdentityProps): ReactElement => {
+const AccountIdentity = ({ address, name, showCopyButton }: AccountIdentityProps): ReactElement => {
   const { displayName, shortAddress } = getSafeDisplayInfo(name ?? '', address)
 
   return (
@@ -28,19 +31,23 @@ const AccountIdentity = ({ address, name }: AccountIdentityProps): ReactElement 
             {name}
           </Typography>
         )}
-        <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
-          <TooltipTrigger render={<span />} className="flex min-w-0">
-            {/* Without a name the address is the account's only label, so it stops reading as muted metadata */}
-            <Typography
-              variant={name ? 'paragraph-mini' : 'paragraph-mini-medium'}
-              color={name ? 'muted' : undefined}
-              className="truncate font-mono"
-            >
-              {shortAddress}
-            </Typography>
-          </TooltipTrigger>
-          <TooltipContent className="pointer-events-none select-none font-mono">{address}</TooltipContent>
-        </Tooltip>
+        <span className="flex min-w-0 items-center gap-1">
+          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
+            <TooltipTrigger render={<span />} className="flex min-w-0">
+              {/* Without a name the address is the account's only label, so it stops reading as muted metadata */}
+              <Typography
+                variant={name ? 'paragraph-mini' : 'paragraph-mini-medium'}
+                color={name ? 'muted' : undefined}
+                className="truncate font-mono"
+              >
+                {shortAddress}
+              </Typography>
+            </TooltipTrigger>
+            <TooltipContent className="pointer-events-none select-none font-mono">{address}</TooltipContent>
+          </Tooltip>
+
+          {showCopyButton && <CopyAddressButton address={checksumAddress(address)} />}
+        </span>
       </span>
     </div>
   )

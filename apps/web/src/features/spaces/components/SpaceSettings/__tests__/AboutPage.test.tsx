@@ -73,13 +73,13 @@ describe('AboutPage', () => {
     it('renders Terms & Conditions with correct href', () => {
       renderWithStore()
       const link = screen.getByRole('link', { name: /^Terms & Conditions/i })
-      expect(link).toHaveAttribute('href', AppRoutes.terms)
+      expect(link).toHaveAttribute('href', 'https://safe.global/terms')
     })
 
     it('renders Privacy Policy with correct href', () => {
       renderWithStore()
       const link = screen.getByRole('link', { name: /Privacy Policy/i })
-      expect(link).toHaveAttribute('href', AppRoutes.privacy)
+      expect(link).toHaveAttribute('href', 'https://safe.global/privacy')
     })
 
     it('renders Licenses with correct href', () => {
@@ -150,7 +150,10 @@ describe('AboutPage', () => {
       renderWithStore()
 
       expect(screen.queryByRole('link', { name: /^Pro /i })).not.toBeInTheDocument()
-      expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute('href', AppRoutes.terms)
+      expect(screen.getByRole('link', { name: /^Terms & Conditions/i })).toHaveAttribute(
+        'href',
+        'https://safe.global/terms',
+      )
     })
   })
 

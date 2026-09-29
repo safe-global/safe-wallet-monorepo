@@ -21,3 +21,6 @@ export const safeAccountsLimitReachedText = (limit: number = SAFE_ACCOUNTS_LIMIT
 
 export const TRIAL_DISCLAIMER =
   "Your paid subscription only starts after you add billing details. If you don't add them before your free access ends, your Workspace will be locked. Your Safe accounts remain available outside the Workspace."
+
+/** Zoho Bookings page the "Talk to sales" CTAs open in a new tab, to schedule a call with sales. */
+export const CONTACT_SALES_URL = 'http://zbooking.eu/3H4cf'

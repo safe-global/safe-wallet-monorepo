@@ -1,19 +1,10 @@
+import type { PolicyStatus } from '../types'
 import { ProposerStatus } from './variants/types'
 
-export type ProposerStatusColor = 'success' | 'warning' | 'destructive'
-
-const STATUS_LABELS: Record<ProposerStatus, string> = {
-  [ProposerStatus.ACTIVE]: 'Active',
-  [ProposerStatus.PENDING]: 'Pending',
-  [ProposerStatus.NOT_ACTIVATED]: 'Not activated',
+const POLICY_STATUS: Record<ProposerStatus, PolicyStatus> = {
+  [ProposerStatus.ACTIVE]: 'active',
+  [ProposerStatus.PENDING]: 'pending',
+  [ProposerStatus.NOT_ACTIVATED]: 'not-activated',
 }
 
-const STATUS_COLORS: Record<ProposerStatus, ProposerStatusColor> = {
-  [ProposerStatus.ACTIVE]: 'success',
-  [ProposerStatus.PENDING]: 'warning',
-  [ProposerStatus.NOT_ACTIVATED]: 'destructive',
-}
-
-export const getProposerStatusLabel = (status: ProposerStatus): string => STATUS_LABELS[status]
-
-export const getProposerStatusColor = (status: ProposerStatus): ProposerStatusColor => STATUS_COLORS[status]
+export const toPolicyStatus = (status: ProposerStatus): PolicyStatus => POLICY_STATUS[status]

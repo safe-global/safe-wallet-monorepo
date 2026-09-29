@@ -27,5 +27,11 @@ export const ACTIVE_CONNECT_HELPER = 'Connect a signer wallet to edit.'
 
 export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this spending limit.'
 
+export const UNENFORCED_HELPER =
+  'The allowance module is not enabled on this Safe account, so this limit is not enforced.'
+
+/** Dropped once WA-3156 supplies an `onEdit` handler. */
+export const EDIT_UNAVAILABLE_HELPER = 'Editing a spending limit is coming soon.'
+
 /** The trailing full stop lives here, not at the call site, so the sentence is punctuated in one place. */
 export const signedAndWaitingLine = (missing: number): string => `You've signed. ${formatAwaitingSignatures(missing)}.`

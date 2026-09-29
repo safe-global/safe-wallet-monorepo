@@ -98,8 +98,8 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('public routes', () => {
-    it('should allow access to /terms', async () => {
-      setupMocks({ pathname: AppRoutes.terms, wallet: null, isAuthenticated: false })
+    it('should allow access to /licenses', async () => {
+      setupMocks({ pathname: AppRoutes.licenses, wallet: null, isAuthenticated: false })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
@@ -125,8 +125,8 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should allow access to /privacy', async () => {
-      setupMocks({ pathname: AppRoutes.privacy, wallet: null, isAuthenticated: false })
+    it('should allow access to /imprint', async () => {
+      setupMocks({ pathname: AppRoutes.imprint, wallet: null, isAuthenticated: false })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()

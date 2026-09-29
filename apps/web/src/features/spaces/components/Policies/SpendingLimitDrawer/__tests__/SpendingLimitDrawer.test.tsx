@@ -19,21 +19,33 @@ const OVERVIEW = {
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
 
-const setup = (policy: DrawerPolicy = mockActiveSpendingLimit(), viewer: Viewer = MOCK_VIEWERS.signer) =>
-  render(
-    <SpendingLimitDrawer
-      open
-      onClose={jest.fn()}
-      policy={policy}
-      viewer={viewer}
-      safe={{ address: SAFE_ADDRESS, name: MOCK_SAFE_NAME }}
-      overview={OVERVIEW}
-      transactionLink={TRANSACTION_LINK}
-      onEdit={jest.fn()}
-      onReviewTransaction={jest.fn()}
-      onConnectWallet={jest.fn()}
-    />,
+const setup = (
+  policy: DrawerPolicy = mockActiveSpendingLimit(),
+  viewer: Viewer = MOCK_VIEWERS.signer,
+  { onEdit }: { onEdit?: () => void } = { onEdit: jest.fn() },
+) => {
+  const shared = {
+    open: true,
+    onClose: jest.fn(),
+    viewer,
+    safe: { address: SAFE_ADDRESS, name: MOCK_SAFE_NAME },
+    overview: OVERVIEW,
+    onConnectWallet: jest.fn(),
+  }
+
+  return render(
+    policy.status === 'pending' ? (
+      <SpendingLimitDrawer
+        {...shared}
+        policy={policy}
+        transactionLink={TRANSACTION_LINK}
+        onReviewTransaction={jest.fn()}
+      />
+    ) : (
+      <SpendingLimitDrawer {...shared} policy={policy} onEdit={onEdit} />
+    ),
   )
+}
 
 describe('SpendingLimitDrawer', () => {
   it('titles itself from the policy type rather than a stored name', () => {
@@ -90,6 +102,45 @@ describe('SpendingLimitDrawer', () => {
 
     expect(screen.getByText('Not enforced')).toBeInTheDocument()
     expect(screen.queryByText('Active')).not.toBeInTheDocument()
+  })
+
+  it('keeps editing out of reach for an unenforced policy, and explains why', () => {
+    setup(asActivePolicy(mockUnenforcedPolicy()))
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(
+      screen.getByText('The allowance module is not enabled on this Safe account, so this limit is not enforced.'),
+    ).toBeInTheDocument()
+  })
+
+  it('shows no usage bars for an unenforced policy, whose spending nothing measures', () => {
+    setup(asActivePolicy(mockUnenforcedPolicy()))
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
+  })
+
+  it('disables editing until an edit flow is supplied', () => {
+    setup(mockActiveSpendingLimit(), MOCK_VIEWERS.signer, {})
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+  })
+
+  it('leaves out the last updated row while the payload carries no timestamp', () => {
+    render(
+      <SpendingLimitDrawer
+        open
+        onClose={jest.fn()}
+        policy={mockActiveSpendingLimit()}
+        viewer={MOCK_VIEWERS.signer}
+        safe={{ address: SAFE_ADDRESS, name: MOCK_SAFE_NAME }}
+        overview={{ enforcedBy: 'Safe allowance module' }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
+    expect(screen.getByText('Enforced by')).toBeInTheDocument()
   })
 
   describe('a signer who has already signed', () => {
