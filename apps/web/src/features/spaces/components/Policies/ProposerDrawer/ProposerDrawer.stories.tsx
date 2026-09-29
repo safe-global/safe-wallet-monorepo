@@ -89,6 +89,24 @@ export const NotASigner: Story = {
   },
 }
 
+/** Granted by the parent Safe of a nested Safe — removal has to happen in that Safe's settings. */
+export const GrantedByParentSafe: Story = {
+  args: {
+    status: ProposerStatus.ACTIVE,
+    overview: OVERVIEW,
+    nestedSafeGrant: {
+      safeName: 'Treasury',
+      parentSafeName: 'Ops',
+      settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${OVERVIEW.appliesTo.address}` } },
+    },
+    actionLabel: 'Remove proposer',
+    actionVariant: 'secondary',
+    actionDisabled: true,
+    actionHint: 'Remove this proposer from the Safe account settings',
+    onAction: fn(),
+  },
+}
+
 export const Pending: Story = {
   args: {
     status: ProposerStatus.PENDING,
