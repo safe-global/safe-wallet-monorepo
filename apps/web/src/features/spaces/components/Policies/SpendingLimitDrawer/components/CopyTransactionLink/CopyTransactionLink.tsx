@@ -7,7 +7,6 @@ export type CopyTransactionLinkProps = {
   transactionLink: string
 }
 
-/** What a viewer who cannot move the transaction along is offered: the link, for someone who can. */
 const CopyTransactionLink = ({ transactionLink }: CopyTransactionLinkProps): ReactElement => (
   <DrawerFooter>
     <div className="flex *:w-full">

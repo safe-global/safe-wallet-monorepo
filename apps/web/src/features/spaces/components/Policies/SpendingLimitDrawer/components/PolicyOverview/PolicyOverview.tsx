@@ -8,7 +8,6 @@ export type PolicyOverviewProps = {
   appliesTo: AccountIdentityProps
   /** Omitted for spending limits — CGW returns no initiator for them. */
   initiatedBy?: AccountIdentityProps
-  /** TODO(WA-3630): always set once the policy payload carries a timestamp; omitted beats a placeholder. */
   lastUpdated?: string
   enforcedBy: string
   /** Block explorer link for the enforcing contract. Without it the name is plain text, not a dead underline. */

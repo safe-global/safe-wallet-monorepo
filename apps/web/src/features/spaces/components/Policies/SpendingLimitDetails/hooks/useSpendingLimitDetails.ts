@@ -7,7 +7,6 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import type { ActiveDrawerPolicy } from '../../SpendingLimitDrawer'
 
-/** The limit is enforced by the Allowance module the policy names, not by Safe{Wallet}. */
 const ENFORCED_BY = 'Safe allowance module'
 
 export type SpendingLimitDetailsContent = {
@@ -18,10 +17,7 @@ export type SpendingLimitDetailsContent = {
   onConnectWallet: () => void
 }
 
-/**
- * Everything the drawer needs beyond the policy itself. Ownership comes from the Space's own safes,
- * which are already loaded, so opening a panel costs no request.
- */
+/** Ownership comes from the Space's own safes, already loaded, so opening a panel costs no request. */
 export const useSpendingLimitDetails = (policy: ActiveDrawerPolicy): SpendingLimitDetailsContent => {
   const { chainId, address: safeAddress } = policy.safe
   const addressBook = useMergedAddressBooks(chainId)

@@ -124,7 +124,6 @@ describe('SpendingLimitDetails', () => {
     expect(screen.getByText(getSafeDisplayInfo('', unnamed.spender).shortAddress)).toBeInTheDocument()
   })
 
-  // Every member of the Space has to read the same policy, so one viewer's own contacts stay out of it.
   it('ignores a spender name that exists only in the local address book', () => {
     mockWallet()
     mockSpaceSafes(false)

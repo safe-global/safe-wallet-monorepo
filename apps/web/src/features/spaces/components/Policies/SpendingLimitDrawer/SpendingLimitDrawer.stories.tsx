@@ -21,7 +21,6 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675'
 
-/** A queued policy reviews or shares its transaction; an active one has none. */
 const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, onReviewTransaction: fn() }
 
 const OVERVIEW = {

@@ -12,9 +12,7 @@ type PendingSpendingLimitActions = {
 export type SpendingLimitActionsProps = {
   state: SpendingLimitDrawerState
   onConnectWallet: () => void
-  /** Absent until WA-3156 ships the edit flow, which leaves the button disabled. */
   onEdit?: () => void
-  /** Supplied only for a queued policy, whose footer signs or shares the transaction instead. */
   pending?: PendingSpendingLimitActions
 }
 

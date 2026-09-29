@@ -14,7 +14,6 @@ import {
 export type Viewer = {
   address?: string
   isSigner: boolean
-  /** Only a queued transaction can be signed, so active viewers leave it out. */
   hasSigned?: boolean
 }
 

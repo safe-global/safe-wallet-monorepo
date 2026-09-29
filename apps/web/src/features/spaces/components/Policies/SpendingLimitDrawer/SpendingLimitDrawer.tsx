@@ -65,7 +65,6 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
         <div className="flex flex-col gap-6">
           {isPending && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {isPending && <PendingSignatures safe={safe} signed={state.signed} required={state.required} />}
-          {/* Usage is only meaningful while the module enforces the limit. */}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={state.kind === 'active'} />
           <PolicyOverview {...overview} appliesTo={safe} enforcedByHref={enforcedByHref} />
         </div>
