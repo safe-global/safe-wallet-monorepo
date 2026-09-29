@@ -1,7 +1,14 @@
 import { renderHook } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import usePolicySearch from '../usePolicySearch'
-import { asActivePolicy, mockPolicies, mockProposerPolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
+import {
+  MOCK_ADDRESSES,
+  MOCK_SAFES,
+  asActivePolicy,
+  mockPolicies,
+  mockProposerPolicy,
+  mockSpendingLimitPolicy,
+} from '../../mocks/policies'
 import type { Policy } from '../../types'
 
 const mockChains = [
@@ -15,6 +22,12 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: (chainId: string) => mockChains.find((chain) => chain.chainId === chainId),
 }))
 
+const mockResolveName = jest.fn()
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useSafeNameResolver: () => mockResolveName,
+}))
+
 // The shared fixtures are mostly zeros, which reads as one address to a fuzzy matcher.
 const SPENDER = '0x9a2C4e5F7b1D3a6E8c0B2d4F6a8C1e3B5d7F9a1C'
 const PROPOSER = '0x4B6d8F1a3C5e7B9d2F4a6C8e0B1d3F5a7C9e2B4D'
@@ -22,6 +35,10 @@ const PROPOSER = '0x4B6d8F1a3C5e7B9d2F4a6C8e0B1d3F5a7C9e2B4D'
 const chainIdsOf = (policies: Policy[]) => policies.map((policy) => policy.safe.chainId)
 
 describe('usePolicySearch', () => {
+  beforeEach(() => {
+    mockResolveName.mockReturnValue('')
+  })
+
   it('should, when the query is empty, return every policy unchanged', () => {
     const policies = mockPolicies()
 
@@ -30,11 +47,60 @@ describe('usePolicySearch', () => {
     expect(result.current).toBe(policies)
   })
 
-  it('should, when the query is a rule name, return only the policies of that type', () => {
+  it('should, when the query is a rule name, return nothing: the type filter selects on the rule', () => {
     const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Proposer'))
 
+    expect(result.current).toHaveLength(0)
+  })
+
+  it('should, when the query is a rule summary, return nothing', () => {
+    const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'spender'))
+
+    expect(result.current).toHaveLength(0)
+  })
+
+  it('should, when the query is a Safe name in the address book, return the policies on that Safe', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_SAFES.grants.address ? 'Act3' : ''))
+
+    const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Act3'))
+
     expect(result.current.length).toBeGreaterThan(0)
-    expect(result.current.every((policy) => policy.type === 'proposer')).toBe(true)
+    expect(result.current.every((policy) => policy.safe.address === MOCK_SAFES.grants.address)).toBe(true)
+  })
+
+  it('should, when the query is a spender name in the address book, return the policy that grants it', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_ADDRESSES.alice ? 'Act1' : ''))
+
+    const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(mockProposerPolicy())]
+    const { result } = renderHook(() => usePolicySearch(policies, 'Act1'))
+
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0].type).toBe('spending-limit')
+  })
+
+  it('should, when the query is a proposer name in the address book, return the grant naming it', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_ADDRESSES.bob ? 'Act2' : ''))
+
+    const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(mockProposerPolicy())]
+    const { result } = renderHook(() => usePolicySearch(policies, 'Act2'))
+
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0].type).toBe('proposer')
+  })
+
+  it('should, when the query is the label CGW returns on a proposer grant, return that grant', () => {
+    const policies = [asActivePolicy(mockSpendingLimitPolicy()), asActivePolicy(mockProposerPolicy())]
+
+    const { result } = renderHook(() => usePolicySearch(policies, 'Bob'))
+
+    expect(result.current).toHaveLength(1)
+    expect(result.current[0].type).toBe('proposer')
+  })
+
+  it('should, when no address resolves to a name, not match every policy on the empty name', () => {
+    const { result } = renderHook(() => usePolicySearch(mockPolicies(), 'Act3'))
+
+    expect(result.current).toHaveLength(0)
   })
 
   it('should, when the query is part of a Safe address, return the policies on that Safe', () => {
@@ -116,10 +182,10 @@ describe('usePolicySearch', () => {
   it('should, when the query changes, return the matches for the new query', () => {
     const policies = mockPolicies()
     const { result, rerender } = renderHook(({ query }: { query: string }) => usePolicySearch(policies, query), {
-      initialProps: { query: 'Proposer' },
+      initialProps: { query: 'USDC' },
     })
 
-    expect(result.current.every((policy) => policy.type === 'proposer')).toBe(true)
+    expect(result.current.length).toBeGreaterThan(0)
 
     rerender({ query: 'zzzznothing' })
 

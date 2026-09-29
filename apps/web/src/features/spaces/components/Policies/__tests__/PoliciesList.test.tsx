@@ -1,5 +1,6 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import {
+  MOCK_SAFES,
   asActivePolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -20,12 +21,18 @@ describe('PoliciesList', () => {
 
   it('should, when a search matches one policy, render only that policy', () => {
     render(<PoliciesList policies={mockPolicies()} />)
+    fireEvent.change(screen.getByPlaceholderText('by name, address or network'), {
+      target: { value: MOCK_SAFES.grants.address },
+    })
+
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+  })
+
+  it('should, when the search is a rule name, not match: the type filter selects on the rule', () => {
+    render(<PoliciesList policies={mockPolicies()} />)
     fireEvent.change(screen.getByPlaceholderText('by name, address or network'), { target: { value: 'Proposer' } })
 
-    const rules = screen.getAllByTestId('policy-cell-rule')
-
-    expect(rules).toHaveLength(1)
-    expect(rules[0]).toHaveTextContent('Proposer')
+    expect(screen.getByTestId('policies-no-results')).toBeInTheDocument()
   })
 
   it('should, when a search matches nothing, say so instead of rendering an empty table', () => {
