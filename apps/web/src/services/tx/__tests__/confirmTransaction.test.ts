@@ -33,7 +33,7 @@ describe('confirmTx', () => {
   }
 
   beforeAll(() => {
-    setStoreInstance(makeStore({}, { skipBroadcast: true }))
+    setStoreInstance(makeStore({}))
   })
 
   it('should return the updated transaction details', async () => {

@@ -100,7 +100,7 @@ describe('txSender', () => {
 
     // Initialize store for tests that need it (e.g., dispatchBatchExecutionRelay)
     const { makeStore, setStoreInstance } = require('@/store')
-    const testStore = makeStore({}, { skipBroadcast: true })
+    const testStore = makeStore({})
     setStoreInstance(testStore)
   })
 
