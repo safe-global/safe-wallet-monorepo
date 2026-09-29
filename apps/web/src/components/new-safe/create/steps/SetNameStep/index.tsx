@@ -2,7 +2,6 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { Typography } from '@/components/ui/typography'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import InfoIcon from '@/public/images/notifications/info.svg'
@@ -13,8 +12,8 @@ import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
 import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import NextLink from 'next/link'
+import ExternalLink from '@/components/common/ExternalLink'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { useRouter } from 'next/router'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -157,8 +156,15 @@ function SetNameStep({
             </div>
           </div>
           <Typography variant="paragraph-small" className="mt-4 block">
-            By continuing, you agree to our <Link render={<NextLink href={AppRoutes.terms} />}>terms of use</Link> and{' '}
-            <Link render={<NextLink href={AppRoutes.privacy} />}>privacy policy</Link>.
+            By continuing, you agree to our{' '}
+            <ExternalLink href={TERMS_URL} noIcon>
+              terms of use
+            </ExternalLink>{' '}
+            and{' '}
+            <ExternalLink href={PRIVACY_URL} noIcon>
+              privacy policy
+            </ExternalLink>
+            .
           </Typography>
 
           <NoWalletConnectedWarning />

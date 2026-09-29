@@ -7,6 +7,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
+import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
@@ -95,7 +96,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
                 />
               </div>
               <Typography variant="paragraph-small" color="muted">
-                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+                How is my data processed? Read our <ExternalLink href={PRIVACY_URL}>privacy policy</ExternalLink>
               </Typography>
 
               {error && (
