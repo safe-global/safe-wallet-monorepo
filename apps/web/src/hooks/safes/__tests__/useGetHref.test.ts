@@ -29,10 +29,10 @@ describe('useGetHref', () => {
 
     const { result } = renderHook(() => useGetHref(router))
 
-    expect(result.current(chain, ADDRESS)).toEqual({
-      pathname: AppRoutes.home,
-      query: { spaceId: SPACE_ID, safe: `eth:${ADDRESS}` },
-    })
+    const href = result.current(chain, ADDRESS)
+    expect(href).toEqual({ pathname: AppRoutes.home, query: { safe: `eth:${ADDRESS}`, spaceId: SPACE_ID } })
+    // Every Safe link puts `safe` first, so the URL reads the same wherever the link comes from
+    expect(Object.keys(href.query)).toEqual(['safe', 'spaceId'])
   })
 
   it('keeps the query of a Safe page, and replaces only the Safe', () => {

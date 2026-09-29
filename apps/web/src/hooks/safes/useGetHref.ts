@@ -26,7 +26,9 @@ export const useGetHref = (router: NextRouter) => {
               ? AppRoutes.transactions.history
               : router.pathname,
         // A Workspace page keeps only its Workspace; a Safe page keeps its whole query, spaceId included
-        query: { ...(isSpacePage ? spaceIdQuery : router.query), safe: `${chain.shortName}:${address}` },
+        query: isSpacePage
+          ? { safe: `${chain.shortName}:${address}`, ...spaceIdQuery }
+          : { ...router.query, safe: `${chain.shortName}:${address}` },
       }
     },
     [isSingleTxPage, isWelcomePage, isSpacePage, spaceIdQuery, router.pathname, router.query],
