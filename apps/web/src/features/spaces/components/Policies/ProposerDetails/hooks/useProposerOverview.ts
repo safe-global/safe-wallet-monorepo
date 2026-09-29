@@ -1,6 +1,7 @@
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
-import { getSafeSettingsHref } from '../../utils/safeSettingsHref'
+import { AppRoutes } from '@/config/routes'
+import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import type { ProposerOverviewProps } from '../../ProposerDrawer/components/ProposerOverview'
 import type { ProposerRef } from './types'
 
@@ -26,7 +27,7 @@ export const useProposerOverview = ({ policy, proposer }: ProposerRef): Proposer
     appliesTo: {
       address: safeAddress,
       name: safeContact?.name,
-      href: getSafeSettingsHref(shortName, safeAddress),
+      href: buildSafeHref(AppRoutes.settings.setup, shortName, safeAddress),
     },
     initiatedBy: { address: grantor ?? '', name: grantorContact?.name },
     lastUpdated: NO_TIMESTAMP,

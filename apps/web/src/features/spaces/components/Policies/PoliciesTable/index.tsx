@@ -10,7 +10,8 @@ import PolicyRule from './components/PolicyRule'
 import PolicyStatusChip from '../components/PolicyStatusChip'
 import PolicyTokens from './components/PolicyTokens'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { getSafeSettingsHref } from '../utils/safeSettingsHref'
+import { AppRoutes } from '@/config/routes'
+import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
@@ -60,7 +61,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           showAddressTooltip
           boldLabel
           avatarSize={24}
-          href={getSafeSettingsHref(getShortName(policy.safe.chainId), policy.safe.address)}
+          href={buildSafeHref(AppRoutes.settings.setup, getShortName(policy.safe.chainId), policy.safe.address)}
         />
       ),
     },

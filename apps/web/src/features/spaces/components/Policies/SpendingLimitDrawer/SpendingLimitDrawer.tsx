@@ -4,7 +4,8 @@ import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { getPolicyLabel } from '../utils/policyLabel'
-import { getSafeSettingsHref } from '../utils/safeSettingsHref'
+import { AppRoutes } from '@/config/routes'
+import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { PendingBanner } from './components/PendingBanner'
 import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
@@ -69,7 +70,10 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={state.kind === 'active'} />
           <PolicyOverview
             {...overview}
-            appliesTo={{ ...safe, href: getSafeSettingsHref(chain?.shortName, policy.safe.address) }}
+            appliesTo={{
+              ...safe,
+              href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address),
+            }}
             enforcedByHref={enforcedByHref}
           />
         </div>
