@@ -11,11 +11,13 @@ import { AppRoutes } from '@/config/routes'
 import { SafeWidget } from '@/features/spaces'
 import { Button } from '@/components/ui/button'
 import TokenIcon from '@/components/common/TokenIcon'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const MAX_ASSETS = 3
 
 const AssetsList = (): ReactElement => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
   const currency = useAppSelector(selectCurrency)
@@ -32,7 +34,7 @@ const AssetsList = (): ReactElement => {
   const isLoading = loading || !balances.fiatTotal
 
   const handleViewAll = () => {
-    router.push({ pathname: AppRoutes.balances.index, query: { safe: router.query.safe } })
+    router.push({ pathname: AppRoutes.balances.index, query: { safe: router.query.safe, ...spaceIdQuery } })
   }
 
   return (

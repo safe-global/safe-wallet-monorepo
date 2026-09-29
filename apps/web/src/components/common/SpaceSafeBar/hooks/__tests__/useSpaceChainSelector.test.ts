@@ -119,6 +119,8 @@ function setupDefaults(
 // ── tests ──────────────────────────────────────────────────────────────
 
 describe('useSpaceChainSelector', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
   beforeEach(() => {
     jest.resetAllMocks()
     setupDefaults()
@@ -169,6 +171,23 @@ describe('useSpaceChainSelector', () => {
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/home',
       query: { safe: 'matic:0xSafe2' },
+    })
+  })
+
+  it('keeps the Workspace of the URL when it switches the chain', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+    window.history.replaceState(null, '', `/home?safe=matic:0xSafe2&spaceId=${spaceId}`)
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('137')
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'matic:0xSafe2', spaceId },
     })
   })
 

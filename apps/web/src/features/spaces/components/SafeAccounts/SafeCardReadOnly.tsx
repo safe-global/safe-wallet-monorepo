@@ -22,6 +22,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { cn } from '@/utils/cn'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -48,6 +49,7 @@ const SafeCardReadOnly = ({
   action,
 }: SafeCardReadOnlyProps) => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
   const safes = useMemo<SafeItem[]>(
@@ -86,6 +88,7 @@ const SafeCardReadOnly = ({
       pathname: AppRoutes.home,
       query: {
         safe: `${chain.shortName}:${singleSafe.address}`,
+        ...spaceIdQuery,
       },
     })
   }

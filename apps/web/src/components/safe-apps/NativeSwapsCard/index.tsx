@@ -7,6 +7,7 @@ import Track from '@/components/common/Track'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 type NativeSwapsCardProps = {
   onDismiss: () => void
@@ -14,6 +15,7 @@ type NativeSwapsCardProps = {
 
 const NativeSwapsCard = ({ onDismiss }: NativeSwapsCardProps) => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
 
   return (
     // eslint-disable-next-line no-restricted-syntax -- h-full fills the dashboard grid cell (layout); the hover tint is a bespoke affordance with no variant
@@ -38,7 +40,10 @@ const NativeSwapsCard = ({ onDismiss }: NativeSwapsCardProps) => {
             Don&apos;t show
           </Button>
           <Track {...SWAP_EVENTS.OPEN_SWAPS} label={SWAP_LABELS.safeAppsPromoWidget}>
-            <Button size="sm" render={<Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe } }} />}>
+            <Button
+              size="sm"
+              render={<Link href={{ pathname: AppRoutes.swap, query: { safe: router.query.safe, ...spaceIdQuery } }} />}
+            >
               Try now
             </Button>
           </Track>

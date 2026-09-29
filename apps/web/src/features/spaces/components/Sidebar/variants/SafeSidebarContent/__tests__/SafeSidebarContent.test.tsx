@@ -9,10 +9,11 @@ const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()
 
 const mockRouterPathname = { current: AppRoutes.home }
+const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    query: { spaceId: '123', safe: 'eth:0x1' },
+    query: { spaceId: SPACE_ID, safe: 'eth:0x1' },
     pathname: mockRouterPathname.current,
     replace: jest.fn(),
   }),
@@ -91,6 +92,8 @@ const renderWithGeoblocking = (isBlockedCountry: boolean | null) =>
   )
 
 describe('SafeSidebarContent', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsRouteEnabled.mockReturnValue(true)
@@ -299,6 +302,15 @@ describe('SafeSidebarContent', () => {
       expect(getLink({ href: AppRoutes.bridge } as SidebarItemConfig).pathname).toBe(AppRoutes.bridge)
       expect(getLink({ href: AppRoutes.earn } as SidebarItemConfig).pathname).toBe(AppRoutes.earn)
       expect(getLink({ href: AppRoutes.stake } as SidebarItemConfig).pathname).toBe(AppRoutes.stake)
+    })
+
+    it('keeps the Workspace of the URL in every link', () => {
+      window.history.replaceState(null, '', `/home?safe=eth:0x1&spaceId=${SPACE_ID}`)
+      render(<SafeSidebarContent {...defaultProps} />)
+
+      const [, , { getLink }] = getCallArgs()
+      expect(getLink({ href: AppRoutes.home } as SidebarItemConfig).query.spaceId).toBe(SPACE_ID)
+      expect(getLink({ href: AppRoutes.swap } as SidebarItemConfig).query.spaceId).toBe(SPACE_ID)
     })
 
     it('routes Transactions entry to History when the queue is empty', () => {

@@ -8,6 +8,7 @@ import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useIsEarnPromoEnabled } from '@/features/earn'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 type PositionsEmptyProps = {
   entryPoint?: string
@@ -15,6 +16,7 @@ type PositionsEmptyProps = {
 
 const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const isEarnFeatureEnabled = useIsEarnPromoEnabled()
 
   return (
@@ -36,7 +38,9 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
             variant="ghost"
             size="sm"
             className="mt-2"
-            render={<NextLink href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe } }} />}
+            render={
+              <NextLink href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe, ...spaceIdQuery } }} />
+            }
           >
             Explore Earn
           </Button>

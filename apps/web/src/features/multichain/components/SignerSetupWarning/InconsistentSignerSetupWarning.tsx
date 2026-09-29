@@ -15,6 +15,7 @@ import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 /**
  * ChainIndicatorList component displays a list of chains with their logos and names
@@ -43,6 +44,7 @@ export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
 
 export const InconsistentSignerSetupWarning = () => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const isMultichainSafe = useIsMultichainSafe()
   const safeAddress = useSafeAddress()
   const currentChain = useCurrentChain()
@@ -72,7 +74,7 @@ export const InconsistentSignerSetupWarning = () => {
   const handleReviewSigners = () => {
     router.push({
       pathname: AppRoutes.settings.setup,
-      query: { safe: router.query.safe },
+      query: { safe: router.query.safe, ...spaceIdQuery },
     })
   }
 

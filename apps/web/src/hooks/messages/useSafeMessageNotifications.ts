@@ -13,6 +13,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingSafeMessagesState } from '@/store/pendingSafeMessagesSlice'
+import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 // Signing failures are absent by design: `SignMessage` is the only surface that
 // can produce them, and it renders them inline next to its CTA (WA-3502).
@@ -74,6 +75,7 @@ const useSafeMessageNotifications = () => {
   const isOwner = useIsSafeOwner()
   const notifications = useAppSelector(selectNotifications)
   const chain = useCurrentChain()
+  const spaceId = useUrlSpaceId()
   const safeAddress = useSafeAddress()
   const notifiedAwaitingMessageHashes = useRef<Array<string>>([])
 
@@ -102,7 +104,7 @@ const useSafeMessageNotifications = () => {
         variant: 'info',
         message: 'A message requires your confirmation.',
         link: {
-          href: `${AppRoutes.transactions.messages}?safe=${chain?.shortName}:${safeAddress}`,
+          href: `${AppRoutes.transactions.messages}?safe=${chain?.shortName}:${safeAddress}${getSpaceIdSearchParam(spaceId)}`,
           title: 'View messages',
         },
         groupKey: messageHash,
@@ -110,7 +112,7 @@ const useSafeMessageNotifications = () => {
     )
 
     notifiedAwaitingMessageHashes.current.push(messageHash)
-  }, [dispatch, isOwner, notifications, msgsNeedingConfirmation, chain?.shortName, safeAddress])
+  }, [dispatch, isOwner, notifications, msgsNeedingConfirmation, chain?.shortName, safeAddress, spaceId])
 }
 
 export default useSafeMessageNotifications

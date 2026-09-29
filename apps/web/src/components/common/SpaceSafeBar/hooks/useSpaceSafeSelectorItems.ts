@@ -26,6 +26,7 @@ import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useSafeBarSafes } from './useSafeBarSafes'
+import { getSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -236,8 +237,9 @@ export function useSpaceSafeSelectorItems() {
 
   const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
+  // A Safe from the Workspace tab opens in that Workspace; one from My accounts opens outside it.
   const handleItemSelect = useCallback(
-    (itemId: string) => {
+    (itemId: string, isWorkspaceTab: boolean) => {
       const colonIndex = itemId.indexOf(':')
       const chainId = itemId.slice(0, colonIndex)
       const address = itemId.slice(colonIndex + 1)
@@ -252,7 +254,10 @@ export function useSpaceSafeSelectorItems() {
           source: 'space_selector',
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
+      router.push({
+        pathname: AppRoutes.home,
+        query: { safe: `${chain.shortName}:${address}`, ...getSpaceIdQuery(isWorkspaceTab ? spaceId : null) },
+      })
     },
     [chainConfigs, router, spaceId],
   )

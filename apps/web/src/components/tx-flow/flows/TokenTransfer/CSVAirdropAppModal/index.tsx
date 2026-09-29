@@ -6,9 +6,11 @@ import { Typography } from '@/components/ui/typography'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?: string }): ReactElement => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
 
   return (
     <ModalDialog
@@ -43,6 +45,7 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
                   query: {
                     safe: router.query.safe,
                     appUrl,
+                    ...spaceIdQuery,
                   },
                 }}
               />

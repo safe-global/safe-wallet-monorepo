@@ -19,10 +19,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useSafeAppRedirects } from '@/hooks/safe-apps/useSafeAppRedirects'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const SafeApps: NextPage = () => {
   const chainId = useChainId()
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const appUrl = useSafeAppUrl()
   const { remoteSafeAppsLoading, getSafeAppByUrl } = useSafeApps()
   const safeAppData = appUrl ? getSafeAppByUrl(appUrl) : undefined
@@ -50,9 +52,9 @@ const SafeApps: NextPage = () => {
   const goToList = useCallback(() => {
     router.push({
       pathname: AppRoutes.apps.index,
-      query: { safe: router.query.safe },
+      query: { safe: router.query.safe, ...spaceIdQuery },
     })
-  }, [router])
+  }, [router, spaceIdQuery])
 
   const shouldRender = useSafeAppRedirects({
     safeAppData,

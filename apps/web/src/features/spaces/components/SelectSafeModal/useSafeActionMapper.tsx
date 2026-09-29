@@ -7,6 +7,7 @@ import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { ESafeAction } from '@/features/spaces/store'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 type SafeActionHandler = (safe: SafeItem) => Promise<void>
 
@@ -21,6 +22,7 @@ interface UseSafeActionMapperResult {
 
 const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions): UseSafeActionMapperResult => {
   const router = useRouter()
+  const spaceIdQuery = useSpaceIdQuery()
   const { setTxFlow } = useContext(TxModalContext)
   const { configs: chains } = useChains()
   const { link: txBuilderLink } = useTxBuilderApp()
@@ -75,7 +77,7 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
         const safeParam = getSafeQueryParam(safe)
         await router.push({
           pathname: AppRoutes.swap,
-          query: { safe: safeParam },
+          query: { safe: safeParam, ...spaceIdQuery },
         })
       },
 
@@ -87,7 +89,16 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
         })
       },
     }),
-    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink],
+    [
+      router,
+      setTxFlow,
+      getSafeQueryParam,
+      navigateToSafe,
+      onReceiveComplete,
+      resetActiveSafe,
+      txBuilderLink,
+      spaceIdQuery,
+    ],
   )
 
   return { actionMapper, resetActiveSafe }

@@ -11,6 +11,7 @@ import { AppRoutes } from '@/config/routes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import TxConfirmations from '@/components/transactions/TxConfirmations'
 import { DateTime } from '@/components/common/DateTime/DateTime'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 type PendingTxType = {
   transaction: Transaction
@@ -19,6 +20,7 @@ type PendingTxType = {
 const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
   const { id } = transaction
   const safeQueryParam = useSafeQueryParam()
+  const spaceIdQuery = useSpaceIdQuery()
 
   const url = useMemo(
     () => ({
@@ -26,9 +28,10 @@ const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
       query: {
         id,
         safe: safeQueryParam,
+        ...spaceIdQuery,
       },
     }),
-    [safeQueryParam, id],
+    [safeQueryParam, spaceIdQuery, id],
   )
 
   return (

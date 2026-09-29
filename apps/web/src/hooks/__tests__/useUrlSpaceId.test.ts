@@ -1,5 +1,12 @@
 import { renderHook } from '@/tests/test-utils'
-import { useUrlSpaceId } from '../useUrlSpaceId'
+import {
+  getLocationSpaceIdQuery,
+  getRouterSpaceIdQuery,
+  getSpaceIdQuery,
+  getSpaceIdSearchParam,
+  useSpaceIdQuery,
+  useUrlSpaceId,
+} from '../useUrlSpaceId'
 
 const SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -43,5 +50,45 @@ describe('useUrlSpaceId', () => {
     const { result } = renderWithQuery({})
 
     expect(result.current).toBe(SPACE_UUID)
+  })
+})
+
+describe('Workspace link helpers', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
+  it('builds a query to spread into a link, empty outside a Workspace', () => {
+    expect(getSpaceIdQuery(SPACE_UUID)).toEqual({ spaceId: SPACE_UUID })
+    expect(getSpaceIdQuery(null)).toEqual({})
+  })
+
+  it('builds a search param for a string link, empty outside a Workspace', () => {
+    expect(getSpaceIdSearchParam(SPACE_UUID)).toBe(`&spaceId=${SPACE_UUID}`)
+    expect(getSpaceIdSearchParam(null)).toBe('')
+  })
+
+  it('reads the Workspace of a router, and ignores a malformed one or a router without query', () => {
+    expect(getRouterSpaceIdQuery({ query: { spaceId: SPACE_UUID } })).toEqual({ spaceId: SPACE_UUID })
+    expect(getRouterSpaceIdQuery({ query: { spaceId: 'space-1' } })).toEqual({})
+    expect(getRouterSpaceIdQuery({} as Parameters<typeof getRouterSpaceIdQuery>[0])).toEqual({})
+  })
+
+  it('reads the Workspace of the page location', () => {
+    expect(getLocationSpaceIdQuery()).toEqual({})
+
+    window.history.replaceState(null, '', `/transactions/queue?safe=eth:0x1&spaceId=${SPACE_UUID}`)
+
+    expect(getLocationSpaceIdQuery()).toEqual({ spaceId: SPACE_UUID })
+  })
+
+  it('returns the same query object while the Workspace stays the same', () => {
+    const { result, rerender } = renderHook(() => useSpaceIdQuery(), {
+      routerProps: { query: { spaceId: SPACE_UUID } },
+    })
+    const first = result.current
+
+    rerender()
+
+    expect(result.current).toEqual({ spaceId: SPACE_UUID })
+    expect(result.current).toBe(first)
   })
 })

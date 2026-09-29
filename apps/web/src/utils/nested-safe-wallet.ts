@@ -13,6 +13,7 @@ import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import type { TransactionResult } from '@safe-global/types-kit'
+import { getRouterSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 export type NestedWallet = {
   address: string
@@ -123,6 +124,7 @@ export const getNestedWallet = (
         query: {
           safe: router.query.safe,
           id: safeTxHash,
+          ...getRouterSpaceIdQuery(router),
         },
       })
     },

@@ -7,6 +7,7 @@ import { TX_LIST_EVENTS } from '@/services/analytics'
 import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
+import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const TxShareLink = ({
   id,
@@ -19,7 +20,8 @@ const TxShareLink = ({
 }): ReactElement => {
   const router = useRouter()
   const { safe = '' } = router.query
-  const href = `${AppRoutes.transactions.tx}?safe=${safe}&id=${id}`
+  const spaceId = useUrlSpaceId()
+  const href = `${AppRoutes.transactions.tx}?safe=${safe}${getSpaceIdSearchParam(spaceId)}&id=${id}`
   const txUrl = useOrigin() + href
 
   return (

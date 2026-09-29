@@ -25,6 +25,7 @@ import { Separator } from '@/components/ui/separator'
 import type { ReactElement } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 interface ContentProps {
   /** The ID assigned to the transaction in the client-gateway */
@@ -39,11 +40,12 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
   const hasSucceededRef = useRef(false)
   const { setTxFlow } = useContext(TxModalContext)
   const chain = useCurrentChain()
+  const spaceIdQuery = useSpaceIdQuery()
   const pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
   const { safeAddress } = useSafeInfo()
   const status = !txId && txHash ? PendingStatus.INDEXING : pendingTx?.status
   const pendingTxHash = pendingTx && 'txHash' in pendingTx ? pendingTx.txHash : undefined
-  const txLink = chain && txId && getTxLink(txId, chain, safeAddress)
+  const txLink = chain && txId && getTxLink(txId, chain, safeAddress, spaceIdQuery)
   const [txDetails] = useTxDetails(txId)
   const isSwapOrder = txDetails && isSwapTransferOrderTxInfo(txDetails.txInfo)
   const [predictedSafeAddress] = usePredictSafeAddressFromTxDetails(txDetails)
@@ -156,7 +158,10 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
                 disabled={!isSuccess}
                 render={
                   <NextLink
-                    href={{ pathname: AppRoutes.home, query: { safe: `${chain?.shortName}:${predictedSafeAddress}` } }}
+                    href={{
+                      pathname: AppRoutes.home,
+                      query: { safe: `${chain?.shortName}:${predictedSafeAddress}`, ...spaceIdQuery },
+                    }}
                   />
                 }
               >

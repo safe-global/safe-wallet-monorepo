@@ -14,6 +14,7 @@ import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const buttonClasses = 'h-[58px] w-full px-6 text-base [&_svg_path]:fill-current'
 
@@ -56,6 +57,7 @@ export const MakeASwapButton = () => {
   const router = useRouter()
   const { setTxFlow } = useContext(TxModalContext)
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
+  const spaceIdQuery = useSpaceIdQuery()
   if (!isSwapFeatureEnabled) return null
 
   const isSwapPage = router.pathname === AppRoutes.swap
@@ -74,7 +76,7 @@ export const MakeASwapButton = () => {
       setTxFlow(undefined)
       router.push({
         pathname: AppRoutes.swap,
-        query: { safe: router.query.safe },
+        query: { safe: router.query.safe, ...spaceIdQuery },
       })
     }
   }

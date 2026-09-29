@@ -305,7 +305,7 @@ function SpaceSafeBar() {
           items={unionItems}
           listItems={listItems}
           selectedItemId={selectedItemId}
-          onItemSelect={handleItemSelect}
+          onItemSelect={(itemId) => handleItemSelect(itemId, activeTab === 'workspace')}
           isLoading={showSelectorSkeleton}
           isError={isError}
           onRetry={refetch}

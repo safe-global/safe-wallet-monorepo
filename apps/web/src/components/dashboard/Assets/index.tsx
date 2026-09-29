@@ -25,6 +25,7 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { StakeFeature } from '@/features/stake'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const MAX_ASSETS = 4
 
@@ -143,6 +144,7 @@ export const isNonZeroBalance = (item: Balances['items'][number]) => item.balanc
 const AssetsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
+  const spaceIdQuery = useSpaceIdQuery()
   const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
 
@@ -153,9 +155,9 @@ const AssetsWidget = () => {
   const viewAllUrl = useMemo(
     () => ({
       pathname: AppRoutes.balances.index,
-      query: { safe },
+      query: { safe, ...spaceIdQuery },
     }),
-    [safe],
+    [safe, spaceIdQuery],
   )
 
   const isLoading = loading || !balances.fiatTotal

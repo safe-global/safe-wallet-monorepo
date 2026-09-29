@@ -390,11 +390,11 @@ describe('useSpaceSafeSelectorItems', () => {
 
   // ── selecting a safe triggers navigation ──
 
-  it('navigates to the selected safe with chain prefix on item select', () => {
+  it('opens a Safe from the My accounts tab outside the Workspace', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('1:0xNewSafe')
+      result.current.handleItemSelect('1:0xNewSafe', false)
     })
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -403,11 +403,24 @@ describe('useSpaceSafeSelectorItems', () => {
     })
   })
 
+  it('opens a Safe from the Workspace tab in that Workspace', () => {
+    const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+    act(() => {
+      result.current.handleItemSelect('1:0xNewSafe', true)
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'eth:0xNewSafe', spaceId: '42' },
+    })
+  })
+
   it('does not navigate when chain config is not found', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('999:0xSafe1')
+      result.current.handleItemSelect('999:0xSafe1', true)
     })
 
     expect(mockPush).not.toHaveBeenCalled()
@@ -665,7 +678,7 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('1:0xNewSafe')
+      result.current.handleItemSelect('1:0xNewSafe', true)
     })
 
     expect(trackEvent).toHaveBeenCalledTimes(1)

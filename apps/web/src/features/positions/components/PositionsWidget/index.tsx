@@ -18,12 +18,14 @@ import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const MAX_PROTOCOLS = 4
 
 const PositionsWidget = () => {
   const router = useRouter()
   const { safe } = router.query
+  const spaceIdQuery = useSpaceIdQuery()
   const { data, error, isLoading } = usePositions()
   const positionsFiatTotal = usePositionsFiatTotal()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
@@ -31,9 +33,9 @@ const PositionsWidget = () => {
   const viewAllUrl = useMemo(
     () => ({
       pathname: AppRoutes.balances.positions,
-      query: { safe },
+      query: { safe, ...spaceIdQuery },
     }),
-    [safe],
+    [safe, spaceIdQuery],
   )
 
   const viewAllWrapper = (children: ReactElement) => (
