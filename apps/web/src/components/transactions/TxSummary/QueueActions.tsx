@@ -20,12 +20,14 @@ const QueueActions = ({ tx }: { tx: Transaction }) => {
     }
   }
 
+  const showSpeedUp = pendingTx?.status === PendingStatus.PROCESSING
+
+  if (!ExecutionComponent && !showSpeedUp) return null
+
   return (
-    <div data-testid="tx-actions" className="mr-4 flex justify-center">
+    <div data-testid="tx-actions" className="flex items-center">
       {ExecutionComponent}
-      {pendingTx && pendingTx.status === PendingStatus.PROCESSING && (
-        <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger="alertButton" />
-      )}
+      {showSpeedUp && <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger="alertButton" />}
     </div>
   )
 }

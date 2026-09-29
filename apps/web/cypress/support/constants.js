@@ -123,6 +123,7 @@ export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
 export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
+export const spacesEntitlementsEndpoint = '**/v1/spaces/*/entitlements'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
@@ -295,8 +296,6 @@ export const addresBookContacts = {
   },
 }
 
-export const termsUrl = '/terms'
-export const privacyUrl = '/privacy'
 export const licensesUrl = '/licenses'
 export const imprintUrl = '/imprint'
 export const cookiePolicyUrl = '/cookie'

@@ -70,7 +70,9 @@ describe('ProposerDetails', () => {
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Remove proposer' })).toBeDisabled()
-    expect(screen.getByText('Only the signer who granted this proposer role can remove it')).toBeInTheDocument()
+    expect(
+      screen.getByText('Only the signer who granted this proposer role, or the proposer themselves, can remove it'),
+    ).toBeInTheDocument()
   })
 
   it('should, when the wallet granted the role, enable the remove action', () => {

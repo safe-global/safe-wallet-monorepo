@@ -14,6 +14,7 @@ import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
+import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -97,7 +98,7 @@ function AcceptInviteDialog({ space, onClose }: { space: GetSpaceResponse; onClo
                 />
               </div>
               <Typography variant="paragraph-small" color="muted">
-                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+                How is my data processed? Read our <ExternalLink href={PRIVACY_URL}>privacy policy</ExternalLink>
               </Typography>
 
               {error && (

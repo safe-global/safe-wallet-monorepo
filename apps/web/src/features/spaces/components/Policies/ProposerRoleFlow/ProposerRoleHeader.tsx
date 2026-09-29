@@ -1,4 +1,4 @@
-import { Info, WalletCards } from 'lucide-react'
+import { Info, UserRoundPen } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
@@ -7,7 +7,7 @@ import { PROPOSER_ROLE_DESCRIPTION, PROPOSER_ROLE_TITLE } from './constants'
 const ProposerRoleHeader = () => (
   <div className="flex items-center gap-4">
     <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[var(--color-background-light-hover)]">
-      <WalletCards className="size-4 text-badge-dot-success" aria-hidden />
+      <UserRoundPen className="size-4 text-badge-dot-success" aria-hidden />
     </div>
 
     <div className="flex flex-col gap-1">

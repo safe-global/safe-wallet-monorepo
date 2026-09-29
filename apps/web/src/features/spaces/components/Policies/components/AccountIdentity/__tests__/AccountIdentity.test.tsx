@@ -19,6 +19,23 @@ describe('AccountIdentity', () => {
     expect(screen.getAllByText('0x8675...a19b')).toHaveLength(1)
   })
 
+  it('has no copy button unless asked for one', () => {
+    render(<AccountIdentity address={ADDRESS} name="Ops" />)
+
+    expect(screen.queryByTestId('copy-btn-icon')).not.toBeInTheDocument()
+  })
+
+  it('copies the checksummed address when the copy button is enabled', async () => {
+    const writeText = jest.fn().mockResolvedValue(undefined)
+    Object.assign(navigator, { clipboard: { writeText } })
+
+    render(<AccountIdentity address={ADDRESS.toLowerCase()} name="Ops" showCopyButton />)
+
+    await userEvent.click(screen.getByTestId('copy-btn-icon'))
+
+    expect(writeText).toHaveBeenCalledWith(ADDRESS)
+  })
+
   it('reveals the full address on hover', async () => {
     render(<AccountIdentity address={ADDRESS} name="Ops" />)
 

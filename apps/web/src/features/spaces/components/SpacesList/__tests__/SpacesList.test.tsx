@@ -535,7 +535,9 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     render(<SpacesList />)
 
-    expect(screen.getByRole('link', { name: /^terms$/i })).toHaveAttribute('href', AppRoutes.terms)
+    const termsLink = screen.getByRole('link', { name: /^terms$/i })
+    expect(termsLink).toHaveAttribute('href', 'https://safe.global/terms')
+    expect(termsLink).toHaveAttribute('target', '_blank')
     expect(screen.queryByRole('link', { name: /safe pro user terms/i })).not.toBeInTheDocument()
   })
 
@@ -553,7 +555,8 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(card).toContainElement(privacyLink)
     expect(termsLink).toHaveAttribute('href', 'https://safe.global/pro-user-terms')
     expect(termsLink).toHaveAttribute('target', '_blank')
-    expect(privacyLink).toHaveAttribute('href', AppRoutes.privacy)
+    expect(privacyLink).toHaveAttribute('href', 'https://safe.global/privacy')
+    expect(privacyLink).toHaveAttribute('target', '_blank')
     expect(screen.queryByRole('link', { name: /^terms$/i })).not.toBeInTheDocument()
   })
 

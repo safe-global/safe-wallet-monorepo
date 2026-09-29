@@ -28,8 +28,6 @@ apps/web/cypress/downloads
 apps/web/.swc
 apps/web/out
 apps/web/public
-apps/web/src/markdown/privacy/privacy.md
-apps/web/src/markdown/terms/terms.md
 apps/web/src/config/__generated__/
 
 # Web (TanStack)

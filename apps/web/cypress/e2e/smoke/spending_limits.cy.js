@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
+import { plans } from '../../support/spaces-login.js'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -15,7 +16,11 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   beforeEach(() => {
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+    spendinglimit.signInOnPlan(signer, plans.business)
+    wallet.connectSignerViaStorage(
+      signer,
+      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
+    )
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     spendinglimit.clickOnNewSpendingLimitBtn()
@@ -64,5 +69,24 @@ describe('[SMOKE] Spending limits tests', () => {
   it('Validate Reset values present in dropdown: One time, 5 minutes, 30 minutes, 1 hr, 1 day, 1 week, 1 month', () => {
     spendinglimit.clickOnTimePeriodDropdown()
     spendinglimit.checkTimeDropdownOptions()
+  })
+})
+
+describe('[SMOKE] Spending limits on a plan without policies', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify the Safe Pro lock replaces the New spending limit button', () => {
+    spendinglimit.signInOnPlan(signer, plans.starter)
+    wallet.connectSignerViaStorage(
+      signer,
+      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
+    )
+    owner.waitForConnectionStatus()
+    cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
+
+    cy.get(spendinglimit.safeProLock).should('be.visible').and('contain', 'Adding spending limits requires Safe Pro')
+    cy.get(spendinglimit.newSpendingLimitBtn).should('not.exist')
   })
 })
