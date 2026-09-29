@@ -1,29 +1,20 @@
-import { useEffect, useRef, useState } from 'react'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { PendingSpendingLimitPolicy } from '../types'
+import type { PendingSpendingLimitPolicy, Policy } from '../types'
+import { isPendingChangeIndexed } from '../utils/mapPendingPolicies'
 
 const HOLD_MS = 5 * 60_000
 const POLL_MS = 15_000
 
-type Held = { policy: PendingSpendingLimitPolicy; since: number; snapshot: string }
+type Held = { policy: PendingSpendingLimitPolicy; since: number }
 
-const snapshotFor = (policy: PendingSpendingLimitPolicy, dtos: ActivePolicyDto[]): string =>
-  JSON.stringify(
-    dtos.find(
-      (dto) =>
-        dto.type === 'spending-limit' &&
-        dto.safe.chainId === policy.safe.chainId &&
-        sameAddress(dto.safe.address, policy.safe.address) &&
-        dto.enforcement.via === 'module' &&
-        policy.enforcement.via === 'module' &&
-        sameAddress(dto.enforcement.moduleAddress, policy.enforcement.moduleAddress),
-    ) ?? null,
-  )
+const isStillHeld = (entry: Held, active: Policy[]): boolean =>
+  Date.now() - entry.since < HOLD_MS && !isPendingChangeIndexed(entry.policy, active)
 
-const isStillHeld = (entry: Held, dtos: ActivePolicyDto[]): boolean =>
-  Date.now() - entry.since < HOLD_MS && snapshotFor(entry.policy, dtos) === entry.snapshot
+const releaseHeld = (current: Held[], active: Policy[]): Held[] => {
+  const next = current.filter((entry) => isStillHeld(entry, active))
+  return next.length === current.length ? current : next
+}
 
 type Options = {
   refetchActive: () => void
@@ -36,12 +27,12 @@ type Options = {
 /** Executed transactions leave the queue before the indexer reports them; this keeps their row on screen meanwhile. */
 export const useActivatingPolicies = (
   pending: PendingSpendingLimitPolicy[],
-  activeDtos: ActivePolicyDto[],
+  active: Policy[],
   { refetchActive, resetKey, enabled }: Options,
 ): PendingSpendingLimitPolicy[] => {
   const [held, setHeld] = useState<Held[]>([])
   const previous = useRef<PendingSpendingLimitPolicy[]>([])
-  const latestDtos = useRef(activeDtos)
+  const latestActive = useRef(active)
   const latestKey = useRef(resetKey)
   const [getTransaction] = useLazyTransactionsGetTransactionByIdV1Query()
 
@@ -58,8 +49,6 @@ export const useActivatingPolicies = (
 
     gone.forEach(async (row) => {
       const key = latestKey.current
-      // Still the dtos of the last render in which the row was queued: this effect runs before the ref is updated.
-      const snapshot = snapshotFor(row, latestDtos.current)
       const { data, error } = await getTransaction({
         chainId: row.safe.chainId,
         id: `multisig_${row.safe.address}_${row.safeTxHash}`,
@@ -68,33 +57,30 @@ export const useActivatingPolicies = (
       if (error && 'status' in error && error.status === 404) return
       if (data && data.txStatus !== 'SUCCESS') return
       if (latestKey.current !== key) return
-      if (snapshotFor(row, latestDtos.current) !== snapshot) return
+      if (isPendingChangeIndexed(row, latestActive.current)) return
 
       setHeld((current) =>
         current.some((entry) => entry.policy.id === row.id)
           ? current
-          : [...current, { policy: { ...row, status: 'activating' }, since: Date.now(), snapshot }],
+          : [...current, { policy: { ...row, status: 'activating' }, since: Date.now() }],
       )
     })
   }, [pending, getTransaction])
 
   useEffect(() => {
-    latestDtos.current = activeDtos
-    setHeld((current) => {
-      const next = current.filter((entry) => isStillHeld(entry, activeDtos))
-      return next.length === current.length ? current : next
-    })
-  }, [activeDtos])
+    latestActive.current = active
+    setHeld((current) => releaseHeld(current, active))
+  }, [active])
 
   useEffect(() => {
     if (!enabled || held.length === 0) return
 
     const interval = setInterval(() => {
       refetchActive()
-      setHeld((current) => current.filter((entry) => isStillHeld(entry, latestDtos.current)))
+      setHeld((current) => releaseHeld(current, latestActive.current))
     }, POLL_MS)
     return () => clearInterval(interval)
   }, [enabled, held.length, refetchActive])
 
-  return held.map((entry) => entry.policy)
+  return useMemo(() => held.map((entry) => entry.policy), [held])
 }

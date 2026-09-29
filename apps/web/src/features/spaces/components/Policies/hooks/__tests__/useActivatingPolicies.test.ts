@@ -1,8 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { mockSpendingLimitDto } from '../../mocks/activePolicies'
-import { MOCK_SAFES, mockPendingPolicy } from '../../mocks/policies'
-import type { PendingSpendingLimitPolicy } from '../../types'
+import { MOCK_SAFES, asActivePolicy, mockPendingPolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
+import type { PendingSpendingLimitPolicy, Policy } from '../../types'
 import { useActivatingPolicies } from '../useActivatingPolicies'
 
 const mockGetTransaction = jest.fn()
@@ -11,18 +9,21 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   useLazyTransactionsGetTransactionByIdV1Query: () => [mockGetTransaction],
 }))
 
-type Props = { pending: PendingSpendingLimitPolicy[]; dtos: ActivePolicyDto[]; resetKey: string; enabled: boolean }
+type Props = { pending: PendingSpendingLimitPolicy[]; active: Policy[]; resetKey: string; enabled: boolean }
+
+const NOT_INDEXED: Policy[] = [asActivePolicy(mockSpendingLimitPolicy({ data: { spenders: [] } }))]
+const INDEXED: Policy[] = [asActivePolicy(mockSpendingLimitPolicy())]
 
 const setup = (refetchActive = jest.fn()) => {
   const initialProps: Props = {
     pending: [mockPendingPolicy({ safe: MOCK_SAFES.treasury })],
-    dtos: [mockSpendingLimitDto()],
+    active: NOT_INDEXED,
     resetKey: 'space-1',
     enabled: true,
   }
   const hook = renderHook(
-    ({ pending, dtos, resetKey, enabled }: Props) =>
-      useActivatingPolicies(pending, dtos, { refetchActive, resetKey, enabled }),
+    ({ pending, active, resetKey, enabled }: Props) =>
+      useActivatingPolicies(pending, active, { refetchActive, resetKey, enabled }),
     { initialProps },
   )
   return { ...hook, refetchActive, initialProps }
@@ -78,23 +79,23 @@ describe('useActivatingPolicies', () => {
     await waitFor(() => expect(result.current.map((row) => row.status)).toEqual(['activating']))
   })
 
-  it('should, when the active policy changes in the same update the row leaves the queue, not hold it', async () => {
+  it('should, when the change is indexed in the same update the row leaves the queue, not hold it', async () => {
     const { result, rerender, initialProps } = setup()
 
-    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({ ...initialProps, pending: [], active: INDEXED })
     await act(async () => {})
 
     expect(mockGetTransaction).toHaveBeenCalled()
     expect(result.current).toEqual([])
   })
 
-  it('should, when the active policy changes while the lookup is in flight, not hold the row', async () => {
+  it('should, when the change is indexed while the lookup is in flight, not hold the row', async () => {
     let resolveLookup: (value: { data: { txStatus: string } }) => void = () => {}
     mockGetTransaction.mockReturnValue(new Promise((resolve) => (resolveLookup = resolve)))
     const { result, rerender, initialProps } = setup()
     rerender({ ...initialProps, pending: [] })
 
-    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({ ...initialProps, pending: [], active: INDEXED })
     await act(async () => resolveLookup({ data: { txStatus: 'SUCCESS' } }))
 
     expect(result.current).toEqual([])
@@ -113,12 +114,37 @@ describe('useActivatingPolicies', () => {
     expect(result.current).toHaveLength(1)
   })
 
-  it('should, once the active policy for that Safe changes, release the held row', async () => {
+  it('should, when the change was indexed a render before the row left the queue, not hold it', async () => {
+    const { result, rerender, initialProps } = setup()
+    rerender({ ...initialProps, active: INDEXED })
+
+    rerender({ ...initialProps, active: INDEXED, pending: [] })
+    await act(async () => {})
+
+    expect(mockGetTransaction).toHaveBeenCalled()
+    expect(result.current).toEqual([])
+  })
+
+  it('should, when an unrelated change reaches the active rows, keep holding the row', async () => {
     const { result, rerender, initialProps } = setup()
     rerender({ ...initialProps, pending: [] })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
-    rerender({ ...initialProps, pending: [], dtos: [mockSpendingLimitDto({ enabled: false })] })
+    rerender({
+      ...initialProps,
+      pending: [],
+      active: [asActivePolicy(mockSpendingLimitPolicy({ enabled: false, data: { spenders: [] } }))],
+    })
+
+    expect(result.current).toHaveLength(1)
+  })
+
+  it('should, once the active rows show the change, release the held row', async () => {
+    const { result, rerender, initialProps } = setup()
+    rerender({ ...initialProps, pending: [] })
+    await waitFor(() => expect(result.current).toHaveLength(1))
+
+    rerender({ ...initialProps, pending: [], active: INDEXED })
 
     expect(result.current).toEqual([])
   })

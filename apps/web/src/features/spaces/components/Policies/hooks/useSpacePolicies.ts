@@ -69,7 +69,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     () => mapPendingPolicies(pendingDtos, activeRows, resolveToken),
     [pendingDtos, activeRows, resolveToken],
   )
-  const activatingRows = useActivatingPolicies(pendingRows, dtos, {
+  const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,
     enabled: !skip,

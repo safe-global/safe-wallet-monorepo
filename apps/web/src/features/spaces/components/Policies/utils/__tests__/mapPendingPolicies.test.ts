@@ -2,10 +2,16 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockSpendingLimitDto } from '../../mocks/activePolicies'
 import { mockPendingDto, PENDING_MOCK_DELEGATE } from '../../mocks/pendingPolicies'
-import { MOCK_ADDRESSES, MOCK_TOKENS } from '../../mocks/policies'
+import {
+  MOCK_ADDRESSES,
+  MOCK_TOKENS,
+  asActivePolicy,
+  mockPendingPolicy,
+  mockSpendingLimitPolicy,
+} from '../../mocks/policies'
 import type { PolicyTokenInfo } from '../../types'
 import { mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
-import { mapPendingPolicies } from '../mapPendingPolicies'
+import { isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 
 const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
 
@@ -219,5 +225,44 @@ describe('mapPendingPolicies', () => {
 
   it('should, when a queued tx carries no changes, render no row', () => {
     expect(mapPendingPolicies([withChanges([])], [], resolveKnownTokens)).toEqual([])
+  })
+})
+
+describe('isPendingChangeIndexed', () => {
+  const active = (overrides: Parameters<typeof mockSpendingLimitPolicy>[0] = {}) => [
+    asActivePolicy(mockSpendingLimitPolicy(overrides)),
+  ]
+  const queued = mockPendingPolicy({ safe: mockSpendingLimitPolicy().safe })
+  const [alice] = queued.data.spenders
+
+  it('should, when the active rows carry the queued allowances, report it indexed', () => {
+    expect(isPendingChangeIndexed(queued, active())).toBe(true)
+  })
+
+  it('should, when the active rows do not have the spender yet, report it not indexed', () => {
+    expect(isPendingChangeIndexed(queued, active({ data: { spenders: [] } }))).toBe(false)
+  })
+
+  it('should, when an active amount still differs, report it not indexed', () => {
+    const edited = { ...alice, allowances: [{ ...alice.allowances[0], amount: '1' }] }
+
+    expect(isPendingChangeIndexed({ ...queued, data: { spenders: [edited] } }, active())).toBe(false)
+  })
+
+  it('should, when a reset is queued and the active allowance still shows spending, report it not indexed', () => {
+    const reset = { ...alice, allowances: [{ ...alice.allowances[0], spent: '0' }] }
+
+    expect(isPendingChangeIndexed({ ...queued, data: { spenders: [reset] } }, active())).toBe(false)
+  })
+
+  it('should, for a removal, report it indexed only once the allowances are gone', () => {
+    const removal = { ...queued, operation: 'remove' as const }
+
+    expect(isPendingChangeIndexed(removal, active())).toBe(false)
+    expect(isPendingChangeIndexed(removal, active({ data: { spenders: [] } }))).toBe(true)
+  })
+
+  it('should not match an active policy on another Safe', () => {
+    expect(isPendingChangeIndexed({ ...queued, safe: { ...queued.safe, chainId: '137' } }, active())).toBe(false)
   })
 })

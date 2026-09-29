@@ -5,6 +5,7 @@ import type {
   PendingSpendingLimitPolicy,
   Policy,
   PolicyAllowance,
+  PolicySafe,
   PolicySpender,
   SpendingLimitPolicy,
 } from '../types'
@@ -16,15 +17,15 @@ type ActiveSpendingLimit = SpendingLimitPolicy & { status: 'active' }
 const isActiveSpendingLimit = (policy: Policy): policy is ActiveSpendingLimit =>
   policy.status === 'active' && policy.type === 'spending-limit'
 
-const findActive = (dto: PendingPolicyDto, active: Policy[]): ActiveSpendingLimit | undefined =>
+const findActive = (safe: PolicySafe, moduleAddress: string, active: Policy[]): ActiveSpendingLimit | undefined =>
   active
     .filter(isActiveSpendingLimit)
     .find(
       (policy) =>
-        policy.safe.chainId === dto.safe.chainId &&
-        sameAddress(policy.safe.address, dto.safe.address) &&
+        policy.safe.chainId === safe.chainId &&
+        sameAddress(policy.safe.address, safe.address) &&
         policy.enforcement.via === 'module' &&
-        sameAddress(policy.enforcement.moduleAddress, dto.enforcement.moduleAddress),
+        sameAddress(policy.enforcement.moduleAddress, moduleAddress),
     )
 
 const findActiveAllowance = (
@@ -129,7 +130,7 @@ export const mapPendingPolicies = (
   dtos.flatMap((dto) => {
     if (dto.type !== 'spending-limit' || dto.data.changes.length === 0) return []
 
-    const current = findActive(dto, active)
+    const current = findActive(dto.safe, dto.enforcement.moduleAddress, active)
     const operation = getOperation(dto.data.changes, current)
 
     return [
@@ -150,3 +151,36 @@ export const mapPendingPolicies = (
       },
     ]
   })
+
+const isAllowanceIndexed = (queued: PolicyAllowance, indexed: PolicyAllowance | undefined): boolean =>
+  indexed !== undefined &&
+  indexed.amount === queued.amount &&
+  indexed.resetPeriodMinutes === queued.resetPeriodMinutes &&
+  (queued.spent !== '0' || indexed.spent === '0')
+
+/** Whether the active rows already show what an executed queued row changed. */
+export const isPendingChangeIndexed = (row: PendingSpendingLimitPolicy, active: Policy[]): boolean => {
+  const current =
+    row.enforcement.via === 'module' ? findActive(row.safe, row.enforcement.moduleAddress, active) : undefined
+  const findSpender = (delegate: string) =>
+    current?.data.spenders.find((spender) => sameAddress(spender.spender, delegate))
+
+  if (row.operation === 'remove') {
+    return row.data.spenders.every(({ spender, allowances }) =>
+      allowances.length === 0
+        ? !findSpender(spender)
+        : allowances.every((allowance) => !findActiveAllowance(current, spender, allowance.token.address)),
+    )
+  }
+
+  return (
+    current !== undefined &&
+    row.data.spenders.every(
+      ({ spender, allowances }) =>
+        findSpender(spender) !== undefined &&
+        allowances.every((allowance) =>
+          isAllowanceIndexed(allowance, findActiveAllowance(current, spender, allowance.token.address)),
+        ),
+    )
+  )
+}
