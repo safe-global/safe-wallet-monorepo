@@ -23,6 +23,13 @@ describe('PolicyDrawerActions', () => {
     expect(screen.queryByText(/wallet/i)).not.toBeInTheDocument()
   })
 
+  it('renders a disabled action that has no handler to call', () => {
+    render(<PolicyDrawerActions actionLabel="Edit" disabled hint="Editing a spending limit is coming soon." />)
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+  })
+
   it('explains a disabled action and does not fire it', async () => {
     const onClick = jest.fn()
     const { user } = renderWithUserEvent(

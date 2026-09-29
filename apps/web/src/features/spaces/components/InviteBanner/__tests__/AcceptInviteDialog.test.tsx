@@ -82,7 +82,7 @@ jest.mock('@/components/common/ExternalLink', () => ({
 }))
 
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { spaces: { index: '/spaces' }, privacy: '/privacy', welcome: { spaces: '/welcome/spaces' } },
+  AppRoutes: { spaces: { index: '/spaces' }, welcome: { spaces: '/welcome/spaces' } },
 }))
 
 describe('AcceptInviteDialog tracking', () => {

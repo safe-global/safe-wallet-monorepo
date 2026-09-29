@@ -18,7 +18,7 @@ import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { APP_HOMEPAGE, APP_VERSION } from '@/config/version'
 import { BRAND_NAME, SAFE_PRO_TERMS_URL, SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
@@ -70,14 +70,14 @@ const LEGAL_LINKS: LegalLink[] = [
   {
     title: 'Terms & Conditions',
     description: 'For using Safe{Wallet}',
-    href: AppRoutes.terms,
+    href: TERMS_URL,
     icon: <FileText className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },
   {
     title: 'Privacy Policy',
     description: 'What we collect and why',
-    href: AppRoutes.privacy,
+    href: PRIVACY_URL,
     icon: <Shield className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },

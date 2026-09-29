@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { getPolicyTokens } from '../utils/policyTokens'
-import { hasSpendingLimitData, type Policy } from '../types'
+import { isSpendingLimitPolicy, type Policy } from '../types'
 
 /**
  * Searches the policies held in the browser, over what a row shows: names, addresses, network and
@@ -33,7 +33,7 @@ export type PolicySearchResult = {
 }
 
 const getSpenders = (policy: Policy): string[] =>
-  hasSpendingLimitData(policy) ? policy.data.spenders.map((spender) => spender.spender) : []
+  isSpendingLimitPolicy(policy) ? policy.data.spenders.map((spender) => spender.spender) : []
 
 const getProposers = (policy: Policy): string[] =>
   policy.type === 'proposer' ? policy.data.proposers.map((proposer) => proposer.proposer) : []

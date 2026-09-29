@@ -51,7 +51,7 @@ describe('useActiveProposer', () => {
     expect(result.current).toMatchObject({
       actionLabel: 'Remove proposer',
       actionDisabled: true,
-      actionHint: 'Only the signer who granted this proposer role can remove it',
+      actionHint: 'Only the signer who granted this proposer role, or the proposer themselves, can remove it',
     })
   })
 

@@ -103,7 +103,7 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/batching', () => ({ BatchingFeature: {} }))
 jest.mock('@/features/spaces', () => ({ SpacesFeature: {} }))
 
-const STATIC_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+const STATIC_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NON_STATIC_ROUTES = ['/home', '/balances', '/settings/setup', '/welcome/accounts']
 
@@ -134,7 +134,7 @@ describe('PageLayout', () => {
     })
 
     it('renders SafeLogo without an explicit href (defaults to /welcome/accounts)', () => {
-      renderLayout(AppRoutes.terms)
+      renderLayout(AppRoutes.licenses)
       // href default is handled inside SafeLogo itself — covered by SafeLogo unit tests
       expect(screen.getByTestId('safe-logo')).toBeInTheDocument()
     })

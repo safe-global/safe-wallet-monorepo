@@ -26,16 +26,16 @@ const ProposerOverview = ({
   <DrawerSection title="Policy overview">
     <DrawerList
       items={[
-        { label: 'Proposer', content: <AccountIdentity {...proposer} /> },
-        { label: 'Applies to', content: <AccountIdentity {...appliesTo} /> },
-        { label: 'Initiated by', content: <AccountIdentity {...initiatedBy} /> },
+        { label: 'Proposer', content: <AccountIdentity {...proposer} showCopyButton /> },
+        { label: 'Applies to', content: <AccountIdentity {...appliesTo} showCopyButton /> },
+        { label: 'Initiated by', content: <AccountIdentity {...initiatedBy} showCopyButton /> },
         { label: 'Last updated', content: lastUpdated },
         {
           label: 'Enforced by',
           content: (
             <span className="inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5" />
-              <span className="underline">{enforcedBy}</span>
+              <span>{enforcedBy}</span>
             </span>
           ),
         },

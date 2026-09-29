@@ -21,6 +21,30 @@ describe('countChecks', () => {
     })
   })
 
+  it('reads 1 of 4 without Safe Pro on a contract call: the locked contract row counts too, but never passes', () => {
+    expect(
+      countChecks({
+        threat,
+        hasProFeatures: false,
+        hasSimulation: true,
+        isSimulationSuccess: false,
+        isContractCall: true,
+      }),
+    ).toEqual({ passed: 1, total: 4 })
+  })
+
+  it('counts the contract row by its results with Safe Pro, whatever the call', () => {
+    expect(
+      countChecks({
+        threat,
+        hasProFeatures: true,
+        hasSimulation: false,
+        isSimulationSuccess: false,
+        isContractCall: true,
+      }),
+    ).toEqual({ passed: 1, total: 1 })
+  })
+
   it('adds the contract and deadlock rows only when they have results, and a simulation not yet run', () => {
     expect(
       countChecks({

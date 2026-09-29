@@ -124,16 +124,18 @@ export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-l
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
 
-export type PolicyStatus = 'active' | 'pending' | 'unenforced'
+export type PolicyStatus = 'active' | 'pending' | 'unenforced' | 'not-activated'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => policy.status === 'pending'
 
-/** Active and pending spending limits carry the same data, so both render the same limits. */
-export const hasSpendingLimitData = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
+export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
+
+export const isActiveSpendingLimitPolicy = (policy: Policy): policy is SpendingLimitPolicy & { status: 'active' } =>
+  policy.type === 'spending-limit' && policy.status === 'active'
 
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'
@@ -147,5 +149,8 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
   if (isPendingPolicy(policy)) return 'pending'
-  return policy.enabled ? 'active' : 'unenforced'
+  if (policy.enabled) return 'active'
+
+  // A proposer grant has no module to switch on, so one that is not in force was never activated.
+  return isProposerPolicy(policy) ? 'not-activated' : 'unenforced'
 }
