@@ -9,7 +9,6 @@ const BADGE_BY_STATUS: Record<
   pending: { label: 'Pending', variant: 'warning' },
   // A configured module that is not enabled enforces nothing, so it is not called active.
   unenforced: { label: 'Not enforced', variant: 'secondary' },
-  // Nothing enforces a proposer grant either way: it is a registration that never took effect.
   'not-activated': { label: 'Not activated', variant: 'destructive' },
 }
 
