@@ -245,8 +245,7 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
  * computed at the group level so multi-chain children never detach from their parent when the table
  * re-sorts.
  *
- * Workspace membership costs one `/spaces/{id}/safes` request per Workspace, so it is only resolved
- * when the table shows the Workspaces column (`withWorkspaces`).
+ * Resolved only when `withWorkspaces` is true to avoid one `/spaces/{id}/safes` request per workspace.
  */
 export function useSafeAccountRows(
   items: AllSafeItems,
