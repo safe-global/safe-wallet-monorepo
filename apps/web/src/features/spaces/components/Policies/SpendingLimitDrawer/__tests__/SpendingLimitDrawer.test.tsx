@@ -55,6 +55,20 @@ describe('SpendingLimitDrawer', () => {
     jest.restoreAllMocks()
   })
 
+  it('calls an executed transaction activating in the header, not pending', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'executed' })
+
+    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+  })
+
+  it('shows no status chip for a transaction that will never execute', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'deleted' })
+
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('policy-status-skeleton')).not.toBeInTheDocument()
+  })
+
   it('drops the signatures and the footer once the transaction has left the queue', () => {
     setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'replaced' })
 

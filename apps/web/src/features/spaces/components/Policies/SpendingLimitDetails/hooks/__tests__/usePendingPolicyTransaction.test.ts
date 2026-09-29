@@ -3,6 +3,7 @@ import {
   useTransactionsGetTransactionByIdV1Query,
   type TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import {
   multisigConfirmationBuilder,
@@ -63,6 +64,17 @@ describe('usePendingPolicyTransaction', () => {
     expect(mockUseQuery).toHaveBeenCalledWith(
       { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
       expect.anything(),
+    )
+  })
+
+  // No tx event reaches this tab when another signer executes, deletes or replaces the transaction.
+  it('polls while the panel is open and the tab is focused', () => {
+    mockQuery({})
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
     )
   })
 

@@ -4,6 +4,7 @@ import {
   type Transaction,
   type TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent } from '@/services/tx/txEvents'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { makeTxFromDetails } from '@/utils/transactions'
@@ -40,7 +41,8 @@ export type PendingPolicyTransaction = {
 export const usePendingPolicyTransaction = (policy: QueuedSpendingLimitPolicy): PendingPolicyTransaction => {
   const { currentData, error, refetch } = useTransactionsGetTransactionByIdV1Query(
     { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
-    { refetchOnFocus: true },
+    // Another signer executing, deleting or replacing it sends no event to this tab.
+    { refetchOnFocus: true, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
   )
 
   useRefetchOnTxEvents(REFETCH_EVENTS, refetch, true)

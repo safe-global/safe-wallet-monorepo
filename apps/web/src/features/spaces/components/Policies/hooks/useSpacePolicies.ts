@@ -32,6 +32,8 @@ const PENDING_REFETCH_EVENTS = [
   TxEvent.SIGNATURE_PROPOSED,
   TxEvent.ONCHAIN_SIGNATURE_SUCCESS,
   TxEvent.DELETED,
+  // SUCCESS comes from the Safe-level history slice, which a Space route does not load.
+  TxEvent.PROCESSED,
   TxEvent.SUCCESS,
 ]
 const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]

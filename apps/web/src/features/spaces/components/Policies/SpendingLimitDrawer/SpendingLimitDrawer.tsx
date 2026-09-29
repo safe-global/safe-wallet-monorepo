@@ -62,13 +62,15 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
   const outcome = isPendingDrawer(props) ? props.outcome : undefined
   const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
+  // A queued transaction that left the queue is no longer pending; only an executed one is on its way.
+  const status = outcome ? (outcome === 'executed' ? 'activating' : null) : getPolicyStatus(policy)
   const actions = isPendingDrawer(props)
     ? { pending: { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction } }
     : { onEdit: props.onEdit }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
-      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={getPolicyStatus(policy)} />
+      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={status} />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">

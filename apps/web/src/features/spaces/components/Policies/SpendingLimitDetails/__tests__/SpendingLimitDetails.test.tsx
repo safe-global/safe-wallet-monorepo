@@ -203,10 +203,8 @@ describe('a pending spending limit', () => {
   const mockPendingTx = (tx: Partial<PendingPolicyTransaction>) =>
     mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], ...tx })
 
-  const withTxModal = (ui: ReactElement) => (
-    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
-      {ui}
-    </TxModalContext.Provider>
+  const withTxModal = (ui: ReactElement, txFlow?: ReactElement) => (
+    <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
   )
 
   const renderPending = (policy: QueuedSpendingLimitPolicy = pending) =>
@@ -234,6 +232,19 @@ describe('a pending spending limit', () => {
       `${pending.safe.chainId}:${pending.safe.address}`,
     )
     expect(screen.getByTestId('confirm-tx-flow')).toHaveAttribute('data-tx-id', txSummary.id)
+  })
+
+  it('steps aside while the tx flow is open, and comes back once it closes', async () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+
+    const { rerender } = renderPending()
+    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />, <div />))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument())
+
+    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />))
+    expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
   })
 
   it('offers a signer who already signed the link to share instead', () => {

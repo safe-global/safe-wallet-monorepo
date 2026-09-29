@@ -296,4 +296,21 @@ describe('useSpacePolicies', () => {
 
     expect(refetchPending).toHaveBeenCalled()
   })
+
+  // TxEvent.SUCCESS comes from the Safe-level history slice, which a Space route does not load.
+  it('should, when a transaction is executed from the page, refetch the pending rows', () => {
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+
+    txDispatch(TxEvent.PROCESSED, {
+      txId: 'multisig_0x1_0xabc',
+      nonce: 1,
+      chainId: '1',
+      safeAddress: '0x1',
+      txHash: '0xhash',
+    })
+
+    expect(refetchPending).toHaveBeenCalled()
+  })
 })
