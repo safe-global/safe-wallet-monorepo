@@ -159,7 +159,6 @@ export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> 
   confirmationsSubmitted: 1,
   confirmationsRequired: 2,
   proposedAt: 1_781_300_000,
-  supersedesId: null,
   ...overrides,
 })
 
@@ -209,14 +208,12 @@ export const mockPendingRemoval = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-remove',
     operation: 'remove',
-    supersedesId: '0xspending-limit-treasury',
   })
 
 export const mockPendingUpdate = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-update',
     operation: 'update',
-    supersedesId: '0xspending-limit-treasury',
   })
 
 /** Every signature collected; the transaction is waiting only for execution. */

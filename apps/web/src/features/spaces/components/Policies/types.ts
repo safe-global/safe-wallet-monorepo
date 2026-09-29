@@ -114,8 +114,6 @@ type PendingPolicyBase = PolicyBase & {
   confirmationsSubmitted: number
   confirmationsRequired: number
   proposedAt: number
-  /** The active policy this replaces, so a queued edit is not rendered as a second policy. */
-  supersedesId: string | null
 }
 
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
@@ -128,7 +126,8 @@ export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
-export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => policy.status !== 'active'
+export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
+  policy.status === 'pending' || policy.status === 'activating'
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'

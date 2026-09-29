@@ -28,7 +28,6 @@ describe('mapPendingPolicies', () => {
       status: 'pending',
       type: 'spending-limit',
       operation: 'create',
-      supersedesId: null,
       confirmationsSubmitted: 1,
       confirmationsRequired: 2,
       nonce: 2,
@@ -83,7 +82,6 @@ describe('mapPendingPolicies', () => {
     )
 
     expect(row.operation).toBe('update')
-    expect(row.supersedesId).toBe(active[0].id)
     expect(row.data.spenders[0].allowances[0]).toMatchObject({
       amount: '2000000000',
       spent: '1000000000',
@@ -103,7 +101,7 @@ describe('mapPendingPolicies', () => {
       resolveKnownTokens,
     )
 
-    expect(row.supersedesId).toBe(active[0].id)
+    expect(row.data.spenders[0].allowances).toHaveLength(1)
   })
 
   it('should, when an allowance is deleted, render a removal of the active allowance', () => {
@@ -124,7 +122,6 @@ describe('mapPendingPolicies', () => {
     )
 
     expect(row.operation).toBe('remove')
-    expect(row.supersedesId).toBe(active[0].id)
     expect(row.data.spenders[0].allowances[0].amount).toBe('1500000000')
   })
 

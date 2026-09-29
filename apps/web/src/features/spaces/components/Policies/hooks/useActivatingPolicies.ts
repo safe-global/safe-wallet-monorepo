@@ -64,6 +64,7 @@ export const useActivatingPolicies = (
         chainId: row.safe.chainId,
         id: `multisig_${row.safe.address}_${row.safeTxHash}`,
       })
+      // Only a 404 means the tx was deleted; any other error can't rule out execution, so the row is held.
       if (error && 'status' in error && error.status === 404) return
       if (data && data.txStatus !== 'SUCCESS') return
       if (latestKey.current !== key) return

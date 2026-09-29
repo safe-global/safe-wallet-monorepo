@@ -107,7 +107,7 @@ const toSpenders = (
   return [...byDelegate.values()]
 }
 
-/** One row per queued transaction and module. Active rows stay; `supersedesId` points at the one this would change. */
+/** One row per queued transaction and module, shown beside the active rows. */
 export const mapPendingPolicies = (
   dtos: PendingPolicyDto[],
   active: Policy[],
@@ -133,7 +133,6 @@ export const mapPendingPolicies = (
         confirmationsSubmitted: dto.confirmations,
         confirmationsRequired: dto.confirmationsRequired,
         proposedAt: dto.proposedAt,
-        supersedesId: operation === 'create' ? null : (current?.id ?? null),
         data: { spenders: toSpenders(dto, current, resolveToken) },
       },
     ]
