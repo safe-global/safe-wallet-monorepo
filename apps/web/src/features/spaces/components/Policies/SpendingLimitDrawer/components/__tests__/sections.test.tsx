@@ -47,7 +47,7 @@ describe('PolicyOverview', () => {
 
     expect(screen.queryByText('Initiated by')).not.toBeInTheDocument()
 
-    const appliesToRow = screen.getByText('Applies to').closest('div') as HTMLElement
+    const appliesToRow = screen.getByText('Safe account').closest('div') as HTMLElement
     expect(within(appliesToRow).getByText('Treasury')).toBeInTheDocument()
 
     const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
@@ -76,7 +76,7 @@ describe('PolicyOverview', () => {
       />,
     )
 
-    const appliesToRow = screen.getByText('Applies to').closest('div') as HTMLElement
+    const appliesToRow = screen.getByText('Safe account').closest('div') as HTMLElement
     expect(within(appliesToRow).getByText('Treasury')).toBeInTheDocument()
     expect(within(appliesToRow).queryByText('Alice')).not.toBeInTheDocument()
 

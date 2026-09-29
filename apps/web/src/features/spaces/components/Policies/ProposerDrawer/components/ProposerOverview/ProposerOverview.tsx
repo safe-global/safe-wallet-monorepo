@@ -27,7 +27,7 @@ const ProposerOverview = ({
     <DrawerList
       items={[
         { label: 'Proposer', content: <AccountIdentity {...proposer} showCopyButton /> },
-        { label: 'Applies to', content: <AccountIdentity {...appliesTo} showCopyButton /> },
+        { label: 'Safe account', content: <AccountIdentity {...appliesTo} showCopyButton /> },
         { label: 'Initiated by', content: <AccountIdentity {...initiatedBy} showCopyButton /> },
         { label: 'Last updated', content: lastUpdated },
         {
@@ -46,7 +46,7 @@ const ProposerOverview = ({
 
 export default ProposerOverview
 
-const ACCOUNT_LABELS = ['Proposer', 'Applies to', 'Initiated by']
+const ACCOUNT_LABELS = ['Proposer', 'Safe account', 'Initiated by']
 
 export const ProposerOverviewSkeleton = (): ReactElement => (
   <DrawerSection title="Policy overview">

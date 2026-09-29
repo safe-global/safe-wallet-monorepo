@@ -67,7 +67,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
     <div className="flex flex-col gap-4" data-testid="policies-list">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Button onClick={onAddPolicy} className="shrink-0" data-testid="add-policy-button">
-          <Plus className="size-4" aria-hidden />
+          <Plus className="size-4 text-green-500" aria-hidden />
           Add policy
         </Button>
 

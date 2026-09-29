@@ -18,12 +18,18 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useSafeNameResolver: () => mockResolveSafeName,
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [{ chainId: '1', shortName: 'eth' }] }),
+  useChain: () => undefined,
+}))
+
 describe('PoliciesTable', () => {
   beforeEach(() => {
     mockResolveSafeName.mockReturnValue('')
   })
 
-  it('should, when the Safe has a name in the space, show it in the applies to column', () => {
+  it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
     mockResolveSafeName.mockImplementation((address: string) =>
       address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
     )
@@ -37,10 +43,10 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 
     expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'APPLIES TO' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'SAFE ACCOUNT' })).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'RULE',
-      'APPLIES TO',
+      'SAFE ACCOUNT',
       'PROPOSER / TOKENS',
       'NETWORK',
       'STATUS',
@@ -164,5 +170,45 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
     expect(screen.queryByTestId('policy-open-button')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['proposer', asActivePolicy(mockProposerPolicy())],
+    ['spending limit', asActivePolicy(mockMultiSpenderPolicy())],
+  ])("should, for a %s policy, link the Safe name to the Safe's settings page", (_, policy) => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[policy]} />)
+
+    expect(
+      within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }),
+    ).toHaveAttribute('href', `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`)
+  })
+
+  it('should, when the Safe has no name, link its address instead', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: /0x8675/ })).toHaveAttribute(
+      'href',
+      `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`,
+    )
+  })
+
+  it('should, when the Safe link is clicked, not open the policy', () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+    const onSelect = jest.fn()
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} onSelect={onSelect} />)
+    fireEvent.click(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }))
+
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it("should, when the Safe's chain is unknown, not link the Safe", () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[asActivePolicy(mockPolygonSpendingLimitPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).queryByRole('link')).not.toBeInTheDocument()
   })
 })

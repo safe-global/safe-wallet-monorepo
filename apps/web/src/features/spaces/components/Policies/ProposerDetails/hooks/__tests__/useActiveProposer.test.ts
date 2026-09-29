@@ -20,6 +20,10 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useAddressBookItem: (address: string) => (address === MOCK_SAFES.treasury.address ? { name: 'Treasury' } : undefined),
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  useChain: () => ({ shortName: 'eth' }),
+}))
+
 const policy = asActivePolicy(mockProposerPolicy())
 const onRemove = jest.fn()
 const args = { policy, proposer: policy.data.proposers[0], onRemove }

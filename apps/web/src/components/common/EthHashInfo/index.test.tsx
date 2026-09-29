@@ -154,6 +154,23 @@ describe('EthHashInfo', () => {
       expect(queryByText('Test')).not.toBeInTheDocument()
       expect(queryByText('Address book name')).not.toBeInTheDocument()
     })
+
+    it('links the name in bold when given an href', () => {
+      const { getByRole } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} href="/settings/setup" />)
+
+      const link = getByRole('link', { name: 'Address book name' })
+      expect(link).toHaveAttribute('href', '/settings/setup')
+      expect(link).toHaveClass('font-bold')
+    })
+
+    it('links the address in bold when given an href and there is no name', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+      const { getByRole } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} href="/settings/setup" />)
+
+      const link = getByRole('link', { name: /0x0000/ })
+      expect(link).toHaveAttribute('href', '/settings/setup')
+      expect(link).toHaveClass('font-bold')
+    })
   })
 
   describe('avatar', () => {

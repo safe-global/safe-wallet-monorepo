@@ -3,9 +3,14 @@ import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '
 import { useProposerOverview } from '../useProposerOverview'
 
 const mockUseAddressBookItem = jest.fn()
+const mockUseChain = jest.fn()
 
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   useAddressBookItem: (address: string, chainId: string) => mockUseAddressBookItem(address, chainId),
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  useChain: (chainId: string) => mockUseChain(chainId),
 }))
 
 const policy = asActivePolicy(mockProposerPolicy())
@@ -14,6 +19,7 @@ const args = { policy, proposer: policy.data.proposers[0] }
 describe('useProposerOverview', () => {
   beforeEach(() => {
     mockUseAddressBookItem.mockReturnValue(undefined)
+    mockUseChain.mockReturnValue({ shortName: 'eth' })
   })
 
   it('should, when opened, name the proposer, the Safe and the granting owner from the address book', () => {
@@ -28,7 +34,11 @@ describe('useProposerOverview', () => {
 
     expect(result.current).toEqual({
       proposer: { address: MOCK_ADDRESSES.bob, name: 'Robert' },
-      appliesTo: { address: MOCK_SAFES.treasury.address, name: 'Treasury' },
+      appliesTo: {
+        address: MOCK_SAFES.treasury.address,
+        name: 'Treasury',
+        href: { pathname: '/settings/setup', query: { safe: `eth:${MOCK_SAFES.treasury.address}` } },
+      },
       initiatedBy: { address: MOCK_ADDRESSES.alice, name: 'Alice' },
       lastUpdated: 'Not available',
       enforcedBy: 'Safe{Wallet}',
@@ -39,5 +49,13 @@ describe('useProposerOverview', () => {
     const { result } = renderHook(() => useProposerOverview(args))
 
     expect(result.current.proposer.name).toBe('Bob')
+  })
+
+  it('should, when the chain is unknown, not link the Safe to its settings', () => {
+    mockUseChain.mockReturnValue(undefined)
+
+    const { result } = renderHook(() => useProposerOverview(args))
+
+    expect(result.current.appliesTo.href).toBeUndefined()
   })
 })

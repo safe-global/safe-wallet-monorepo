@@ -34,6 +34,8 @@ const COLUMN_WIDTHS = {
   '30%': 'md:w-[30%]',
   '35%': 'md:w-[35%]',
   '40%': 'md:w-[40%]',
+  // Pinned to the column's minWidth, so columns without a width share what is left equally
+  fit: 'md:w-[var(--col-min-w)]',
 } as const
 
 export type ColumnWidth = keyof typeof COLUMN_WIDTHS
@@ -53,7 +55,7 @@ export type DataTableColumn<T> = {
   align?: 'start' | 'center' | 'end'
   /** Visual emphasis of the cell content */
   emphasis?: 'default' | 'strong'
-  /** Desktop column width, bounded to the shared scale (mobile auto-sizes) */
+  /** Desktop column width, bounded to the shared scale (mobile auto-sizes); `fit` requires `minWidth` */
   width?: ColumnWidth
   /** `secondary` columns are dropped in the compact layout (mobile viewport or too-narrow container) */
   priority?: 'essential' | 'secondary'
