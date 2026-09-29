@@ -61,7 +61,7 @@ describe('ExecutionMethodSelector', () => {
 
     expect(JSON.parse(screen.getByTestId('sponsored-txs-counter').getAttribute('data-props') ?? '')).toEqual({
       left: 5,
-      quota: null,
+      quota: 5,
       resetsAt: null,
       isPro: false,
     })
