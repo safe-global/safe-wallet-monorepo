@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import SeatLimitBanner from '../SeatLimitBanner'
 
 const mockUseSeatUpsell = jest.fn()
@@ -12,7 +12,7 @@ describe('SeatLimitBanner', () => {
 
     expect(screen.getByText('Business includes 20 Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Remove one to add another, or talk to us about a higher limit.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('leads with a primary Talk to sales inside the chooser', () => {
@@ -20,7 +20,7 @@ describe('SeatLimitBanner', () => {
     render(<SeatLimitBanner variant="alert" />)
 
     expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 20 Safe accounts')
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('sends a Starter Workspace to the Plans page for the bigger plan, also as an alert', () => {

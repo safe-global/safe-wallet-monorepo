@@ -1,5 +1,5 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -103,7 +103,7 @@ describe('PlanChooserModal', () => {
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+    expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(onBack).toHaveBeenCalled()
