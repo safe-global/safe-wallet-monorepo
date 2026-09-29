@@ -12,6 +12,7 @@ import { AppRoutes } from '@/config/routes'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
 import { cn } from '@/utils/cn'
 import css from './styles.module.css'
+import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 /** Transaction with safeAddress and chainId from the space pending-transactions API */
 type SpacePendingTxItem = TransactionQueuedItem & { safeAddress?: string; chainId?: string }
@@ -41,6 +42,7 @@ const PendingTxWidget = ({
 }: PendingTxWidgetProps): ReactElement => {
   const isEmpty = transactions.length === 0 && !loading
   const hasError = !!error && !loading
+  const spaceId = useUrlSpaceId()
 
   if (hasError) {
     return (
@@ -68,7 +70,9 @@ const PendingTxWidget = ({
         transactions.map((tx) => {
           const shortName = getEip3770ShortName(tx.chainId ?? '')
           const safeParam = shortName && tx.safeAddress ? `${shortName}:${tx.safeAddress}` : undefined
-          const href = safeParam ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}` : undefined
+          const href = safeParam
+            ? `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${safeParam}${getSpaceIdSearchParam(spaceId)}`
+            : undefined
 
           return (
             <SafeWidget.Item

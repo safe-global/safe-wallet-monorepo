@@ -31,7 +31,7 @@ export type SpaceIdQuery = { spaceId?: string }
 export const getSpaceIdQuery = (spaceId: string | null): SpaceIdQuery => (spaceId ? { spaceId } : {})
 
 /** `&spaceId=…` for a link built as a string, after its `?safe=` param; empty outside a Workspace. */
-export const getSpaceIdSearchParam = (spaceId: string | null): string => (spaceId ? `&spaceId=${spaceId}` : '')
+export const getSpaceIdSearchParam = (spaceId?: string | null): string => (spaceId ? `&spaceId=${spaceId}` : '')
 
 /** The {@link getSpaceIdQuery} of the page location, for code that has no router (e.g. store listeners). */
 export const getLocationSpaceIdQuery = (): SpaceIdQuery => getSpaceIdQuery(parseSpaceId(getLocationSpaceId()))
