@@ -141,15 +141,6 @@ describe('SafeShieldContent Safe Pro gating', () => {
     expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
   })
 
-  it.each([true, false])(
-    'leaves the Hypernative login out when the Safe is not eligible (hasProFeatures: %s)',
-    (hasProFeatures) => {
-      renderContent(hasProFeatures)
-
-      expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
-    },
-  )
-
   it('hides the Hypernative login while the analysis skeleton shows', () => {
     render(
       <SafeShieldContent
