@@ -39,6 +39,16 @@ describe('sortPolicies', () => {
     expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'unenforced', 'active', 'active'])
   })
 
+  it('should read a proposer grant that never took effect as not activated, and sort it with the unenforced', () => {
+    const notActivated = asActivePolicy(mockProposerPolicy({ enabled: false }))
+    const active = asActivePolicy(mockProposerPolicy())
+    const pending = mockPendingPolicy()
+
+    const sorted = sortPolicies([active, pending, notActivated], 'status', context)
+
+    expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'not-activated', 'active'])
+  })
+
   it('should, when two policies share a status, keep the order they arrived in', () => {
     const recovery = asActivePolicy(mockRecoveryPolicy())
     const proposer = asActivePolicy(mockProposerPolicy())
