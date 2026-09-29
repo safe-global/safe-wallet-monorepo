@@ -90,6 +90,41 @@ describe('mapPendingPolicies', () => {
     })
   })
 
+  it('should, when a used limit is edited as a reset then a set, render one allowance with nothing spent', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          {
+            kind: 'reset-allowance',
+            operation: 'update',
+            delegate: MOCK_ADDRESSES.alice,
+            token: MOCK_TOKENS.usdc.address,
+          },
+          {
+            kind: 'set-allowance',
+            operation: 'update',
+            delegate: MOCK_ADDRESSES.alice,
+            token: MOCK_TOKENS.usdc.address,
+            amount: '2000000000',
+            resetPeriodMinutes: 43_200,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('update')
+    expect(row.data.spenders[0].allowances).toEqual([
+      expect.objectContaining({
+        amount: '2000000000',
+        spent: '0',
+        remaining: '2000000000',
+        resetsAtMinute: 29_846_880,
+      }),
+    ])
+  })
+
   it('should match the active policy on the enforcing module', () => {
     const active = activeRows()
     const dto = withChanges([

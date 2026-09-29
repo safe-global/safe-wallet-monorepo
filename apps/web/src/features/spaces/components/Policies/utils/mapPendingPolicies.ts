@@ -63,6 +63,14 @@ const toSpenders = (
     byDelegate.set(key, spender)
     return spender
   }
+  const findQueuedAllowance = (delegate: string, token: string): PolicyAllowance | undefined =>
+    byDelegate.get(delegate.toLowerCase())?.allowances.find((allowance) => sameAddress(allowance.token.address, token))
+  const upsertAllowance = (delegate: string, allowance: PolicyAllowance) => {
+    const { allowances } = spenderFor(delegate)
+    const index = allowances.findIndex((existing) => sameAddress(existing.token.address, allowance.token.address))
+    if (index === -1) allowances.push(allowance)
+    else allowances[index] = allowance
+  }
 
   for (const change of dto.data.changes) {
     switch (change.kind) {
@@ -77,11 +85,14 @@ const toSpenders = (
         break
       }
       case 'set-allowance': {
-        const current = findActiveAllowance(active, change.delegate, change.token)
+        // A used limit is edited as reset then set, so the set starts from the reset allowance, not the active one.
+        const current =
+          findQueuedAllowance(change.delegate, change.token) ??
+          findActiveAllowance(active, change.delegate, change.token)
         const spent = current?.spent ?? '0'
         const remaining = BigInt(change.amount) - BigInt(spent)
 
-        spenderFor(change.delegate).allowances.push({
+        upsertAllowance(change.delegate, {
           token: resolveToken(dto.safe.chainId, change.token) ?? unknownToken(change.token),
           amount: change.amount,
           spent,
@@ -92,8 +103,10 @@ const toSpenders = (
         break
       }
       case 'reset-allowance': {
-        const current = findActiveAllowance(active, change.delegate, change.token)
-        if (current) spenderFor(change.delegate).allowances.push({ ...current, spent: '0', remaining: current.amount })
+        const current =
+          findQueuedAllowance(change.delegate, change.token) ??
+          findActiveAllowance(active, change.delegate, change.token)
+        if (current) upsertAllowance(change.delegate, { ...current, spent: '0', remaining: current.amount })
         break
       }
       case 'delete-allowance': {
