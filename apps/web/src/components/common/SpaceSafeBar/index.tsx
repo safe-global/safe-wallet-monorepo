@@ -229,9 +229,7 @@ function SpaceSafeBar() {
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  // Only surface the space name when the current safe actually belongs to it. Off a space context
-  // `useCurrentSpaceId` still resolves a fallback space (last-used / first in the list), so `space`
-  // is populated even for a safe in no workspace — labelling the tab with it would be misleading.
+  // Only surface the space name when the current safe belongs to the Workspace of the URL.
   const workspaceLabel = isInSpaceContext
     ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
     : 'Workspace'

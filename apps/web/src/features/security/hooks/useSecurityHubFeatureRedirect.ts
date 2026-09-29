@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
+import { getRouterSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 /**
  * Redirect away from the Security Hub page when `FEATURES.SECURITY_HUB` is disabled
@@ -17,7 +18,7 @@ const useSecurityHubFeatureRedirect = () => {
 
   useEffect(() => {
     if (isSecurityHubEnabled === false) {
-      router.push({ pathname: AppRoutes.spaces.index })
+      router.push({ pathname: AppRoutes.spaces.index, query: getRouterSpaceIdQuery(router) })
     }
   }, [isSecurityHubEnabled, router])
 }

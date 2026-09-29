@@ -24,7 +24,7 @@ type PersistArgs = {
   props: ReplayedSafeProps
   name: string
   payMethod: PayMethod
-  /** Active space id (string from auth state), or null if user has none. */
+  /** The Workspace of the URL (useUrlSpaceId), or null outside a Workspace. */
   spaceId: string | null
   /** Whether the user is signed into the CGW session. Non-authed users can
    *  still create counterfactual safes but nothing is written to the backend. */
@@ -118,8 +118,6 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that are empty or
-    // whitespace-only — pass any non-empty string through unchanged.
     const resolvedSpaceId = normalizeSpaceId(spaceId)
     if (resolvedSpaceId !== null) {
       if (!isAdminOfActiveSpace) {
