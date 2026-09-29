@@ -245,7 +245,7 @@ describe('ExecuteForm', () => {
   describe('success screen scope', () => {
     const renderWithModal = () => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm

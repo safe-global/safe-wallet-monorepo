@@ -805,6 +805,89 @@ describe('SignOrExecute hooks', () => {
     })
   })
 
+  describe('useTxActions — Safe signer routing', () => {
+    const SIGNER_ADDRESS = zeroPadValue('0x0abc', 20)
+
+    const mockSigner = (signer: Partial<SignerWallet>, isSmartContract: boolean) => {
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: SIGNER_ADDRESS,
+        provider: MockEip1193Provider,
+        ...signer,
+      } as SignerWallet)
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(isSmartContract)
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: SIGNER_ADDRESS }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: zeroPadValue('0x0000', 20),
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+    }
+
+    it.each([
+      ['in-app nested signer, threshold 1', { isSafe: true, threshold: 1 }, false, true, true],
+      ['in-app nested signer, threshold 2', { isSafe: true, threshold: 2 }, false, true, false],
+      ['connected Safe, threshold 1', { isConnectedSafe: true, threshold: 1 }, false, true, false],
+      ['non-Safe smart account', {}, true, false, true],
+    ])('signs on-chain as a %s', async (_, signer, isSmartContract, isSafeSigner, executed) => {
+      mockSigner(signer, isSmartContract)
+      const onChainSignSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockResolvedValue()
+
+      const { result } = renderHook(() => useTxActions())
+      const signResult = await result.current.signTx(createSafeTx(), '456')
+
+      expect(onChainSignSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        '456',
+        MockEip1193Provider,
+        '1',
+        SIGNER_ADDRESS,
+        zeroPadValue('0x0000', 20),
+        isSafeSigner,
+        executed,
+        undefined,
+      )
+      expect(signResult).toEqual({ txId: '456', isNestedSigning: isSafeSigner })
+    })
+
+    it.each([
+      ['EOA', {}, false, false, true],
+      ['in-app nested signer, threshold 1', { isSafe: true, threshold: 1 }, false, true, true],
+      ['in-app nested signer, threshold 2', { isSafe: true, threshold: 2 }, false, true, false],
+      ['connected Safe, threshold 1', { isConnectedSafe: true, threshold: 1 }, false, true, false],
+      ['non-Safe smart account', {}, true, true, true],
+    ])('executes as a %s', async (_, signer, isSmartContract, isSmartAccount, executed) => {
+      mockSigner(signer, isSmartContract)
+      const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockResolvedValue()
+
+      const { result } = renderHook(() => useTxActions())
+      const executeResult = await result.current.executeTx({ gasPrice: 1 }, createSafeTx(), '455')
+
+      expect(executeSpy).toHaveBeenCalledWith(
+        '1',
+        expect.anything(),
+        { gasPrice: 1 },
+        '455',
+        MockEip1193Provider,
+        SIGNER_ADDRESS,
+        zeroPadValue('0x0000', 20),
+        isSmartAccount,
+        executed,
+        undefined,
+      )
+      expect(executeResult).toEqual({ txId: '455', isExecuted: executed })
+    })
+  })
+
   describe('useTxActions — GTF fee-params merge', () => {
     const GAS_TOKEN = '0xa0b86991000000000000000000000000000000aa'
     const SAFE_ADDRESS = zeroPadValue('0x0000', 20)

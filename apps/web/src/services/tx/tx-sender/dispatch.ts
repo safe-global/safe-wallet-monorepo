@@ -341,7 +341,7 @@ export const dispatchTxExecution = async (
   isSmartAccount: boolean,
   executed: boolean,
   scope?: TxSenderScope,
-): Promise<string> => {
+): Promise<void> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   const eventParams = { txId, nonce: safeTx.data.nonce, chainId, safeAddress }
 
@@ -383,7 +383,7 @@ export const dispatchTxExecution = async (
       method: 'execTransaction',
     })
 
-    return result.hash
+    return
   }
 
   txDispatch(TxEvent.EXECUTING, { ...eventParams })
@@ -397,8 +397,6 @@ export const dispatchTxExecution = async (
     gasLimit: txOptions.gasLimit?.toString(),
     txType: 'SafeTx',
   })
-
-  return result.hash
 }
 
 export const dispatchBatchExecution = async (
