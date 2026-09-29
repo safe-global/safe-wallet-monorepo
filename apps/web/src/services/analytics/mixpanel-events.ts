@@ -88,6 +88,7 @@ export enum MixpanelEvent {
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
+  POLICY_UPSELL_UPGRADE_CLICKED = 'Policy Upsell Upgrade Clicked',
 }
 
 export enum WorkspaceCreateEntryPoint {

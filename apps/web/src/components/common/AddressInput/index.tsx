@@ -86,6 +86,7 @@ const AddressInput = ({
     control,
     formState: { errors, isValidating },
     trigger,
+    getValues,
   } = useFormContext()
 
   const currentChain = useCurrentChain()
@@ -255,7 +256,10 @@ const AddressInput = ({
     },
 
     // Workaround for a bug in react-hook-form that it restores a cached error state on blur
-    onBlur: () => setTimeout(() => trigger(name), 100),
+    onBlur: () =>
+      setTimeout(() => {
+        if (getValues(name)) void trigger(name)
+      }, 100),
   })
 
   return (
