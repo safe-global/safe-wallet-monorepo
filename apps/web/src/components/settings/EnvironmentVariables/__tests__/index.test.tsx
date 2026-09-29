@@ -128,13 +128,18 @@ describe('EnvironmentVariables', () => {
     })
 
     const tenderlyTokenInput = screen.getByLabelText('Tenderly access token') as HTMLInputElement
-    expect(tenderlyTokenInput).toHaveAttribute('type', 'password')
+    // Never a password field, so password managers leave it alone; the masking is CSS only.
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+    expect(tenderlyTokenInput).toHaveAttribute('data-1p-ignore')
+    expect(tenderlyTokenInput).toHaveAttribute('data-lpignore', 'true')
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
 
     fireEvent.click(screen.getByRole('button', { name: 'Show access token' }))
-    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+    expect(tenderlyTokenInput).not.toHaveClass('[-webkit-text-security:disc]')
 
     fireEvent.click(screen.getByRole('button', { name: 'Hide access token' }))
-    expect(tenderlyTokenInput).toHaveAttribute('type', 'password')
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
   })
 
   it('should show reset button when value is entered', async () => {

@@ -96,9 +96,17 @@ const TenderlySection = ({
                   {...field}
                   id={EnvVariablesField.tenderlyToken}
                   value={field.value || ''}
-                  type={isTokenVisible ? 'text' : 'password'}
+                  // A text field masked with CSS, not type="password", so browsers and password managers don't offer to
+                  // save it as a password or autofill a saved one into it.
+                  type="text"
                   autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
                   spellCheck={false}
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
+                  className={isTokenVisible ? undefined : '[-webkit-text-security:disc]'}
                 />
                 <InputGroupAddon align="inline-end">
                   <Tooltip>
