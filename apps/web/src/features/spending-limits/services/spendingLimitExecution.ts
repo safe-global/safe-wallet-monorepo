@@ -5,10 +5,13 @@ import {
   getSpendingLimitContract,
 } from './spendingLimitContracts'
 import { isSpendingLimitFor } from './spendingLimitMatching'
+import type { SpendingLimitDelta } from './spendingLimitDelta'
 import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import {
   createAddDelegateTx,
+  createDeleteAllowanceTx,
   createEnableModuleTx,
+  createRemoveDelegateTx,
   createResetAllowanceTx,
   createSetAllowanceTx,
 } from './spendingLimitParams'
@@ -32,6 +35,9 @@ export const EMPTY_SPENDING_LIMITS_ERROR = 'The policy has no spender and token 
 export const DUPLICATE_SPENDING_LIMIT_ERROR = 'The same spender and token appear twice in the policy.'
 export const UNKNOWN_TOKEN_DECIMALS_ERROR =
   'The decimals of a selected token are unknown, so its limit cannot be encoded.'
+export const EMPTY_SPENDING_LIMIT_EDIT_ERROR = 'This edit changes nothing, so there is no transaction to sign.'
+export const MODULE_NOT_ENABLED_ERROR =
+  'The spending limit module is not enabled on this Safe account, so its limits cannot be edited.'
 
 /** A recurring period is anchored this far in the past so its first window is already running. */
 const RESET_BASE_OFFSET_MIN = 30
@@ -159,6 +165,60 @@ export const createSpendingLimitsTx = async (
       txs.push(createResetAllowanceTx(pair.beneficiary, pair.tokenAddress, allowanceModule.address))
     }
     txs.push(createSetAllowanceMetaTx(pair, allowanceModule.address))
+  }
+
+  return createMultiSendCallOnlyTx(txs, scope)
+}
+
+const hasChanges = (delta: SpendingLimitDelta): boolean =>
+  delta.addedDelegates.length > 0 ||
+  delta.added.length > 0 ||
+  delta.modified.length > 0 ||
+  delta.removed.length > 0 ||
+  delta.removedDelegates.length > 0
+
+/**
+ * One multiSend for an edit: register every spender written to, write every added and changed limit,
+ * clear the dropped ones, then unregister the spenders left with nothing. Clearing precedes
+ * unregistering because `removeDelegate` leaves stored allowances behind, which re-adding the spender
+ * later would resurrect.
+ */
+export const createSpendingLimitEditTx = async (
+  delta: SpendingLimitDelta,
+  existingSpendingLimits: readonly SpendingLimitState[],
+  chainId: string,
+  safeModules: SafeState['modules'],
+  deployed: boolean,
+  scope?: TxSenderScope,
+): Promise<SafeTransaction> => {
+  if (!hasChanges(delta)) throw new Error(EMPTY_SPENDING_LIMIT_EDIT_ERROR)
+  getAndValidateSafeSDK(scope)
+  const { address, isEnabled } = resolveAllowanceModule(chainId, safeModules, deployed)
+  if (!isEnabled) throw new Error(MODULE_NOT_ENABLED_ERROR)
+
+  const writes = [...delta.added, ...delta.modified]
+
+  // `addDelegate` returns silently for a delegate the module already knows, while `setAllowance`
+  // reverts for one it does not. Registering every spender written to therefore costs one call and
+  // survives a baseline that a transaction queued in the meantime has already made stale.
+  const txs: MetaTransactionData[] = uniqueBeneficiaries(writes).map((delegate) =>
+    createAddDelegateTx(delegate, address),
+  )
+
+  for (const pair of writes) {
+    const existing = findExistingLimit(existingSpendingLimits, pair)
+    if (existing && existing.spent !== '0') {
+      txs.push(createResetAllowanceTx(pair.beneficiary, pair.tokenAddress, address))
+    }
+    txs.push(createSetAllowanceMetaTx(pair, address))
+  }
+
+  for (const limit of delta.removed) {
+    txs.push(createDeleteAllowanceTx(limit.beneficiary, limit.tokenAddress, address))
+  }
+
+  for (const delegate of delta.removedDelegates) {
+    txs.push(createRemoveDelegateTx(delegate, address))
   }
 
   return createMultiSendCallOnlyTx(txs, scope)

@@ -8,9 +8,11 @@ import SpendingLimitsLoader from './components/SpendingLimitsLoader'
 import { loadSpendingLimits } from './services/spendingLimitLoader'
 import {
   createNewSpendingLimitTx,
+  createSpendingLimitEditTx,
   createSpendingLimitsTx,
   dispatchSpendingLimitTxExecution,
 } from './services/spendingLimitExecution'
+import { buildSpendingLimitDelta } from './services/spendingLimitDelta'
 
 export default {
   // Components
@@ -26,5 +28,7 @@ export default {
   loadSpendingLimits,
   createNewSpendingLimitTx,
   createSpendingLimitsTx,
+  createSpendingLimitEditTx,
+  buildSpendingLimitDelta,
   dispatchSpendingLimitTxExecution,
 }

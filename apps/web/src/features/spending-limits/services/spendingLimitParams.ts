@@ -73,3 +73,32 @@ export const createSetAllowanceTx = (
     data,
   }
 }
+
+export const createDeleteAllowanceTx = (
+  delegate: string,
+  tokenAddress: string,
+  spendingLimitAddress: string,
+): MetaTransactionData => {
+  const spendingLimitInterface = getSpendingLimitInterface()
+
+  const data = spendingLimitInterface.encodeFunctionData('deleteAllowance', [delegate, tokenAddress])
+
+  return {
+    to: spendingLimitAddress,
+    value: '0',
+    data,
+  }
+}
+
+/** The delta clears each allowance explicitly first, so the module is not asked to sweep them again. */
+export const createRemoveDelegateTx = (delegate: string, spendingLimitAddress: string): MetaTransactionData => {
+  const spendingLimitInterface = getSpendingLimitInterface()
+
+  const data = spendingLimitInterface.encodeFunctionData('removeDelegate', [delegate, false])
+
+  return {
+    to: spendingLimitAddress,
+    value: '0',
+    data,
+  }
+}
