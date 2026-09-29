@@ -4,8 +4,6 @@ import * as spendinglimit from '../pages/spending_limits.pages'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import * as space from '../pages/spaces.page.js'
-import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -17,16 +15,10 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   beforeEach(() => {
-    cy.intercept('GET', '**/v1/spaces/*/entitlements', {
-      plan: { id: 'business', name: 'Business', cycleEndsAt: '2099-01-01T00:00:00Z' },
-      entitlements: [{ feature: 'policies', type: 'binary', enabled: true }],
-    })
-    wallet.connectSignerViaStorage(signer, constants.spacesUrl)
-    space.clickOnSignInBtn()
-    space.waitForSpacesWelcomeReady()
+    spendinglimit.signInOnPlan(signer, spendinglimit.plans.business)
     wallet.connectSignerViaStorage(
       signer,
-      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + '&spaceId=' + staticSpaces.dashboardWithSafes.uuid,
+      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
     )
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
@@ -85,23 +77,15 @@ describe('[SMOKE] Spending limits on a plan without policies', () => {
   })
 
   it('Verify the Safe Pro lock replaces the New spending limit button', () => {
-    cy.intercept('GET', '**/v1/spaces/*/entitlements', {
-      plan: { id: 'starter', name: 'Starter', cycleEndsAt: '2099-01-01T00:00:00Z' },
-      entitlements: [{ feature: 'policies', type: 'binary', enabled: false }],
-    })
-    wallet.connectSignerViaStorage(signer, constants.spacesUrl)
-    space.clickOnSignInBtn()
-    space.waitForSpacesWelcomeReady()
+    spendinglimit.signInOnPlan(signer, spendinglimit.plans.starter)
     wallet.connectSignerViaStorage(
       signer,
-      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + '&spaceId=' + staticSpaces.dashboardWithSafes.uuid,
+      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
     )
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
 
-    cy.get('[data-testid="safe-pro-lock"]')
-      .should('be.visible')
-      .and('contain', 'Adding spending limits requires Safe Pro')
+    cy.get(spendinglimit.safeProLock).should('be.visible').and('contain', 'Adding spending limits requires Safe Pro')
     cy.get(spendinglimit.newSpendingLimitBtn).should('not.exist')
   })
 })

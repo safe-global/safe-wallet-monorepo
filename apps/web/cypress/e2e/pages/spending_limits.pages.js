@@ -4,9 +4,13 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
+import * as space from './spaces.page.js'
+import * as wallet from '../../support/utils/wallet.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
+export const safeProLock = '[data-testid="safe-pro-lock"]'
 const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
@@ -246,4 +250,40 @@ export function verifyDecodedTxSummary(names) {
 export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
+}
+
+export const plans = {
+  business: 'Business',
+  starter: 'Starter',
+}
+
+/** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
+export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
+
+/**
+ * Sets up the spending limit plan gate as in production: SAFE_PRO and SPENDING_LIMIT_GATING on, the wallet signed in to
+ * Workspaces, and the Workspace on `plan`. Business includes policies, Starter does not.
+ */
+export function signInOnPlan(signer, plan) {
+  cy.intercept('GET', '**/v2/chains**', (req) => {
+    req.continue((res) => {
+      const addGatingFlags = (chain) => ({
+        ...chain,
+        features: [...new Set([...(chain.features || []), 'SAFE_PRO', 'SPENDING_LIMIT_GATING'])],
+      })
+
+      if (res.body?.results && Array.isArray(res.body.results)) {
+        res.body.results = res.body.results.map(addGatingFlags)
+      } else if (res.body?.chainId) {
+        res.body = addGatingFlags(res.body)
+      }
+    })
+  })
+  cy.intercept('GET', '**/v1/spaces/*/entitlements', {
+    plan: { id: plan.toLowerCase(), name: plan, cycleEndsAt: '2099-01-01T00:00:00Z' },
+    entitlements: [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }],
+  })
+  wallet.connectSignerViaStorage(signer, constants.spacesUrl)
+  space.clickOnSignInBtn()
+  space.waitForSpacesWelcomeReady()
 }
