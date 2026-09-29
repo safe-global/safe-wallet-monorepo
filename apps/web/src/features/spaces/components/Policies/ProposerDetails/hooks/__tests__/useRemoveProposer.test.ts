@@ -70,6 +70,10 @@ describe('useRemoveProposer', () => {
       deleteDelegateV2Dto: { delegator: MOCK_ADDRESSES.alice, safe: MOCK_SAFES.treasury.address, signature: '0xtyped' },
     })
     expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockDispatch.mock.calls[0][0].payload).toMatchObject({
+      title: 'Proposer deleted successfully!',
+      message: expect.stringContaining('cannot suggest transactions anymore.'),
+    })
     expect(onRemoved).toHaveBeenCalledTimes(1)
     expect(result.current.error).toBeUndefined()
   })
@@ -131,7 +135,9 @@ describe('useRemoveProposer', () => {
 
     await act(() => result.current.removeProposer())
 
-    expect(result.current.error?.message).toBe('Only the signer who granted this proposer role can remove it')
+    expect(result.current.error?.message).toBe(
+      'Only the signer who granted this proposer role, or the proposer themselves, can remove it',
+    )
     expect(mockSignTypedData).not.toHaveBeenCalled()
     expect(mockDeleteV2).not.toHaveBeenCalled()
   })

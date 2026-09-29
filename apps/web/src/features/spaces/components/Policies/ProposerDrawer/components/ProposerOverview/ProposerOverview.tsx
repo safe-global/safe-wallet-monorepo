@@ -35,7 +35,7 @@ const ProposerOverview = ({
           content: (
             <span className="inline-flex items-center gap-1">
               <ShieldCheck className="size-3.5" />
-              <span className="underline">{enforcedBy}</span>
+              <span>{enforcedBy}</span>
             </span>
           ),
         },

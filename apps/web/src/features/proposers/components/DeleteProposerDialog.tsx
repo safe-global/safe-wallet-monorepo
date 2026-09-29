@@ -150,7 +150,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
           variant: 'success',
           groupKey: 'delete-proposer-success',
           title: 'Proposer deleted successfully!',
-          message: `${shortenAddress(proposer.delegate)} can not suggest transactions anymore.`,
+          message: `${shortenAddress(proposer.delegate)} cannot suggest transactions anymore.`,
         }),
       )
       setOpen(false)

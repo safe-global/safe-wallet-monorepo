@@ -15,7 +15,8 @@ import { isEthSignWallet } from '@/utils/wallets'
 import type { Proposer } from '../../types'
 import type { ProposerRef } from './types'
 
-export const REMOVE_PROPOSER_NOT_ALLOWED = 'Only the signer who granted this proposer role can remove it'
+export const REMOVE_PROPOSER_NOT_ALLOWED =
+  'Only the signer who granted this proposer role, or the proposer themselves, can remove it'
 
 /** The grant the wallet made, or any grant when the proposer removes itself. Another owner gets none. */
 export const getRemovableGrantDelegator = (proposer: Proposer, walletAddress?: string): string | undefined => {
@@ -78,7 +79,7 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
           variant: 'success',
           groupKey: 'delete-proposer-success',
           title: 'Proposer deleted successfully!',
-          message: `${shortenAddress(delegateAddress)} can not suggest transactions anymore.`,
+          message: `${shortenAddress(delegateAddress)} cannot suggest transactions anymore.`,
         }),
       )
       onRemoved()
