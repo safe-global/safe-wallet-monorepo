@@ -34,8 +34,12 @@ export type EthHashInfoProps = {
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
   badgeTooltip?: ReactNode
-  /** Links the account's label (its name, or the address when unnamed) and sets it in bold */
+  /** Links the account's label: its name, or the address when unnamed */
   href?: LinkProps['href']
+  /** Sets the account's label in bold: its name, or the address when unnamed */
+  boldLabel?: boolean
+  /** Shows the full address, instead of the copy hint, when hovering the address */
+  showAddressTooltip?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -60,6 +64,8 @@ const SrcEthHashInfo = ({
   highlight4bytes = false,
   badgeTooltip,
   href,
+  boldLabel = false,
+  showAddressTooltip = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const isMobile = useIsBelowSm()
@@ -109,9 +115,13 @@ const SrcEthHashInfo = ({
 
       <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
-          <div title={name} className="ethHashInfo-name flex items-center gap-1" style={accountStylesWithBadge}>
+          <div
+            title={name}
+            className={classnames('ethHashInfo-name flex items-center gap-1', { 'font-bold': boldLabel })}
+            style={accountStylesWithBadge}
+          >
             {href ? (
-              <NextLink href={href} className="overflow-hidden text-ellipsis font-bold text-inherit hover:underline">
+              <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
                 {name}
               </NextLink>
             ) : (
@@ -141,13 +151,23 @@ const SrcEthHashInfo = ({
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
           {(!onlyName || !name) && (
-            <div className="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]">
+            <div
+              className={classnames(
+                'overflow-hidden text-ellipsis',
+                boldLabel && !name ? 'font-bold' : 'font-[weight:inherit]',
+                'text-[length:inherit]',
+              )}
+            >
               {href && !name ? (
-                <NextLink href={href} className="font-bold text-inherit hover:underline">
+                <NextLink href={href} className="text-inherit hover:underline">
                   {addressElement}
                 </NextLink>
               ) : copyAddress ? (
-                <CopyAddressButton address={address} trusted={trusted}>
+                <CopyAddressButton
+                  address={address}
+                  trusted={trusted}
+                  initialToolTipText={showAddressTooltip ? address : undefined}
+                >
                   {addressElement}
                 </CopyAddressButton>
               ) : (

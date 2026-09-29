@@ -57,6 +57,8 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           showPrefix={false}
           highlight4bytes
           showCopyButton
+          showAddressTooltip
+          boldLabel
           avatarSize={24}
           href={getSafeSettingsHref(getShortName(policy.safe.chainId), policy.safe.address)}
         />
@@ -82,6 +84,8 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
             showPrefix={false}
             highlight4bytes
             showCopyButton
+            showAddressTooltip
+            boldLabel
             avatarSize={24}
           />
         )
