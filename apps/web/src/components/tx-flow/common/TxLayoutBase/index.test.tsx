@@ -10,7 +10,11 @@ jest.mock('@/features/safe-shield', () => ({
 
 jest.mock('@/components/tx-flow/common/TxStatusWidget', () => ({
   __esModule: true,
-  default: () => <div data-testid="tx-status-widget">StatusRail</div>,
+  default: ({ reviewStepDone }: { reviewStepDone?: boolean }) => (
+    <div data-testid="tx-status-widget" data-review-step-done={String(reviewStepDone)}>
+      StatusRail
+    </div>
+  ),
 }))
 
 const Step = () => <div data-testid="step-content">Step content</div>
@@ -85,6 +89,48 @@ describe('TxLayoutBase', () => {
     expect(screen.queryByTestId('tx-status-widget')).not.toBeInTheDocument()
     expect(screen.queryByTestId('safe-shield-widget')).not.toBeInTheDocument()
     expect(screen.getByTestId('step-content')).toBeInTheDocument()
+  })
+
+  it('tells the rail there is no review step unless the flow has one', () => {
+    render(
+      <TxLayoutBase title="Sign message" step={0} stepCount={1} progress={100}>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.getByTestId('tx-status-widget')).toHaveAttribute('data-review-step-done', 'undefined')
+  })
+
+  it('leaves the review step pending while the flow is on one of its own steps', () => {
+    // TxFlow appends review + confirm, so a flow with one step of its own has stepCount 3.
+    render(
+      <TxLayoutBase title="Send tokens" step={0} stepCount={3} progress={33} hasReviewStep>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.getByTestId('tx-status-widget')).toHaveAttribute('data-review-step-done', 'false')
+  })
+
+  it('marks the review step done from the review step onwards', () => {
+    render(
+      <TxLayoutBase title="Send tokens" step={1} stepCount={3} progress={66} hasReviewStep>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.getByTestId('tx-status-widget')).toHaveAttribute('data-review-step-done', 'true')
+  })
+
+  it('marks the review step done for a flow whose first step is the review step', () => {
+    // ConfirmTx opens an existing transaction: it adds no steps of its own, so stepCount is 2.
+    render(
+      <TxLayoutBase title="Confirm transaction" step={0} stepCount={2} progress={50} hasReviewStep>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.getByTestId('tx-status-widget')).toHaveAttribute('data-review-step-done', 'true')
   })
 
   it('renders the sidebar slot content under the widget when provided', () => {

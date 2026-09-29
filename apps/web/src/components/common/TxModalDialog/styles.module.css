@@ -58,9 +58,9 @@
   cursor: pointer;
   border: none;
   border-radius: 50%;
-  color: var(--color-border-main);
+  color: var(--color-text-primary);
   padding: var(--space-1);
-  background-color: var(--color-border-light);
+  background-color: var(--color-background-paper);
 }
 
 .close svg {

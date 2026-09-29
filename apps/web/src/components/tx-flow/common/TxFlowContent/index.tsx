@@ -43,6 +43,7 @@ export const TxFlowContent = ({ children }: { children?: ReactNode[] | ReactNode
       isBatch={isBatch}
       step={step}
       stepCount={childrenArray.length}
+      hasReviewStep
       progress={progress}
       onBack={onPrev}
       sidebarSlot={<Slot name={SlotName.Sidebar} />}

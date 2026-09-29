@@ -67,6 +67,8 @@ export type TxLayoutBaseProps = {
   step: number
   /** Total number of steps, used to flag the last step to the status widget. */
   stepCount: number
+  /** Set by flows whose steps end in a review step — TxFlow appends one, TxLayout flows have none. */
+  hasReviewStep?: boolean
   /** Completion percentage for the progress bar. */
   progress: number
   /** Back handler; the button only renders when set and not on the first step. */
@@ -99,6 +101,7 @@ const TxLayoutBase = ({
   hideStatusRail = false,
   step,
   stepCount,
+  hasReviewStep = false,
   progress,
   onBack,
   children,
@@ -114,9 +117,12 @@ const TxLayoutBase = ({
            rather than squeezing it, since the card is what the user is actually filling in. */
         <div className="w-14 pt-10 min-[1200px]:w-[200px]">
           <aside>
-            <div className="fixed flex flex-col gap-6">
+            {/* `fixed` shrinks to its content, so the width is repeated here — without it the
+                right-aligned rail hangs off the middle of the column instead of its inner edge. */}
+            <div className="fixed flex w-14 flex-col gap-6 min-[1200px]:w-[200px]">
               <TxStatusWidget
                 isLastStep={step === stepCount - 1}
+                reviewStepDone={hasReviewStep ? step >= stepCount - 2 : undefined}
                 txSummary={txSummary}
                 isBatch={isBatch}
                 isMessage={isMessage}

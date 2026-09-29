@@ -1,12 +1,9 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { useContext, type ReactNode } from 'react'
-import CreatedIcon from '@/public/images/messages/created.svg'
-import SignedIcon from '@/public/images/messages/signed.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
-import classnames from 'classnames'
-import { cn } from '@/utils/cn'
+import { Steps, type StepItem } from '@/components/common/Steps'
 import css from './styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -17,12 +14,8 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
    the screen — keeps its width instead of the header wrapping mid-word. `sr-only` rather than
    `hidden` so the step names stay in the accessibility tree at every width. Below 900px
    TxLayoutBase drops the rail entirely. */
-const StatusLabel = ({ children, className }: { children: ReactNode; className?: string }) => (
-  <span
-    className={cn('sr-only min-[1200px]:not-sr-only min-[1200px]:truncate text-xs leading-4 font-normal', className)}
-  >
-    {children}
-  </span>
+const StatusLabel = ({ children }: { children: ReactNode }) => (
+  <span className="text-xs leading-4 sr-only min-[1200px]:not-sr-only min-[1200px]:truncate">{children}</span>
 )
 
 const TxStatusWidget = ({
@@ -30,11 +23,14 @@ const TxStatusWidget = ({
   isBatch = false,
   isMessage = false,
   isLastStep = false,
+  reviewStepDone,
 }: {
   txSummary?: Transaction
   isBatch?: boolean
   isMessage?: boolean
   isLastStep?: boolean
+  /** Undefined for flows that have no review step of their own — the cell is then not rendered. */
+  reviewStepDone?: boolean
 }) => {
   const wallet = useWallet()
   const { safe } = useSafeInfo()
@@ -54,47 +50,41 @@ const TxStatusWidget = ({
 
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
 
-  return (
-    <div className="bg-transparent">
-      <ul className={css.status}>
-        <li className={css.item}>
-          <span className={css.itemIcon}>
-            <CreatedIcon />
-          </span>
+  const items: StepItem[] = [
+    { id: 'create', label: <StatusLabel>{isBatch ? 'Queue transactions' : 'Create'}</StatusLabel>, done: true },
 
-          <StatusLabel>{isBatch ? 'Queue transactions' : 'Create'}</StatusLabel>
-        </li>
+    ...(reviewStepDone === undefined
+      ? []
+      : [{ id: 'review', label: <StatusLabel>Review</StatusLabel>, done: reviewStepDone }]),
 
-        <li className={classnames(css.item, { [css.incomplete]: !canConfirm && !isBatch })}>
-          <span className={css.itemIcon}>
-            <SignedIcon />
-          </span>
+    {
+      id: 'confirm',
+      label: (
+        <StatusLabel>
+          {isBatch ? (
+            'Create batch'
+          ) : !nonceNeeded ? (
+            'Confirmed'
+          ) : isMessage ? (
+            'Collect signatures'
+          ) : (
+            <>
+              Confirm ({confirmationsSubmitted} of {threshold}){canSign && <span className={css.badge}>+1</span>}
+            </>
+          )}
+        </StatusLabel>
+      ),
+      done: canConfirm || isBatch,
+    },
 
-          <StatusLabel>
-            {isBatch ? (
-              'Create batch'
-            ) : !nonceNeeded ? (
-              'Confirmed'
-            ) : isMessage ? (
-              'Collect signatures'
-            ) : (
-              <>
-                Confirmed ({confirmationsSubmitted} of {threshold}){canSign && <span className={css.badge}>+1</span>}
-              </>
-            )}
-          </StatusLabel>
-        </li>
+    {
+      id: 'execute',
+      label: <StatusLabel>{isMessage ? 'Done' : 'Execute'}</StatusLabel>,
+      done: isAwaitingExecution && isLastStep,
+    },
+  ]
 
-        <li className={classnames(css.item, { [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>
-          <span className={css.itemIcon}>
-            <SignedIcon />
-          </span>
-
-          <StatusLabel>{isMessage ? 'Done' : 'Execute'}</StatusLabel>
-        </li>
-      </ul>
-    </div>
-  )
+  return <Steps items={items} />
 }
 
 export default TxStatusWidget
