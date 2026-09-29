@@ -1,4 +1,5 @@
-import { render, screen, within } from '@/tests/test-utils'
+import { act, mockClipboard, render, screen, waitFor, within } from '@/tests/test-utils'
+import { CopyTransactionLink } from '../CopyTransactionLink'
 import { PendingBanner } from '../PendingBanner'
 import { PendingSignatures } from '../PendingSignatures'
 import { PolicyOverview } from '../PolicyOverview'
@@ -82,5 +83,20 @@ describe('PolicyOverview', () => {
     const initiatedByRow = screen.getByText('Initiated by').closest('div') as HTMLElement
     expect(within(initiatedByRow).getByText('Alice')).toBeInTheDocument()
     expect(within(initiatedByRow).queryByText('Treasury')).not.toBeInTheDocument()
+  })
+})
+
+describe('CopyTransactionLink', () => {
+  const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
+
+  it('copies the link a viewer can pass to someone who can sign', async () => {
+    const writeText = mockClipboard()
+    render(<CopyTransactionLink transactionLink={TRANSACTION_LINK} />)
+
+    act(() => {
+      screen.getByRole('button', { name: /Copy transaction link/ }).click()
+    })
+
+    await waitFor(() => expect(writeText).toHaveBeenCalledWith(TRANSACTION_LINK))
   })
 })
