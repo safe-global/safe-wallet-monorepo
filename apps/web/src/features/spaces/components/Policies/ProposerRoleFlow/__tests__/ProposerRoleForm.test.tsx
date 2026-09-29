@@ -2,6 +2,10 @@ import type { ReactNode } from 'react'
 import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
+import * as useChainIdHook from '@/hooks/useChainId'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
@@ -17,6 +21,19 @@ jest.mock('@/components/common/ChainIndicator', () => {
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
   default: ({ children }: { children: (ok: boolean) => ReactNode }) => <>{children(true)}</>,
+}))
+
+const NO_WORKSPACE_CONTACTS: SpaceAddressBookItemDto[] = []
+
+jest.mock('../../../../hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../../hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: jest.fn(() => NO_WORKSPACE_CONTACTS),
+}))
+
+jest.mock('../../../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(() => false),
 }))
 
 const CHAIN_ID = '1'
@@ -44,9 +61,10 @@ const eligible = {
   refetch: jest.fn(),
 }
 
-const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
+const renderForm = (props: Partial<ProposerRoleFormProps> = {}, addressBook = {}) =>
   renderWithUserEvent(
     <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
+    { initialReduxState: { addressBook } },
   )
 
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
@@ -70,13 +88,13 @@ describe('ProposerRoleForm', () => {
     ).toBeInTheDocument()
   })
 
-  it('says the proposer address is public and the name is not', () => {
+  it('says the proposer address is public and where a member name goes', () => {
     renderForm()
 
     expect(
       screen.getByText('The beneficiary that will have the ability to propose transactions, publicly visible'),
     ).toBeInTheDocument()
-    expect(screen.getByText('Only you can see this name. Everyone else sees the address.')).toBeInTheDocument()
+    expect(screen.getByText('Sent to an admin to add to the Workspace address book.')).toBeInTheDocument()
   })
 
   describe('submit gating', () => {
@@ -247,6 +265,96 @@ describe('ProposerRoleForm', () => {
       await user.click(submitButton())
 
       await waitFor(() => expect(onSubmit).toHaveBeenCalled())
+    })
+  })
+
+  describe('proposer name', () => {
+    const nameField = () => screen.getByRole('textbox', { name: 'Proposer name' })
+    const queryNameField = () => screen.queryByRole('textbox', { name: 'Proposer name' })
+    const localContact = { [CHAIN_ID]: { [PROPOSER]: 'Alice' } }
+    const workspaceContact: SpaceAddressBookItemDto = {
+      name: 'Workspace Alice',
+      address: PROPOSER,
+      chainIds: [CHAIN_ID],
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+    }
+    const workspaceContacts = [workspaceContact]
+
+    beforeEach(() => jest.spyOn(useChainIdHook, 'default').mockReturnValue(CHAIN_ID))
+    afterEach(() => {
+      jest.restoreAllMocks()
+      jest.mocked(useIsAdmin).mockReturnValue(false)
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(NO_WORKSPACE_CONTACTS)
+    })
+
+    it('fills in the local address book name and lets a member change it', async () => {
+      const { user } = renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+      expect(nameField()).toHaveValue('Bob')
+    })
+
+    it('fills in the local address book name, lets an admin change it and says it goes to the Workspace', async () => {
+      jest.mocked(useIsAdmin).mockReturnValue(true)
+      const { user } = renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+      expect(nameField()).toHaveValue('Bob')
+      expect(screen.getByText('Saved to the Workspace address book, visible to all members.')).toBeInTheDocument()
+    })
+
+    it.each([
+      ['an admin', true],
+      ['a member', false],
+    ])('hides the name field from %s when the proposer is in the Workspace address book', async (_, isAdmin) => {
+      jest.mocked(useIsAdmin).mockReturnValue(isAdmin)
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      renderForm({ defaultValues: { proposer: PROPOSER } })
+
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+    })
+
+    it('hides the name field when the proposer is in both the Workspace and the local address book', async () => {
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+    })
+
+    it('submits the Workspace address book name while the name field is hidden', async () => {
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      const onSubmit = jest.fn()
+      const { user } = renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER }, onSubmit })
+
+      await waitFor(() => expect(submitButton()).toBeEnabled())
+      await user.click(submitButton())
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Workspace Alice' }, expect.anything()),
+      )
+    })
+
+    it('shows an empty name field when the proposer is in neither address book', () => {
+      renderForm({ defaultValues: { proposer: PROPOSER } })
+
+      expect(nameField()).toHaveValue('')
+    })
+
+    it('flags a local address book name the Workspace would reject so the admin can fix it', async () => {
+      jest.mocked(useIsAdmin).mockReturnValue(true)
+      renderForm({ defaultValues: { proposer: PROPOSER } }, { [CHAIN_ID]: { [PROPOSER]: 'Al' } })
+
+      await waitFor(() => expect(nameField()).toHaveValue('Al'))
+      expect(screen.getByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
     })
   })
 

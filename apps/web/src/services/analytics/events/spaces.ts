@@ -334,4 +334,5 @@ export enum SPACE_LABELS {
   space_context_menu = 'space_context_menu',
   space_breadcrumbs = 'space_breadcrumbs',
   security_page = 'security_page',
+  proposer_role_flow = 'proposer_role_flow',
 }
