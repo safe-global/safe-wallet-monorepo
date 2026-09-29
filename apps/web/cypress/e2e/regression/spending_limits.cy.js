@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
+import { plans } from '../../support/spaces-login.js'
 import * as navigation from '../pages/navigation.page'
 import * as tx from '../pages/create_tx.pages'
 import * as ls from '../../support/localstorage_data.js'
@@ -24,7 +25,7 @@ describe('Spending limits tests', () => {
 
   describe('Connected on the default safe', () => {
     beforeEach(() => {
-      spendinglimit.signInOnPlan(signer, spendinglimit.plans.business)
+      spendinglimit.signInOnPlan(signer, plans.business)
       wallet.connectSignerViaStorage(
         signer,
         constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
@@ -139,7 +140,7 @@ describe('Spending limits tests', () => {
 
   describe('Other safes and pre-seeded data', () => {
     beforeEach(() => {
-      spendinglimit.signInOnPlan(signer, spendinglimit.plans.business)
+      spendinglimit.signInOnPlan(signer, plans.business)
     })
 
     it('Verify only setAllowance action is shown if allowance was not used', () => {

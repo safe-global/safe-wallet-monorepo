@@ -4,8 +4,7 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
-import * as space from './spaces.page.js'
-import * as wallet from '../../support/utils/wallet.js'
+import { plans, signInToSpaces, stubWorkspacePlan } from '../../support/spaces-login.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
@@ -248,21 +247,11 @@ export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }
 
-export const plans = {
-  business: 'Business',
-  starter: 'Starter',
-}
-
 /** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
 export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
 
 /** Signs the wallet in to Workspaces with the Workspace on `plan`. Business includes policies, Starter does not. */
 export function signInOnPlan(signer, plan) {
-  cy.intercept('GET', '**/v1/spaces/*/entitlements', {
-    plan: { id: plan.toLowerCase(), name: plan, cycleEndsAt: '2099-01-01T00:00:00Z' },
-    entitlements: [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }],
-  })
-  wallet.connectSignerViaStorage(signer, constants.spacesUrl)
-  space.clickOnSignInBtn()
-  space.waitForSpacesWelcomeReady()
+  stubWorkspacePlan(plan, [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }])
+  signInToSpaces(signer)
 }

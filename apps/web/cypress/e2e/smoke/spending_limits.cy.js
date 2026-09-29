@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
+import { plans } from '../../support/spaces-login.js'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -15,7 +16,7 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   beforeEach(() => {
-    spendinglimit.signInOnPlan(signer, spendinglimit.plans.business)
+    spendinglimit.signInOnPlan(signer, plans.business)
     wallet.connectSignerViaStorage(
       signer,
       constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
@@ -77,7 +78,7 @@ describe('[SMOKE] Spending limits on a plan without policies', () => {
   })
 
   it('Verify the Safe Pro lock replaces the New spending limit button', () => {
-    spendinglimit.signInOnPlan(signer, spendinglimit.plans.starter)
+    spendinglimit.signInOnPlan(signer, plans.starter)
     wallet.connectSignerViaStorage(
       signer,
       constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
