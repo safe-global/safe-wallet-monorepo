@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { CONTACT_SALES_URL } from '../../constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 
 /** Shown once the Workspace holds as many Safes as its plan covers: upgrade when a bigger plan is offered, else sales. */
 export default function SeatLimitBanner({

@@ -1,5 +1,5 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '../../../constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()

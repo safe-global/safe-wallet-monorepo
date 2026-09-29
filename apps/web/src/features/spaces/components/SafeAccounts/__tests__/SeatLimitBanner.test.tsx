@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '../../../constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import SeatLimitBanner from '../SeatLimitBanner'
 
 const mockUseSeatUpsell = jest.fn()

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { CONTACT_SALES_URL } from '../../constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { cn } from '@/utils/cn'
 import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
