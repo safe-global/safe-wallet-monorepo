@@ -75,6 +75,7 @@ describe('CreateSpendingLimitPolicy', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
+      signersOnly: false,
       refetch: jest.fn(),
     })
   })

@@ -142,15 +142,23 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         </div>
       )}
 
-      {(!isQueue || expiredSwap || isPending) && (
+      {!isQueue && (
         <div className={css.status} style={{ gridArea: 'status' }}>
-          {isQueue && expiredSwap ? <StatusLabel status="expired" /> : <TxStatusLabel tx={tx} />}
+          <TxStatusLabel tx={tx} />
         </div>
       )}
 
-      {isQueue && !expiredSwap && (
+      {/* A queue row's status takes the action's cell, so pending rows keep the same tracks as the rest. */}
+      {isQueue && (
         <div className={css.actions} style={{ gridArea: 'actions' }}>
-          <QueueActions tx={tx} />
+          {expiredSwap ? (
+            <StatusLabel status="expired" />
+          ) : (
+            <>
+              {isPending && <TxStatusLabel tx={tx} />}
+              <QueueActions tx={tx} />
+            </>
+          )}
         </div>
       )}
     </div>

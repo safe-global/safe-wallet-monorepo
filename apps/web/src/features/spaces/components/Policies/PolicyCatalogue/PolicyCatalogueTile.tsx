@@ -1,6 +1,9 @@
-import { type LucideIcon } from 'lucide-react'
+import { Lock, type LucideIcon } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
+import type { PolicyAccountCount } from '../policyLock'
 import { type PolicyCatalogueId } from './catalogue'
 
 export interface PolicyCatalogueTileProps {
@@ -10,13 +13,34 @@ export interface PolicyCatalogueTileProps {
   Icon: LucideIcon
   action: string
   onClick: () => void
+  /** Renders the plan-gated tile: greyed out, with a lock on the button. */
+  locked?: boolean
+  /** Shown next to the icon of a locked tile. */
+  accountCount?: PolicyAccountCount
 }
 
-const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick }: PolicyCatalogueTileProps) => (
+const PolicyCatalogueTile = ({
+  id,
+  title,
+  description,
+  Icon,
+  action,
+  onClick,
+  locked,
+  accountCount,
+}: PolicyCatalogueTileProps) => (
   <div data-testid={`policy-catalogue-tile-${id}`} className="flex h-full flex-col gap-3 rounded-xl bg-card p-4">
-    <div className="flex flex-1 flex-col gap-2">
-      <div className="flex size-10 items-center justify-center rounded-md bg-muted">
-        <Icon className="size-4 text-muted-foreground" />
+    <div className={cn('flex flex-1 flex-col gap-2', locked && 'opacity-80')}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex size-10 items-center justify-center rounded-md bg-muted">
+          <Icon className="size-4 text-muted-foreground" />
+        </div>
+
+        {locked && accountCount && (
+          <Badge variant="subtle" size="status" shape="pill" data-testid="policy-account-count">
+            {accountCount.applied} / {accountCount.total} Accounts
+          </Badge>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -28,6 +52,7 @@ const PolicyCatalogueTile = ({ id, title, description, Icon, action, onClick }: 
     </div>
 
     <Button variant="outline" className="w-full" onClick={onClick} aria-label={`${action}: ${title}`}>
+      {locked && <Lock aria-hidden data-testid="policy-locked-icon" />}
       {action}
     </Button>
   </div>

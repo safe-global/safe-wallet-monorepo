@@ -14,10 +14,14 @@
   --grid-confirmations: minmax(56px, 1fr);
   --grid-assessment: 0;
   --grid-safenet: 0;
-  /* `auto`, not a fixed minimum: queue rows only render a status for pending/expired transactions, so
-     a hard min reserved ~72px of dead width on every ordinary row and forced the wrap sooner. */
-  --grid-status: auto;
+  /* A fixed minimum, not `auto`: each row is its own grid, so a content-sized track would shift every
+     column by the width of that row's label. Queue rows have no status track (see .actions). */
+  --grid-status: minmax(84px, 1fr);
   --grid-actions: minmax(84px, 1fr);
+  /* The narrow templates pin the trailing cells: a compact Confirm/Execute button plus the cell's
+     right margin, and a "1/3" badge. */
+  --grid-actions-narrow: calc(86px + var(--space-2));
+  --grid-confirmations-narrow: 49px;
 
   width: 100%;
   display: grid;
@@ -26,8 +30,8 @@
   white-space: nowrap;
   grid-template-columns:
     var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
-    var(--grid-assessment) var(--grid-safenet) var(--grid-status) var(--grid-actions);
-  grid-template-areas: 'nonce type info date confirmations assessment safenet status actions';
+    var(--grid-assessment) var(--grid-safenet) var(--grid-actions);
+  grid-template-areas: 'nonce type info date confirmations assessment safenet actions';
 }
 
 .gridContainer.withAssessment {
@@ -79,8 +83,8 @@
 .gridContainer.conflictGroup {
   grid-template-columns:
     var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(--grid-assessment)
-    var(--grid-safenet) var(--grid-status) var(--grid-actions);
-  grid-template-areas: 'type info date confirmations assessment safenet status actions';
+    var(--grid-safenet) var(--grid-actions);
+  grid-template-areas: 'type info date confirmations assessment safenet actions';
 }
 
 .gridContainer.bulkGroup {
@@ -110,6 +114,15 @@
   margin-right: var(--space-3);
   display: flex;
   justify-content: flex-end;
+}
+
+/* Holds the sign/execute button or, while pending or expired, the status label in its place. */
+.gridContainer .actions {
+  margin-right: var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
 }
 
 .date {
@@ -154,24 +167,20 @@
   .gridContainer.queue {
     display: grid;
     gap: var(--space-1) var(--space-2);
-    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    /* The unnamed `auto` track only takes an amount too wide for the pinned cells beneath it, so the
+       confirmations and actions stay put whatever the amount or status. */
+    grid-template-columns:
+      4ch minmax(0, 1fr) auto var(--grid-confirmations-narrow)
+      var(--grid-actions-narrow);
     grid-template-areas:
-      'nonce type info info'
-      'nonce date confirmations actions';
+      'nonce type info info info'
+      'nonce date . confirmations actions';
     align-items: center;
-  }
-
-  .gridContainer.queue .status {
-    margin: 0;
   }
 
   /* The two-row template has no safenet area; the check state lives in the expanded panel anyway. */
   .gridContainer.queue .safenet {
     display: none;
-  }
-
-  .gridContainer.queue .nonce {
-    min-width: 30px;
   }
 }
 
@@ -186,16 +195,14 @@
   /* The amount wants 74px but only had 49px of the 291px row, so it ellipsized to "-0.00…". Three
      reclaims cover the 25px shortfall: a 4px gap instead of 8px across four gaps (16px), zeroing the
      token container's own gap now that its logo is hidden (8px), and letting the nonce size to "12"
-     rather than the 30px floor the wider rules set (6px). */
+     rather than the 4ch the two-row template gives it (6px). */
   .gridContainer.queue {
     column-gap: 4px;
-    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-columns:
+      auto auto minmax(0, 1fr) var(--grid-confirmations-narrow)
+      var(--grid-actions-narrow);
     grid-template-areas: 'nonce type info confirmations actions';
     align-items: center;
-  }
-
-  .gridContainer.queue .nonce {
-    min-width: 0;
   }
 
   /* TokenAmount lays its logo and value out in a flex row; with the logo hidden its gap is dead space. */
@@ -225,17 +232,15 @@
   }
 }
 
-/* A recovery row fills four cells at most — type, the malicious warning, date, and one of
-   status/actions — and has no nonce, amount or confirmations. The queue templates above name
-   neither `status` nor most of what they place, so below 680px they dropped the recovery's chip
-   onto an implicit track under the row. Higher specificity than `.gridContainer.queue`, so these
-   win inside both container queries above while leaving every other row variant untouched. */
+/* A recovery row fills four cells at most — type, the malicious warning, date, and actions — and has
+   no nonce, amount or confirmations, so the queue templates above would leave it mostly empty tracks.
+   Higher specificity than `.gridContainer.queue`, so these win inside both container queries above. */
 @container (max-width: 680px) {
   .gridContainer.queue.recovery {
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) auto var(--grid-actions-narrow);
     grid-template-areas:
-      'type type info'
-      'date status actions';
+      'type info info'
+      'date . actions';
   }
 }
 
@@ -247,7 +252,7 @@
   }
 }
 
-/* History and bulk-group rows have fewer columns (no confirmations/actions, ~424px of minimums), so
+/* History and bulk-group rows have fewer columns (no confirmations/actions, ~450px of minimums), so
    they hold one line well below the 900px fallback that queue rows need. */
 @media (max-width: 900px) and (min-width: 600px) {
   .gridContainer.history,
