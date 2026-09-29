@@ -48,16 +48,54 @@ jobs:
         env:
           NEXT_PUBLIC_IS_OFFICIAL_HOST: true
 
-      - name: Upload coverage
+      - name: Upload test report
+        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: coverage-${{ matrix.shard }}
-          path: apps/web/coverage/coverage-final.json
+          name: head-shard-${{ matrix.shard }}
+          path: |
+            apps/web/report.json
+            apps/web/coverage/coverage-final.json
           retention-days: 1
           if-no-files-found: error
 
+  base-coverage:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+
+      - uses: ./.github/actions/yarn
+
+      - name: Run tests on base branch
+        # Only the base coverage is needed, so failing tests on the base branch must not fail this PR
+        continue-on-error: true
+        run: yarn test:ci --shard=${{ matrix.shard }}/4 --coverageThreshold='{}'
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: true
+
+      - name: Upload base test report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: base-shard-${{ matrix.shard }}
+          path: |
+            apps/web/report.json
+            apps/web/coverage/coverage-final.json
+          retention-days: 1
+          if-no-files-found: ignore
+
   coverage:
-    needs: test
+    needs: [test, base-coverage]
     if: ${{ !cancelled() }}
     permissions:
       contents: read
@@ -70,18 +108,62 @@ jobs:
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
-          pattern: coverage-*
-          path: apps/web/shards
+          pattern: head-shard-*
+          path: apps/web/shards/head
 
-      - name: Merge coverage and check threshold
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        if: github.event_name == 'pull_request'
+        with:
+          pattern: base-shard-*
+          path: apps/web/shards/base
+
+      - name: Merge shard reports
         working-directory: apps/web
-        # nyc merge only reads files at the top level of the folder, and download-artifact puts each shard in its own subfolder
+        # Builds one Jest JSON report per side, in the format the coverage report action reads.
+        # nyc merge only reads files at the top level of a folder, so the shard coverage files are copied into one first.
         run: |
-          for dir in shards/*/; do mv "${dir}coverage-final.json" "${dir%/}.json"; done
-          test "$(ls shards/*.json | wc -l)" -eq 4
-          yarn nyc merge shards .nyc_output/coverage.json
-          yarn nyc report --temp-dir .nyc_output --reporter=lcov --reporter=text-summary --report-dir coverage
-          yarn nyc check-coverage --temp-dir .nyc_output --branches 56 --functions 62 --lines 78 --statements 76
+          merge_side() {
+            mkdir -p "nyc-$1" "$2"
+            for dir in shards/$1/*/; do cp "${dir}coverage/coverage-final.json" "nyc-$1/$(basename "$dir").json"; done
+            test "$(ls nyc-$1/*.json | wc -l)" -eq 4
+            yarn nyc merge "nyc-$1" "nyc-output-$1/coverage.json"
+            jq -s --slurpfile coverage "nyc-output-$1/coverage.json" '
+              (map(to_entries[] | select(.key | startswith("num"))) | group_by(.key)
+                | map({ key: .[0].key, value: (map(.value) | add) }) | from_entries)
+              + {
+                success: all(.[]; .success),
+                startTime: (map(.startTime) | min),
+                wasInterrupted: any(.[]; .wasInterrupted),
+                snapshot: .[0].snapshot,
+                testResults: (map(.testResults) | add),
+                coverageMap: $coverage[0]
+              }' shards/$1/*/report.json > "$2/report.json"
+          }
+          merge_side head .
+          yarn nyc report --temp-dir nyc-output-head --reporter=lcov --reporter=text-summary --report-dir coverage
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then merge_side base base; fi
+
+      - name: Upload test report
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: head-report
+          path: apps/web/report.json
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Upload base test report
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: base-report
+          path: apps/web/base/report.json
+          retention-days: 1
+          if-no-files-found: ignore
+
+      - name: Check coverage threshold
+        working-directory: apps/web
+        run: yarn nyc check-coverage --temp-dir nyc-output-head --branches 56 --functions 62 --lines 78 --statements 76
 
       - name: Upload coverage to Datadog
         if: success() && github.event_name == 'push' && needs.test.result == 'success'
@@ -112,3 +194,35 @@ jobs:
                 }
               ]
             }
+
+  coverage-report:
+    needs: coverage
+    if: always() && github.event_name == 'pull_request' && needs.coverage.result != 'cancelled'
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: head-report
+          path: apps/web
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: base-report
+          path: apps/web/base
+
+      - name: Annotations and coverage report
+        uses: ArtiomTr/jest-coverage-report-action@262a7bb0b20c4d1d6b6b026af0f008f78da72788 # v2.3.1
+        with:
+          skip-step: all
+          coverage-file: report.json
+          base-coverage-file: base/report.json
+          annotations: failed-tests
+          working-directory: apps/web
+          github-token: ${{ secrets.GITHUB_TOKEN }}
