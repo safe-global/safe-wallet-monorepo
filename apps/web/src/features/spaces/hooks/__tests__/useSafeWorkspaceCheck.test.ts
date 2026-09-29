@@ -53,7 +53,7 @@ describe('getSafeWorkspaceAction', () => {
     ['a malformed spaceId', { rawSpaceId: 'space-1' }, 'remove'],
     ['a repeated spaceId', { rawSpaceId: [SPACE_ID, SPACE_ID] }, 'remove'],
     ['a session check in progress', { isSessionPending: true }, 'wait'],
-    ['a signed-out user, who keeps the Workspace for a later sign-in', { isSignedIn: false }, 'none'],
+    ['a signed-out user, who gets a sign-in prompt', { isSignedIn: false }, 'signIn'],
     ['a user without access to the Workspace', { hasNoAccess: true }, 'removeNotMember'],
     ['a membership that is still loading', { membershipStatus: undefined }, 'wait'],
     ['an invited member', { membershipStatus: MemberStatus.INVITED }, 'none'],
