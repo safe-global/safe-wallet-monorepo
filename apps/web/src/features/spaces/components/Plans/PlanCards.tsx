@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { CONTACT_SALES_URL, openContactSales } from '../../utils/formPopup'
+import { CONTACT_SALES_URL } from '../../constants'
 import { cn } from '@/utils/cn'
 import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
@@ -92,7 +92,7 @@ const PlanCta = ({
           size="lg"
           weight="semibold"
           className="w-full"
-          render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" onClick={openContactSales} />}
+          render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
         >
           {cta.label}
         </Button>
@@ -219,13 +219,7 @@ export const PlanCard = ({
                   {hint && (
                     <Typography variant="paragraph-mini" color="muted">
                       {hint}{' '}
-                      <Link
-                        href={CONTACT_SALES_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        variant="muted"
-                        onClick={openContactSales}
-                      >
+                      <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
                         Talk to sales <ArrowRight className="inline size-3" />
                       </Link>
                     </Typography>

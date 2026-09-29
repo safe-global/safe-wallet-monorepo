@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { CONTACT_SALES_URL } from '../../../utils/formPopup'
+import { CONTACT_SALES_URL } from '../../../constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
