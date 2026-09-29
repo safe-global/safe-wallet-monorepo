@@ -93,10 +93,6 @@ type PaginatedDataTableProps<T> = {
 const hideClass = <T,>(column: DataTableColumn<T>) =>
   column.priority === 'secondary' ? 'max-[767px]:hidden md:table-cell' : ''
 
-// Sticky only kicks in on mobile, where the table can scroll horizontally
-const stickyClass = <T,>(column: DataTableColumn<T>) =>
-  column.sticky ? 'max-[767px]:bg-card max-[767px]:sticky max-[767px]:left-0 max-[767px]:z-10' : ''
-
 // minWidth is a desktop-only floor; mobile auto-sizes to content
 const minWidthClass = <T,>(column: DataTableColumn<T>) => (column.minWidth ? 'md:min-w-[var(--col-min-w)]' : '')
 
@@ -214,12 +210,12 @@ function PaginatedDataTable<T>({
               return (
                 <TableHead
                   key={column.id}
+                  data-sticky={column.sticky ? '' : undefined}
                   aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
                   style={isCompact ? undefined : minWidthStyle(column)}
                   className={cn(
                     tableHeadVariants({ align: column.align }),
                     hideClass(column),
-                    stickyClass(column),
                     !isCompact && minWidthClass(column),
                     !isCompact && column.width && COLUMN_WIDTHS[column.width],
                   )}
@@ -270,12 +266,12 @@ function PaginatedDataTable<T>({
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}
+                      data-sticky={column.sticky ? '' : undefined}
                       data-testid={column.cellTestId}
                       style={isCompact ? undefined : minWidthStyle(column)}
                       className={cn(
                         tableCellVariants({ align: column.align, emphasis: column.emphasis }),
                         hideClass(column),
-                        stickyClass(column),
                         !isCompact && minWidthClass(column),
                         isCompact && 'whitespace-normal wrap-anywhere',
                       )}

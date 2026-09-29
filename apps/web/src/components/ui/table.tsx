@@ -54,7 +54,10 @@ const tableVariants = cva('w-full caption-bottom text-sm', {
 
 function Table({ className, variant, ...props }: React.ComponentProps<'table'> & VariantProps<typeof tableVariants>) {
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div
+      data-slot="table-container"
+      className={cn('relative w-full overflow-x-auto', variant === 'panel' && 'rounded-t-lg')}
+    >
       <table data-slot="table" className={cn(tableVariants({ variant }), className)} {...props} />
     </div>
   )
