@@ -2,8 +2,11 @@ import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
   MOCK_SAFES,
   asActivePolicy,
+  mockActivatingPolicy,
+  mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
+  mockPendingUpdate,
   mockPolicies,
   mockPolygonSpendingLimitPolicy,
   mockProposerPolicy,
@@ -112,6 +115,19 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an executed change is not yet indexed, show it as activating', () => {
+    render(<PoliciesTable policies={[mockActivatingPolicy()]} />)
+
+    expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
+  })
+
+  it('should, when a change is queued for an active policy, keep the active row beside the pending one', () => {
+    render(<PoliciesTable policies={[mockActiveSpendingLimit(), mockPendingUpdate()]} />)
+
+    expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
   })
 
   it('should, when the policy is a proposer grant, render no token icons', () => {

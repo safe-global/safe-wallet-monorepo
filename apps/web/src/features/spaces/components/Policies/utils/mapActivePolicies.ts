@@ -2,6 +2,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type {
   ActivePolicyDto,
+  PendingPolicyDto,
   ProposerPolicyDataDto,
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
@@ -11,7 +12,7 @@ import type { Policy, PolicyAllowance, PolicyTokenInfo, ProposerPolicy, Spending
 export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
 
 /** A token the gateway does not know still has to render its amount, so it shows base units. */
-const unknownToken = (address: string): PolicyTokenInfo => ({
+export const unknownToken = (address: string): PolicyTokenInfo => ({
   address,
   symbol: shortenAddress(address),
   decimals: 0,
@@ -88,26 +89,34 @@ const toPolicies = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): Polic
   }
 }
 
-/** Every distinct ERC-20 the policies reference. The native currency needs no lookup. */
-export const getReferencedTokens = (dtos: ActivePolicyDto[]): { chainId: string; address: string }[] => {
+/** Every distinct ERC-20 the active and queued policies reference. The native currency needs no lookup. */
+export const getReferencedTokens = (
+  dtos: ActivePolicyDto[],
+  pendingDtos: PendingPolicyDto[] = [],
+): { chainId: string; address: string }[] => {
+  const refs = [
+    ...dtos.flatMap((dto) =>
+      isSpendingLimitData(dto.data)
+        ? dto.data.spenders.flatMap((spender) =>
+            spender.allowances.map(({ tokenAddress }) => ({ chainId: dto.safe.chainId, address: tokenAddress })),
+          )
+        : [],
+    ),
+    ...pendingDtos.flatMap((dto) =>
+      dto.data.changes.flatMap((change) =>
+        change.kind === 'set-allowance' ? [{ chainId: dto.safe.chainId, address: change.token }] : [],
+      ),
+    ),
+  ]
+
   const seen = new Set<string>()
-  const tokens: { chainId: string; address: string }[] = []
-
-  for (const dto of dtos) {
-    if (!isSpendingLimitData(dto.data)) continue
-
-    for (const spender of dto.data.spenders) {
-      for (const { tokenAddress } of spender.allowances) {
-        const key = `${dto.safe.chainId}:${tokenAddress.toLowerCase()}`
-        if (tokenAddress.toLowerCase() === ZERO_ADDRESS || seen.has(key)) continue
-
-        seen.add(key)
-        tokens.push({ chainId: dto.safe.chainId, address: tokenAddress })
-      }
-    }
-  }
-
-  return tokens
+  return refs.filter(({ chainId, address }) => {
+    const lowerCaseAddress = address.toLowerCase()
+    const key = `${chainId}:${lowerCaseAddress}`
+    if (lowerCaseAddress === ZERO_ADDRESS || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 }
 
 /** A policy of a type the page does not render, or with data of another type's shape, is left out. */

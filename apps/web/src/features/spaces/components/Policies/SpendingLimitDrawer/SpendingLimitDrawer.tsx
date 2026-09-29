@@ -33,7 +33,7 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
 }
 
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
-  policy: PendingSpendingLimitPolicy
+  policy: PendingSpendingLimitPolicy & { status: 'pending' }
   transactionLink: string
   onReviewTransaction: () => void
 }
