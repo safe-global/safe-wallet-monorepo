@@ -7632,6 +7632,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                       <span
                         class="flex items-center gap-2 text-xs font-bold"
                         data-testid="tx-status-label"
+                        style="color: var(--color-warning-main);"
                       >
                         <svg
                           aria-label="Loading"
