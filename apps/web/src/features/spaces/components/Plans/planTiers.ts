@@ -202,7 +202,7 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
-/** The tiers the billing-cycle toggle shows; the current card stays put when the other cycle has no offer of that plan to replace it. */
+/** Tiers for the selected billing cycle. Keeps the current plan if the other cycle has no matching offer. */
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
   tiers.filter((tier) => {
     if (tier.billingCycle === null || tier.billingCycle === cycle) return true

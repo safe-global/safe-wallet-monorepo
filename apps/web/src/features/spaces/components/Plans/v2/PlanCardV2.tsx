@@ -19,7 +19,7 @@ export type PlanCardV2Actions = {
   onManage?: () => void
   isBusy?: boolean
   currentPlan?: CurrentPlan
-  /** A Workspace member who is not an admin: the cards show no plan buttons. */
+  /** Non-admin member: no plan buttons. */
   readOnly?: boolean
 }
 
@@ -27,7 +27,6 @@ const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLi
 
 const salesLink = <a href={SUPPORT_CHAT_URL} target="_blank" rel="noopener noreferrer" />
 
-/** Only the recommended plan's card gets the filled button; every other action stays outlined. */
 const PlanCtaV2 = ({
   pick,
   isPrimary,
@@ -96,16 +95,16 @@ const PlanCtaV2 = ({
 export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2Actions) => {
   const content = getPlanContentV2(tier.name)
   const isPrimary = tier.name === RECOMMENDED_PLAN
-  // Held by key, not object: the tiers are rebuilt on every page render, and a late subscription must still land.
+  // Tracked by key: tiers are rebuilt every render.
   const [pickedKey, setPickedKey] = useState<string>()
   const option =
     tier.options.find((candidate) => optionKey(candidate) === pickedKey) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options[0]
   const price = option ? getPlanPriceV2(tier, option) : undefined
-  const features = content?.features ?? tier.features
+  const features = content?.additionalFeatures ?? tier.features
 
-  // Five rows that always render, empty or not, so the catalog's subgrid lines each one up across the cards.
+  // Always render all five rows so the subgrid lines up across cards.
   return (
     <Card
       variant="muted-secondary"

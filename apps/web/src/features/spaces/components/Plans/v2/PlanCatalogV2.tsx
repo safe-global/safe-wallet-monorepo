@@ -21,7 +21,7 @@ export default function PlanCatalogV2({
   ...actions
 }: {
   tiers: PlanTier[]
-  /** Expands the comparison card below and moves to it; without it the link only jumps to its anchor. */
+  /** Opens and scrolls to the compare card. Without it, the link just jumps to the anchor. */
   onCompareFeatures?: () => void
 } & PlanCardV2Actions) {
   const [cycle, setCycle] = useState<Cycle>('month')

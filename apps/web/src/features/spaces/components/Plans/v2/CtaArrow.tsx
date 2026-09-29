@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn'
 
 const ARROW_EASE = 'duration-300 ease-soft motion-reduce:transition-none'
 
-/** Follows its `group/plan` card: nudges on the filled button, slides in on outlined ones (the negative margin keeps the label centred). */
+/** Animates on `group/plan` hover. The negative margin keeps the label centred. */
 export const CtaArrow = ({ variant, external }: { variant: 'nudge' | 'reveal'; external?: boolean }) => {
   const Icon = external ? ArrowUpRight : ArrowRight
   if (variant === 'nudge') {

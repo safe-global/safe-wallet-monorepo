@@ -46,7 +46,6 @@ const badgeVariants = cva(
         info: 'bg-info-subtle text-foreground border-transparent',
         positive: 'bg-success-subtle text-foreground border-transparent',
         brand: 'bg-success-tint text-badge-dot-success border-transparent',
-        // Solid Safe mint; the ink is the fixed near-black pairing so it holds in dark mode too.
         mint: 'bg-mint text-accent-secondary-foreground border-transparent',
         negative: 'bg-destructive/10 text-destructive border-transparent dark:bg-destructive/20',
         // Neutral tint for counts and metadata that carry no status — the fill only lifts the pill

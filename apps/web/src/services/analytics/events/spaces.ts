@@ -317,6 +317,10 @@ export const SPACE_EVENTS = {
     action: 'Local contact added',
     category: SPACE_CATEGORY,
   },
+  SAFE_PRO_PLANS_CLICKED: {
+    action: 'Safe Pro plans clicked',
+    category: SPACE_CATEGORY,
+  },
 }
 
 export enum SPACE_LABELS {

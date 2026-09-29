@@ -3,7 +3,7 @@ import type { PlanSeatOption, PlanTier } from './types'
 
 const formatters = new Map<string, Intl.NumberFormat>()
 
-/** Built once per currency and decimal count; the catalog renders the same few on every card. */
+/** Cached per currency and decimals. */
 const formatterFor = (currency: string, fractionDigits?: number): Intl.NumberFormat => {
   const key = `${currency}:${fractionDigits ?? 'default'}`
   let formatter = formatters.get(key)
@@ -22,13 +22,13 @@ const formatterFor = (currency: string, fractionDigits?: number): Intl.NumberFor
 
 const minorDigits = (currency: string): number => formatterFor(currency).resolvedOptions().maximumFractionDigits ?? 2
 
-/** Integer division rounding halves up; both operands are non-negative integers. */
+/** Integer division, rounding half up. */
 export const _roundHalfUp = (numerator: number, denominator: number): number => {
   const doubled = 2 * numerator + denominator
   return (doubled - (doubled % (2 * denominator))) / (2 * denominator)
 }
 
-/** The subscription reports whole units only; the one place a major amount becomes minor units. */
+/** Subscriptions report whole units. Converts them to minor units. */
 export const toMinorUnits = (amount: number, currency: string): number =>
   Math.round(amount * 10 ** minorDigits(currency))
 
@@ -44,14 +44,14 @@ type Cycle = PlanTier['billingCycle']
 
 const monthsIn = (cycle: Cycle): number => (cycle === 'year' ? 12 : 1)
 
-/** What one Safe costs per month: the total over the cycle's months and the Safe count, rounded half up. */
+/** Monthly price per Safe, rounded half up. */
 export const getPerSafeMonthlyMinor = (totalMinor: number, safes: number, cycle: Cycle): number =>
   _roundHalfUp(totalMinor, monthsIn(cycle) * safes)
 
 export type PlanPriceV2 = {
   headline: string
   suffix: string
-  /** The line under the button, always built from the amount actually charged. */
+  /** Line under the button, from the amount actually charged. */
   line: string
 }
 
@@ -66,7 +66,7 @@ const priceLine = (totalMinor: number, currency: string, cycle: Cycle): string =
   return PLAN_CARD_COPY_V2.billedYearly(formatMinorAmount(_roundHalfUp(totalMinor, 12), currency), total)
 }
 
-/** Per-Safe headline and billed-amount line for one seat option; custom pricing when the option has no price. */
+/** Per-Safe price and billed amount for one seat option. Custom pricing when there's no price. */
 export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPriceV2 => {
   const totalMinor = optionAmountMinor(option, tier.currency)
   if (totalMinor === null) {

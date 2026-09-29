@@ -47,7 +47,7 @@ describe('PLAN_CONTENT_V2', () => {
   })
 
   it('never repeats a feature between plans', () => {
-    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.features)
+    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures)
     expect(new Set(features).size).toBe(features.length)
   })
 
@@ -60,8 +60,8 @@ describe('PLAN_CONTENT_V2', () => {
     }
 
     PLAN_ORDER.forEach((plan, index) => {
-      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].features)
-      const own = PLAN_CONTENT_V2[plan].features
+      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].additionalFeatures)
+      const own = PLAN_CONTENT_V2[plan].additionalFeatures
       PLAN_FEATURES[plan].forEach((launchFeature) => {
         const feature = renamed[launchFeature] ?? launchFeature
         // A sponsorship quota replaces the inherited one, so each plan must state its own.
@@ -71,7 +71,7 @@ describe('PLAN_CONTENT_V2', () => {
   })
 
   it('leaves the coming-soon fee payment out of every plan', () => {
-    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.features)
+    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures)
     expect(features.filter((feature) => /pay (fees|gas)/i.test(feature))).toEqual([])
   })
 

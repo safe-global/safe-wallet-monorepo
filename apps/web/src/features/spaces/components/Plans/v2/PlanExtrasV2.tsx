@@ -51,7 +51,6 @@ const ExtraCard = ({
   </Card>
 )
 
-/** Coming soon and the Hypernative add-on, side by side with their buttons level; stacked on mobile. */
 export default function PlanExtrasV2() {
   const { comingSoon, addOn } = PLAN_EXTRAS_V2
 

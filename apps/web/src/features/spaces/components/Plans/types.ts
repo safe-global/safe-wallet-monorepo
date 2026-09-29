@@ -12,7 +12,7 @@ export type PlanSeatOption = {
   /** Seat quota behind the option; null when unlimited or unknown. */
   seats?: number | null
   price: number | null
-  /** The price in minor units (cents) as Stripe charges it; absent on the card rebuilt from a subscription. */
+  /** Price in minor units (cents). Absent when rebuilt from a subscription. */
   amountMinor?: number | null
   /** Undiscounted reference, e.g. twelve monthly payments for a yearly option. */
   originalPrice: number | null

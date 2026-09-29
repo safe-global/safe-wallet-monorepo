@@ -9,7 +9,7 @@ export type PlanOffer = {
   seats: number | 'unlimited' | null
   /** Whole currency units; `null` when the link has no priced line item. */
   price: number | null
-  /** The same price in minor units (cents), exactly as Stripe charges it. */
+  /** Price in minor units (cents). */
   amountMinor?: number | null
   currency: string
   billingCycle: BillingCycle | null

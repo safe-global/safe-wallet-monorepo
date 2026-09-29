@@ -2,7 +2,7 @@ import { ENTERPRISE_TIER, PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getPlanCta } from '../planTiers'
 import type { CurrentPlan, PlanCta, PlanPick, PlanTier } from '../types'
 
-/** v2 moves "Manage plan" to the status panel: the current card reads as current, Enterprise changes go through sales. */
+/** v2 cards: "Manage plan" moves to the status panel, Enterprise changes go through sales. */
 export type PlanCtaV2 =
   | Exclude<PlanCta, { kind: 'manage' }>
   | { kind: 'current'; label: typeof PLAN_CARD_COPY_V2.currentPlan }
@@ -16,11 +16,11 @@ export const getPlanCtaV2 = (pick: PlanPick, current: CurrentPlan | undefined): 
   return cta.kind === 'manage' ? { kind: 'current', label: PLAN_CARD_COPY_V2.currentPlan } : cta
 }
 
-/** Plans v2 shows "Manage plan" in the status panel whenever the card would have, a trial with a card on file included. */
+/** Show "Manage plan" in the status panel, including trials with a card on file. */
 export const canManageV2 = (canManage: boolean | undefined, currentPlan: CurrentPlan | undefined): boolean =>
   Boolean(canManage || (currentPlan?.isTrialing && currentPlan.hasPaymentMethod))
 
-/** An Enterprise subscription has its own current card, so the static sales card would repeat it. */
+/** Hide the static Enterprise card when Enterprise is the current plan. */
 export const getTiersV2 = (tiers: PlanTier[]): PlanTier[] => {
   const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
   return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers

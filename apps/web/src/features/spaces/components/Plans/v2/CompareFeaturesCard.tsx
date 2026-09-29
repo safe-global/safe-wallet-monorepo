@@ -68,7 +68,6 @@ const CompareRow = ({ row, currentPlan }: { row: CompareRowV2; currentPlan?: str
   </TableRow>
 )
 
-/** Expanding eases out a touch longer than collapsing, so opening reads as unfolding and closing gets out of the way. */
 const HEIGHT_TRANSITION = {
   expand: 'transition-[height] duration-[420ms] ease-soft',
   collapse: 'transition-[height] duration-[320ms] ease-[cubic-bezier(0.4,0,0.2,1)]',
@@ -85,7 +84,6 @@ const useTableHeights = (
 ): TableHeights | undefined => {
   const [heights, setHeights] = useState<TableHeights>()
 
-  // Re-measured on every toggle too, so content that changed while folded never waits on the observer.
   useLayoutEffect(() => {
     const table = tableRef.current
     const firstSection = firstSectionRef.current
@@ -93,7 +91,7 @@ const useTableHeights = (
     if (!table || !firstSection || !container) return
     const measure = () => {
       const full = container.offsetHeight
-      // Unlaid-out (e.g. jsdom) reports 0: leave the height alone rather than clip everything.
+      // 0 means not laid out yet (e.g. jsdom), so don't clip.
       setHeights(full > 0 ? { full, collapsed: firstSection.offsetTop + firstSection.offsetHeight } : undefined)
     }
     measure()
@@ -133,7 +131,6 @@ const CompareHeaderRow = ({ currentPlan }: { currentPlan?: string }) => (
   </TableHeader>
 )
 
-/** The first section is always shown; the others fold away inert and fade back in one after another. */
 const CompareSection = ({
   section,
   index,
@@ -178,14 +175,13 @@ const CompareSection = ({
   )
 }
 
-/** "Compare all features": the first section always, the rest once expanded; the current plan's column is tinted mint. */
 export default function CompareFeaturesCard({
   currentPlan,
   isExpanded,
   onExpandedChange,
   ref,
 }: {
-  /** The plan in force, free access included; no column is marked without one. */
+  /** Current plan, including free access. */
   currentPlan?: string
   isExpanded: boolean
   onExpandedChange: (isExpanded: boolean) => void

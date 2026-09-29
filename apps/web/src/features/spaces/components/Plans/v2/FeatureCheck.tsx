@@ -2,7 +2,6 @@ import type { CSSProperties } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
-/** A light ripple down the list on the way in; leaving reverts every row at once. */
 const STAGGER_MS = 15
 
 const PLAN_HOVER_CLASSES = [
@@ -12,7 +11,7 @@ const PLAN_HOVER_CLASSES = [
   'motion-reduce:transition-none motion-reduce:delay-0',
 ]
 
-/** 20px check chip; with `followsPlanHover` it inverts while its `group/plan` card is hovered or focused, staggered by `index`. */
+/** 20px check icon. With `followsPlanHover`, it inverts when its plan card is hovered, delayed by `index`. */
 export const FeatureCheck = ({
   followsPlanHover,
   index = 0,
@@ -20,7 +19,7 @@ export const FeatureCheck = ({
 }: {
   followsPlanHover?: boolean
   index?: number
-  /** Always dark, e.g. in the current plan's mint column where the light chip would wash out. */
+  /** Dark version, for the mint current-plan column. */
   isEmphasized?: boolean
 }) => (
   <span

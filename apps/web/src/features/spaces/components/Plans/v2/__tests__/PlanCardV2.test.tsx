@@ -62,7 +62,9 @@ describe('PlanCardV2', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 
     expect(screen.getByText(PLAN_CONTENT_V2.Business.featuresHeading)).toBeInTheDocument()
-    PLAN_CONTENT_V2.Business.features.forEach((feature) => expect(screen.getByText(feature)).toBeInTheDocument())
+    PLAN_CONTENT_V2.Business.additionalFeatures.forEach((feature) =>
+      expect(screen.getByText(feature)).toBeInTheDocument(),
+    )
     expect(screen.queryByText('A Stripe selling point')).not.toBeInTheDocument()
   })
 
@@ -144,7 +146,7 @@ describe('PlanCardV2', () => {
       within(businessCard)
         .getAllByTestId('plan-feature-check')
         .map((check) => check.style.getPropertyValue('--check-delay')),
-    ).toEqual(PLAN_CONTENT_V2.Business.features.map((_, index) => `${index * 15}ms`))
+    ).toEqual(PLAN_CONTENT_V2.Business.additionalFeatures.map((_, index) => `${index * 15}ms`))
   })
 
   it('gives only the Business card the filled button, whose arrow nudges while the others reveal one', () => {

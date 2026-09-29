@@ -17,7 +17,7 @@ export const _remaining = ({ used, quota }: Meter): number | null => (quota === 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
-/** The badge the status card and the current plan card wear; `countdownDays` sets when the trial label starts counting down. */
+/** `countdownDays`: days left when the trial label starts counting down. */
 export const getCurrentBadge = (plan: PlanSummary | null, countdownDays?: number): CurrentBadge | undefined => {
   if (!plan) return undefined
   if (plan.status === 'active') return { label: 'Active', variant: 'brand' }
@@ -116,7 +116,7 @@ export default function PlanStatusCard({
   isManaging?: boolean
   /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
-  /** Plans v2 draws the usage tiles with the hairline outline and the badge in solid mint. */
+  /** v2 style: hairline tiles, solid mint badge. */
   appearance?: 'launch' | 'v2'
 }) {
   const isTrial = plan?.status === 'trialing'

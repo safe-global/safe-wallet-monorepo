@@ -9,7 +9,6 @@ import { trackPlansV2Click } from './trackPlansV2Click'
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
-/** The Plans page behind SAFE_PRO_PLANS_V2: the same status panel over the v2 plan cards, comparison and extras. */
 export default function PlansV2({
   plan,
   safeAccounts,

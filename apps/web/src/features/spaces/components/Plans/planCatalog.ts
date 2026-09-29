@@ -3,7 +3,7 @@ import type { PlanTier } from './types'
 // TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
 
-/** The largest yearly saving across plans; each page words its own label around it. */
+/** Largest yearly saving across plans. */
 export const YEARLY_SAVINGS_PERCENT = 13
 
 /** The plan the trial and lapsed-Workspace modals lead with. */
@@ -39,8 +39,8 @@ export type PlanContentV2 = {
   /** Who the plan is for, one line under its name. */
   description: string
   featuresHeading: string
-  /** Only what this plan adds over the one before it. */
-  features: string[]
+  /** On top of the previous plan's features. */
+  additionalFeatures: string[]
   support: { level: string; detail: string }
 }
 
@@ -49,7 +49,7 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   Starter: {
     description: 'Coordinate your team with a shared home for your Safes and transactions.',
     featuresHeading: 'Get started with Pro',
-    features: [
+    additionalFeatures: [
       '10 sponsored transactions per month',
       UNLIMITED_MEMBERS,
       'Advanced threat analysis',
@@ -64,7 +64,7 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   Business: {
     description: 'Scale with control. Delegate daily operations with hands-on help.',
     featuresHeading: 'Everything in Starter, plus',
-    features: [
+    additionalFeatures: [
       '50 sponsored transactions per month',
       'Policy engine & spending limits',
       'Transaction proposers',
@@ -76,7 +76,7 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   Enterprise: {
     description: 'Tailored to your organization, with custom capacity and commercial terms.',
     featuresHeading: 'Everything in Business, plus',
-    features: [
+    additionalFeatures: [
       'Unlimited sponsored transactions',
       'Custom Safe capacity',
       'Scale API access',
@@ -109,7 +109,6 @@ export const PLAN_CARD_COPY_V2 = {
 
 export const SAFENET_CHECKS = 'Safenet checks'
 
-/** The fee payment feature is coming soon: it lives in the Coming soon card and a "Soon" table row, never in a plan list. */
 export const PAY_FEES_FROM_SAFE = 'Pay fees from Safe accounts'
 
 /** `true` is included, `false` is not; a string names what the plan gets. */
@@ -117,7 +116,7 @@ export type CompareValueV2 = boolean | string
 
 export type CompareRowV2 = {
   feature: string
-  /** Not released yet: the row carries a "Soon" badge and no per-plan answer. */
+  /** Unreleased: shows "Soon" instead of per-plan values. */
   isComingSoon?: boolean
   values?: Record<PlanNameV2, CompareValueV2>
 }
