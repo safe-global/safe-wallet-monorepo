@@ -3,6 +3,7 @@ import { UserRoundPen } from 'lucide-react'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
+import { NestedSafeGrantNotice, type NestedSafeGrantNoticeProps } from './components/NestedSafeGrantNotice'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
 import { toPolicyStatus } from './utils'
 import { ProposerVariantContent } from './variants'
@@ -14,6 +15,8 @@ type ProposerDrawerActionProps = {
   actionHint?: string
   actionVariant?: 'default' | 'secondary'
   actionDisabled?: boolean
+  /** Set when a parent Safe granted the role: removing it needs that Safe, which the drawer cannot connect. */
+  nestedSafeGrant?: NestedSafeGrantNoticeProps
 }
 
 /** Everything the drawer shows once loaded: the status variant and its action. */
@@ -40,7 +43,16 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
         title="Proposer role"
         status={props.isLoading ? undefined : toPolicyStatus(props.status)}
       />
-      <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
+      <DrawerBody>
+        {props.isLoading ? (
+          <ProposerOverviewSkeleton />
+        ) : (
+          <div className="flex flex-col gap-4">
+            {props.nestedSafeGrant && <NestedSafeGrantNotice {...props.nestedSafeGrant} />}
+            <ProposerVariantContent {...props} />
+          </div>
+        )}
+      </DrawerBody>
       {props.isLoading ? (
         <PolicyDrawerActionsSkeleton />
       ) : (
