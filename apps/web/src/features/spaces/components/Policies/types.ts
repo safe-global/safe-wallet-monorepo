@@ -121,6 +121,9 @@ export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-l
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
 
+/** Still in the queue, as opposed to executed and waiting for the indexer. */
+export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+
 export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
 
 /** One table row: an active or a pending policy. */
@@ -134,6 +137,9 @@ export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy,
 
 export const isActiveSpendingLimitPolicy = (policy: Policy): policy is SpendingLimitPolicy & { status: 'active' } =>
   policy.type === 'spending-limit' && policy.status === 'active'
+
+export const isQueuedSpendingLimitPolicy = (policy: Policy): policy is QueuedSpendingLimitPolicy =>
+  policy.type === 'spending-limit' && policy.status === 'pending'
 
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'

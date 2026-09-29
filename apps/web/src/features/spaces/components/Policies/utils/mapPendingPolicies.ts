@@ -121,6 +121,10 @@ const toSpenders = (
   return [...byDelegate.values()]
 }
 
+/** The id CGW's transactions endpoint knows a queued Safe transaction by. */
+export const getPendingTxId = ({ safe, safeTxHash }: Pick<PendingSpendingLimitPolicy, 'safe' | 'safeTxHash'>): string =>
+  `multisig_${safe.address}_${safeTxHash}`
+
 /** One row per queued transaction and module, shown beside the active rows. */
 export const mapPendingPolicies = (
   dtos: PendingPolicyDto[],
