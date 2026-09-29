@@ -698,6 +698,10 @@ export type SpendingLimitAllowanceDto = {
   resetBoundaryIsExact: boolean
   /** False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added */
   isDelegateActive: boolean
+  /** Unix seconds this allowance was (re-)established */
+  createdAt: number
+  /** Unix seconds of the last event that changed this allowance */
+  updatedAt: number
 }
 export type SpendingLimitSpenderDto = {
   /** Name resolved by the client, never carried here */
@@ -758,17 +762,14 @@ export type ActivePolicyDto = {
 }
 export type EnableModuleChangeDto = {
   kind: 'enable-module'
-  operation: 'create'
 }
 export type AddDelegateChangeDto = {
   kind: 'add-delegate'
-  operation: 'create'
-  /** The address being granted a delegate slot */
+  /** The address being added as a delegate in AllowanceModule contract */
   delegate: string
 }
 export type RemoveDelegateChangeDto = {
   kind: 'remove-delegate'
-  operation: 'remove'
   /** The delegate being removed */
   delegate: string
   /** Whether the delegate's allowances are deleted along with it */
@@ -776,7 +777,6 @@ export type RemoveDelegateChangeDto = {
 }
 export type SetAllowanceChangeDto = {
   kind: 'set-allowance'
-  operation: 'update'
   delegate: string
   /** The token the limit applies to; zero address for native */
   token: string
@@ -787,20 +787,18 @@ export type SetAllowanceChangeDto = {
 }
 export type ResetAllowanceChangeDto = {
   kind: 'reset-allowance'
-  operation: 'update'
   delegate: string
   token: string
 }
 export type DeleteAllowanceChangeDto = {
   kind: 'delete-allowance'
-  operation: 'remove'
   delegate: string
   token: string
 }
 export type PendingSpendingLimitDataDto = {
-  /** The Allowance Module deployment holding this state */
+  /** The AllowanceModule deployment holding this state */
   module: string
-  /** The Allowance Module calls this transaction decodes to */
+  /** The AllowanceModule calls this transaction decodes to */
   changes: (
     | ({
         kind: 'enable-module'

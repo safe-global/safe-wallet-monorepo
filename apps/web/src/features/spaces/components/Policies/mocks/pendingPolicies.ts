@@ -19,10 +19,9 @@ export const mockPendingDto = (overrides: Partial<PendingPolicyDto> = {}): Pendi
   data: {
     module: ALLOWANCE_MODULE,
     changes: [
-      { kind: 'add-delegate', operation: 'create', delegate: PENDING_MOCK_DELEGATE },
+      { kind: 'add-delegate', delegate: PENDING_MOCK_DELEGATE },
       {
         kind: 'set-allowance',
-        operation: 'update',
         delegate: PENDING_MOCK_DELEGATE,
         token: '0x0000000000000000000000000000000000000000',
         amount: '100000000000000000',

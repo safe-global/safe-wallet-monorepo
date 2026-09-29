@@ -75,7 +75,6 @@ describe('mapPendingPolicies', () => {
         withChanges([
           {
             kind: 'set-allowance',
-            operation: 'update',
             delegate: MOCK_ADDRESSES.alice.toLowerCase(),
             token: MOCK_TOKENS.usdc.address.toLowerCase(),
             amount: '2000000000',
@@ -102,13 +101,11 @@ describe('mapPendingPolicies', () => {
         withChanges([
           {
             kind: 'reset-allowance',
-            operation: 'update',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
           },
           {
             kind: 'set-allowance',
-            operation: 'update',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
             amount: '2000000000',
@@ -134,7 +131,7 @@ describe('mapPendingPolicies', () => {
   it('should match the active policy on the enforcing module', () => {
     const active = activeRows()
     const dto = withChanges([
-      { kind: 'reset-allowance', operation: 'update', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+      { kind: 'reset-allowance', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
     ])
     const [row] = mapPendingPolicies(
       [{ ...dto, data: { ...dto.data, module: '0x0000000000000000000000000000000000000001' } }],
@@ -152,7 +149,6 @@ describe('mapPendingPolicies', () => {
         withChanges([
           {
             kind: 'delete-allowance',
-            operation: 'remove',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
           },
@@ -168,11 +164,7 @@ describe('mapPendingPolicies', () => {
 
   it('should, when a delegate is removed, list its active allowances as the ones going away', () => {
     const [row] = mapPendingPolicies(
-      [
-        withChanges([
-          { kind: 'remove-delegate', operation: 'remove', delegate: MOCK_ADDRESSES.alice, removeAllowances: true },
-        ]),
-      ],
+      [withChanges([{ kind: 'remove-delegate', delegate: MOCK_ADDRESSES.alice, removeAllowances: true }])],
       activeRows(),
       resolveKnownTokens,
     )
@@ -187,7 +179,6 @@ describe('mapPendingPolicies', () => {
         withChanges([
           {
             kind: 'reset-allowance',
-            operation: 'update',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
           },
@@ -208,7 +199,6 @@ describe('mapPendingPolicies', () => {
         withChanges([
           {
             kind: 'set-allowance',
-            operation: 'update',
             delegate: PENDING_MOCK_DELEGATE,
             token: unknown,
             amount: '5',

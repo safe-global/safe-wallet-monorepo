@@ -156,7 +156,6 @@ describe('getReferencedTokens', () => {
         changes: [
           {
             kind: 'set-allowance',
-            operation: 'update',
             delegate: MOCK_ADDRESSES.bob,
             token: MOCK_TOKENS.usdt.address,
             amount: '1',

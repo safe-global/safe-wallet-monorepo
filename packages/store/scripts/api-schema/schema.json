@@ -2358,10 +2358,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not a member of this space"
+            "description": "Access forbidden - user is not an active member of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space address book",
@@ -2413,10 +2413,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space address book",
@@ -2458,10 +2458,10 @@
             "description": "Invalid space identifier"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, space, or address book entry not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete address book entry",
@@ -3996,7 +3996,7 @@
     },
     "/v1/spaces/{spaceId}/policies/pending": {
       "get": {
-        "description": "Returns the spending-limit changes sitting unexecuted in the queue of every Safe in the Space. Detects only direct Allowance Module calls and calls found one level inside a MultiSend batch, and only against known Allowance Module deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial Allowance Module fork is not detected. `operation` on each change is derived from which function was called, not verified against the module's current storage.",
+        "description": "Returns the spending-limit changes in the transaction queue of every Safe in the Space. Detects only direct AllowanceModule calls and calls found one level inside a MultiSend batch, and only against known AllowanceModule deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial AllowanceModule fork is not detected.",
         "operationId": "spacePoliciesGetPendingPoliciesV1",
         "parameters": [
           {
@@ -4061,7 +4061,7 @@
             "description": "The policy api is unavailable"
           }
         },
-        "summary": "Get the spending-limit changes pending on Safes in a Space",
+        "summary": "Get the pending policy changes on Safes in a Space",
         "tags": [
           "spaces"
         ]
@@ -7230,7 +7230,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-bb4ea72",
+    "version": "main-4c474e1",
     "contact": {}
   },
   "tags": [],
@@ -12195,6 +12195,14 @@
           "isDelegateActive": {
             "type": "boolean",
             "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix seconds this allowance was (re-)established"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix seconds of the last event that changed this allowance"
           }
         },
         "required": [
@@ -12204,7 +12212,9 @@
           "resetPeriodMinutes",
           "resetsAtMinute",
           "resetBoundaryIsExact",
-          "isDelegateActive"
+          "isDelegateActive",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "SpendingLimitSpenderDto": {
@@ -12392,17 +12402,10 @@
             "enum": [
               "enable-module"
             ]
-          },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "create"
-            ]
           }
         },
         "required": [
-          "kind",
-          "operation"
+          "kind"
         ]
       },
       "AddDelegateChangeDto": {
@@ -12414,20 +12417,13 @@
               "add-delegate"
             ]
           },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "create"
-            ]
-          },
           "delegate": {
             "type": "string",
-            "description": "The address being granted a delegate slot"
+            "description": "The address being added as a delegate in AllowanceModule contract"
           }
         },
         "required": [
           "kind",
-          "operation",
           "delegate"
         ]
       },
@@ -12438,12 +12434,6 @@
             "type": "string",
             "enum": [
               "remove-delegate"
-            ]
-          },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "remove"
             ]
           },
           "delegate": {
@@ -12457,7 +12447,6 @@
         },
         "required": [
           "kind",
-          "operation",
           "delegate",
           "removeAllowances"
         ]
@@ -12469,12 +12458,6 @@
             "type": "string",
             "enum": [
               "set-allowance"
-            ]
-          },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "update"
             ]
           },
           "delegate": {
@@ -12495,7 +12478,6 @@
         },
         "required": [
           "kind",
-          "operation",
           "delegate",
           "token",
           "amount",
@@ -12511,12 +12493,6 @@
               "reset-allowance"
             ]
           },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "update"
-            ]
-          },
           "delegate": {
             "type": "string"
           },
@@ -12526,7 +12502,6 @@
         },
         "required": [
           "kind",
-          "operation",
           "delegate",
           "token"
         ]
@@ -12540,12 +12515,6 @@
               "delete-allowance"
             ]
           },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "remove"
-            ]
-          },
           "delegate": {
             "type": "string"
           },
@@ -12555,7 +12524,6 @@
         },
         "required": [
           "kind",
-          "operation",
           "delegate",
           "token"
         ]
@@ -12565,10 +12533,9 @@
         "properties": {
           "module": {
             "type": "string",
-            "description": "The Allowance Module deployment holding this state"
+            "description": "The AllowanceModule deployment holding this state"
           },
           "changes": {
-            "description": "The Allowance Module calls this transaction decodes to",
             "type": "array",
             "items": {
               "oneOf": [
@@ -12602,7 +12569,8 @@
                   "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
                 }
               }
-            }
+            },
+            "description": "The AllowanceModule calls this transaction decodes to"
           }
         },
         "required": [
