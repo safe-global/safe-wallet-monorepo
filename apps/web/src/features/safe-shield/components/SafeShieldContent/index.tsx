@@ -15,6 +15,7 @@ import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
 import { LockedCheckRow } from '../LockedCheckRow'
+import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -81,8 +82,6 @@ export const SafeShieldContent = ({
   const { recipientDelay, contractAnalysisDelay, deadlockAnalysisDelay, threatAnalysisDelay, simulationAnalysisDelay } =
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
-  // A native transfer carries no calldata, so there is no contract to check
-  const isContractCall = !!safeTx?.data.data && safeTx.data.data !== '0x'
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
 
   // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
@@ -183,7 +182,7 @@ export const SafeShieldContent = ({
               )}
 
               {hasProFeatures && contractCard}
-              {!hasProFeatures && isContractCall && (
+              {!hasProFeatures && isContractCall(safeTx) && (
                 <LockedCheckRow data-testid="contract-analysis-locked">Known contract</LockedCheckRow>
               )}
 
