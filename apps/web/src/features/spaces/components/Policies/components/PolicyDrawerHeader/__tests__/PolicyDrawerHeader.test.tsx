@@ -4,24 +4,21 @@ import PolicyDrawerHeader from '../PolicyDrawerHeader'
 
 describe('PolicyDrawerHeader', () => {
   it('titles the drawer', () => {
-    render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" />)
+    render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" status="active" />)
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
   })
 
-  it('renders whatever status the drawer puts in its slot', () => {
-    render(
-      <PolicyDrawerHeader icon={Wallet} title="Spending limit">
-        <span>Not enforced</span>
-      </PolicyDrawerHeader>,
-    )
+  it('renders the status it is given', () => {
+    render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" status="not-activated" />)
 
-    expect(screen.getByText('Not enforced')).toBeInTheDocument()
+    expect(screen.getByText('Not activated')).toBeInTheDocument()
   })
 
-  it('leaves out the status slot when there is none, rather than an empty box', () => {
-    const { container } = render(<PolicyDrawerHeader icon={Wallet} title="Spending limit" />)
+  it('stands in with a skeleton until the status is known', () => {
+    render(<PolicyDrawerHeader icon={Wallet} title="Proposer role" />)
 
-    expect(container.querySelector('.ml-auto')).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-skeleton')).toBeInTheDocument()
+    expect(screen.queryByText('Active')).not.toBeInTheDocument()
   })
 })

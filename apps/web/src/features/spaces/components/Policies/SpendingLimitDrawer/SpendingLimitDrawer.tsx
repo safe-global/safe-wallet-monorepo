@@ -10,7 +10,6 @@ import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOve
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyStatus, type PendingSpendingLimitPolicy } from '../types'
 import { resolveSpendingLimitDrawerState, type ActiveDrawerPolicy, type Viewer } from './resolveState'
 
@@ -60,9 +59,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
-      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)}>
-        <PolicyStatusChip status={getPolicyStatus(policy)} />
-      </PolicyDrawerHeader>
+      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={getPolicyStatus(policy)} />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">

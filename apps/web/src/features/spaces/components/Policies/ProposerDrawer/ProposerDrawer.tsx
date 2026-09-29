@@ -1,12 +1,10 @@
 import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
-import { Badge, BadgeDot } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
 import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
-import { getProposerStatusColor, getProposerStatusLabel } from './utils'
+import { toPolicyStatus } from './utils'
 import { ProposerVariantContent } from './variants'
 import type { ProposerVariantContentProps } from './variants/types'
 
@@ -37,16 +35,11 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
-      <PolicyDrawerHeader icon={UserRoundPen} title="Proposer role">
-        {props.isLoading ? (
-          <Skeleton className="h-6 w-24 rounded-lg" data-testid="proposer-status-skeleton" />
-        ) : (
-          <Badge variant={getProposerStatusColor(props.status)} size="status" shape="status">
-            <BadgeDot />
-            {getProposerStatusLabel(props.status)}
-          </Badge>
-        )}
-      </PolicyDrawerHeader>
+      <PolicyDrawerHeader
+        icon={UserRoundPen}
+        title="Proposer role"
+        status={props.isLoading ? undefined : toPolicyStatus(props.status)}
+      />
       <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
       {props.isLoading ? (
         <PolicyDrawerActionsSkeleton />

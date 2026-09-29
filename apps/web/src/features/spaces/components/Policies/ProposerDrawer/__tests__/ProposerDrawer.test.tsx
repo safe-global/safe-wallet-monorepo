@@ -122,7 +122,7 @@ describe('ProposerDrawer', () => {
     render(<ProposerDrawer open onClose={jest.fn()} isLoading />)
 
     expect(screen.getByText('Proposer role')).toBeInTheDocument()
-    expect(screen.getByTestId('proposer-status-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-skeleton')).toBeInTheDocument()
     expect(screen.getByText('Policy overview')).toBeInTheDocument()
     expect(screen.getAllByTestId('account-identity-skeleton')).toHaveLength(3)
     expect(screen.getByTestId('policy-drawer-actions-skeleton')).toBeInTheDocument()

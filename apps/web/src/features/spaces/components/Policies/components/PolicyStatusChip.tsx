@@ -1,11 +1,16 @@
 import { Badge, BadgeDot } from '@/components/ui/badge'
 import type { PolicyStatus } from '../types'
 
-const BADGE_BY_STATUS: Record<PolicyStatus, { label: string; variant: 'success' | 'warning' | 'secondary' }> = {
+const BADGE_BY_STATUS: Record<
+  PolicyStatus,
+  { label: string; variant: 'success' | 'warning' | 'secondary' | 'destructive' }
+> = {
   active: { label: 'Active', variant: 'success' },
   pending: { label: 'Pending', variant: 'warning' },
   // A configured module that is not enabled enforces nothing, so it is not called active.
   unenforced: { label: 'Not enforced', variant: 'secondary' },
+  // Nothing enforces a proposer grant either way: it is a registration that never took effect.
+  'not-activated': { label: 'Not activated', variant: 'destructive' },
 }
 
 /** Status of a policy, matching the 2FA status badges on the Team table. */
