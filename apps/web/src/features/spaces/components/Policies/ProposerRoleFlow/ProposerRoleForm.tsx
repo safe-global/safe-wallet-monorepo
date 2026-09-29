@@ -67,12 +67,13 @@ const ProposerRoleForm = ({
     if (getValues('proposer')) void trigger('proposer')
   }, [safeAccount, validateProposer, trigger, getValues])
 
-  // A known contact brings its name; clear it again once the address no longer matches
+  // Every newly picked contact brings its own name; clear it again once the address matches none.
+  // Keyed on the proposer too: two contacts can share a name while the field holds an edited one.
   useEffect(() => {
     if (contactName) setValue('name', contactName, { shouldValidate: true })
     else if (autofilledName.current && getValues('name') === autofilledName.current) setValue('name', '')
     autofilledName.current = contactName
-  }, [contactName, setValue, getValues])
+  }, [proposer, contactName, setValue, getValues])
 
   const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
   const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)

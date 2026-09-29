@@ -343,6 +343,34 @@ describe('ProposerRoleForm', () => {
       )
     })
 
+    it('restores the Workspace name when switching from an edited local contact to a Workspace contact with the same name', async () => {
+      const otherContact = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed'
+      jest
+        .mocked(useGetSpaceAddressBook)
+        .mockReturnValue([{ ...workspaceContact, name: 'Alice', address: otherContact }])
+      const onSubmit = jest.fn()
+      const { user } = renderForm({ safeAccount: treasury.id, onSubmit }, localContact)
+      const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
+
+      await user.type(proposerField(), PROPOSER)
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+
+      // Picked from the suggestions, so the proposer jumps straight from one contact to the other
+      await user.click(screen.getByTestId('address-book-recipient'))
+      const workspaceOption = (await screen.findAllByTestId('address-item')).find((option) =>
+        option.textContent?.toLowerCase().includes(otherContact.slice(-4).toLowerCase()),
+      )
+      await user.click(workspaceOption!)
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+
+      await user.click(submitButton())
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({ proposer: otherContact, name: 'Alice' }, expect.anything()),
+      )
+    })
+
     it('shows an empty name field when the proposer is in neither address book', () => {
       renderForm({ defaultValues: { proposer: PROPOSER } })
 
