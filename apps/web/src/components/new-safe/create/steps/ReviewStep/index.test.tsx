@@ -98,7 +98,7 @@ describe('ReviewStep', () => {
       initialReduxState: {
         auth: {
           sessionExpiresAt: Date.now() + 60000,
-          lastUsedSpace: null,
+          landingSpaceHint: null,
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
@@ -199,7 +199,7 @@ describe('ReviewStep', () => {
   const authReduxState = {
     auth: {
       sessionExpiresAt: Date.now() + 60000,
-      lastUsedSpace: null,
+      landingSpaceHint: null,
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
@@ -562,7 +562,7 @@ describe('ReviewStep', () => {
       const persistSpy = mockCreation()
 
       render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
-        initialReduxState: { auth: { ...authReduxState.auth, lastUsedSpace: MOCK_SPACE_UUID } },
+        initialReduxState: { auth: { ...authReduxState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
       })
 
       await act(async () => {

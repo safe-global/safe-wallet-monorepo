@@ -48,7 +48,7 @@ const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const signedInState = {
   auth: {
     sessionExpiresAt: Date.now() + 60000,
-    lastUsedSpace: null as string | null,
+    landingSpaceHint: null as string | null,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,
@@ -191,7 +191,9 @@ describe('CreateSafeOnSpecificChain', () => {
     mockUseIsAdmin.mockReturnValue(true)
     mockPersist.mockResolvedValue({ ok: true })
 
-    renderDialog(jest.fn(), { initialReduxState: { auth: { ...signedInState.auth, lastUsedSpace: MOCK_SPACE_UUID } } })
+    renderDialog(jest.fn(), {
+      initialReduxState: { auth: { ...signedInState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
+    })
 
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 

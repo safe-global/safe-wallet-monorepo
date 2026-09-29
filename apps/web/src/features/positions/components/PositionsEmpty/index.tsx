@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import NextLink from 'next/link'
 import DefiIcon from '@/public/images/balances/defi.svg'
 import { Button } from '@/components/ui/button'
@@ -8,15 +7,14 @@ import Track from '@/components/common/Track'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useIsEarnPromoEnabled } from '@/features/earn'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 type PositionsEmptyProps = {
   entryPoint?: string
 }
 
 const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
-  const router = useRouter()
-  const spaceIdQuery = useSpaceIdQuery()
+  const safeLinkQuery = useSafeLinkQuery()
   const isEarnFeatureEnabled = useIsEarnPromoEnabled()
 
   return (
@@ -38,9 +36,7 @@ const PositionsEmpty = ({ entryPoint = 'Dashboard' }: PositionsEmptyProps) => {
             variant="ghost"
             size="sm"
             className="mt-2"
-            render={
-              <NextLink href={{ pathname: AppRoutes.earn, query: { safe: router.query.safe, ...spaceIdQuery } }} />
-            }
+            render={<NextLink href={{ pathname: AppRoutes.earn, query: safeLinkQuery }} />}
           >
             Explore Earn
           </Button>

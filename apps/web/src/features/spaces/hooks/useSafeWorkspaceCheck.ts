@@ -1,6 +1,10 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceSafesGetV1Query, useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  type SpaceMemberDto,
+  useSpaceSafesGetV1Query,
+  useSpacesGetOneV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -29,9 +33,19 @@ export type SafeWorkspaceState = {
   /** The Workspace endpoint answered 401/404: the user is not a member. */
   hasNoAccess: boolean
   /** The membership of the user; undefined while loading, null when the user is not in the member list. */
-  membershipStatus: string | null | undefined
+  membershipStatus: SpaceMemberDto['status'] | null | undefined
   /** Undefined while the Safes of the Workspace or the Safe address are loading. */
   isSafeInSpace: boolean | undefined
+}
+
+/** The action for a signed-in user, from the membership and the Safes of the Workspace. */
+const getMemberAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
+  if (state.hasNoAccess) return 'removeNotMember'
+  if (state.membershipStatus === undefined) return 'wait'
+  if (state.membershipStatus === MemberStatus.INVITED) return 'none'
+  if (state.membershipStatus !== MemberStatus.ACTIVE) return 'removeNotMember'
+  if (state.isSafeInSpace === undefined) return 'wait'
+  return state.isSafeInSpace ? 'none' : 'remove'
 }
 
 /** What a Safe page does with the `spaceId` of its URL. A signed-out user keeps it and gets a sign-in prompt. */
@@ -40,12 +54,7 @@ export const getSafeWorkspaceAction = (state: SafeWorkspaceState): SafeWorkspace
   if (parseSpaceId(state.rawSpaceId) === null) return 'remove'
   if (state.isSessionPending) return 'wait'
   if (!state.isSignedIn) return 'signIn'
-  if (state.hasNoAccess) return 'removeNotMember'
-  if (state.membershipStatus === undefined) return 'wait'
-  if (state.membershipStatus === MemberStatus.INVITED) return 'none'
-  if (state.membershipStatus !== MemberStatus.ACTIVE) return 'removeNotMember'
-  if (state.isSafeInSpace === undefined) return 'wait'
-  return state.isSafeInSpace ? 'none' : 'remove'
+  return getMemberAction(state)
 }
 
 const useSafeWorkspaceState = (): SafeWorkspaceState => {
@@ -109,12 +118,21 @@ export const useRemoveUrlSpaceId = (): (() => void) => {
  */
 export const useSafeWorkspaceCheck = (): void => {
   const dispatch = useAppDispatch()
-  const action = useSafeWorkspaceAction()
+  const state = useSafeWorkspaceState()
+  const action = getSafeWorkspaceAction(state)
   const removeUrlSpaceId = useRemoveUrlSpaceId()
+  // The router changes before the removal lands; act once per id, so the notice shows once
+  const removedSpaceId = useRef<string | undefined>(undefined)
+  const rawSpaceId = String(state.rawSpaceId)
 
   useEffect(() => {
-    if (action !== 'remove' && action !== 'removeNotMember') return
+    if (action !== 'remove' && action !== 'removeNotMember') {
+      removedSpaceId.current = undefined
+      return
+    }
+    if (removedSpaceId.current === rawSpaceId) return
 
+    removedSpaceId.current = rawSpaceId
     removeUrlSpaceId()
 
     if (action === 'removeNotMember') {
@@ -126,5 +144,5 @@ export const useSafeWorkspaceCheck = (): void => {
         }),
       )
     }
-  }, [action, removeUrlSpaceId, dispatch])
+  }, [action, rawSpaceId, removeUrlSpaceId, dispatch])
 }

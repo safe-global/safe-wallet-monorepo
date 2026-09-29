@@ -40,7 +40,6 @@ import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 import MsgShareLink from '@/components/safe-messages/MsgShareLink'
 import LinkIcon from '@/public/images/messages/link.svg'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -49,7 +48,7 @@ import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/uti
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
@@ -177,9 +176,8 @@ const BlindSigningWarning = ({
   isBlindSigningEnabled: boolean
   isBlindSigningPayload: boolean
 }) => {
-  const router = useRouter()
-  const spaceIdQuery = useSpaceIdQuery()
-  const query = router.query.safe ? { safe: router.query.safe, ...spaceIdQuery } : undefined
+  const safeLinkQuery = useSafeLinkQuery()
+  const query = safeLinkQuery.safe ? safeLinkQuery : undefined
 
   if (!isBlindSigningPayload) {
     return null

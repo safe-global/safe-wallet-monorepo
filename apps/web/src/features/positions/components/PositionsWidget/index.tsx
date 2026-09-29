@@ -1,4 +1,3 @@
-import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '../../hooks/usePositionsFiatTotal'
 import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
@@ -18,14 +17,12 @@ import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const MAX_PROTOCOLS = 4
 
 const PositionsWidget = () => {
-  const router = useRouter()
-  const { safe } = router.query
-  const spaceIdQuery = useSpaceIdQuery()
+  const safeLinkQuery = useSafeLinkQuery()
   const { data, error, isLoading } = usePositions()
   const positionsFiatTotal = usePositionsFiatTotal()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
@@ -33,9 +30,9 @@ const PositionsWidget = () => {
   const viewAllUrl = useMemo(
     () => ({
       pathname: AppRoutes.balances.positions,
-      query: { safe, ...spaceIdQuery },
+      query: safeLinkQuery,
     }),
-    [safe, spaceIdQuery],
+    [safeLinkQuery],
   )
 
   const viewAllWrapper = (children: ReactElement) => (

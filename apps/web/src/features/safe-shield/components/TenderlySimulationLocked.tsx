@@ -1,18 +1,16 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
-import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { Typography } from '@/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { LockedCheckRow } from './LockedCheckRow'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 /** Without Pro or an own Tenderly project nothing is called; "Set" leads to settings to bring one's own project. */
 export const TenderlySimulationLocked = (): ReactElement | null => {
   const hasSimulation = useHasFeature(FEATURES.TX_SIMULATION) === true
-  const router = useRouter()
-  const spaceIdQuery = useSpaceIdQuery()
+  const safeLinkQuery = useSafeLinkQuery()
   if (!hasSimulation) return null
 
   return (
@@ -23,7 +21,7 @@ export const TenderlySimulationLocked = (): ReactElement | null => {
         <NextLink
           href={{
             pathname: AppRoutes.settings.environmentVariables,
-            query: { safe: router.query.safe, ...spaceIdQuery },
+            query: safeLinkQuery,
           }}
           data-testid="set-simulation-link"
           className="inline-flex items-center rounded-2xs bg-[var(--color-border-light)] px-2 py-0.5 no-underline hover:bg-[var(--color-border-main)]"

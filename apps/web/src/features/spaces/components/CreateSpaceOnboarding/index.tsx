@@ -82,7 +82,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
     }
   }, [isEditMode, isInputDisabled, setFocus])
 
-  // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
+  // spaceId gate avoids leaking landingSpaceHint's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(

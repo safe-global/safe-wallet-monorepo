@@ -82,7 +82,7 @@ type CallArgs = [
   },
 ]
 
-const getCallArgs = () => mockUseResolvedSidebarNav.mock.calls[0] as CallArgs
+const getCallArgs = () => mockUseResolvedSidebarNav.mock.calls.at(-1) as CallArgs
 
 const renderWithGeoblocking = (isBlockedCountry: boolean | null) =>
   render(

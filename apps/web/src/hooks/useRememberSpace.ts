@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectIsStoreHydrated, setLastUsedSpace } from '@/store/authSlice'
+import { selectIsStoreHydrated, setLandingSpaceHint } from '@/store/authSlice'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
@@ -17,7 +17,7 @@ export const useRememberSpace = (): void => {
     if (!isStoreHydrated || !spaceId) return
 
     const rememberIfVisible = () => {
-      if (document.visibilityState === 'visible') dispatch(setLastUsedSpace(spaceId))
+      if (document.visibilityState === 'visible') dispatch(setLandingSpaceHint(spaceId))
     }
 
     rememberIfVisible()

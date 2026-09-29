@@ -20,7 +20,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
 const authState = (signedIn: boolean) => ({
   auth: {
     sessionExpiresAt: signedIn ? Date.now() + 60_000 : null,
-    lastUsedSpace: null,
+    landingSpaceHint: null,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,

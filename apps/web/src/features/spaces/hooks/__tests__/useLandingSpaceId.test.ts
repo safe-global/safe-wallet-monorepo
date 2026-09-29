@@ -22,7 +22,7 @@ const renderLanding = (hint: string | null) =>
     initialReduxState: {
       auth: {
         sessionExpiresAt: Date.now() + 60_000,
-        lastUsedSpace: hint,
+        landingSpaceHint: hint,
         isStoreHydrated: true,
         cfSafeSynced: false,
         isOidcLoginPending: false,

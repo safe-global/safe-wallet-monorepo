@@ -81,11 +81,12 @@ describe('SpacePage (/spaces)', () => {
   })
 
   it('renders the space dashboard when spaceId is present', async () => {
-    setup({ spaceId: '7' })
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setup({ spaceId })
 
     const { findByTestId } = render(<SpacePage />)
 
-    expect(await findByTestId('dash')).toHaveTextContent('space 7')
+    expect(await findByTestId('dash')).toHaveTextContent(`space ${spaceId}`)
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
@@ -120,6 +121,17 @@ describe('SpacePage (/spaces)', () => {
         pathname: AppRoutes.welcome.spaces,
         query: { spaceId: ['1', '2'] },
       }),
+    )
+    expect(queryByTestId('dash')).not.toBeInTheDocument()
+  })
+
+  it('treats a malformed spaceId as missing and redirects', async () => {
+    setup({ query: { spaceId: 'space-7' } })
+
+    const { queryByTestId } = render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: { spaceId: 'space-7' } }),
     )
     expect(queryByTestId('dash')).not.toBeInTheDocument()
   })

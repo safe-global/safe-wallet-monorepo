@@ -15,7 +15,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const LEARN_MORE_LINK = 'https://help.safe.global/articles/7497206492-Safe{Staking}'
 
@@ -24,7 +24,7 @@ const StakingBanner = ({
 }: { large?: boolean; hideLocalStorageKey?: string } = {}) => {
   const isDarkMode = useDarkMode()
   const router = useRouter()
-  const spaceIdQuery = useSpaceIdQuery()
+  const safeLinkQuery = useSafeLinkQuery()
   const isStakingBannerVisible = useIsStakingBannerVisible()
 
   const [_, setWidgetHidden] = useLocalStorage<boolean>(hideLocalStorageKey)
@@ -91,7 +91,7 @@ const StakingBanner = ({
                   href={
                     AppRoutes.stake && {
                       pathname: AppRoutes.stake,
-                      query: { safe: router.query.safe, ...spaceIdQuery },
+                      query: safeLinkQuery,
                     }
                   }
                   rel="noreferrer"

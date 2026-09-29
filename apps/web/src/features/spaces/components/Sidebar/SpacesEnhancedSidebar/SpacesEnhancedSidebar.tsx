@@ -9,7 +9,7 @@ import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
 import type { SpaceItem } from '../types'
-import { getQuerySpaceId } from '../utils'
+import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
@@ -88,7 +88,7 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
 
   const isLoadingData = isUserSignedIn && (isUserLoading || isSpacesLoading)
 
-  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
+  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : parseSpaceId(router.query.spaceId)
 
   const selectedSpace =
     spaceIdForSidebarSelection != null ? spaces?.find((space) => space.uuid === spaceIdForSidebarSelection) : undefined

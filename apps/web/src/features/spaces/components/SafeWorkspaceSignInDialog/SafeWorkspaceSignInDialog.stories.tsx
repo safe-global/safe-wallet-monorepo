@@ -6,7 +6,7 @@ import SafeWorkspaceSignInDialog from './index'
 const signedOutState = {
   auth: {
     sessionExpiresAt: null,
-    lastUsedSpace: null,
+    landingSpaceHint: null,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,

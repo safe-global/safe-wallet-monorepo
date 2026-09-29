@@ -15,7 +15,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isSpaceAtSafeLimit, normalizeSpaceId, type SafeLimit } from '@/utils/spaces'
+import { isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
@@ -118,8 +118,7 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    const resolvedSpaceId = normalizeSpaceId(spaceId)
-    if (resolvedSpaceId !== null) {
+    if (spaceId !== null) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the
         // user — the safe is still persisted at the user level above.
@@ -142,7 +141,7 @@ export const persistCounterfactualSafe = async ({
       } else {
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId: resolvedSpaceId,
+            spaceId,
             createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )

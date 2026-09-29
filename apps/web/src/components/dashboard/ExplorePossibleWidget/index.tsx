@@ -2,7 +2,6 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 import { useState, useRef, useEffect, useMemo } from 'react'
-import { useRouter } from 'next/router'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -14,7 +13,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { EURCV_ASSET_ID } from '@/config/eurcv'
 import css from './styles.module.css'
-import { useSpaceIdQuery, type SpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery, type SafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 export type ExplorePossibleApp = {
   id: string
@@ -24,8 +23,6 @@ export type ExplorePossibleApp = {
   iconUrl: string
   link: string | UrlObject
 }
-
-type SafeLinkQuery = SpaceIdQuery & { safe?: string | string[] }
 
 const EXPLORE_POSSIBLE_CONFIG = [
   {
@@ -88,8 +85,7 @@ const EXPLORE_POSSIBLE_CONFIG = [
 ] as const
 
 const ExplorePossibleWidget = () => {
-  const router = useRouter()
-  const spaceIdQuery = useSpaceIdQuery()
+  const safeLinkQuery = useSafeLinkQuery()
   const txBuilderApp = useTxBuilderApp()
   const isDarkMode = useDarkMode()
   const isSwapEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)
@@ -117,9 +113,9 @@ const ExplorePossibleWidget = () => {
         subtitle: 'subtitle' in config ? config.subtitle : undefined,
         badge: 'badge' in config ? config.badge : undefined,
         iconUrl: isDarkMode ? config.iconUrl.dark : config.iconUrl.light,
-        link: config.getLink({ safe: router.query.safe, ...spaceIdQuery }, txBuilderApp.link),
+        link: config.getLink(safeLinkQuery, txBuilderApp.link),
       })),
-    [router.query.safe, spaceIdQuery, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
+    [safeLinkQuery, txBuilderApp, isDarkMode, isSwapEnabled, isEurcvBoostEnabled],
   )
 
   const updateScrollState = () => {

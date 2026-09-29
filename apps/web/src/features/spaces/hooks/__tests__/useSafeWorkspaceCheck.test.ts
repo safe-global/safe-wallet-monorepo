@@ -27,7 +27,7 @@ jest.mock('@/store/notificationsSlice', () => ({
 const signedInAuth = {
   auth: {
     sessionExpiresAt: Date.now() + 60_000,
-    lastUsedSpace: null,
+    landingSpaceHint: null,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,
@@ -101,6 +101,19 @@ describe('useSafeWorkspaceCheck', () => {
       shallow: true,
     })
     expect(mockShowNotification).not.toHaveBeenCalled()
+  })
+
+  it('removes the Workspace once, even when the page renders again before the removal lands', () => {
+    mockSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [] } } })
+    const replace = jest.fn(() => Promise.resolve(true))
+    const { rerender } = renderHook(() => useSafeWorkspaceCheck(), {
+      initialReduxState: signedInAuth,
+      routerProps: { pathname: '/home', query: { safe: `eth:${SAFE_ADDRESS}`, spaceId: SPACE_ID }, replace },
+    })
+
+    rerender()
+
+    expect(replace).toHaveBeenCalledTimes(1)
   })
 
   it('removes the Workspace and tells a user who is not a member', () => {

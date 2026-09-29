@@ -394,7 +394,7 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('1:0xNewSafe', false)
+      result.current.handleItemSelect('1:0xNewSafe', 'local')
     })
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -407,7 +407,7 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('1:0xNewSafe', true)
+      result.current.handleItemSelect('1:0xNewSafe', 'workspace')
     })
 
     expect(mockPush).toHaveBeenCalledWith({
@@ -420,7 +420,7 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('999:0xSafe1', true)
+      result.current.handleItemSelect('999:0xSafe1', 'workspace')
     })
 
     expect(mockPush).not.toHaveBeenCalled()
@@ -678,7 +678,7 @@ describe('useSpaceSafeSelectorItems', () => {
     const { result } = renderHook(() => useSpaceSafeSelectorItems())
 
     act(() => {
-      result.current.handleItemSelect('1:0xNewSafe', true)
+      result.current.handleItemSelect('1:0xNewSafe', 'workspace')
     })
 
     expect(trackEvent).toHaveBeenCalledTimes(1)

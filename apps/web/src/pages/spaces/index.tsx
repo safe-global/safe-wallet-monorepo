@@ -5,14 +5,11 @@ import { BRAND_NAME } from '@/config/constants'
 import { SpacesFeature, useFeatureFlagRedirect, useLandingSpaceId } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
+import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 
 export default function SpacePage() {
   const router = useRouter()
-  // Next.js parses duplicate query keys (`?spaceId=1&spaceId=2`) into a string[].
-  // Treat anything other than a non-empty string as "no spaceId" so we redirect
-  // rather than passing a comma-joined value to the dashboard.
-  const rawSpaceId = router.query.spaceId
-  const spaceId = typeof rawSpaceId === 'string' && rawSpaceId.length > 0 ? rawSpaceId : undefined
+  const spaceId = parseSpaceId(router.query.spaceId)
   const spaces = useLoadFeature(SpacesFeature)
   const landing = useLandingSpaceId()
   useFeatureFlagRedirect()

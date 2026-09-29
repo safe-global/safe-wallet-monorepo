@@ -7,7 +7,7 @@ const STORED_SPACE_ID = '22222222-2222-2222-2222-222222222222'
 const authWithStoredSpace = {
   auth: {
     sessionExpiresAt: Date.now() + 60_000,
-    lastUsedSpace: STORED_SPACE_ID,
+    landingSpaceHint: STORED_SPACE_ID,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,
