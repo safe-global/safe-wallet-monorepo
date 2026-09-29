@@ -25,7 +25,12 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeProAccess } from '@/features/spaces'
-import { getPublicSimulatorLink } from '@safe-global/utils/components/tx/security/tenderly/utils'
+import NextLink from 'next/link'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { useAppSelector } from '@/store'
+import { selectHasOwnTenderly } from '@/store/settingsSlice'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
   isSuccess && !isError && !isCallTraceError
@@ -64,6 +69,31 @@ const CompactSimulationButton = ({
   )
 }
 
+const SimulationSetupLink = () => {
+  const router = useRouter()
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <NextLink
+            href={{ pathname: AppRoutes.settings.environmentVariables, query: { safe: router.query.safe } }}
+            data-testid="queued-tx-simulation-setup"
+            className="flex flex-row items-center gap-1 rounded-lg bg-[var(--color-background-main)] px-2 py-1 no-underline"
+          >
+            <TenderlyIcon className="h-4" />
+            <Typography variant="paragraph-small-bold">Simulate</Typography>
+          </NextLink>
+        }
+      />
+      <TooltipContent>
+        Built-in simulation is part of Safe Pro. To simulate on your own Tenderly project, add its URL and access token
+        in Settings › Environment variables.
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
@@ -89,6 +119,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   const { simulationLink, simulateTransaction } = simulation
   const status = simulation ? getSimulationStatus(simulation) : undefined
   const { hasProFeatures } = useSafeProAccess()
+  const hasOwnTenderly = useAppSelector(selectHasOwnTenderly)
 
   const handleSimulation = () => {
     if (safeTransaction && executionOwner) {
@@ -100,26 +131,9 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
     return null
   }
 
-  // Without Safe Pro the simulation is not run through our Tenderly project; hand the inner call to Tenderly's public simulator.
-  if (!hasProFeatures) {
-    if (!safeTransaction) return null
-    return (
-      <ExternalLink
-        href={getPublicSimulatorLink({
-          chainId,
-          from: safe.address.value,
-          to: safeTransaction.data.to,
-          value: safeTransaction.data.value,
-          data: safeTransaction.data.data,
-        })}
-        data-testid="queued-tx-external-simulation"
-      >
-        <div className="flex flex-row items-center gap-1">
-          <TenderlyIcon className="h-4" />
-          Simulate on Tenderly
-        </div>
-      </ExternalLink>
-    )
+  // Without Safe Pro and without an own Tenderly project nothing is simulated; lead to settings to bring one, as Safe Shield does.
+  if (!hasProFeatures && !hasOwnTenderly) {
+    return <SimulationSetupLink />
   }
 
   if (status?.isLoading) {

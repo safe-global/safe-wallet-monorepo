@@ -117,6 +117,26 @@ describe('EnvironmentVariables', () => {
     })
   })
 
+  it('should mask the Tenderly access token until the user reveals it', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: mockTenderlyUrl, accessToken: mockTenderlyToken } },
+        },
+      },
+    })
+
+    const tenderlyTokenInput = screen.getByLabelText('Tenderly access token') as HTMLInputElement
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'password')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show access token' }))
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide access token' }))
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'password')
+  })
+
   it('should show reset button when value is entered', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {
