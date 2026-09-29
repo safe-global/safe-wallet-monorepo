@@ -6,7 +6,7 @@ import useChainId from '@/hooks/useChainId'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { useLazySafeAppsGetSafeAppsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
  * Navigates to the native SAFE (Safenet) staking app.
@@ -36,7 +36,10 @@ export const useOpenSafenetStakingApp = () => {
       const safenetApp = apps.find((app) => app.tags.includes(SafeAppsTag.SAFENET))
       if (!safenetApp) return
       router.push(
-        `${AppRoutes.apps.open}?safe=${query?.get('safe')}${getSpaceIdSearchParam(spaceId)}&appUrl=${encodeURIComponent(safenetApp.url)}`,
+        withSpaceIdInUrl(
+          `${AppRoutes.apps.open}?safe=${query?.get('safe')}&appUrl=${encodeURIComponent(safenetApp.url)}`,
+          spaceId,
+        ),
       )
     } catch (error) {
       logError(ErrorCodes._902, error)

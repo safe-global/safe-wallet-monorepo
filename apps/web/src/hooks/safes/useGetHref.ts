@@ -3,7 +3,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type NextRouter } from 'next/router'
 import { useCallback } from 'react'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
  * Navigate to the dashboard when selecting a safe on the welcome page,
@@ -14,7 +14,7 @@ export const useGetHref = (router: NextRouter) => {
   const isSpacePage = useIsSpaceRoute()
   const isWelcomePage = router.pathname === AppRoutes.welcome.accounts
   const isSingleTxPage = router.pathname === AppRoutes.transactions.tx
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
 
   return useCallback(
     (chain: Chain, address: string) => {
@@ -27,10 +27,10 @@ export const useGetHref = (router: NextRouter) => {
               : router.pathname,
         // A Workspace page keeps only its Workspace; a Safe page keeps its whole query, spaceId included
         query: isSpacePage
-          ? { safe: `${chain.shortName}:${address}`, ...spaceIdQuery }
+          ? withSpaceId({ safe: `${chain.shortName}:${address}` }, spaceId)
           : { ...router.query, safe: `${chain.shortName}:${address}` },
       }
     },
-    [isSingleTxPage, isWelcomePage, isSpacePage, spaceIdQuery, router.pathname, router.query],
+    [isSingleTxPage, isWelcomePage, isSpacePage, spaceId, router.pathname, router.query],
   )
 }

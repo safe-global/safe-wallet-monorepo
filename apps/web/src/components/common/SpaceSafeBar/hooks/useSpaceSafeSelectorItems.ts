@@ -26,7 +26,7 @@ import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useSafeBarSafes } from './useSafeBarSafes'
-import { getSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -259,7 +259,7 @@ export function useSpaceSafeSelectorItems() {
       )
       router.push({
         pathname: AppRoutes.home,
-        query: { safe: `${chain.shortName}:${address}`, ...getSpaceIdQuery(tab === 'workspace' ? spaceId : null) },
+        query: withSpaceId({ safe: `${chain.shortName}:${address}` }, tab === 'workspace' ? spaceId : null),
       })
     },
     [chainConfigs, router, spaceId],

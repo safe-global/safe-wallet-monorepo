@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { useSpaceIdQuery, type SpaceIdQuery } from './useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from './useUrlSpaceId'
 
-export type SafeLinkQuery = SpaceIdQuery & { safe?: string | string[] }
+export type SafeLinkQuery = { safe?: string | string[]; spaceId?: string }
 
-/** The query of a link to the current Safe, in the Workspace of this tab. */
+/** Query params for a link to the Safe of the current URL: its `safe` and, if present, its `spaceId`. */
 export const useSafeLinkQuery = (): SafeLinkQuery => {
   const { safe } = useRouter().query
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
 
-  return useMemo(() => (safe === undefined ? spaceIdQuery : { safe, ...spaceIdQuery }), [safe, spaceIdQuery])
+  return useMemo(() => withSpaceId(safe === undefined ? {} : { safe }, spaceId), [safe, spaceId])
 }

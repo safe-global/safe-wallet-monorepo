@@ -17,7 +17,7 @@ import TxInfo from '@/components/transactions/TxInfo'
 import PendingRecoveryListItem from '@/components/dashboard/PendingTxs/PendingRecoveryListItem'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
-import { getSpaceIdSearchParam } from '@/hooks/useUrlSpaceId'
+import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 
 const MAX_TXS = 3
 
@@ -84,7 +84,10 @@ const PendingTxList = (): ReactElement => {
             return (
               <SafeWidget.Item
                 key={tx.transaction.id}
-                href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}${getSpaceIdSearchParam(safeLinkQuery.spaceId)}`}
+                href={withSpaceIdInUrl(
+                  `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`,
+                  safeLinkQuery.spaceId,
+                )}
                 label={
                   <div className="flex gap-1 items-center">
                     <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />

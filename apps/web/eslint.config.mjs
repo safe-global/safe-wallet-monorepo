@@ -72,8 +72,8 @@ const dsDialogClassnameRule = (element, message) => ({
   message,
 })
 
-// A link that keeps the `safe` param but drops `spaceId` moves the tab out of its Workspace. Covers a
-// `query` property or variable, holding the object directly or in a conditional.
+// A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
+// `query` property or variable that holds such an object, directly or in a conditional.
 const safeQueryWithoutSpaceId =
   "ObjectExpression:has(> Property[key.name='safe']):not(:has(> Property[key.name='spaceId'])):not(:has(> SpreadElement))"
 const safeLinkWithoutSpaceIdRules = [
@@ -84,7 +84,7 @@ const safeLinkWithoutSpaceIdRules = [
 ].map((selector) => ({
   selector,
   message:
-    'A Safe link must keep the Workspace of the tab: spread `useSpaceIdQuery()` (or `getSpaceIdQuery(spaceId)`) into `query`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
+    'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
 const designSystemSyntaxRules = [

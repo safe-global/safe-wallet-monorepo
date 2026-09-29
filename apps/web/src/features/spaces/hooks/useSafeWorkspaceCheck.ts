@@ -128,7 +128,7 @@ export const useSafeWorkspaceCheck = (): void => {
   const state = useSafeWorkspaceState()
   const action = getSafeWorkspaceAction(state)
   const removeUrlSpaceId = useRemoveUrlSpaceId()
-  // The router changes before the removal lands; act once per id, so the notice shows once
+  // The router can change before the replace completes; act once per id so the notice shows once
   const removedSpaceId = useRef<string | undefined>(undefined)
   const rawSpaceId = String(state.rawSpaceId)
 

@@ -10,7 +10,7 @@ import { useNestedSafeGrantor } from './useNestedSafeGrantor'
 import { useProposerOverview } from './useProposerOverview'
 import { getRemovableGrantDelegator, REMOVE_PROPOSER_NOT_ALLOWED } from './useRemoveProposer'
 import type { ProposerDetailsArgs } from './types'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export const REMOVE_NESTED_PROPOSER_HINT = 'Remove this proposer from the Safe account settings'
 
@@ -23,7 +23,7 @@ export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerCont
   const grantorContact = useAddressBookItem(nestedSafeGrantor ?? '', chainId)
   const wallet = useWallet()
   const connectWallet = useConnectWallet()
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
   const safeName = getSafeDisplayInfo(safeContact?.name ?? '', safeAddress).displayName
 
   const hasOwnGrant = args.proposer.delegatedBy.some((grant) => sameAddress(grant.delegator, wallet?.address))
@@ -35,7 +35,7 @@ export const useActiveProposer = (args: ProposerDetailsArgs): ProposerDrawerCont
           settingsHref: chain
             ? {
                 pathname: AppRoutes.settings.setup,
-                query: { safe: `${chain.shortName}:${safeAddress}`, ...spaceIdQuery },
+                query: withSpaceId({ safe: `${chain.shortName}:${safeAddress}` }, spaceId),
               }
             : undefined,
         }

@@ -4,8 +4,8 @@ import { selectIsStoreHydrated, setLandingSpaceHint } from '@/store/authSlice'
 import { isLegacySpaceId, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
- * Stores the Workspace of the URL while this tab is visible, so that `/spaces` without a spaceId
- * opens the Workspace of the last active tab.
+ * Saves the `spaceId` URL param as the landing hint while the page is visible, so `/spaces`
+ * without an id opens the Workspace that the user saw last.
  */
 export const useRememberSpace = (): void => {
   const dispatch = useAppDispatch()

@@ -12,7 +12,7 @@ import ExternalLink from '@/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import TxData from '../..'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -50,7 +50,7 @@ export const ExecTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
 
   const childSafeTx = useMemo<SafeTransaction | undefined>(
     () => (data?.hexData ? extractTransactionData(data.hexData) : undefined),
@@ -90,7 +90,7 @@ export const ExecTransaction = ({
               <Link
                 href={{
                   pathname: AppRoutes.transactions.history,
-                  query: { safe: `${chain.shortName}:${data.to.value}`, ...spaceIdQuery },
+                  query: withSpaceId({ safe: `${chain.shortName}:${data.to.value}` }, spaceId),
                 }}
                 passHref
                 legacyBehavior

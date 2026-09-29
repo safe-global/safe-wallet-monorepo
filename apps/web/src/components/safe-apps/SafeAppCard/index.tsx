@@ -16,7 +16,7 @@ import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
-import { getRouterSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SafeAppCardProps = {
   safeApp: SafeAppData
@@ -60,7 +60,7 @@ export default SafeAppCard
 export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
   const shareUrlObj: UrlObject = {
     pathname: AppRoutes.apps.open,
-    query: { safe: router.query.safe, appUrl: safeAppUrl, ...getRouterSpaceIdQuery(router) },
+    query: withSpaceId({ safe: router.query.safe, appUrl: safeAppUrl }, router.query.spaceId),
   }
 
   return resolveHref(router, shareUrlObj)

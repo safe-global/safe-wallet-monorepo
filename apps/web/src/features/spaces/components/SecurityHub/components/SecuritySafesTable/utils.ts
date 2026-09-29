@@ -5,7 +5,6 @@ import { AppRoutes } from '@/config/routes'
 import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
 import { DASH } from './constants'
 import type { SpaceSafeEntry } from '../../types'
-import type { SpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 /** Inverse of `SEVERITY_RANK` — rank index → SecurityGrade. Single source of truth for ordering. */
 const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade, number]>)
@@ -22,11 +21,8 @@ export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
 export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
-/** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
-export type GetSafeSecurityHref = (
-  address: string,
-  chainId: string,
-) => { pathname: string; query: SafeHref['query'] & SpaceIdQuery } | undefined
+/** Builder returning a Safe's security settings URL for a given (address, chainId), or undefined if the chain has no short name. */
+export type GetSafeSecurityHref = (address: string, chainId: string) => SafeHref | undefined
 
 /**
  * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.
@@ -38,11 +34,8 @@ export const buildSafeSecurityHref = (
   chainShortNames: Record<string, string>,
   address: string,
   chainId: string,
-  spaceIdQuery: SpaceIdQuery,
-): { pathname: string; query: SafeHref['query'] & SpaceIdQuery } | undefined => {
-  const href = buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address)
-  return href && { ...href, query: { ...href.query, ...spaceIdQuery } }
-}
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address, spaceId)
 
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same

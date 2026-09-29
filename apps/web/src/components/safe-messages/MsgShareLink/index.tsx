@@ -8,13 +8,13 @@ import { MESSAGE_EVENTS } from '@/services/analytics/events/txList'
 import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
-import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MsgShareLink = ({ safeMessageHash, button }: { safeMessageHash: string; button?: boolean }): ReactElement => {
   const router = useRouter()
   const { safe = '' } = router.query
   const spaceId = useUrlSpaceId()
-  const href = `${AppRoutes.transactions.msg}?safe=${safe}${getSpaceIdSearchParam(spaceId)}&messageHash=${safeMessageHash}`
+  const href = withSpaceIdInUrl(`${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${safeMessageHash}`, spaceId)
   const txUrl = useOrigin() + href
 
   return (

@@ -11,7 +11,7 @@ import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -37,18 +37,18 @@ export const SafeSidebarContent = ({
   const isBlockedCountry = useContext(GeoblockingContext)
   const { safe } = useSafeInfo()
   const safeAddress = useSafeQueryParam() || undefined
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
 
   const getLink = useCallback(
     (item: SidebarItemConfig) => {
-      const query = { ...(safeAddress && { safe: safeAddress }), ...spaceIdQuery }
+      const query = withSpaceId(safeAddress ? { safe: safeAddress } : {}, spaceId)
 
       const pathname =
         item.href === AppRoutes.transactions.history && queueSize ? AppRoutes.transactions.queue : item.href
 
       return { pathname, query }
     },
-    [spaceIdQuery, safeAddress, queueSize],
+    [spaceId, safeAddress, queueSize],
   )
 
   const isItemDisabled = useCallback(

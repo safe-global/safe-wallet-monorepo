@@ -9,7 +9,7 @@ import { selectSafeInfo } from '@/store/safeInfoSlice'
 import { chainsAdapter, apiSliceWithChainsConfig } from '@safe-global/store/gateway/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getTxLink } from '@/utils/tx-link'
-import { getLocationSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { getLocationSpaceId, parseSpaceId } from '@/hooks/useUrlSpaceId'
 
 type AllStatuses = OrderStatuses | 'created'
 type Order = {
@@ -96,7 +96,7 @@ export const swapOrderStatusListener = (listenerMiddleware: typeof listenerMiddl
           ? chainsAdapter.getSelectors().selectById(chainsCache.data, safeInfo.data?.chainId)
           : undefined
         if (chainInfo !== undefined) {
-          link = getTxLink(swapOrder.txId, chainInfo, safeInfo.data?.address.value, getLocationSpaceIdQuery())
+          link = getTxLink(swapOrder.txId, chainInfo, safeInfo.data?.address.value, parseSpaceId(getLocationSpaceId()))
         }
       }
 

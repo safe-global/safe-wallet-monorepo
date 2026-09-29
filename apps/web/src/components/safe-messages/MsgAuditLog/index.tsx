@@ -10,7 +10,7 @@ import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import useOrigin from '@/hooks/useOrigin'
 import useAddressBook from '@/hooks/useAddressBook'
-import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
   const addressBook = useAddressBook()
@@ -18,7 +18,10 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
   const { safe = '' } = router.query
   const spaceId = useUrlSpaceId()
   const origin = useOrigin()
-  const msgUrl = `${origin}${AppRoutes.transactions.msg}?safe=${safe}${getSpaceIdSearchParam(spaceId)}&messageHash=${msg.messageHash}`
+  const msgUrl = withSpaceIdInUrl(
+    `${origin}${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${msg.messageHash}`,
+    spaceId,
+  )
   const { confirmations, confirmationsRequired, confirmationsSubmitted, proposedBy, creationTimestamp } = msg
   const isConfirmed = msg.status === 'CONFIRMED'
 

@@ -25,7 +25,7 @@ import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { PendingDelegation as PendingDelegationType } from '@/features/proposers/types'
-import { getSpaceIdSearchParam, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type PendingDelegationProps = {
   delegation: PendingDelegationType
@@ -52,7 +52,10 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     ? `${chain.shortName}:${delegation.parentSafeAddress}`
     : `${chainId}:${delegation.parentSafeAddress}`
   const shareUrl = origin
-    ? `${origin}${AppRoutes.transactions.msg}?safe=${parentSafeId}${getSpaceIdSearchParam(spaceId)}&messageHash=${delegation.messageHash}`
+    ? withSpaceIdInUrl(
+        `${origin}${AppRoutes.transactions.msg}?safe=${parentSafeId}&messageHash=${delegation.messageHash}`,
+        spaceId,
+      )
     : ''
 
   const handleSign = async () => {

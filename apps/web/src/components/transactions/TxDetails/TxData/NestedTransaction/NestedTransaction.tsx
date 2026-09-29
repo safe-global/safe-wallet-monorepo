@@ -15,7 +15,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useSignedHash } from './useSignedHash'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export const NestedTransaction = ({
   txData,
@@ -27,7 +27,7 @@ export const NestedTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
   const signedHash = useSignedHash(txData)
   return (
     <div className="flex flex-col gap-4">
@@ -50,11 +50,7 @@ export const NestedTransaction = ({
               <Link
                 href={{
                   pathname: AppRoutes.transactions.tx,
-                  query: {
-                    safe: `${chain?.shortName}:${txData.to.value}`,
-                    id: signedHash,
-                    ...spaceIdQuery,
-                  },
+                  query: withSpaceId({ safe: `${chain?.shortName}:${txData.to.value}`, id: signedHash }, spaceId),
                 }}
                 passHref
                 legacyBehavior

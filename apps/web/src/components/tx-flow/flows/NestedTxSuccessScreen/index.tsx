@@ -17,14 +17,14 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeTransaction } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { Typography } from '@/components/ui/typography'
-import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type Props = {
   txId: string
 }
 const NestedTxSuccessScreen = ({ txId }: Props) => {
   const addressBook = useAddressBook()
-  const spaceIdQuery = useSpaceIdQuery()
+  const spaceId = useUrlSpaceId()
 
   // _pendingTx eventually clears from the store, so we need to cache it
   const _pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
@@ -98,20 +98,21 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
               isSafeTxHash
                 ? {
                     pathname: AppRoutes.transactions.tx,
-                    query: {
-                      safe: cachedPendingTx.signerAddress,
-                      chainId: cachedPendingTx.chainId,
-                      ...spaceIdQuery,
-                      id: cachedPendingTx.txHashOrParentSafeTxHash,
-                    },
+                    query: withSpaceId(
+                      {
+                        safe: cachedPendingTx.signerAddress,
+                        chainId: cachedPendingTx.chainId,
+                        id: cachedPendingTx.txHashOrParentSafeTxHash,
+                      },
+                      spaceId,
+                    ),
                   }
                 : {
                     pathname: AppRoutes.transactions.queue,
-                    query: {
-                      safe: cachedPendingTx.signerAddress,
-                      chainId: cachedPendingTx.chainId,
-                      ...spaceIdQuery,
-                    },
+                    query: withSpaceId(
+                      { safe: cachedPendingTx.signerAddress, chainId: cachedPendingTx.chainId },
+                      spaceId,
+                    ),
                   }
             }
             passHref

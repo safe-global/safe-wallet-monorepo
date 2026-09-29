@@ -11,20 +11,23 @@ const chain = { shortName: 'eth' } as Chain
 let mockIsSpaceRoute = false
 jest.mock('@/hooks/useIsSpaceRoute', () => ({ useIsSpaceRoute: () => mockIsSpaceRoute }))
 
-let mockSpaceIdQuery: { spaceId?: string } = {}
-jest.mock('@/hooks/useUrlSpaceId', () => ({ useSpaceIdQuery: () => mockSpaceIdQuery }))
+let mockSpaceId: string | null = null
+jest.mock('@/hooks/useUrlSpaceId', () => ({
+  ...jest.requireActual('@/hooks/useUrlSpaceId'),
+  useUrlSpaceId: () => mockSpaceId,
+}))
 
 const routerAt = (pathname: string, query: NextRouter['query']) => ({ pathname, query }) as NextRouter
 
 describe('useGetHref', () => {
   beforeEach(() => {
     mockIsSpaceRoute = false
-    mockSpaceIdQuery = {}
+    mockSpaceId = null
   })
 
   it('opens a Safe from a Workspace page in that Workspace', () => {
     mockIsSpaceRoute = true
-    mockSpaceIdQuery = { spaceId: SPACE_ID }
+    mockSpaceId = SPACE_ID
     const router = routerAt(AppRoutes.spaces.safeAccounts, { spaceId: SPACE_ID, sort: 'name' })
 
     const { result } = renderHook(() => useGetHref(router))

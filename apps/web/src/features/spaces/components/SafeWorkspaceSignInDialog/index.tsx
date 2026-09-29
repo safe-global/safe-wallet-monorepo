@@ -5,7 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import SignInOptions from '../SignInOptions'
 import { useRemoveUrlSpaceId, useSafeWorkspaceAction } from '../../hooks/useSafeWorkspaceCheck'
 
-// Sign-in updates the session, and the Workspace check then takes over.
+// Nothing to do here: useSafeWorkspaceCheck re-runs when the session changes
 const noop = () => {}
 
 /** Asks a signed-out user who opens a Workspace link to a Safe to sign in, or to continue without it. */

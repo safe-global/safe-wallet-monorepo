@@ -72,8 +72,8 @@ export const isAuthenticated = (state: RootState): boolean => {
 }
 
 /**
- * The last Workspace used in any tab. Read it only to choose where `/spaces` without a spaceId
- * goes (useLandingSpaceId): every other code must take the Workspace from the URL of its tab.
+ * The Workspace id last seen in a URL, for the `/spaces` redirect without an id only
+ * (useLandingSpaceId). All browser tabs share it, so it cannot tell which Workspace a page is in.
  */
 export const selectLandingSpaceHint = (state: RootState): string | null => {
   // State persisted before the rename has no such key
