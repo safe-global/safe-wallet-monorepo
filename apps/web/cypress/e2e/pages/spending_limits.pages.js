@@ -81,10 +81,6 @@ export function verifyActionNamesAreDisplayed(names) {
   main.verifyValuesExist(actionItem, names)
 }
 
-export function verifySpendingLimitBtnIsDisabled() {
-  cy.get(newSpendingLimitBtn).should('be.disabled')
-}
-
 export function verifySpendingLimitsIcons() {
   main.verifyElementsIsVisible([splimitBeneficiaryIcon, splimitAssetIcon, splimitTimeIcon])
 }
@@ -260,11 +256,8 @@ export const plans = {
 /** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
 export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
 
-/**
- * Sets up the spending limit plan gate as in production: SAFE_PRO and SPENDING_LIMIT_GATING on, the wallet signed in to
- * Workspaces, and the Workspace on `plan`. Business includes policies, Starter does not.
- */
-export function signInOnPlan(signer, plan) {
+/** Turns on SAFE_PRO and SPENDING_LIMIT_GATING on every chain, as in production. */
+export function turnOnSpendingLimitGate() {
   cy.intercept('GET', '**/v2/chains**', (req) => {
     req.continue((res) => {
       const addGatingFlags = (chain) => ({
@@ -279,6 +272,14 @@ export function signInOnPlan(signer, plan) {
       }
     })
   })
+}
+
+/**
+ * Sets up the spending limit plan gate as in production: the gate on, the wallet signed in to Workspaces, and the
+ * Workspace on `plan`. Business includes policies, Starter does not.
+ */
+export function signInOnPlan(signer, plan) {
+  turnOnSpendingLimitGate()
   cy.intercept('GET', '**/v1/spaces/*/entitlements', {
     plan: { id: plan.toLowerCase(), name: plan, cycleEndsAt: '2099-01-01T00:00:00Z' },
     entitlements: [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }],

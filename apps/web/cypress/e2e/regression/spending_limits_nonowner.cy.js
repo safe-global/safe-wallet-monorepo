@@ -11,6 +11,7 @@ describe('Spending limits non-owner tests', () => {
   })
 
   beforeEach(() => {
+    spendinglimit.turnOnSpendingLimitGate()
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
   })
@@ -19,7 +20,8 @@ describe('Spending limits non-owner tests', () => {
     spendinglimit.verifySpendingLimitsIcons()
   })
 
-  it('Verify "New spending limit" button only available for owners', () => {
-    spendinglimit.verifySpendingLimitBtnIsDisabled()
+  it('Verify the Safe Pro lock replaces "New spending limit" for a visitor who is not signed in', () => {
+    cy.get(spendinglimit.safeProLock).should('be.visible').and('contain', 'Adding spending limits requires Safe Pro')
+    cy.get(spendinglimit.newSpendingLimitBtn).should('not.exist')
   })
 })
