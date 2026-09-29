@@ -49,6 +49,7 @@ import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/uti
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
@@ -177,7 +178,8 @@ const BlindSigningWarning = ({
   isBlindSigningPayload: boolean
 }) => {
   const router = useRouter()
-  const query = router.query.safe ? { safe: router.query.safe } : undefined
+  const spaceIdQuery = useSpaceIdQuery()
+  const query = router.query.safe ? { safe: router.query.safe, ...spaceIdQuery } : undefined
 
   if (!isBlindSigningPayload) {
     return null

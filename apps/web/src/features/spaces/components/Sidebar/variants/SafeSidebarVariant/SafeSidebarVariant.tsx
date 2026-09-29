@@ -27,6 +27,7 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '../../constants'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
+import { useSpaceIdQuery } from '@/hooks/useUrlSpaceId'
 
 const MAIN_NAV_SKELETON_COUNT = 5
 const DEFI_GROUP_SKELETON_COUNT = 4
@@ -43,6 +44,7 @@ export const SafeSidebarVariant = ({
   const isHydrated = useIsHydrated()
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const safeFromQuery = useSafeQueryParam()
+  const spaceIdQuery = useSpaceIdQuery()
   const safeAddress = isHydrated ? safeFromQuery || undefined : undefined
   const isOutdated =
     isHydrated &&
@@ -50,7 +52,7 @@ export const SafeSidebarVariant = ({
     !isNonCriticalUpdate(safe.version)
   const settingsHref = {
     pathname: AppRoutes.settings.setup,
-    query: safeAddress ? { safe: safeAddress } : {},
+    query: safeAddress ? { safe: safeAddress, ...spaceIdQuery } : {},
   }
   const isSettingsActive = router.pathname.startsWith(AppRoutes.settings.index)
 

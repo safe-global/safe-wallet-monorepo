@@ -72,13 +72,20 @@ const dsDialogClassnameRule = (element, message) => ({
   message,
 })
 
-// A link that keeps the `safe` param but drops `spaceId` moves the tab out of its Workspace.
-const safeLinkWithoutSpaceIdRule = {
-  selector:
-    "Property[key.name='query'] > ObjectExpression:has(> Property[key.name='safe']):not(:has(> Property[key.name='spaceId'])):not(:has(> SpreadElement))",
+// A link that keeps the `safe` param but drops `spaceId` moves the tab out of its Workspace. Covers a
+// `query` property or variable, holding the object directly or in a conditional.
+const safeQueryWithoutSpaceId =
+  "ObjectExpression:has(> Property[key.name='safe']):not(:has(> Property[key.name='spaceId'])):not(:has(> SpreadElement))"
+const safeLinkWithoutSpaceIdRules = [
+  `Property[key.name='query'] > ${safeQueryWithoutSpaceId}`,
+  `Property[key.name='query'] > ConditionalExpression > ${safeQueryWithoutSpaceId}`,
+  `VariableDeclarator[id.name='query'] > ${safeQueryWithoutSpaceId}`,
+  `VariableDeclarator[id.name='query'] > ConditionalExpression > ${safeQueryWithoutSpaceId}`,
+].map((selector) => ({
+  selector,
   message:
     'A Safe link must keep the Workspace of the tab: spread `useSpaceIdQuery()` (or `getSpaceIdQuery(spaceId)`) into `query`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-}
+}))
 
 const designSystemSyntaxRules = [
   dsButtonClassnameRule(
@@ -310,7 +317,7 @@ export default [
       // makes buttons drift out of sync. If no size/variant fits a recurring need, add one
       // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, safeLinkWithoutSpaceIdRule],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
