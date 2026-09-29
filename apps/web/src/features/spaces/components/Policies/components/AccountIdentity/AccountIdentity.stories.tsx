@@ -26,6 +26,13 @@ export const Unnamed: Story = {
   },
 }
 
+/** The policy drawers let you lift the full address out of a truncated row. */
+export const WithCopyButton: Story = {
+  args: {
+    showCopyButton: true,
+  },
+}
+
 export const LongName: Story = {
   args: {
     name: 'Marketing operations treasury',
