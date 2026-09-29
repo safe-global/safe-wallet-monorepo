@@ -29,26 +29,18 @@ const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactEleme
     onSelect?.(id)
   }
 
-  if (locked) {
-    return (
-      <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
-        {POLICY_CATALOGUE.filter(isPolicyEntry).map((entry) => (
-          <PolicyCatalogueTile
-            key={entry.id}
-            {...entry}
-            locked={isLocked(entry.id)}
-            accountCount={locked.accountCounts?.[entry.id]}
-            onClick={() => handleClick(entry)}
-          />
-        ))}
-      </div>
-    )
-  }
+  const entries = locked ? POLICY_CATALOGUE.filter(isPolicyEntry) : POLICY_CATALOGUE
 
   return (
     <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
-      {POLICY_CATALOGUE.map((entry) => (
-        <PolicyCatalogueTile key={entry.id} {...entry} onClick={() => handleClick(entry)} />
+      {entries.map((entry) => (
+        <PolicyCatalogueTile
+          key={entry.id}
+          {...entry}
+          locked={isLocked(entry.id)}
+          accountCount={isPolicyEntry(entry) ? locked?.accountCounts?.[entry.id] : undefined}
+          onClick={() => handleClick(entry)}
+        />
       ))}
     </div>
   )
