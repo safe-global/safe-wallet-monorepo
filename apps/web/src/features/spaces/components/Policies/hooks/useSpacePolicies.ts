@@ -40,7 +40,7 @@ export type SpacePoliciesResult = {
   refetch: () => void
 }
 
-/** The Space's active and queued policies, ready for the table. It counts as loading until their tokens are resolved. */
+/** The Space's active and queued policies, ready for the table. It counts as loading until the active rows and their tokens are in. */
 export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -62,12 +62,17 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   // Queued changes are extra information: without them the table still shows what is enforced.
   const pendingDtos = pending.currentData ?? NO_PENDING
 
-  const { resolveToken, isLoading: isLoadingTokens } = usePolicyTokenResolver(dtos, pendingDtos)
+  // Separate lookups, so tokens only a queued change uses don't blank the active rows while they load.
+  const activeTokens = usePolicyTokenResolver(dtos)
+  const pendingTokens = usePolicyTokenResolver(NO_POLICIES, pendingDtos)
 
-  const activeRows = useMemo(() => mapActivePolicies(dtos, resolveToken), [dtos, resolveToken])
+  const activeRows = useMemo(
+    () => mapActivePolicies(dtos, activeTokens.resolveToken),
+    [dtos, activeTokens.resolveToken],
+  )
   const pendingRows = useMemo(
-    () => mapPendingPolicies(pendingDtos, activeRows, resolveToken),
-    [pendingDtos, activeRows, resolveToken],
+    () => (pendingTokens.isLoading ? [] : mapPendingPolicies(pendingDtos, activeRows, pendingTokens.resolveToken)),
+    [pendingDtos, activeRows, pendingTokens.isLoading, pendingTokens.resolveToken],
   )
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
@@ -80,9 +85,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     [activeRows, pendingRows, activatingRows],
   )
 
-  // RTK's isLoading stays false on a refetch after an error: wanted for the optional pending rows, not for active ones.
+  // RTK's isLoading stays false on a refetch after an error, so it would hide a retry of the active rows.
   const isLoadingActive = active.isFetching && !active.currentData
-  const isLoadingPending = pending.isLoading
 
   const refetch = () => {
     active.refetch()
@@ -91,7 +95,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   return {
     policies,
-    isLoading: isLoadingActive || isLoadingPending || isLoadingTokens,
+    isLoading: isLoadingActive || activeTokens.isLoading,
     isError: active.isError,
     refetch,
   }

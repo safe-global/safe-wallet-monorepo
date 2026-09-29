@@ -226,13 +226,33 @@ describe('useSpacePolicies', () => {
     expect(result.current.policies).toHaveLength(1)
   })
 
-  it('should, while pending rows load for the first time, count as loading', () => {
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [] })
+  it('should, while pending rows load for the first time, show the active rows', () => {
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
     mockPendingQuery.mockReturnValue({ ...idle, isLoading: true, isFetching: true })
 
     const { result } = renderHook(() => useSpacePolicies())
 
-    expect(result.current.isLoading).toBe(true)
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.policies.map((policy) => policy.status)).toEqual(['active'])
+  })
+
+  it('should, while the tokens only a queued change uses load, show the active rows alone', () => {
+    const pendingDto = mockPendingDto()
+    const [addDelegate, setAllowance] = pendingDto.data.changes
+    if (setAllowance.kind !== 'set-allowance') throw new Error('expected a set-allowance')
+    pendingDto.data.changes = [addDelegate, { ...setAllowance, token: MOCK_TOKENS.usdt.address }]
+    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [pendingDto] })
+    mockTokenInfosQuery.mockImplementation((arg: typeof skipToken | { tokens: { address: string }[] }) =>
+      arg !== skipToken && arg.tokens.some((token) => token.address === MOCK_TOKENS.usdt.address)
+        ? { ...idle, isLoading: true }
+        : idle,
+    )
+
+    const { result } = renderHook(() => useSpacePolicies())
+
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.policies.map((policy) => policy.status)).toEqual(['active'])
   })
 
   it('should, while retrying the pending rows after a failure, keep the active rows on screen', () => {
