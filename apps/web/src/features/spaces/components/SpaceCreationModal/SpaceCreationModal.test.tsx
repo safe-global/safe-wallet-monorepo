@@ -64,7 +64,7 @@ jest.mock('@/components/common/ExternalLink', () => ({
 }))
 
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { spaces: { index: '/spaces' }, privacy: '/privacy' },
+  AppRoutes: { spaces: { index: '/spaces' } },
 }))
 
 describe('SpaceCreationModal tracking', () => {
