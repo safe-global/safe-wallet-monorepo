@@ -11,12 +11,17 @@ import {
   mockPendingPolicy,
   mockPendingUpdate,
   mockSpendingLimitPolicy,
+  mockUnenforcedPolicy,
   asActivePolicy,
 } from '../mocks/policies'
 import { createMockStory } from '@/stories/mocks'
 import SpendingLimitDrawer from './SpendingLimitDrawer'
 
 const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK_SAFE_NAME }
+
+const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675'
+
+const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, onReviewTransaction: fn() }
 
 const OVERVIEW = {
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
@@ -37,9 +42,7 @@ const meta = {
     onClose: fn(),
     safe: SAFE,
     overview: OVERVIEW,
-    transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675',
     onEdit: fn(),
-    onReviewTransaction: fn(),
     onConnectWallet: fn(),
     policy: mockActiveSpendingLimit(),
     viewer: MOCK_VIEWERS.signer,
@@ -59,26 +62,40 @@ export const ActiveNoWallet: Story = { args: { viewer: MOCK_VIEWERS.disconnected
 export const ActiveNotASigner: Story = { args: { viewer: MOCK_VIEWERS.nonSigner } }
 
 /** 4 — queued and unsigned by this signer, who can take it all the way. */
-export const PendingNotSigned: Story = { args: { policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer } }
+export const PendingNotSigned: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer },
+}
 
 /** 5 — queued, no wallet. The banner says what is needed; the helper names the Safe. */
-export const PendingNoWallet: Story = { args: { policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.disconnected } }
+export const PendingNoWallet: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.disconnected },
+}
 
 /** 6 — this signer has done their part; the useful action is nudging the others. */
 export const PendingAlreadySigned: Story = {
-  args: { policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signerWhoSigned },
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signerWhoSigned },
 }
 
 /** 7 — a bystander: nothing to sign, nothing to explain, just the link. */
-export const PendingNotASigner: Story = { args: { policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.nonSigner } }
+export const PendingNotASigner: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.nonSigner },
+}
 
 /** 8 — every signature is in; anyone can execute it now, signer or not. */
 export const PendingFullySigned: Story = {
-  args: { policy: mockFullySignedPending(), viewer: MOCK_VIEWERS.nonSigner },
+  args: { ...PENDING_ARGS, policy: mockFullySignedPending(), viewer: MOCK_VIEWERS.nonSigner },
 }
 
 /** A queued edit: the current limits still apply until it executes. */
-export const PendingUpdate: Story = { args: { policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer } }
+export const PendingUpdate: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** The module is configured but not enabled, so the limit governs nothing and cannot be managed. */
+export const Unenforced: Story = { args: { policy: asActivePolicy(mockUnenforcedPolicy()) } }
+
+/** The edit flow has not shipped yet, so a signer sees the action explained rather than dead. */
+export const ActiveWithoutEditFlow: Story = { args: { onEdit: undefined } }
 
 /** Several spenders, each with its own tokens and its own usage. */
 export const MultiSpender: Story = { args: { policy: asActivePolicy(mockMultiSpenderPolicy()) } }

@@ -3,7 +3,7 @@ import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { getPolicyLabel, getPolicySummary } from '../utils/policyLabel'
 import { getPolicyTokens } from '../utils/policyTokens'
-import { hasSpendingLimitData, type Policy } from '../types'
+import { isSpendingLimitPolicy, type Policy } from '../types'
 
 /** Searches the policies held in the browser. The space address book is not searched: a policy carries no names. */
 
@@ -19,7 +19,7 @@ type SearchablePolicy = {
 }
 
 const getParties = (policy: Policy): string[] => {
-  if (hasSpendingLimitData(policy)) return policy.data.spenders.map((spender) => spender.spender)
+  if (isSpendingLimitPolicy(policy)) return policy.data.spenders.map((spender) => spender.spender)
   if (policy.type === 'proposer') return policy.data.proposers.map((proposer) => proposer.proposer)
   return []
 }
