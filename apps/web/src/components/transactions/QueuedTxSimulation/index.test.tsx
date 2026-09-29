@@ -149,6 +149,15 @@ describe('QueuedTxSimulation gating', () => {
     expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
   })
 
+  it('renders nothing while the plan is still loading', () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true })
+    const { container } = render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('keeps the in-app simulation button with Safe Pro', async () => {
     mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
     render(<QueuedTxSimulation transaction={transaction} />)
