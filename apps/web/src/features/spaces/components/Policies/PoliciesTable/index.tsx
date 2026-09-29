@@ -80,7 +80,6 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           <EthHashInfo
             address={proposer.proposer}
             chainId={policy.safe.chainId}
-            name={proposer.delegatedBy.find((grant) => grant.label)?.label}
             shortAddress
             showPrefix={false}
             highlight4bytes

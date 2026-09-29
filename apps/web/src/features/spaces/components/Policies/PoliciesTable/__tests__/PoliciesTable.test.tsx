@@ -54,12 +54,12 @@ describe('PoliciesTable', () => {
     ])
   })
 
-  it('should, when given a proposer policy, show the proposer with its grant label in the proposer / tokens column', () => {
+  it('should, when given a proposer policy, show the proposer without its grant label in the proposer / tokens column', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
     const cell = screen.getByTestId('policy-cell-proposer-tokens')
 
-    expect(within(cell).getByText('Bob')).toBeInTheDocument()
+    expect(within(cell).queryByText('Bob')).not.toBeInTheDocument()
     expect(within(cell).queryByTestId('policy-tokens')).not.toBeInTheDocument()
   })
 

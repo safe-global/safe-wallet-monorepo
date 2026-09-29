@@ -45,10 +45,10 @@ describe('useProposerOverview', () => {
     })
   })
 
-  it('should, when the proposer has no address book entry, fall back to the grant label', () => {
+  it('should, when the proposer has no address book entry, leave it unnamed instead of using the grant label', () => {
     const { result } = renderHook(() => useProposerOverview(args))
 
-    expect(result.current.proposer.name).toBe('Bob')
+    expect(result.current.proposer.name).toBeUndefined()
   })
 
   it('should, when the chain is unknown, not link the Safe to its settings', () => {

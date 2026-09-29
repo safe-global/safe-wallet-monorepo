@@ -22,7 +22,7 @@ export const useProposerOverview = ({ policy, proposer }: ProposerRef): Proposer
   return {
     proposer: {
       address: proposer.proposer,
-      name: proposerContact?.name ?? proposer.delegatedBy.find((grant) => grant.label)?.label,
+      name: proposerContact?.name,
     },
     appliesTo: {
       address: safeAddress,
