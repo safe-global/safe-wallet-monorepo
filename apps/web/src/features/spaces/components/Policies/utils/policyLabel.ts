@@ -1,7 +1,7 @@
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import {
   hasRecoveryData,
-  hasSpendingLimitData,
+  isSpendingLimitPolicy,
   type Policy,
   type PolicyAllowance,
   type PolicyTokenInfo,
@@ -61,7 +61,7 @@ const getAllowances = (policy: Extract<Policy, { type: 'spending-limit' }>): Pol
  * single allowance that represents it, so the summary counts them instead.
  */
 export const getPolicySummary = (policy: Policy): string => {
-  if (hasSpendingLimitData(policy)) {
+  if (isSpendingLimitPolicy(policy)) {
     const allowances = getAllowances(policy)
 
     if (allowances.length === 0) return 'No limits set'

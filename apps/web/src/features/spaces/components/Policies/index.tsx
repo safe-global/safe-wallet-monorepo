@@ -63,10 +63,10 @@ const Policies = ({
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
-  // One slot, so opening another row swaps the panel instead of stacking a second one.
   const [openPolicyId, setOpenPolicyId] = useState<string | null>(null)
 
   const openPolicy = useCallback((policy: Policy) => {
+    // TODO(WA-3646): widen to isSpendingLimitPolicy once the panel can take a queued policy.
     if (isProposerPolicy(policy) || isActiveSpendingLimitPolicy(policy)) setOpenPolicyId(policy.id)
   }, [])
 

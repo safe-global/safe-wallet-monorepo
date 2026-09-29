@@ -37,8 +37,8 @@ export const useSpendingLimitDetails = (policy: ActiveDrawerPolicy): SpendingLim
     [allSafes, chainId, safeAddress],
   )
 
-  // Spenders are named from the Space book alone (decision Q44), so every member of the Space reads
-  // the same policy. The Safe's own name stays merged, to match the row the panel was opened from.
+  // Spenders are named from the Space book alone, so every member reads the same policy; the Safe's
+  // own name stays merged, to match the row.
   const names = useMemo(() => {
     const named: Array<[string, string]> = []
 

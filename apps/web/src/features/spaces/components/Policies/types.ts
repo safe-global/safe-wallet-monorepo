@@ -131,8 +131,7 @@ export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => policy.status === 'pending'
 
-/** Active and pending spending limits carry the same data, so both render the same limits. */
-export const hasSpendingLimitData = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
+export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
 
 export const isActiveSpendingLimitPolicy = (policy: Policy): policy is SpendingLimitPolicy & { status: 'active' } =>
