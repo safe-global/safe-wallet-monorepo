@@ -4,13 +4,13 @@ import AccountsNavigation from '../index'
 let mockPathname = '/welcome/spaces'
 jest.mock('next/router', () => ({ useRouter: () => ({ pathname: mockPathname }) }))
 
-const mockUseHasFeature = jest.fn()
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
+const mockUseIsSafeProEnabled = jest.fn()
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 
 describe('AccountsNavigation', () => {
   beforeEach(() => {
     mockPathname = '/welcome/spaces'
-    mockUseHasFeature.mockReturnValue(true)
+    mockUseIsSafeProEnabled.mockReturnValue(true)
   })
 
   it('names the Workspaces side Safe Pro with the brand underline and keeps My accounts plain', () => {
@@ -27,7 +27,7 @@ describe('AccountsNavigation', () => {
   })
 
   it('keeps the plain Workspaces tab until Safe Pro is live', () => {
-    mockUseHasFeature.mockReturnValue(false)
+    mockUseIsSafeProEnabled.mockReturnValue(false)
     render(<AccountsNavigation />)
 
     const workspaces = screen.getByRole('tab', { name: 'Workspaces' })

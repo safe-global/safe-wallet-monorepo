@@ -84,16 +84,23 @@ const SCROLL_REGION_CLASS =
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
 
-  return Object.entries(safes).filter(
-    ([key, isSelected]) =>
-      isSelected &&
-      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
-      !flatSafeItems.some((spaceSafe) => {
-        const [chainId, address] = key.split(':')
-        return spaceSafe.address === address && spaceSafe.chainId === chainId
-      }),
-  )
+  return Object.entries(safes)
+    .filter(
+      ([key, isSelected]) =>
+        isSelected &&
+        !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
+        !flatSafeItems.some((spaceSafe) => {
+          const [chainId, address] = key.split(':')
+          return spaceSafe.address === address && spaceSafe.chainId === chainId
+        }),
+    )
+    .map(([key]) => {
+      const [chainId, address] = key.split(':')
+      return { chainId, address }
+    })
 }
+
+const countSafeAccounts = (safes: Array<{ address: string }>) => countSeats(safes.map(({ address }) => address))
 
 function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -211,9 +218,9 @@ const AddAccounts = ({
   const { handleSubmit, watch, getValues, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
-  const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
+  const newSafes = getSelectedSafes(selectedSafes, spaceSafes)
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
-  const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
+  const isFormDirty = newSafes.length > 0 || removedSafesCount > 0
   const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
   const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
   const submitError = error ?? (isAddressBookError ? ADDRESS_BOOK_UNAVAILABLE : undefined)
@@ -258,10 +265,7 @@ const AddAccounts = ({
         return
       }
 
-      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
-        const [chainId, address] = key.split(':')
-        return { chainId, address }
-      })
+      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes)
 
       const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
         chainId: safe.chainId,
@@ -358,8 +362,8 @@ const AddAccounts = ({
 
         // Show success notification
         const messages = []
-        if (safesToAdd.length > 0) messages.push(`Added ${safesToAdd.length} safe account(s)`)
-        if (safesToRemove.length > 0) messages.push(`Removed ${safesToRemove.length} safe account(s)`)
+        if (safesToAdd.length > 0) messages.push(`Added ${countSafeAccounts(safesToAdd)} safe account(s)`)
+        if (safesToRemove.length > 0) messages.push(`Removed ${countSafeAccounts(safesToRemove)} safe account(s)`)
 
         dispatch(
           showNotification({
@@ -650,7 +654,7 @@ const AddAccounts = ({
                       {isSubmitting ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
-                        `Add accounts (${selectedSafesLength})`
+                        `Add accounts (${countSafeAccounts(newSafes)})`
                       )}
                     </Button>
                   </div>

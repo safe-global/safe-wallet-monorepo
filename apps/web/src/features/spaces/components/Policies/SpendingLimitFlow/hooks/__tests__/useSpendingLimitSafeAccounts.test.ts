@@ -38,6 +38,7 @@ describe('useSpendingLimitSafeAccounts', () => {
       isLoading: false,
       isError: false,
       hasWallet: true,
+      signersOnly: false,
       refetch: jest.fn(),
     })
   })
@@ -55,6 +56,7 @@ describe('useSpendingLimitSafeAccounts', () => {
       isLoading: true,
       isError: false,
       hasWallet: false,
+      signersOnly: false,
       refetch,
     })
 

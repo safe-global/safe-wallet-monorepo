@@ -163,4 +163,12 @@ describe('CheckoutReturnModals', () => {
     expect(screen.getByTestId('checkout-failed')).toHaveTextContent('We couldn’t confirm your checkout')
     expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
   })
+
+  it('renders nothing for an abandoned checkout, so the Workspace lock takes over', () => {
+    mockUseCheckoutReturn.mockReturnValue({ status: 'canceled', subscription: undefined, dismiss, retry })
+    const { container } = render(<CheckoutReturnModals />)
+
+    expect(container).toBeEmptyDOMElement()
+    expect(mockPush).not.toHaveBeenCalled()
+  })
 })

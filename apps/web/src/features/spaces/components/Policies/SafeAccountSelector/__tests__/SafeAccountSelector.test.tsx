@@ -10,6 +10,7 @@ import {
   NO_WALLET_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
+  SIGNERS_ONLY_COPY,
 } from '../constants'
 import { buildSafeAccountId } from '../utils'
 import type { SafeAccountEntry, SafeAccountGroup, SafeAccountOption } from '../types'
@@ -71,6 +72,27 @@ describe('SafeAccountSelector', () => {
   it('states the same eligibility rule in the helper text and the empty state', () => {
     expect(ELIGIBILITY_HELPER_TEXT).toContain(ELIGIBILITY_RULE)
     expect(NO_ELIGIBLE_ACCOUNTS_TEXT).toContain(ELIGIBILITY_RULE)
+
+    expect(SIGNERS_ONLY_COPY.helperText).toContain(SIGNERS_ONLY_COPY.rule)
+    expect(SIGNERS_ONLY_COPY.noEligibleAccountsText).toContain(SIGNERS_ONLY_COPY.rule)
+  })
+
+  it('renders the signer-only helper text and empty state when signersOnly is set', async () => {
+    const { user } = renderSelector({ accounts: [], signersOnly: true })
+
+    expect(screen.getByText(SIGNERS_ONLY_COPY.helperText)).toBeInTheDocument()
+    expect(screen.queryByText(ELIGIBILITY_HELPER_TEXT)).not.toBeInTheDocument()
+
+    await openSelector(user)
+
+    expect(screen.getByText(SIGNERS_ONLY_COPY.noEligibleAccountsText)).toBeInTheDocument()
+  })
+
+  it('lets a custom helper text override the rule copy', () => {
+    render(<SafeAccountSelector accounts={[]} onChange={jest.fn()} signersOnly helperText="Custom hint" />)
+
+    expect(screen.getByText('Custom hint')).toBeInTheDocument()
+    expect(screen.queryByText(SIGNERS_ONLY_COPY.helperText)).not.toBeInTheDocument()
   })
 
   it('renders a custom label and helper text when provided', () => {

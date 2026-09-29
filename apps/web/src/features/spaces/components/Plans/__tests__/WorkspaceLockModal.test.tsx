@@ -94,6 +94,12 @@ describe('WorkspaceLockModal', () => {
     expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
   })
 
+  it('shows the lock right away when the user came back from an abandoned checkout', () => {
+    mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'canceled' })
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+    expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
+  })
+
   it('asks to try again instead of locking when the plan could not be checked, admin or not', () => {
     const retry = jest.fn()
     mockUseWorkspaceLock.mockReturnValue(lock({ isLocked: false, isError: true, retry }))

@@ -14,12 +14,15 @@ export const useImportPrivateKey = () => {
   const [inputType, setInputType] = useState<InputType>('unknown')
   const [wallet, setWallet] = useState<ethers.Wallet>()
   const [error, setError] = useState<string | undefined>(undefined)
+  const [validationError, setValidationError] = useState<string | undefined>(undefined)
+  const isInputValid = !!input && !validationError && (inputType === 'private-key' || inputType === 'seed-phrase')
   const router = useRouter()
   const { createDelegate } = useDelegate()
   const { guardAgainstCollision } = useSignerCollisionGuard()
 
   const handleInputChange = (text: string) => {
     setInput(text)
+    setError(undefined)
     const detectedType = detectInputType(text)
     setInputType(detectedType)
 
@@ -27,9 +30,9 @@ export const useImportPrivateKey = () => {
       try {
         const wallet = new ethers.Wallet(text.trim())
         setWallet(wallet)
-        setError(undefined)
+        setValidationError(undefined)
       } catch {
-        setError(ERROR_MESSAGE)
+        setValidationError(ERROR_MESSAGE)
       }
     } else if (detectedType === 'seed-phrase') {
       try {
@@ -37,18 +40,23 @@ export const useImportPrivateKey = () => {
         // Trim the input to handle leading/trailing whitespace
         ethers.Wallet.fromPhrase(text.trim())
         setWallet(undefined) // Clear wallet since we'll show address selection
-        setError(undefined)
+        setValidationError(undefined)
       } catch {
-        setError(ERROR_MESSAGE)
+        setValidationError(ERROR_MESSAGE)
       }
     } else {
       setWallet(undefined)
-      setError(text.length > 0 ? ERROR_MESSAGE : undefined)
+      setValidationError(text.length > 0 ? ERROR_MESSAGE : undefined)
     }
   }
 
   const handleImport = async () => {
     setError(undefined)
+
+    if (!isInputValid) {
+      setError(ERROR_MESSAGE)
+      return
+    }
 
     const trimmedInput = input.trim()
 
@@ -110,6 +118,7 @@ export const useImportPrivateKey = () => {
     input,
     inputType,
     wallet,
-    error,
+    error: validationError ?? error,
+    isInputValid,
   }
 }
