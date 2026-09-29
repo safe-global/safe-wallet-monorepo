@@ -11,7 +11,6 @@ describe('Spending limits non-owner tests', () => {
   })
 
   beforeEach(() => {
-    spendinglimit.turnOnSpendingLimitGate()
     cy.visit(constants.setupUrl + staticSafes.SEP_STATIC_SAFE_3)
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
   })

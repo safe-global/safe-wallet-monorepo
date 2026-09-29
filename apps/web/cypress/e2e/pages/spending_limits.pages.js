@@ -256,30 +256,8 @@ export const plans = {
 /** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
 export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
 
-/** Turns on SAFE_PRO and SPENDING_LIMIT_GATING on every chain, as in production. */
-export function turnOnSpendingLimitGate() {
-  cy.intercept('GET', '**/v2/chains**', (req) => {
-    req.continue((res) => {
-      const addGatingFlags = (chain) => ({
-        ...chain,
-        features: [...new Set([...(chain.features || []), 'SAFE_PRO', 'SPENDING_LIMIT_GATING'])],
-      })
-
-      if (res.body?.results && Array.isArray(res.body.results)) {
-        res.body.results = res.body.results.map(addGatingFlags)
-      } else if (res.body?.chainId) {
-        res.body = addGatingFlags(res.body)
-      }
-    })
-  })
-}
-
-/**
- * Sets up the spending limit plan gate as in production: the gate on, the wallet signed in to Workspaces, and the
- * Workspace on `plan`. Business includes policies, Starter does not.
- */
+/** Signs the wallet in to Workspaces with the Workspace on `plan`. Business includes policies, Starter does not. */
 export function signInOnPlan(signer, plan) {
-  turnOnSpendingLimitGate()
   cy.intercept('GET', '**/v1/spaces/*/entitlements', {
     plan: { id: plan.toLowerCase(), name: plan, cycleEndsAt: '2099-01-01T00:00:00Z' },
     entitlements: [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }],
