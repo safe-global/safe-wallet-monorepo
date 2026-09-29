@@ -1,7 +1,7 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
@@ -145,5 +145,16 @@ describe('SpendingLimitDetails', () => {
 
     expect(screen.getAllByRole('progressbar')).toHaveLength(policy.data.spenders[0].allowances.length)
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
+  })
+
+  it('hands the Edit button to the caller', async () => {
+    mockWallet()
+    mockSpaceSafes(false)
+    const onEdit = jest.fn()
+
+    const { user } = renderWithUserEvent(<SpendingLimitDetails policy={policy} onClose={jest.fn()} onEdit={onEdit} />)
+    await user.click(screen.getByRole('button', { name: 'Edit' }))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
   })
 })

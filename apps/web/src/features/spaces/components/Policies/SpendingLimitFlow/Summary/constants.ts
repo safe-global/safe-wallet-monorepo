@@ -19,9 +19,20 @@ export const CANONICAL_FREQUENCIES: Readonly<Partial<Record<string, CanonicalFre
 }
 
 export const CALLOUT_TITLE_PREFIX = 'You are giving'
+export const EDIT_CALLOUT_DESCRIPTION =
+  'Nothing changes on chain until this transaction is executed. Until then the limits below can still be spent.'
+export const EDIT_CALLOUT_NO_CHANGES = 'This edit changes nothing.'
 export const CALLOUT_NOUN_SINGULAR = 'spending limit'
 export const CALLOUT_NOUN_PLURAL = 'spending limits'
 export const CALLOUT_DESCRIPTION_SINGULAR =
   'Once this transaction executes, withdrawals up to the limit you set go through with no further approvals required.'
 export const CALLOUT_DESCRIPTION_PLURAL =
   'Once this transaction executes, withdrawals up to the limits you set go through with no further approvals required.'
+
+/** How each row of an edit is labelled. The create flow sets no `change`, so none of these show there. */
+export const CHANGE_BADGE = {
+  added: { label: 'Added', variant: 'success' },
+  changed: { label: 'Changed', variant: 'warning' },
+  unchanged: { label: 'Unchanged', variant: 'outline' },
+  removed: { label: 'Removed', variant: 'destructive' },
+} as const satisfies Record<string, { label: string; variant: 'success' | 'warning' | 'outline' | 'destructive' }>

@@ -12,6 +12,9 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import SpendingLimitSummary from '../Summary'
+import { toEditSummaryModel } from '../Summary/toEditSummaryModel'
+import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import { toPolicySummaryModel } from '../Summary/toPolicySummaryModel'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { resetPeriodEventLabel } from '../utils/resetPeriod'
@@ -31,6 +34,8 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const { options: tokens } = useSpendingLimitTokenOptions()
   const names = useAddressBook()
   const chainId = useChainId()
+  const isEditMode = useIsEditMode()
+  const { limits: baseline } = useExistingSpendingLimits()
 
   useBuildPolicyTransaction(formValues)
 
@@ -50,10 +55,14 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
     [formValues, chainId, onSubmit],
   )
 
-  const summary = useMemo(
-    () => (formValues ? toPolicySummaryModel(formValues, { accounts, tokens, names }) : undefined),
-    [formValues, accounts, tokens, names],
-  )
+  const summary = useMemo(() => {
+    if (!formValues) return undefined
+    const sources = { accounts, tokens, names }
+
+    return isEditMode && baseline
+      ? toEditSummaryModel(formValues, baseline, sources)
+      : toPolicySummaryModel(formValues, sources)
+  }, [formValues, accounts, tokens, names, isEditMode, baseline])
 
   if (!safeTx && !safeTxError) {
     return (

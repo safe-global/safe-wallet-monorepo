@@ -1,5 +1,6 @@
 /** Copy of the Create step, verbatim from the Figma frames. */
 export const CREATE_STEP_TITLE = 'Create new policy'
+export const EDIT_STEP_TITLE = 'Edit policy'
 export const FLOW_SUBTITLE = 'Spending limit'
 export const FLOW_HELP_LABEL = 'Learn more about spending limits'
 
@@ -23,6 +24,7 @@ export const ADD_SPENDER_LABEL = 'Add spender'
 export const REMOVE_SPENDER_LABEL = 'Remove spender'
 export const REMOVE_LIMIT_LABEL = 'Remove token limit'
 export const NEXT_LABEL = 'Next'
+export const DISCARD_CHANGES_LABEL = 'Discard all changes'
 
 export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy. Add the token to their existing card.'
 export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this spender'

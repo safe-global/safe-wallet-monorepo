@@ -6,6 +6,7 @@ import { SpendingLimitsFeature, type SpendingLimitPair, type SpendingLimitState 
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR } from '../constants'
@@ -16,6 +17,7 @@ type BlockerInputs = {
   pairsError: Error | undefined
   pairs: readonly SpendingLimitPair[] | undefined
   existingLimits: readonly SpendingLimitState[] | undefined
+  isEditMode: boolean
 }
 
 /** Why the policy cannot be built at all, as the error the review shows; `undefined` when nothing forbids it. */
@@ -24,12 +26,13 @@ const findBuildBlocker = ({
   pairsError,
   pairs,
   existingLimits,
+  isEditMode,
 }: BlockerInputs): Error | undefined => {
   // Building blind over unknown limits could re-add a delegate or skip a reset, so a failed load is final.
   if (existingLimitsError) return new Error(EXISTING_LIMITS_LOAD_ERROR, { cause: existingLimitsError })
   if (pairsError) return pairsError
-  // Step 1 hides these pairs; this catches one that slipped through, since editing a limit is WA-3156's flow.
-  if (pairs && existingLimits && findExistingPair(pairs, existingLimits)) {
+  // Only the create flow hides these pairs; an edit describes the Safe's own limits, so they belong in it.
+  if (!isEditMode && pairs && existingLimits && findExistingPair(pairs, existingLimits)) {
     return new Error(EXISTING_PAIR_IN_POLICY_ERROR)
   }
   return undefined
@@ -47,7 +50,9 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const chain = useCurrentChain()
   const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions()
   const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
-  const { createSpendingLimitsTx, $isReady } = useLoadFeature(SpendingLimitsFeature)
+  const { createSpendingLimitsTx, createSpendingLimitEditTx, buildSpendingLimitDelta, $isReady } =
+    useLoadFeature(SpendingLimitsFeature)
+  const isEditMode = useIsEditMode()
 
   const tokensReady = !tokensLoading && !isPopularLoading
   const pairsResult = useMemo(
@@ -62,8 +67,8 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const pairsError = pairsResult?.error
 
   const blocker = useMemo(
-    () => findBuildBlocker({ existingLimitsError, pairsError, pairs, existingLimits }),
-    [existingLimitsError, pairsError, pairs, existingLimits],
+    () => findBuildBlocker({ existingLimitsError, pairsError, pairs, existingLimits, isEditMode }),
+    [existingLimitsError, pairsError, pairs, existingLimits, isEditMode],
   )
 
   const sdk = scope?.sdk
@@ -79,7 +84,18 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
-    createSpendingLimitsTx(pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
+    const build = isEditMode
+      ? createSpendingLimitEditTx(
+          buildSpendingLimitDelta(pairs, existingLimits),
+          existingLimits,
+          chainId,
+          safe.modules,
+          safe.deployed,
+          scope,
+        )
+      : createSpendingLimitsTx(pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
+
+    build
       .then((tx) => {
         if (!isStale) setSafeTx(tx)
       })
@@ -103,7 +119,10 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     safeLoaded,
     moduleCount,
     safe.deployed,
+    isEditMode,
     createSpendingLimitsTx,
+    createSpendingLimitEditTx,
+    buildSpendingLimitDelta,
     setSafeTx,
     setSafeTxError,
   ])

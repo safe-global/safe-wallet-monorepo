@@ -17,10 +17,11 @@ import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
+import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isActiveSpendingLimitPolicy, isProposerPolicy, type Policy } from './types'
+import { isActiveSpendingLimitPolicy, isProposerPolicy, type Policy, type PolicySafe } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -89,6 +90,14 @@ const Policies = ({
   )
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
+
+  const editSpendingLimit = useCallback(
+    (safe: PolicySafe) => {
+      setOpenPolicyId(null)
+      setTxFlow(<EditSpendingLimitFlow safe={safe} />)
+    },
+    [setTxFlow],
+  )
 
   const startProposerFlow = useCallback(() => {
     setTxFlow(<ProposerRoleFlow />)
@@ -242,7 +251,11 @@ const Policies = ({
       )}
 
       {openedPolicy && isActiveSpendingLimitPolicy(openedPolicy) && (
-        <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
+        <SpendingLimitDetails
+          policy={openedPolicy}
+          onClose={closeDetails}
+          onEdit={() => editSpendingLimit(openedPolicy.safe)}
+        />
       )}
     </div>
   )
