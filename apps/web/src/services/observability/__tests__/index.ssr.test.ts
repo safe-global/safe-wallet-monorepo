@@ -12,10 +12,9 @@ jest.mock('../factory', () => ({
   createObservabilityProvider: jest.fn(() => mockProvider),
 }))
 
-import { initObservability } from '../index'
-
 describe('initObservability on the server', () => {
   it('should be a no-op', () => {
+    const { initObservability } = require('../index')
     initObservability()
 
     expect(mockProvider.init).not.toHaveBeenCalled()

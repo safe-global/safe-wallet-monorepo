@@ -104,12 +104,8 @@ jest.mock('@/components/ui/field', () => ({
   ),
 }))
 
-let isProductionMock = true
-jest.mock('@/config/constants', () => ({
-  get IS_PRODUCTION() {
-    return isProductionMock
-  },
-}))
+jest.mock('@/config/constants', () => ({ IS_PRODUCTION: true }))
+const mockConstants = jest.requireMock<{ IS_PRODUCTION: boolean }>('@/config/constants')
 
 // Mock icons
 jest.mock('../../config', () => ({
@@ -205,7 +201,7 @@ jest.mock('@/services/beamer', () => ({
 describe('SidebarCommonFooter', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    isProductionMock = true
+    mockConstants.IS_PRODUCTION = true
     mockHasBeamerConsent = true
     mockUseAppDispatch.mockReturnValue(jest.fn())
     mockUseDarkMode.mockReturnValue(false)
@@ -519,7 +515,7 @@ describe('SidebarCommonFooter', () => {
 
   describe('dev mode (IS_PRODUCTION = false)', () => {
     beforeEach(() => {
-      isProductionMock = false
+      mockConstants.IS_PRODUCTION = false
     })
 
     it('renders the Dark mode toggle', () => {
