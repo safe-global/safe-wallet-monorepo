@@ -7875,6 +7875,21 @@
           "lineItems"
         ]
       },
+      "RemovedSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
       "UpdateSubscriptionDto": {
         "type": "object",
         "properties": {
@@ -7885,6 +7900,13 @@
           "paymentLinkId": {
             "type": "string",
             "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          },
+          "removedSafes": {
+            "description": "Safes to remove from the workspace before the plan changes, so it fits the new plan. Safes the workspace does not hold are ignored",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RemovedSafeDto"
+            }
           }
         },
         "required": [

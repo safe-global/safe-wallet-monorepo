@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react'
+import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useChangePlan } from '../useChangePlan'
 
 const mockTriggerPreview = jest.fn()
@@ -50,6 +51,53 @@ describe('useChangePlan', () => {
     })
     expect(ok).toBe(true)
     expect(mockSyncPlanChange).toHaveBeenCalledWith(mockDispatch, SPACE_ID, 'price_starter')
+  })
+
+  it('sends the Safes to remove with the change and refreshes the Workspace Safes', async () => {
+    mockUpdate.mockResolvedValue({ data: { subscriptionId: 'sub_1', success: true } })
+    const removed = [{ chainId: '1', address: '0xB' }]
+    const { result } = renderHook(() => useChangePlan())
+
+    let ok = false
+    await act(async () => {
+      ok = await result.current.changePlan('price_starter', 'pl_starter', removed)
+    })
+
+    expect(mockUpdate).toHaveBeenCalledWith({
+      spaceId: SPACE_ID,
+      subscriptionId: 'sub_1',
+      updateSubscriptionDto: { planId: 'price_starter', paymentLinkId: 'pl_starter', removedSafes: removed },
+    })
+    expect(ok).toBe(true)
+    expect(mockDispatch).toHaveBeenCalledWith(spacesApi.util.invalidateTags(['spaces']))
+  })
+
+  it('refreshes the Workspace Safes when a change with removals fails, as they may be gone already', async () => {
+    mockUpdate.mockResolvedValue({ error: { status: 502 } })
+    const { result } = renderHook(() => useChangePlan())
+
+    let ok = true
+    await act(async () => {
+      ok = await result.current.changePlan('price_starter', 'pl_starter', [{ chainId: '1', address: '0xB' }])
+    })
+
+    expect(ok).toBe(false)
+    expect(mockDispatch).toHaveBeenCalledWith(spacesApi.util.invalidateTags(['spaces']))
+    expect(mockSyncPlanChange).not.toHaveBeenCalled()
+  })
+
+  it('leaves the Workspace Safes alone when nothing is removed', async () => {
+    mockUpdate.mockResolvedValue({ data: { subscriptionId: 'sub_1', success: true } })
+    const { result } = renderHook(() => useChangePlan())
+
+    await act(async () => {
+      await result.current.changePlan('price_starter', 'pl_starter', [])
+    })
+
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ updateSubscriptionDto: { planId: 'price_starter', paymentLinkId: 'pl_starter' } }),
+    )
+    expect(mockDispatch).not.toHaveBeenCalledWith(spacesApi.util.invalidateTags(['spaces']))
   })
 
   it('reports a failed change', async () => {

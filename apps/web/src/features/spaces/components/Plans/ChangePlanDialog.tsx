@@ -12,7 +12,6 @@ import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
-import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
 
@@ -53,7 +52,7 @@ export default function ChangePlanDialog({
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
-  /** Safes the accounts step left out; they leave the Workspace right before the plan changes. */
+  /** Safes the accounts step left out; the plan change removes them from the Workspace first. */
   removed?: SafeRef[]
   /** Dismissed without changing anything. */
   onClose: () => void
@@ -62,7 +61,6 @@ export default function ChangePlanDialog({
 }) {
   const { previewChange, preview, isPreviewing, previewError, changePlan, isChanging, changeError } =
     useChangePlan(spaceId)
-  const { trim, isTrimming, error: trimError } = useSeatTrim(spaceId)
   const [isVerifying, setIsVerifying] = useState(false)
   const { priceId, paymentLinkId } = pick.option
   const direction = getChangeDirection(currentPlan, pick)
@@ -82,14 +80,12 @@ export default function ChangePlanDialog({
 
   const onConfirm = async () => {
     if (!priceId || !paymentLinkId) return
-    if (!(await trim(removed))) return
-    if (await changePlan(priceId, paymentLinkId)) onChanged()
+    if (await changePlan(priceId, paymentLinkId, removed)) onChanged()
   }
 
   const error = previewError ?? (isVerifying ? undefined : changeError)
-  const errorMessage =
-    trimError ?? (error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined)
-  const isBusy = isTrimming || isChanging || isVerifying
+  const errorMessage = error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined
+  const isBusy = isChanging || isVerifying
   const canConfirm = Boolean(priceId && paymentLinkId) && (isTrialSwitch || (Boolean(preview) && !previewError))
 
   return (

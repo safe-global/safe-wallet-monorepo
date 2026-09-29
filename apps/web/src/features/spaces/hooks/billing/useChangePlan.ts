@@ -3,13 +3,18 @@ import {
   useBillingUpdateSubscriptionV1Mutation,
   useLazyBillingPreviewSubscriptionUpdateV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppDispatch } from '@/store'
+import type { SafeRef } from '../../components/Plans/types'
 import { isPlanChangeable } from './subscription'
 import { syncPlanChange } from './syncPlanChange'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'
 
-/** The elevation listener steps up the PATCH's second factor and replays it; callers tolerate `elevation_required`. */
+/**
+ * The elevation listener steps up the PATCH's second factor and replays it; callers tolerate `elevation_required`.
+ * `removedSafes` leave the Workspace in the same request, before the plan changes.
+ */
 export const useChangePlan = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const dispatch = useAppDispatch()
@@ -28,13 +33,18 @@ export const useChangePlan = (spaceId?: string | null) => {
   )
 
   const changePlan = useCallback(
-    async (priceId: string, paymentLinkId: string): Promise<boolean> => {
+    async (priceId: string, paymentLinkId: string, removedSafes: SafeRef[] = []): Promise<boolean> => {
       if (!gatedSpaceId || !subscriptionId) return false
       const result = await update({
         spaceId: gatedSpaceId,
         subscriptionId,
-        updateSubscriptionDto: { planId: priceId, paymentLinkId },
+        updateSubscriptionDto: {
+          planId: priceId,
+          paymentLinkId,
+          ...(removedSafes.length > 0 && { removedSafes }),
+        },
       })
+      if (removedSafes.length > 0) dispatch(spacesApi.util.invalidateTags(['spaces']))
       if ('error' in result) return false
       void syncPlanChange(dispatch, gatedSpaceId, priceId)
       return true
