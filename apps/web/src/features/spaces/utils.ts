@@ -9,21 +9,14 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
 import type { AddressBookState } from '@/store/addressBookSlice'
+import { filterSpacesByStatus } from '@/utils/spaces'
 
 // TODO: Currently also checks for 404 because the /v1/spaces/<orgId> endpoint does not return 401
 export const isUnauthorized = (error: FetchBaseQueryError | SerializedError | undefined) => {
   return error && 'status' in error && (error.status === 401 || error.status === 404)
 }
 
-export const filterSpacesByStatus = (
-  currentUser: UserWithWallets | undefined,
-  spaces: GetSpaceResponse[],
-  status: MemberStatus,
-) => {
-  return spaces.filter((space) => {
-    return space.members.some((member) => member.user.id === currentUser?.id && member.status === status)
-  })
-}
+export { filterSpacesByStatus }
 
 export const getInvitedByName = (
   space: GetSpaceResponse | undefined,

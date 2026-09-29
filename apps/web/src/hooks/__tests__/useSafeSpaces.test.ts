@@ -111,6 +111,23 @@ describe('useSafeSpaces', () => {
     expect(trigger).not.toHaveBeenCalled()
   })
 
+  it('falls back to every Space when the current user fails to load, dropping the ones it cannot read', async () => {
+    const trigger = jest.fn((arg: { spaceId: string }) => ({
+      unwrap: () =>
+        arg.spaceId === 'alpha' ? Promise.resolve({ safes: { '1': ['0xAAA'] } }) : Promise.reject({ status: 403 }),
+    }))
+    mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
+    const invited = space('invited', [member('INVITED')])
+    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, invited], isLoading: false })
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: undefined, isLoading: false, isError: true })
+
+    const { result } = renderHook(() => useSafeSpaces())
+
+    await waitFor(() => expect(result.current.safeSpaces['1:0xaaa']).toEqual([spaceAlpha]))
+    expect(result.current.isLoading).toBe(false)
+    expect(trigger).toHaveBeenCalledTimes(2)
+  })
+
   it('does not fetch any Space safes while skipped', async () => {
     mockSafesResolver({})
     mockUseSpacesGetV1Query.mockReturnValue({ data: undefined, isLoading: false })

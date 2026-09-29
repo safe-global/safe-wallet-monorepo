@@ -1,3 +1,6 @@
+import type { UserWithWallets } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import type { GetSpaceResponse, SpaceMemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+
 /**
  * Normalize a Space UUID (string | null) for use as a Space identifier.
  * Returns null for missing/whitespace-only inputs so callers can skip
@@ -21,3 +24,9 @@ export const addressOfSafeKey = (key: string): string => key.slice(key.indexOf('
 /** Seats are per Safe address: the same Safe deployed on several chains takes one. */
 export const countSeats = (addresses: Iterable<string>): number =>
   new Set(Array.from(addresses, (address) => address.toLowerCase())).size
+
+export const filterSpacesByStatus = (
+  currentUser: UserWithWallets | undefined,
+  spaces: GetSpaceResponse[],
+  status: SpaceMemberDto['status'],
+) => spaces.filter((space) => space.members.some((m) => m.user.id === currentUser?.id && m.status === status))

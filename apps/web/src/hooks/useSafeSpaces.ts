@@ -7,8 +7,7 @@ import {
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { MemberStatus } from '@/features/spaces'
-import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { filterSpacesByStatus } from '@/utils/spaces'
 
 /** Maps a chain-qualified Safe key (`${chainId}:${lowercased address}`) to the Spaces (workspaces) it belongs to. */
 export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
@@ -32,17 +31,22 @@ export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${
 export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
   const isSignedIn = useAppSelector(isAuthenticated)
   const { data: spaces, isLoading: isLoadingSpaces } = useSpacesGetV1Query(undefined, { skip: !isSignedIn || skip })
-  const { data: currentUser, isLoading: isLoadingUser } = useUsersGetWithWalletsV1Query(undefined, {
+  const {
+    data: currentUser,
+    isLoading: isLoadingUser,
+    isError: isUserError,
+  } = useUsersGetWithWalletsV1Query(undefined, {
     skip: !isSignedIn || skip,
   })
   const [triggerSpaceSafes] = useLazySpaceSafesGetV1Query()
   const [safeSpaces, setSafeSpaces] = useState<SafeSpacesMap>({})
   const [isResolving, setIsResolving] = useState(false)
 
-  const joinedSpaces = useMemo(
-    () => (spaces && currentUser ? filterSpacesByStatus(currentUser, spaces, MemberStatus.ACTIVE) : undefined),
-    [spaces, currentUser],
-  )
+  const joinedSpaces = useMemo(() => {
+    if (!spaces) return undefined
+    if (currentUser) return filterSpacesByStatus(currentUser, spaces, 'ACTIVE')
+    return isUserError ? spaces : undefined
+  }, [spaces, currentUser, isUserError])
 
   useEffect(() => {
     if (!joinedSpaces || joinedSpaces.length === 0) {
