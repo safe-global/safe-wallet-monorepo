@@ -3,10 +3,10 @@ name: 'Yarn'
 description: 'Set up Node.js and install dependencies'
 
 inputs:
-  after-install:
-    description: 'Run web after-install step to generate contract types'
+  verify_cache:
+    description: 'Verify Yarn cache tarball checksums against the lockfile (--check-cache). Slow; reserve for release jobs that publish artifacts.'
     required: false
-    default: 'true'
+    default: 'false'
   turbo-token:
     description: 'Turborepo remote cache token (Vercel PAT)'
     required: false
@@ -34,30 +34,12 @@ runs:
         echo "TURBO_TEAM=${{ inputs.turbo-team }}" >> "$GITHUB_ENV"
         echo "TURBO_REMOTE_ONLY=false" >> "$GITHUB_ENV"
 
-    - name: Restore Yarn Cache & Types
-      id: restore-yarn-types
-      uses: ./.github/actions/cache-deps
+    - name: Cache Yarn install-state
+      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
       with:
-        mode: restore-yarn
-
-    - name: Echo cache hit
-      shell: bash
-      run: |
-        echo "Yarn cache hit: ${{ steps.restore-yarn-types.outputs.cache-hit-yarn }}"
+        path: ${{ github.workspace }}/.yarn/install-state.gz
+        key: ${{ runner.os }}-yarn-install-state-${{ hashFiles('**/yarn.lock') }}
 
     - name: Yarn install
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
       shell: bash
-      run: yarn install --immutable
-
-    - name: Yarn after-install to generate contracts types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true' && inputs.after-install == 'true'
-      shell: bash
-      run: yarn workspace @safe-global/web after-install
-
-    - name: Save Yarn Cache & Types
-      if: steps.restore-yarn-types.outputs.cache-hit-yarn != 'true'
-      uses: ./.github/actions/cache-deps
-      with:
-        mode: save-yarn
-        key: ${{ steps.restore-yarn-types.outputs.computed-cache-key-yarn }}
+      run: yarn install --immutable ${{ inputs.verify_cache == 'true' && '--check-cache' || '' }}
