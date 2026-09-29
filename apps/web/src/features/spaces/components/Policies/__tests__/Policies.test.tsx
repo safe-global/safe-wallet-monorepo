@@ -6,6 +6,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
+import { mockStarterPlan } from '../mocks/plan'
 import { asActivePolicy, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
@@ -85,13 +86,13 @@ describe('Policies', () => {
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  it('styles Learn more like the Proposers section', () => {
+  it('should, when rendered, style Learn more as a bold underlined link without the external icon', () => {
     render(<Policies />)
 
     const link = screen.getByRole('link', { name: 'Learn more' })
 
-    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
+    expect(link.querySelector('.external-link-icon')).not.toBeInTheDocument()
+    expect(link).toHaveClass('font-bold', 'underline')
   })
 
   it('renders the policy catalogue', () => {
@@ -501,6 +502,81 @@ describe('Policies', () => {
 
       expect(setTxFlow).toHaveBeenCalledTimes(1)
       expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+  })
+
+  describe('a plan that does not include policies', () => {
+    it('should, when the plan is given, render the upsell banner naming the workspace and the plan', () => {
+      render(<Policies locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
+
+      expect(screen.getByTestId('policy-upsell-banner')).toHaveTextContent('Acme Inc is on Starter')
+      expect(screen.getByRole('button', { name: /Upgrade to Business/ })).toBeInTheDocument()
+    })
+
+    it('should, when no plan is given, render no banner', () => {
+      render(<Policies />)
+
+      expect(screen.queryByTestId('policy-upsell-banner')).not.toBeInTheDocument()
+    })
+
+    it('should, when the banner button is clicked, call onUpgrade', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(screen.getByRole('button', { name: /Upgrade to Business/ }))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when a locked tile is clicked, call onUpgrade and open no intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the workspace has policies, keep listing them under the banner', () => {
+      render(<Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
+
+      expect(screen.getByTestId('policy-upsell-banner')).toBeInTheDocument()
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the plan does not include a policy, disable it in the add policy dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(screen.getByTestId('add-policy-option-proposer')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-spending-limit')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-suggestion')).not.toHaveAttribute('aria-disabled')
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
+    })
+
+    it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies
+          policies={mockPolicies()}
+          locked={{ ...mockStarterPlan, lockedPolicies: ['spending-limit'], onUpgrade }}
+        />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
     })
   })
 })
