@@ -5,13 +5,6 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { getPolicyTokens } from '../utils/policyTokens'
 import { isSpendingLimitPolicy, type Policy } from '../types'
 
-/**
- * Searches the policies held in the browser, over what a row shows: names, addresses, network and
- * tokens. The rule is not indexed — the type filter below the search field already selects on it.
- * Spender names are indexed although the table hides them, so a hit on one is reported back and
- * the row can say why it matched.
- */
-
 type SafeNameResolver = ReturnType<typeof useSafeNameResolver>
 
 type SearchablePolicy = {
@@ -28,7 +21,6 @@ type SearchablePolicy = {
 
 export type PolicySearchResult = {
   policies: Policy[]
-  /** Policy id → the spender name the query hit. */
   matchedSpenderNames: Map<string, string>
 }
 
@@ -38,13 +30,11 @@ const getSpenders = (policy: Policy): string[] =>
 const getProposers = (policy: Policy): string[] =>
   policy.type === 'proposer' ? policy.data.proposers.map((proposer) => proposer.proposer) : []
 
-/** A proposer's name, as CGW returns it. This is the name the Proposer column shows. */
 const getProposerLabels = (policy: Policy): string[] => {
   if (policy.type !== 'proposer') return []
   return policy.data.proposers.flatMap((proposer) => proposer.delegatedBy.map((grant) => grant.label))
 }
 
-/** Every name a row shows: the Safe's, its proposers', and the proposer label from CGW. */
 const getSearchableNames = (policy: Policy, resolveName: SafeNameResolver): string[] => {
   const { chainId } = policy.safe
 

@@ -14,7 +14,7 @@ import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
-  /** Policy id → the spender name the search hit. The row shows it, since spenders are otherwise only in the detail panel. */
+  /** Shown in the row because spenders are otherwise only in the detail panel. */
   matchedSpenderNames?: Map<string, string>
   onSelect?: (policy: Policy) => void
 }
