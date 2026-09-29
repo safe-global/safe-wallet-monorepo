@@ -27,7 +27,13 @@ export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types']
 /** Proposer grants take effect off chain at once, so only spending limits can be pending. */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = ['spending-limit']
 
-const PENDING_REFETCH_EVENTS = [TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.DELETED, TxEvent.SUCCESS]
+const PENDING_REFETCH_EVENTS = [
+  TxEvent.PROPOSED,
+  TxEvent.SIGNATURE_PROPOSED,
+  TxEvent.ONCHAIN_SIGNATURE_SUCCESS,
+  TxEvent.DELETED,
+  TxEvent.SUCCESS,
+]
 const ACTIVE_REFETCH_EVENTS = [TxEvent.SUCCESS]
 
 const NO_POLICIES: ActivePolicyDto[] = []

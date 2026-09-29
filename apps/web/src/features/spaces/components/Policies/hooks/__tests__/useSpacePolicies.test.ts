@@ -286,4 +286,14 @@ describe('useSpacePolicies', () => {
 
     expect(refetchPending).toHaveBeenCalled()
   })
+
+  it('should, when a signature is submitted onchain, refetch the pending rows', () => {
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+
+    txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, { txId: 'multisig_0x1_0xabc', nonce: 1 })
+
+    expect(refetchPending).toHaveBeenCalled()
+  })
 })
