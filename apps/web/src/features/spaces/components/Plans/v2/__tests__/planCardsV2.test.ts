@@ -1,14 +1,16 @@
 import {
+  COMING_SOON_V2,
   COMPARE_SECTIONS_V2,
   ENTERPRISE_TIER,
+  getCardComingSoonV2,
   getCardFeaturesV2,
   getPlanContentV2,
   MULTIPLE_WORKSPACES,
-  NAMED_ACCOUNT_MANAGER,
+  NAMED_SUPPORT_CONTACT,
   PLAN_CONTENT_V2,
   PLAN_FEATURES,
   PLAN_ORDER,
-  SLAS,
+  MEMBERS,
   WORKSPACE_2FA,
 } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
@@ -51,34 +53,45 @@ describe('PLAN_CONTENT_V2', () => {
     expect(Object.keys(PLAN_CONTENT_V2)).toEqual(PLAN_ORDER)
   })
 
-  it('lists more on each card than on the one before it, keeping everything the lower plan has', () => {
+  it('lists only what each card adds over the plan below it, plus its own sponsored allowance', () => {
     const lists = PLAN_ORDER.map((plan) => getCardFeaturesV2(plan) ?? [])
 
     lists.slice(1).forEach((list, index) => {
       const lower = lists[index]
-      expect(list.length).toBeGreaterThan(lower.length)
-      lower.filter((label) => !/sponsored transactions/.test(label)).forEach((label) => expect(list).toContain(label))
+      expect(list.length).toBeGreaterThan(0)
+      lower
+        .filter((label) => !/sponsored transactions/.test(label))
+        .forEach((label) => expect(list).not.toContain(label))
+      expect(list.filter((label) => /sponsored transactions/.test(label))).toHaveLength(1)
     })
   })
 
-  it('keeps 2FA and API access off the cards but in the compare table', () => {
+  it('keeps 2FA and members off the cards but in the compare table, and API access out of both', () => {
     const cardLabels = PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? [])
-    const tableRows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows.map((row) => row.feature))
+    const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
+    const tableRows = rows.map((row) => row.feature)
 
-    expect(cardLabels.filter((label) => label === WORKSPACE_2FA || /API/.test(label))).toEqual([])
-    expect(tableRows).toEqual(expect.arrayContaining([WORKSPACE_2FA, 'API access']))
+    expect(cardLabels).not.toContain(WORKSPACE_2FA)
+    expect(cardLabels).not.toContain(MEMBERS)
+    expect(tableRows).toEqual(expect.arrayContaining([WORKSPACE_2FA, MEMBERS]))
+    expect(rows.find((row) => row.feature === MEMBERS)?.values).toEqual({
+      Starter: 'Unlimited',
+      Business: 'Unlimited',
+      Enterprise: 'Unlimited',
+    })
+    expect([...cardLabels, ...tableRows].filter((label) => /API/.test(label))).toEqual([])
   })
 
-  it('keeps every other launch card feature', () => {
+  it('keeps every other launch card feature on the plan or one below it', () => {
     const renamed: Record<string, string> = {
       '10 sponsored transactions / month': '10 sponsored transactions per month',
       '50 sponsored transactions / month': '50 sponsored transactions per month',
-      'Policy engine': 'Policy engine & spending limits',
+      'Policy engine': 'Spending limits',
     }
-    const dropped = /MFA|API access/
+    const dropped = /MFA|API access|Unlimited Workspace members/
 
-    PLAN_ORDER.forEach((plan) => {
-      const labels = getCardFeaturesV2(plan) ?? []
+    PLAN_ORDER.forEach((plan, rank) => {
+      const labels = PLAN_ORDER.slice(0, rank + 1).flatMap((lower) => getCardFeaturesV2(lower) ?? [])
       PLAN_FEATURES[plan]
         .filter((feature) => !dropped.test(feature))
         .forEach((feature) => expect(labels).toContain(renamed[feature] ?? feature))
@@ -86,10 +99,15 @@ describe('PLAN_CONTENT_V2', () => {
   })
 
   it('adds the Enterprise-only terms to the Enterprise card and marks them Enterprise-only in the table', () => {
-    const enterpriseOnly = [MULTIPLE_WORKSPACES, NAMED_ACCOUNT_MANAGER, SLAS]
+    const enterpriseOnly = [NAMED_SUPPORT_CONTACT]
     const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
 
-    expect(getCardFeaturesV2('Enterprise')).toEqual(expect.arrayContaining(enterpriseOnly))
+    expect(getCardFeaturesV2('Enterprise')).toEqual(expect.arrayContaining([MULTIPLE_WORKSPACES, ...enterpriseOnly]))
+    expect(COMPARE_SECTIONS_V2[0].rows[0]).toEqual({
+      feature: 'Workspaces',
+      values: { Starter: '1', Business: '1', Enterprise: 'Multiple' },
+    })
+    expect(rows.find((row) => row.feature === MULTIPLE_WORKSPACES)).toBeUndefined()
     enterpriseOnly.forEach((feature) => {
       expect(getCardFeaturesV2('Business')).not.toContain(feature)
       expect(rows.find((row) => row.feature === feature)?.values).toEqual({
@@ -100,35 +118,47 @@ describe('PLAN_CONTENT_V2', () => {
     })
   })
 
-  it('agrees with the comparison table on what each plan includes', () => {
+  it('agrees with the comparison table: a feature is included from the card that lists it upwards', () => {
     const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
-    const listed = new Set(PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? []))
+    const firstListedOn = (feature: string) =>
+      PLAN_ORDER.findIndex((plan) => getCardFeaturesV2(plan)?.includes(feature))
 
-    PLAN_ORDER.forEach((plan) => {
-      const labels = getCardFeaturesV2(plan) ?? []
-      const value = (feature: string) => rows.find((row) => row.feature === feature)?.values[plan]
-      rows
-        .filter((row) => listed.has(row.feature))
-        .forEach((row) => expect(row.values[plan]).toBe(labels.includes(row.feature)))
+    rows
+      .filter((row) => firstListedOn(row.feature) !== -1)
+      .forEach((row) =>
+        PLAN_ORDER.forEach((plan, rank) => expect(row.values[plan]).toBe(rank >= firstListedOn(row.feature))),
+      )
 
-      expect(labels).toContainEqual(expect.stringContaining(`${value('Sponsored transactions per month')} sponsored`))
-    })
+    const sponsored = rows.find((row) => row.feature === 'Sponsored transactions per month')
+    PLAN_ORDER.forEach((plan) =>
+      expect(getCardFeaturesV2(plan)).toContainEqual(expect.stringContaining(`${sponsored?.values[plan]} sponsored`)),
+    )
   })
 
-  it('leads the compare table with what is coming, then operations, and ends with add-ons', () => {
+  it('orders the compare table limits, operations, security, support, then add-ons', () => {
     expect(COMPARE_SECTIONS_V2.map((section) => section.title)).toEqual([
-      'Coming soon',
-      'Operations',
-      'Security',
-      'Support',
       'Limits',
+      'Operations',
+      'Security & Safe Shield',
+      'Support & service levels',
       'Add-ons',
     ])
   })
 
-  it('leaves the coming-soon fee payment out of every plan', () => {
-    const labels = PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? [])
-    expect(labels.filter((label) => /pay (fees|gas)/i.test(label))).toEqual([])
+  it('keeps what is coming out of the included lists, marks it Soon in the table, and shows it on the first card that will get it', () => {
+    const included = PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? [])
+    const tableRows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
+
+    COMING_SOON_V2.forEach((row) => {
+      expect(included).not.toContain(row.feature)
+      tableRows
+        .filter((tableRow) => tableRow.feature === row.feature)
+        .forEach((tableRow) => expect(tableRow.isComingSoon).toBe(true))
+    })
+    expect(getCardComingSoonV2('Starter')).toEqual(['Pay gas from your Safe'])
+    expect(getCardComingSoonV2('Business')).toEqual(['Safenet checks', 'More policies'])
+    expect(getCardComingSoonV2('Enterprise')).toEqual([])
+    expect(getCardComingSoonV2('Safe Pro')).toBeUndefined()
   })
 
   it('looks content up by plan name, ignoring names outside the catalog', () => {

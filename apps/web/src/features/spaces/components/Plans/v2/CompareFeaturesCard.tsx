@@ -6,8 +6,7 @@ import { Card } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Typography } from '@/components/ui/typography'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
-import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import { HnSignupFlow } from '@/features/hypernative'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@/utils/cn'
@@ -58,23 +57,36 @@ const trackDiscussAddOn = () =>
     { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.discuss_add_on },
   )
 
-const AddOnFeature = ({ feature }: { feature: string }) => (
-  <span className="flex items-start gap-2 whitespace-normal">
-    <HypernativeIcon aria-hidden className="mt-px size-5 shrink-0" />
-    <span className="flex flex-col gap-0.5">
-      {feature}
-      <Link
-        href={CONTACT_SALES_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex w-fit items-center gap-0.5 text-xs font-semibold"
-        onClick={trackDiscussAddOn}
-      >
-        {COMPARE_COPY_V2.discussAddOn}
-        <ArrowUpRight aria-hidden className="size-3" />
-      </Link>
+const ADD_ON_ARROW_EASE = 'duration-300 ease-soft motion-reduce:transition-none'
+
+/** A plan's add-on value, opening the Guardian signup; an arrow slides in while it is hovered or focused. */
+const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => (
+  <Link
+    render={<button type="button" />}
+    className="group/add-on inline-flex items-center font-semibold"
+    onClick={() => {
+      trackDiscussAddOn()
+      onOpen()
+    }}
+  >
+    {label}
+    <span
+      aria-hidden
+      className={cn(
+        'inline-flex w-0 overflow-hidden opacity-0 transition-[width,margin,opacity]',
+        'group-hover/add-on:ml-1 group-hover/add-on:w-4 group-hover/add-on:opacity-100',
+        'group-focus-visible/add-on:ml-1 group-focus-visible/add-on:w-4 group-focus-visible/add-on:opacity-100',
+        ADD_ON_ARROW_EASE,
+      )}
+    >
+      <ArrowUpRight
+        className={cn(
+          'size-4 -translate-x-1 transition-transform group-hover/add-on:translate-x-0 group-focus-visible/add-on:translate-x-0',
+          ADD_ON_ARROW_EASE,
+        )}
+      />
     </span>
-  </span>
+  </Link>
 )
 
 const CompareRow = ({
@@ -82,12 +94,14 @@ const CompareRow = ({
   currentPlanName,
   isFolded,
   isExpanded,
+  onOpenAddOn,
   ref,
 }: {
   row: CompareRowV2
   currentPlanName?: string
   isFolded: boolean
   isExpanded: boolean
+  onOpenAddOn: () => void
   ref?: Ref<HTMLTableRowElement>
 }) => (
   <TableRow
@@ -98,22 +112,22 @@ const CompareRow = ({
     className="hover:bg-transparent"
   >
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal">
-      {row.isAddOn ? (
-        <AddOnFeature feature={row.feature} />
-      ) : (
-        <span className="flex items-center gap-2">
-          {row.feature}
-          {row.isComingSoon && (
-            <Badge variant="subtle" size="status" shape="status">
-              {COMPARE_COPY_V2.soon}
-            </Badge>
-          )}
-        </span>
-      )}
+      <span className="flex items-center gap-2">
+        {row.feature}
+        {row.isComingSoon && (
+          <Badge variant="subtle" size="status" shape="status">
+            {COMPARE_COPY_V2.soon}
+          </Badge>
+        )}
+      </span>
     </TableHead>
     {PLANS.map((plan) => (
       <TableCell key={plan} className="px-4 py-3">
-        <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
+        {row.isAddOn && typeof row.values[plan] === 'string' ? (
+          <AddOnLink label={row.values[plan]} onOpen={onOpenAddOn} />
+        ) : (
+          <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
+        )}
       </TableCell>
     ))}
   </TableRow>
@@ -194,12 +208,14 @@ const CompareSection = ({
   index,
   isExpanded,
   currentPlanName,
+  onOpenAddOn,
   lastPeekRowRef,
 }: {
   section: CompareSectionV2
   index: number
   isExpanded: boolean
   currentPlanName?: string
+  onOpenAddOn: () => void
   lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
   const firstRow = SECTION_FIRST_ROWS[index]
@@ -234,6 +250,7 @@ const CompareSection = ({
           currentPlanName={currentPlanName}
           isFolded={!isFoldable && !isExpanded && firstRow + rowIndex >= VISIBLE_FEATURES}
           isExpanded={isExpanded}
+          onOpenAddOn={onOpenAddOn}
         />
       ))}
     </TableBody>
@@ -252,6 +269,7 @@ export default function CompareFeaturesCard({
   onExpandedChange: (isExpanded: boolean) => void
   ref?: Ref<HTMLElement>
 }) {
+  const [isGuardianOpen, setGuardianOpen] = useState(false)
   const tableRef = useRef<HTMLTableElement>(null)
   const lastPeekRowRef = useRef<HTMLTableRowElement>(null)
   const heights = useTableHeights(tableRef, lastPeekRowRef, isExpanded)
@@ -317,6 +335,7 @@ export default function CompareFeaturesCard({
                     index={index}
                     isExpanded={isExpanded}
                     currentPlanName={currentPlanName}
+                    onOpenAddOn={() => setGuardianOpen(true)}
                   />
                 ))}
               </Table>
@@ -348,6 +367,7 @@ export default function CompareFeaturesCard({
           </div>
         </div>
       </Card>
+      <HnSignupFlow open={isGuardianOpen} onClose={() => setGuardianOpen(false)} />
     </section>
   )
 }

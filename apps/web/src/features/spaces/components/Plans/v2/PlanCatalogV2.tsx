@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { ArrowDown } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { READ_ONLY_NOTE } from '../PlanCards'
 import { COMPARE_COPY_V2, PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getVisibleTiers } from '../planTiers'
@@ -40,9 +40,9 @@ export default function PlanCatalogV2({
                 <TabsTrigger value="year">
                   {PLAN_CARD_COPY_V2.yearly}
                   {hasYearly && (
-                    <span className={cn('font-normal', cycle === 'year' ? 'text-foreground' : 'text-muted-foreground')}>
-                      · {PLAN_CARD_COPY_V2.yearlySavings}
-                    </span>
+                    <Badge variant="subtle" size="status" shape="status" data-testid="yearly-savings">
+                      {PLAN_CARD_COPY_V2.yearlySavings}
+                    </Badge>
                   )}
                 </TabsTrigger>
               </TabsList>

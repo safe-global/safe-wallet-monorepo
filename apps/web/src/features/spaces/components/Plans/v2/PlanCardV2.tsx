@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { List, ListItem } from '@/components/ui/list'
@@ -10,7 +11,9 @@ import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/eve
 import { cn } from '@/utils/cn'
 import { Seats } from '../PlanCards'
 import {
-  getCardFeatureItemsV2,
+  COMPARE_COPY_V2,
+  getCardComingSoonV2,
+  getCardFeaturesV2,
   getFeaturesHeadingV2,
   getPlanContentV2,
   PLAN_CARD_COPY_V2,
@@ -43,6 +46,24 @@ const SUPPORT_HIGHLIGHT_CLASSES = [
   'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
 ]
 
+/** Outline link to sales, tracked by which card sent the user there. */
+const SalesCtaV2 = ({ label, kind }: { label: string; kind: 'sales' | 'account-team' }) => (
+  <Button
+    variant="outline"
+    size="lg"
+    weight="semibold"
+    className="w-full"
+    render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
+    onClick={() => {
+      const location = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
+      trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location }, { [MixpanelEventParams.LOCATION]: location })
+    }}
+  >
+    {label}
+    <CtaArrow variant="reveal" external />
+  </Button>
+)
+
 const PlanCtaV2 = ({
   pick,
   isPrimary,
@@ -56,23 +77,7 @@ const PlanCtaV2 = ({
   switch (cta.kind) {
     case 'sales':
     case 'account-team':
-      return (
-        <Button
-          variant="outline"
-          size="lg"
-          weight="semibold"
-          className="w-full"
-          render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
-          onClick={() => {
-            const label =
-              cta.kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
-            trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, { [MixpanelEventParams.LOCATION]: label })
-          }}
-        >
-          {cta.label}
-          <CtaArrow variant="reveal" external />
-        </Button>
-      )
+      return <SalesCtaV2 label={cta.label} kind={cta.kind} />
     case 'current':
       return (
         <Button variant="outline" size="lg" weight="semibold" className="w-full" disabled>
@@ -124,7 +129,8 @@ export const PlanCardV2 = ({
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options[0]
   const price = option ? getPlanPriceV2(tier, option) : undefined
-  const features = getCardFeatureItemsV2(tier.name) ?? tier.features.map((label) => ({ label, isInherited: false }))
+  const features = getCardFeaturesV2(tier.name) ?? tier.features
+  const comingSoon = getCardComingSoonV2(tier.name) ?? []
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
@@ -178,7 +184,12 @@ export const PlanCardV2 = ({
                 }}
                 label={`${PLAN_CARD_COPY_V2.seatsLabel} ${tier.name}`}
               />
-              {!actions.readOnly && <PlanCtaV2 pick={{ tier, option }} isPrimary={isPrimary} {...actions} />}
+              {!actions.readOnly && (
+                <div className="flex flex-wrap gap-2 [&>*]:flex-1" data-testid="plan-ctas">
+                  <PlanCtaV2 pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
+                  {isPrimary && <SalesCtaV2 label={PLAN_CARD_COPY_V2.talkToSales} kind="sales" />}
+                </div>
+              )}
               {price && (
                 <Typography variant="paragraph-mini" color="muted" align="center" data-testid="plan-price-line">
                   {price.line}
@@ -192,13 +203,26 @@ export const PlanCardV2 = ({
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
             {content && <Typography variant="paragraph-small-bold">{getFeaturesHeadingV2(tier.name)}</Typography>}
-            <List className="gap-3">
-              {features.map(({ label, isInherited }, index) => (
-                <ListItem key={label} size="sm" className="items-start py-0" data-inherited={isInherited || undefined}>
+            <List className="gap-3" data-testid="plan-features">
+              {features.map((label, index) => (
+                <ListItem key={label} size="sm" className="items-start py-0">
                   <FeatureCheck followsPlanHover index={index} />
                   <Typography variant="paragraph-small" color="muted" className={FEATURE_TEXT_HOVER_CLASSES}>
                     {label}
                   </Typography>
+                </ListItem>
+              ))}
+              {comingSoon.map((label) => (
+                <ListItem key={label} size="sm" className="items-start py-0" data-coming-soon>
+                  <span aria-hidden className="size-5 shrink-0 rounded-full border border-border" />
+                  <span className="flex flex-wrap items-center gap-2">
+                    <Typography variant="paragraph-small" color="muted">
+                      {label}
+                    </Typography>
+                    <Badge variant="subtle" size="status" shape="status">
+                      {COMPARE_COPY_V2.soon}
+                    </Badge>
+                  </span>
                 </ListItem>
               ))}
             </List>

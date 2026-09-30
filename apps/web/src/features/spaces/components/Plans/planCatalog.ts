@@ -32,11 +32,10 @@ export const PLAN_FEATURES: Record<string, string[]> = {
 
 export type PlanNameV2 = (typeof PLAN_ORDER)[number]
 
-export const UNLIMITED_MEMBERS = 'Unlimited Workspace members'
+export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
-export const MULTIPLE_WORKSPACES = 'Multiple Workspaces'
-export const NAMED_ACCOUNT_MANAGER = 'Named account manager'
-export const SLAS = 'SLAs'
+export const MULTIPLE_WORKSPACES = 'Multi-Workspace agreements available'
+export const NAMED_SUPPORT_CONTACT = 'Named support contact'
 
 export type PlanContentV2 = {
   /** Who the plan is for, one line under its name. */
@@ -48,7 +47,7 @@ export type PlanContentV2 = {
 export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   Starter: {
     description: 'Coordinate your team with a shared home for your Safes and transactions.',
-    support: { level: 'Standard', detail: 'Help center and email' },
+    support: { level: 'Standard', detail: 'In-app and email' },
   },
   Business: {
     description: 'Scale with control. Delegate daily operations with hands-on help.',
@@ -56,7 +55,7 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   },
   Enterprise: {
     description: 'Tailored to your organization, with custom capacity and commercial terms.',
-    support: { level: 'Tailored', detail: '+ Guided onboarding' },
+    support: { level: 'Tailored', detail: '+ Customized onboarding' },
   },
 }
 
@@ -64,8 +63,10 @@ const isPlanNameV2 = (name: string): name is PlanNameV2 => PLAN_ORDER.some((plan
 
 type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, string> }
 
-/** Card lists, in order. `from` is the first plan that includes it. */
+/** Card lists, in the compare table's section order. `from` is the first plan that includes it. */
 export const CARD_FEATURES_V2: CardFeatureV2[] = [
+  { from: 'Enterprise', label: MULTIPLE_WORKSPACES },
+  { from: 'Enterprise', label: 'Custom Safe capacity' },
   {
     from: 'Starter',
     label: {
@@ -74,36 +75,24 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
       Enterprise: 'Unlimited sponsored transactions',
     },
   },
-  { from: 'Starter', label: UNLIMITED_MEMBERS },
-  { from: 'Starter', label: 'Advanced threat analysis' },
-  { from: 'Starter', label: 'Transaction simulation' },
   { from: 'Starter', label: 'Shared address book' },
   { from: 'Starter', label: 'Workspace activity log' },
-  { from: 'Business', label: 'Policy engine & spending limits' },
+  { from: 'Business', label: 'Spending limits' },
   { from: 'Business', label: 'Transaction proposers' },
-  { from: 'Business', label: 'Account recovery' },
-  { from: 'Enterprise', label: 'Custom Safe capacity' },
+  { from: 'Business', label: 'Self-custodial account recovery' },
+  { from: 'Starter', label: 'Advanced threat analysis' },
+  { from: 'Starter', label: 'Transaction simulation' },
+  { from: 'Enterprise', label: NAMED_SUPPORT_CONTACT },
   { from: 'Enterprise', label: 'Tailored contract & billing terms' },
-  { from: 'Enterprise', label: MULTIPLE_WORKSPACES },
-  { from: 'Enterprise', label: NAMED_ACCOUNT_MANAGER },
-  { from: 'Enterprise', label: SLAS },
 ]
 
-export type CardFeatureItemV2 = { label: string; isInherited: boolean }
-
-/** Everything a plan includes: what it adds first, then what it keeps from lower plans. A per-plan quota counts as added. */
-export const getCardFeatureItemsV2 = (name: string): CardFeatureItemV2[] | undefined => {
+/** What a plan adds over the plan below it; a per-plan quota counts as added. The compare table lists everything. */
+export const getCardFeaturesV2 = (name: string): string[] | undefined => {
   if (!isPlanNameV2(name)) return undefined
-  const rank = PLAN_ORDER.indexOf(name)
-  const items = CARD_FEATURES_V2.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ from, label }) => ({
-    label: typeof label === 'string' ? label : label[name],
-    isInherited: typeof label === 'string' && from !== name,
-  }))
-  return [...items.filter((item) => !item.isInherited), ...items.filter((item) => item.isInherited)]
+  return CARD_FEATURES_V2.filter(({ from, label }) => from === name || typeof label !== 'string').map(({ label }) =>
+    typeof label === 'string' ? label : label[name],
+  )
 }
-
-export const getCardFeaturesV2 = (name: string): string[] | undefined =>
-  getCardFeatureItemsV2(name)?.map((item) => item.label)
 
 /** "What's included" on the first plan, "Everything in Starter, plus" on the ones after it. */
 export const getFeaturesHeadingV2 = (name: string): string => {
@@ -115,12 +104,13 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
-  yearlySavings: `save ${YEARLY_SAVINGS_PERCENT}%`,
+  yearlySavings: `Save up to ${YEARLY_SAVINGS_PERCENT}%`,
   billingCycleLabel: 'Billing cycle',
   monthly: 'Monthly',
   yearly: 'Yearly',
   currentPlan: 'Current plan',
   accountTeam: 'Change via your account team',
+  talkToSales: 'Talk to sales',
   custom: 'Custom',
   customSuffix: 'Annual term',
   customLine: 'Pricing by agreement · Billed annually',
@@ -134,7 +124,7 @@ export const PLAN_CARD_COPY_V2 = {
 
 export const SAFENET_CHECKS = 'Safenet checks'
 
-export const PAY_FEES_FROM_SAFE = 'Pay fees from Safe accounts'
+export const PAY_GAS_FROM_SAFE = 'Pay gas from your Safe'
 
 /** `true` is included, `false` is not; a string names what the plan gets. */
 export type CompareValueV2 = boolean | string
@@ -143,7 +133,7 @@ export type CompareRowV2 = {
   feature: string
   /** Unreleased: a "Soon" chip next to the feature name. */
   isComingSoon?: boolean
-  /** Partner add-on, sold separately: the partner's icon and a sales link. */
+  /** Partner add-on, sold separately: each plan's value links to sales. */
   isAddOn?: boolean
   values: Record<PlanNameV2, CompareValueV2>
 }
@@ -158,61 +148,32 @@ const every = (value: CompareValueV2): Record<PlanNameV2, CompareValueV2> => ({
 const fromBusiness: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: true, Enterprise: true }
 const enterpriseOnly: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: false, Enterprise: true }
 
+export const COMPARE_COPY_V2 = {
+  title: 'Compare all features',
+  subtitle: 'Limits, operations, security and support for every plan',
+  featureColumn: 'Features',
+  current: 'Current',
+  soon: 'Soon',
+  included: 'Included',
+  notIncluded: 'Not included',
+  showAll: 'Expand table',
+  soldSeparately: 'Sold separately',
+}
+
+/** Unreleased: listed on the cards with a "Soon" chip, never in the compare table. */
+export const COMING_SOON_V2: Pick<CompareRowV2, 'feature' | 'values'>[] = [
+  { feature: PAY_GAS_FROM_SAFE, values: every(true) },
+  { feature: SAFENET_CHECKS, values: fromBusiness },
+  { feature: 'More policies', values: fromBusiness },
+]
+
 /** The collapsed "Compare all features" card shows the first few rows. */
 export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
-    title: 'Coming soon',
-    rows: [
-      { feature: PAY_FEES_FROM_SAFE, values: every(true), isComingSoon: true },
-      { feature: SAFENET_CHECKS, values: fromBusiness, isComingSoon: true },
-      { feature: 'More policies', values: every(true), isComingSoon: true },
-    ],
-  },
-  {
-    title: 'Operations',
-    rows: [
-      { feature: UNLIMITED_MEMBERS, values: every(true) },
-      { feature: 'Shared address book', values: every(true) },
-      { feature: 'Workspace activity log', values: every(true) },
-      { feature: 'Policy engine & spending limits', values: fromBusiness },
-      { feature: 'Transaction proposers', values: fromBusiness },
-      { feature: 'Account recovery', values: fromBusiness },
-      { feature: MULTIPLE_WORKSPACES, values: enterpriseOnly },
-      { feature: 'API access', values: { Starter: 'Builder', Business: 'Growth', Enterprise: 'Scale' } },
-    ],
-  },
-  {
-    title: 'Security',
-    rows: [
-      { feature: WORKSPACE_2FA, values: every(true) },
-      { feature: 'Security Hub', values: every(true) },
-      { feature: 'Advanced threat analysis', values: every(true) },
-      { feature: 'Transaction simulation', values: every(true) },
-    ],
-  },
-  {
-    title: 'Support',
-    rows: [
-      {
-        feature: 'Support',
-        values: {
-          Starter: PLAN_CONTENT_V2.Starter.support.level,
-          Business: PLAN_CONTENT_V2.Business.support.level,
-          Enterprise: PLAN_CONTENT_V2.Enterprise.support.level,
-        },
-      },
-      { feature: 'Guided onboarding', values: fromBusiness },
-      { feature: NAMED_ACCOUNT_MANAGER, values: enterpriseOnly },
-      { feature: SLAS, values: enterpriseOnly },
-      {
-        feature: 'Contract & billing terms',
-        values: { Starter: 'Standard', Business: 'Standard', Enterprise: 'Tailored' },
-      },
-    ],
-  },
-  {
     title: 'Limits',
     rows: [
+      { feature: 'Workspaces', values: { Starter: '1', Business: '1', Enterprise: 'Multiple' } },
+      { feature: MEMBERS, values: every('Unlimited') },
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
         feature: 'Sponsored transactions per month',
@@ -221,21 +182,60 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
     ],
   },
   {
+    title: 'Operations',
+    rows: [
+      { feature: 'Shared address book', values: every(true) },
+      { feature: 'Workspace activity log', values: every(true) },
+      { feature: 'Nested Safe support', values: every(true) },
+      { feature: 'Spending limits', values: fromBusiness },
+      { feature: 'Transaction proposers', values: fromBusiness },
+      { feature: 'Self-custodial account recovery', values: fromBusiness },
+    ],
+  },
+  {
+    title: 'Security & Safe Shield',
+    rows: [
+      { feature: WORKSPACE_2FA, values: every(true) },
+      { feature: 'Security Hub', values: every(true) },
+      { feature: 'Advanced threat analysis', values: every(true) },
+      { feature: 'Transaction simulation', values: every(true) },
+      {
+        feature: SAFENET_CHECKS,
+        values: { Starter: 'Pay per transaction', Business: true, Enterprise: true },
+        isComingSoon: true,
+      },
+    ],
+  },
+  {
+    title: 'Support & service levels',
+    rows: [
+      { feature: 'In-app and email support', values: every(true) },
+      { feature: 'Priority handling within the same severity', values: fromBusiness },
+      { feature: NAMED_SUPPORT_CONTACT, values: enterpriseOnly },
+      { feature: 'Shared support channel', values: enterpriseOnly },
+      {
+        feature: 'Defined escalation path',
+        values: { Starter: false, Business: 'By separate agreement', Enterprise: true },
+      },
+      {
+        feature: 'Guided onboarding',
+        values: { Starter: false, Business: 'One 60-minute session', Enterprise: 'Tailored to your needs' },
+      },
+    ],
+  },
+  {
     title: 'Add-ons',
-    rows: [{ feature: 'Hypernative threat monitoring', values: every('Add-on'), isAddOn: true }],
+    rows: [{ feature: 'Hypernative Guardian', values: every(COMPARE_COPY_V2.soldSeparately), isAddOn: true }],
   },
 ]
 
-export const COMPARE_COPY_V2 = {
-  title: 'Compare all features',
-  subtitle: 'Operations, security, support and limits for every plan',
-  featureColumn: 'Features',
-  current: 'Current',
-  soon: 'Soon',
-  included: 'Included',
-  notIncluded: 'Not included',
-  showAll: 'Expand table',
-  discussAddOn: 'Discuss add-on',
+/** Unreleased features a plan will get that the plan below it will not; the card lists them after what is included. */
+export const getCardComingSoonV2 = (name: string): string[] | undefined => {
+  if (!isPlanNameV2(name)) return undefined
+  const below = PLAN_ORDER[PLAN_ORDER.indexOf(name) - 1]
+  return COMING_SOON_V2.filter((row) => row.values[name] === true && (!below || row.values[below] !== true)).map(
+    (row) => row.feature,
+  )
 }
 
 export const SALES_PROMPT_V2 = {

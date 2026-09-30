@@ -1,5 +1,5 @@
-import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { YEARLY_SAVINGS_LABEL, READ_ONLY_NOTE } from '../../PlanCards'
+import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { READ_ONLY_NOTE } from '../../PlanCards'
 import { ENTERPRISE_TIER } from '../../planCatalog'
 import type { PlanSeatOption, PlanTier } from '../../types'
 import PlanCatalogV2 from '../PlanCatalogV2'
@@ -23,20 +23,19 @@ const tier = (billingCycle: 'month' | 'year'): PlanTier => ({
 })
 
 describe('PlanCatalogV2', () => {
-  it('advertises the yearly saving with the v2 label', () => {
+  it('advertises the yearly saving as a ceiling in a status chip inside the Yearly tab', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
 
-    expect(screen.getByText('· save 13%')).toHaveClass('text-muted-foreground')
-    expect(screen.queryByText(YEARLY_SAVINGS_LABEL)).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
-    expect(screen.getByText('· save 13%')).toHaveClass('text-foreground')
+    const chip = within(screen.getByRole('tab', { name: /Yearly/ })).getByTestId('yearly-savings')
+    expect(chip).toHaveTextContent('Save up to 13%')
+    expect(chip).toHaveAttribute('data-variant', 'subtle')
+    expect(chip).toHaveClass('h-6', 'text-xs', 'rounded-lg')
   })
 
   it('shows no saving when no plan has a yearly price', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), ENTERPRISE_TIER]} />)
 
-    expect(screen.queryByText(/save 13%/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Save up to 13%/)).not.toBeInTheDocument()
   })
 
   it('tells a member who is not an admin why there are no buttons', () => {

@@ -77,18 +77,36 @@ describe('PlanCardV2', () => {
     expect(screen.queryByText('A Stripe selling point')).not.toBeInTheDocument()
   })
 
-  it('leads with what the plan adds, then lists what it keeps from the plan below', () => {
+  it('lists only what the plan adds over the one below it, leading with its sponsored allowance', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 
-    const items = screen
+    const items = within(screen.getByTestId('plan-features'))
       .getAllByRole('listitem')
-      .filter((item) => item.closest('ul')?.querySelector('[data-inherited]'))
-    const inherited = items.map((item) => item.hasAttribute('data-inherited'))
-    expect(inherited.indexOf(true)).toBeGreaterThan(0)
-    expect(inherited.slice(inherited.indexOf(true)).every(Boolean)).toBe(true)
-    expect(items[0]).toHaveTextContent('50 sponsored transactions per month')
-    const kept = items.find((item) => item.textContent === 'Shared address book') as HTMLElement
-    expect(kept).toHaveAttribute('data-inherited', 'true')
+      .filter((item) => !item.hasAttribute('data-coming-soon'))
+      .map((item) => item.textContent)
+    expect(items[0]).toBe('50 sponsored transactions per month')
+    expect(items).not.toContain('Shared address book')
+    expect(items).toEqual(getCardFeaturesV2('Business'))
+  })
+
+  it('ends the list with what is coming to the plan, marked Soon instead of checked', () => {
+    render(<PlanCardV2 tier={BUSINESS} />)
+
+    const items = within(screen.getByTestId('plan-features')).getAllByRole('listitem')
+    const comingSoon = items.filter((item) => item.hasAttribute('data-coming-soon'))
+    expect(items.slice(-comingSoon.length)).toEqual(comingSoon)
+    expect(comingSoon.map((item) => item.textContent)).toEqual(['Safenet checksSoon', 'More policiesSoon'])
+    comingSoon.forEach((item) => {
+      expect(within(item).getByText('Soon')).toHaveAttribute('data-variant', 'subtle')
+      expect(within(item).queryByTestId('plan-feature-check')).not.toBeInTheDocument()
+    })
+    expect(screen.queryByText('Pay gas from your Safe')).not.toBeInTheDocument()
+  })
+
+  it('adds no coming-soon items to a plan that gets nothing unreleased over the one below it', () => {
+    render(<PlanCardV2 tier={ENTERPRISE_TIER} />)
+
+    expect(screen.queryByText('Soon')).not.toBeInTheDocument()
   })
 
   it('keeps "What\'s included" on the first plan', () => {
@@ -145,11 +163,12 @@ describe('PlanCardV2', () => {
     expect(onSubscribe).toHaveBeenCalledWith({ tier: BUSINESS, option: BUSINESS.options[0] })
   })
 
-  it('shows a member who is not an admin the price but no button', () => {
+  it('shows a member who is not an admin the price but no button or sales link', () => {
     render(<PlanCardV2 tier={BUSINESS} readOnly />)
 
     expect(screen.getByTestId('plan-price-line')).toBeInTheDocument()
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
   })
 
   it('keeps every card flat on the muted surface, lifting it to white with a shadow on hover', () => {
@@ -194,6 +213,26 @@ describe('PlanCardV2', () => {
       within(card).getByRole('button', { name }).querySelector('[data-cta-arrow]')
     expect(arrowOf(starterCard, 'Continue with Starter')).toHaveAttribute('data-cta-arrow', 'reveal')
     expect(arrowOf(businessCard, 'Continue with Business')).toHaveAttribute('data-cta-arrow', 'nudge')
+  })
+
+  it('pairs the Business button with a Talk to sales link in the same row, tracked as sales', () => {
+    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
+    render(
+      <>
+        <PlanCardV2 tier={starter} />
+        <PlanCardV2 tier={BUSINESS} />
+      </>,
+    )
+
+    const [starterCtas, businessCtas] = screen.getAllByTestId('plan-ctas')
+    expect(within(starterCtas).queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
+    expect(within(businessCtas).getByRole('button', { name: 'Continue with Business' })).toBeInTheDocument()
+    const talkToSales = within(businessCtas).getByRole('link', { name: 'Talk to sales' })
+    expect(talkToSales).toHaveAttribute('href', CONTACT_SALES_URL)
+    expect(talkToSales).toHaveAttribute('target', '_blank')
+
+    fireEvent.click(talkToSales)
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.talk_to_sales)
   })
 
   it('greys out the plan in force, even on the Business card', () => {

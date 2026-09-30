@@ -87,21 +87,22 @@ describe('PlansV2', () => {
 
     expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByRole('link', { name: 'Request updates' })).not.toBeInTheDocument()
-    expect(screen.getAllByRole('link', { name: 'Discuss add-on', hidden: true })).toHaveLength(1)
+    expect(screen.getAllByRole('button', { name: 'Sold separately', hidden: true })).toHaveLength(3)
   })
 
-  it('offers the Hypernative add-on from its row, opening sales in a new tab and tracking it', () => {
+  it('offers Hypernative Guardian from every plan cell, opening its signup and tracking it', () => {
     renderPlans()
     fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
 
-    const row = screen.getByRole('rowheader', { name: /Hypernative threat monitoring/ }).closest('tr') as HTMLElement
+    const row = screen.getByRole('rowheader', { name: 'Hypernative Guardian' }).closest('tr') as HTMLElement
     expect(row).toHaveAttribute('data-add-on', 'true')
-    const discussAddOn = within(row).getByRole('link', { name: 'Discuss add-on' })
-    expect(discussAddOn).toHaveAttribute('href', CONTACT_SALES_URL)
-    expect(discussAddOn).toHaveAttribute('target', '_blank')
-    expect(discussAddOn).toHaveAttribute('rel', 'noopener noreferrer')
+    const addOns = within(row).getAllByRole('button', { name: 'Sold separately' })
+    expect(addOns).toHaveLength(3)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-    fireEvent.click(discussAddOn)
+    fireEvent.click(addOns[1])
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
     expectPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
   })
 
@@ -128,11 +129,11 @@ describe('PlansV2', () => {
     expectPlansClick(SAFE_PRO_PLANS_LABELS.sales_prompt)
   })
 
-  it('keeps the add-on link for a member who is not an admin, without plan buttons', () => {
+  it('keeps the add-on buttons for a member who is not an admin, without plan buttons', () => {
     renderPlans(true)
     fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
 
-    expect(screen.getByRole('link', { name: 'Discuss add-on' })).toBeInTheDocument()
+    expect(screen.getAllByRole('button', { name: 'Sold separately' })).toHaveLength(3)
     expect(screen.queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('plans-sales-prompt')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()

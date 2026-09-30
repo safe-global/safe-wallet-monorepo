@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
-import { COMPARE_SECTIONS_V2, PAY_FEES_FROM_SAFE, SAFENET_CHECKS } from '../../planCatalog'
+import { COMPARE_SECTIONS_V2, SAFENET_CHECKS } from '../../planCatalog'
 import CompareFeaturesCard, { VISIBLE_FEATURES } from '../CompareFeaturesCard'
 
 const Harness = ({ currentPlan, initiallyExpanded = false }: { currentPlan?: string; initiallyExpanded?: boolean }) => {
@@ -25,7 +25,7 @@ describe('CompareFeaturesCard', () => {
   it('previews the sections at the top of the table while collapsed', () => {
     render(<Harness />)
 
-    expect(sectionTitles()).toEqual(['Coming soon', 'Operations'])
+    expect(sectionTitles()).toEqual(['Limits', 'Operations'])
     COMPARE_SECTIONS_V2[0].rows.forEach((row) => expect(screen.getByText(row.feature)).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'false')
   })
@@ -44,7 +44,7 @@ describe('CompareFeaturesCard', () => {
   it('keeps the folded sections rendered for the animation but out of reach until expanded', () => {
     render(<Harness />)
 
-    const folded = screen.getByText('Security', { selector: 'th' }).closest('tbody') as HTMLElement
+    const folded = screen.getByText('Security & Safe Shield', { selector: 'th' }).closest('tbody') as HTMLElement
     expect(folded).toHaveAttribute('inert')
     expect(folded).toHaveAttribute('aria-hidden', 'true')
 
@@ -59,7 +59,7 @@ describe('CompareFeaturesCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Compare all features/ }))
 
-    expect(sectionTitles()).toEqual(['Coming soon', 'Operations'])
+    expect(sectionTitles()).toEqual(['Limits', 'Operations'])
   })
 
   it.each(['Starter', 'Business', 'Enterprise'])(
@@ -79,22 +79,21 @@ describe('CompareFeaturesCard', () => {
     expect(screen.queryByText('Current')).not.toBeInTheDocument()
   })
 
-  it.each([
-    [PAY_FEES_FROM_SAFE, ['Included', 'Included', 'Included']],
-    [SAFENET_CHECKS, ['—Not included', 'Included', 'Included']],
-    ['More policies', ['Included', 'Included', 'Included']],
-  ])('groups %s at the top under Coming soon, showing which plans will get it', (feature, cells) => {
+  it('closes the Security section with Safenet checks marked Soon, paid per transaction on Starter', () => {
     render(<Harness initiallyExpanded />)
 
-    expect(sectionTitles()[0]).toBe('Coming soon')
-    const header = screen.getByRole('rowheader', { name: `${feature} Soon` })
+    expect(sectionTitles()).not.toContain('Coming soon')
+    const header = screen.getByRole('rowheader', { name: `${SAFENET_CHECKS} Soon` })
     expect(within(header).getByText('Soon')).toHaveAttribute('data-variant', 'subtle')
     const row = header.closest('tr') as HTMLElement
     expect(
       within(row)
         .getAllByRole('cell')
         .map((cell) => cell.textContent),
-    ).toEqual(cells)
+    ).toEqual(['Pay per transaction', 'Included', 'Included'])
+    const security = screen.getByText('Security & Safe Shield', { selector: 'th' }).closest('tbody') as HTMLElement
+    expect(within(security).getAllByRole('row').at(-1)).toBe(row)
+    expect(screen.getAllByText('Soon')).toHaveLength(1)
   })
 
   it('draws no divider under the last row', () => {
@@ -104,13 +103,23 @@ describe('CompareFeaturesCard', () => {
     expect(lastSection.className).not.toMatch(/last-child\]:border-b/)
   })
 
-  it('puts the Hypernative add-on last, in its own section', () => {
+  it('ends the table with an Add-ons section for Hypernative Guardian, whose values open the Guardian signup', () => {
     render(<Harness initiallyExpanded />)
 
     expect(sectionTitles().at(-1)).toBe('Add-ons')
-    const row = screen.getByRole('rowheader', { name: /Hypernative threat monitoring/ }).closest('tr') as HTMLElement
+    const row = screen.getByRole('rowheader', { name: 'Hypernative Guardian' }).closest('tr') as HTMLElement
     expect(row).toHaveAttribute('data-add-on', 'true')
-    expect(within(row).getByRole('link', { name: 'Discuss add-on' })).toBeInTheDocument()
+    expect(row.querySelector('svg:not(button svg)')).toBeNull()
+    const addOns = within(row).getAllByRole('button', { name: 'Sold separately' })
+    expect(addOns).toHaveLength(3)
+    expect(addOns[0].querySelector('svg')).toHaveClass('group-hover/add-on:translate-x-0')
+    const addOnsSection = screen.getByText('Add-ons', { selector: 'th' }).closest('tbody') as HTMLElement
+    expect(within(addOnsSection).getAllByRole('row')).toHaveLength(2)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+
+    fireEvent.click(addOns[2])
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
   })
 
   it('names included and missing features for screen readers', () => {
@@ -127,15 +136,15 @@ describe('CompareFeaturesCard', () => {
   it('draws included features with the 20px circle check', () => {
     render(<Harness />)
 
-    const members = screen.getByRole('rowheader', { name: 'Unlimited Workspace members' }).closest('tr') as HTMLElement
-    expect(within(members).getAllByTestId('plan-feature-check')).toHaveLength(3)
+    const addressBook = screen.getByRole('rowheader', { name: 'Shared address book' }).closest('tr') as HTMLElement
+    expect(within(addressBook).getAllByTestId('plan-feature-check')).toHaveLength(3)
   })
 
   it('keeps the current plan checks gray until the table is expanded', () => {
     render(<Harness currentPlan="Business" />)
 
-    const members = screen.getByRole('rowheader', { name: 'Unlimited Workspace members' }).closest('tr') as HTMLElement
-    within(members)
+    const addressBook = screen.getByRole('rowheader', { name: 'Shared address book' }).closest('tr') as HTMLElement
+    within(addressBook)
       .getAllByTestId('plan-feature-check')
       .forEach((check) => expect(check).not.toHaveClass('bg-foreground'))
   })
@@ -145,9 +154,9 @@ describe('CompareFeaturesCard', () => {
 
     screen.getAllByRole('cell').forEach((cell) => expect(cell.className).not.toMatch(/bg-mint/))
 
-    const members = screen.getByRole('rowheader', { name: 'Unlimited Workspace members' }).closest('tr') as HTMLElement
+    const addressBook = screen.getByRole('rowheader', { name: 'Shared address book' }).closest('tr') as HTMLElement
     expect(
-      within(members)
+      within(addressBook)
         .getAllByTestId('plan-feature-check')
         .map((check) => check.classList.contains('bg-foreground')),
     ).toEqual([false, true, false])
