@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
@@ -98,11 +97,13 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
         </ul>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="delete-confirm-input">
+          {/* Not a <label>: clicking a label focuses the input, which clears the selection and stops users copying the name */}
+          <Typography id="delete-confirm-label" variant="paragraph-small-medium" as="p">
             Type <span className="font-mono font-semibold text-foreground">{space?.name}</span> to confirm
-          </Label>
+          </Typography>
           <Input
             id="delete-confirm-input"
+            aria-labelledby="delete-confirm-label"
             data-testid="space-confirm-name-input"
             value={confirmName}
             onChange={(e) => setConfirmName(e.target.value)}
