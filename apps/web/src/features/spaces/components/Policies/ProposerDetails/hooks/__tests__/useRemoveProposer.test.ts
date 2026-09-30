@@ -4,6 +4,8 @@ import { useRemoveProposer } from '../useRemoveProposer'
 
 const mockDeleteV1 = jest.fn()
 const mockUseAddressBookItem = jest.fn()
+const mockUseSpaceSafes = jest.fn()
+const mockUseChain = jest.fn()
 const mockDeleteV2 = jest.fn()
 const mockDispatch = jest.fn()
 const mockShowNotification = jest.fn()
@@ -46,6 +48,16 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
 }))
 
+jest.mock('@/features/spaces', () => ({
+  useSpaceSafes: () => mockUseSpaceSafes(),
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  useChain: (...args: unknown[]) => mockUseChain(...args),
+}))
+
+jest.mock('@/hooks/safes', () => jest.requireActual('@/hooks/safes/isMultiChainSafeItem'))
+
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (...args: unknown[]) => mockShowNotification(...args),
 }))
@@ -65,6 +77,8 @@ describe('useRemoveProposer', () => {
     mockDeleteV1.mockReturnValue(unwrapped())
     mockDeleteV2.mockReturnValue(unwrapped())
     mockUseAddressBookItem.mockReturnValue(undefined)
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [] })
+    mockUseChain.mockReturnValue({ chainName: 'Ethereum' })
   })
 
   it('should, when confirmed, switch to the Safe chain, sign the typed data and delete the delegate', async () => {
@@ -105,6 +119,20 @@ describe('useRemoveProposer', () => {
     expect(mockShowNotification).toHaveBeenCalledWith(
       expect.objectContaining({
         message: 'Bob (0x0000...0B0b) cannot suggest transactions for Treasury (0x8675...a19b) anymore.',
+      }),
+    )
+  })
+
+  it('should name the chain in the confirmation when the Safe is in the Workspace on several chains', async () => {
+    mockUseSpaceSafes.mockReturnValue({ allSafes: [{ address: MOCK_SAFES.treasury.address, safes: [] }] })
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockUseChain).toHaveBeenCalledWith(MOCK_SAFES.treasury.chainId)
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: '0x0000...0B0b cannot suggest transactions for 0x8675...a19b on Ethereum anymore.',
       }),
     )
   })

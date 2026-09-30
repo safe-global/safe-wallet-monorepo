@@ -1,4 +1,4 @@
-import { buildSafeAccountId, getSafeAccountLabel, groupSafeAccounts } from './utils'
+import { buildSafeAccountId, findSafeAccount, getSafeAccountLabel, groupSafeAccounts } from './utils'
 import { isSafeAccountGroup, type SafeAccountOption } from './types'
 import type { ChainInfo } from '@/features/spaces/types'
 
@@ -150,34 +150,35 @@ describe('groupSafeAccounts', () => {
 })
 
 describe('getSafeAccountLabel', () => {
-  it('puts the shortened address after the Safe name', () => {
+  const pick = (entries: ReturnType<typeof groupSafeAccounts>, chainId: string) => {
+    const account = findSafeAccount(entries, buildSafeAccountId(chainId, SAFE_A))
+    if (!account) throw new Error('missing account')
+    return account
+  }
+
+  it('puts the shortened address after the account name', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { name: 'Treasury' })])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('1', SAFE_A))).toBe('Treasury (0xAAAA...AAaA)')
+    expect(getSafeAccountLabel(entries, pick(entries, '1'))).toBe('Treasury (0xAAAA...AAaA)')
   })
 
-  it('falls back to the shortened address for an unnamed Safe', () => {
+  it('falls back to the shortened address without a name', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A)])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('1', SAFE_A))).toBe('0xAAAA...AAaA')
+    expect(getSafeAccountLabel(entries, pick(entries, '1'))).toBe('0xAAAA...AAaA')
+    expect(getSafeAccountLabel(entries, { ...pick(entries, '1'), name: '' })).toBe('0xAAAA...AAaA')
   })
 
   it('adds the chain name when the Safe is offered on several chains', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { name: 'Treasury' }), option('137', SAFE_A)])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('137', SAFE_A))).toBe('Treasury (0xAAAA...AAaA) on Polygon')
+    expect(getSafeAccountLabel(entries, pick(entries, '137'))).toBe('0xAAAA...AAaA on Polygon')
+    expect(getSafeAccountLabel(entries, { ...pick(entries, '137') })).toBe('0xAAAA...AAaA on Polygon')
   })
 
   it('adds the chain id when the Safe is on several chains and the chain config has not loaded', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A, { chain: undefined })])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('137', SAFE_A))).toBe('0xAAAA...AAaA on 137')
-  })
-
-  it('returns undefined for no selection or an unknown id', () => {
-    const entries = groupSafeAccounts([option('1', SAFE_A)])
-
-    expect(getSafeAccountLabel(entries, undefined)).toBeUndefined()
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('1', SAFE_B))).toBeUndefined()
+    expect(getSafeAccountLabel(entries, pick(entries, '137'))).toBe('0xAAAA...AAaA on 137')
   })
 })

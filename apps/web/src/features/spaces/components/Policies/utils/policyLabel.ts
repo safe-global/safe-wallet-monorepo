@@ -98,3 +98,7 @@ export const getPolicyLabel = (policy: Policy): string => POLICY_TYPE_LABELS[pol
 /** "Name (0x1234...abcd)" when the contact has a name, otherwise the shortened address alone. */
 export const formatContactLabel = (address: string, name?: string): string =>
   name ? `${name} (${shortenAddress(address)})` : shortenAddress(address)
+
+/** The contact label plus "on <chain>" when given: a Safe on several chains needs the chain to be unambiguous. */
+export const formatSafeLabel = (address: string, name?: string, chainLabel?: string): string =>
+  chainLabel ? `${formatContactLabel(address, name)} on ${chainLabel}` : formatContactLabel(address, name)
