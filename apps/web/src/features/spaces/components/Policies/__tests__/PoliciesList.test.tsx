@@ -18,6 +18,18 @@ describe('PoliciesList', () => {
     expect(screen.getByTestId('policies-sort')).toBeInTheDocument()
   })
 
+  it('should show the limited actions hint by default', () => {
+    render(<PoliciesList policies={mockPolicies()} />)
+
+    expect(screen.getByTestId('policies-limited-actions-hint')).toBeInTheDocument()
+  })
+
+  it('should hide the limited actions hint when hasLimitedActions is false', () => {
+    render(<PoliciesList policies={mockPolicies()} hasLimitedActions={false} />)
+
+    expect(screen.queryByTestId('policies-limited-actions-hint')).not.toBeInTheDocument()
+  })
+
   it('should, when a search matches one policy, render only that policy', () => {
     render(<PoliciesList policies={mockPolicies()} />)
     fireEvent.change(screen.getByPlaceholderText('by name, address or network'), { target: { value: 'Proposer' } })

@@ -3,12 +3,15 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@/components/ui/button'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
+import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import PolicyRule from './components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
 import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyLabel } from '../utils/policyLabel'
+import { AppRoutes } from '@/config/routes'
+import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
@@ -28,21 +31,22 @@ const getOpenPolicyLabel = (policy: Policy): string =>
  */
 const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
   const resolveSafeName = useSafeNameResolver()
+  const { configs } = useChains()
+  const getShortName = (chainId: string) => configs.find((chain) => chain.chainId === chainId)?.shortName
 
   const columns: DataTableColumn<Policy>[] = [
     {
       id: 'rule',
       header: 'RULE',
-      width: '20%',
+      width: 'fit',
       sticky: true,
-      minWidth: 240,
+      minWidth: 256,
       cellTestId: 'policy-cell-rule',
       cell: (policy) => <PolicyRule policy={policy} />,
     },
     {
       id: 'appliesTo',
-      header: 'APPLIES TO',
-      width: '20%',
+      header: 'SAFE ACCOUNT',
       minWidth: 200,
       cellTestId: 'policy-cell-applies-to',
       cell: (policy) => (
@@ -54,14 +58,16 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           showPrefix={false}
           highlight4bytes
           showCopyButton
+          showAddressTooltip
+          boldLabel
           avatarSize={24}
+          href={buildSafeHref(AppRoutes.settings.setup, getShortName(policy.safe.chainId), policy.safe.address)}
         />
       ),
     },
     {
       id: 'proposerTokens',
       header: 'PROPOSER / TOKENS',
-      width: '30%',
       minWidth: 200,
       cellTestId: 'policy-cell-proposer-tokens',
       cell: (policy) => {
@@ -74,11 +80,12 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
           <EthHashInfo
             address={proposer.proposer}
             chainId={policy.safe.chainId}
-            name={proposer.delegatedBy.find((grant) => grant.label)?.label}
             shortAddress
             showPrefix={false}
             highlight4bytes
             showCopyButton
+            showAddressTooltip
+            boldLabel
             avatarSize={24}
           />
         )
@@ -87,8 +94,8 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
     {
       id: 'network',
       header: 'NETWORK',
-      width: '10%',
-      minWidth: 120,
+      width: 'fit',
+      minWidth: 96,
       align: 'center',
       priority: 'secondary',
       cellTestId: 'policy-cell-network',
@@ -101,7 +108,7 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
     {
       id: 'status',
       header: 'STATUS',
-      width: '15%',
+      width: 'fit',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
       cell: (policy) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
@@ -110,7 +117,8 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       id: 'open',
       header: '',
       align: 'end',
-      minWidth: 48,
+      width: 'fit',
+      minWidth: 64,
       cell: (policy) =>
         onSelect ? (
           <Button

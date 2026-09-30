@@ -8,10 +8,12 @@ const CopyAddressButton = ({
   address,
   children,
   trusted = true,
+  initialToolTipText,
 }: {
   address: string
   children?: ReactNode
   trusted?: boolean
+  initialToolTipText?: string
 }): ReactElement => {
   const checksummedAddress = checksumAddress(address)
 
@@ -32,7 +34,7 @@ const CopyAddressButton = ({
   )
 
   return (
-    <CopyButton text={address} dialogContent={dialogContent}>
+    <CopyButton text={address} dialogContent={dialogContent} initialToolTipText={initialToolTipText}>
       {children}
     </CopyButton>
   )

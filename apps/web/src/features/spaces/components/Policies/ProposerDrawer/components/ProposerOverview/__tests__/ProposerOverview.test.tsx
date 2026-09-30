@@ -16,7 +16,7 @@ describe('ProposerOverview', () => {
     expect(screen.getByText('Policy overview')).toBeInTheDocument()
     expect(screen.getByText('Proposer')).toBeInTheDocument()
     expect(screen.getByText('Marc')).toBeInTheDocument()
-    expect(screen.getByText('Applies to')).toBeInTheDocument()
+    expect(screen.getByText('Safe account')).toBeInTheDocument()
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('Initiated by')).toBeInTheDocument()
     expect(screen.getByText('Jacob')).toBeInTheDocument()

@@ -34,6 +34,10 @@ jest.mock('../useNestedSafeGrantor', () => ({
   useNestedSafeGrantor: () => mockUseNestedSafeGrantor(),
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  useChain: () => ({ shortName: 'eth' }),
+}))
+
 const policy = asActivePolicy(mockProposerPolicy())
 const onRemove = jest.fn()
 const args = { policy, proposer: policy.data.proposers[0], onRemove }
