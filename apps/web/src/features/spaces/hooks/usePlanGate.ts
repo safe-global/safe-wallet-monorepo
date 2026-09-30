@@ -1,6 +1,9 @@
 import type { LinkProps } from 'next/link'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import useChainId from '@/hooks/useChainId'
+import useSafeAddress from '@/hooks/useSafeAddress'
+import { safeSpaceKey, useSafeSpaces } from '@/hooks/useSafeSpaces'
 import { AppRoutes } from '@/config/routes'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
@@ -27,7 +30,19 @@ export const usePlanGate = (gatingFlag: FEATURES): PlanGate => {
   const isGatingFlagEnabled = useHasFeature(gatingFlag) === true
   const isGateActive = isSafeProEnabled && isGatingFlagEnabled
   const activeSpaceId = useCurrentSpaceId()
-  const { isEntitled, isLoading: isEntitlementsLoading } = useSpaceEntitlements(isGateActive ? activeSpaceId : null)
+  const chainId = useChainId()
+  const safeAddress = useSafeAddress()
+  const { safeSpaces } = useSafeSpaces(!isGateActive || !safeAddress)
+  // An open Safe takes the plan of a Workspace it belongs to, the active one first.
+  const safeSpaceIds = safeAddress ? (safeSpaces[safeSpaceKey(chainId, safeAddress)] ?? []).map(({ uuid }) => uuid) : []
+  const entitlementsSpaceId = !safeAddress
+    ? activeSpaceId
+    : activeSpaceId && safeSpaceIds.includes(activeSpaceId)
+      ? activeSpaceId
+      : (safeSpaceIds[0] ?? null)
+  const { isEntitled, isLoading: isEntitlementsLoading } = useSpaceEntitlements(
+    isGateActive ? entitlementsSpaceId : null,
+  )
 
   return {
     mustUpgradeToSafePro: isGateActive && !isEntitlementsLoading && !isEntitled(POLICIES_ENTITLEMENT),

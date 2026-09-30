@@ -8,8 +8,16 @@ const PLANS_HREF = { pathname: '/spaces/plans', query: { spaceId: SPACE_ID } }
 let mockFlags: FEATURES[] = []
 let mockCurrentSpaceId: string | null = SPACE_ID
 const mockUseSpaceEntitlements = jest.fn()
+let mockSafeAddress = ''
+let mockSafeSpaces: Record<string, { uuid: string }[]> = {}
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: (feature: FEATURES) => mockFlags.includes(feature) }))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
+jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => mockSafeAddress }))
+jest.mock('@/hooks/useSafeSpaces', () => ({
+  ...jest.requireActual('@/hooks/useSafeSpaces'),
+  useSafeSpaces: () => ({ safeSpaces: mockSafeSpaces, isLoading: false }),
+}))
 jest.mock('../billing/useSpaceEntitlements', () => ({
   useSpaceEntitlements: (spaceId: string | null) => mockUseSpaceEntitlements(spaceId),
 }))
@@ -24,6 +32,8 @@ describe('usePlanGate', () => {
     jest.clearAllMocks()
     mockFlags = [FEATURES.SAFE_PRO, FEATURES.PROPOSER_GATING]
     mockCurrentSpaceId = SPACE_ID
+    mockSafeAddress = ''
+    mockSafeSpaces = {}
     mockUseSpaceEntitlements.mockReturnValue(entitlements([]))
   })
 
@@ -69,5 +79,36 @@ describe('usePlanGate', () => {
     const { result } = renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
 
     expect(result.current).toEqual({ mustUpgradeToSafePro: true, isLoading: false, upgradeHref: '/welcome/spaces' })
+  })
+
+  describe('with a Safe open', () => {
+    const SAFE = '0x00000000000000000000000000000000000000Ab'
+    const OTHER_SPACE_ID = 'space-2'
+
+    beforeEach(() => {
+      mockSafeAddress = SAFE
+    })
+
+    it('reads the active Workspace while it holds the Safe', () => {
+      mockSafeSpaces = { [`1:${SAFE.toLowerCase()}`]: [{ uuid: OTHER_SPACE_ID }, { uuid: SPACE_ID }] }
+
+      renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
+
+      expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(SPACE_ID)
+    })
+
+    it('reads a Workspace the Safe belongs to while the active one does not hold it', () => {
+      mockSafeSpaces = { [`1:${SAFE.toLowerCase()}`]: [{ uuid: OTHER_SPACE_ID }] }
+
+      renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
+
+      expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(OTHER_SPACE_ID)
+    })
+
+    it('reads no Workspace while the Safe belongs to none', () => {
+      renderHook(() => usePlanGate(FEATURES.PROPOSER_GATING))
+
+      expect(mockUseSpaceEntitlements).toHaveBeenCalledWith(null)
+    })
   })
 })
