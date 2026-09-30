@@ -74,7 +74,7 @@ export const AB_LOCAL_CONTACT = {
  */
 export const DROPDOWN_TEST_SPACE = {
   // Legacy numeric space id — accepted by the backend's LegacySpaceIdPipe and what
-  // the Cypress spaces mocks use. `lastUsedSpace` is seeded to this so it resolves.
+  // the Cypress spaces mocks use. `landingSpaceHint` is seeded to this so it resolves.
   id: '1',
   name: 'E2E Workspace',
 } as const

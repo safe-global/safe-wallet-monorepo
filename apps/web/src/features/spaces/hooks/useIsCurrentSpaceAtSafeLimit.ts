@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpaceSafeLimit } from './useSpaceSafeLimit'
 
@@ -15,10 +15,9 @@ export const useSpaceSafeCount = (spaceId: string | null): number | undefined =>
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const { data: spaces } = useSpacesGetV1Query(undefined, { skip: !isSiweAuthenticated })
 
-  const resolvedSpaceId = normalizeSpaceId(spaceId)
-  if (resolvedSpaceId === null) return undefined
+  if (spaceId === null) return undefined
 
-  return spaces?.find((s) => s.uuid === resolvedSpaceId)?.safeCount
+  return spaces?.find((s) => s.uuid === spaceId)?.safeCount
 }
 
 /**

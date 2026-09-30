@@ -21,7 +21,7 @@ export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
 export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
-/** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
+/** Builder returning a Safe's security settings URL for a given (address, chainId), or undefined if the chain has no short name. */
 export type GetSafeSecurityHref = (address: string, chainId: string) => SafeHref | undefined
 
 /**
@@ -34,7 +34,8 @@ export const buildSafeSecurityHref = (
   chainShortNames: Record<string, string>,
   address: string,
   chainId: string,
-): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address)
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address, spaceId)
 
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same

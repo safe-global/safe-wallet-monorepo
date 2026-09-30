@@ -139,21 +139,30 @@ describe('buildSafeSecurityHref', () => {
   const address = '0x1234567890123456789012345678901234567890'
 
   it("links to the Safe's security settings page with a prefixed safe param", () => {
-    expect(buildSafeSecurityHref(chainShortNames, address, '1')).toEqual({
+    expect(buildSafeSecurityHref(chainShortNames, address, '1', null)).toEqual({
       pathname: AppRoutes.settings.security,
       query: { safe: `eth:${address}` },
     })
   })
 
+  it('keeps the Workspace of the Security Hub in the link', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+
+    expect(buildSafeSecurityHref(chainShortNames, address, '1', spaceId)).toEqual({
+      pathname: AppRoutes.settings.security,
+      query: { safe: `eth:${address}`, spaceId },
+    })
+  })
+
   it('uses the short name matching the given chainId', () => {
-    expect(buildSafeSecurityHref(chainShortNames, address, '137')).toEqual({
+    expect(buildSafeSecurityHref(chainShortNames, address, '137', null)).toEqual({
       pathname: AppRoutes.settings.security,
       query: { safe: `matic:${address}` },
     })
   })
 
   it('returns undefined when the chain has no known short name (renders as plain text)', () => {
-    expect(buildSafeSecurityHref(chainShortNames, address, '999')).toBeUndefined()
-    expect(buildSafeSecurityHref({}, address, '1')).toBeUndefined()
+    expect(buildSafeSecurityHref(chainShortNames, address, '999', null)).toBeUndefined()
+    expect(buildSafeSecurityHref({}, address, '1', null)).toBeUndefined()
   })
 })

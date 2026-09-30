@@ -25,6 +25,7 @@ import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { PendingDelegation as PendingDelegationType } from '@/features/proposers/types'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type PendingDelegationProps = {
   delegation: PendingDelegationType
@@ -39,6 +40,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
   const wallet = useWallet()
   const dispatch = useAppDispatch()
   const origin = useOrigin()
+  const spaceId = useUrlSpaceId()
   const { submitDelegation, isSubmitting } = useSubmitDelegation()
 
   const hasAlreadySigned = delegation.confirmations.some((c) => sameAddress(c.owner.value, wallet?.address))
@@ -50,7 +52,10 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     ? `${chain.shortName}:${delegation.parentSafeAddress}`
     : `${chainId}:${delegation.parentSafeAddress}`
   const shareUrl = origin
-    ? `${origin}${AppRoutes.transactions.msg}?safe=${parentSafeId}&messageHash=${delegation.messageHash}`
+    ? withSpaceIdInUrl(
+        `${origin}${AppRoutes.transactions.msg}?safe=${parentSafeId}&messageHash=${delegation.messageHash}`,
+        spaceId,
+      )
     : ''
 
   const handleSign = async () => {

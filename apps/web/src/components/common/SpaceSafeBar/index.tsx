@@ -27,12 +27,10 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
-import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems, type DropdownTab } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
-
-type DropdownTab = 'workspace' | 'local'
 
 const HIDDEN_ROUTES = [
   AppRoutes.welcome.accounts,
@@ -229,9 +227,7 @@ function SpaceSafeBar() {
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  // Only surface the space name when the current safe actually belongs to it. Off a space context
-  // `useCurrentSpaceId` still resolves a fallback space (last-used / first in the list), so `space`
-  // is populated even for a safe in no workspace — labelling the tab with it would be misleading.
+  // Only surface the space name when the current safe belongs to the Workspace of the URL.
   const workspaceLabel = isInSpaceContext
     ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
     : 'Workspace'
@@ -305,7 +301,7 @@ function SpaceSafeBar() {
           items={unionItems}
           listItems={listItems}
           selectedItemId={selectedItemId}
-          onItemSelect={handleItemSelect}
+          onItemSelect={(itemId) => handleItemSelect(itemId, activeTab)}
           isLoading={showSelectorSkeleton}
           isError={isError}
           onRetry={refetch}

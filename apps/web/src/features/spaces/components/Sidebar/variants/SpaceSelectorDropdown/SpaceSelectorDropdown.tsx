@@ -104,6 +104,7 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.SIDEBAR })
+    // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
     router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
   }
 

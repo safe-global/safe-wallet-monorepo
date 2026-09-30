@@ -31,8 +31,9 @@ export class HomePage {
   }
 
   /** Navigate to dashboard for a given Safe address */
-  async goto(safeAddress: string): Promise<void> {
-    await this.page.goto(`${ROUTES.home}?safe=${safeAddress}`)
+  /** Open the Safe dashboard, in a Workspace when `spaceId` is given */
+  async goto(safeAddress: string, spaceId?: string): Promise<void> {
+    await this.page.goto(`${ROUTES.home}?safe=${safeAddress}${spaceId ? `&spaceId=${spaceId}` : ''}`)
   }
 
   /** Wait for the dashboard to finish loading */

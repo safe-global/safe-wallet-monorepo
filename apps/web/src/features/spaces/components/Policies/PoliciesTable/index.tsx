@@ -13,6 +13,7 @@ import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyLabel } from '../utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
@@ -35,6 +36,7 @@ const getOpenPolicyLabel = (policy: Policy): string =>
 const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTableProps) => {
   const resolveSafeName = useSafeNameResolver()
   const { configs } = useChains()
+  const spaceId = useUrlSpaceId()
   const getShortName = (chainId: string) => configs.find((chain) => chain.chainId === chainId)?.shortName
 
   const columns: DataTableColumn<Policy>[] = [
@@ -64,7 +66,12 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
           showAddressTooltip
           boldLabel
           avatarSize={24}
-          href={buildSafeHref(AppRoutes.settings.setup, getShortName(policy.safe.chainId), policy.safe.address)}
+          href={buildSafeHref(
+            AppRoutes.settings.setup,
+            getShortName(policy.safe.chainId),
+            policy.safe.address,
+            spaceId,
+          )}
         />
       ),
     },

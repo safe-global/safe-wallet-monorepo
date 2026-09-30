@@ -15,7 +15,7 @@ import { replayCounterfactualSafeDeployment } from './safeDeployment'
 import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isSpaceAtSafeLimit, normalizeSpaceId, type SafeLimit } from '@/utils/spaces'
+import { isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
@@ -24,7 +24,7 @@ type PersistArgs = {
   props: ReplayedSafeProps
   name: string
   payMethod: PayMethod
-  /** Active space id (string from auth state), or null if user has none. */
+  /** The Workspace of the URL (useUrlSpaceId), or null outside a Workspace. */
   spaceId: string | null
   /** Whether the user is signed into the CGW session. Non-authed users can
    *  still create counterfactual safes but nothing is written to the backend. */
@@ -118,10 +118,7 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    // Guard against persisted/legacy lastUsedSpace values that are empty or
-    // whitespace-only — pass any non-empty string through unchanged.
-    const resolvedSpaceId = normalizeSpaceId(spaceId)
-    if (resolvedSpaceId !== null) {
+    if (spaceId !== null) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the
         // user — the safe is still persisted at the user level above.
@@ -144,7 +141,7 @@ export const persistCounterfactualSafe = async ({
       } else {
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId: resolvedSpaceId,
+            spaceId,
             createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
           }),
         )

@@ -28,9 +28,10 @@ import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { isAuthenticated } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const ReplaySafeDialog = ({
@@ -55,14 +56,13 @@ const ReplaySafeDialog = ({
 
   const customRpc = useAppSelector(selectRpc)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
-  const spaceId = useAppSelector(lastUsedSpace)
-  const resolvedSpaceId = normalizeSpaceId(spaceId)
-  const isAdminOfActiveSpace = useIsAdmin(resolvedSpaceId ?? undefined)
+  const spaceId = useUrlSpaceId()
+  const isAdminOfActiveSpace = useIsAdmin(spaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
   const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
-    { spaceId: resolvedSpaceId ?? '' },
-    { skip: !isUserAuthenticated || resolvedSpaceId === null },
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserAuthenticated || spaceId === null },
   )
   // Seats are per address: another chain of a Safe already in the space takes none.
   const holdsSeatInSpace = Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
@@ -70,7 +70,7 @@ const ReplaySafeDialog = ({
   )
   const willStayOutsideSpace =
     isUserAuthenticated &&
-    resolvedSpaceId !== null &&
+    spaceId !== null &&
     isAdminOfActiveSpace &&
     !holdsSeatInSpace &&
     isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
@@ -169,6 +169,7 @@ const ReplaySafeDialog = ({
         pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
         query: {
           safe: `${selectedChain.shortName}:${safeAddress}`,
+          ...(spaceId && { spaceId }),
         },
       })
 

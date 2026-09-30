@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
-import { plans } from '../../support/spaces-login.js'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
@@ -16,11 +15,9 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 
   beforeEach(() => {
-    spendinglimit.signInOnPlan(signer, plans.business)
-    wallet.connectSignerViaStorage(
-      signer,
-      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
-    )
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+      extraStorage: spendinglimit.safeProOffStorage,
+    })
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     spendinglimit.clickOnNewSpendingLimitBtn()
@@ -72,17 +69,13 @@ describe('[SMOKE] Spending limits tests', () => {
   })
 })
 
-describe('[SMOKE] Spending limits on a plan without policies', () => {
+describe('[SMOKE] Spending limits outside a Workspace', () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
   it('Verify the Safe Pro lock replaces the New spending limit button', () => {
-    spendinglimit.signInOnPlan(signer, plans.starter)
-    wallet.connectSignerViaStorage(
-      signer,
-      constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
-    )
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
     owner.waitForConnectionStatus()
     cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
 
