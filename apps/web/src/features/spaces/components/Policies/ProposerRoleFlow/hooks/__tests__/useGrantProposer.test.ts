@@ -4,6 +4,7 @@ import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import * as delegatesApi from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
@@ -84,11 +85,11 @@ describe('useGrantProposer', () => {
     jest.restoreAllMocks()
   })
 
-  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}) => {
+  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}, safeLabel?: string) => {
     const rendered = renderHook(() => useGrantProposer(), { initialReduxState: { addressBook } })
     let ok = false
     await act(async () => {
-      ok = await rendered.result.current.grantProposerRole(values)
+      ok = await rendered.result.current.grantProposerRole(values, safeLabel)
     })
     return { ok, result: rendered.result }
   }
@@ -155,7 +156,28 @@ describe('useGrantProposer', () => {
       expect.objectContaining({
         variant: 'success',
         groupKey: 'add-proposer-success',
+        autoHideDuration: 7000,
         title: 'Proposer added successfully!',
+      }),
+    ])
+  })
+
+  it('names the Safe the proposer was added to in the success message', async () => {
+    await submit({ proposer: PROPOSER, name: 'Nicole' }, {}, 'Treasury on Polygon')
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `${shortenAddress(PROPOSER)} can now suggest transactions for Treasury on Polygon.`,
+      }),
+    ])
+  })
+
+  it('falls back to the scoped Safe address in the success message without a label', async () => {
+    await submit()
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `${shortenAddress(PROPOSER)} can now suggest transactions for ${shortenAddress(SAFE)}.`,
       }),
     ])
   })

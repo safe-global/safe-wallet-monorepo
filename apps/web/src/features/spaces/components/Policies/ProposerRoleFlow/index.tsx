@@ -6,6 +6,7 @@ import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
+import { getSafeAccountLabel } from '../SafeAccountSelector/utils'
 import { CREATE_POLICY_TITLE } from './constants'
 import { useGrantProposer } from './hooks/useGrantProposer'
 import { useProposerValidation } from './hooks/useProposerValidation'
@@ -34,9 +35,10 @@ const ProposerRoleFlowContent = (): ReactElement => {
 
   const onSubmit = useCallback(
     async (values: ProposerRoleFormValues) => {
-      if (await grantProposerRole(values)) setTxFlow(undefined)
+      const safeLabel = getSafeAccountLabel(safeAccounts.accounts, safeAccount)
+      if (await grantProposerRole(values, safeLabel)) setTxFlow(undefined)
     },
-    [grantProposerRole, setTxFlow],
+    [grantProposerRole, setTxFlow, safeAccounts.accounts, safeAccount],
   )
 
   const errorMessage = error ? (

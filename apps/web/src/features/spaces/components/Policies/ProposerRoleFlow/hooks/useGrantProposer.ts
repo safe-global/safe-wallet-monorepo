@@ -24,11 +24,12 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
 import type { ProposerRoleFormValues } from '../ProposerRoleForm'
+import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 
 export type GrantProposer = {
-  grantProposerRole: (values: ProposerRoleFormValues) => Promise<boolean>
+  grantProposerRole: (values: ProposerRoleFormValues, safeLabel?: string) => Promise<boolean>
   isSubmitting: boolean
   error?: Error
   blockedReason?: string
@@ -93,7 +94,7 @@ export const useGrantProposer = (): GrantProposer => {
   )
 
   const announceSuccess = useCallback(
-    (proposer: string, name: string) => {
+    (proposer: string, name: string, safeLabel: string) => {
       // A member's request waits for an admin, so a new contact is also kept in their local address book
       if (!isAdmin && !getContact(proposer, chainId)) {
         dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
@@ -104,8 +105,9 @@ export const useGrantProposer = (): GrantProposer => {
         showNotification({
           variant: 'success',
           groupKey: 'add-proposer-success',
+          autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS,
           title: 'Proposer added successfully!',
-          message: `${shortenAddress(proposer)} can now suggest transactions for this account.`,
+          message: `${shortenAddress(proposer)} can now suggest transactions for ${safeLabel}.`,
         }),
       )
     },
@@ -113,7 +115,7 @@ export const useGrantProposer = (): GrantProposer => {
   )
 
   const grantProposerRole = useCallback(
-    async ({ proposer, name }: ProposerRoleFormValues): Promise<boolean> => {
+    async ({ proposer, name }: ProposerRoleFormValues, safeLabel?: string): Promise<boolean> => {
       if (!wallet || !onboard || !safeAddress) return false
 
       reset()
@@ -132,7 +134,7 @@ export const useGrantProposer = (): GrantProposer => {
 
         const signed = await signDelegation(onboard, chainId, proposer)
         await submitDelegation(proposer, signed)
-        announceSuccess(proposer, name)
+        announceSuccess(proposer, name, safeLabel ?? shortenAddress(safeAddress))
 
         return true
       } catch (err) {
