@@ -7,6 +7,7 @@ import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import { FieldDescription } from '@/components/ui/field'
 import TokenLimitCard from './TokenLimitCard'
 import { validateUniqueSpender } from '../utils/validation'
@@ -84,7 +85,8 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
           </Button>
         )}
 
-        <div className="flex flex-col gap-1">
+        {/* Dimmed as a whole: an edit cannot change who a delegate is, and the field has to say so. */}
+        <div className={cn('flex flex-col gap-1', isFixed && 'cursor-not-allowed opacity-50')}>
           <AddressBookInput
             name={spenderAddressPath(spenderIndex)}
             label={SPENDER_LABEL}

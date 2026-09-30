@@ -1,4 +1,5 @@
 import { useId, useMemo, type ReactNode } from 'react'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { cn } from '@/utils/cn'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -34,9 +35,9 @@ export type SafeAccountSelectorProps = {
   onRetry?: () => void
   disabled?: boolean
   /**
-   * Shows the picked account without offering the others. Not `disabled`: a dimmed address is harder
-   * to check than a plain one, and this field exists to be checked — the same reasoning `AddressInput`
-   * applies to a fixed address.
+   * Shows the picked account without offering the others, dimmed so it reads as a field that cannot be
+   * edited. Not the `Select`'s own `disabled`, which would swallow the pointer events the copy button
+   * needs; the dimming is applied to the account, and the copy button stays live beside it.
    */
   readOnly?: boolean
   label?: string
@@ -136,13 +137,19 @@ const SafeAccountSelector = ({
       <div className="flex w-full flex-col gap-1.5">
         <Label htmlFor={fieldId}>{label}</Label>
 
-        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control. */}
+        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control — and so
+            carries no `aria-disabled`, which Chrome propagates onto the copy button and would kill it. */}
         <div
           id={fieldId}
           data-testid="safe-account-readonly"
-          className="border-border bg-input flex min-h-9 w-full items-center rounded-md border px-3 py-1.5 shadow-xs"
+          className="border-border bg-input flex min-h-9 w-full cursor-not-allowed items-center gap-2 rounded-md border px-3 py-1.5 shadow-xs"
         >
-          <SafeAccountSummary account={selectedAccount} />
+          {/* The summary brings its own tooltip with the whole address, which is what gets checked before signing. */}
+          <span className="flex min-w-0 flex-1 opacity-50">
+            <SafeAccountSummary account={selectedAccount} />
+          </span>
+
+          <CopyAddressIconButton address={selectedAccount.address} />
         </div>
 
         {helper}
