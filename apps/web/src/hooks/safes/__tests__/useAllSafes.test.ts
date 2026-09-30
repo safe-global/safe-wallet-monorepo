@@ -3,6 +3,7 @@ import useAllSafes, { _buildSafeItem, _prepareAddresses } from '../useAllSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import { renderHook } from '@/tests/test-utils'
+import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 
@@ -10,6 +11,8 @@ describe('useAllSafes hook', () => {
   beforeEach(() => {
     jest.clearAllMocks()
 
+    // Default to no connected wallet; tests that need one override this spy explicitly.
+    jest.spyOn(useWallet, 'default').mockReturnValue(null)
     jest.spyOn(allOwnedSafes, 'default').mockReturnValue([undefined, undefined, false])
     jest.spyOn(useChains, 'default').mockImplementation(() => ({
       configs: [{ chainId: '1' } as Chain],
@@ -31,6 +34,25 @@ describe('useAllSafes hook', () => {
     const { result } = renderHook(() => useAllSafes())
 
     expect(result.current).toEqual([])
+  })
+
+  it('enumerates owned safes for the connected wallet by default', () => {
+    jest.spyOn(useWallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x111' }).build())
+    const ownedSpy = jest.spyOn(allOwnedSafes, 'default').mockReturnValue([undefined, undefined, false])
+
+    renderHook(() => useAllSafes())
+
+    expect(ownedSpy).toHaveBeenCalledWith('0x111')
+  })
+
+  it('skips the owned-safes enumeration when fetchOwnedSafes is false', () => {
+    jest.spyOn(useWallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x111' }).build())
+    const ownedSpy = jest.spyOn(allOwnedSafes, 'default').mockReturnValue([undefined, undefined, false])
+
+    // Passing an empty address makes useAllOwnedSafes skip the owned-safes request.
+    renderHook(() => useAllSafes(false))
+
+    expect(ownedSpy).toHaveBeenCalledWith('')
   })
 
   it('returns SafeItems for added safes', () => {

@@ -22,7 +22,9 @@ describe('CF Safe creation happy path tests', () => {
     createwallet.connectWalletAndCreateSafe(signer)
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
-    createwallet.selectPayNowOption()
+    // Creating a counterfactual (pay-later) Safe now requires signing into a workspace first, which
+    // selects the pay-later method and enables the review step's Next button.
+    createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
     cy.wait(1000)
     main.getAddedSafeAddressFromLocalStorage(constants.networkKeys.sepolia, 0).then((address) => {

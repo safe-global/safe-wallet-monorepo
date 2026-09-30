@@ -160,7 +160,7 @@ export const LedgerAddressesContainer = () => {
       <SectionTitle
         title={TITLE}
         paddingHorizontal={'$0'}
-        description={`Select one or more addresses derived from your ${deviceLabel}. Make sure they are signers of the selected Safe Account.`}
+        description={`Select one or more addresses derived from your ${deviceLabel}. Make sure they are signers of the selected Safe account.`}
       />
 
       {/* Derivation Path Selector */}

@@ -9,11 +9,11 @@ export * from './addedSafesSlice'
 export * from './settingsSlice'
 export * from './cookiesAndTermsSlice'
 export * from './popupSlice'
-export * from '@/features/spending-limits/store/spendingLimitsSlice'
+export * from '@/features/spending-limits/store'
 export * from './safeAppsSlice'
 export { safeMessagesListener } from './safeMessagesSlice'
 export * from './pendingSafeMessagesSlice'
-export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store/batchSlice'
+export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store'
 export {
   undeployedSafesSlice,
   addUndeployedSafe,
@@ -38,6 +38,9 @@ export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
+export * from '@/features/gtf/store'
+export * from '@/features/address-poisoning/store'
+export * from '@/features/feature-flag-overrides/store'
 export {
   globalSearchSlice,
   openGlobalSearch,
@@ -46,6 +49,16 @@ export {
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
 export {
+  elevationListener,
+  stepUpSlice,
+  stepUpLeaving,
+  stepUpReturning,
+  stepUpSettled,
+  selectStepUpPhase,
+} from '@/features/oidc-auth/store'
+export {
+  spaceSafesEntitlementsListener,
+  trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,
   openSafeActionsModal,
@@ -53,4 +66,7 @@ export {
   selectSafeActionsModal,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
+  spaceNavigationSlice,
+  setLastUsedSpaceOrigin,
+  selectLastUsedSpaceOrigin,
 } from '@/features/spaces/store'

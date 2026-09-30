@@ -28,7 +28,7 @@ describe('multichainSetupScanner', () => {
       }),
     )
     expect(result.status).toBe('partial')
-    expect(result.severity).toBe('Medium')
+    expect(result.severity).toBe('High')
     expect(result.score).toBe(30)
   })
 

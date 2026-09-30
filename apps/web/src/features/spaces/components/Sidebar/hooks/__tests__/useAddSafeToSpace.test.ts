@@ -37,40 +37,40 @@ describe('useAddSafeToSpace', () => {
 
   it('calls the mutation with correct args and returns true on success', async () => {
     const onSpaceAdded = jest.fn()
-    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
+    const spaces = [{ id: 5, uuid: 'alpha-uuid', name: 'Alpha', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
 
     let success: boolean | undefined
     await act(async () => {
-      success = await result.current.addToSpace(5)
+      success = await result.current.addToSpace('alpha-uuid')
     })
 
     expect(mockAddSafeToSpace).toHaveBeenCalledWith({
-      spaceId: 5,
+      spaceId: 'alpha-uuid',
       createSpaceSafesDto: { safes: [{ chainId: '1', address: '0xSafe' }] },
     })
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'notifications/add',
         payload: {
-          message: 'Successfully added Safe to workspace.',
+          message: 'Successfully added Safe to Workspace.',
           variant: 'success',
           groupKey: 'add-safe-to-workspace-success',
         },
       }),
     )
-    expect(onSpaceAdded).toHaveBeenCalledWith({ id: 5, name: 'Alpha', safeCount: 0 })
+    expect(onSpaceAdded).toHaveBeenCalledWith({ id: 5, uuid: 'alpha-uuid', name: 'Alpha', safeCount: 0 })
     expect(success).toBe(true)
   })
 
   it('dispatches error notification and returns false when API returns an error', async () => {
     mockAddSafeToSpace.mockResolvedValue({ error: new Error('API error') })
-    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
+    const spaces = [{ id: 5, uuid: 'alpha-uuid', name: 'Alpha', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces }))
 
     let success: boolean | undefined
     await act(async () => {
-      success = await result.current.addToSpace(5)
+      success = await result.current.addToSpace('alpha-uuid')
     })
 
     expect(mockDispatch).toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/add' }))
@@ -82,14 +82,14 @@ describe('useAddSafeToSpace', () => {
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
     await act(async () => {
-      await result.current.addToSpace(5)
+      await result.current.addToSpace('any-uuid')
     })
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. API error',
+          message: 'Failed to add Safe to Workspace. API error',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -103,7 +103,7 @@ describe('useAddSafeToSpace', () => {
 
     let success: boolean | undefined
     await act(async () => {
-      success = await result.current.addToSpace(1)
+      success = await result.current.addToSpace('any-uuid')
     })
 
     expect(mockAddSafeToSpace).not.toHaveBeenCalled()
@@ -116,7 +116,7 @@ describe('useAddSafeToSpace', () => {
 
     let success: boolean | undefined
     await act(async () => {
-      success = await result.current.addToSpace(1)
+      success = await result.current.addToSpace('any-uuid')
     })
 
     expect(mockAddSafeToSpace).not.toHaveBeenCalled()
@@ -134,10 +134,10 @@ describe('useAddSafeToSpace', () => {
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
     act(() => {
-      void result.current.addToSpace(7)
+      void result.current.addToSpace('loading-uuid')
     })
 
-    expect(result.current.loadingSpaceId).toBe(7)
+    expect(result.current.loadingSpaceId).toBe('loading-uuid')
 
     await act(async () => {
       resolveRequest({ data: {} })
@@ -154,14 +154,14 @@ describe('useAddSafeToSpace', () => {
 
     let success: boolean | undefined
     await act(async () => {
-      success = await result.current.addToSpace(5)
+      success = await result.current.addToSpace('any-uuid')
     })
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. Network failure',
+          message: 'Failed to add Safe to Workspace. Network failure',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -175,7 +175,7 @@ describe('useAddSafeToSpace', () => {
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
     await act(async () => {
-      await result.current.addToSpace(3)
+      await result.current.addToSpace('any-uuid')
     })
 
     expect(result.current.loadingSpaceId).toBe(null)
@@ -183,38 +183,39 @@ describe('useAddSafeToSpace', () => {
 
   it('extracts the message from a FetchBaseQueryError data payload', async () => {
     mockAddSafeToSpace.mockResolvedValue({
-      error: { status: 409, data: { message: 'Safe already exists in this workspace' } },
+      error: { status: 409, data: { message: 'Safe already exists in this Workspace' } },
     })
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
     await act(async () => {
-      await result.current.addToSpace(5)
+      await result.current.addToSpace('any-uuid')
     })
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. Safe already exists in this workspace',
+          message: 'Failed to add Safe to Workspace. Safe already exists in this Workspace',
           variant: 'error',
         }),
       }),
     )
   })
 
-  it('falls back to status code when FetchBaseQueryError has no data message', async () => {
+  it('shows a friendly network message instead of the raw fetch error', async () => {
     mockAddSafeToSpace.mockResolvedValue({
       error: { status: 'FETCH_ERROR', error: 'TypeError: Failed to fetch' },
     })
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
     await act(async () => {
-      await result.current.addToSpace(5)
+      await result.current.addToSpace('any-uuid')
     })
 
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. TypeError: Failed to fetch',
+          message:
+            "Failed to add Safe to Workspace. Couldn't connect to the server. Please check your connection and try again.",
           variant: 'error',
         }),
       }),
@@ -223,11 +224,11 @@ describe('useAddSafeToSpace', () => {
 
   it('does not call onSpaceAdded when the spaceId is not in the spaces list', async () => {
     const onSpaceAdded = jest.fn()
-    const spaces = [{ id: 10, name: 'Other', safeCount: 0 }]
+    const spaces = [{ id: 10, uuid: 'other-uuid', name: 'Other', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
 
     await act(async () => {
-      await result.current.addToSpace(99)
+      await result.current.addToSpace('missing-uuid')
     })
 
     expect(onSpaceAdded).not.toHaveBeenCalled()
@@ -236,11 +237,11 @@ describe('useAddSafeToSpace', () => {
   it('does not call onSpaceAdded when the API returns an error', async () => {
     mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })
     const onSpaceAdded = jest.fn()
-    const spaces = [{ id: 5, name: 'Alpha', safeCount: 0 }]
+    const spaces = [{ id: 5, uuid: 'alpha-uuid', name: 'Alpha', safeCount: 0 }]
     const { result } = renderHook(() => useAddSafeToSpace({ spaces, onSpaceAdded }))
 
     await act(async () => {
-      await result.current.addToSpace(5)
+      await result.current.addToSpace('alpha-uuid')
     })
 
     expect(onSpaceAdded).not.toHaveBeenCalled()
@@ -253,7 +254,7 @@ describe('useAddSafeToSpace', () => {
 
       let success: boolean | undefined
       await act(async () => {
-        success = await result.current.addToSpace(1)
+        success = await result.current.addToSpace('any-uuid')
       })
 
       expect(mockAddSafeToSpace).not.toHaveBeenCalled()
@@ -266,7 +267,7 @@ describe('useAddSafeToSpace', () => {
 
       let success: boolean | undefined
       await act(async () => {
-        success = await result.current.addToSpace(1)
+        success = await result.current.addToSpace('any-uuid')
       })
 
       expect(mockAddSafeToSpace).not.toHaveBeenCalled()
@@ -278,14 +279,14 @@ describe('useAddSafeToSpace', () => {
       const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
       await act(async () => {
-        await result.current.addToSpace(5)
+        await result.current.addToSpace('any-uuid')
       })
 
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'notifications/add',
           payload: expect.objectContaining({
-            message: 'Failed to add Safe to workspace. ',
+            message: 'Failed to add Safe to Workspace. ',
             variant: 'error',
           }),
         }),

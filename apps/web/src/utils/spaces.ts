@@ -1,12 +1,23 @@
 /**
- * The space id stored in auth state is `string | null` (from Redux persistence).
- * Convert to a numeric id for API calls, returning `null` for missing or
- * non-numeric values so callers can skip space-scoped requests rather than
- * silently hit the API with NaN.
+ * Normalize a Space UUID (string | null) for use as a Space identifier.
+ * Returns null for missing/whitespace-only inputs so callers can skip
+ * space-scoped requests rather than passing an empty id.
  */
-export const parseSpaceId = (spaceId: string | null): number | null => {
-  // Number('') === 0 and Number('  ') === 0 in JS; treat both as missing.
+export const normalizeSpaceId = (spaceId: string | null): string | null => {
   if (spaceId === null || spaceId.trim() === '') return null
-  const parsed = Number(spaceId)
-  return Number.isFinite(parsed) ? parsed : null
+  return spaceId
 }
+
+/** A Workspace's Safe account cap: `null` is unlimited, `undefined` is not known yet (loading or failed). */
+export type SafeLimit = number | null | undefined
+
+/** False when the count or the limit is unknown, or the plan is unlimited. */
+export const isSpaceAtSafeLimit = (safeCount: number | undefined, limit: SafeLimit): boolean =>
+  safeCount !== undefined && typeof limit === 'number' && safeCount >= limit
+
+/** The address of a `chainId:address` Safe key. */
+export const addressOfSafeKey = (key: string): string => key.slice(key.indexOf(':') + 1)
+
+/** Seats are per Safe address: the same Safe deployed on several chains takes one. */
+export const countSeats = (addresses: Iterable<string>): number =>
+  new Set(Array.from(addresses, (address) => address.toLowerCase())).size

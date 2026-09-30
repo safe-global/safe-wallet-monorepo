@@ -1,19 +1,9 @@
-import { Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
-const stickyTop = { xs: '103px', sm: '111px' }
+// Pins at the page header's bottom edge, tracked live: a fixed offset leaves a band of scrolling
+// content showing through whenever the header is shorter than it (see `--page-header-bottom`).
 export const Sticky = ({ children }: { children: ReactElement }): ReactElement => (
-  <Box
-    sx={{
-      position: 'sticky',
-      zIndex: 2,
-      top: stickyTop,
-      py: 1,
-      bgcolor: 'background.main',
-      mt: -1,
-      mb: 1,
-    }}
-  >
+  <div className="sticky top-[var(--page-header-bottom)] z-[2] -mt-2 mb-2 bg-[var(--color-background-main)] py-2 dark:bg-background">
     {children}
-  </Box>
+  </div>
 )

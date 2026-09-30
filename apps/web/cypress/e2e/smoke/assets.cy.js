@@ -38,12 +38,12 @@ describe('[SMOKE] Assets tests', () => {
     // Disable dust filter to see tokens with no fiat value
     assets.toggleHideDust(false)
 
-    // Verify default tokens list shows only native token
+    // On chains without portfolio support, trusted filtering is disabled.
+    // "Default tokens" therefore behaves like "all tokens".
     assets.toggleShowAllTokens(false)
-    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther])
-    main.verifyValuesDoNotExist(assets.tokenListTable, spamTokens)
+    main.verifyValuesExist(assets.tokenListTable, [constants.tokenNames.sepoliaEther, ...spamTokens])
 
-    // Verify all tokens list shows spam tokens
+    // Verify toggling "Show all tokens" still keeps the full list visible
     assets.toggleShowAllTokens(true)
     spamTokens.push(constants.tokenNames.sepoliaEther)
     main.verifyValuesExist(assets.tokenListTable, spamTokens)

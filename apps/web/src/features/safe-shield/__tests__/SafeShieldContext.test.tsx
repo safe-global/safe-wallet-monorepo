@@ -1,6 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { SafeShieldProvider, useSafeShield } from '../SafeShieldContext'
-import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { SafeShieldProvider, useSafeShield, useSafeShieldForAddressPoisoning } from '../SafeShieldContext'
+import { RecipientStatus, Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import {
   DeadlockAnalysisBuilder,
   DeadlockAnalysisResultBuilder,
@@ -17,8 +17,12 @@ jest.mock('../hooks', () => ({
     deadlock: [undefined, undefined, false],
   })),
   useThreatAnalysis: jest.fn(),
+  // Pass-through by default (set in beforeEach); the overlay is covered by its own suite
+  useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
+const mockUseSafeProAccess = jest.fn(() => ({ hasProFeatures: true, isLoading: false }))
+jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
 // Mock new dependencies for untrusted Safe check
 jest.mock('@/hooks/useIsTrustedSafe', () => ({
   __esModule: true,
@@ -50,10 +54,15 @@ const mockSafeTxContextValue = {
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
+  gtfPaymentMode: 'safe' as const,
+  setGtfPaymentMode: jest.fn(),
+  setGtfSelectedGasToken: jest.fn(),
 }
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
+const mockUseRecipientAnalysis = jest.requireMock('../hooks').useRecipientAnalysis
 const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
+const mockUseRecipientAnalysisWithPoisoning = jest.requireMock('../hooks').useRecipientAnalysisWithPoisoning
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),
@@ -92,6 +101,46 @@ const buildThreatResult = (severity: Severity) => [
 describe('SafeShieldContext', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation((recipient: unknown) => recipient)
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+  })
+
+  describe('Safe Pro gating', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    it('runs the recipient and counterparty analyses for a Workspace with Safe Pro', () => {
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+      const { result } = renderHook(() => useSafeShield(), { wrapper })
+      const tx = buildSafeTransaction('0x1234')
+      act(() => {
+        result.current.setSafeTx(tx)
+        result.current.setRecipientAddresses(['0x00000000000000000000000000000000000000aa'])
+      })
+
+      expect(result.current.hasProFeatures).toBe(true)
+      expect(mockUseRecipientAnalysis).toHaveBeenLastCalledWith(['0x00000000000000000000000000000000000000aa'])
+      expect(mockUseCounterpartyAnalysis).toHaveBeenLastCalledWith(tx, true)
+    })
+
+    it('keeps only the threat analysis without Safe Pro: no recipient addresses, counterparty disabled', () => {
+      mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+      const { result } = renderHook(() => useSafeShield(), { wrapper })
+      const tx = buildSafeTransaction('0x1234')
+      act(() => {
+        result.current.setSafeTx(tx)
+        result.current.setRecipientAddresses(['0x00000000000000000000000000000000000000aa'])
+      })
+
+      expect(result.current.hasProFeatures).toBe(false)
+      expect(mockUseRecipientAnalysis).toHaveBeenLastCalledWith(undefined)
+      expect(mockUseCounterpartyAnalysis).toHaveBeenLastCalledWith(tx, false)
+      expect(mockUseThreatAnalysis).toHaveBeenCalled()
+    })
   })
 
   it('should require risk confirmation for critical threats', async () => {
@@ -274,6 +323,57 @@ describe('SafeShieldContext', () => {
     await waitFor(
       () => {
         expect(result.current.needsRiskConfirmation).toBe(false)
+      },
+      { timeout: 3000 },
+    )
+  })
+
+  it('registers poisoning-only addresses for the overlay', async () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const addresses = ['0x00000000000000000000000000000000000000bb']
+    renderHook(() => useSafeShieldForAddressPoisoning(addresses), { wrapper })
+
+    await waitFor(() => {
+      expect(mockUseRecipientAnalysisWithPoisoning).toHaveBeenLastCalledWith(expect.anything(), addresses)
+    })
+  })
+
+  it('should require risk confirmation for a CRITICAL address-poisoning match', async () => {
+    mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
+    mockUseRecipientAnalysisWithPoisoning.mockImplementation(() => [
+      {
+        '0x00000000000000000000000000000000000000cc': {
+          [StatusGroup.ADDRESS_POISONING]: [
+            {
+              severity: Severity.CRITICAL,
+              type: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS,
+              title: 'Potential address poisoning',
+              description: 'test',
+            },
+          ],
+        },
+      },
+      undefined,
+      false,
+    ])
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    await waitFor(
+      () => {
+        expect(result.current.needsRiskConfirmation).toBe(true)
+        expect(result.current.isRiskConfirmed).toBe(false)
       },
       { timeout: 3000 },
     )

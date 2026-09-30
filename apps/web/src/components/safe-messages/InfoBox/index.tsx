@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import { type ReactElement, type ReactNode } from 'react'
-import { Typography, SvgIcon, Divider } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Separator } from '@/components/ui/separator'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import css from './styles.module.css'
 
@@ -8,27 +9,25 @@ const InfoBox = ({
   title,
   message,
   children,
-  icon = InfoIcon,
+  icon: Icon = InfoIcon,
 }: {
   title: string
   message: ReactNode
   children?: ReactNode
-  icon?: ComponentType
+  icon?: ComponentType<{ className?: string }>
 }): ReactElement => {
   return (
     <div data-testid="message-infobox" className={css.container}>
       <div className={css.message}>
-        <SvgIcon component={icon} color="info" inheritViewBox fontSize="medium" />
+        <Icon className="size-6 text-[var(--color-info-main)]" />
         <div>
-          <Typography variant="subtitle1" fontWeight="bold">
-            {title}
-          </Typography>
-          <Typography variant="body2">{message}</Typography>
+          <Typography variant="paragraph-bold">{title}</Typography>
+          <Typography variant="paragraph-small">{message}</Typography>
         </div>
       </div>
       {children && (
         <>
-          <Divider className={css.divider} />
+          <Separator className={css.divider} />
           <div>{children}</div>
         </>
       )}

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Box, Container, Paper, Stack, SvgIcon, Typography } from '@mui/material'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -17,6 +16,7 @@ import Track from '@/components/common/Track'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getSafeTransaction } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { Typography } from '@/components/ui/typography'
 
 type Props = {
   txId: string
@@ -56,57 +56,40 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
   const parentSafeAddress = addressBook[cachedPendingTx.signerAddress]
 
   return (
-    <Container
-      component={Paper}
-      disableGutters
-      sx={{
-        textAlign: 'center',
-        maxWidth: `${900 - 75}px`, // md={11}
-      }}
-      maxWidth={false}
-    >
-      <Box padding={3} mt={3} display="flex" flexDirection="column" alignItems="center" gap={2}>
-        <Box className={css.icon}>
-          <SvgIcon component={NestedSafeIcon} inheritViewBox fontSize="large" alt="Nested Safe" />
-        </Box>
-        <Typography data-testid="transaction-status" variant="h6" marginTop={2} fontWeight={700}>
+    <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
+      <div className="mt-6 flex flex-col items-center gap-4 p-6">
+        <div className={css.icon}>
+          <NestedSafeIcon className="size-9" aria-label="Nested Safe" />
+        </div>
+        <Typography data-testid="transaction-status" variant="h4" className="mt-4">
           A nested transaction was created
         </Typography>
-        <Typography variant="body2" mb={3}>
+        <Typography variant="paragraph-small" className="mb-6 block">
           Once confirmed and executed this signer transaction will confirm the child Safe&apos;s transaction.
         </Typography>
-        <Stack spacing={2} width="70%">
-          <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
-            <Typography variant="body2" color="text.secondary">
+        <div className="flex w-[70%] flex-col gap-4">
+          <div className="flex flex-col items-start gap-2">
+            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
               Parent Safe
             </Typography>
             <EthHashInfo address={cachedPendingTx.signerAddress} name={parentSafeAddress} shortAddress={false} />
-          </Box>
-          <Stack direction="row" spacing={2} alignItems="center" pl={1}>
-            <SvgIcon component={ArrowDownIcon} fontSize="medium" color="border" inheritViewBox />
+          </div>
+          <div className="flex flex-row items-center gap-4 pl-2">
+            <ArrowDownIcon className="size-6 text-[var(--color-border-main)]" />
             <Typography
-              component="code"
-              variant="body2"
-              color="primary.light"
-              sx={{
-                backgroundColor: 'background.main',
-                px: 1,
-                py: 0.5,
-                borderRadius: 0.5,
-                fontFamily: 'monospace',
-                whiteSpace: 'nowrap',
-              }}
+              variant="code"
+              className="rounded-sm bg-[var(--color-background-main)] px-2 py-0.5 font-mono whitespace-nowrap text-[var(--color-primary-light)]"
             >
               approveHash
             </Typography>
-          </Stack>
-          <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
-            <Typography variant="body2" color="text.secondary">
+          </div>
+          <div className="flex flex-col items-start gap-2">
+            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
               Current Safe
             </Typography>
             <EthHashInfo address={cachedPendingTx.safeAddress} name={currentSafeAddress} shortAddress={false} />
-          </Box>
-        </Stack>
+          </div>
+        </div>
         <Track {...MODALS_EVENTS.OPEN_PARENT_TX}>
           <Link
             href={
@@ -133,8 +116,8 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
             <ExternalLink mode="button">Open the transaction</ExternalLink>
           </Link>
         </Track>
-      </Box>
-    </Container>
+      </div>
+    </div>
   )
 }
 

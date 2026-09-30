@@ -1,5 +1,4 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box } from '@mui/material'
 import { isAwaitingExecution } from '@/utils/transaction-guards'
 import ExecuteTxButton from '../ExecuteTxButton'
 import SignTxButton from '../SignTxButton'
@@ -21,13 +20,15 @@ const QueueActions = ({ tx }: { tx: Transaction }) => {
     }
   }
 
+  const showSpeedUp = pendingTx?.status === PendingStatus.PROCESSING
+
+  if (!ExecutionComponent && !showSpeedUp) return null
+
   return (
-    <Box data-testid="tx-actions" mr={2} display="flex" justifyContent="center">
+    <div data-testid="tx-actions" className="flex items-center">
       {ExecutionComponent}
-      {pendingTx && pendingTx.status === PendingStatus.PROCESSING && (
-        <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger="alertButton" />
-      )}
-    </Box>
+      {showSpeedUp && <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger="alertButton" />}
+    </div>
   )
 }
 

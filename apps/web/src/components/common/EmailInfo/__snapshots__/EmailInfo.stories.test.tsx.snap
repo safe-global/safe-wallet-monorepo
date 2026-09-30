@@ -1,0 +1,214 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./EmailInfo.stories AllSizes 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="flex flex-col items-start gap-4"
+    >
+      <div
+        class="container"
+      >
+        <div
+          class="initialsAvatar"
+          style="background-color: rgb(86, 72, 199); width: 20px; height: 20px; min-width: 20px; min-height: 20px; flex-shrink: 0; border-radius: 50%;"
+        >
+          a
+        </div>
+        <span
+          class="email"
+        >
+          alice@example.com
+        </span>
+      </div>
+      <div
+        class="container"
+      >
+        <div
+          class="initialsAvatar"
+          style="background-color: rgb(86, 72, 199); width: 24px; height: 24px; min-width: 24px; min-height: 24px; flex-shrink: 0; border-radius: 50%;"
+        >
+          a
+        </div>
+        <span
+          class="email"
+        >
+          alice@example.com
+        </span>
+      </div>
+      <div
+        class="container"
+      >
+        <div
+          class="initialsAvatar"
+          style="background-color: rgb(86, 72, 199); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 50%;"
+        >
+          a
+        </div>
+        <span
+          class="email"
+        >
+          alice@example.com
+        </span>
+      </div>
+      <div
+        class="container"
+      >
+        <div
+          class="initialsAvatar"
+          style="background-color: rgb(86, 72, 199); width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0; border-radius: 50%;"
+        >
+          a
+        </div>
+        <span
+          class="email"
+        >
+          alice@example.com
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(86, 72, 199); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 50%;"
+      >
+        a
+      </div>
+      <span
+        class="email"
+      >
+        alice@example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories EmptyEmail 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[240px]"
+    />
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories LongEmailTruncated 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[240px]"
+    >
+      <div
+        class="container"
+      >
+        <div
+          class="initialsAvatar"
+          style="background-color: rgb(157, 133, 63); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 50%;"
+        >
+          a
+        </div>
+        <span
+          class="email"
+        >
+          a-very-long-address-that-will-not-fit@some-very-long-domain.example.com
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories SquareAvatar 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(227, 197, 114); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 6px;"
+      >
+        b
+      </div>
+      <span
+        class="email"
+      >
+        bob@example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories WhitespaceOnly 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="w-[240px]"
+    />
+  </div>
+</div>
+`;
+
+exports[`./EmailInfo.stories WithTooltip 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="initialsAvatar"
+        style="background-color: rgb(86, 72, 199); width: 32px; height: 32px; min-width: 32px; min-height: 32px; flex-shrink: 0; border-radius: 50%;"
+      >
+        a
+      </div>
+      <span
+        class="email"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_1_"
+      >
+        alice@example.com
+      </span>
+    </div>
+  </div>
+</div>
+`;

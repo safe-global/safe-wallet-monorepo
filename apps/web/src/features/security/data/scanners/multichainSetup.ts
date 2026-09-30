@@ -1,4 +1,5 @@
 import type { SecurityScanner } from './types'
+import { getSeverityFromScore } from './constants'
 
 export const multichainSetupScanner: SecurityScanner = {
   id: 'multichain_setup',
@@ -7,10 +8,11 @@ export const multichainSetupScanner: SecurityScanner = {
     const now = new Date().toISOString()
 
     if (!isMultichain) {
+      const score = 100
       return {
         status: 'not_applicable',
-        severity: 'Low',
-        score: 100,
+        severity: getSeverityFromScore(score, { excluded: true }),
+        score,
         evidence: [{ label: 'Result', value: 'Deployed on a single network' }],
         remediation: '',
         lastChecked: now,
@@ -21,10 +23,11 @@ export const multichainSetupScanner: SecurityScanner = {
       const chainList =
         multichainDeviatingChains.length > 0 ? multichainDeviatingChains.join(', ') : 'Multiple networks'
 
+      const score = 30
       return {
         status: 'partial',
-        severity: 'Medium',
-        score: 30,
+        severity: getSeverityFromScore(score),
+        score,
         evidence: [
           { label: 'Result', value: 'Signer setup differs across networks' },
           { label: 'Affected', value: chainList },
@@ -35,10 +38,11 @@ export const multichainSetupScanner: SecurityScanner = {
       }
     }
 
+    const score = 100
     return {
       status: 'clear',
-      severity: 'Low',
-      score: 100,
+      severity: getSeverityFromScore(score),
+      score,
       evidence: [{ label: 'Result', value: 'Signer setup is consistent across all networks' }],
       remediation: '',
       lastChecked: now,

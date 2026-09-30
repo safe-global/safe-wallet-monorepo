@@ -1,5 +1,5 @@
 import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Box, Stack, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { vaultTypeToLabel } from '../../services/utils'
@@ -14,15 +14,13 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
   if (!txInfo.additionalRewards[0]) return null
 
   return (
-    <Stack sx={{ border: '1px solid #ddd', borderRadius: '6px', padding: '12px', mt: 1 }}>
+    <div className="mt-2 flex flex-col rounded-md border border-[var(--color-border-light)] p-3">
       <DataTable
         header="Additional reward"
         rows={[
           <DataRow key="Token" title="Token">
             {txInfo.additionalRewards[0].tokenInfo.name}{' '}
-            <Typography component="span" color="primary.light">
-              {txInfo.additionalRewards[0].tokenInfo.symbol}
-            </Typography>
+            <span className="text-[var(--color-primary-light)]">{txInfo.additionalRewards[0].tokenInfo.symbol}</span>
           </DataRow>,
 
           <DataRow key="Earn" title="Earn">
@@ -33,20 +31,12 @@ const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) 
             0%
           </DataRow>,
 
-          <Typography
-            key="Powered by"
-            variant="caption"
-            color="text.secondary"
-            display="flex"
-            alignItems="center"
-            gap={0.5}
-            mt={1}
-          >
+          <Typography key="Powered by" variant="paragraph-mini" color="muted" className="mt-2 flex items-center gap-1">
             Powered by <IframeIcon src={txInfo.vaultInfo.logoUri} alt="Morpho logo" width={16} height={16} /> Morpho
           </Typography>,
         ]}
       />
-    </Stack>
+    </div>
   )
 }
 
@@ -54,32 +44,20 @@ const ConfirmationHeader = ({ txInfo }: { txInfo: VaultDepositTransactionInfo })
   const totalNrr = (txInfo.baseNrr + txInfo.additionalRewardsNrr) / 100
 
   return (
-    <Stack key="amount" direction="row" gap={1} mb={1}>
-      <Stack
-        direction="row"
-        sx={{
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          width: '50%',
-          bgcolor: 'border.background',
-          position: 'relative',
-          borderRadius: 1,
-          py: 2,
-          px: 3,
-        }}
-      >
+    <div key="amount" className="mb-2 flex flex-row gap-2">
+      <div className="relative flex w-1/2 flex-row flex-wrap items-center rounded bg-[var(--color-border-background)] px-6 py-4">
         {txInfo.tokenInfo && (
-          <Box width={40} mr={2}>
+          <div className="mr-4 w-10">
             <TokenIcon size={40} logoUri={txInfo.tokenInfo.logoUri || ''} tokenSymbol={txInfo.tokenInfo.symbol} />
-          </Box>
+          </div>
         )}
 
-        <Box flex={1}>
-          <Typography variant="body2" color="primary.light">
+        <div className="flex-1">
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             {vaultTypeToLabel[txInfo.type]}
           </Typography>
 
-          <Typography variant="h4" fontWeight="bold" component="div">
+          <Typography variant="h4">
             {txInfo.tokenInfo ? (
               <TokenAmount
                 tokenSymbol={txInfo.tokenInfo.symbol}
@@ -90,33 +68,19 @@ const ConfirmationHeader = ({ txInfo }: { txInfo: VaultDepositTransactionInfo })
               txInfo.value
             )}
           </Typography>
-        </Box>
-      </Stack>
+        </div>
+      </div>
 
-      <Stack
-        direction="row"
-        sx={{
-          flexWrap: 'wrap',
-          alignItems: 'center',
-          width: '50%',
-          bgcolor: 'border.background',
-          position: 'relative',
-          borderRadius: 1,
-          py: 2,
-          px: 3,
-        }}
-      >
-        <Box flex={1}>
-          <Typography variant="body2" color="primary.light">
+      <div className="relative flex w-1/2 flex-row flex-wrap items-center rounded bg-[var(--color-border-background)] px-6 py-4">
+        <div className="flex-1">
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
             Earn (after fees)
           </Typography>
 
-          <Typography variant="h4" fontWeight="bold" component="div">
-            {formatPercentage(totalNrr)}
-          </Typography>
-        </Box>
-      </Stack>
-    </Stack>
+          <Typography variant="h4">{formatPercentage(totalNrr)}</Typography>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -139,12 +103,10 @@ const VaultDepositConfirmation = ({
           <>{!isTxDetails && <ConfirmationHeader txInfo={txInfo} />}</>,
 
           <DataRow key="Deposit via" title="Deposit via">
-            <Stack direction="row" alignItems="center">
+            <div className="flex flex-row items-center">
               <IframeIcon src={txInfo.vaultInfo.logoUri} alt="Morpho logo" width={24} height={24} />
-              <Typography component="span" ml={1} fontWeight="bold">
-                {txInfo.vaultInfo.name}
-              </Typography>
-            </Stack>
+              <span className="ml-2 font-bold">{txInfo.vaultInfo.name}</span>
+            </div>
           </DataRow>,
 
           <DataRow key="Expected annual reward" title="Exp. annual reward">
@@ -179,7 +141,7 @@ const VaultDepositConfirmation = ({
 
           <AdditionalRewards key="Additional rewards" txInfo={txInfo} />,
 
-          <Typography key="Vault description" variant="body2" color="text.secondary" mt={1}>
+          <Typography key="Vault description" variant="paragraph-small" color="muted" className="mt-2 block">
             {txInfo.vaultInfo.description}
           </Typography>,
         ]}

@@ -7,8 +7,7 @@ import * as useNotificationRegistrations from '../useNotificationRegistrations'
 import * as useNotificationPreferences from '../useNotificationPreferences'
 import * as notificationsSlice from '@/store/notificationsSlice'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
-import { renderHook, waitFor } from '@testing-library/react'
-import { RENEWAL_NOTIFICATION_KEY } from '../../constants'
+import { renderHook } from '@testing-library/react'
 
 const { V1, V2 } = NotificationsTokenVersion
 
@@ -29,11 +28,10 @@ describe('useNotificationsRenewal', () => {
     useNotificationsTokenVersion,
     'useIsNotificationsRenewalEnabled',
   )
-  const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
   const selectNotificationsSpy = jest.spyOn(notificationsSlice, 'selectNotifications')
 
   const dispatchMock = jest.fn()
-  const registerNotificationsMock = jest.fn().mockResolvedValue(undefined)
+  const registerNotificationsMock = jest.fn().mockResolvedValue(false)
   const preferencesMock = {
     [`${chainId1}:${safeAddress1}`]: {
       chainId: chainId1,
@@ -254,37 +252,6 @@ describe('useNotificationsRenewal', () => {
 
       expect(registerNotificationsMock).toHaveBeenCalledTimes(1)
       expect(registerNotificationsMock).toHaveBeenCalledWith(result.current.safesForRenewal)
-    })
-
-    it('should show an error notification if `registerNotifications` call throws', async () => {
-      const notificationMock = {
-        message: 'Something went wrong',
-        groupKey: RENEWAL_NOTIFICATION_KEY,
-      }
-      showNotificationSpy.mockReturnValue(
-        notificationMock as unknown as ReturnType<(typeof notificationsSlice)['showNotification']>,
-      )
-      registerNotificationsMock.mockRejectedValueOnce(new Error('Failed to renew notifications'))
-
-      const { result } = renderHook(() => useNotificationsRenewal())
-
-      await result.current.renewNotifications()
-
-      expect(registerNotificationsMock).toHaveBeenCalledTimes(1)
-      expect(registerNotificationsMock).toHaveBeenCalledWith(result.current.safesForRenewal)
-
-      await waitFor(async () => {
-        expect(dispatchMock).toHaveBeenCalledTimes(1)
-        expect(dispatchMock).toHaveBeenCalledWith(notificationMock)
-
-        expect(showNotificationSpy).toHaveBeenCalledTimes(1)
-        expect(showNotificationSpy).toHaveBeenCalledWith({
-          message: 'Failed to renew notifications',
-          variant: 'error',
-          detailedMessage: 'Failed to renew notifications',
-          groupKey: RENEWAL_NOTIFICATION_KEY,
-        })
-      })
     })
 
     it('should NOT call `registerNotifications` if no Safes need to be renewed', async () => {

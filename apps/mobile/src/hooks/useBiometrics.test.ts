@@ -2,7 +2,7 @@ import { act, waitFor } from '@testing-library/react-native'
 import { renderHook, type TestStore } from '@/src/tests/test-utils'
 import { useBiometrics } from './useBiometrics'
 import * as Keychain from 'react-native-keychain'
-import { Alert, Linking } from 'react-native'
+import { Alert, Linking, Platform } from 'react-native'
 
 const mockGetSupportedBiometryType = Keychain.getSupportedBiometryType as jest.Mock
 const mockSetGenericPassword = Keychain.setGenericPassword as jest.Mock
@@ -289,50 +289,95 @@ describe('useBiometrics', () => {
   })
 
   describe('promptBiometricsSetup', () => {
-    it('shows an Alert with explicit Cancel and Open Settings buttons', () => {
+    const originalPlatform = Platform.OS
+    afterEach(() => {
+      Object.defineProperty(Platform, 'OS', { value: originalPlatform, configurable: true })
+    })
+
+    it('shows Cancel + Open settings buttons', () => {
       const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
       const { result } = renderHook(() => useBiometrics())
 
       result.current.promptBiometricsSetup()
 
-      expect(alertSpy).toHaveBeenCalledTimes(1)
       const [, , buttons] = alertSpy.mock.calls[0]
       expect(buttons).toEqual([
         expect.objectContaining({ text: 'Cancel', style: 'cancel' }),
-        expect.objectContaining({ text: 'Open Settings' }),
+        expect.objectContaining({ text: 'Open settings' }),
       ])
-
       alertSpy.mockRestore()
     })
 
-    it('only invokes Linking when the user taps Open Settings', () => {
+    it('routes iOS Open settings tap to app-settings:', async () => {
+      Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true })
       const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
-      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true)
       const { result } = renderHook(() => useBiometrics())
 
       result.current.promptBiometricsSetup()
-      expect(openURLSpy).not.toHaveBeenCalled()
-
-      // Simulate the user tapping the Open Settings button.
       const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[]
-      buttons.find((b) => b.text === 'Open Settings')?.onPress?.()
+      await buttons.find((b) => b.text === 'Open settings')?.onPress?.()
 
       expect(openURLSpy).toHaveBeenCalledWith('app-settings:')
-
       alertSpy.mockRestore()
       openURLSpy.mockRestore()
+    })
+
+    it('routes Android Open settings tap through BIOMETRIC_ENROLL intent', async () => {
+      Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true })
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(jest.fn())
+      const sendIntentSpy = jest.spyOn(Linking, 'sendIntent').mockResolvedValue(undefined)
+      const { result } = renderHook(() => useBiometrics())
+
+      result.current.promptBiometricsSetup()
+      const buttons = alertSpy.mock.calls[0][2] as { text: string; onPress?: () => void }[]
+      await buttons.find((b) => b.text === 'Open settings')?.onPress?.()
+
+      expect(sendIntentSpy).toHaveBeenCalledWith('android.settings.BIOMETRIC_ENROLL')
+      alertSpy.mockRestore()
+      sendIntentSpy.mockRestore()
     })
   })
 
   describe('openBiometricSettings', () => {
-    it('opens settings when called', () => {
-      const openURLSpy = jest.spyOn(Linking, 'openURL').mockImplementation(jest.fn())
+    const originalPlatform = Platform.OS
+    afterEach(() => {
+      Object.defineProperty(Platform, 'OS', { value: originalPlatform, configurable: true })
+    })
+
+    it('opens app-settings: on iOS', async () => {
+      Object.defineProperty(Platform, 'OS', { value: 'ios', configurable: true })
+      const openURLSpy = jest.spyOn(Linking, 'openURL').mockResolvedValue(true)
       const { result } = renderHook(() => useBiometrics())
 
-      result.current.openBiometricSettings()
+      await result.current.openBiometricSettings()
 
       expect(openURLSpy).toHaveBeenCalledWith('app-settings:')
       openURLSpy.mockRestore()
+    })
+
+    it('uses BIOMETRIC_ENROLL intent on Android', async () => {
+      Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true })
+      const sendIntentSpy = jest.spyOn(Linking, 'sendIntent').mockResolvedValue(undefined)
+      const { result } = renderHook(() => useBiometrics())
+
+      await result.current.openBiometricSettings()
+
+      expect(sendIntentSpy).toHaveBeenCalledWith('android.settings.BIOMETRIC_ENROLL')
+      sendIntentSpy.mockRestore()
+    })
+
+    it('falls back to openSettings on Android when the intent throws', async () => {
+      Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true })
+      const sendIntentSpy = jest.spyOn(Linking, 'sendIntent').mockRejectedValue(new Error('no activity'))
+      const openSettingsSpy = jest.spyOn(Linking, 'openSettings').mockResolvedValue(undefined)
+      const { result } = renderHook(() => useBiometrics())
+
+      await result.current.openBiometricSettings()
+
+      expect(openSettingsSpy).toHaveBeenCalled()
+      sendIntentSpy.mockRestore()
+      openSettingsSpy.mockRestore()
     })
   })
 

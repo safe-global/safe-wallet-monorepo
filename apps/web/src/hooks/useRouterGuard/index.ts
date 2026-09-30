@@ -1,7 +1,7 @@
-import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import ExternalStore from '@safe-global/utils/services/ExternalStore'
+import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 export type ActivationGuard = () => Promise<{ success: boolean; redirectTo?: string }>
 export type UseGuard = () => {
@@ -38,7 +38,7 @@ export const useRouterGuard = ({ useGuard }: useRouterGuardProps) => {
       } else {
         // we do not want to set isCheckingAccess to false here because we want
         // the checking access to be reseted only after the redirect is done
-        router.replace(redirectTo ?? AppRoutes.welcome.index)
+        router.replace(redirectTo ?? getWelcomeRoute())
       }
     }
 

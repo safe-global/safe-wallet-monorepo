@@ -1,30 +1,38 @@
-import type { ReactElement } from 'react'
-import { Stack, Typography } from '@mui/material'
-import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
+import type { ReactElement, ReactNode } from 'react'
+import { Typography } from '@/components/ui/typography'
+import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield'
 import HypernativeLogo from '../HypernativeLogo'
 
-type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'>
+type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {
+  overflowRow?: ReactNode
+}
+
+const ByHypernativeFooter = () => {
+  return (
+    <div className="flex flex-row items-center gap-1 self-end">
+      <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)]">
+        by
+      </Typography>
+      <HypernativeLogo fill="var(--color-text-secondary)" className="h-[17px] w-[70px]" />
+    </div>
+  )
+}
 
 /**
  * Hypernative-branded variant of AnalysisGroupCard.
- * Renders the "by Hypernative" footer inside the collapse content.
+ * Stacks an optional overflow row above the "by Hypernative" footer.
  * Strips requestId to hide the "Report false result" link (Blockaid-only).
  */
-// eslint-disable-next-line unused-imports/no-unused-vars
-export const HnAnalysisGroupCard = ({ requestId, ...props }: HnAnalysisGroupCardProps): ReactElement | null => {
+export const HnAnalysisGroupCard = ({
+  requestId: _requestId,
+  overflowRow,
+  ...props
+}: HnAnalysisGroupCardProps): ReactElement | null => {
   const footer = (
-    <Stack direction="row" alignItems="center" alignSelf="flex-end" gap={0.5}>
-      <Typography variant="caption" color="text.secondary">
-        by
-      </Typography>
-      <HypernativeLogo
-        sx={{
-          width: 78,
-          height: 15,
-          '& > rect': { fill: (theme) => theme.palette.text.secondary },
-        }}
-      />
-    </Stack>
+    <>
+      {overflowRow}
+      <ByHypernativeFooter />
+    </>
   )
 
   return <AnalysisGroupCard {...props} footer={footer} />

@@ -70,9 +70,14 @@ export const _buildSafeItem = (
   }
 }
 
-const useAllSafes = (): SafeItems | undefined => {
+/**
+ * @param fetchOwnedSafes When false, skips the owned-safes enumeration and treats no safes as owned
+ *   (everything read-only). Defaults to true; lets consumers that only need it conditionally avoid
+ *   the request until it's relevant.
+ */
+const useAllSafes = (fetchOwnedSafes = true): SafeItems | undefined => {
   const { address: walletAddress = '' } = useWallet() || {}
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  const [allOwned = {}] = useAllOwnedSafes(fetchOwnedSafes ? walletAddress : '')
   const { configs } = useChains()
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)

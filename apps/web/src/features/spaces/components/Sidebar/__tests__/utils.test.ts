@@ -1,4 +1,4 @@
-import { truncateSpaceName, getSidebarItemTestId } from '../utils'
+import { truncateSpaceName, getSidebarItemTestId, getSidebarActionItemTestId } from '../utils'
 
 describe('truncateSpaceName', () => {
   it('returns original value when within max length', () => {
@@ -38,5 +38,15 @@ describe('getSidebarItemTestId', () => {
 
   it('handles already-lowercase input unchanged', () => {
     expect(getSidebarItemTestId('overview')).toBe('sidebar-item-overview')
+  })
+})
+
+describe('getSidebarActionItemTestId', () => {
+  it('keys the test id off the item id', () => {
+    expect(getSidebarActionItemTestId('feature-flags')).toBe('sidebar-feature-flags-item')
+  })
+
+  it('does not collide with label-derived nav item test ids', () => {
+    expect(getSidebarActionItemTestId('feature-flags')).not.toBe(getSidebarItemTestId('Feature flags'))
   })
 })

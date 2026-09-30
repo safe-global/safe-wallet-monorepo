@@ -1,23 +1,25 @@
+/* Hover reads on the border, not the fill: `--muted` (#f5f5f5) sits one value off the card's own
+   white, so the old background-only hover was all but invisible. The resting border is transparent
+   rather than absent so picking up a colour on hover costs no reflow. */
 .safeAppContainer {
-  transition:
-    background-color 0.3s ease-in-out,
-    border 0.3s ease-in-out;
+  box-shadow: none;
   border: 1px solid transparent;
+  transition: border-color 0.3s ease-in-out;
 }
 
 .safeAppContainer:hover {
-  background-color: var(--color-background-light);
-  border: 1px solid var(--color-secondary-light);
+  border-color: var(--color-secondary-light);
 }
 
+/* Compact keeps its resting outline (it has no card shadow to separate it from the list) and only
+   recolours it on hover. `transition: none` is deliberate — the list view does not animate. */
 .compactContainer {
   transition: none;
   border: 1px solid var(--color-border-light);
 }
 
 .compactContainer:hover {
-  background-color: var(--color-background-main);
-  border: 1px solid var(--color-border-light);
+  border-color: var(--color-secondary-light);
 }
 
 .safeAppHeader {

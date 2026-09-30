@@ -1,4 +1,5 @@
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
 import type { SpaceSafeEntry, SelectedSafe } from './types'
 
@@ -91,3 +92,7 @@ export const reconcileDeployedSafes = (
     return changed ? { ...safe, chainEntries: reconciled } : safe
   })
 }
+
+/** Whether the drawer's current selection is the given Safe — a re-click on it closes the drawer. */
+export const isSameSelection = (selected: SelectedSafe | null, address: string, chainId: string): boolean =>
+  !!selected && sameAddress(selected.address, address) && selected.chainId === chainId

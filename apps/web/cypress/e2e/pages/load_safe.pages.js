@@ -12,25 +12,38 @@ const safeDataForm = '[data-testid=load-safe-form]'
 const removeOwnerBtn = '[data-testid="remove-owner-btn"]'
 const addOwnerBtn = '[data-testid="add-new-signer"]'
 const ownerPolicyStepForm = '[data-testid="owner-policy-step-form"]'
-const addressItem = '[data-testid="address-item"]'
+const addressItem = '[data-testid="address-book-input"]'
 const sideBarIcon = '[data-testid="ChevronRightIcon"]'
 const sidebarCheckIcon = '[data-testid="CheckIcon"]'
 const addressStepNextBtn = '[data-testid="load-safe-next-btn"]'
 const ownerName = '[data-testid="owner-name"]'
+const networkSelectorItem = '[data-testid="network-selector-item"]'
+const selectContent = '[data-slot="select-content"]'
 const addressSection = '[data-testid="address-section"]'
 const addBtnStr = 'Add'
 const settingsBtnStr = 'Settings'
 const ownersConfirmationsStr = 'Owners and confirmations'
 const transactionStr = 'Transactions'
 const qrErrorMsg = 'The QR could not be read'
-const safeAddressError = 'Address given is not a valid Safe Account address'
+const safeAddressError = 'Address given is not a valid Safe account address'
 const ownerNameLabel = 'Signer name'
-export const addSafeStr = 'Add existing Safe Account'
+export const addSafeStr = 'Add existing Safe account'
 
 const mandatoryNetworks = [constants.networks.sepolia, constants.networks.polygon, constants.networks.ethereum]
 
 export function verifyAddresFormatIsValid() {
-  cy.get(addressSection).find('label').contains(constants.addressBookErrrMsg.invalidFormat).should('not.exist')
+  cy.get(addressSection)
+    .closest('[data-slot="field"]')
+    .find('label')
+    .contains(constants.addressBookErrrMsg.invalidFormat)
+    .should('not.exist')
+}
+
+function getOwnerNameInput(index) {
+  return cy
+    .get(ownerName)
+    .eq(index)
+    .then(($el) => ($el.is('input') ? cy.wrap($el) : cy.wrap($el.find('input'))))
 }
 
 export function clickOnAddNewOwnerBtn() {
@@ -38,7 +51,7 @@ export function clickOnAddNewOwnerBtn() {
 }
 
 export function verifyOnwerName(index, name) {
-  cy.get(ownerName).eq(index).find('input').should('have.value', name)
+  getOwnerNameInput(index).should('have.value', name)
   cy.get(addressBookRecipient).eq(index).should('contain', name)
 }
 
@@ -67,7 +80,12 @@ export function clickOnRemoveOwnerBtn(index) {
 }
 
 export function verifyownerNameFormatIsValid() {
-  cy.get(ownerName).find('label').contains(ownerNameLabel).should('be.visible')
+  cy.get(ownerName)
+    .eq(0)
+    .then(($el) => {
+      const $label = $el.is('input') ? $el.closest('[data-slot="field"]').find('label') : $el.find('label')
+      cy.wrap($label).contains(ownerNameLabel).should('be.visible')
+    })
 }
 
 export function clickOnBackBtn() {
@@ -89,9 +107,7 @@ export function verifyDataDoesNotExist(data) {
 }
 
 export function inputOwnerName(index, name) {
-  cy.get(ownerName)
-    .eq(index)
-    .find('input')
+  getOwnerNameInput(index)
     .clear()
     .type(name)
     .then(($input) => {
@@ -118,15 +134,15 @@ export function inputOwnerAddress(index, name) {
 }
 
 export function verifyOnwerNameENS(index, ens) {
-  cy.get(ownerName).eq(index).find('input').invoke('attr', 'placeholder').should('contain', ens)
+  getOwnerNameInput(index).invoke('attr', 'placeholder').should('contain', ens)
 }
 
 export function verifyAddressError() {
-  cy.get(addressSection).find('label').contains(safeAddressError)
+  cy.get(addressSection).closest('[data-slot="field"]').find('label').contains(safeAddressError)
 }
 
 export function verifyOnwerInputIsNotEmpty(index) {
-  cy.get(ownerName).find('input').eq(index).invoke('attr', 'placeholder').should('not.be.empty')
+  getOwnerNameInput(index).invoke('attr', 'placeholder').should('not.be.empty')
 }
 
 export function checkMainNetworkSelected(network) {
@@ -134,7 +150,7 @@ export function checkMainNetworkSelected(network) {
 }
 
 export function verifyMandatoryNetworksExist() {
-  main.verifyValuesExist('ul li', mandatoryNetworks)
+  main.verifyValuesExist(networkSelectorItem, mandatoryNetworks)
 }
 
 export function verifyQRCodeErrorMsg() {
@@ -150,24 +166,30 @@ export function clickNetworkSelector(networkName) {
   cy.get(safeDataForm).contains(networkName).click()
 }
 
+function selectNetwork(networkName) {
+  cy.get(networkSelectorItem).contains(networkName).click()
+  // Cypress-only: synthetic clicks skip the pointermove that highlights a Base UI select item,
+  // so the select never commits/closes and only the item's embedded link navigates. Real user
+  // clicks close the popup; here we dismiss it before interacting with the form underneath.
+  cy.get('body').type('{esc}')
+  cy.get(selectContent).should('not.be.visible')
+  cy.get(safeDataForm).contains(networkName)
+}
+
 export function selectGoerli() {
-  cy.get('ul li').contains(constants.networks.goerli).click()
-  cy.contains('span', constants.networks.goerli)
+  selectNetwork(constants.networks.goerli)
 }
 
 export function selectSepolia() {
-  cy.get('ul li').contains(constants.networks.sepolia).click()
-  cy.contains('span', constants.networks.sepolia)
+  selectNetwork(constants.networks.sepolia)
 }
 
 export function selectEth() {
-  cy.get('ul li').contains(constants.networks.ethereum).click()
-  cy.contains('span', constants.networks.ethereum)
+  selectNetwork(constants.networks.ethereum)
 }
 
 export function selectPolygon() {
-  cy.get('ul li').contains(constants.networks.polygon).click()
-  cy.contains('span', constants.networks.polygon)
+  selectNetwork(constants.networks.polygon)
 }
 
 export function inputNameAndAddress(name, address) {
@@ -185,7 +207,7 @@ export function verifyIncorrectAddressErrorMessage() {
 }
 
 export function verifyNameLengthErrorMessage() {
-  cy.get(main.nameInput).parent().prev('label').contains(invalidAddressNameLengthErrorMsg)
+  cy.get(main.nameInput).closest('[data-slot="field"]').find('label').contains(invalidAddressNameLengthErrorMsg)
 }
 
 export function inputAddress(address) {

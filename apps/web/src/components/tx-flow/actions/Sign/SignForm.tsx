@@ -1,6 +1,6 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Box, Divider, Stack } from '@mui/material'
+import { Separator } from '@/components/ui/separator'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -8,7 +8,6 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
@@ -104,13 +103,13 @@ export const SignForm = ({
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <Stack gap={3}>
+    <div className="flex flex-col gap-6">
       {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
 
       {cannotPropose && <NonOwnerError />}
 
-      <Box>
-        <Divider className={commonCss.nestedDivider} />
+      <div>
+        <Separator bleed="6" />
 
         {/* Submit button */}
         <TxCardActions>
@@ -129,8 +128,8 @@ export const SignForm = ({
             </CheckWallet>
           </form>
         </TxCardActions>
-      </Box>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

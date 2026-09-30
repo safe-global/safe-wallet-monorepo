@@ -3,6 +3,7 @@ import * as safeapps from '../pages/safeapps.pages.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import { txAccordionDetails } from '../pages/create_tx.pages'
+import * as ls from '../../support/localstorage_data.js'
 let staticSafes = []
 let iframeSelector
 
@@ -13,9 +14,13 @@ describe('Transaction Builder 3 tests', { defaultCommandTimeout: 20000 }, () => 
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+    iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${staticSafes.SEP_STATIC_SAFE_43}&appUrl=${encodeURIComponent(appUrl)}`
+    // tx-builder keeps its form disabled until the address book permission prompt is answered:
+    // pre-grant it before the visit
+    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(visitUrl)
+    safeapps.verifySafeAppIframeVisible(appUrl)
   })
 
   it('Verify that no error for the COWSwap fallbackhandler on confirm tx screen', () => {

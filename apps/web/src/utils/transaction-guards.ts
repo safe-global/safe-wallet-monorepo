@@ -16,7 +16,7 @@ import {
   ConflictType,
   TransactionTokenType,
 } from '@safe-global/store/gateway/types'
-import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 
 import type {
   ConflictHeaderQueuedItem,
@@ -55,27 +55,26 @@ import { Operation } from '@safe-global/store/gateway/types'
 // NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
 // transaction-guards.ts is imported by store slices, and the barrel imports createFeatureHandle
 // which has dependencies that create a circular import chain
-import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { NamedAddress } from '@/components/new-safe/create/types'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery'
 import { id } from 'ethers'
 import {
   getSafeToL2MigrationDeployment,
-  getSafeMigrationDeployment,
   getMultiSendDeployments,
   getSignMessageLibDeployments,
 } from '@safe-global/safe-deployments'
+import { isSafeMigrationCall } from '@/utils/safe-migrations'
 import {
   Safe__factory,
   Safe_to_l2_migration__factory,
   Sign_message_lib__factory,
 } from '@safe-global/utils/types/contracts'
-import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType } from '@safe-global/types-kit'
-import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import type {
   BridgeAndSwapTransactionInfo,
   SwapTransactionInfo,
@@ -100,6 +99,21 @@ export const isOwner = (safeOwners: AddressInfo[] | NamedAddress[] = [], walletA
   }
 
   return safeOwners.some((owner) => sameAddress(owner.address, walletAddress))
+}
+
+/**
+ * The CGW `awaitingConfirmation` count is keyed off the connected wallet regardless of whether that
+ * wallet is an owner, so gate it on the overview's owner list: a non-owner (or watch-only) wallet
+ * must never be told that transactions await its signature. Returns 0 when there is no wallet, the
+ * wallet is not an owner, or nothing is awaiting confirmation.
+ */
+export const getOwnerAwaitingConfirmations = (
+  overview: Pick<SafeOverview, 'owners' | 'awaitingConfirmation'> | null | undefined,
+  walletAddress: string | undefined,
+): number => {
+  const awaiting = overview?.awaitingConfirmation ?? 0
+  if (awaiting <= 0) return 0
+  return isOwner(overview?.owners, walletAddress) ? awaiting : 0
 }
 
 export const isMultisigDetailedExecutionInfo = (
@@ -142,7 +156,7 @@ export const isMigrateToL2TxData = (
     chainId &&
     value?.hexData &&
     isMultiSendCalldata(value?.hexData) &&
-    hasMatchingDeployment(getMultiSendDeployments, value.to.value, chainId, ['1.3.0', '1.4.1'])
+    hasMatchingDeployment(getMultiSendDeployments, value.to.value, chainId, TRUSTED_DEPLOYMENT_VERSIONS)
   ) {
     // Its a multiSend to the MultiSend contract (not CallOnly)
     const decodedMultiSend = decodeMultiSendData(value.hexData)
@@ -402,7 +416,7 @@ export const isOnChainSignMessageTxData = (data: TransactionData | null | undefi
   const isDelegateCall = data?.operation === Operation.DELEGATE
   const isSignMessageLib =
     toAddress !== undefined &&
-    hasMatchingDeployment(getSignMessageLibDeployments, toAddress, chainId, ['1.3.0', '1.4.1'])
+    hasMatchingDeployment(getSignMessageLibDeployments, toAddress, chainId, TRUSTED_DEPLOYMENT_VERSIONS)
   return Boolean(data && data.hexData?.startsWith(signMessageSelector) && isSignMessageLib && isDelegateCall)
 }
 
@@ -433,9 +447,9 @@ export const isSafeUpdateTxData = (data?: TransactionData | null): boolean => {
     return false
   }
 
-  // For 1.3.0+ Safes
-  const migrationContract = getSafeMigrationDeployment({ version: LATEST_SAFE_VERSION })
-  if (migrationContract && sameAddress(data.to.value, migrationContract.defaultAddress)) {
+  // For 1.3.0+ Safes: a delegate call to any official SafeMigration deployment
+  // (any version, canonical or zksync variant) calling one of its migrate methods
+  if (isSafeMigrationCall(data)) {
     return true
   }
 

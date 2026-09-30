@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { DataTable } from './DataTable'
-import { Paper } from '@mui/material'
 import { DataRow } from '@/components/common/Table/DataRow'
 
 const meta = {
+  title: 'Components/Common/DataTable',
   component: DataTable,
   tags: ['autodocs'],
 } satisfies Meta<typeof DataTable>
@@ -31,9 +31,9 @@ export const Default: Story = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2 }}>
+      <div className="rounded-lg bg-card p-4">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
 }

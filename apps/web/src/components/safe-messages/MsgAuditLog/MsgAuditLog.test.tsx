@@ -17,6 +17,10 @@ const buildMsg = (overrides: Partial<MessageItem> = {}): MessageItem => ({
   modifiedTimestamp: 1712000060000,
   name: null,
   proposedBy: { value: toBeHex('0x1', 20) },
+  preparedSignature: null,
+  origin: null,
+  safeAppInfo: null,
+  safeAppId: null,
   status: 'NEEDS_CONFIRMATION',
   type: 'MESSAGE',
   ...overrides,
@@ -72,6 +76,9 @@ describe('MsgAuditLog', () => {
     render(<MsgAuditLog msg={buildMsg()} />)
 
     expect(screen.getByText('Can be confirmed once the threshold is reached.')).toBeInTheDocument()
+    const alert = screen.getByText('Can be confirmed once the threshold is reached.').closest('[role="alert"]')
+    expect(alert).toHaveClass('bg-[var(--color-info-background)]')
+    expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
   it('hides info banner when confirmed', () => {

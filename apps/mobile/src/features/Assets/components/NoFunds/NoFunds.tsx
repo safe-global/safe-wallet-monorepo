@@ -7,7 +7,7 @@ const texts = {
   token: {
     icon: <EmptyToken />,
     title: 'Top up your balance',
-    description: 'Send funds to your Safe Account from another wallet by copying your address.',
+    description: 'Send funds to your Safe account from another wallet by copying your address.',
   },
   nft: {
     icon: <EmptyNft />,

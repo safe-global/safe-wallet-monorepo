@@ -1,56 +1,41 @@
-import { useId, useRef, useEffect } from 'react'
-import { SvgIcon, type SvgIconProps } from '@mui/material'
 import HypernativeLogoSvg from '@/public/images/hypernative/hypernative-logo.svg'
+import { useEffect, useId, useRef, type CSSProperties } from 'react'
+import { cn } from '@/utils/cn'
 
-interface HypernativeLogoProps extends Omit<SvgIconProps, 'component'> {
-  component?: never // Prevent overriding component prop
+interface HypernativeLogoProps {
+  className?: string
+  fill?: string
+  style?: CSSProperties
 }
 
 /**
- * HypernativeLogo component that wraps the SVG to prevent ID collisions
- * when rendered multiple times. Uses React's useId hook to generate unique IDs.
+ * HypernativeLogo wraps the logo SVG.
+ * It dynamically updates the gradient ID to ensure multiple instances on a page don't collide.
  */
-const HypernativeLogo = (props: HypernativeLogoProps) => {
+const HypernativeLogo = ({ className, fill, style }: HypernativeLogoProps) => {
   const uniqueId = useId()
-  const filterId = `invert-${uniqueId}`
-  const maskId = `logoMask-${uniqueId}`
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
-
-    // Find the SVG element inside the SvgIcon wrapper
-    const svg = containerRef.current.querySelector('svg')
+    // Find the SVG element inside the wrapper
+    const svg = containerRef?.current?.querySelector('svg')
     if (!svg) return
 
-    // Find and update filter ID
-    const filter = svg.querySelector('#invert')
-    if (filter) {
-      filter.setAttribute('id', filterId)
+    // Find the linearGradient element and update its ID to a unique one
+    const gradient = svg.querySelector('linearGradient')
+    if (gradient) {
+      const gradientId = `hnGradient-${uniqueId}`
+      gradient.setAttribute('id', gradientId)
+      svg.querySelector(`[fill="url(#${gradient.id})"]`)?.setAttribute('fill', `url(#${gradientId})`)
     }
-
-    // Find and update mask ID
-    const mask = svg.querySelector('#logoMask')
-    if (mask) {
-      mask.setAttribute('id', maskId)
-    }
-
-    // Update image filter reference
-    const image = svg.querySelector('mask image')
-    if (image) {
-      image.setAttribute('filter', `url(#${filterId})`)
-    }
-
-    // Update rect mask reference
-    const rect = svg.querySelector('rect')
-    if (rect) {
-      rect.setAttribute('mask', `url(#${maskId})`)
-    }
-  }, [filterId, maskId])
+  }, [uniqueId])
 
   return (
-    <div ref={containerRef} style={{ display: 'inline-flex' }}>
-      <SvgIcon {...props} component={HypernativeLogoSvg} inheritViewBox />
+    <div ref={containerRef} className="inline-flex">
+      <HypernativeLogoSvg
+        className={cn(fill ? '[&_.hypernative-logo-fill]:fill-[var(--hn-logo-fill)]' : undefined, className)}
+        style={{ ...style, ...(fill ? ({ '--hn-logo-fill': fill } as CSSProperties) : {}) }}
+      />
     </div>
   )
 }

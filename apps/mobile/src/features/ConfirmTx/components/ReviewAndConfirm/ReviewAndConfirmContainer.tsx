@@ -10,6 +10,7 @@ import { useTransactionSigner } from '@/src/features/ConfirmTx/hooks/useTransact
 import { useTransactionSigningState } from '@/src/hooks/useTransactionSigningState'
 import { useBiometrics } from '@/src/hooks/useBiometrics'
 import { useIsMounted } from '@/src/hooks/useIsMounted'
+import { getErrorMessage } from '@/src/features/ExecuteTx/components/ReviewAndExecute/helpers'
 
 export function ReviewAndConfirmContainer() {
   const { txId } = useLocalSearchParams<{ txId: string }>()
@@ -60,12 +61,10 @@ export function ReviewAndConfirmContainer() {
         })
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to sign transaction'
-
       if (isMounted()) {
         router.push({
           pathname: '/signing-error',
-          params: { description: errorMessage },
+          params: { description: getErrorMessage(err, 'Failed to sign transaction') },
         })
       }
     }

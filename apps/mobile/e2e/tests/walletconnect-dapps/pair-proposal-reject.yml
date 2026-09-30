@@ -1,0 +1,36 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Reject: synthesise a session_proposal → proposal sheet → swipe down to dismiss
+# → rejectSession is called (asserted via the e2e-wc-reject-called side-channel).
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSynthProposalValid'
+- extendedWaitUntil:
+    visible:
+      id: 'wc-proposal-connect'
+    timeout: 10000
+
+# Swipe the sheet down to dismiss → onSheetDismiss dispatches rejectPending.
+# Coordinate swipe from the sheet body down past the bottom, independent of any
+# element id/text.
+- swipe:
+    start: 50%, 45%
+    end: 50%, 95%
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# The reject listener called the fake rejectSession(), surfaced as a test-id marker.
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-reject-called'
+    timeout: 5000

@@ -1,13 +1,20 @@
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 
-import { Box, FormControl, FormControlLabel, Radio, RadioGroup, Typography, Tooltip, Chip, Link } from '@mui/material'
-import type { Dispatch, SetStateAction, ReactElement, ChangeEvent } from 'react'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Label } from '@/components/ui/label'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Chip } from '@/components/ui/chip'
+import { Link } from '@/components/ui/link'
+import { useEffect, type Dispatch, type SetStateAction, type ReactElement } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import WalletIcon from '@/components/common/WalletIcon'
 import SponsoredBy from '../SponsoredBy'
 
 import RemainingRelays from '../RemainingRelays'
-import InfoIcon from '@mui/icons-material/Info'
+import SponsoredTxsCounter from '../SponsoredTxsCounter'
+import { useSafeSponsoredTxs, type SafeSponsoredTxs } from '@/features/spaces'
+import { Info } from 'lucide-react'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 import { useLoadFeature } from '@/features/__core__'
 
@@ -15,6 +22,7 @@ import css from './styles.module.css'
 import BalanceInfo from '@/components/tx/BalanceInfo'
 import madProps from '@/utils/mad-props'
 import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 
@@ -30,6 +38,20 @@ const GasTooHighBannerLoader = () => {
   return <GasTooHighBanner />
 }
 
+/** A Pro Safe whose sponsored allowance ran out cannot relay: the selection falls back to the wallet. */
+const RelayExhaustedFallback = ({
+  executionMethod,
+  setExecutionMethod,
+}: {
+  executionMethod: ExecutionMethod
+  setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
+}) => {
+  useEffect(() => {
+    if (executionMethod === ExecutionMethod.RELAY) setExecutionMethod(ExecutionMethod.WALLET)
+  }, [executionMethod, setExecutionMethod])
+  return null
+}
+
 const _ExecutionMethodSelector = ({
   wallet,
   chain,
@@ -40,9 +62,12 @@ const _ExecutionMethodSelector = ({
   tooltip,
   noFeeCampaign,
   gasTooHigh,
+  sponsoredTxs,
 }: {
   wallet: ConnectedWallet | null
   chain?: Chain
+  /** The Safe's Safe Pro sponsored-transactions allowance; drives the counter strip under the SAFE_PRO flag. */
+  sponsoredTxs?: SafeSponsoredTxs
   executionMethod: ExecutionMethod
   setExecutionMethod: Dispatch<SetStateAction<ExecutionMethod>>
   relays?: RelaysRemaining
@@ -56,143 +81,137 @@ const _ExecutionMethodSelector = ({
   gasTooHigh?: boolean
 }): ReactElement | null => {
   const shouldRelay = executionMethod === ExecutionMethod.RELAY || executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
+  // On unlimited-relay (GTF) chains the finite "N free transactions left" counter is meaningless, so hide it.
+  const isUnlimitedRelay = !!chain && hasFeature(chain, FEATURES.GTF)
+  // Under SAFE_PRO the relay strip counts sponsored transactions; the no-fee campaign keeps its own counter.
+  const showsSponsoredTxs = Boolean(
+    sponsoredTxs?.isEnabled && relays && !isUnlimitedRelay && !noFeeCampaign?.isEligible,
+  )
+  const isProExhausted = Boolean(
+    sponsoredTxs?.isEnabled && sponsoredTxs.isPro && sponsoredTxs.left === 0 && !noFeeCampaign?.isEligible,
+  )
 
-  const onChooseExecutionMethod = (_: ChangeEvent<HTMLInputElement>, newExecutionMethod: string) => {
+  const onChooseExecutionMethod = (newExecutionMethod: unknown) => {
     setExecutionMethod(newExecutionMethod as ExecutionMethod)
   }
 
   return (
-    <Box className={css.container} sx={{ borderRadius: ({ shape }) => `${shape.borderRadius}px` }}>
+    /* overflow-hidden so the relay counter's own 6px bottom corners are clipped to this 16px
+       radius instead of poking outside it. */
+    <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
+      {isProExhausted && (
+        <RelayExhaustedFallback executionMethod={executionMethod} setExecutionMethod={setExecutionMethod} />
+      )}
       <div className={css.method}>
-        <FormControl sx={{ display: 'flex' }}>
+        <div className="flex flex-col">
           {!noLabel ? (
-            <Typography variant="body2" className={css.label}>
+            <Typography variant="paragraph-small" className={css.label}>
               Who will pay gas fees:
             </Typography>
           ) : null}
 
-          <RadioGroup row value={executionMethod} onChange={onChooseExecutionMethod} className={css.radioGroup}>
+          <RadioGroup
+            value={executionMethod}
+            onValueChange={onChooseExecutionMethod}
+            className={`${css.radioGroup} flex flex-row`}
+          >
             {(() => {
               const isLimitReached = noFeeCampaign?.isEligible && noFeeCampaign.remaining === 0
               const availabilityLabel = noFeeCampaign?.limit
                 ? `${noFeeCampaign.remaining || 0}/${noFeeCampaign.limit} available`
                 : ''
-              const isDisabled = gasTooHigh || isLimitReached
+              const isDisabled = gasTooHigh || isLimitReached || isProExhausted
+
+              const relayValue = noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY
 
               return isDisabled ? (
-                <Tooltip
-                  title={
-                    gasTooHigh
-                      ? 'Gas prices are too high right now'
-                      : 'You reached the limit of sponsored transactions.'
-                  }
-                  placement="top"
-                  arrow
-                >
-                  <FormControlLabel
-                    data-testid="relay-execution-method"
-                    value={noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY}
-                    disabled
-                    sx={{
-                      flex: 1,
-                      '& .MuiFormControlLabel-label': {
-                        marginLeft: '10px',
-                      },
-                    }}
-                    label={
-                      noFeeCampaign?.isEligible ? (
-                        <div className={css.noFeeCampaignLabel}>
-                          <Chip
-                            label={isLimitReached ? availabilityLabel : 'Not available'}
-                            size="small"
-                            className={css.notAvailableChip}
-                            sx={{
-                              '& .MuiChip-label': {
-                                padding: 0,
-                              },
-                            }}
-                          />
-                          <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
-                          <div className={css.descriptionWrapper}>
-                            <Typography className={css.descriptionText}>
-                              Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe holders
-                            </Typography>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Label
+                        data-testid="relay-execution-method"
+                        className="flex flex-1 cursor-not-allowed items-center gap-[10px]"
+                      >
+                        <RadioGroupItem value={relayValue} disabled />
+                        {noFeeCampaign?.isEligible ? (
+                          <div className={css.noFeeCampaignLabel}>
+                            <Chip size="sm" shape="tag">
+                              {isLimitReached ? availabilityLabel : 'Not available'}
+                            </Chip>
+                            <Typography className={css.notAvailableTitle}>Sponsored gas</Typography>
+                            <div className={css.descriptionWrapper}>
+                              <Typography className={css.descriptionText}>
+                                Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe
+                                holders
+                              </Typography>
+                            </div>
                           </div>
-                        </div>
-                      ) : (
-                        <Typography className={css.radioLabel} whiteSpace="nowrap">
-                          Sponsored by
-                          <SponsoredBy chainId={chain?.chainId ?? ''} />
-                        </Typography>
-                      )
+                        ) : (
+                          <Typography className={`${css.radioLabel} whitespace-nowrap`}>
+                            Sponsored by
+                            <SponsoredBy chainId={chain?.chainId ?? ''} />
+                          </Typography>
+                        )}
+                      </Label>
                     }
-                    control={<Radio />}
                   />
+                  <TooltipContent>
+                    {gasTooHigh
+                      ? 'Gas prices are too high right now'
+                      : 'You reached the limit of sponsored transactions.'}
+                  </TooltipContent>
                 </Tooltip>
               ) : (
-                <FormControlLabel
-                  data-testid="relay-execution-method"
-                  sx={{ flex: 1 }}
-                  value={noFeeCampaign?.isEligible ? ExecutionMethod.NO_FEE_CAMPAIGN : ExecutionMethod.RELAY}
-                  label={
-                    noFeeCampaign?.isEligible ? (
-                      <div className={css.noFeeCampaignLabel}>
-                        <Typography className={css.mainLabel}>Sponsored gas</Typography>
-                        <div className={css.subLabel}>
-                          <Typography variant="body2" color="text.secondary">
-                            Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe holders{' '}
-                            <Tooltip
-                              title={
-                                <Box>
-                                  <Typography variant="body2" color="inherit">
-                                    USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
-                                    <Typography component="span" fontWeight="bold">
-                                      <Link
-                                        href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
-                                        style={{ textDecoration: 'underline', fontWeight: 'bold' }}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        Learn more
-                                      </Link>
-                                    </Typography>
-                                  </Typography>
-                                </Box>
-                              }
-                              placement="top"
-                              arrow
-                            >
-                              <InfoIcon className={css.infoIconInline} />
-                            </Tooltip>
-                          </Typography>
-                        </div>
+                <Label data-testid="relay-execution-method" className="flex flex-1 cursor-pointer items-center gap-2">
+                  <RadioGroupItem value={relayValue} />
+                  {noFeeCampaign?.isEligible ? (
+                    <div className={css.noFeeCampaignLabel}>
+                      <Typography className={css.mainLabel}>Sponsored gas</Typography>
+                      <div className={css.subLabel}>
+                        <Typography variant="paragraph-small" className="text-muted-foreground">
+                          Part of the Free January, Safe Foundation&apos;s gas sponsorship program for USDe holders{' '}
+                          <Tooltip>
+                            <TooltipTrigger render={<Info className={css.infoIconInline} />} />
+                            <TooltipContent>
+                              <span>
+                                USDe holders enjoy gasless transactions on Ethereum Mainnet this January.{' '}
+                                <Link
+                                  href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
+                                  className="font-bold underline"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  variant="inherit"
+                                >
+                                  Learn more
+                                </Link>
+                              </span>
+                            </TooltipContent>
+                          </Tooltip>
+                        </Typography>
                       </div>
-                    ) : (
-                      <Typography className={css.radioLabel} whiteSpace="nowrap">
-                        Sponsored by
-                        <SponsoredBy chainId={chain?.chainId ?? ''} />
-                      </Typography>
-                    )
-                  }
-                  control={<Radio />}
-                />
+                    </div>
+                  ) : (
+                    <Typography className={`${css.radioLabel} whitespace-nowrap`}>
+                      Sponsored by
+                      <SponsoredBy chainId={chain?.chainId ?? ''} />
+                    </Typography>
+                  )}
+                </Label>
               )
             })()}
 
-            <FormControlLabel
+            <Label
               data-testid="connected-wallet-execution-method"
-              sx={{ flex: 1 }}
-              value={ExecutionMethod.WALLET}
-              label={
-                <Typography className={css.radioLabel}>
-                  <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
-                  wallet
-                </Typography>
-              }
-              control={<Radio />}
-            />
+              className="flex flex-1 cursor-pointer items-center gap-2"
+            >
+              <RadioGroupItem value={ExecutionMethod.WALLET} />
+              <Typography className={css.radioLabel}>
+                <WalletIcon provider={wallet?.label || ''} width={20} height={20} icon={wallet?.icon} /> Connected
+                wallet
+              </Typography>
+            </Label>
           </RadioGroup>
-        </FormControl>
+        </div>
 
         {/* Gas too high banner - shown inside method section when gas is too high */}
         {gasTooHigh && noFeeCampaign?.isEligible && (
@@ -203,19 +222,29 @@ const _ExecutionMethodSelector = ({
       </div>
 
       {shouldRelay && noFeeCampaign?.isEligible ? (
-        <Typography variant="body2" className={css.transactionCounter}>
+        <Typography variant="paragraph-small" className={css.transactionCounter}>
           <span className={css.counterNumber}>{noFeeCampaign.remaining}</span> free transactions left
         </Typography>
+      ) : showsSponsoredTxs && relays && sponsoredTxs ? (
+        <SponsoredTxsCounter
+          left={sponsoredTxs.isPro ? sponsoredTxs.left : relays.remaining}
+          quota={sponsoredTxs.isPro ? (sponsoredTxs.meter?.quota ?? null) : relays.limit}
+          resetsAt={sponsoredTxs.meter?.resetsAt ?? null}
+          isPro={sponsoredTxs.isPro}
+        />
       ) : shouldRelay && relays ? (
-        <RemainingRelays relays={relays} tooltip={tooltip} />
+        isUnlimitedRelay ? null : (
+          <RemainingRelays relays={relays} tooltip={tooltip} />
+        )
       ) : wallet ? (
         <BalanceInfo />
       ) : null}
-    </Box>
+    </div>
   )
 }
 
 export const ExecutionMethodSelector = madProps(_ExecutionMethodSelector, {
   wallet: useWallet,
   chain: useCurrentChain,
+  sponsoredTxs: useSafeSponsoredTxs,
 })

@@ -1,4 +1,4 @@
-import { Container, Typography, Grid } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -10,9 +10,9 @@ import OwnerPolicyStep from '@/components/new-safe/create/steps/OwnerPolicyStep'
 import ReviewStep from '@/components/new-safe/create/steps/ReviewStep'
 import { CreateSafeStatus } from '@/components/new-safe/create/steps/StatusStep'
 import { CardStepper } from '@/components/new-safe/CardStepper'
-import { AppRoutes } from '@/config/routes'
+import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import { CREATE_SAFE_CATEGORY } from '@/services/analytics'
-import type { AlertColor } from '@mui/material'
+import type { CreateSafeInfoVariant } from '@/components/new-safe/create/CreateSafeInfos'
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
 import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
@@ -37,42 +37,42 @@ export type NewSafeFormData = {
 
 const staticHints: Record<
   number,
-  { title: string; variant: AlertColor; steps: { title: string; text: string | ReactElement }[] }
+  { title: string; variant: CreateSafeInfoVariant; steps: { title: string; text: string | ReactElement }[] }
 > = {
   1: {
-    title: 'Safe Account creation',
+    title: 'Safe account creation',
     variant: 'info',
     steps: [
       {
         title: 'Network fee',
-        text: 'Deploying your Safe Account requires the payment of the associated network fee with your connected wallet. An estimation will be provided in the last step.',
+        text: 'Deploying your Safe account requires the payment of the associated network fee with your connected wallet. An estimation will be provided in the last step.',
       },
       {
         title: 'Address book privacy',
-        text: 'The name of your Safe Account will be stored in a local address book on your device and can be changed at a later stage. It will not be shared with us or any third party.',
+        text: 'The name of your Safe account will be stored in a local address book on your device and can be changed at a later stage. It will not be shared with us or any third party.',
       },
     ],
   },
   2: {
-    title: 'Safe Account creation',
+    title: 'Safe account creation',
     variant: 'info',
     steps: [
       {
         title: 'Flat hierarchy',
-        text: 'Every signer has the same rights within the Safe Account and can propose, sign and execute transactions that have the required confirmations.',
+        text: 'Every signer has the same rights within the Safe account and can propose, sign and execute transactions that have the required confirmations.',
       },
       {
         title: 'Managing Signers',
-        text: 'You can always change the number of signers and required confirmations in your Safe Account after creation.',
+        text: 'You can always change the number of signers and required confirmations in your Safe account after creation.',
       },
       {
-        title: 'Safe Account setup',
+        title: 'Safe account setup',
         text: (
           <>
-            Not sure how many signers and confirmations you need for your Safe Account?
+            Not sure how many signers and confirmations you need for your Safe account?
             <br />
-            <ExternalLink href={HelpCenterArticle.SAFE_SETUP} fontWeight="bold">
-              Learn more about setting up your Safe Account.
+            <ExternalLink href={HelpCenterArticle.SAFE_SETUP} className="font-bold">
+              Learn more about setting up your Safe account.
             </ExternalLink>
           </>
         ),
@@ -80,7 +80,7 @@ const staticHints: Record<
     ],
   },
   3: {
-    title: 'Safe Account creation',
+    title: 'Safe account creation',
     variant: 'info',
     steps: [
       {
@@ -90,12 +90,12 @@ const staticHints: Record<
     ],
   },
   4: {
-    title: 'Safe Account usage',
+    title: 'Safe account usage',
     variant: 'success',
     steps: [
       {
-        title: 'Connect your Safe Account',
-        text: 'In our Safe Apps section you can connect your Safe Account to over 70 dApps directly or via Wallet Connect to interact with any application.',
+        title: 'Connect your Safe account',
+        text: 'In our Safe Apps section you can connect your Safe account to over 70 dApps directly or via Wallet Connect to interact with any application.',
       },
     ],
   },
@@ -131,7 +131,7 @@ const CreateSafe = () => {
     {
       title: 'Signers and confirmations',
       subtitle:
-        'Set the signer wallets of your Safe Account and how many need to confirm to execute a valid transaction.',
+        'Set the signer wallets of your Safe account and how many need to confirm to execute a valid transaction.',
       render: (data, onSubmit, onBack, setStep) => (
         <OwnerPolicyStep
           setDynamicHint={setDynamicHint}
@@ -145,7 +145,7 @@ const CreateSafe = () => {
     {
       title: 'Review',
       subtitle:
-        "You're about to create a new Safe Account and will have to confirm the transaction with your connected wallet.",
+        "You're about to create a new Safe account and will have to confirm the transaction with your connected wallet.",
       render: (data, onSubmit, onBack, setStep) => (
         <ReviewStep data={data} onSubmit={onSubmit} onBack={onBack} setStep={setStep} />
       ),
@@ -178,36 +178,18 @@ const CreateSafe = () => {
   }
 
   const onClose = () => {
-    router.push(AppRoutes.welcome.index)
+    router.push(getNewSafeReturnUrl(router.query.next))
   }
 
   return (
-    <Container>
-      <Grid
-        container
-        columnSpacing={3}
-        sx={{
-          justifyContent: 'center',
-        }}
-      >
-        <Grid item xs={12}>
-          <Typography
-            variant="h2"
-            sx={{
-              pb: 2,
-            }}
-          >
-            Create new Safe Account
+    <div className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
+      <div className="grid grid-cols-12 justify-center gap-x-6">
+        <div className="col-span-12">
+          <Typography variant="h2" className="pb-4">
+            Create new Safe account
           </Typography>
-        </Grid>
-        <Grid
-          item
-          xs={12}
-          md={8}
-          sx={{
-            order: [1, null, 0],
-          }}
-        >
+        </div>
+        <div className="order-1 col-span-12 md:order-0 md:col-span-8">
           <CardStepper
             initialData={initialData}
             initialStep={initialStep}
@@ -216,24 +198,16 @@ const CreateSafe = () => {
             eventCategory={CREATE_SAFE_CATEGORY}
             setWidgetStep={setActiveStep}
           />
-        </Grid>
+        </div>
 
-        <Grid
-          item
-          xs={12}
-          md={4}
-          sx={{
-            mb: [3, null, 0],
-            order: [0, null, 1],
-          }}
-        >
-          <Grid container spacing={3}>
+        <div className="order-0 col-span-12 mb-6 md:order-1 md:col-span-4 md:mb-0">
+          <div className="grid grid-cols-12 gap-6">
             {activeStep < 2 && <OverviewWidget safeName={safeName} networks={overviewNetworks || []} />}
             {wallet?.address && <CreateSafeInfos staticHint={staticHint} dynamicHint={dynamicHint} />}
-          </Grid>
-        </Grid>
-      </Grid>
-    </Container>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

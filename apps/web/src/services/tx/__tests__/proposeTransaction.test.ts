@@ -146,6 +146,7 @@ describe('proposeTx', () => {
       txStatus: 'AWAITING_CONFIRMATIONS',
       detailedExecutionInfo: undefined,
       safeAppInfo: {
+        id: 1,
         name: 'Test App',
         url: 'https://test.app',
       },

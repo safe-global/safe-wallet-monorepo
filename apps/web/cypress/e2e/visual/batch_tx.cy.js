@@ -19,18 +19,13 @@ describe(
       mockVisualTestApis()
     })
 
-    it('[VISUAL] Screenshot empty batch list', () => {
-      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
-      main.awaitVisualStability()
-      batch.openBatchtransactionsModal()
-      main.awaitVisualStability()
-    })
-
     it('[VISUAL] Screenshot batch list with transaction', () => {
-      main.addToLocalStorage(constants.localStorageKeys.SAFE_v2__batch, ls.batchData.entry1)
-      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2)
+      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_2, {
+        onBeforeLoad(win) {
+          win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__batch, JSON.stringify(ls.batchData.entry1))
+        },
+      })
       main.awaitVisualStability()
-      cy.reload()
       batch.clickOnBatchCounter()
       main.awaitVisualStability()
     })

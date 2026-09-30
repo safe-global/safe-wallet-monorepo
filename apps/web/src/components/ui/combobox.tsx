@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Combobox as ComboboxPrimitive } from '@base-ui/react'
+import { Autocomplete as AutocompletePrimitive } from '@base-ui/react/autocomplete'
 
 import { cn } from '@/utils/cn'
 import { usePortalContainer } from '@/components/ui/ShadcnProvider'
@@ -31,9 +32,19 @@ import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react'
  * Key Props:
  * - Root: `items`, `value`, `onValueChange`, `multiple`, `itemToStringValue`
  * - Input: `showTrigger`, `showClear` — see Base UI
+ *
+ * Two roots share these parts:
+ * `Combobox` selects an item from a list (typed text is only a filter);
+ * `Autocomplete` is for free text the user may submit as-is, with optional suggestions.
  */
 
 const Combobox = ComboboxPrimitive.Root
+
+/**
+ * Free-text root: `value`/`onValueChange` control the input text, which suggestions fill in
+ * but never clear. All Combobox* parts below work unchanged inside it.
+ */
+const Autocomplete = AutocompletePrimitive.Root
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />
@@ -71,13 +82,17 @@ function ComboboxInput({
   disabled = false,
   showTrigger = true,
   showClear = false,
+  inputSize,
   ...props
 }: ComboboxPrimitive.Input.Props & {
   showTrigger?: boolean
   showClear?: boolean
+  // Without this the combobox shell was permanently h-9 and could not be lined up with a taller or
+  // shorter button on the same row.
+  inputSize?: React.ComponentProps<typeof InputGroup>['inputSize']
 }) {
   return (
-    <InputGroup className={cn('w-auto', className)}>
+    <InputGroup inputSize={inputSize} className={cn('w-auto', className)}>
       <ComboboxPrimitive.Input render={<InputGroupInput disabled={disabled} />} {...props} />
       <InputGroupAddon align="inline-end">
         {showTrigger && (
@@ -122,7 +137,7 @@ function ComboboxContent({
           data-slot="combobox-content"
           data-chips={!!anchor}
           className={cn(
-            'bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/10 *:data-[slot=input-group]:bg-input/30 *:data-[slot=input-group]:border-input/30 max-h-72 min-w-36 overflow-hidden rounded-md shadow-md ring-1 duration-100 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-8 *:data-[slot=input-group]:shadow-none data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)',
+            'bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/10 *:data-[slot=input-group]:bg-input *:data-[slot=input-group]:border-border/60 max-h-72 min-w-36 overflow-hidden rounded-md shadow-md ring-1 duration-100 *:data-[slot=input-group]:m-1 *:data-[slot=input-group]:mb-0 *:data-[slot=input-group]:h-8 *:data-[slot=input-group]:shadow-none data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 group/combobox-content relative max-h-(--available-height) w-(--anchor-width) max-w-(--available-width) min-w-[calc(var(--anchor-width)+--spacing(7))] origin-(--transform-origin) data-[chips=true]:min-w-(--anchor-width)',
             className,
           )}
           {...props}
@@ -214,7 +229,7 @@ function ComboboxChips({
     <ComboboxPrimitive.Chips
       data-slot="combobox-chips"
       className={cn(
-        'dark:bg-input/30 border-input focus-within:border-ring focus-within:ring-ring/50 has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40 has-aria-invalid:border-destructive dark:has-aria-invalid:border-destructive/50 flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-transparent bg-clip-padding px-2.5 py-1.5 text-sm shadow-xs transition-[color,box-shadow] focus-within:ring-[3px] has-aria-invalid:ring-[3px] has-data-[slot=combobox-chip]:px-1.5',
+        'border-border focus-within:border-ring focus-within:ring-ring/50 has-aria-invalid:ring-destructive/20 dark:has-aria-invalid:ring-destructive/40 has-aria-invalid:border-destructive dark:has-aria-invalid:border-destructive/50 flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-input bg-clip-padding px-2.5 py-1.5 text-sm shadow-xs transition-[color,box-shadow] focus-within:ring-[3px] has-aria-invalid:ring-[3px] has-data-[slot=combobox-chip]:px-1.5',
         className,
       )}
       {...props}
@@ -268,6 +283,7 @@ function useComboboxAnchor() {
 }
 
 export {
+  Autocomplete,
   Combobox,
   ComboboxInput,
   ComboboxContent,

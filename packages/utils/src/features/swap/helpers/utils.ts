@@ -1,7 +1,7 @@
 import type { OrderTransactionInfo as SwapOrder } from '@safe-global/store/gateway/types'
 import type { DataDecoded } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 import { getOrderFeeBps as getOrderFeeBpsHelper } from '@safe-global/utils/features/swap/helpers/fee'
@@ -25,9 +25,6 @@ function asDecimal(amount: number | bigint, decimals: number): number {
 }
 
 export const TWAP_FALLBACK_HANDLER = '0x2f55e8b20D0B9FEFA187AA7d00B6Cbe563605bF5'
-
-// https://github.com/cowprotocol/composable-cow/blob/main/networks.json
-export const TWAP_FALLBACK_HANDLER_NETWORKS = ['1', '100', '11155111', '42161']
 
 export const getExecutionPrice = (
   order: Pick<SwapOrder, 'executedSellAmount' | 'executedBuyAmount' | 'buyToken' | 'sellToken'>,

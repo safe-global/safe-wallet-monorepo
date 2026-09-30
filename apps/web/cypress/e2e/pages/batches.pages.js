@@ -2,7 +2,7 @@ import * as constants from '../../support/constants'
 import * as main from './main.page'
 import { clickOnContinueSignTransactionBtn, selectComboButtonOption, tokenSelector } from './create_tx.pages'
 
-export const newTransactionBtnStr = 'New transaction'
+export const newTransactionBtn = '[data-testid="new-tx-btn"]'
 const sendTokensButn = 'Send tokens'
 export const addToBatchBtn = 'Add to batch'
 const confirmBatchBtn = 'Confirm batch'
@@ -12,7 +12,7 @@ export const closeModalBtnBtn = '[data-testid="CloseIcon"]'
 export const deleteTransactionbtn = '[title="Delete transaction"]'
 export const batchTxTopBar = '[data-track="batching: Batch sidebar open"] button'
 export const batchTxCounter = '[data-track="batching: Batch sidebar open"] button'
-export const addNewTxBatch = '[data-track="batching: Add new tx to batch"]'
+export const addNewTxBatch = '[data-track="batching: Add new tx to batch"] button'
 export const batchedTransactionsStr = 'Batched transactions'
 export const addInitialTransactionStr = 'Add an initial transaction to the batch'
 export const transactionAddedToBatchStr = 'Transaction is added to batch'
@@ -21,12 +21,11 @@ export const allActionsSection = '[data-testid="all-actions"]'
 export const accordionActionItem = '[data-testid="action-item"]'
 
 const recipientInput = 'input[name^="recipients."][name$=".recipient"]'
-const listBox = 'ul[role="listbox"]'
+const tokenItem = '[data-slot="select-item"]'
 const amountInput = 'input[name^="recipients."][name$=".amount"]'
 const nonceInput = 'input[name="nonce"]'
 const executeOptionsContainer = 'div[role="radiogroup"]'
-const expandedItem = 'div[class*="MuiCollapse-entered"]'
-const collapsedItem = 'div[class*="MuiCollapse-hidden"]'
+const accordionTrigger = '[data-slot="accordion-trigger"]'
 
 export function addToBatch(EOA, currentNonce, amount) {
   fillTransactionData(EOA, amount)
@@ -44,7 +43,7 @@ function fillTransactionData(EOA, amount) {
   cy.get(recipientInput).type(EOA, { delay: 1 })
   // Click on the Token selector
   cy.get(tokenSelector).click()
-  cy.get(listBox).contains(constants.tokenNames.sepoliaEther).click()
+  main.selectDropdownOption(tokenItem, constants.tokenNames.sepoliaEther)
   cy.get(amountInput).type(amount)
   cy.contains(main.nextBtnStr).click()
 }
@@ -112,15 +111,17 @@ export function verifyBatchIconCount(count) {
 }
 
 export function verifyNewTxButtonStatus(param) {
-  cy.get('button').contains(newTransactionBtnStr).should(param)
+  cy.get(newTransactionBtn).should(param)
 }
 
 export function isTxExpanded(index, option) {
-  let item = option ? expandedItem : collapsedItem
   cy.contains(batchedTxs)
     .parent()
     .within(() => {
-      cy.get('li').eq(index).find(item)
+      cy.get('li')
+        .eq(index)
+        .find(accordionTrigger)
+        .should('have.attr', 'aria-expanded', option ? 'true' : 'false')
     })
 }
 export function verifyCountOfActions(count) {

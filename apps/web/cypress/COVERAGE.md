@@ -2,64 +2,61 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**65 tests** across **33 test files** — each test captures an Argos screenshot automatically.
+**53 tests** across **31 test files** — each test captures an Argos screenshot automatically.
 
 Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
 ## Covered pages
 
-| Page                              | Test file                    | Tests | Mocked?          | Wallet? |
-| --------------------------------- | ---------------------------- | ----- | ---------------- | ------- |
-| `/welcome`                        | welcome.cy.js                | 2     | No               | No      |
-| `/home`                           | dashboard.cy.js              | 2     | Yes (1 mocked)   | No      |
-| `/balances`                       | balances.cy.js               | 2     | No               | No      |
-| `/balances/nfts`                  | nfts.cy.js                   | 1     | Yes              | No      |
-| `/balances/positions`             | positions.cy.js              | 1     | No               | No      |
-| `/address-book`                   | address_book.cy.js           | 2     | No               | No      |
-| `/transactions/queue`             | tx_queue.cy.js               | 2     | Yes              | No      |
-| `/transactions/history`           | tx_history.cy.js             | 1     | Yes              | No      |
-| `/transactions/messages`          | messages.cy.js               | 1     | Yes              | No      |
-| `/transactions/tx`                | tx_details.cy.js             | 1     | No               | No      |
-| `/transactions/msg`               | msg_details.cy.js            | 1     | Yes              | No      |
-| `/settings/setup`                 | settings_pages.cy.js         | 1     | No               | No      |
-| `/settings/appearance`            | settings_pages.cy.js         | 1     | No               | No      |
-| `/settings/modules`               | settings_pages.cy.js         | 1     | No               | No      |
-| `/settings/notifications`         | settings_pages.cy.js         | 1     | No               | No      |
-| `/settings/data`                  | settings_data_security.cy.js | 1     | No               | No      |
-| `/settings/security`              | settings_data_security.cy.js | 1     | No               | No      |
-| `/settings/cookies`               | settings_cookies.cy.js       | 1     | No               | No      |
-| `/settings/safe-apps`             | settings_safe_apps.cy.js     | 1     | No               | No      |
-| `/settings/environment-variables` | env_variables.cy.js          | 1     | No               | No      |
-| `/apps`                           | safe_apps.cy.js              | 3     | No               | No      |
-| `/apps/custom`                    | apps_custom.cy.js            | 1     | No               | No      |
-| `/new-safe/create`                | new_safe.cy.js               | 1     | No               | No      |
-| `/new-safe/load`                  | new_safe.cy.js               | 2     | No               | No      |
-| `/new-safe/advanced-create`       | new_safe_advanced.cy.js      | 1     | No               | No      |
-| `/swap`                           | swap.cy.js                   | 1     | No               | No      |
-| `/bridge`                         | bridge.cy.js                 | 1     | No               | No      |
-| `/stake`                          | stake.cy.js                  | 1     | No               | No      |
-| `/earn`                           | earn.cy.js                   | 1     | No               | No      |
-| `/403`                            | error_pages.cy.js            | 1     | No               | No      |
-| `/404`                            | error_pages.cy.js            | 1     | No               | No      |
-| `/terms`                          | legal_pages.cy.js            | 1     | No               | No      |
-| `/privacy`                        | legal_pages.cy.js            | 1     | No               | No      |
-| `/licenses`                       | legal_pages.cy.js            | 1     | No               | No      |
-| `/imprint`                        | legal_pages.cy.js            | 1     | No               | No      |
-| `/cookie`                         | legal_pages.cy.js            | 1     | No               | No      |
-| `/safe-labs-terms`                | legal_pages.cy.js            | 1     | No               | No      |
-| `/welcome/spaces`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/spaces` (dashboard)             | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/spaces/settings`                | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/spaces/members`                 | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/spaces/safe-accounts`           | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/spaces/address-book`            | spaces.cy.js                 | 1     | Yes (auth + API) | No      |
-| `/user-settings`                  | user_settings.cy.js          | 1     | Yes (auth + API) | No      |
-| Send tx form (modal)              | create_tx_flow.cy.js         | 4     | No               | Yes     |
-| Add owner form (modal)            | owner_management.cy.js       | 2     | No               | Yes     |
-| Replace owner dialog (modal)      | owner_management.cy.js       | 1     | No               | Yes     |
-| Spending limit form (modal)       | spending_limits.cy.js        | 3     | No               | Yes     |
-| Sidebar multichain safes          | sidebar.cy.js                | 1     | No               | No      |
-| Batch tx modal                    | batch_tx.cy.js               | 2     | No               | Yes     |
+| Page                              | Test file                  | Tests | Mocked? | Wallet? |
+| --------------------------------- | -------------------------- | ----- | ------- | ------- |
+| `/welcome/accounts`               | welcome.cy.js              | 1     | No      | No      |
+| `/welcome/spaces` (signed-out)    | welcome.cy.js              | 1     | No      | No      |
+| `/home`                           | dashboard.cy.js            | 1     | Yes     | No      |
+| `/balances`                       | balances.cy.js             | 2     | No      | No      |
+| `/balances/nfts`                  | nfts.cy.js                 | 1     | Yes     | No      |
+| `/balances/positions`             | positions.cy.js            | 1     | No      | No      |
+| `/address-book`                   | address_book.cy.js         | 2     | No      | No      |
+| `/transactions/queue`             | tx_queue.cy.js             | 2     | Yes     | No      |
+| `/transactions/history`           | tx_history.cy.js           | 1     | Yes     | No      |
+| `/transactions/tx`                | tx_details.cy.js           | 1     | No      | No      |
+| `/transactions/msg`               | msg_details.cy.js          | 1     | Yes     | No      |
+| `/settings/setup`                 | settings.cy.js             | 1     | No      | No      |
+| `/settings/appearance`            | settings.cy.js             | 1     | No      | No      |
+| `/settings/modules`               | settings.cy.js             | 1     | No      | No      |
+| `/settings/notifications`         | settings.cy.js             | 1     | No      | No      |
+| `/settings/data`                  | settings.cy.js             | 1     | No      | No      |
+| `/settings/security`              | settings.cy.js             | 1     | No      | No      |
+| `/settings/cookies`               | settings.cy.js             | 1     | No      | No      |
+| `/settings/safe-apps`             | settings.cy.js             | 1     | No      | No      |
+| `/settings/environment-variables` | settings.cy.js             | 1     | No      | No      |
+| `/apps`                           | safe_apps.cy.js            | 2     | No      | No      |
+| `/apps/custom`                    | apps_custom.cy.js          | 1     | No      | No      |
+| `/new-safe/create`                | new_safe.cy.js             | 1     | No      | No      |
+| `/new-safe/load`                  | new_safe.cy.js             | 1     | No      | No      |
+| `/swap`                           | swap.cy.js                 | 1     | No      | No      |
+| `/bridge`                         | bridge.cy.js               | 1     | No      | No      |
+| `/stake`                          | stake.cy.js                | 1     | No      | No      |
+| `/earn`                           | earn.cy.js                 | 1     | No      | No      |
+| `/403`                            | error_pages.cy.js          | 1     | No      | No      |
+| `/404`                            | error_pages.cy.js          | 1     | No      | No      |
+| `/spaces` (dashboard)             | spaces_dashboard.cy.js     | 2     | No      | Yes     |
+| `/spaces/settings/general`        | spaces_settings.cy.js      | 1     | No      | Yes     |
+| `/spaces/settings/account`        | spaces_settings.cy.js      | 1     | No      | Yes     |
+| `/spaces/settings/about`          | spaces_settings.cy.js      | 1     | No      | Yes     |
+| `/spaces/members`                 | spaces_members.cy.js       | 2     | No      | Yes     |
+| `/spaces/safe-accounts`           | spaces_safe_accounts.cy.js | 1     | No      | Yes     |
+| `/spaces/address-book`            | spaces_address_book.cy.js  | 1     | No      | Yes     |
+| `/spaces/activity`                | spaces_activity.cy.js      | 1     | No      | Yes     |
+| `/spaces/security`                | spaces_security.cy.js      | 1     | No      | Yes     |
+| Send tx form (modal)              | create_tx_flow.cy.js       | 1     | No      | Yes     |
+| Add signer form (modal)           | owner_management.cy.js     | 1     | No      | Yes     |
+| Replace signer dialog (modal)     | owner_management.cy.js     | 1     | No      | Yes     |
+| Spending limit form (modal)       | spending_limits.cy.js      | 3     | No      | Yes     |
+| Batch tx modal                    | batch_tx.cy.js             | 1     | No      | Yes     |
+| Sidebar collapsed state           | sidebar.cy.js              | 1     | No      | No      |
+
+> **Spaces tests** sign in with a real wallet (SIWE) against the live backend via `support/spaces-login.js` — no auth/API mocks. `spaces_dashboard.cy.js` also covers the send-from modal, and `spaces_members.cy.js` the pending-invites tab. `spaces_address_book.cy.js` has 2 additional skipped tests (local + pending contacts tabs).
 
 ## Gaps — interactive states not yet covered
 
@@ -96,13 +93,13 @@ Bell icon in the header — never opened in any test.
 
 ### P1 — Spaces dialogs (3 components)
 
-We cover all 5 spaces pages but never open modal dialogs.
+We cover all spaces pages and the dashboard send-from modal, but never open these creation/management dialogs.
 
-| Component          | How to trigger                    | Wallet? | Mocked?          |
-| ------------------ | --------------------------------- | ------- | ---------------- |
-| SpaceCreationModal | Click "Create space" on dashboard | No      | Yes (auth + API) |
-| AddMemberModal     | Click "Invite" on members page    | No      | Yes (auth + API) |
-| SpaceInfoModal     | Click space info icon             | No      | Yes (auth + API) |
+| Component          | How to trigger                    | Wallet? | Mocked? |
+| ------------------ | --------------------------------- | ------- | ------- |
+| SpaceCreationModal | Click "Create space" on dashboard | Yes     | No      |
+| AddMemberModal     | Click "Invite" on members page    | Yes     | No      |
+| SpaceInfoModal     | Click space info icon             | Yes     | No      |
 
 ### P1 — Sidebar states (14 families, 17 components)
 

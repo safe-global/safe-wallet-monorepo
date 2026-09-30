@@ -39,15 +39,20 @@ export function TokenTransfer({ txId, txInfo, executionInfo, executedAt }: Token
         badgeThemeName="badge_error"
         badgeColor="$error"
         title={
-          <H3 fontWeight={600}>
-            <TokenAmount
-              value={value}
-              decimals={decimals}
-              tokenSymbol={tokenSymbol}
-              direction={txInfo.direction}
-              preciseAmount
-            />
-          </H3>
+          <YStack alignItems="center" gap="$1">
+            <Text color="$textSecondaryLight" fontSize="$4">
+              Sending
+            </Text>
+            <H3 fontWeight={600} textAlign="center" paddingHorizontal="$4">
+              <TokenAmount
+                value={value}
+                decimals={decimals}
+                tokenSymbol={tokenSymbol}
+                direction={txInfo.direction}
+                preciseAmount
+              />
+            </H3>
+          </YStack>
         }
         submittedAt={executionInfo?.submittedAt || executedAt}
       />

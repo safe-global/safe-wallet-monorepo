@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BridgeTransaction from './index'
 import { mockPendingBridgeTxInfo, mockFailedBridgeTxInfo, mockSuccessfulBridgeTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/BridgeTransaction',
   component: BridgeTransaction,
   decorators: [
     (Story) => {
@@ -19,9 +19,9 @@ const meta = {
             },
           }}
         >
-          <Paper sx={{ padding: 2 }}>
+          <div className="p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

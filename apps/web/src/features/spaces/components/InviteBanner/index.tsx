@@ -1,92 +1,47 @@
-import { Card, Box, Typography, Link as MUILink, Stack } from '@mui/material'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceSummary } from '../SpaceCard'
-import { MemberStatus } from '@/features/spaces'
-import InitialsAvatar from '../InitialsAvatar'
-import Link from 'next/link'
-import { AppRoutes } from '@/config/routes'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import css from './styles.module.css'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import AcceptButton from './AcceptButton'
 import DeclineButton from './DeclineButton'
-import { trackEvent } from '@/services/analytics'
-import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
+import Inviter from './Inviter'
 
 type SpaceListInvite = {
   space: GetSpaceResponse
+  invitedByName: string | undefined
 }
 
-const SpaceListInvite = ({ space }: SpaceListInvite) => {
-  const { id, name, members, safeCount } = space
-  const isUserSignedIn = useAppSelector(isAuthenticated)
-  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const numberOfMembers = members.filter((member) => member.status === MemberStatus.ACTIVE).length
-
-  const invitedBy = space.members.find((member) => member.user.id === currentUser?.id)?.invitedBy
+const SpaceListInvite = ({ space, invitedByName }: SpaceListInvite) => {
+  const { name, safeCount, memberCount } = space
 
   return (
-    <Card sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h4" fontWeight={700} mb={2} color="primary.light">
-        You were invited to join{' '}
-        <Typography component="span" variant="h4" fontWeight={700} color="primary.main">
-          {name}
-        </Typography>
-        {invitedBy && (
-          <>
-            {' '}
-            by
-            <Typography
-              component="span"
-              variant="h4"
-              fontWeight={700}
-              color="primary.main"
-              position="relative"
-              top="4px"
-              ml="6px"
-              display="inline-block"
-              sx={{ '> div': { gap: '4px' } }}
-            >
-              <EthHashInfo address={invitedBy} avatarSize={24} showName={false} showPrefix={false} copyPrefix={false} />
-            </Typography>
-          </>
-        )}
-      </Typography>
+    <div className="mb-4 rounded-3xl bg-card p-4" data-testid="space-invite-banner">
+      <div className={cn(css.spacesListInviteContent, 'mb-4')}>
+        <div className="flex flex-grow flex-row flex-wrap items-center gap-x-1 gap-y-1">
+          <Typography variant="paragraph-small">You were invited to join</Typography>
+          <Typography variant="paragraph-small-bold">{name}</Typography>
+          <Inviter invitedByName={invitedByName} variant="paragraph-small" avatarSize={24} />
+        </div>
 
-      <Link href={{ pathname: AppRoutes.spaces.index, query: { spaceId: id } }} passHref legacyBehavior>
-        <MUILink
-          underline="none"
-          sx={{ display: 'block' }}
-          onClick={() => trackEvent({ ...SPACE_EVENTS.VIEW_INVITING_SPACE })}
-        >
-          <Card sx={{ p: 2, backgroundColor: 'background.main', '&:hover': { backgroundColor: 'background.light' } }}>
-            <Box className={css.spacesListInviteContent}>
-              <Stack direction="row" spacing={2} alignItems="center" flexGrow={1}>
-                <Box>
-                  <InitialsAvatar name={name} size="large" />
-                </Box>
+        <div className={cn(css.inviteButtonContainer, 'flex flex-row gap-2')}>
+          <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
+            <DeclineButton space={space} />
+          </Track>
+          <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
+            <AcceptButton space={space} />
+          </Track>
+        </div>
+      </div>
 
-                <Box>
-                  <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={numberOfMembers} />
-                </Box>
-              </Stack>
-
-              <Stack direction="row" spacing={1}>
-                <Track {...SPACE_EVENTS.ACCEPT_INVITE} label={SPACE_LABELS.space_list_page}>
-                  <AcceptButton space={space} />
-                </Track>
-                <Track {...SPACE_EVENTS.DECLINE_INVITE} label={SPACE_LABELS.space_list_page}>
-                  <DeclineButton space={space} />
-                </Track>
-              </Stack>
-            </Box>
-          </Card>
-        </MUILink>
-      </Link>
-    </Card>
+      <div className="flex flex-row items-center gap-3 rounded-2xl bg-[var(--color-background-main)] px-2 py-3">
+        <InitialsAvatar name={name} size="medium" />
+        <SpaceSummary name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} isCompact />
+      </div>
+    </div>
   )
 }
 

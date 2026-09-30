@@ -5,6 +5,7 @@ import { useAddressOwnershipValidation } from '@/src/hooks/useAddressOwnershipVa
 import { storePrivateKey } from '@/src/hooks/useSign/useSign'
 import useDelegate from '@/src/hooks/useDelegate'
 import Logger from '@/src/utils/logger'
+import { KeyStorageError } from '@/src/services/key-storage'
 import { useSignerCollisionGuard } from './useSignerCollisionGuard'
 
 interface ImportError {
@@ -54,7 +55,7 @@ export const useImportSeedPhraseAddress = () => {
         if (!validationResult.isOwner) {
           setError({
             code: 'OWNER_VALIDATION',
-            message: 'This address is not an owner of the Safe Account',
+            message: 'This address is not an owner of the Safe account',
           })
           setIsImporting(false)
           return { success: false }
@@ -100,7 +101,10 @@ export const useImportSeedPhraseAddress = () => {
         Logger.error('Error importing seed phrase address:', error)
         setError({
           code: 'IMPORT',
-          message: 'Failed to import the selected address. Please try again.',
+          message:
+            error instanceof KeyStorageError
+              ? error.message
+              : 'Failed to import the selected address. Please try again.',
         })
         setIsImporting(false)
         return { success: false }

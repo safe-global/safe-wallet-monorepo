@@ -23,7 +23,7 @@ describe('Recovery happy path tests 4', () => {
 
   // Check that recovery can be setup and removed from modules
   it('Verify that recovery can be setup and removed from modules', () => {
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer)
     owner.waitForConnectionStatus()
     recovery.clearRecoverers()
     recovery.clickOnSetupRecoveryBtn()

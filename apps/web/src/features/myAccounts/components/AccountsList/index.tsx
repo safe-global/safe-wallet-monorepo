@@ -3,15 +3,15 @@ import PinnedSafes from '../PinnedSafes'
 import CurrentSafe from '../CurrentSafe'
 import ConnectWalletPrompt from '../ConnectWalletPrompt'
 import { type AllSafeItems, type AllSafeItemsGrouped, getComparator } from '@/hooks/safes'
-import SafeSelectionModal from '../SafeSelectionModal'
+import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import MigrationPrompt from '../MigrationPrompt'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import useSafeSelectionModal from '../../hooks/useSafeSelectionModal'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useMemo, useCallback } from 'react'
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 const AccountsList = ({
   searchQuery,
@@ -30,7 +30,7 @@ const AccountsList = ({
   const sortComparator = getComparator(orderBy)
 
   // Safe selection modal hook
-  const modal = useSafeSelectionModal()
+  const modal = useTrustedSafesModal()
 
   // Migration prompt hook
   const migration = useMigrationPrompt()
@@ -64,13 +64,18 @@ const AccountsList = ({
       <PinnedSafes allSafes={allSafes} onLinkClick={onLinkClick} onOpenSelectionModal={modal.open} />
 
       {!migration.hasPinnedSafes && !migration.shouldShowPrompt && (
-        <Typography data-testid="empty-safe-list" color="text.secondary" variant="body2" textAlign="center" py={3}>
+        <Typography
+          data-testid="empty-safe-list"
+          color="muted"
+          variant="paragraph-small"
+          align="center"
+          className="py-6"
+        >
           You don&apos;t have any safes yet
         </Typography>
       )}
 
-      {/* Safe selection modal - only way to manage safes */}
-      <SafeSelectionModal modal={modal} />
+      <TrustedSafesModal modal={modal} />
     </>
   )
 }

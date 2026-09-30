@@ -1,47 +1,88 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import SpaceCard from 'src/features/spaces/components/SpaceCard'
+import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
-import LocalSafesAlert from './LocalSafesAlert'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
-import { useIsClassicViewFeatureEnabled } from '@/hooks/useClassicView'
-import ClassicViewLink from '../ClassicViewLink'
-import SpacesIcon from '@/public/images/spaces/spaces.svg'
+import WorkspaceBanner from '../WorkspaceBanner'
+import Image from 'next/image'
+import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
+import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
+import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
+import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
-import { isAuthenticated } from '@/store/authSlice'
-import { Box, Card, Grid2, Link, Typography } from '@mui/material'
+import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
+import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Spinner } from '@/components/ui/spinner'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
+import { useDarkMode } from '@/hooks/useDarkMode'
+import { cn } from '@/utils/cn'
 import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
-import { filterSpacesByStatus } from '@/features/spaces/utils'
+import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
+import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
-import { SPACES_LIMIT } from '../Sidebar/constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 
-const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?: boolean }) => {
+const AddSpaceButton = ({
+  onClick,
+  disabled,
+  size = 'lg',
+  variant = 'default',
+  label = 'Create Workspace',
+  icon = 'add',
+  link = true,
+}: {
+  onClick?: () => void
+  disabled?: boolean
+  size?: 'lg' | 'default'
+  variant?: 'default' | 'outline'
+  label?: string
+  icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
+}) => {
+  const iconSize = size === 'lg' ? 'size-5' : 'size-4'
+
   const button = (
     <Button
       data-testid="create-space-button"
-      variant="default"
-      size="lg"
-      className={`h-full rounded-lg px-6 py-3 text-base${disabled ? ' cursor-not-allowed opacity-50 grayscale' : ''}`}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      variant={variant}
+      size={size}
+      accentIcon={icon === 'arrow' && variant === 'default'}
+      className={cn(
+        // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
+        size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
+        variant === 'outline' && 'hover:bg-muted',
+        disabled && 'cursor-not-allowed opacity-50 grayscale',
+      )}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
-      <AddIcon className="size-5 fill-primary-foreground" />
-      Create workspace
+      {icon === 'add' && (
+        <AddIcon className={cn(variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground', iconSize)} />
+      )}
+      {label}
+      {icon === 'arrow' && <ArrowRight className={iconSize} />}
     </Button>
   )
 
@@ -50,61 +91,173 @@ const AddSpaceButton = ({ onClick, disabled }: { onClick?: () => void; disabled?
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
 
+const termsLinkClassName = 'underline underline-offset-2'
+
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
-  const isClassicViewFeatureEnabled = useIsClassicViewFeatureEnabled() === true
+  const isDarkMode = useDarkMode()
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  // The Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useIsSafeProEnabled()
+  const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
-    <>
-      <Card sx={{ p: 5, textAlign: 'center' }}>
-        <Typography variant="h3" fontWeight={600} mb={3}>
-          Sign in
-        </Typography>
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
+          card renders inline rather than as a full-screen takeover. */}
+      <div
+        className={cn(
+          'relative flex items-center justify-center pb-10',
+          isSafeProAnnouncementEnabled ? 'pt-0' : 'pt-10',
+        )}
+      >
+        <div className={cn('flex w-full flex-col items-center', isSafePro ? 'max-w-116' : 'max-w-110')}>
+          {isSafeProAnnouncementEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
-        <Typography color="text.secondary" mb={3}>
-          Sign in to view or create a workspace.
-        </Typography>
+          <div className="relative w-full">
+            <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
+              <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+                {/* The Pro brand stays once Safe Pro exists, banner or not. */}
+                {isSafeProAnnouncementEnabled || isSafePro ? (
+                  isDarkMode ? (
+                    <SafeProLockupDark className="h-10 w-auto" />
+                  ) : (
+                    <SafeProLockup className="h-10 w-auto" />
+                  )
+                ) : (
+                  <SafeMarkIcon className="size-10" />
+                )}
+              </div>
 
-        <LocalSafesAlert />
+              <Typography variant="h3" className={cn('text-center', isSafePro ? 'mb-4' : 'mb-6')}>
+                Sign in to your Workspace
+              </Typography>
 
-        <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
-      </Card>
+              {isSafePro && (
+                <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
+                  By continuing you accept the{' '}
+                  <Link
+                    variant="muted"
+                    href={SAFE_PRO_USER_TERMS_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={termsLinkClassName}
+                  >
+                    Safe Pro User Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    variant="muted"
+                    href={PRIVACY_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={cn(termsLinkClassName, 'whitespace-nowrap')}
+                  >
+                    Privacy Policy. <ExternalLinkIcon className="ml-0.5 inline size-4 align-text-bottom" />
+                  </Link>
+                </p>
+              )}
 
-      {isClassicViewFeatureEnabled && <ClassicViewLink />}
-    </>
+              <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+            </div>
+          </div>
+
+          {!isSafePro && (
+            <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
+              By continuing, you agree to the{' '}
+              <Link
+                variant="muted"
+                href={TERMS_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
+              >
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link
+                variant="muted"
+                href={PRIVACY_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   )
 }
 
+const WORKSPACE_BENEFITS = [
+  'Organize multiple Safe accounts in one place',
+  'Invite members and manage their roles',
+  'Share an address book across your team',
+]
+
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const isDarkMode = useDarkMode()
+  const isSafePro = useIsSafeProEnabled()
 
   return (
     <>
-      <Card sx={{ p: 5, textAlign: 'center', width: 1 }}>
-        <Box display="flex" justifyContent="center">
-          <SpacesIcon />
-        </Box>
+      <Card
+        size="none"
+        // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
+        className="w-full rounded-4xl p-1 text-center"
+      >
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
+          <div className="relative flex shrink-0 flex-col gap-4 md:self-center">
+            {WORKSPACE_BENEFITS.map((benefit) => (
+              <div key={benefit} className="flex flex-row items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Check className="size-4 text-badge-dot-success" strokeWidth={1.5} />
+                </div>
+                <Typography variant="paragraph-large" className="font-medium whitespace-nowrap">
+                  {benefit}
+                </Typography>
+              </div>
+            ))}
+          </div>
 
-        <Box mb={3}>
-          <Typography color="text.secondary" mb={1}>
-            No workspaces found.
-            <br />
-          </Typography>
-          <Link onClick={() => setIsInfoOpen(true)} href="#">
-            What are workspaces?
-          </Link>
-        </Box>
-        <div className="h-12">
-          <AddSpaceButton
-            disabled={isAtLimit}
-            onClick={() =>
-              trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-            }
+          <Image
+            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
+            alt="Workspace dashboard showing accounts grouped by Workspace"
+            className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />
+        </div>
+
+        <div className="flex flex-col items-center gap-6 p-8">
+          <Typography variant="h3">Collaborate on your Safe accounts with your team.</Typography>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12">
+              <AddSpaceButton
+                label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
+                icon="arrow"
+                disabled={isAtLimit}
+                link
+                onClick={() =>
+                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+                    entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                  })
+                }
+              />
+            </div>
+
+            <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
+              What are Workspaces?
+            </Link>
+          </div>
         </div>
       </Card>
       {isInfoOpen && <SpaceInfoModal onClose={() => setIsInfoOpen(false)} />}
@@ -114,77 +267,115 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)
+  const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const {
     currentData: spaces,
     isFetching,
     isUninitialized,
     error,
+    refetch,
   } = useSpacesGetV1Query(undefined, { skip: !isUserSignedIn })
   const pendingInvites = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.INVITED)
   const activeSpaces = filterSpacesByStatus(currentUser, spaces || [], MemberStatus.ACTIVE)
-  const inviteAmount = pendingInvites?.length
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
+
+  const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
+
+  // Treat any indefinite state as loading. On the skip→unskip flip (re-login
+  // after logout) RTK Query lags one render — isFetching/isUninitialized are
+  // both false while spaces is still undefined. The `spaces === undefined &&
+  // !error` clause covers that gap so an existing user isn't bounced into
+  // /welcome/create-space on a stale spacesAmount=0.
+  const isSpacesLoading = isFetching || isUninitialized || (spaces === undefined && !error)
 
   const { setHasSignedIn, redirectLoading } = useSignInRedirect({
     spacesAmount: spaces?.length || 0,
-    inviteAmount: inviteAmount || 0,
-    // Treat the "skip→unskip" transition as still loading. On the render where
-    // skip flips to false RTK Query returns isFetching=false but hasn't yet
-    // dispatched the fetch (that happens in a useEffect), so isFetching alone
-    // would lead useSignInRedirect to read spacesAmount=0 and bounce existing
-    // users into the create-space flow on re-login.
-    isSpacesLoading: isFetching || isUninitialized,
+    inviteAmount: pendingInvites.length,
+    isSpacesLoading,
     error: error || undefined,
+    singleSpaceId,
   })
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
+  const onAddSpaceBtnClick = () =>
+    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
+
+  const pendingInviteBanners =
+    isUserSignedIn && pendingInvites.length > 0
+      ? pendingInvites.map((invitingSpace: GetSpaceResponse) => (
+          <SpaceListInvite
+            key={invitingSpace.uuid}
+            space={invitingSpace}
+            invitedByName={getInvitedByName(invitingSpace, currentUser?.id)}
+          />
+        ))
+      : null
+
   return (
-    <Box className={css.container}>
-      <Box className={css.mySpaces}>
-        <Box className={css.spacesHeader}>
-          {!isRequireLoginEnabled && <AccountsNavigation />}
+    <div className={css.container}>
+      <div className={css.mySpaces}>
+        <div className={css.spacesHeader}>
+          <AccountsNavigation />
+        </div>
 
-          {isUserSignedIn && activeSpaces.length > 0 && (
-            <AddSpaceButton
-              disabled={isAtSpacesLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          )}
-        </Box>
-
-        {isUserSignedIn &&
-          pendingInvites.length > 0 &&
-          pendingInvites.map((invitingSpace: GetSpaceResponse) => (
-            <SpaceListInvite key={invitingSpace.id} space={invitingSpace} />
-          ))}
-
-        {isUserSignedIn || (!redirectLoading && pendingInvites.length) ? (
+        {!isStoreHydrated || (isUserSignedIn && isSpacesLoading) ? (
+          <div className="flex justify-center py-10">
+            <Spinner className="size-6 text-muted-foreground" />
+          </div>
+        ) : !isUserSignedIn ? (
+          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+        ) : error && !spaces?.length ? (
+          <div className="flex flex-col items-center gap-3 py-10 text-center">
+            <Typography color="muted">Couldn&apos;t load your Workspaces. Try again, or contact support.</Typography>
+            <Button variant="outline" onClick={() => refetch()}>
+              Try again
+            </Button>
+          </div>
+        ) : activeSpaces.length > 0 ? (
           <>
-            {activeSpaces.length > 0 ? (
-              <Grid2 container spacing={2} flexWrap="wrap" data-testid="org-list">
-                {activeSpaces.map((space) => (
-                  <Grid2 size={{ xs: 12, md: 6 }} key={space.name}>
-                    <SpaceCard space={space} currentUserId={currentUser?.id} />
-                  </Grid2>
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            <WelcomeContentCard className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <AddSpaceButton
+                  size="default"
+                  variant="outline"
+                  label="Create"
+                  disabled={isAtSpacesLimit}
+                  onClick={onAddSpaceBtnClick}
+                />
+              </div>
+
+              {pendingInviteBanners}
+
+              <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
+                {activeSpaces.map((space, index) => (
+                  <SpaceRow
+                    key={space.uuid}
+                    space={space}
+                    currentUserId={currentUser?.id}
+                    showDivider={index < activeSpaces.length - 1}
+                  />
                 ))}
-              </Grid2>
-            ) : (
-              <NoSpacesState isAtLimit={isAtSpacesLimit} />
-            )}
+              </div>
+            </WelcomeContentCard>
           </>
         ) : (
-          <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+          <>
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            {pendingInviteBanners}
+            <NoSpacesState isAtLimit={isAtSpacesLimit} />
+          </>
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

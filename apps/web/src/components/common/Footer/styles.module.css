@@ -20,6 +20,15 @@
   margin: 0;
 }
 
+.container a {
+  font-weight: 700;
+  text-underline-offset: auto;
+}
+
+.container a:hover {
+  color: var(--muted-foreground);
+}
+
 .container li:not(:last-of-type):after {
   content: '|';
   margin-left: var(--space-2);

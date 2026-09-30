@@ -16,7 +16,7 @@ const SectionEntry = ({ item, query }: { item: SectionItem; query: string }) => 
 
   if (!isActive) return null
 
-  return <>{item.renderItem({ query, label: item.label })}</>
+  return <item.Component query={query} label={item.label} />
 }
 
 const SearchSectionContent = ({ query }: SearchSectionProps) => {

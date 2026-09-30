@@ -119,7 +119,7 @@ describe('Settings', () => {
       })
 
       const warningTitle = getByText('Base contract is not supported')
-      const warningMessage = getByText(/Your Safe Account's base contract is not supported/)
+      const warningMessage = getByText(/Your Safe account's base contract is not supported/)
 
       expect(warningTitle).toBeTruthy()
       expect(warningMessage).toBeTruthy()
@@ -132,7 +132,7 @@ describe('Settings', () => {
       })
 
       const warningTitle = queryByText('Base contract is not supported')
-      const warningMessage = queryByText(/Your Safe Account's base contract is not supported/)
+      const warningMessage = queryByText(/Your Safe account's base contract is not supported/)
 
       expect(warningTitle).toBeNull()
       expect(warningMessage).toBeNull()

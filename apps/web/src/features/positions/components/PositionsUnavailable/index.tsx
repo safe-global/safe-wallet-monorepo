@@ -1,5 +1,5 @@
-import { Box, Paper, Typography } from '@mui/material'
 import DefiIcon from '@/public/images/balances/defi.svg'
+import { Typography } from '@/components/ui/typography'
 
 // This component is displayed when the positions feature flag is enabled,
 // but the API does not return data from CGW (Client Gateway), or errors out.
@@ -9,19 +9,19 @@ const PositionsUnavailable = ({ hasError = false }: { hasError?: boolean }) => {
   const subtitle = hasError ? 'Try again later' : 'Positions feature is still in beta and will be available soon'
 
   return (
-    <Paper elevation={0} sx={{ p: 3, textAlign: 'center' }}>
-      <Box display="flex" justifyContent="center">
+    <div className="rounded-xl border border-border bg-card p-6 text-center">
+      <div className="flex justify-center">
         <DefiIcon />
-      </Box>
+      </div>
 
-      <Typography data-testid="positions-unavailable-text" variant="body1" color="primary.light">
+      <Typography data-testid="positions-unavailable-text" align="center" className="text-[var(--color-primary-light)]">
         {title}
       </Typography>
 
-      <Typography variant="caption" color="primary.light" sx={{ mt: 1, display: 'block' }}>
+      <Typography variant="paragraph-mini" align="center" className="mt-2 block text-[var(--color-primary-light)]">
         {subtitle}
       </Typography>
-    </Paper>
+    </div>
   )
 }
 

@@ -5,21 +5,39 @@
   row-gap: 4px;
 }
 
+/* Capped lists (logos + "+N") are a fixed-size cluster — never break the +N onto its own row */
+.capped {
+  flex-wrap: nowrap;
+}
+
 .networks img {
   margin-left: -6px;
-  outline: 2px solid var(--color-background-paper);
   border-radius: 50%;
 }
 
+/* Carves a transparent crescent where the next stacked logo (or the +N indicator) overlaps.
+   Logos advance by (size - 6px), so the neighbour's circle is centred at 1.5 * size - 6px;
+   the cut radius is the logo radius + 1.5-2px so a visible gap remains around the neighbour.
+   At 22px this replicates the safe-selector dropdown's SafeRowStats stack exactly (16px
+   advance, 12.5px -> 13px cut). Lets the background show through instead of painting a
+   border, so it works on any surface. */
+.networks span:not(:last-child) > img {
+  mask-image: radial-gradient(
+    circle at calc(var(--network-logo-size, 24px) * 1.5 - 6px) 50%,
+    transparent calc(var(--network-logo-size, 24px) / 2 + 1.5px),
+    black calc(var(--network-logo-size, 24px) / 2 + 2px)
+  );
+}
+
 .moreChainsIndicator {
-  margin-left: -5px;
-  width: 24px;
-  height: 24px;
+  margin-left: -6px;
+  width: var(--network-logo-size, 24px);
+  height: var(--network-logo-size, 24px);
   border-radius: 50%;
-  background-color: var(--color-border-light);
-  outline: 2px solid var(--color-background-paper);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }

@@ -1,8 +1,9 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import type { SafeMessageStatus } from '@safe-global/store/gateway/types'
-import { Box, CircularProgress, type Palette, Typography } from '@mui/material'
 import type { ReactElement } from 'react'
 
+import { Typography } from '@/components/ui/typography'
+import { Spinner } from '@/components/ui/spinner'
 import DateTime from '@/components/common/DateTime'
 import MsgType from '@/components/safe-messages/MsgType'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
@@ -13,14 +14,14 @@ import css from '@/components/transactions/TxSummary/styles.module.css'
 import useIsSafeMessagePending from '@/hooks/messages/useIsSafeMessagePending'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 
-const getStatusColor = (value: SafeMessageStatus, palette: Palette): string => {
+const getStatusColor = (value: SafeMessageStatus): string => {
   switch (value) {
     case 'CONFIRMED':
-      return palette.success.main
+      return 'var(--color-success-main)'
     case 'NEEDS_CONFIRMATION':
-      return palette.warning.main
+      return 'var(--color-warning-main)'
     default:
-      return palette.text.primary
+      return 'var(--color-text-primary)'
   }
 }
 
@@ -35,45 +36,42 @@ const MsgSummary = ({ msg }: { msg: MessageItem }): ReactElement => {
   }
 
   return (
-    <Box className={[css.gridContainer, css.message].join(' ')}>
-      <Box gridArea="type">
+    <div className={[css.gridContainer, css.message].join(' ')}>
+      <div style={{ gridArea: 'type' }}>
         <MsgType msg={msg} />
-      </Box>
+      </div>
 
-      <Box gridArea="info">{type || 'Signature'}</Box>
+      <div style={{ gridArea: 'info' }}>{type || 'Signature'}</div>
 
-      <Box gridArea="date" className={css.date}>
+      <div style={{ gridArea: 'date' }} className={css.date}>
         <DateTime value={msg.modifiedTimestamp} />
-      </Box>
+      </div>
 
-      <Box gridArea="confirmations">
+      <div style={{ gridArea: 'confirmations' }}>
         {confirmationsRequired > 0 && (
           <TxConfirmations
             submittedConfirmations={confirmationsSubmitted}
             requiredConfirmations={confirmationsRequired}
           />
         )}
-      </Box>
+      </div>
 
-      <Box gridArea="status">
+      <div style={{ gridArea: 'status' }}>
         {isConfirmed || isPending ? (
           <Typography
-            variant="caption"
-            fontWeight="bold"
-            display="flex"
-            alignItems="center"
-            gap={1}
-            sx={{ color: ({ palette }) => getStatusColor(msg.status, palette) }}
+            variant="paragraph-mini-bold"
+            className="flex items-center gap-2"
+            style={{ color: getStatusColor(msg.status) }}
           >
-            {isPending && <CircularProgress size={14} color="inherit" />}
+            {isPending && <Spinner className="size-3.5" />}
 
             {txStatusLabel}
           </Typography>
         ) : (
           <SignMsgButton msg={msg} compact />
         )}
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

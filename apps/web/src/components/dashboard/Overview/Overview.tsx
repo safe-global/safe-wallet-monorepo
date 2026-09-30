@@ -1,5 +1,4 @@
 import { type ReactElement, useMemo } from 'react'
-import { Card, Box, Stack } from '@mui/material'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
@@ -26,24 +25,29 @@ const Overview = (): ReactElement => {
   if (isLoading) return <OverviewSkeleton />
 
   return (
-    <Card sx={{ border: 0, px: 3, pt: 2.5, borderRadius: '24px', pb: 1.5 }} component="section">
-      {!portfolio.$isDisabled && (
-        <Box display="flex" justifyContent="flex-end" mb={-3}>
-          <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />
-        </Box>
-      )}
-      <Box>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          alignItems={{ xs: 'flex-start', md: 'flex-end' }}
-          justifyContent="space-between"
-        >
+    <section className="overflow-hidden rounded-3xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
+      {/* Refresh hint pinned to the top, actions to the bottom so they line up with the balance,
+          which keeps the hint from overlapping them when they wrap onto a second row. */}
+      <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-stretch">
+        <div className="flex items-end">
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
+        </div>
 
-          {safe.deployed && <ActionsTray noAssets={noAssets} />}
-        </Stack>
-      </Box>
-    </Card>
+        <div className="flex flex-col items-start gap-4 md:items-end">
+          {!portfolio.$isDisabled && <portfolio.PortfolioRefreshHint entryPoint="Dashboard" />}
+
+          {/* `mt-auto` rather than a `justify-between` on the column: that only reaches the bottom
+              while the hint above is also rendered, and the hint is conditional — with the actions
+              alone in the column they sat at the top, level with the balance's label instead of its
+              figure. */}
+          {safe.deployed && (
+            <div className="md:mt-auto">
+              <ActionsTray noAssets={noAssets} />
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
   )
 }
 

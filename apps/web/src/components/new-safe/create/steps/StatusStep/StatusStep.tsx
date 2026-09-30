@@ -1,38 +1,48 @@
 import type { ReactNode } from 'react'
-import { Box, Skeleton, StepLabel, SvgIcon } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import css from '@/components/new-safe/create/steps/StatusStep/styles.module.css'
-import CircleIcon from '@mui/icons-material/Circle'
-import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined'
+import { Circle } from 'lucide-react'
 import Identicon from '@/components/common/Identicon'
 
 const StatusStep = ({
   isLoading,
   safeAddress,
   children,
+  isFirst,
 }: {
   isLoading: boolean
   safeAddress?: string
   children: ReactNode
+  /** Hides the connector segment above the dot on the first step */
+  isFirst?: boolean
 }) => {
-  const Icon = isLoading ? CircleOutlinedIcon : CircleIcon
-  const color = isLoading ? 'border' : 'primary'
+  const colorClass = isLoading ? 'text-[var(--color-border-main)]' : 'text-[var(--color-primary-main)]'
 
   return (
-    <StepLabel
-      className={css.label}
-      icon={<SvgIcon component={Icon} className={css.icon} color={color} fontSize="small" />}
-    >
-      <Box display="flex" alignItems="center" gap={2} color={color}>
-        <Box flexShrink={0}>
+    <div className={`${css.label} relative flex items-center gap-2 text-left [&:not(:first-child)]:mt-9`}>
+      {/* Like the pre-migration StepConnector, the segment spans only the 36px margin between
+          rows, so it stops short of the dots above and below it. */}
+      {!isFirst && (
+        <div
+          data-testid="status-step-connector"
+          className="absolute bottom-full left-[6.5px] top-[-36px] w-px bg-[var(--color-border-light)]"
+        />
+      )}
+      <Circle
+        data-testid="status-step-icon"
+        className={`size-3.5 shrink-0 ${colorClass} ${isLoading ? '' : 'fill-current'}`}
+      />
+      <div className={`flex items-center gap-4 ${colorClass}`}>
+        <div data-testid="status-step-avatar" className="shrink-0">
           {safeAddress && !isLoading ? (
             <Identicon address={safeAddress} size={32} />
           ) : (
-            <Skeleton variant="circular" width="2.3em" height="2.3em" />
+            <Skeleton className="h-[2.3em] w-[2.3em] rounded-full" />
           )}
-        </Box>
+        </div>
         {children}
-      </Box>
-    </StepLabel>
+      </div>
+    </div>
   )
 }
 

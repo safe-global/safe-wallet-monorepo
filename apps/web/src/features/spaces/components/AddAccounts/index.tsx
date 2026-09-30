@@ -1,4 +1,4 @@
-import ModalDialog from '@/components/common/ModalDialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   type SafeItem,
   type SafeItems,
@@ -6,23 +6,39 @@ import {
   flattenSafeItems,
   useSafesSearch,
   getComparator,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
+  _groupAndSort,
   _buildSafeItem,
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
-import { getSafeId } from './SafesList'
-import OnboardingSafesList from '../SelectSafesOnboarding/components/OnboardingSafesList'
-import ConnectWalletPrompt from '../SelectSafesOnboarding/components/ConnectWalletPrompt'
-import { getFlaggedSimilarAddressSet } from '@safe-global/utils/utils/addressSimilarity'
-import { useCurrentSpaceId, useIsAdmin, useSpaceSafes } from '@/features/spaces'
+import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
+import ExternalLink from '@/components/common/ExternalLink'
+import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { useSimilarityClusters } from '@/features/address-poisoning'
+import {
+  ADDRESS_BOOK_UNAVAILABLE,
+  getChainIdsParam,
+  useCurrentSpaceId,
+  useSpaceAddressBookState,
+  useIsAdmin,
+  useSpaceSafes,
+  useUpsertWorkspaceSafeNames,
+} from '@/features/spaces'
+import {
+  NameAccountsFields,
+  buildWorkspaceSafeNames,
+  getSafesToName,
+  hasAllNames,
+  touchNames,
+  withWorkspaceNames,
+} from '../NameAccounts'
+import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useChains from '@/hooks/useChains'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -30,38 +46,61 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
-import { Search, Plus, X, Loader2 } from 'lucide-react'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import { ArrowLeft, Info, Plus, Settings2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { SearchInput } from '@/components/ui/search-input'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
+import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
+import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import Track from '@/components/common/Track'
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT } from '../Sidebar/constants'
+import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
+import SafeLimitError from '../SelectedCounter/SafeLimitError'
+import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
+import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
+import { useSeatUpsell } from '../../hooks/useSeatUpsell'
+import { seatsTooltip } from '../Plans/PlanStatusCard'
+import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
-import { useSelectAll } from '../../hooks/useSelectAll'
-import type { AddAccountsFormValues } from '../../hooks/useSelectAll.types'
+import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { getSeatLimitMessage } from '../../utils/seatLimitError'
+
+const PICKER_COLUMNS: SafeAccountColumnId[] = ['select', 'name', 'threshold', 'networks', 'balance']
+
+const SCROLL_REGION_CLASS =
+  'overflow-y-auto overscroll-y-none pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border'
 
 function getSelectedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
 
-  return Object.entries(safes).filter(
-    ([key, isSelected]) =>
-      isSelected &&
-      !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
-      !flatSafeItems.some((spaceSafe) => {
-        const [chainId, address] = key.split(':')
-        return spaceSafe.address === address && spaceSafe.chainId === chainId
-      }),
-  )
+  return Object.entries(safes)
+    .filter(
+      ([key, isSelected]) =>
+        isSelected &&
+        !key.startsWith(MULTICHAIN_SAFE_KEY_PREFIX) &&
+        !flatSafeItems.some((spaceSafe) => {
+          const [chainId, address] = key.split(':')
+          return spaceSafe.address === address && spaceSafe.chainId === chainId
+        }),
+    )
+    .map(([key]) => {
+      const [chainId, address] = key.split(':')
+      return { chainId, address }
+    })
 }
+
+const countSafeAccounts = (safes: Array<{ address: string }>) => countSeats(safes.map(({ address }) => address))
 
 function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSafes: AllSafeItems) {
   const flatSafeItems = flattenSafeItems(spaceSafes)
@@ -70,15 +109,6 @@ function getRemovedSafes(safes: AddAccountsFormValues['selectedSafes'], spaceSaf
     const safeId = `${spaceSafe.chainId}:${spaceSafe.address}`
     return !safes[safeId]
   })
-}
-
-const _groupAndSort = (
-  items: SafeItem[],
-  sortComparator: (a: AllSafeItems[number], b: AllSafeItems[number]) => number,
-): AllSafeItems => {
-  const multi = _getMultiChainAccounts(items)
-  const single = _getSingleChainAccounts(items, multi)
-  return [...multi, ...single].sort(sortComparator)
 }
 
 interface AddAccountsProps {
@@ -90,25 +120,33 @@ interface AddAccountsProps {
 
 const AddAccounts = ({
   buttonVariant = 'outline',
-  buttonLabel = 'Add Accounts',
+  buttonLabel = 'Add accounts',
   externalOpen,
   onExternalClose,
 }: AddAccountsProps = {}) => {
   const isAdmin = useIsAdmin()
   const [open, setOpen] = useState<boolean>(false)
   const isOpen = externalOpen ?? open
+  const [view, setView] = useState<'select' | 'manage' | 'name'>('select')
   const [error, setError] = useState<string>()
   const [manualSafes, setManualSafes] = useState<SafeItems>([])
+  const [safesToName, setSafesToName] = useState<AllSafeItems>([])
   const hasResetForOpen = useRef(false)
 
   const { orderBy } = useAppSelector(selectOrderByPreference)
   const dispatch = useAppDispatch()
-  const { allSafes: spaceSafes } = useSpaceSafes()
+  const { allSafes: spaceSafes, isLoading: isLoadingSpaceSafes } = useSpaceSafes()
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const {
+    items: spaceAddressBook,
+    isLoading: isAddressBookLoading,
+    isError: isAddressBookError,
+  } = useSpaceAddressBookState()
   const spaceId = useCurrentSpaceId()
-  const isDarkMode = useDarkMode()
+  const trustedModal = useTrustedSafesModal()
 
   // Get wallet and chain info
   const wallet = useWallet()
@@ -116,45 +154,27 @@ const AddAccounts = ({
   const { configs } = useChains()
   const allChainIds = useMemo(() => configs.map((c) => c.chainId), [configs])
 
-  // Get safe data
-  const [allOwned = {}] = useAllOwnedSafes(walletAddress)
+  // Get safe data. Only enumerate owned safes (the captcha-protected owners endpoint) once the modal
+  // is open: the trusted list itself is built from added safes, so `allOwned` only feeds the per-row
+  // read-only flag — which nothing needs while the dialog is closed and this trigger sits mounted.
+  const [allOwned = {}] = useAllOwnedSafes(isOpen ? walletAddress : '')
   const allAdded = useAppSelector(selectAllAddedSafes)
   const allUndeployed = useAppSelector(selectUndeployedSafes)
   const allVisitedSafes = useAppSelector(selectAllVisitedSafes)
   const allSafeNames = useAppSelector(selectAllAddressBooks)
 
-  // Build trusted (pinned) and owned safes
-  const { trustedSafes, ownedSafes } = useMemo(() => {
+  // Build the trusted (pinned) safes list — owned safes are added by first trusting them via the
+  // "Manage trusted Safes" view, then they appear here. Safes already in the workspace stay in the
+  // list and open pre-checked (seeded by defaultSelectedSafes); unchecking one removes it.
+  const trustedSafes = useMemo<AllSafeItems>(() => {
     const buildItem = (chainId: string, address: string) =>
       _buildSafeItem(chainId, address, walletAddress, allAdded, allOwned, allUndeployed, allVisitedSafes, allSafeNames)
 
-    // Get safes already in the space
-    const spaceSafeIds = new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`))
+    const trusted = allChainIds.flatMap((chainId) =>
+      Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)),
+    )
 
-    // Trusted safes: from addedSafes (user-pinned), excluding space safes
-    const trusted = allChainIds
-      .flatMap((chainId) => Object.keys(allAdded[chainId] || {}).map((address) => buildItem(chainId, address)))
-      .filter((safe) => !spaceSafeIds.has(`${safe.chainId}:${safe.address}`))
-
-    // Owned safes: from CGW API + undeployed, excluding space safes
-    const owned = allChainIds.flatMap((chainId) => {
-      const combined = [...new Set([...(allOwned[chainId] || []), ...Object.keys(allUndeployed[chainId] || {})])]
-      return combined
-        .filter(
-          (address) =>
-            !trusted.some((t) => t.chainId === chainId && sameAddress(t.address, address)) &&
-            !spaceSafeIds.has(`${chainId}:${address}`),
-        )
-        .map((address) => buildItem(chainId, address))
-    })
-
-    // Add manually added safes to owned
-    const allOwned_ = [...owned, ...manualSafes]
-
-    return {
-      trustedSafes: _groupAndSort(trusted, sortComparator),
-      ownedSafes: _groupAndSort(allOwned_, sortComparator),
-    }
+    return _groupAndSort(withWorkspaceNames([...trusted, ...manualSafes], spaceAddressBook), sortComparator)
   }, [
     allChainIds,
     allAdded,
@@ -164,19 +184,17 @@ const AddAccounts = ({
     allVisitedSafes,
     allSafeNames,
     manualSafes,
+    spaceAddressBook,
     sortComparator,
-    spaceSafes,
   ])
 
-  const similarAddresses = useMemo<Set<string>>(() => {
-    const allItems = [...trustedSafes, ...ownedSafes]
-    return getFlaggedSimilarAddressSet(allItems.map((s) => s.address))
-  }, [trustedSafes, ownedSafes])
+  const trustedSafeAddresses = useMemo(() => trustedSafes.map((s) => s.address), [trustedSafes])
+  const { groupIdByAddress: similarityGroups } = useSimilarityClusters(trustedSafeAddresses)
 
   const [rawSearchQuery, setRawSearchQuery] = useState('')
   const debouncedSearchQuery = useDebounce(rawSearchQuery, 300)
   const filteredTrusted = useSafesSearch(trustedSafes, debouncedSearchQuery)
-  const filteredOwned = useSafesSearch(ownedSafes, debouncedSearchQuery)
+  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
 
   // Build pre-checked safes from space safes
   const defaultSelectedSafes = useMemo(() => {
@@ -193,127 +211,185 @@ const AddAccounts = ({
     mode: 'onChange',
     defaultValues: {
       selectedSafes: {},
+      names: {},
     },
   })
 
-  const { handleSubmit, watch, setValue, reset, formState, control } = formMethods
+  const { handleSubmit, watch, getValues, setValue, reset, formState } = formMethods
 
   const selectedSafes = watch(`selectedSafes`)
-  const selectedSafesLength = getSelectedSafes(selectedSafes, spaceSafes).length
+  const newSafes = getSelectedSafes(selectedSafes, spaceSafes)
   const removedSafesCount = getRemovedSafes(selectedSafes, spaceSafes).length
-  const isFormDirty = selectedSafesLength > 0 || removedSafesCount > 0
+  const isFormDirty = newSafes.length > 0 || removedSafesCount > 0
+  const hasSomethingToSubmit = view === 'name' ? safesToName.length > 0 : isFormDirty
+  const isAddressBookReady = !isAddressBookLoading && !isAddressBookError
+  const submitError = error ?? (isAddressBookError ? ADDRESS_BOOK_UNAVAILABLE : undefined)
   const { isSubmitting } = formState
 
-  const visibleTrusted = debouncedSearchQuery ? filteredTrusted : trustedSafes
-  const visibleOwned = debouncedSearchQuery ? filteredOwned : ownedSafes
+  // Not memoised: watch() returns the same object reference, so a useMemo on it would keep a stale Set.
+  const selectedKeys = getSelectedLeafKeys(selectedSafes || {})
 
-  const { trustedSelection, ownedSelection, handleSelectAll, isAtLimit } = useSelectAll({
-    visibleTrusted,
-    visibleOwned,
-    control,
-    setValue,
-  })
+  // Checked Safes, one seat per address (workspace Safes are pre-checked and count toward the plan's cap).
+  const seatCount = countSeats(Array.from(selectedKeys, addressOfSafeKey))
+  const { limit, isError: isLimitError, retry: retryLimit } = useSpaceSafeLimit(spaceId)
+  const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
+  const isSelectionLocked = isAtLimit || limit === undefined
+  const { isSafePro, tierName, plansHref } = useSeatUpsell(spaceId)
+  const limitTooltip = isSafePro && typeof limit === 'number' ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)
 
-  // Reset form when modal opens
+  // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
+  const spaceSafeKeys = useMemo(
+    () => new Set(flattenSafeItems(spaceSafes || []).map((safe) => `${safe.chainId}:${safe.address}`)),
+    [spaceSafes],
+  )
+
+  const handleTableToggle = (line: AccountLine, nextChecked: boolean) =>
+    applySafeSelectionToggle(setValue, visibleTrusted, selectedSafes || {}, line, nextChecked, spaceSafeKeys)
+
+  // Reset form when modal opens. Wait until the space-safes query has resolved before seeding:
+  // opening via the AddAccountsChooser on a cold cache can render with `spaceSafes` still empty, and
+  // finalizing that empty seed would make Save diff every existing member as a removal (data loss).
   useEffect(() => {
-    if (isOpen && !hasResetForOpen.current) {
-      reset({ selectedSafes: defaultSelectedSafes })
+    if (isOpen && !hasResetForOpen.current && !isLoadingSpaceSafes) {
+      reset({ selectedSafes: defaultSelectedSafes, names: {} })
       hasResetForOpen.current = true
     } else if (!isOpen) {
       hasResetForOpen.current = false
     }
-  }, [isOpen, defaultSelectedSafes, reset])
+  }, [isOpen, defaultSelectedSafes, reset, isLoadingSpaceSafes])
 
-  const onSubmit = handleSubmit(async (data) => {
-    const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes).map(([key]) => {
-      const [chainId, address] = key.split(':')
-      return { chainId, address }
-    })
+  const onSubmit = handleSubmit(
+    async (data) => {
+      if (!isAdmin) {
+        setError('Only admins can add or remove Safe accounts in this Workspace')
+        return
+      }
 
-    const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
-      chainId: safe.chainId,
-      address: safe.address,
-    }))
+      const safesToAdd = getSelectedSafes(data.selectedSafes, spaceSafes)
 
-    // Track event based on what action is being taken
-    if (safesToAdd.length > 0) {
-      trackEvent({ ...SPACE_EVENTS.ADD_ACCOUNTS })
-    }
-    if (safesToRemove.length > 0) {
-      trackEvent({ ...SPACE_EVENTS.DELETE_ACCOUNT })
-    }
+      const safesToRemove = getRemovedSafes(data.selectedSafes, spaceSafes).map((safe) => ({
+        chainId: safe.chainId,
+        address: safe.address,
+      }))
 
-    try {
-      // Add new safes
+      const safesToWrite = view === 'select' ? getSafesToName(safesToAdd, trustedSafes, spaceAddressBook) : safesToName
+
+      if (view === 'name' && !hasAllNames(data.names, safesToWrite)) {
+        touchNames(getValues, setValue, safesToWrite)
+        return
+      }
+
+      if (view === 'select' && safesToWrite.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+        })
+        setSafesToName(safesToWrite)
+        setView('name')
+        return
+      }
+
+      // Track event based on what action is being taken
       if (safesToAdd.length > 0) {
-        const result = await addSafesToSpace({
-          spaceId: Number(spaceId),
-          createSpaceSafesDto: { safes: safesToAdd },
-        })
-
-        if (result.error) {
-          const msg = getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe Accounts.'
-          setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
-          return
-        }
-
-        safesToAdd.forEach(({ chainId, address }) => {
-          trackEvent(
-            { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-          )
+        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.add_accounts_modal,
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
         })
       }
-
-      // Remove unchecked safes
       if (safesToRemove.length > 0) {
-        const result = await removeSafesFromSpace({
-          spaceId: Number(spaceId),
-          deleteSpaceSafesDto: { safes: safesToRemove },
-        })
-
-        if (result.error) {
-          setError(getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe Accounts.')
-          return
-        }
-
-        safesToRemove.forEach(({ chainId, address }) => {
-          trackEvent(
-            { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
-            { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-          )
+        trackEvent(SPACE_EVENTS.DELETE_ACCOUNT, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToRemove.length,
+          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToRemove),
         })
       }
 
-      // Show success notification
-      const messages = []
-      if (safesToAdd.length > 0) messages.push(`Added ${safesToAdd.length} safe account(s)`)
-      if (safesToRemove.length > 0) messages.push(`Removed ${safesToRemove.length} safe account(s)`)
+      try {
+        // Add new safes
+        if (safesToAdd.length > 0) {
+          const result = await addSafesToSpace({
+            spaceId: spaceId ?? '',
+            createSpaceSafesDto: { safes: safesToAdd },
+          })
 
-      dispatch(
-        showNotification({
-          message: messages.length > 0 ? messages.join(' and ') : 'Safes updated',
-          variant: 'success',
-          groupKey: 'safe-account-update-success',
-        }),
-      )
+          if (isElevationRequiredError(result.error)) return
+          if (result.error) {
+            const seatLimit = getSeatLimitMessage(result.error)
+            if (seatLimit && spaceId) refreshSpaceEntitlements(dispatch, spaceId)
+            const msg =
+              seatLimit ??
+              (getRtkQueryErrorMessage(result.error) || 'Something went wrong adding one or more Safe accounts.')
+            setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
+            return
+          }
 
-      handleClose()
-    } catch (e) {
-      console.log(e)
-    }
-  })
+          safesToAdd.forEach(({ chainId, address }) => {
+            trackEvent(
+              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
+              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+            )
+          })
+        }
+
+        // Remove unchecked safes
+        if (safesToRemove.length > 0) {
+          const result = await removeSafesFromSpace({
+            spaceId: spaceId ?? '',
+            deleteSpaceSafesDto: { safes: safesToRemove },
+          })
+
+          if (isElevationRequiredError(result.error)) return
+          if (result.error) {
+            setError(
+              getRtkQueryErrorMessage(result.error) || 'Something went wrong removing one or more Safe accounts.',
+            )
+            return
+          }
+
+          safesToRemove.forEach(({ chainId, address }) => {
+            trackEvent(
+              { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
+              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
+            )
+          })
+        }
+
+        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+        if (namesResult.error) {
+          setError(namesResult.error)
+          return
+        }
+
+        // Show success notification
+        const messages = []
+        if (safesToAdd.length > 0) messages.push(`Added ${countSafeAccounts(safesToAdd)} safe account(s)`)
+        if (safesToRemove.length > 0) messages.push(`Removed ${countSafeAccounts(safesToRemove)} safe account(s)`)
+
+        dispatch(
+          showNotification({
+            message: messages.length > 0 ? messages.join(' and ') : 'Safes updated',
+            variant: 'success',
+            groupKey: 'safe-account-update-success',
+          }),
+        )
+
+        handleClose()
+      } catch {
+        setError('Something went wrong updating Safe accounts. Please try again.')
+      }
+    },
+    () => touchNames(getValues, setValue, safesToName),
+  )
 
   const handleAddSafe = (data: AddManuallyFormValues) => {
-    const allSafes = [...trustedSafes, ...ownedSafes]
-    const alreadyExists = allSafes.some((safe) => safe.address === data.address)
+    const alreadyExists = trustedSafes.some((safe) => safe.address === data.address)
 
     const newSafeItem: SafeItem = {
       ...data,
       isReadOnly: false,
       isPinned: false,
       lastVisited: 0,
-      name: '',
+      name: allSafeNames[data.chainId]?.[data.address] ?? '',
     }
 
     if (!alreadyExists) {
@@ -324,11 +400,28 @@ const AddAccounts = ({
     setValue(`selectedSafes.${safeId}`, true, { shouldValidate: true })
   }
 
+  const handleOpenManage = () => {
+    trustedModal.open()
+    setRawSearchQuery('')
+    setView('manage')
+  }
+
+  const handleBack = () => {
+    trustedModal.close()
+    setView('select')
+  }
+
+  const handleSaved = () => setView('select')
+
   const handleClose = () => {
     setError(undefined)
     setRawSearchQuery('')
     setManualSafes([])
     setValue('selectedSafes', {}) // Reset doesn't seem to work consistently with an object
+    setValue('names', {})
+    setSafesToName([])
+    setView('select')
+    trustedModal.close()
     setOpen(false)
     onExternalClose?.()
   }
@@ -339,158 +432,238 @@ const AddAccounts = ({
     }
   }, [debouncedSearchQuery])
 
-  const hasAvailableSafes = trustedSafes.length > 0 || ownedSafes.length > 0
-  const showConnectWalletPrompt = !wallet
+  const isListEmpty = trustedSafes.length === 0 && !debouncedSearchQuery
+  const hasNoSearchMatch = visibleTrusted.length === 0 && Boolean(debouncedSearchQuery)
+  const emptyStateMessage = wallet
+    ? 'No accounts yet — add some via "Manage list", or add one by address below.'
+    : 'No saved Safe accounts yet — add one by address below.'
 
   return (
     <>
       {externalOpen === undefined && (
-        <Button
-          size="lg"
-          className="font-normal px-4 py-0"
-          variant={buttonVariant}
-          disabled={!isAdmin}
-          onClick={() => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-              { workspace_id: spaceId, entry_point: 'dashboard' },
-            )
-            setOpen(true)
-          }}
-          title={!isAdmin ? 'You need to be an Admin to add accounts' : ''}
-          data-testid="add-space-account-button"
-        >
-          <Plus
-            className={cn('size-4', {
-              'text-green-500': buttonVariant === 'default',
-            })}
-          />
-          {buttonLabel}
-        </Button>
+        <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
+          <Button
+            size="lg"
+            className="font-normal"
+            variant={buttonVariant}
+            disabled={!isAdmin}
+            onClick={() => {
+              trackEvent(
+                { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
+                { workspace_id: spaceId, entry_point: 'dashboard' },
+              )
+              setOpen(true)
+            }}
+            data-testid="add-space-account-button"
+          >
+            <Plus
+              className={cn('size-4', {
+                'text-green-500': buttonVariant === 'default',
+              })}
+            />
+            {buttonLabel}
+          </Button>
+        </AdminOnlyWorkspaceTooltip>
       )}
 
-      <ModalDialog open={isOpen} fullScreen hideChainIndicator>
-        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-          <div className="flex h-dvh max-h-dvh w-full min-w-0 max-w-full flex-col overflow-hidden overflow-x-hidden bg-secondary p-4">
-            <div className="mx-auto flex justify-center min-h-0 w-full min-w-0 max-w-full flex-1 flex-col gap-6 sm:max-w-[520px]">
-              <FormProvider {...formMethods}>
-                <form onSubmit={onSubmit} className="flex flex-col min-h-0 w-full gap-6">
-                  <div className="flex shrink-0 flex-col gap-4">
-                    <div className="flex items-center justify-between">
-                      <Button type="button" variant="ghost" size="icon" onClick={handleClose} className="rounded-md">
-                        <X className="size-5" />
-                      </Button>
-                      <Typography variant="h2" align="center" className="flex-1">
-                        Add Safe Accounts
-                      </Typography>
-                      <div className="size-10" />
-                    </div>
+      <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>
+        {/* eslint-disable-next-line no-restricted-syntax -- bespoke full-height dialog layout preserved from dev's #8271 redesign */}
+        <DialogContent className="flex max-h-[90vh] w-full max-w-[min(900px,calc(100vw-2rem))] flex-col gap-0 p-0">
+          {view === 'manage' ? (
+            <>
+              {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog header (back button row + divider) from dev's #8271 redesign */}
+              <DialogHeader className="shrink-0 flex-row items-center gap-2 border-b border-border px-6 pb-4 pt-6">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleBack}
+                  aria-label="Back"
+                  data-testid="manage-trusted-back"
+                >
+                  <ArrowLeft className="size-5" />
+                </Button>
+                <DialogTitle className="font-bold">Manage my account list</DialogTitle>
+              </DialogHeader>
 
-                    <Typography variant="paragraph" align="center" color="muted">
-                      You can add up to {SAFE_ACCOUNTS_LIMIT} Safe accounts
-                    </Typography>
-
-                    <InputGroup className="bg-card px-2">
-                      <InputGroupAddon>
-                        <Search className="size-4" />
-                      </InputGroupAddon>
-                      <InputGroupInput
-                        placeholder="Search for safes"
-                        aria-label="Search Safe list"
-                        autoComplete="off"
-                        onChange={(e) => setRawSearchQuery(e.target.value)}
-                      />
-                    </InputGroup>
-                  </div>
-
-                  {showConnectWalletPrompt ? (
-                    <ConnectWalletPrompt className="shrink-0 py-4" testId="add-accounts-connect-wallet-button" />
-                  ) : (
-                    <div
-                      className="relative min-h-[30dvh] min-w-0 w-full max-h-[25rem] overflow-y-auto overflow-x-hidden after:pointer-events-none after:absolute after:bottom-0 after:left-0 after:right-0 after:z-10 after:h-16 after:bg-gradient-to-t after:from-secondary after:to-transparent [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--border)] [&::-webkit-scrollbar-thumb:hover]:bg-[color-mix(in_srgb,var(--muted-foreground)_55%,var(--border))]"
-                      data-testid="add-accounts-safes-list-scroll-region"
+              <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
+                <ManageTrustedSafesContent
+                  modal={trustedModal}
+                  secondaryLabel="Back"
+                  onSecondary={handleBack}
+                  onSaved={handleSaved}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* eslint-disable-next-line no-restricted-syntax -- bespoke dialog header divider/padding from dev's #8271 redesign */}
+              <DialogHeader className="shrink-0 border-b border-border px-6 pb-4 pt-6">
+                <div className="flex items-center gap-2">
+                  {view === 'name' && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setView('select')}
+                      aria-label="Back"
+                      data-testid="name-accounts-back"
                     >
-                      {!hasAvailableSafes && !debouncedSearchQuery ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          No safes on your list
-                        </Typography>
-                      ) : trustedSelection.total === 0 && ownedSelection.total === 0 && debouncedSearchQuery ? (
-                        <Typography variant="paragraph" align="center" color="muted" className="py-8">
-                          No safes match your search
-                        </Typography>
-                      ) : (
-                        <>
-                          {isAtLimit && (
-                            <Typography variant="paragraph" color="muted" className="text-xs pb-1">
-                              Limit of {SAFE_ACCOUNTS_LIMIT} accounts reached
-                            </Typography>
-                          )}
-                          <OnboardingSafesList
-                            trustedSafes={visibleTrusted}
-                            ownedSafes={visibleOwned}
-                            similarAddresses={similarAddresses}
-                            trustedSelectAll={{
-                              state: trustedSelection.state,
-                              count: trustedSelection.selectedCount,
-                              total: trustedSelection.total,
-                              onToggle: (check) => handleSelectAll('trusted', check),
-                            }}
-                            ownedSelectAll={{
-                              state: ownedSelection.state,
-                              count: ownedSelection.selectedCount,
-                              total: ownedSelection.total,
-                              onToggle: (check) => handleSelectAll('owned', check),
-                            }}
+                      <ArrowLeft className="size-5" />
+                    </Button>
+                  )}
+                  <DialogTitle className="font-bold">
+                    {view === 'name' ? 'Name your Safe accounts' : 'My accounts'}
+                  </DialogTitle>
+                </div>
+              </DialogHeader>
+
+              <FormProvider {...formMethods}>
+                <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-4">
+                  {view === 'name' ? (
+                    <div className={cn(SCROLL_REGION_CLASS, 'min-h-0 flex-1')} data-testid="name-accounts-region">
+                      <NameAccountsFields items={safesToName} />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4 flex shrink-0 items-center gap-3 rounded-2xl bg-muted p-4">
+                        <Info className="size-5 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground">What are my accounts?</p>
+                          <p className="text-sm text-muted-foreground">
+                            This list protects you from impersonation. Anyone can create a Safe account listing your
+                            address as a signer, so only accounts you&apos;ve confirmed appear here.{' '}
+                            <ExternalLink href={HELP_CENTER_URL} noIcon className="underline">
+                              Learn more
+                            </ExternalLink>
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={handleOpenManage}
+                          data-testid="open-manage-trusted-safes"
+                          className="shrink-0"
+                        >
+                          <Settings2 className="size-4" />
+                          Manage list
+                        </Button>
+                      </div>
+
+                      {!isListEmpty && (
+                        <div className="mb-3 flex shrink-0 items-center gap-3">
+                          <SelectedCounter
+                            count={seatCount}
+                            limit={limit}
+                            isAtLimit={isAtLimit}
+                            tooltip={limitTooltip}
                           />
-                        </>
+                          <SearchInput
+                            className="flex-1"
+                            placeholder="by name, address or network"
+                            aria-label="Search Safe accounts by name, address or network"
+                            autoComplete="off"
+                            value={rawSearchQuery}
+                            onChange={(e) => setRawSearchQuery(e.target.value)}
+                            data-testid="add-accounts-search-input"
+                          />
+                        </div>
                       )}
+
+                      <div
+                        className={cn(SCROLL_REGION_CLASS, 'min-h-0 flex-1')}
+                        data-testid="add-accounts-safes-list-region"
+                      >
+                        {isListEmpty ? (
+                          <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                            {emptyStateMessage}
+                          </Typography>
+                        ) : hasNoSearchMatch ? (
+                          <Typography variant="paragraph" align="center" color="muted" className="py-8">
+                            No safes match your search
+                          </Typography>
+                        ) : (
+                          <SafeAccountsTable
+                            items={visibleTrusted}
+                            columns={PICKER_COLUMNS}
+                            similarityGroups={similarityGroups}
+                            selection={{
+                              selectedKeys,
+                              onToggle: handleTableToggle,
+                              isAtLimit: isSelectionLocked,
+                              disabledKeys: spaceSafeKeys,
+                              disabledReason: 'This safe is already part of your Workspace',
+                            }}
+                            data-testid="add-accounts-safes-table"
+                          />
+                        )}
+                      </div>
+                    </>
+                  )}
+
+                  {isLimitError && view === 'select' && (
+                    <div className="mt-4">
+                      <SafeLimitError onRetry={retryLimit} />
                     </div>
                   )}
 
-                  {error && (
-                    <Alert variant="destructive" className="shrink-0">
-                      <AlertDescription>{error}</AlertDescription>
+                  {submitError && (
+                    <Alert variant="destructive" className="mt-4 shrink-0">
+                      <AlertSeverityIcon variant="destructive" />
+                      <AlertDescription>{submitError}</AlertDescription>
                     </Alert>
                   )}
 
-                  <div className="flex shrink-0 flex-col gap-2">
-                    <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
-                      <AddManually handleAddSafe={handleAddSafe} />
-                    </Track>
+                  {isSafePro && isAtLimit && (
+                    <Typography variant="paragraph-small" color="muted" align="center" className="mt-4 shrink-0">
+                      Need more?{' '}
+                      <Link href={plansHref} variant="muted" data-testid="compare-plans-link">
+                        Compare plans
+                      </Link>
+                    </Typography>
+                  )}
 
-                    <div className="flex shrink-0 flex-col gap-2">
-                      <Button
-                        data-testid="add-accounts-button"
-                        type="submit"
-                        size="lg"
-                        disabled={!isFormDirty || isSubmitting}
-                        className="w-full"
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="size-4 animate-spin" />
-                        ) : (
-                          `Add Accounts (${selectedSafesLength})`
-                        )}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="lg"
-                        onClick={handleClose}
-                        disabled={isSubmitting}
-                        className="w-full hover:bg-card"
-                      >
-                        Cancel
-                      </Button>
+                  <div className="mt-4 flex shrink-0 flex-row items-center gap-3">
+                    <div className="flex-1">
+                      {view === 'name' ? (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="lg"
+                          onClick={() => setView('select')}
+                          className="w-full"
+                          data-testid="name-accounts-back-button"
+                        >
+                          Back
+                        </Button>
+                      ) : (
+                        <Track {...SPACE_EVENTS.ADD_ACCOUNT_MANUALLY_MODAL}>
+                          <AddManually handleAddSafe={handleAddSafe} disabled={isSelectionLocked} />
+                        </Track>
+                      )}
                     </div>
+
+                    <Button
+                      data-testid="add-accounts-button"
+                      type="submit"
+                      size="lg"
+                      disabled={!hasSomethingToSubmit || !isAddressBookReady || isSubmitting}
+                      className="flex-1"
+                    >
+                      {isSubmitting ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        `Add accounts (${countSafeAccounts(newSafes)})`
+                      )}
+                    </Button>
                   </div>
                 </form>
               </FormProvider>
-            </div>
-          </div>
-        </div>
-      </ModalDialog>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

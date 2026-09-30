@@ -8,17 +8,7 @@ import {
   synthetixSafeApp,
 } from '@safe-global/test/msw/mockSafeApps'
 
-import {
-  render,
-  screen,
-  waitFor,
-  fireEvent,
-  getByRole,
-  getByText,
-  waitForElementToBeRemoved,
-  within,
-  createAppNameRegex,
-} from '../test-utils'
+import { render, screen, waitFor, fireEvent, getByRole, getByText, within, createAppNameRegex } from '../test-utils'
 import AppsPage from '@/pages/apps'
 import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
@@ -60,10 +50,12 @@ describe('AppsPage', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-        expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-        expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-        expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+        expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+        expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+        expect(
+          screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+        ).toBeInTheDocument()
+        expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
       })
     })
 
@@ -78,15 +70,17 @@ describe('AppsPage', () => {
       })
 
       // drawer is not present
-      expect(screen.queryByRole('presentation')).not.toBeInTheDocument()
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Transaction Builder Safe App
+      // clicks on Transaction Builder Safe App — target the card's overlay link: in the browser a
+      // click anywhere on the card passes through the pointer-events-none content layer to this
+      // link, but jsdom does no hit-testing, so the test must click the link directly.
       await waitFor(() => {
-        fireEvent.click(screen.getByRole('heading', { level: 5, name: 'Transaction Builder' }))
+        fireEvent.click(screen.getByRole('link', { name: 'Open Transaction Builder' }))
       })
 
       await waitFor(() => {
-        const safeAppPreviewDrawer = screen.getByRole('presentation')
+        const safeAppPreviewDrawer = screen.getByRole('dialog')
         expect(safeAppPreviewDrawer).toBeInTheDocument()
         // Transaction Builder Safe App title
         expect(getByRole(safeAppPreviewDrawer, 'heading', { level: 4, name: 'Transaction Builder' }))
@@ -114,14 +108,14 @@ describe('AppsPage', () => {
         },
       })
 
-      // show Bookmarked Safe Apps only
+      // pinned apps show the "Unpin" tooltip, unpinned apps show the "Pin" tooltip
       await waitFor(() => {
         expect(screen.queryByText('My pinned apps (2)')).toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin Compound')).toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin Transaction Builder')).toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin ENS App')).not.toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin Synthetix')).not.toBeInTheDocument()
       })
+      await expectBookmarkTooltip('Compound', 'Unpin Compound')
+      await expectBookmarkTooltip('Transaction Builder', 'Unpin Transaction Builder')
+      await expectBookmarkTooltip('ENS App', 'Pin ENS App')
+      await expectBookmarkTooltip('Synthetix', 'Pin Synthetix')
     })
 
     it('unpin a Safe app', async () => {
@@ -141,20 +135,22 @@ describe('AppsPage', () => {
         },
       })
 
-      // show Bookmarked Safe Apps
+      // both apps start pinned (show the "Unpin" tooltip)
       await waitFor(() => {
-        expect(screen.queryByLabelText('Unpin Compound')).toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin Transaction Builder')).toBeInTheDocument()
+        expect(screen.queryByText('My pinned apps (2)')).toBeInTheDocument()
       })
+      await expectBookmarkTooltip('Compound', 'Unpin Compound')
+      await expectBookmarkTooltip('Transaction Builder', 'Unpin Transaction Builder')
 
       // unpin Transaction Builder Safe App
-      fireEvent.click(screen.getByLabelText('Unpin Transaction Builder'))
+      fireEvent.click(getBookmarkButton('Transaction Builder'))
 
-      // show Bookmarked Safe Apps
+      // Compound stays pinned, Transaction Builder is now unpinned (shows the "Pin" tooltip)
       await waitFor(() => {
-        expect(screen.queryByLabelText('Unpin Compound')).toBeInTheDocument()
-        expect(screen.queryByLabelText('Unpin Transaction Builder')).not.toBeInTheDocument()
+        expect(screen.queryByText('My pinned apps (1)')).toBeInTheDocument()
       })
+      await expectBookmarkTooltip('Compound', 'Unpin Compound')
+      await expectBookmarkTooltip('Transaction Builder', 'Pin Transaction Builder')
     })
 
     it('shows Safe app details when you click on the Safe app card', async () => {
@@ -175,15 +171,17 @@ describe('AppsPage', () => {
       })
 
       // drawer is not present
-      expect(screen.queryByRole('presentation')).not.toBeInTheDocument()
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Transaction Builder Safe App
+      // clicks on Transaction Builder Safe App — target the card's overlay link: in the browser a
+      // click anywhere on the card passes through the pointer-events-none content layer to this
+      // link, but jsdom does no hit-testing, so the test must click the link directly.
       await waitFor(() => {
-        fireEvent.click(screen.getByRole('heading', { level: 5, name: 'Transaction Builder' }))
+        fireEvent.click(screen.getByRole('link', { name: 'Open Transaction Builder' }))
       })
 
       await waitFor(() => {
-        const safeAppPreviewDrawer = screen.getByRole('presentation')
+        const safeAppPreviewDrawer = screen.getByRole('dialog')
         expect(safeAppPreviewDrawer).toBeInTheDocument()
         // Transaction Builder Safe App title
         expect(getByRole(safeAppPreviewDrawer, 'heading', { level: 4, name: 'Transaction Builder' }))
@@ -272,20 +270,20 @@ describe('AppsPage', () => {
       )
       await userEvent.click(screen.getByText('Add'))
 
-      // modal is closed
-      await waitForElementToBeRemoved(() => screen.queryByLabelText(/Safe App URL/))
+      // modal is closed (shadcn Dialog unmounts the field synchronously, so wait for absence)
+      await waitFor(() => expect(screen.queryByLabelText(/Safe App URL/)).not.toBeInTheDocument())
 
       // custom safe app is present in the list
       expect(screen.queryByText('Custom test Safe app')).toBeInTheDocument()
 
       // shows safe app description drawer is not present
-      expect(screen.queryByRole('presentation')).not.toBeInTheDocument()
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
 
-      // clicks on Custom test Safe app Safe App
-      await userEvent.click(screen.getByRole('heading', { level: 5, name: 'Custom test Safe app' }))
+      // clicks on Custom test Safe app Safe App (overlay link — see note above about jsdom hit-testing)
+      fireEvent.click(screen.getByRole('link', { name: 'Open Custom test Safe app' }))
 
       await waitFor(() => {
-        const safeAppPreviewDrawer = screen.getByRole('presentation')
+        const safeAppPreviewDrawer = screen.getByRole('dialog')
         expect(safeAppPreviewDrawer).toBeInTheDocument()
         // Custom test Safe app Safe App title
         expect(getByRole(safeAppPreviewDrawer, 'heading', { level: 4, name: 'Custom test Safe app' }))
@@ -417,10 +415,13 @@ describe('AppsPage', () => {
 
       await userEvent.click(screen.getByText('Add'))
 
-      // modal is closed
-      await waitForElementToBeRemoved(() => screen.queryByLabelText(/Safe App URL/))
+      // modal is closed (shadcn Dialog unmounts the field synchronously, so wait for absence)
+      await waitFor(() => expect(screen.queryByLabelText(/Safe App URL/)).not.toBeInTheDocument())
 
-      const removeCustomSafeAppButton = screen.getByLabelText('Delete Custom test Safe app')
+      // The delete label moved from a MUI aria-label to a hover-only tooltip; the delete toggle is
+      // the last action button on the custom app card.
+      const customAppCardButtons = within(getSafeAppCard('Custom test Safe app')).getAllByRole('button')
+      const removeCustomSafeAppButton = customAppCardButtons[customAppCardButtons.length - 1]
 
       await userEvent.click(removeCustomSafeAppButton)
 
@@ -429,8 +430,32 @@ describe('AppsPage', () => {
       const confirmRemovalButton = screen.getByRole('button', { name: 'Remove' })
       await userEvent.click(confirmRemovalButton)
 
-      await waitForElementToBeRemoved(() => screen.getByRole('button', { name: 'Remove' }))
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Remove' })).not.toBeInTheDocument())
       expect(screen.queryByText('Custom test Safe app')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('feature gate', () => {
+    it('renders nothing while the chains config is still loading (feature === undefined)', () => {
+      jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => undefined)
+
+      render(<AppsPage />, {
+        routerProps: { pathname: '/apps', query: { safe: 'matic:0x0000000000000000000000000000000000000000' } },
+      })
+
+      expect(screen.queryByText('Safe Apps are not available on this network.')).not.toBeInTheDocument()
+      expect(screen.queryByPlaceholderText('Search by name or category')).not.toBeInTheDocument()
+    })
+
+    it('shows the not-available message when Safe Apps are disabled (feature === false)', () => {
+      jest.spyOn(chainHooks, 'useHasFeature').mockImplementation(() => false)
+
+      render(<AppsPage />, {
+        routerProps: { pathname: '/apps', query: { safe: 'matic:0x0000000000000000000000000000000000000000' } },
+      })
+
+      expect(screen.getByText('Safe Apps are not available on this network.')).toBeInTheDocument()
+      expect(screen.queryByPlaceholderText('Search by name or category')).not.toBeInTheDocument()
     })
   })
 
@@ -447,10 +472,12 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
         const query = 'Transaction'
@@ -459,10 +486,16 @@ describe('AppsPage', () => {
         fireEvent.change(searchInput, { target: { value: query } })
 
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
       })
 
@@ -477,10 +510,12 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
         const query = transactionBuilderSafeAppMock.description
@@ -489,10 +524,16 @@ describe('AppsPage', () => {
         fireEvent.change(searchInput, { target: { value: query } })
 
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
       })
 
@@ -507,10 +548,12 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
         const query = 'zero results'
@@ -520,10 +563,16 @@ describe('AppsPage', () => {
         act(() => fireEvent.change(searchInput, { target: { value: query } }))
 
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
 
           // zero results component
           expect(screen.getByText('No Safe Apps found', { exact: false })).toBeInTheDocument()
@@ -543,17 +592,17 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
-        const categorySelector = screen.getByText('Select category')
+        await userEvent.click(screen.getByRole('combobox', { name: /category/i }))
 
-        act(() => fireEvent.mouseDown(categorySelector))
-
-        const categoriesDropdown = within(screen.getByRole('listbox'))
+        const categoriesDropdown = within(await screen.findByRole('listbox'))
 
         // show only visible options in the categories dropdown
         await waitFor(() => expect(categoriesDropdown.getByText('Infrastructure')).toBeInTheDocument())
@@ -562,27 +611,24 @@ describe('AppsPage', () => {
         await waitFor(() => expect(categoriesDropdown.queryByText('transaction-builder')).not.toBeInTheDocument())
 
         // filter by Infrastructure category
-        act(() => {
-          fireEvent.click(categoriesDropdown.getByText('Infrastructure'))
-        })
+        await userEvent.click(categoriesDropdown.getByText('Infrastructure'))
 
         // close the dropdown
-        act(() => {
-          fireEvent.keyDown(screen.getByRole('listbox'), {
-            key: 'Escape',
-            code: 'Escape',
-            keyCode: 27,
-            charCode: 27,
-          })
-        })
+        await userEvent.keyboard('{Escape}')
 
         await waitFor(() => {
           // 1 categories selected label
           expect(screen.queryByText('1 categories selected')).toBeInTheDocument()
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
       })
 
@@ -597,47 +643,48 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
-        const categorySelector = screen.getByText('Select category')
+        await userEvent.click(screen.getByRole('combobox', { name: /category/i }))
 
-        act(() => fireEvent.mouseDown(categorySelector))
-
-        const categoriesDropdown = within(screen.getByRole('listbox'))
+        const categoriesDropdown = within(await screen.findByRole('listbox'))
 
         // filter by Infrastructure category
-        act(() => fireEvent.click(categoriesDropdown.getByText('Infrastructure')))
+        await userEvent.click(categoriesDropdown.getByText('Infrastructure'))
 
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
 
         // clear active Infrastructure filter
-        act(() => fireEvent.click(categoriesDropdown.getByText('Infrastructure')))
+        await userEvent.click(categoriesDropdown.getByText('Infrastructure'))
 
         // close the dropdown
-        act(() =>
-          fireEvent.keyDown(screen.getByRole('listbox'), {
-            key: 'Escape',
-            code: 'Escape',
-            keyCode: 27,
-            charCode: 27,
-          }),
-        )
+        await userEvent.keyboard('{Escape}')
 
         // show all safe apps again
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
       })
 
@@ -652,47 +699,48 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
-        const categorySelector = screen.getByText('Select category')
+        await userEvent.click(screen.getByRole('combobox', { name: /category/i }))
 
-        act(() => fireEvent.mouseDown(categorySelector))
-
-        const categoriesDropdown = within(screen.getByRole('listbox'))
+        const categoriesDropdown = within(await screen.findByRole('listbox'))
 
         // filter by Infrastructure category
-        act(() => fireEvent.click(categoriesDropdown.getByText('Infrastructure')))
+        await userEvent.click(categoriesDropdown.getByText('Infrastructure'))
 
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
 
         // close the dropdown
-        act(() =>
-          fireEvent.keyDown(screen.getByRole('listbox'), {
-            key: 'Escape',
-            code: 'Escape',
-            keyCode: 27,
-            charCode: 27,
-          }),
-        )
+        await userEvent.keyboard('{Escape}')
 
         // clear all selected filters
-        act(() => fireEvent.click(screen.getByLabelText('clear selected categories')))
+        await userEvent.click(screen.getByLabelText('clear selected categories'))
 
         // show all safe apps again
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
       })
     })
@@ -709,10 +757,12 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
         // filter by optimized for batch transactions
@@ -720,10 +770,16 @@ describe('AppsPage', () => {
 
         // show only transaction builder safe app
         await waitFor(() => {
-          expect(screen.queryByText('Compound', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('ENS App', { selector: 'h5' })).not.toBeInTheDocument()
-          expect(screen.queryByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.queryByText('Synthetix', { selector: 'h5' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Compound', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
+          expect(screen.queryByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).not.toBeInTheDocument()
+          expect(
+            screen.queryByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(
+            screen.queryByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' }),
+          ).not.toBeInTheDocument()
         })
       })
 
@@ -738,10 +794,12 @@ describe('AppsPage', () => {
         })
 
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
 
         // filter by optimized for batch transactions
@@ -752,15 +810,39 @@ describe('AppsPage', () => {
 
         // show all safe apps
         await waitFor(() => {
-          expect(screen.getByText('Compound', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('ENS App', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Transaction Builder', { selector: 'h5' })).toBeInTheDocument()
-          expect(screen.getByText('Synthetix', { selector: 'h5' })).toBeInTheDocument()
+          expect(screen.getByText('Compound', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(screen.getByText('ENS App', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
+          expect(
+            screen.getByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' }),
+          ).toBeInTheDocument()
+          expect(screen.getByText('Synthetix', { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
         })
       })
     })
   })
 })
+
+// The Safe App card title renders as a shadcn Typography (paragraph-bold), not a heading.
+const getSafeAppCard = (appName: string): HTMLElement => {
+  const title = screen.getByText(appName, { selector: '[data-variant="paragraph-bold"]' })
+  const card = title.closest('[data-slot="card"]')
+  if (!card) throw new Error(`Safe App card not found: ${appName}`)
+  return card as HTMLElement
+}
+
+// The bookmark toggle is the last action button on the card.
+const getBookmarkButton = (appName: string): HTMLElement => {
+  const buttons = within(getSafeAppCard(appName)).getAllByRole('button')
+  return buttons[buttons.length - 1]
+}
+
+// Pin/Unpin labels moved from MUI aria-labels to hover-only shadcn tooltips, so the pinned state is
+// asserted by hovering the bookmark toggle and reading its tooltip ("Unpin <app>" vs "Pin <app>").
+const expectBookmarkTooltip = async (appName: string, expected: string): Promise<void> => {
+  await userEvent.hover(getBookmarkButton(appName))
+  await screen.findByText(expected, { selector: '[data-slot="tooltip-content"]' })
+  await userEvent.unhover(getBookmarkButton(appName))
+}
 
 // Using centralized mock data from @safe-global/test/msw/mockSafeApps
 const transactionBuilderSafeAppMock = transactionBuilderSafeApp

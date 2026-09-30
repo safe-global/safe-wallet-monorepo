@@ -1,4 +1,4 @@
-import { _getAppData } from '@/features/bridge/components/BridgeWidget'
+import { _getAppData } from './'
 import { chainBuilder } from '@/tests/builders/chains'
 
 describe('BridgeWidget', () => {

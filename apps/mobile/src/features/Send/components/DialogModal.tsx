@@ -29,7 +29,7 @@ export function DialogModal({
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <Pressable style={styles.overlay} onPress={onCancel}>
+        <Pressable style={styles.overlay} onPress={onCancel} accessible={false}>
           <Pressable
             style={[
               styles.container,
@@ -39,6 +39,7 @@ export function DialogModal({
               },
             ]}
             onPress={(e) => e.stopPropagation()}
+            accessible={false}
           >
             <View alignItems="center" gap="$4" paddingVertical="$4">
               {title ? (

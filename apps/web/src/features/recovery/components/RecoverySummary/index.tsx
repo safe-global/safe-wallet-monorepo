@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import type { ReactElement } from 'react'
 
 import RecoveryType from '../RecoveryType'
@@ -6,9 +5,10 @@ import RecoveryInfo from '../RecoveryInfo'
 import RecoveryStatus from '../RecoveryStatus'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
+import classNames from 'classnames'
 import css from '@/components/transactions/TxSummary/styles.module.css'
-import { useRecoveryTxState } from '@/features/recovery/hooks/useRecoveryTxState'
+import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import DateTime from '@/components/common/DateTime'
 
 export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): ReactElement {
@@ -17,28 +17,28 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
   const { isMalicious } = item
 
   return (
-    <Box className={css.gridContainer}>
-      <Box gridArea="type">
+    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue, css.recovery)}>
+      <div className={css.type} style={{ gridArea: 'type' }}>
         <RecoveryType isMalicious={isMalicious} />
-      </Box>
+      </div>
 
-      <Box gridArea="info">
+      <div className={css.info} style={{ gridArea: 'info' }}>
         <RecoveryInfo isMalicious={isMalicious} />
-      </Box>
+      </div>
 
-      <Box gridArea="date" data-testid="tx-date" className={css.date}>
+      <div style={{ gridArea: 'date' }} data-testid="tx-date" className={css.date}>
         <DateTime value={Number(item.timestamp)} />
-      </Box>
+      </div>
 
-      {!isExecutable || isPending ? (
-        <Box gridArea="status">
+      <div className={css.actions} style={{ gridArea: 'actions' }}>
+        {!isExecutable || isPending ? (
           <RecoveryStatus recovery={item} />
-        </Box>
-      ) : (
-        <Box gridArea="actions" mr={2} display="flex" justifyContent="center">
-          {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
-        </Box>
-      )}
-    </Box>
+        ) : (
+          <div data-testid="tx-actions">
+            {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }

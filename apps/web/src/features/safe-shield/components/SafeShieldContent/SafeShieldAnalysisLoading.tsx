@@ -1,7 +1,7 @@
 import { ProgressBar } from '@/components/common/ProgressBar'
-import { KeyboardArrowDown } from '@mui/icons-material'
-import { Box, Skeleton } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { ChevronDown } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 
 interface SafeShieldAnalysisLoadingProps {
@@ -10,10 +10,9 @@ interface SafeShieldAnalysisLoadingProps {
 }
 
 export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShieldAnalysisLoadingProps): ReactElement => {
-  const theme = useTheme()
   const [progress, setProgress] = useState(30)
   const [delayedAnalysesEmpty, setDelayedAnalysesEmpty] = useState(analysesEmpty)
-  const isDarkMode = theme.palette.mode === 'dark'
+  const isDarkMode = useDarkMode()
   const color = isDarkMode ? 'primary' : 'secondary'
   const showSkeleton = loading && delayedAnalysesEmpty
   const hasStarted = useRef(false)
@@ -62,22 +61,22 @@ export const SafeShieldAnalysisLoading = ({ analysesEmpty, loading }: SafeShield
 
   return (
     <>
-      <Box position="absolute" top={0} width="100%" zIndex={2} left={0}>
+      <div className="absolute top-0 left-0 z-[2] w-full">
         <ProgressBar
           color={color}
           value={progress}
           sx={{ opacity: loading ? 1 : 0, transition: 'opacity 0.3s ease-out' }}
         />
-      </Box>
+      </div>
 
       {showSkeleton && (
-        <Box p="1rem 12px">
-          <Box display="flex" flexDirection="row" gap={1} alignItems="center">
-            <Skeleton variant="rounded" width="1rem" height="1rem" />
-            <Skeleton variant="rounded" width="100%" height={10} />
-            <KeyboardArrowDown sx={{ width: 16, height: 16, color: 'text.secondary' }} />
-          </Box>
-        </Box>
+        <div className="px-3 py-4">
+          <div className="flex flex-row items-center gap-2">
+            <Skeleton className="size-4 rounded-md" />
+            <Skeleton className="h-2.5 w-full rounded-md" />
+            <ChevronDown className="size-4 text-[var(--color-text-secondary)]" />
+          </div>
+        </div>
       )}
     </>
   )

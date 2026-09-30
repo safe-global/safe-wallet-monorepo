@@ -19,21 +19,11 @@ tags:
 - assertVisible:
     id: 'pending-tx-list'
 
-# Scroll to see the batch transaction card
-# Scroll to see the setFallbackHandler transaction card
-- scrollUntilVisible:
-    element:
-      text: '.*3 actions.*'
-      index: 1
-    centerElement: true
-
-# Tap on the 3 actions batch transaction card
+# Benign 3-action batch at nonce 19 — targeted by txId so queue reordering can't break it
 - runFlow:
     file: '../../../../utils/components/pending-tx/tap-tx-card.yml'
     env:
-      WAIT_FOR: '.*3 actions.*'
-      TAP_TEXT: '.*3 actions.*'
-      TAP_INDEX: '1'
+      TAP_ID: 'tx-card-multisig_0x65e1Ff7e0901055B3bea7D8b3AF457a659714013_0xc5dd31e2cabbb17a8d1c34e283b93d4eac1a2af89ad50df9d302029d105be484'
 
 - assertVisible: 'Confirm transaction'
 

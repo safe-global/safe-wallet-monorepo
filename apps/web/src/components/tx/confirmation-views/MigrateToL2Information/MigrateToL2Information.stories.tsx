@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { MigrateToL2Information } from './index'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/MigrateToL2Information',
   component: MigrateToL2Information,
   decorators: [
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

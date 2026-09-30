@@ -8,9 +8,7 @@ import EnvironmentVariables from '..'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
-import { ThemeProvider } from '@mui/material/styles'
-import type { Theme } from '@mui/material/styles'
+import { reloadPage } from '@/utils/navigation'
 
 // Mock chain data
 const mockChain = chainBuilder()
@@ -19,6 +17,8 @@ const mockChain = chainBuilder()
   .build()
 
 // Mock hooks
+jest.mock('@/utils/navigation')
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(() => '1'),
@@ -41,13 +41,7 @@ jest.mock('@/services/analytics', () => ({
 // Helper function to render with store access
 const renderWithStore = (ui: React.ReactElement, initialReduxState?: Partial<RootState>) => {
   const store = makeStore(initialReduxState, { skipBroadcast: true })
-  const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <Provider store={store}>
-      <SafeThemeProvider mode="light">
-        {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-      </SafeThemeProvider>
-    </Provider>
-  )
+  const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   const result = rtlRender(ui, { wrapper })
   return { ...result, store }
 }
@@ -59,9 +53,6 @@ describe('EnvironmentVariables', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Mock location.reload
-    delete (window as any).location
-    window.location = { reload: jest.fn() } as any
   })
 
   afterEach(() => {
@@ -200,8 +191,7 @@ describe('EnvironmentVariables', () => {
       expect(state.settings.env.tenderly.url).toBe(mockTenderlyUrl)
       expect(state.settings.env.tenderly.accessToken).toBe(mockTenderlyToken)
 
-      // Check that location.reload was called
-      expect(window.location.reload).toHaveBeenCalled()
+      expect(reloadPage).toHaveBeenCalled()
     })
   })
 

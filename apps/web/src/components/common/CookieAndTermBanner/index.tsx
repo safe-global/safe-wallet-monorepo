@@ -1,6 +1,5 @@
 import { useEffect, type ReactElement } from 'react'
 import classnames from 'classnames'
-import { Grid, Paper } from '@mui/material'
 import { useForm } from 'react-hook-form'
 import * as metadata from '@/markdown/terms/version'
 
@@ -14,21 +13,16 @@ import {
 import { selectCookieBanner, openCookieBanner, closeCookieBanner } from '@/store/popupSlice'
 
 import css from './styles.module.css'
-import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
-import { COOKIE_AND_TERM_WARNING, styles } from './constants'
+import { COOKIE_AND_TERM_WARNING } from './constants'
 import WarningMessage from './WarningMessage'
 import IntroText from './IntroText'
 import CookieOptionsList from './CookieOptionsList'
 import CookieBannerActions from './CookieBannerActions'
 
-export const CookieAndTermBanner = ({
-  warningKey,
-  inverted,
-}: {
-  warningKey?: CookieAndTermType
-  inverted?: boolean
-}): ReactElement => {
+/** Overlay chrome for the first-visit popup, matching the other overlays in the design system. */
+export const POPUP_SURFACE = 'bg-popover text-popover-foreground rounded-lg shadow-lg ring-foreground/10 ring-1'
+
+export const CookieAndTermBanner = ({ warningKey }: { warningKey?: CookieAndTermType }): ReactElement => {
   const warning = warningKey ? COOKIE_AND_TERM_WARNING[warningKey] : undefined
   const dispatch = useAppDispatch()
   const cookies = useAppSelector(selectCookies)
@@ -61,33 +55,24 @@ export const CookieAndTermBanner = ({
   }
 
   return (
-    <Paper data-testid="cookies-popup" className={classnames(css.container, { [css.inverted]: inverted })}>
+    <div data-testid="cookies-popup" className={css.container}>
       {warning && <WarningMessage message={warning} />}
       <form>
-        <Grid container sx={{ alignItems: 'center' }}>
-          <Grid item xs>
-            <IntroText lastUpdated={metadata.lastUpdated} />
+        <IntroText lastUpdated={metadata.lastUpdated} />
 
-            <Grid container sx={styles.optionsGrid}>
-              <CookieOptionsList control={control} />
-            </Grid>
+        <CookieOptionsList control={control} />
 
-            <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
-          </Grid>
-        </Grid>
+        <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
       </form>
-    </Paper>
+    </div>
   )
 }
 
 const CookieBannerPopup = (): ReactElement | null => {
   const cookiePopup = useAppSelector(selectCookieBanner)
   const dispatch = useAppDispatch()
-  const router = useRouter()
-  const exceptionPages = [AppRoutes.safeLabsTerms]
-
   const hasAccepted = useAppSelector(hasAcceptedTerms)
-  const shouldOpen = !hasAccepted && !exceptionPages.includes(router.pathname)
+  const shouldOpen = !hasAccepted
 
   useEffect(() => {
     if (shouldOpen) {
@@ -98,8 +83,8 @@ const CookieBannerPopup = (): ReactElement | null => {
   }, [dispatch, shouldOpen])
 
   return cookiePopup.open ? (
-    <div className={css.popup}>
-      <CookieAndTermBanner warningKey={cookiePopup.warningKey} inverted />
+    <div className={classnames(css.popup, POPUP_SURFACE)}>
+      <CookieAndTermBanner warningKey={cookiePopup.warningKey} />
     </div>
   ) : null
 }

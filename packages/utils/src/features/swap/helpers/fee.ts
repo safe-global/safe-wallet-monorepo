@@ -1,4 +1,4 @@
-import { v1_4_0, v1_3_0, LatestAppDataDocVersion } from '@cowprotocol/app-data'
+import { v1_4_0, v1_3_0, LatestAppDataDocVersion } from '@cowprotocol/sdk-app-data'
 import type { OrderTransactionInfo as SwapOrder } from '@safe-global/store/gateway/types'
 
 type VolumeFee = {

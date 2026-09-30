@@ -2,9 +2,6 @@ import type { RenderHookOptions } from '@testing-library/react'
 import { render, renderHook } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
-import type { Theme } from '@mui/material/styles'
-import { ThemeProvider } from '@mui/material/styles'
-import SafeThemeProvider from '@/components/theme/SafeThemeProvider'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
 import * as web3 from '@/hooks/wallets/web3'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
@@ -67,11 +64,7 @@ const getProviders: (options: {
 
     return (
       <Provider store={store}>
-        <RouterContext.Provider value={mockRouter(routerProps)}>
-          <SafeThemeProvider mode="light">
-            {(safeTheme: Theme) => <ThemeProvider theme={safeTheme}>{children}</ThemeProvider>}
-          </SafeThemeProvider>
-        </RouterContext.Provider>
+        <RouterContext.Provider value={mockRouter(routerProps)}>{children}</RouterContext.Provider>
       </Provider>
     )
   }
@@ -92,15 +85,29 @@ function customRenderHook<Result, Props>(
   render: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props> & { routerProps?: Partial<NextRouter>; initialReduxState?: Partial<RootState> },
 ) {
-  const wrapper = getProviders({
+  const Providers = getProviders({
     routerProps: options?.routerProps || {},
     initialReduxState: options?.initialReduxState,
   })
+  const InnerWrapper = options?.wrapper
+  const wrapper: React.JSXElementConstructor<{ children: React.ReactNode }> = ({ children }) => (
+    <Providers>{InnerWrapper ? <InnerWrapper>{children}</InnerWrapper> : children}</Providers>
+  )
 
-  return renderHook(render, { wrapper, ...options })
+  return renderHook(render, { ...options, wrapper })
 }
 
 export const fakerChecksummedAddress = () => checksumAddress(faker.finance.ethereumAddress())
+
+/**
+ * Stub `navigator.clipboard.writeText` and return the mock so tests can assert
+ * what was copied. Keeps clipboard mocking consistent across test files.
+ */
+export const mockClipboard = (): jest.Mock => {
+  const writeText = jest.fn().mockResolvedValue(undefined)
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } })
+  return writeText
+}
 
 // https://testing-library.com/docs/user-event/intro#writing-tests-with-userevent
 export const renderWithUserEvent = (

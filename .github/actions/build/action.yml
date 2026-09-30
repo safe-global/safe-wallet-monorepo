@@ -3,10 +3,6 @@ name: 'Build'
 description: 'Build the app'
 
 inputs:
-  secrets:
-    required: true
-    description: 'GitHub secrets as JSON'
-
   prod: # id of input
     description: 'Production build flag'
     required: false
@@ -21,73 +17,29 @@ runs:
       with:
         mode: restore-nc
 
-    - name: Export NEXT_PUBLIC secrets to env
-      shell: bash
-      env:
-        SECRETS_JSON: ${{ inputs.secrets }}
-      run: |
-        set -euo pipefail
-
-        # Auto-export all NEXT_PUBLIC_* secrets.
-        # New secrets with this prefix are picked up automatically.
-        # Uses per-key heredoc delimiters to safely handle multi-line values
-        # (e.g. NEXT_PUBLIC_FIREBASE_OPTIONS_* are JSON strings).
-        EXPORTED=$(echo "$SECRETS_JSON" | jq -r '
-          to_entries[]
-          | select(.key | startswith("NEXT_PUBLIC_"))
-          | select(.value != null and .value != "")
-          | "\(.key)<<EOF_\(.key)\n\(.value)\nEOF_\(.key)"
-        ')
-
-        if [ -n "$EXPORTED" ]; then
-          echo "$EXPORTED" >> "$GITHUB_ENV"
-          # Log exported key names (values masked)
-          echo "$EXPORTED" | grep -oP '^[A-Z0-9_]+(?=<<)' | while read -r key; do
-            echo "  Exported: $key"
-          done
-        else
-          echo "Warning: No NEXT_PUBLIC_* secrets found to export"
-        fi
-
-    - name: Set environment variables
-      shell: bash
-      run: |
-        SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        echo "NEXT_PUBLIC_COMMIT_HASH=$SHORT_SHA" >> $GITHUB_ENV
-
-        # Datadog RUM env:
-        # - can be overridden by setting NEXT_PUBLIC_DATADOG_RUM_ENV in repo secrets
-        # - otherwise set to "production" or "development" based on prod flag
-        DATADOG_RUM_ENV="${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_ENV }}"
-        if [ -z "$DATADOG_RUM_ENV" ]; then
-          if [ "${{ inputs.prod }}" = "true" ]; then
-            DATADOG_RUM_ENV="production"
-          else
-            DATADOG_RUM_ENV="development"
-          fi
-        fi
-        echo "NEXT_PUBLIC_DATADOG_RUM_ENV=$DATADOG_RUM_ENV" >> $GITHUB_ENV
-
-        if [ "${{ inputs.prod }}" = "true" ]; then
-          echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}" >> $GITHUB_ENV
-        else
-          echo "NEXT_PUBLIC_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING }}" >> $GITHUB_ENV
-          echo "NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN=${{ fromJSON(inputs.secrets).NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}" >> $GITHUB_ENV
-        fi
-
     - name: Build
       shell: bash
-      run: yarn workspace @safe-global/web build
+      # NEXT_PUBLIC_* vars come from the calling workflow's `env:` block on the
+      # step that uses this action. New secrets must be added there.
+      run: |
+        source apps/web/scripts/github/resolve-web-build-env.sh
+        yarn workspace @safe-global/web build
       env:
         NEXT_PUBLIC_IS_PRODUCTION: ${{ inputs.prod }}
+        PROD: ${{ inputs.prod }}
+        COMMIT_SHA: ${{ github.sha }}
 
     - name: Upload source maps to Datadog
-      if: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
       shell: bash
       working-directory: apps/web
       run: |
-        RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-$(echo "${{ github.sha }}" | cut -c1-7)}"
+        if [ -z "${DATADOG_API_KEY:-}" ]; then
+          echo "No DATADOG_API_KEY provided, skipping sourcemap upload"
+          exit 0
+        fi
+        source ./scripts/github/resolve-web-build-env.sh
+        export DATADOG_SITE="${NEXT_PUBLIC_DATADOG_RUM_SITE:-datadoghq.eu}"
+        RELEASE_VERSION="${NEXT_PUBLIC_COMMIT_HASH:-}"
         DATADOG_SERVICE="${NEXT_PUBLIC_DATADOG_RUM_SERVICE:-safe-wallet-web}"
         echo "Uploading Datadog sourcemaps:"
         echo "- env: ${NEXT_PUBLIC_DATADOG_RUM_ENV:-unset}"
@@ -100,8 +52,8 @@ runs:
           --release-version="$RELEASE_VERSION" \
           --minified-path-prefix=/_next/static
       env:
-        DATADOG_API_KEY: ${{ fromJSON(inputs.secrets).DATADOG_API_KEY }}
-        DATADOG_SITE: ${{ fromJSON(inputs.secrets).NEXT_PUBLIC_DATADOG_RUM_SITE || 'datadoghq.eu' }}
+        PROD: ${{ inputs.prod }}
+        COMMIT_SHA: ${{ github.sha }}
     - name: Generate SRI for static scripts
       shell: bash
       # Skip SRI for Cypress test builds (NODE_ENV=cypress)

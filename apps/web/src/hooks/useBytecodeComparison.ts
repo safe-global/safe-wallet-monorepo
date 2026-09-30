@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useWeb3ReadOnly } from './wallets/web3'
 import useSafeInfo from './useSafeInfo'
+import { useCurrentChain } from './useChains'
+import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import {
-  compareWithSupportedL2Contracts,
-  isSupportedL2Version,
+  compareWithOfficialSingletons,
+  isSupportedMigrationVersion,
 } from '@safe-global/utils/services/contracts/bytecodeComparison'
 import type { BytecodeComparisonResult } from '@safe-global/utils/services/contracts/bytecodeComparison'
 import { isValidMasterCopy } from '@safe-global/utils/services/contracts/safeContracts'
@@ -14,15 +16,57 @@ export type BytecodeComparisonState = {
   isLoading: boolean
 }
 
+type Web3ReadOnly = NonNullable<ReturnType<typeof useWeb3ReadOnly>>
+
+// An implementation's bytecode is immutable, so its comparison result is memoised per
+// `${chainId}:${implementation}` for the session. `inFlight` additionally coalesces
+// concurrent consumers (the settings page renders two) so getCode runs at most once.
+const resultCache = new Map<string, BytecodeComparisonResult>()
+const inFlight = new Map<string, Promise<BytecodeComparisonResult>>()
+
+/** Test-only: clears the module-level caches so mocked providers/addresses don't leak between tests. */
+export const _resetBytecodeComparisonCache = (): void => {
+  resultCache.clear()
+  inFlight.clear()
+}
+
+const resolveComparison = (
+  provider: Web3ReadOnly,
+  key: string,
+  implementationAddress: string,
+  recommendedVersion: string,
+): Promise<BytecodeComparisonResult> => {
+  const existing = inFlight.get(key)
+  if (existing) return existing
+
+  const promise = provider
+    .getCode(implementationAddress)
+    .then((bytecode) => compareWithOfficialSingletons(bytecode, recommendedVersion))
+    .then((result) => {
+      resultCache.set(key, result)
+      inFlight.delete(key)
+      return result
+    })
+    .catch((error) => {
+      inFlight.delete(key)
+      throw error
+    })
+
+  inFlight.set(key, promise)
+  return promise
+}
+
 /**
- * Hook to fetch and compare bytecode of an unsupported mastercopy
- * with official L2 deployments for migration purposes
+ * Hook to fetch and compare the bytecode of an unsupported mastercopy against the
+ * official Safe singletons for migration purposes.
  *
  * @returns BytecodeComparisonState with result and loading status
  */
 export const useBytecodeComparison = (): BytecodeComparisonState => {
   const { safe } = useSafeInfo()
   const web3ReadOnly = useWeb3ReadOnly()
+  const currentChain = useCurrentChain()
+  const recommendedVersion = getLatestSafeVersion(currentChain)
   const [comparisonResult, setComparisonResult] = useState<BytecodeComparisonResult | undefined>()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -41,6 +85,18 @@ export const useBytecodeComparison = (): BytecodeComparisonState => {
         return
       }
 
+      const implementationAddress = safe.implementation?.value
+
+      // Cache hit: resolve synchronously without an RPC round-trip.
+      if (implementationAddress) {
+        const cached = resultCache.get(`${safe.chainId}:${implementationAddress}:${recommendedVersion}`)
+        if (cached) {
+          setComparisonResult(cached)
+          setIsLoading(false)
+          return
+        }
+      }
+
       setIsLoading(true)
 
       try {
@@ -51,31 +107,18 @@ export const useBytecodeComparison = (): BytecodeComparisonState => {
           safeVersion = await safeContract.VERSION()
         }
 
-        // Only compare for supported L2 versions (1.3.0+L2 and 1.4.1+L2)
-        if (!safeVersion) {
+        if (!safeVersion || !isSupportedMigrationVersion(safeVersion, recommendedVersion) || !implementationAddress) {
           setComparisonResult(undefined)
           setIsLoading(false)
           return
         }
 
-        const isSupported = isSupportedL2Version(safeVersion)
-
-        if (!isSupported) {
-          setComparisonResult(undefined)
-          setIsLoading(false)
-          return
-        }
-
-        if (!safe.implementation?.value) {
-          setComparisonResult(undefined)
-          setIsLoading(false)
-          return
-        }
-
-        const implementationAddress = safe.implementation.value
-        const bytecode = await web3ReadOnly.getCode(implementationAddress)
-
-        const result = await compareWithSupportedL2Contracts(bytecode, safe.chainId)
+        const result = await resolveComparison(
+          web3ReadOnly,
+          `${safe.chainId}:${implementationAddress}:${recommendedVersion}`,
+          implementationAddress,
+          recommendedVersion,
+        )
         setComparisonResult(result)
         setIsLoading(false)
       } catch (error) {
@@ -92,6 +135,7 @@ export const useBytecodeComparison = (): BytecodeComparisonState => {
     safe.version,
     safe.address.value,
     web3ReadOnly,
+    recommendedVersion,
   ])
 
   return { result: comparisonResult, isLoading }

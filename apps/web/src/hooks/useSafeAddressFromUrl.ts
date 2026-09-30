@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useRouter } from 'next/compat/router'
 import { parse, type ParsedUrlQuery } from 'querystring'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import { useIsHydrated } from './useIsHydrated'
 
 // Use location object directly because Next.js router.query is empty during SSG hydration
 const getLocationQuery = (): ParsedUrlQuery => {
@@ -16,7 +17,16 @@ export const useSafeQueryParam = (): string => {
   return safe ? (Array.isArray(safe) ? safe[0] : safe) : getLocationQuery().safe?.toString() || ''
 }
 
+/**
+ * The checksummed URL safe address, `''` until mounted. The app is a static export, so reading the
+ * address on the first render diverges from the build-time HTML — anything branching its output on
+ * it would throw React #418. The later swap is an ordinary React update.
+ *
+ * Data fetching pays one render pass for this. Use {@link useSafeQueryParam} to read the raw param
+ * without the gate.
+ */
 export const useSafeAddressFromUrl = (): string => {
+  const isHydrated = useIsHydrated()
   const fullAddress = useSafeQueryParam()
 
   const checksummedAddress = useMemo(() => {
@@ -25,5 +35,5 @@ export const useSafeAddressFromUrl = (): string => {
     return address
   }, [fullAddress])
 
-  return checksummedAddress
+  return isHydrated ? checksummedAddress : ''
 }

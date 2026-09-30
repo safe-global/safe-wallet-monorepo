@@ -1,5 +1,6 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Box, Button } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
@@ -16,57 +17,41 @@ export interface ManageTokensButtonHandle {
 
 const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButtonProps>(
   ({ onHideTokens, _hasDefaultTokenlist }, ref): ReactElement => {
-    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
-    const open = Boolean(anchorEl)
+    const [open, setOpen] = useState(false)
 
-    const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-      setAnchorEl(event.currentTarget)
-      trackEvent(ASSETS_EVENTS.OPEN_TOKEN_LIST_MENU)
+    const handleOpenChange = (nextOpen: boolean) => {
+      setOpen(nextOpen)
+      if (nextOpen) {
+        trackEvent(ASSETS_EVENTS.OPEN_TOKEN_LIST_MENU)
+      }
     }
 
     useImperativeHandle(ref, () => ({
-      openMenu: (anchorElement?: HTMLElement) => {
-        if (anchorElement) {
-          setAnchorEl(anchorElement)
-        } else {
-          const button = document.querySelector('[data-testid="manage-tokens-button"]') as HTMLElement
-          if (button) {
-            setAnchorEl(button)
-          }
-        }
-        trackEvent(ASSETS_EVENTS.OPEN_TOKEN_LIST_MENU)
+      openMenu: () => {
+        handleOpenChange(true)
       },
     }))
 
     const handleClose = () => {
-      setAnchorEl(null)
+      setOpen(false)
     }
 
     return (
-      <>
-        <Button
-          onClick={handleClick}
-          variant="outlined"
-          size="small"
-          startIcon={<SettingsIcon />}
-          data-testid="manage-tokens-button"
-          sx={{
-            px: '12px',
-            '& .MuiButton-startIcon': { marginRight: { xs: 0, sm: '8px' } },
-          }}
-        >
-          <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
-            Manage tokens
-          </Box>
-        </Button>
+      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
+        <DropdownMenuTrigger
+          render={
+            <Button variant="outline" size="sm" data-testid="manage-tokens-button">
+              <SettingsIcon className="size-4 sm:mr-2" />
+              <span className="hidden sm:inline">Manage tokens</span>
+            </Button>
+          }
+        />
         <ManageTokensMenu
-          anchorEl={anchorEl}
-          open={open}
           onClose={handleClose}
           onHideTokens={onHideTokens}
           _hasDefaultTokenlist={_hasDefaultTokenlist}
         />
-      </>
+      </DropdownMenu>
     )
   },
 )

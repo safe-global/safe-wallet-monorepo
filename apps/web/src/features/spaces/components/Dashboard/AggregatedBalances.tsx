@@ -1,4 +1,4 @@
-import { Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/router'
 import { useContext, useCallback, useState } from 'react'
 import { useAppSelector } from '@/store'
@@ -13,8 +13,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
-import QrModal from '@/components/sidebar/QrCodeButton/QrModal'
+import { DashboardHeader } from './DashboardHeader'
+import QrModal from '@/components/common/QrCodeButton/QrModal'
 
 const AggregatedBalance = ({
   safeItems,
@@ -110,10 +110,10 @@ const AggregatedBalanceSkeleton = () => {
   return (
     <div className="mb-4 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <Skeleton variant="rounded" width={80} height={16} />
-        <Skeleton variant="rounded" width={200} height={30} />
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-[30px] w-[200px]" />
       </div>
-      <Skeleton variant="rounded" width={400} height={36} />
+      <Skeleton className="h-9 w-[400px]" />
     </div>
   )
 }

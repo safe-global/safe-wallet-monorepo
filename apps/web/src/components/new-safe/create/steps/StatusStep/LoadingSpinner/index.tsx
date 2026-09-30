@@ -1,4 +1,3 @@
-import { Box } from '@mui/material'
 import css from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner/styles.module.css'
 import classnames from 'classnames'
 import { useCallback, useEffect, useRef } from 'react'
@@ -60,7 +59,7 @@ const LoadingSpinner = ({ status }: { status: SpinnerStatus }) => {
   }, [isSuccess, onFinish])
 
   return (
-    <Box className={classnames(css.box, { [css.rectError]: isError }, { [css.rectSuccess]: isSuccess })}>
+    <div className={classnames(css.box, { [css.rectError]: isError }, { [css.rectSuccess]: isSuccess })}>
       <div className={classnames(css.rect, css.rectTl)} ref={rectTl} />
       <div className={classnames(css.rect, css.rectTr)} ref={rectTr} />
       <div className={classnames(css.rect, css.rectBl)} ref={rectBl} />
@@ -76,7 +75,7 @@ const LoadingSpinner = ({ status }: { status: SpinnerStatus }) => {
           </filter>
         </defs>
       </svg>
-    </Box>
+    </div>
   )
 }
 

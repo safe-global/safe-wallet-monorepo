@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /* eslint-env node */
-/* eslint-disable no-console, no-undef */
+/* eslint-disable no-undef */
 
 /**
  * SSL Certificate Extractor for SSL Pinning
@@ -101,6 +101,27 @@ function extractCertificateHash(cert) {
   return crypto.createHash('sha256').update(publicKeyDer).digest('base64')
 }
 
+// All Amazon Trust Services root CAs (https://www.amazontrust.com/repository/).
+// Keep in sync with amazonRootCAs in apps/mobile/app.config.ts.
+const ATS_ROOTS = {
+  '++MBgDH5WGvL9Bcn5Be30cRcL0f5O+NyoXuWtQdX1aI=': 'Amazon Root CA 1 (RSA 2048, valid until: Jan 17 2038)',
+  'f0KW/FtqTjs108NpYj42SrGvOB2PpxIVM8nWxjPqJGE=': 'Amazon Root CA 2 (RSA 4096, valid until: May 26 2040)',
+  'NqvDJlas/GRcYbcWE8S/IceH9cq77kg0jVhZeAPXq8k=': 'Amazon Root CA 3 (ECDSA 256, valid until: May 26 2040)',
+  '9+ze1cZgR9KO1kZrVDxA4HQ6voHRCSVNz4RdTCx4U8U=': 'Amazon Root CA 4 (ECDSA 384, valid until: May 26 2040)',
+  'KwccWaCgrnaw6tsrrSO61FgLacNgG2MMLq8GE6+oP5I=': 'Starfield Services Root CA - G2 (valid until: Dec 31 2037)',
+  'jZNVWOajyJYzAUj/32oawKW/uhq0RUUTWjs3bJoaMI0=': 'Amazon RSA 2048 Root EU M1 (valid until: Nov 14 2042)',
+  'lWWQdyVGS+C/9EsSMvhe6GKpoNmduXG6IDRKr0FDHVg=': 'Amazon ECDSA 256 Root EU M1 (valid until: Nov 14 2042)',
+  'eY/hCVfoxaCHQgHK8J1e9LLiQSxHv5kZSVZstULTrz8=': 'Amazon ECDSA 384 Root EU M1 (valid until: Nov 14 2042)',
+}
+
+function certRole(cert, index) {
+  if (index === 0) {
+    return '🍃 Leaf'
+  }
+  const selfSigned = JSON.stringify(cert.subject) === JSON.stringify(cert.issuer)
+  return selfSigned ? '🌳 Root' : '🔗 CA'
+}
+
 function displayCertificateInfo(domain, chain) {
   console.log(`\n🔐 SSL Certificate Chain for ${domain}`)
   console.log('='.repeat(60))
@@ -110,75 +131,52 @@ function displayCertificateInfo(domain, chain) {
     return
   }
 
-  if (chain.length < 2) {
-    console.log('⚠️  Only root certificate available - no intermediate found')
-    console.log('💡 Consider using the root certificate as backup')
-  }
+  console.log('\n📜 Certificate Chain (with SPKI hashes):')
+  chain.forEach((cert, index) => {
+    console.log(`\n${certRole(cert, index)}: ${cert.subject.CN || cert.subject.O || 'Unknown'}`)
+    console.log(`   Valid: ${cert.valid_from} → ${cert.valid_to}`)
+    console.log(`   SPKI:  ${extractCertificateHash(cert)}`)
+  })
 
-  const leafCert = chain[0]
-  const intermediateCert = chain[1]
-  const rootCert = chain[chain.length - 1]
-
-  console.log('\n📋 Certificate Chain:')
-  console.log(`🍃 Leaf: ${leafCert.subject.CN || leafCert.subject.O || 'Unknown'}`)
-
-  if (intermediateCert && intermediateCert !== leafCert) {
-    console.log(`🔗 Intermediate: ${intermediateCert.subject.CN || intermediateCert.subject.O || 'Unknown'}`)
-  }
-
-  if (rootCert && rootCert !== leafCert && rootCert !== intermediateCert) {
-    console.log(`🌳 Root: ${rootCert.subject.CN || rootCert.subject.O || 'Unknown'}`)
-  }
-
-  const leafHash = extractCertificateHash(leafCert)
-  const intermediateHash = intermediateCert ? extractCertificateHash(intermediateCert) : null
-  const rootHash = rootCert ? extractCertificateHash(rootCert) : null
-
-  console.log('\n🎯 SSL Pinning Configuration:')
+  console.log('\n🎯 SSL Pinning Configuration (pin root keys — leaves and intermediates rotate):')
   console.log('='.repeat(35))
-  console.log(`'${domain}': [`)
-  console.log(`  '${leafHash}', // 🍃 Leaf (primary)`)
 
-  if (intermediateHash && intermediateHash !== leafHash) {
-    console.log(`  '${intermediateHash}', // 🔗 Intermediate (could be used as backup, but need to trust CA authority)`)
-  } else if (rootHash && rootHash !== leafHash) {
-    console.log(`  '${rootHash}', // 🌳 Root (backup)`)
+  const isAmazonChain = chain.slice(1).some((cert) => ATS_ROOTS[extractCertificateHash(cert)])
+  if (isAmazonChain) {
+    console.log('💡 Amazon/ACM-issued chain detected. Renewals can switch to a different Amazon root,')
+    console.log('   so pin ALL Amazon Trust Services roots, not just the ones served in this chain')
+    console.log('   (https://docs.aws.amazon.com/acm/latest/userguide/acm-bestpractices.html#best-practices-pinning):')
+    console.log(`'${domain}': [`)
+    Object.entries(ATS_ROOTS).forEach(([hash, name]) => {
+      console.log(`  '${hash}', // 🌳 ${name}`)
+    })
+    console.log(`],`)
+    console.log('\n   This matches amazonRootCAs in apps/mobile/app.config.ts.')
+  } else {
+    const roots = chain.filter((cert, index) => certRole(cert, index) === '🌳 Root')
+    if (roots.length === 0) {
+      console.log('⚠️  The served chain does not include a self-signed root. Fetch the issuing CA root')
+      console.log("   from the CA's official repository and pin its SPKI hash — do NOT pin the")
+      console.log('   intermediates above, they rotate.')
+    } else {
+      console.log("💡 Pin the CA's full advertised root set if it publishes one — chains can move")
+      console.log('   between roots of the same CA on renewal. Roots served in this chain:')
+      console.log(`'${domain}': [`)
+      roots.forEach((cert) => {
+        console.log(`  '${extractCertificateHash(cert)}', // 🌳 ${cert.subject.CN || cert.subject.O}`)
+      })
+      console.log(`],`)
+    }
   }
 
-  console.log(`],`)
-
-  // Show certificate details
-  console.log('\n📜 Certificate Details:')
-  console.log('='.repeat(25))
-
-  console.log(`\n🍃 Leaf Certificate:`)
-  console.log(`   Subject: ${leafCert.subject.CN || leafCert.subject.O}`)
-  console.log(`   Valid: ${leafCert.valid_from} → ${leafCert.valid_to}`)
-  console.log(`   Hash: ${leafHash}`)
-
-  if (intermediateCert && intermediateHash !== leafHash) {
-    console.log(`\n🔗 Intermediate Certificate:`)
-    console.log(`   Subject: ${intermediateCert.subject.CN || intermediateCert.subject.O}`)
-    console.log(`   Valid: ${intermediateCert.valid_from} → ${intermediateCert.valid_to}`)
-    console.log(`   Hash: ${intermediateHash}`)
-    console.log(`   💡 Recommended for backup pinning (more stable than leaf)`)
-  }
-
-  console.log('\n🛠️  Manual OpenSSL Commands:')
+  console.log('\n🛠️  Manual verification:')
   console.log('='.repeat(30))
   console.log('# Get full certificate chain:')
-  console.log(`openssl s_client -servername ${domain} -connect ${domain}:443 -showcerts > ${domain}-chain.pem`)
-
-  if (intermediateCert) {
-    console.log('\n# Extract intermediate certificate:')
-    console.log(
-      `awk '/BEGIN CERTIFICATE/,/END CERTIFICATE/' ${domain}-chain.pem | sed -n '2,/END CERTIFICATE/p' > ${domain}-intermediate.pem`,
-    )
-    console.log('\n# Get intermediate hash:')
-    console.log(
-      `openssl x509 -in ${domain}-intermediate.pem -pubkey -noout | openssl rsa -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64`,
-    )
-  }
+  console.log(`openssl s_client -servername ${domain} -connect ${domain}:443 -showcerts`)
+  console.log('# SPKI hash of any certificate PEM:')
+  console.log(
+    'openssl x509 -in cert.pem -pubkey -noout | openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | openssl enc -base64',
+  )
 }
 
 async function main() {
@@ -191,8 +189,8 @@ async function main() {
     console.log('\nExamples:')
     console.log('  node scripts/getCertificates.js safe.global')
     console.log('  node scripts/getCertificates.js safe-client.safe.global safe-client.staging.5afe.dev')
-    console.log('\nThis script extracts certificate hashes for SSL pinning and recommends')
-    console.log('using intermediate certificates as backup for better stability.')
+    console.log('\nThis script prints the SPKI hash of every certificate in the served chain')
+    console.log('and recommends pinning CA/root keys, which survive leaf rotation.')
     process.exit(1)
   }
 
@@ -214,12 +212,12 @@ async function main() {
 
   console.log('\n✅ Certificate analysis complete!')
   console.log('\n💡 SSL Pinning Best Practices:')
-  console.log('- Pin the leaf certificate as primary')
-  console.log('- Intermediate certificate as backup (more stable than leaf, but means you trust the intermediate)')
-  console.log('- Monitor certificate expiration dates')
-  console.log('- Test SSL pinning with invalid hashes to verify it works')
-  console.log('- Update certificates before they expire to avoid app outages')
-  console.log('- Intermediate certificates change less frequently than leaf certificates')
+  console.log('- Pin CA/root public keys, NOT the leaf — ACM re-keys the leaf on every renewal (~6 months),')
+  console.log('  which silently invalidates leaf pins and can swap the issuing intermediate')
+  console.log('- For Amazon/ACM certs, pin all Amazon Trust Services roots (AWS best practice)')
+  console.log('- SPKI pins match keys, not certificates — cross-signed variants of a root match the same pin')
+  console.log('- Test SSL pinning with an invalid hash to verify enforcement works')
+  console.log('- Re-run this script after infra/CDN changes to confirm the served chain still chains to pinned roots')
 }
 
 if (require.main === module) {

@@ -1,22 +1,28 @@
-import { styled } from '@mui/material/styles'
-import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
-import { type TooltipProps } from '@mui/material/Tooltip'
+import type { ReactElement, ReactNode } from 'react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export const CustomTooltip = styled(({ className, ...props }: TooltipProps) => (
-  <Tooltip {...props} classes={{ popper: className }} arrow />
-))(({ theme }) => ({
-  [`& .${tooltipClasses.tooltip}`]: {
-    backgroundColor: theme.palette.background.paper,
-    color: theme.palette.text.primary,
-    fontSize: theme.typography.pxToRem(16),
-    fontWeight: 700,
-    border: `1px solid ${theme.palette.border.light}`,
-    marginTop: theme.spacing(2) + ' !important',
-  },
-  [`& .${tooltipClasses.arrow}`]: {
-    color: theme.palette.background.paper,
-  },
-  [`& .${tooltipClasses.arrow}:before`]: {
-    border: `1px solid ${theme.palette.border.light}`,
-  },
-}))
+export type CustomTooltipProps = {
+  title: ReactNode
+  children: ReactElement
+  open?: boolean
+  onClose?: () => void
+  className?: string
+}
+
+export const CustomTooltip = ({ title, children, open, onClose, className }: CustomTooltipProps): ReactElement => {
+  return (
+    <Tooltip open={open} onOpenChange={(value) => !value && onClose?.()}>
+      <TooltipTrigger render={<span className="inline-flex" />}>{children}</TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        sideOffset={16}
+        className={
+          'border border-[var(--color-border-light)] bg-[var(--color-background-paper)] text-base font-bold text-[var(--color-text-primary)]' +
+          (className ? ` ${className}` : '')
+        }
+      >
+        {title}
+      </TooltipContent>
+    </Tooltip>
+  )
+}

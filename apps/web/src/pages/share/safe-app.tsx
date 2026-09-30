@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { Box, CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { SafeAppLanding } from '@/components/safe-apps/SafeAppLandingPage'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -19,9 +19,9 @@ const ShareSafeApp = () => {
         {appUrl && chain ? (
           <SafeAppLanding appUrl={appUrl} chain={chain} />
         ) : (
-          <Box py={4} textAlign="center">
-            <CircularProgress size={40} />
-          </Box>
+          <div className="py-8 text-center">
+            <Spinner className="mx-auto size-10" />
+          </div>
         )}
       </main>
     </>

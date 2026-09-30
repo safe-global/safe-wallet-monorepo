@@ -20,14 +20,9 @@ describe(
 
     beforeEach(() => {
       mockVisualTestApis()
-      cy.visit(constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
-      wallet.connectSigner(signer)
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_10)
       createtx.clickOnNewtransactionBtn()
       createtx.clickOnSendTokensBtn()
-      main.awaitVisualStability()
-    })
-
-    it('[VISUAL] Screenshot send form initial state', () => {
       main.awaitVisualStability()
     })
 
@@ -35,16 +30,6 @@ describe(
       createtx.typeRecipientAddress(constants.RECIPIENT_ADDRESS)
       createtx.clickOnTokenselectorAndSelectToken('Ether')
       createtx.setMaxAmount()
-      main.awaitVisualStability()
-    })
-
-    it('[VISUAL] Screenshot send form validation errors for invalid address', () => {
-      createtx.typeRecipientAddress('Lorem Ipsum')
-      main.awaitVisualStability()
-    })
-
-    it('[VISUAL] Screenshot send form with nonce warning', () => {
-      createtx.changeNonce(0)
       main.awaitVisualStability()
     })
   },

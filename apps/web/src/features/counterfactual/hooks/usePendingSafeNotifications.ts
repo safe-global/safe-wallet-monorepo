@@ -51,7 +51,7 @@ const usePendingSafeNotifications = (): void => {
 
         dispatch(
           showNotification({
-            title: 'Safe Account activation',
+            title: 'Safe account activation',
             message,
             detailedMessage: isError ? detail.error.message : undefined,
             groupKey,

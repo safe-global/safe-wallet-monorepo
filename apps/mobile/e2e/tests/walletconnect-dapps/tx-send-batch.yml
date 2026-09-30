@@ -1,0 +1,89 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# wallet_sendCalls (EIP-5792) batch of two calls: both render in the confirm
+# screen's actions list, and `e2e-wc-response-5792-match` asserts the dApp got
+# exactly `{ id: safeTxHash }`.
+
+- runScript:
+    file: ../../utils/scripts/defaults.js
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsTx'
+- extendedWaitUntil:
+    visible:
+      id: 'e2e-wc-tx-setup-ready'
+    timeout: ${output.defaults.wcTxUiTimeout}
+
+- tapOn:
+    id: 'e2eWcSynthTxBatch'
+- extendedWaitUntil:
+    visible:
+      text: 'Transaction request'
+    timeout: ${output.defaults.wcTxUiTimeout}
+
+- extendedWaitUntil:
+    visible:
+      id: 'wc-tx-review'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'wc-tx-review'
+
+# The multisend draft exposes an Actions row with both calls.
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.wcTxNetworkTimeout}
+- extendedWaitUntil:
+    visible:
+      id: 'actions-row'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'actions-row'
+- extendedWaitUntil:
+    visible:
+      id: 'tx-action-item-0'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- assertVisible:
+    id: 'tx-action-item-1'
+- assertNotVisible:
+    id: 'tx-action-item-2'
+- tapOn:
+    id: 'go-back'
+
+- extendedWaitUntil:
+    visible:
+      id: 'sign-transaction-continue-button'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'sign-transaction-continue-button'
+- extendedWaitUntil:
+    visible:
+      text: '.*Review this transaction data.*'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'review-and-confirm-button'
+- extendedWaitUntil:
+    visible:
+      text: 'You successfully signed this transaction.'
+    timeout: ${output.defaults.wcTxNetworkTimeout}
+
+# The native success modal hides the TestCtrls markers — assert from home.
+- tapOn: 'Done'
+- extendedWaitUntil:
+    visible:
+      text: 'Confirm transaction'
+    timeout: ${output.defaults.wcTxUiTimeout}
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'home-tab'
+    timeout: ${output.defaults.wcTxUiTimeout}
+
+- assertVisible:
+    id: 'e2e-wc-response-5792-match'

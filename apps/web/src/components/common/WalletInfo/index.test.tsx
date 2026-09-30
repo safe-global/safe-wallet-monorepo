@@ -2,6 +2,9 @@ import { render } from '@/tests/test-utils'
 import { WalletInfo } from '@/components/common/WalletInfo/index'
 import { type EIP1193Provider, type OnboardAPI } from '@web3-onboard/core'
 import { act } from '@testing-library/react'
+import * as authApi from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+
+const mockAuthLogout = jest.fn()
 
 const mockWallet = {
   address: '0x1234567890123456789012345678901234567890',
@@ -19,6 +22,7 @@ const mockOnboard = {
 describe('WalletInfo', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    jest.spyOn(authApi, 'useAuthLogoutV1Mutation').mockReturnValue([mockAuthLogout, {} as never])
   })
 
   it('should display the wallet address', () => {
@@ -51,7 +55,7 @@ describe('WalletInfo', () => {
     expect(getByText('Switch wallet')).toBeInTheDocument()
   })
 
-  it('should disconnect the wallet when the button is clicked', () => {
+  it('should disconnect only the wallet, not the auth session, when the button is clicked', () => {
     const { getByText } = render(
       <WalletInfo
         wallet={mockWallet}
@@ -72,6 +76,8 @@ describe('WalletInfo', () => {
     })
 
     expect(mockOnboard.disconnectWallet).toHaveBeenCalled()
+    // Disconnecting the wallet must not end the spaces auth session
+    expect(mockAuthLogout).not.toHaveBeenCalled()
   })
 
   it('calls onSwitch when Switch wallet is clicked', () => {

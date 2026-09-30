@@ -20,6 +20,15 @@ type QrCameraProps = {
   onActivateCamera: () => void
   onRequestPermission: () => void | Promise<unknown>
   onPressSettings: () => void
+  lensTone?: 'success' | 'neutral' | 'error'
+  dimLens?: boolean
+  centerOverlay?: React.ReactNode
+}
+
+const TONE_CORNER_COLOR: Record<NonNullable<QrCameraProps['lensTone']>, string> = {
+  success: '$success',
+  neutral: '$color',
+  error: '$error',
 }
 
 type LensButtonConfig = {
@@ -97,12 +106,18 @@ function CameraLens({
   onActivateCamera,
   onRequestPermission,
   onPressSettings,
+  dim,
+  cornerColor,
+  centerOverlay,
 }: {
   permission: CameraPermissionStatus
   isCameraActive: boolean
   onActivateCamera: () => void
   onRequestPermission: () => void | Promise<unknown>
   onPressSettings: () => void
+  dim: boolean
+  cornerColor: string
+  centerOverlay?: React.ReactNode
 }) {
   const { isDark } = useTheme()
   const color = isDark ? getTokenValue('$color.textPrimaryDark') : getTokenValue('$color.textPrimaryLight')
@@ -116,12 +131,9 @@ function CameraLens({
     onPressSettings,
   })
 
-  // Only let taps on the wrapper trigger the in-lens action when the camera is
-  // ready to activate. For 'not-determined' / 'denied' / 'restricted' the
-  // wrapper must be inert so that Settings (and the OS prompt) only ever fires
-  // from an explicit tap on the labeled SafeButton — Apple guideline 5.1.1(iv).
+  // Only allow the wrapper tap to activate the camera when no overlay owns the lens.
   const wrapperPress =
-    permission === 'granted' && !isCameraActive
+    permission === 'granted' && !isCameraActive && !centerOverlay
       ? () => {
           void onActivateCamera()
         }
@@ -129,23 +141,27 @@ function CameraLens({
 
   return (
     <Pressable
-      style={[styles.transparentBox, denied && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
+      style={[styles.transparentBox, dim && { backgroundColor: 'rgba(0, 0, 0, 0.8)' }]}
       onPress={wrapperPress}
       disabled={!wrapperPress}
       testID="camera-lens-wrapper"
     >
-      <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topLeft]} />
-      <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.topRight]} />
-      <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomLeft]} />
-      <View borderColor={denied ? '$error' : '$success'} style={[styles.corner, styles.bottomRight]} />
+      <View borderColor={cornerColor} style={[styles.corner, styles.topLeft]} />
+      <View borderColor={cornerColor} style={[styles.corner, styles.topRight]} />
+      <View borderColor={cornerColor} style={[styles.corner, styles.bottomLeft]} />
+      <View borderColor={cornerColor} style={[styles.corner, styles.bottomRight]} />
 
-      {button && (
-        <View style={styles.deniedCameraContainer}>
-          <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : color} />
-          <SafeButton rounded secondary onPress={button.onPress} marginTop={20} testID={button.testID}>
-            {button.label}
-          </SafeButton>
-        </View>
+      {centerOverlay ? (
+        <View style={styles.deniedCameraContainer}>{centerOverlay}</View>
+      ) : (
+        button && (
+          <View style={styles.deniedCameraContainer}>
+            <SafeFontIcon name={'camera'} size={40} color={denied ? '$error' : color} />
+            <SafeButton rounded secondary onPress={button.onPress} marginTop={20} testID={button.testID}>
+              {button.label}
+            </SafeButton>
+          </View>
+        )
       )}
     </Pressable>
   )
@@ -160,6 +176,9 @@ export const QrCamera = ({
   onActivateCamera,
   onRequestPermission,
   onPressSettings,
+  lensTone = 'success',
+  dimLens = false,
+  centerOverlay,
 }: QrCameraProps) => {
   const device = useCameraDevice('back')
   const { height } = useWindowDimensions()
@@ -170,6 +189,8 @@ export const QrCamera = ({
 
   const denied = permission === 'denied' || permission === 'restricted'
   const granted = permission === 'granted'
+  const dim = denied || dimLens
+  const cornerColor = TONE_CORNER_COLOR[denied ? 'error' : lensTone]
 
   return (
     <Theme name={'dark'}>
@@ -181,7 +202,7 @@ export const QrCamera = ({
         <View style={styles.overlay}>
           <View flex={1}>
             <BlurView
-              style={[styles.blurTop, denied && styles.deniedCameraBlur, { height: height * 0.3 }]}
+              style={[styles.blurTop, dim && styles.deniedCameraBlur, { height: height * 0.3 }]}
               intensity={30}
               tint={'systemUltraThinMaterialDark'}
             >
@@ -190,7 +211,7 @@ export const QrCamera = ({
 
             <View style={styles.transparentCenter}>
               <BlurView
-                style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
+                style={[styles.sideBlur, dim && styles.deniedCameraBlur]}
                 intensity={30}
                 tint={'systemUltraThinMaterialDark'}
               />
@@ -201,16 +222,19 @@ export const QrCamera = ({
                 onActivateCamera={onActivateCamera}
                 onRequestPermission={onRequestPermission}
                 onPressSettings={onPressSettings}
+                dim={dim}
+                cornerColor={cornerColor}
+                centerOverlay={centerOverlay}
               />
               <BlurView
-                style={[styles.sideBlur, denied && styles.deniedCameraBlur]}
+                style={[styles.sideBlur, dim && styles.deniedCameraBlur]}
                 intensity={30}
                 tint={'systemUltraThinMaterialDark'}
               />
             </View>
 
             <BlurView
-              style={[styles.blur, denied && styles.deniedCameraBlur]}
+              style={[styles.blur, dim && styles.deniedCameraBlur]}
               intensity={30}
               tint={'systemUltraThinMaterialDark'}
             >

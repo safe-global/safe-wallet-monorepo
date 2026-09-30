@@ -8,7 +8,6 @@ import { modulesScanner } from '../modules'
 import { transactionScanningScanner } from '../transactionScanning'
 import { fallbackHandlerScanner } from '../fallbackHandler'
 import { factoryValidationScanner } from '../factoryValidation'
-import { signerIntegrityScanner } from '../signerIntegrity'
 import { createMockContext } from '../test-helpers'
 
 /**
@@ -48,11 +47,11 @@ describe('scanner accuracy with real vs default data', () => {
       expect(result.partner).toBe('hypernative')
     })
 
-    it('correctly distinguishes 0 balance (clear) from high balance (partial) on supported chain', async () => {
+    it('correctly distinguishes 0 balance (not_applicable) from high balance (partial) on supported chain', async () => {
       const base = { guard: null, chainSupportsHypernative: true }
-      const clearResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 0 }))
+      const naResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 0 }))
       const partialResult = await guardScanner.scan(createMockContext({ ...base, balanceUsd: 2_000_000 }))
-      expect(clearResult.status).toBe('clear')
+      expect(naResult.status).toBe('not_applicable')
       expect(partialResult.status).toBe('partial')
     })
   })
@@ -83,7 +82,6 @@ describe('scanner accuracy with real vs default data', () => {
       ['transactionScanning', transactionScanningScanner],
       ['fallbackHandler', fallbackHandlerScanner],
       ['factoryValidation', factoryValidationScanner],
-      ['signerIntegrity', signerIntegrityScanner],
     ])('%s scanner includes lastChecked', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(result.lastChecked).toBeDefined()
@@ -103,7 +101,6 @@ describe('scanner accuracy with real vs default data', () => {
       ['transactionScanning', transactionScanningScanner],
       ['fallbackHandler', fallbackHandlerScanner],
       ['factoryValidation', factoryValidationScanner],
-      ['signerIntegrity', signerIntegrityScanner],
     ])('%s scanner returns valid status and severity', async (_name, scanner) => {
       const result = await scanner.scan(createMockContext())
       expect(['clear', 'issue', 'partial', 'not_applicable', 'inconclusive']).toContain(result.status)

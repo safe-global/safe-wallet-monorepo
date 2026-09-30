@@ -12,7 +12,7 @@ import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { useEditAccountItem } from '@/src/features/AccountsSheet/AccountItem/hooks/useEditAccountItem'
 import { type Address } from '@/src/types/address'
 import { router } from 'expo-router'
-import { FloatingMenu } from '../FloatingMenu'
+import { FloatingMenu, NATIVE_MENU_DESTRUCTIVE_COLOR } from '../FloatingMenu'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { trackEvent } from '@/src/services/analytics/firebaseAnalytics'
 import { createAppSettingsOpenEvent, createSettingsMenuActionEvent } from '@/src/services/analytics/events/settings'
@@ -28,11 +28,6 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
   const copyAndDispatchToast = useCopyAndDispatchToast()
   const theme = useTheme()
   const color = theme.color.get()
-  // hardcoded to the iOS red
-  // when we set danger to a button, it automatically sets a color that the OS selects
-  // titleColor only works on android and not on iOS
-  // that's why I'm hardcoding the iOS value of the danger text here
-  const colorError = 'rgb(255,66,69)'
 
   if (!safeAddress) {
     return null
@@ -80,6 +75,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
         </Pressable>
 
         <FloatingMenu
+          testID="settings-screen-header-more-settings-button"
           onPressAction={({ nativeEvent }) => {
             const action = nativeEvent.event as 'rename' | 'explorer' | 'copy' | 'share' | 'remove'
 
@@ -184,7 +180,7 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
             {
               id: 'remove',
               title: 'Remove account',
-              titleColor: colorError,
+              titleColor: NATIVE_MENU_DESTRUCTIVE_COLOR,
               attributes: {
                 destructive: true,
               },
@@ -192,11 +188,11 @@ export const SettingsMenu = ({ safeAddress }: Props) => {
                 ios: 'trash',
                 android: 'baseline_delete_24',
               }),
-              imageColor: colorError,
+              imageColor: NATIVE_MENU_DESTRUCTIVE_COLOR,
             },
           ]}
         >
-          <Pressable hitSlop={6} testID={'settings-screen-header-more-settings-button'}>
+          <Pressable hitSlop={6}>
             <View
               backgroundColor={'$backgroundSkeleton'}
               alignItems={'center'}

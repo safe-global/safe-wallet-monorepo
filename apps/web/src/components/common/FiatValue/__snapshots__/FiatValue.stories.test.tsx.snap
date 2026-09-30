@@ -1,21 +1,32 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./FiatValue.stories Default 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 1,234.56"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 1,235
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_1_"
+      >
+        <span
+          aria-hidden="true"
+        >
+          $ 1,235
+        </span>
+        <span
+          class="sr-only"
+        >
+          $ 1,234.56
+        </span>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -25,17 +36,28 @@ exports[`./FiatValue.stories LargeValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 1,234,567.89"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 1.23M
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_3_"
+      >
+        <span
+          aria-hidden="true"
+        >
+          $ 1.23M
+        </span>
+        <span
+          class="sr-only"
+        >
+          $ 1,234,567.89
+        </span>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -45,14 +67,17 @@ exports[`./FiatValue.stories NullValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class="MuiTypography-root MuiTypography-body1 mui-style-fw8ds0-MuiTypography-root"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      --
-    </span>
+      <span
+        class="text-muted-foreground"
+      >
+        --
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -62,17 +87,28 @@ exports[`./FiatValue.stories NumberValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 9,999.99"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 10,000
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_5_"
+      >
+        <span
+          aria-hidden="true"
+        >
+          $ 10,000
+        </span>
+        <span
+          class="sr-only"
+        >
+          $ 9,999.99
+        </span>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -82,21 +118,22 @@ exports[`./FiatValue.stories Precise 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 1,234
       <span
-        class="MuiTypography-root MuiTypography-body1 mui-style-i1lkuv-MuiTypography-root"
+        class="whitespace-nowrap"
       >
-        .57
+        $ 1,234
+        <span
+          class="text-muted-foreground"
+        >
+          .57
+        </span>
       </span>
-    </span>
+    </div>
   </div>
 </div>
 `;
@@ -106,17 +143,19 @@ exports[`./FiatValue.stories SmallValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 0.00"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 0.00
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_7_"
+      >
+        $ 0.00
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -126,17 +165,28 @@ exports[`./FiatValue.stories WithMaxLength 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 123,456,789.12"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 123.46M
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_9_"
+      >
+        <span
+          aria-hidden="true"
+        >
+          $ 123.46M
+        </span>
+        <span
+          class="sr-only"
+        >
+          $ 123,456,789.12
+        </span>
+      </span>
+    </div>
   </div>
 </div>
 `;
@@ -146,17 +196,28 @@ exports[`./FiatValue.stories ZeroValue 1`] = `
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
   <div
-    class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 mui-style-l2lphb-MuiPaper-root"
-    style="--Paper-shadow: none;"
+    class="shadcn-scope"
   >
-    <span
-      aria-label="$ 0.00"
-      class=""
-      data-mui-internal-clone-element="true"
-      style="white-space: nowrap;"
+    <div
+      class="rounded-lg bg-[var(--color-background-paper)] p-4"
     >
-      $ 0
-    </span>
+      <span
+        class="whitespace-nowrap"
+        data-slot="tooltip-trigger"
+        id="base-ui-_r_b_"
+      >
+        <span
+          aria-hidden="true"
+        >
+          $ 0
+        </span>
+        <span
+          class="sr-only"
+        >
+          $ 0.00
+        </span>
+      </span>
+    </div>
   </div>
 </div>
 `;

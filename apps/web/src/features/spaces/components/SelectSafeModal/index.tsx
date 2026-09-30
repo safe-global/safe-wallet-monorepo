@@ -6,6 +6,7 @@ import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
+import { selectUndeployedSafes } from '@/store/slices'
 import {
   ESafeAction,
   selectSafeActionsModalOpen,
@@ -14,15 +15,16 @@ import {
 } from '@/features/spaces/store'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
-import SafeCardReadOnly from '@/features/spaces/components/SafeAccounts/SafeCardReadOnly'
+import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 const SWAP_DISABLED_TOOLTIP = 'Swap is not supported on this chain. Try another chain.'
+const SWAP_DISABLED_CF_TOOLTIP = 'This account is not activated yet and cannot swap.'
 
-const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
+const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
 const SelectSafeModal = () => {
   const [query, setQuery] = useState('')
@@ -33,6 +35,7 @@ const SelectSafeModal = () => {
 
   const { allSafes, isLoading } = useSpaceSafes()
   const { configs: chains } = useChains()
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const flatSafes = useMemo(() => flattenSafeItems(allSafes), [allSafes])
   const matchSafe = useMatchSafe()
   const filteredSafes = useSearchFilter(flatSafes, query, matchSafe)
@@ -46,13 +49,15 @@ const SelectSafeModal = () => {
   }, [resetActiveSafe])
 
   const isSwapAction = actionType === ESafeAction.Swap
-  const isSwapDisabledForSafe = useCallback(
-    (safe: SafeItem) => {
-      if (!isSwapAction) return false
+  const getSwapDisabledTooltip = useCallback(
+    (safe: SafeItem): string | undefined => {
+      if (!isSwapAction) return undefined
       const chain = chains.find((c) => c.chainId === safe.chainId)
-      return !chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)
+      if (!chain || !hasFeature(chain, FEATURES.NATIVE_SWAPS)) return SWAP_DISABLED_TOOLTIP
+      if (undeployedSafes[safe.chainId]?.[safe.address]) return SWAP_DISABLED_CF_TOOLTIP
+      return undefined
     },
-    [isSwapAction, chains],
+    [isSwapAction, chains, undeployedSafes],
   )
 
   const handleClose = useCallback(() => {
@@ -72,8 +77,11 @@ const SelectSafeModal = () => {
     <>
       {opened && (
         <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-          <DialogContent className="flex max-h-[520px] flex-col gap-0 overflow-clip p-0">
-            <DialogHeader className="shrink-0 p-5 pb-0">
+          <DialogContent padding="none" className="flex max-h-[520px] flex-col overflow-clip">
+            <DialogHeader
+              // eslint-disable-next-line no-restricted-syntax -- p-5 pb-0: bespoke header padding, no token
+              className="shrink-0 p-5 pb-0"
+            >
               <DialogTitle className="text-xl font-semibold">{safeModalTitles[actionType]}</DialogTitle>
             </DialogHeader>
 
@@ -93,7 +101,7 @@ const SelectSafeModal = () => {
               ) : (
                 <div className="flex flex-col gap-1.5">
                   {filteredSafes.map((safe) => {
-                    const disabled = isSwapDisabledForSafe(safe)
+                    const disabledTooltip = getSwapDisabledTooltip(safe)
                     return (
                       <SafeCardReadOnly
                         key={`${safe.chainId}:${safe.address}`}
@@ -101,8 +109,8 @@ const SelectSafeModal = () => {
                         hideContextMenu
                         showPending={false}
                         onClick={() => void handleSafeClick(safe)}
-                        disabled={disabled}
-                        disabledTooltip={disabled ? SWAP_DISABLED_TOOLTIP : undefined}
+                        disabled={Boolean(disabledTooltip)}
+                        disabledTooltip={disabledTooltip}
                         className="px-4 sm:px-4"
                       />
                     )

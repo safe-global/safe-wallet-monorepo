@@ -18,6 +18,12 @@ export interface LedgerSafeSigningParams {
   signerAddress: string
   derivationPath: string
   safeVersion: SafeVersion
+  /**
+   * Pre-built SafeTransaction for un-proposed (draft) transactions. When
+   * supplied, the service signs this transaction directly instead of
+   * fetching its data from CGW by `txId`.
+   */
+  prebuiltSafeTx?: SafeTransaction
 }
 
 export interface SigningResponse {
@@ -48,7 +54,7 @@ export class LedgerSafeSigningService {
     signature: string
     safeTransactionHash: string
   }> {
-    const { chain, activeSafe, txId, signerAddress, derivationPath, safeVersion } = params
+    const { chain, activeSafe, txId, signerAddress, derivationPath, safeVersion, prebuiltSafeTx } = params
 
     try {
       // Get current Ledger session
@@ -58,7 +64,7 @@ export class LedgerSafeSigningService {
       }
 
       // Get the Safe transaction without requiring a private key (like web app does)
-      const safeTx = await this.createSafeTransactionForLedger(activeSafe, txId)
+      const safeTx = prebuiltSafeTx ?? (await this.createSafeTransactionForLedger(activeSafe, txId))
 
       if (!safeTx) {
         throw new Error('Safe transaction not found')
@@ -82,7 +88,7 @@ export class LedgerSafeSigningService {
       logger.info('Successfully signed transaction with Ledger', {
         signerAddress,
         safeTransactionHash,
-        txId,
+        ...(prebuiltSafeTx ? {} : { txId }),
       })
 
       return {
@@ -93,7 +99,7 @@ export class LedgerSafeSigningService {
       logger.error('Failed to sign Safe transaction with Ledger', {
         error,
         signerAddress,
-        txId,
+        ...(prebuiltSafeTx ? {} : { txId }),
       })
       throw new Error(`Ledger signing failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
     }

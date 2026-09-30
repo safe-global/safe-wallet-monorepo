@@ -1,4 +1,4 @@
-import { SvgIcon, Tooltip } from '@mui/material'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import type { ReactNode } from 'react'
 
@@ -10,19 +10,15 @@ export function InfoTooltip({
   'data-testid'?: string
 }) {
   return (
-    <Tooltip title={title} arrow placement="top">
-      <span data-testid={dataTestId}>
-        <SvgIcon
-          component={InfoIcon}
-          inheritViewBox
-          color="border"
-          fontSize="small"
-          sx={{
-            verticalAlign: 'middle',
-            ml: 0.5,
-          }}
-        />
-      </span>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span data-testid={dataTestId}>
+            <InfoIcon className="ml-1 inline size-5 align-middle text-[var(--color-border-main)]" />
+          </span>
+        }
+      />
+      <TooltipContent side="top">{title}</TooltipContent>
     </Tooltip>
   )
 }

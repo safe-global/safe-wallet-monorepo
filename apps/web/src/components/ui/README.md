@@ -1,6 +1,6 @@
 # shadcn/ui Components
 
-This directory contains UI components from [shadcn/ui](https://ui.shadcn.com/), a collection of re-usable components built with Radix UI and Tailwind CSS.
+This directory contains UI components from [shadcn/ui](https://ui.shadcn.com/), a collection of re-usable components built with Base UI (`@base-ui/react`) and Tailwind CSS.
 
 ## ⚠️ Semi-Auto Generated Code
 

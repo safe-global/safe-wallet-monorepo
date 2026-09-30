@@ -67,7 +67,9 @@ export const calculateFeePercentageInBps = (
   }
 
   const stableCoins = getLowerCaseStableCoinAddresses()
-  const isStableCoin = stableCoins[sellToken?.address?.toLowerCase()] && stableCoins[buyToken?.address.toLowerCase()]
+  const sellAddress = sellToken?.address?.toLowerCase()
+  const buyAddress = buyToken?.address?.toLowerCase()
+  const isStableCoin = !!sellAddress && !!buyAddress && !!stableCoins[sellAddress] && !!stableCoins[buyAddress]
 
   const fiatAmount = Number(orderKind == 'sell' ? sellTokenFiatAmount : buyTokenFiatAmount) || 0
 

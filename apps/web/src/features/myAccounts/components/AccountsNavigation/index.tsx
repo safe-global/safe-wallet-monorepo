@@ -1,68 +1,62 @@
-import { AppRoutes } from '@/config/routes'
-import css from './styles.module.css'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Chip } from '@mui/material'
-import classNames from 'classnames'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import { AppRoutes } from '@/config/routes'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
-import { useIsRequireLoginEnabled } from '@/hooks/useIsRequireLoginEnabled'
+import { ProHighlight } from '@/components/common/ProHighlight'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { cn } from '@/utils/cn'
 
 type Item = {
   label: string
   url: string
   trackEvent?: AnalyticsEvent
-  beta?: boolean
+  /** Under SAFE_PRO the Workspaces tab is named after Safe Pro and wears the brand underline. */
+  proLabel?: string
 }
 
-type NavItems = Item[]
-
-const navItems: NavItems = [
-  {
-    label: 'Accounts',
-    url: AppRoutes.welcome.accounts,
-  },
+const navItems: Item[] = [
   {
     label: 'Workspaces',
     url: AppRoutes.welcome.spaces,
     trackEvent: { ...SPACE_EVENTS.OPEN_SPACE_LIST_PAGE, label: SPACE_LABELS.accounts_page },
-    beta: true,
+    proLabel: 'Safe Pro',
+  },
+  {
+    label: 'My accounts',
+    url: AppRoutes.welcome.accounts,
   },
 ]
 
 const AccountsNavigation = () => {
   const router = useRouter()
-  const isRequireLoginEnabled = useIsRequireLoginEnabled() ?? false
+  const isSafePro = useIsSafeProEnabled()
 
-  if (isRequireLoginEnabled) return null
-
-  const isActiveNavigation = (pathname: string) => {
-    return router.pathname === pathname
-  }
+  const activeUrl = navItems.some((item) => item.url === router.pathname) ? router.pathname : navItems[0].url
 
   const handleClick = (item: Item) => () => {
-    if (item.trackEvent && !isActiveNavigation(item.url)) {
+    if (item.trackEvent && router.pathname !== item.url) {
       trackEvent(item.trackEvent)
     }
   }
 
   return (
-    <nav className={css.nav}>
-      {navItems.map((item) => (
-        <Link
-          key={item.url}
-          href={item.url}
-          onClick={handleClick(item)}
-          className={classNames(css.tab, { [css.active]: isActiveNavigation(item.url) })}
-        >
-          <span className={css.label}>
-            {item.label}
-            {item.beta && <Chip label="Beta" size="small" sx={{ ml: 1, fontWeight: 'normal', borderRadius: '4px' }} />}
-          </span>
-        </Link>
-      ))}
-    </nav>
+    <Tabs value={activeUrl} className={cn('w-full', isSafePro ? 'max-w-116' : 'max-w-110')}>
+      <TabsList variant="toggle" size="lg" aria-label="Accounts navigation" className="w-full">
+        {navItems.map((item) => (
+          <TabsTrigger
+            key={item.url}
+            value={item.url}
+            nativeButton={false}
+            render={<NextLink href={item.url} onClick={handleClick(item)} />}
+          >
+            {isSafePro && item.proLabel ? <ProHighlight>{item.proLabel}</ProHighlight> : item.label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   )
 }
 

@@ -12,6 +12,15 @@ jest.mock('axios', () => ({
   delete: jest.fn(),
 }))
 
+const KNOWN_ADDRESS = '0x9913B9180C20C6b0F21B6480c84422F6ebc4B808'
+
+jest.mock('../../hooks/useKnownAddresses', () => ({
+  useKnownAddresses: () => ({
+    knownAddresses: [{ address: '0x9913B9180C20C6b0F21B6480c84422F6ebc4B808', name: 'Treasury' }],
+    loadAddressBook: jest.fn(),
+  }),
+}))
+
 const testAddressMethod = {
   inputs: [{ internalType: 'address', name: 'newValue', type: 'address' }],
   name: 'testAddressValue',
@@ -43,7 +52,7 @@ describe('<SolidityForm>', () => {
         initialValues={initialValues}
         contract={testContract}
         nativeCurrencySymbol={'ETH'}
-        networkPrefix={'rin:'}
+        networkPrefix={'rin'}
         showHexEncodedData={false}
       >
         <button type="submit">submit</button>
@@ -64,7 +73,7 @@ describe('<SolidityForm>', () => {
         initialValues={initialValues}
         contract={testContract}
         nativeCurrencySymbol={'ETH'}
-        networkPrefix={'rin:'}
+        networkPrefix={'rin'}
         showHexEncodedData={false}
       >
         <button type="submit">submit</button>
@@ -73,9 +82,9 @@ describe('<SolidityForm>', () => {
 
     let input: ReturnType<typeof screen.getByRole>
 
-    // testAddressMethod is selected by default
+    // Address fields are comboboxes too, so the selector needs a scoped query
     await waitFor(() => {
-      input = screen.getByRole('combobox')
+      input = screen.getByRole('combobox', { name: /contract method selector/i })
       expect(input).toHaveValue('testAddressValue')
     })
 
@@ -91,6 +100,49 @@ describe('<SolidityForm>', () => {
     })
   })
 
+  it('Submits an address picked from the To Address dropdown', async () => {
+    const onSubmit = jest.fn()
+
+    render(
+      <SolidityForm
+        id={'test-form'}
+        onSubmit={onSubmit}
+        getAddressFromDomain={jest.fn()}
+        initialValues={initialValues}
+        contract={testContract}
+        nativeCurrencySymbol={'ETH'}
+        networkPrefix={'rin'}
+        showHexEncodedData={false}
+      >
+        <button type="submit">submit</button>
+      </SolidityForm>,
+    )
+
+    const toAddressInput = await screen.findByRole('combobox', { name: /to address/i })
+
+    act(() => {
+      fireEvent.change(toAddressInput, { target: { value: 'Treas' } })
+      fireEvent.keyDown(toAddressInput, { key: 'ArrowDown' })
+      fireEvent.keyDown(toAddressInput, { key: 'Enter' })
+    })
+
+    await waitFor(() => {
+      expect(toAddressInput).toHaveValue(`rin:${KNOWN_ADDRESS}`)
+    })
+
+    // The contract method parameter is required for the form to submit
+    fireEvent.change(screen.getByRole('combobox', { name: /newValue/i }), {
+      target: { value: initialValues[TO_ADDRESS_FIELD_NAME] },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'submit' }))
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled()
+    })
+    // The prefix is display-only: the submitted value stays unprefixed
+    expect(onSubmit.mock.calls[0][0][TO_ADDRESS_FIELD_NAME]).toBe(KNOWN_ADDRESS)
+  })
+
   // see https://github.com/safe-global/safe-react-apps/issues/450
   xit('Avoid collisions between parameters with the same name and different types when changing contract methods', async () => {
     render(
@@ -101,7 +153,7 @@ describe('<SolidityForm>', () => {
         initialValues={initialValues}
         contract={testContract}
         nativeCurrencySymbol={'ETH'}
-        networkPrefix={'rin:'}
+        networkPrefix={'rin'}
         showHexEncodedData={false}
       >
         <button type="submit">submit</button>

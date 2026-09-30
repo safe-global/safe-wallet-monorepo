@@ -4,13 +4,14 @@ import { createMockStory } from '@/stories/mocks'
 import Accounts from '@/pages/welcome/accounts'
 
 /**
- * My Accounts page - displays all user's Safe Accounts.
+ * My Accounts page - displays all user's Safe accounts.
  * Shows a list of Safes the user has access to across networks.
  */
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
+  pathname: '/welcome/accounts',
 })
 
 const meta = {

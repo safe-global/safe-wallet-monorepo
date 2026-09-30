@@ -9,6 +9,6 @@ describe('CanNotSign', () => {
 
   it('renders the correct message', () => {
     const { getByText } = render(<CanNotSign />)
-    expect(getByText('Only signers of this safe can sign this transaction')).toBeTruthy()
+    expect(getByText('Only signers of this Safe Account can confirm this transaction')).toBeTruthy()
   })
 })

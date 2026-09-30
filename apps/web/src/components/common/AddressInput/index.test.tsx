@@ -13,22 +13,36 @@ import userEvent from '@testing-library/user-event'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const mockChain = chainBuilder()
-  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: true })
   .with({ chainId: '11155111' })
   .build()
 
-// mock useCurrentChain
+const mockMainnetChain = chainBuilder()
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: false })
+  .with({ chainId: '1', shortName: 'eth' })
+  .build()
+
+const mockUseChain = jest.fn((chainId: string) => {
+  if (chainId === '1') return mockMainnetChain
+  if (chainId === '11155111') return mockChain
+  return undefined
+})
+
+// mock useCurrentChain / useChain
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
-  useChain: jest.fn(() => mockChain),
+  useChain: (chainId: string) => mockUseChain(chainId),
   useHasFeature: jest.fn(() => false),
 }))
 
 // mock useNameResolver
 jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   __esModule: true,
+  getEnsNotAvailableError: (chain?: { chainName?: string }) =>
+    `ENS name not available on ${chain?.chainName || 'this network'}`,
   default: jest.fn((val: string) => ({
     address: val === 'zero.eth' ? '0x0000000000000000000000000000000000000000' : undefined,
+    name: val === 'zero.eth' ? 'zero.eth' : undefined,
     resolverError: val === 'bogus.eth' ? new Error('Failed to resolve') : undefined,
     resolving: false,
   })),
@@ -38,10 +52,16 @@ const TestForm = ({
   address,
   validate,
   disabled,
+  chain,
+  required,
+  placeholder,
 }: {
   address: string
   validate?: AddressInputProps['validate']
   disabled?: boolean
+  chain?: AddressInputProps['chain']
+  required?: boolean
+  placeholder?: string
 }) => {
   const name = 'recipient'
 
@@ -57,15 +77,28 @@ const TestForm = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(() => null)}>
-        <AddressInput name={name} label="Recipient address" validate={validate} disabled={disabled} />
+        <AddressInput
+          name={name}
+          label="Recipient address"
+          validate={validate}
+          disabled={disabled}
+          chain={chain}
+          required={required}
+          placeholder={placeholder}
+        />
         <button type="submit">Submit</button>
       </form>
     </FormProvider>
   )
 }
 
-const setup = (address: string, validate?: AddressInputProps['validate'], disabled?: boolean) => {
-  const utils = render(<TestForm address={address} validate={validate} disabled={disabled} />)
+const setup = (
+  address: string,
+  validate?: AddressInputProps['validate'],
+  disabled?: boolean,
+  chain?: AddressInputProps['chain'],
+) => {
+  const utils = render(<TestForm address={address} validate={validate} disabled={disabled} chain={chain} />)
   const input = utils.getByLabelText('Recipient address', { exact: false })
 
   return {
@@ -89,6 +122,11 @@ describe('AddressInput tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    mockUseChain.mockImplementation((chainId: string) => {
+      if (chainId === '1') return mockMainnetChain
+      if (chainId === '11155111') return mockChain
+      return undefined
+    })
     jest.spyOn(addressBook, 'default').mockReturnValue({})
   })
 
@@ -100,6 +138,29 @@ describe('AddressInput tests', () => {
   it('should render with a default prefixed address value', () => {
     const { input } = setup(`eth:${TEST_ADDRESS_A}`)
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
+  })
+
+  describe('optional placeholder', () => {
+    it('defaults to an "Optional" placeholder when not required and none is provided', () => {
+      const utils = render(<TestForm address="" required={false} />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).toHaveAttribute('placeholder', 'Optional')
+    })
+
+    it('keeps the provided placeholder when one is given', () => {
+      const utils = render(<TestForm address="" required={false} placeholder="0x... address" />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).toHaveAttribute('placeholder', '0x... address')
+    })
+
+    it('does not add an "Optional" placeholder when the field is required by default', () => {
+      const utils = render(<TestForm address="" />)
+      const input = utils.getByLabelText('Recipient address', { exact: false })
+
+      expect(input).not.toHaveAttribute('placeholder')
+    })
   })
 
   it('should validate the address on input', async () => {
@@ -185,7 +246,61 @@ describe('AddressInput tests', () => {
 
     await waitFor(() => {
       expect(input.value).toBe('0x0000000000000000000000000000000000000000')
-      expect(useNameResolver).toHaveBeenCalledWith('zero.eth')
+      expect(useNameResolver).toHaveBeenCalledWith('zero.eth', undefined)
+    })
+  })
+
+  it('should label the field with the ENS name it resolved from', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('0x0000000000000000000000000000000000000000')
+      expect(utils.getByLabelText('Address resolved from zero.eth', { exact: false })).toBeDefined()
+    })
+  })
+
+  it('should revert the label when the resolved address is edited', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => expect(utils.getByLabelText('Address resolved from zero.eth', { exact: false })).toBeDefined())
+
+    act(() => {
+      fireEvent.change(input, { target: { value: TEST_ADDRESS_B } })
+    })
+
+    await waitFor(() => {
+      expect(utils.queryByLabelText('Address resolved from zero.eth', { exact: false })).toBeNull()
+    })
+  })
+
+  it('should resolve ENS names against the given chain even if the current chain lacks the feature', async () => {
+    // The Spaces address book is chain-agnostic, so it passes mainnet to resolve .eth names while
+    // the connected/current chain would otherwise not be the ENS hub.
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+      shortName: 'gno',
+      chainId: '100',
+      chainName: 'Gnosis Chain',
+      isTestnet: false,
+      features: [],
+    }))
+
+    const { input } = setup('', undefined, undefined, mockMainnetChain)
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'zero.eth' } })
+    })
+
+    await waitFor(() => {
+      expect(input.value).toBe('0x0000000000000000000000000000000000000000')
+      expect(useNameResolver).toHaveBeenCalledWith('zero.eth', mockMainnetChain)
     })
   })
 
@@ -197,17 +312,21 @@ describe('AddressInput tests', () => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(useNameResolver).toHaveBeenCalledWith('bogus.eth')
+    expect(useNameResolver).toHaveBeenCalledWith('bogus.eth', undefined)
     await waitFor(() => expect(utils.getByLabelText(`Failed to resolve`, { exact: false })).toBeDefined())
   })
 
-  it('should not resolve ENS names if this feature is disabled', async () => {
+  it('should not resolve ENS names if hub domain lookup is disabled', async () => {
     ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
-      shortName: 'gor',
-      chainId: '5',
-      chainName: 'Goerli',
+      shortName: 'base',
+      chainId: '8453',
+      chainName: 'Base',
+      isTestnet: false,
       features: [],
     }))
+    mockUseChain.mockImplementation((chainId: string) =>
+      chainId === '1' ? { ...mockMainnetChain, features: [] } : undefined,
+    )
 
     const { input, utils } = setup('')
 
@@ -216,9 +335,29 @@ describe('AddressInput tests', () => {
       jest.advanceTimersByTime(1000)
     })
 
-    expect(useNameResolver).toHaveBeenCalledWith('')
+    expect(useNameResolver).toHaveBeenCalledWith('', undefined)
     await waitFor(() => expect(input.value).toBe('zero.eth'))
-    await waitFor(() => expect(utils.getByLabelText('Invalid address format', { exact: false })).toBeDefined())
+    await waitFor(() => expect(utils.getByLabelText('ENS name not available on Base', { exact: false })).toBeDefined())
+  })
+
+  it('shows a domain-specific error when an ENS name cannot be resolved on the chain', async () => {
+    ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
+      shortName: 'matic',
+      chainId: '137',
+      chainName: 'Polygon',
+      features: [],
+    }))
+
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: 'vitalik.eth' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() =>
+      expect(utils.getByLabelText('ENS name not available on Polygon', { exact: false })).toBeDefined(),
+    )
   })
 
   it('should show chain prefix in an adornment', async () => {
@@ -309,7 +448,15 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByText(mockSafeName)).toBeInTheDocument())
   })
 
-  it('should clear the input on click if the address is in the address book and not disabled', async () => {
+  it('should render a readable read-only field when disabled even if the address is not in the address book', async () => {
+    // Address book is empty (mocked in beforeEach), mirroring a contact shown under a source
+    // (e.g. spaceOnly) that does not contain it. The disabled field must still be readable.
+    const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+
+    await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
+  })
+
+  it('should keep the address and switch to editing when the contact chip is clicked', async () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
@@ -342,10 +489,12 @@ describe('AddressInput tests', () => {
     })
 
     act(() => {
-      userEvent.click(input)
+      fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
     })
 
-    await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(''))
+    expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+    expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+    expect(input).toHaveFocus()
   })
 
   it('should not clear the input on click if the address is in the address book and the input is disabled', async () => {
@@ -385,5 +534,99 @@ describe('AddressInput tests', () => {
     })
 
     await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A))
+  })
+
+  describe('keyboard focus on the read-only contact chip', () => {
+    const mockSafeName = 'Test Safe'
+
+    const mockSavedContact = () => {
+      const mockChainId = '11155111'
+      jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
+      jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue({
+        name: mockSafeName,
+        address: TEST_ADDRESS_A,
+        chainIds: [mockChainId],
+        createdBy: '',
+        createdByUserId: 0,
+        lastUpdatedBy: '',
+        lastUpdatedByUserId: 0,
+        createdAt: '',
+        updatedAt: '',
+        source: ContactSource.local,
+      })
+      jest.spyOn(addressBook, 'default').mockImplementation(() => ({ [TEST_ADDRESS_A]: mockSafeName }))
+    }
+
+    it('moves focus from the hidden input to the chip when the address becomes a saved contact', async () => {
+      mockSavedContact()
+      const { input, utils } = setup('')
+
+      // Assert synchronously: earlier tests leave un-awaited userEvent clicks whose fake-timer
+      // steps blur the active element as soon as a waitFor advances the clock.
+      act(() => {
+        input.focus()
+        fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
+      })
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+      expect(chip).toHaveAttribute('tabindex', '0')
+      expect(chip).toHaveFocus()
+    })
+
+    it('opens the kept address for editing and refocuses the input on Enter', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      act(() => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Enter' })
+      })
+
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+      expect(input).toHaveFocus()
+    })
+
+    it('clears the address and refocuses the input on Backspace', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      act(() => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Backspace' })
+      })
+
+      expect(utils.getByRole('textbox')).toHaveValue('')
+      expect(input).toHaveFocus()
+    })
+
+    it('shows the chip again when focus leaves the field while editing', () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      act(() => {
+        fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
+      })
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+
+      act(() => {
+        fireEvent.blur(input, { relatedTarget: utils.getByRole('button', { name: 'Submit' }) })
+      })
+
+      expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+    })
+
+    it('does not add a tab stop for a disabled read-only address', async () => {
+      const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+
+      const chip = await utils.findByTestId('address-book-recipient')
+      expect(chip.parentElement).not.toHaveAttribute('tabindex')
+      expect(chip.parentElement).not.toHaveAttribute('role')
+    })
   })
 })

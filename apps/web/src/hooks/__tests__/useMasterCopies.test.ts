@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useMasterCopies, MasterCopyDeployer } from '@/hooks/useMasterCopies'
+import { useMasterCopies } from '@/hooks/useMasterCopies'
+import { MasterCopyDeployer } from '@/services/contracts/masterCopies'
 import * as useChainId from '@/hooks/useChainId'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'

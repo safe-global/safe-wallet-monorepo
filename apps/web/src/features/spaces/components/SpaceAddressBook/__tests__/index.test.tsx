@@ -3,6 +3,7 @@ import SpaceAddressBook from '../index'
 import { useIsAdmin, useIsInvited, useAddressBookSearch, useGetSpaceAddressBook } from '@/features/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
+import { useHasFeature } from '@/hooks/useChains'
 import { Builder } from '@/tests/Builder'
 import type { UserWithWallets, UserWallet } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { faker } from '@faker-js/faker'
@@ -20,8 +21,8 @@ jest.mock('@/features/spaces', () => ({
   useIsInvited: jest.fn(() => false),
   useAddressBookSearch: jest.fn(() => []),
   useGetSpaceAddressBook: jest.fn(() => []),
-  useGetPrivateAddressBook: jest.fn(() => []),
   useGetAddressBookRequests: jest.fn(() => []),
+  useCurrentSpaceId: jest.fn(() => '1'),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: jest.fn(),
@@ -34,10 +35,6 @@ jest.mock('../SpaceAddressBookTable', () => {
   const SpaceAddressBookTable = () => <div data-testid="table" />
   return SpaceAddressBookTable
 })
-jest.mock('../EmptyAddressBook', () => {
-  const EmptyAddressBook = () => <div data-testid="empty" />
-  return EmptyAddressBook
-})
 jest.mock('../AddContact', () => {
   const AddContact = () => <button>Add contact</button>
   return AddContact
@@ -46,11 +43,6 @@ jest.mock('../Import', () => {
   const ImportAddressBook = () => <button>Import</button>
   return ImportAddressBook
 })
-jest.mock('../ActivityLog', () => {
-  const ActivityLog = () => <div data-testid="activity-log" />
-  return ActivityLog
-})
-
 const walletBuilder = () =>
   Builder.new<UserWallet>().with({
     id: faker.number.int(),
@@ -75,6 +67,7 @@ describe('SpaceAddressBook', () => {
     ;(useIsInvited as jest.Mock).mockReturnValue(false)
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
     ;(useAddressBookSearch as jest.Mock).mockReturnValue([])
+    ;(useHasFeature as jest.Mock).mockReturnValue(true)
   })
 
   it('hides action buttons for non-admin users', () => {
@@ -103,5 +96,18 @@ describe('SpaceAddressBook', () => {
 
     expect(screen.getByText('Import')).toBeInTheDocument()
     expect(screen.getByText('Add contact')).toBeInTheDocument()
+  })
+
+  it('does not render an activity log tab', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockUserQuery(
+      userBuilder()
+        .with({ wallets: [walletBuilder().build()] })
+        .build(),
+    )
+
+    render(<SpaceAddressBook />)
+
+    expect(screen.queryByRole('tab', { name: 'Activity log' })).not.toBeInTheDocument()
   })
 })

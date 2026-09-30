@@ -1,6 +1,5 @@
 import GroupedTxListItems from '@/components/transactions/GroupedTxListItems'
 import { groupTxs, type AnyTransactionItem } from '@/utils/tx-list'
-import { Box } from '@mui/material'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
 import TxListItem from '../TxListItem'
@@ -19,7 +18,7 @@ const getBulkGroupTxHash = (group: AnyTransactionItem[]) => {
 }
 
 export const TxListGrid = ({ children }: { children: ReactNode }): ReactElement => {
-  return <Box className={css.container}>{children}</Box>
+  return <div className={css.container}>{children}</div>
 }
 
 const TxList = ({ items }: TxListProps): ReactElement => {

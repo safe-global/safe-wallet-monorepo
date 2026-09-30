@@ -1,0 +1,36 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "web",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web-tanstack", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "web-next",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "dev"],
+      "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "storybook",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "storybook", "-p", "6010"],
+      "port": 6010
+    },
+    {
+      "name": "storybook-alt",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/web", "storybook", "-p", "6011"],
+      "port": 6011
+    },
+    {
+      "name": "mobile",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["workspace", "@safe-global/mobile", "start"],
+      "port": 8081
+    }
+  ]
+}

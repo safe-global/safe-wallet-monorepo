@@ -6,7 +6,7 @@ import { SafeFontIcon } from '@/src/components/SafeFontIcon/SafeFontIcon'
 import { TouchableOpacity } from 'react-native'
 
 interface ChainItemsProps {
-  activeChain: Chain
+  activeChain?: Chain
   chains: Chain[]
   chainId: string
   fiatTotal: string
@@ -24,7 +24,7 @@ export function ChainItems({
   isNewlyDiscovered = false,
 }: ChainItemsProps) {
   const chain = chains.find((item) => item.chainId === chainId)
-  const isActive = chainId === activeChain.chainId
+  const isActive = chainId === activeChain?.chainId
 
   const handleChainSelect = () => {
     onSelect(chainId)

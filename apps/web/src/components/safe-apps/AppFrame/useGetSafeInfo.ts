@@ -5,22 +5,26 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getLegacyChainName } from '../utils'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import { useGetIsWalletProposer } from '@/hooks/useProposers'
 
 const useGetSafeInfo = () => {
   const { safe, safeAddress } = useSafeInfo()
   const isOwner = useIsSafeOwner()
+  const getIsWalletProposer = useGetIsWalletProposer()
   const nestedSafeOwners = useNestedSafeOwners()
   const chainId = useChainId()
   const chain = useCurrentChain()
   const chainName = chain?.chainName || ''
 
-  return useCallback(() => {
+  return useCallback(async () => {
+    const canPropose = isOwner || !!nestedSafeOwners?.length || (await getIsWalletProposer())
+
     return {
       safeAddress,
       chainId: parseInt(chainId, 10),
       owners: safe.owners.map((owner) => owner.value),
       threshold: safe.threshold,
-      isReadOnly: !isOwner && (nestedSafeOwners == null || nestedSafeOwners.length === 0),
+      isReadOnly: !canPropose,
       nonce: safe.nonce,
       implementation: safe.implementation.value,
       modules: safe.modules ? safe.modules.map((module) => module.value) : null,
@@ -42,6 +46,7 @@ const useGetSafeInfo = () => {
     safe.version,
     isOwner,
     nestedSafeOwners,
+    getIsWalletProposer,
     chainName,
   ])
 }

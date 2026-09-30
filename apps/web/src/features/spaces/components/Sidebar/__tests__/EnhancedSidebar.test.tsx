@@ -19,10 +19,6 @@ jest.mock('../SidebarCommonFooter', () => ({
   SidebarCommonFooter: () => <div>Footer</div>,
 }))
 
-jest.mock('../SidebarProfileSection', () => ({
-  SidebarProfileSection: () => <div>Profile</div>,
-}))
-
 jest.mock('../variants', () => ({
   getSidebarVariant: jest.fn((type) => {
     if (type === 'spaces') {
@@ -38,18 +34,17 @@ jest.mock('../variants', () => ({
 
 describe('EnhancedSidebar', () => {
   const mockSpaces: SpaceItem[] = [
-    { id: 1, name: 'Space 1', safeCount: 0 },
-    { id: 2, name: 'Space 2', safeCount: 0 },
+    { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 },
+    { uuid: 'uuid-2', name: 'Space 2', safeCount: 0 },
   ]
 
-  const mockSelectedSpace: SpaceItem = { id: 1, name: 'Space 1', safeCount: 0 }
+  const mockSelectedSpace: SpaceItem = { uuid: 'uuid-1', name: 'Space 1', safeCount: 0 }
 
   it('renders all required components', () => {
     render(<EnhancedSidebar type="spaces" spaceInitial="T" selectedSpace={mockSelectedSpace} spaces={mockSpaces} />)
 
     expect(screen.getByText('Top Bar')).toBeInTheDocument()
     expect(screen.getByText('Footer')).toBeInTheDocument()
-    expect(screen.getByText('Profile')).toBeInTheDocument()
   })
 
   it('renders spaces variant when type is spaces', () => {

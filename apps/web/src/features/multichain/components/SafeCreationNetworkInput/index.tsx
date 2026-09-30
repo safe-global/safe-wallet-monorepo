@@ -7,7 +7,7 @@ import { useRouter } from 'next/router'
 import { getNetworkLink } from '@/components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
-import { hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
+import { getSafeToL2SetupVersion, hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
 import { hasMultiChainCreationFeatures } from '../../utils'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
@@ -57,17 +57,21 @@ const SafeCreationNetworkInput = ({
         return !optionIsSelectedNetwork
       }
 
-      // Check if required deployments are available
+      // Check if required deployments are available. The setup contract release must
+      // pair with the Safe version the group will be created at (1.5.0 → 1.5.0 setup).
+      const groupSafeVersion = getLatestSafeVersion(firstSelectedNetwork)
+      const setupVersion = getSafeToL2SetupVersion(groupSafeVersion)
+
       const optionHasCanonicalSingletonDeployment =
         hasCanonicalDeployment(
           getSafeSingletonDeployments({
             network: optionNetwork.chainId,
-            version: getLatestSafeVersion(firstSelectedNetwork),
+            version: groupSafeVersion,
           }),
           optionNetwork.chainId,
         ) &&
         hasCanonicalDeployment(
-          getSafeToL2SetupDeployments({ network: optionNetwork.chainId, version: '1.4.1' }),
+          getSafeToL2SetupDeployments({ network: optionNetwork.chainId, version: setupVersion }),
           optionNetwork.chainId,
         )
 
@@ -75,16 +79,16 @@ const SafeCreationNetworkInput = ({
         hasCanonicalDeployment(
           getSafeSingletonDeployments({
             network: firstSelectedNetwork.chainId,
-            version: getLatestSafeVersion(firstSelectedNetwork),
+            version: groupSafeVersion,
           }),
           firstSelectedNetwork.chainId,
         ) &&
         hasCanonicalDeployment(
-          getSafeToL2SetupDeployments({ network: firstSelectedNetwork.chainId, version: '1.4.1' }),
+          getSafeToL2SetupDeployments({ network: firstSelectedNetwork.chainId, version: setupVersion }),
           firstSelectedNetwork.chainId,
         )
 
-      // Only 1.4.1 safes with canonical deployment addresses and SafeToL2Setup can be deployed as part of a multichain group
+      // Only 1.4.1+ safes with canonical deployment addresses and SafeToL2Setup can be deployed as part of a multichain group
       if (!selectedHasCanonicalSingletonDeployment) return !optionIsSelectedNetwork
       return !optionHasCanonicalSingletonDeployment
     },

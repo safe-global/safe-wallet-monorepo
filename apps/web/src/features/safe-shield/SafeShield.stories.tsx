@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Box, Paper } from '@mui/material'
 import { SafeShieldDisplay } from './components/SafeShieldDisplay'
 import {
   FullAnalysisBuilder,
@@ -10,22 +9,29 @@ import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/b
 import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
+import { Provider } from 'react-redux'
+import { makeStore } from '@/store'
+import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { safeFixtures } from '../../../../../config/test/msw/fixtures'
+import { createSafeInfoState } from '@/stories/mocks/defaults'
 
 // Seed faker for deterministic visual regression tests
 faker.seed(456)
 
 const meta: Meta<typeof SafeShieldDisplay> = {
+  title: 'Features/SafeShield',
   component: SafeShieldDisplay,
   parameters: { layout: 'centered' },
   decorators: [
     (Story, context) => (
       <StoreDecorator initialState={{}} context={context}>
         <RouterDecorator>
-          <Paper sx={{ padding: 2, backgroundColor: 'background.main' }}>
-            <Box sx={{ width: 320 }}>
+          <div className="bg-background rounded-lg p-4">
+            <div className="w-80">
               <Story />
-            </Box>
-          </Paper>
+            </div>
+          </div>
         </RouterDecorator>
       </StoreDecorator>
     ),
@@ -68,7 +74,7 @@ export const ModerateThreat: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing with moderate threat detected' } } },
 }
 
@@ -80,7 +86,7 @@ export const FailedThreatAnalysis: Story = {
       .threat(FullAnalysisBuilder.failedThreat().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when threat analysis fails' } } },
 }
 
@@ -92,7 +98,7 @@ export const OwnershipChange: Story = {
       .threat(FullAnalysisBuilder.ownershipChange().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe ownership' } } },
 }
 
@@ -104,7 +110,7 @@ export const ModulesChange: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe modules' } } },
 }
 
@@ -116,7 +122,7 @@ export const MastercopyChange: Story = {
       .threat(FullAnalysisBuilder.masterCopyChange().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget when transaction will change Safe mastercopy' } } },
 }
 
@@ -127,7 +133,7 @@ export const UnverifiedContract: Story = {
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: { docs: { description: { story: 'SafeShieldWidget analyzing an unverified contract' } } },
 }
 
@@ -139,7 +145,7 @@ export const UnableToVerifyContract: Story = {
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: { description: { story: 'SafeShieldWidget when unable to verify a contract due to verification failure' } },
   },
@@ -175,7 +181,7 @@ export const UnofficialFallbackHandler: Story = {
       .threat(FullAnalysisBuilder.noThreat().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: { description: { story: 'SafeShieldWidget when transaction sets an unofficial fallback handler' } },
   },
@@ -194,7 +200,7 @@ export const MultipleIssues: Story = {
       .threat(FullAnalysisBuilder.moduleChange().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
@@ -217,7 +223,7 @@ export const MultipleCounterparties: Story = {
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
@@ -234,7 +240,7 @@ export const ThreatAnalysisWithError: Story = {
       .threat(ThreatAnalysisBuilder.failedThreatWithError())
       .build(),
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
@@ -260,7 +266,7 @@ export const HypernativeGuardActive: Story = {
       logout: () => {},
     },
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
@@ -288,7 +294,7 @@ export const HypernativeNotLoggedIn: Story = {
       },
     },
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
@@ -314,12 +320,84 @@ export const HypernativeMaliciousThreat: Story = {
       logout: () => {},
     },
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {
         story:
           'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a critical contract check result',
+      },
+    },
+  },
+}
+
+// Top-3 cap + overflow row: 5 THREAT + 4 CUSTOM_CHECKS findings.
+// useSafeShieldAssessmentUrl reads from SafeTxContext + safeInfoSlice to compute
+// the Hypernative URL, so the decorator below seeds both.
+const overflowMockSafeTx = {
+  addSignature: () => {},
+  encodedSignatures: () => '',
+  getSignature: () => undefined,
+  signatures: new Map(),
+  data: {
+    to: '0x00000000000000000000000000000000000000aa',
+    value: '0',
+    data: '0x',
+    operation: 0,
+    safeTxGas: '0',
+    baseGas: '0',
+    gasPrice: '0',
+    gasToken: '0x0000000000000000000000000000000000000000',
+    refundReceiver: '0x0000000000000000000000000000000000000000',
+    nonce: 0,
+  },
+} as unknown as SafeTransaction
+
+const overflowSafeTxContextValue: SafeTxContextParams = {
+  safeTx: overflowMockSafeTx,
+  setSafeTx: () => {},
+  setSafeMessage: () => {},
+  setSafeMessageHash: () => {},
+  setSafeTxError: () => {},
+  setNonce: () => {},
+  setNonceNeeded: () => {},
+  setSafeTxGas: () => {},
+  setTxOrigin: () => {},
+  isReadOnly: false,
+  gtfPaymentMode: 'safe',
+  setGtfPaymentMode: () => {},
+  setGtfSelectedGasToken: () => {},
+}
+
+const overflowStore = makeStore({
+  safeInfo: createSafeInfoState(safeFixtures.efSafe),
+})
+
+export const OverflowFindings: Story = {
+  args: {
+    ...FullAnalysisBuilder.empty().threat(ThreatAnalysisBuilder.overflowFindings()).build(),
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
+  },
+  decorators: [
+    (Story) => (
+      <Provider store={overflowStore}>
+        <SafeTxContext.Provider value={overflowSafeTxContextValue}>
+          <Story />
+        </SafeTxContext.Provider>
+      </Provider>
+    ),
+  ],
+  tags: ['skip-visual-test'],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '5 THREAT + 4 CUSTOM_CHECKS findings — both sections should cap at top 3 and show "+N More" overflow row linking to Hypernative.',
       },
     },
   },
@@ -339,7 +417,7 @@ export const HypernativeCustomCheckFailed: Story = {
       logout: () => {},
     },
   },
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   parameters: {
     docs: {
       description: {

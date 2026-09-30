@@ -1,10 +1,16 @@
-import { Box, CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
+import { cn } from '@/utils/cn'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 const LoadingState = () => {
+  const isDarkMode = useDarkMode()
+
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
-      <CircularProgress aria-label="Loading content" />
-    </Box>
+    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner className="size-10" aria-label="Loading content" />
+      </div>
+    </div>
   )
 }
 

@@ -57,7 +57,32 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   const setOpen = wcPopupStore.setStore
   const [error, setError] = useState<Error | null>(null)
   const [loading, setLoading] = useState<WCLoadingState | null>(null)
-  const safeWalletProvider = useSafeWalletProvider()
+
+  //
+  // --- Sessions
+  //
+  const [sessions, setSessions] = useState<SessionTypes.Struct[]>([])
+
+  const updateSessions = useCallback(() => {
+    walletConnect && setSessions(walletConnect.getActiveSessions())
+  }, [walletConnect])
+
+  // Initial sessions
+  useEffect(updateSessions, [updateSessions])
+
+  // On session add
+  useEffect(() => {
+    return walletConnect?.onSessionAdd(updateSessions)
+  }, [walletConnect, updateSessions])
+
+  // On session delete
+  useEffect(() => {
+    return walletConnect?.onSessionDelete(updateSessions)
+  }, [walletConnect, updateSessions])
+
+  // The owned-safes list is only needed for dApp-initiated chain switches, so enable it once a
+  // session exists.
+  const safeWalletProvider = useSafeWalletProvider(sessions.length > 0)
   const [autoApprove = {}, setAutoApprove] = useLocalStorage<WcAutoApproveProps>(WC_AUTO_APPROVE_KEY)
 
   // Init WalletConnect
@@ -192,28 +217,6 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       setLoading(null)
     })
   }, [walletConnect, safeWalletProvider, chainId, safeAddress, setOpen])
-
-  //
-  // --- Sessions
-  //
-  const [sessions, setSessions] = useState<SessionTypes.Struct[]>([])
-
-  const updateSessions = useCallback(() => {
-    walletConnect && setSessions(walletConnect.getActiveSessions())
-  }, [walletConnect])
-
-  // Initial sessions
-  useEffect(updateSessions, [updateSessions])
-
-  // On session add
-  useEffect(() => {
-    return walletConnect?.onSessionAdd(updateSessions)
-  }, [walletConnect, updateSessions])
-
-  // On session delete
-  useEffect(() => {
-    return walletConnect?.onSessionDelete(updateSessions)
-  }, [walletConnect, updateSessions])
 
   //
   // --- Proposals

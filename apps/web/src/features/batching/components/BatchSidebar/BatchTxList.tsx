@@ -6,11 +6,12 @@ import type {
 import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
-import { List } from '@mui/material'
+import { List } from '@/components/ui/list'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { Operation } from '@safe-global/store/gateway/types'
 import { type SafeTransaction } from '@safe-global/types-kit'
 
@@ -54,7 +55,13 @@ const extractMultiSendActions = (txPreview: TransactionPreview | undefined): Mul
 }
 
 const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete?: (id: string) => void }) => {
+  // `createTx` throws until the SDK is ready, and `txItems` never changes, so without this
+  // dependency an early open left every row a permanent skeleton.
+  const safeSDK = useSafeSDK()
+
   const [batchSafeTx] = useAsync(() => {
+    if (!safeSDK) return
+
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txItems.length > 1
       const tx = isMultiSend
@@ -64,7 +71,7 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
     }
 
     return createSafeTx()
-  }, [txItems])
+  }, [txItems, safeSDK])
 
   const [decodedBatch] = useTxPreview(batchSafeTx?.data)
 
@@ -72,7 +79,7 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
 
   return (
     <>
-      <List sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <List className="gap-4">
         {txItems.map((item, index) => (
           <BatchTxItem
             key={item.id}

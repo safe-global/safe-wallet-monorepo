@@ -15,44 +15,47 @@ describe('Sidebar tests', () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  beforeEach(() => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+  describe('Disconnected', () => {
+    beforeEach(() => {
+      cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+    })
+
+    it('Verify New Transaction button disabled for non-owners', () => {
+      sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
+    })
+
+    it('Verify the side menu buttons exist', () => {
+      sideBar.verifySideListItemsNew()
+    })
+
+    it('Verify counter in the "Transaction" menu item if there are tx in the queue tab', () => {
+      sideBar.verifyTxCounterNew(1)
+    })
+
+    it('Verify that clicking on Bridge in the sidebar opens the exchange iframe', () => {
+      const iframeSelector = `iframe[src*="${constants.bridgeWidget}"]`
+
+      clickOnBridgeOption()
+      swaps.acceptLegalDisclaimer()
+
+      cy.get(iframeSelector).should('be.visible')
+      cy.get(iframeSelector).then(($iframe) => {
+        const $body = $iframe.contents().find('body')
+        cy.wrap($body).should('exist')
+        cy.wrap($body).contains(exchangeStr).should('be.visible')
+      })
+    })
   })
 
-  it('Verify New transaction button enabled for owners', () => {
-    wallet.connectSigner(signer)
-    sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
-  })
+  describe('Connected', () => {
+    it('Verify New transaction button enabled for owners', () => {
+      wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
+      sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
+    })
 
-  it('Verify New transaction button enabled for beneficiaries who are non-owners', () => {
-    cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
-    wallet.connectSigner(signer)
-    sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
-  })
-
-  it('Verify New Transaction button disabled for non-owners', () => {
-    sideBar.verifyNewTxBtnStatus(constants.enabledStates.disabled)
-  })
-
-  it('Verify the side menu buttons exist', () => {
-    sideBar.verifySideListItemsNew()
-  })
-
-  it('Verify counter in the "Transaction" menu item if there are tx in the queue tab', () => {
-    sideBar.verifyTxCounterNew(1)
-  })
-
-  it('Verify that clicking on Bridge in the sidebar opens the exchange iframe', () => {
-    const iframeSelector = `iframe[src*="${constants.bridgeWidget}"]`
-
-    clickOnBridgeOption()
-    swaps.acceptLegalDisclaimer()
-
-    cy.get(iframeSelector).should('be.visible')
-    cy.get(iframeSelector).then(($iframe) => {
-      const $body = $iframe.contents().find('body')
-      cy.wrap($body).should('exist')
-      cy.wrap($body).contains(exchangeStr).should('be.visible')
+    it('Verify New transaction button enabled for beneficiaries who are non-owners', () => {
+      wallet.connectSignerViaStorage(signer, constants.homeUrl + staticSafes.SEP_STATIC_SAFE_11)
+      sideBar.verifyNewTxBtnStatus(constants.enabledStates.enabled)
     })
   })
 })

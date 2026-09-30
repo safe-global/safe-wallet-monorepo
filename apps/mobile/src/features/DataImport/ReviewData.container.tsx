@@ -17,7 +17,7 @@ export const ReviewData = () => {
 
     const data = importedData.data as LegacyDataStructure
 
-    // Count Safe Accounts from addedSafes
+    // Count Safe accounts from addedSafes
     const safeAccountsCount = data.safes ? data.safes.length : 0
 
     // Count signers from addedSafes owners

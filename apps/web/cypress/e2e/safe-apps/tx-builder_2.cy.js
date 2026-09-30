@@ -1,8 +1,10 @@
 import * as constants from '../../support/constants.js'
 import * as safeapps from '../pages/safeapps.pages.js'
+import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as utils from '../../support/utils/checkers.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import * as ls from '../../support/localstorage_data.js'
 
 let safeAppSafes = []
 let iframeSelector
@@ -14,8 +16,11 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
 
   beforeEach(() => {
     const appUrl = constants.TX_Builder_url
-    iframeSelector = `iframe[id="iframe-${encodeURIComponent(appUrl)}"]`
+    iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
     const visitUrl = `/apps/open?safe=${safeAppSafes.SEP_SAFEAPP_SAFE_1}&appUrl=${encodeURIComponent(appUrl)}`
+    // tx-builder keeps its form disabled until the address book permission prompt is answered:
+    // pre-grant it before the visit
+    main.addToLocalStorage(constants.SAFE_PERMISSIONS_KEY, ls.safeAppSafePermissions(appUrl))
     cy.visit(visitUrl)
   })
 
@@ -47,6 +52,15 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
       getBody().findAllByText(safeapps.confirmDeleteBtnStr).should('not.be.disabled').click()
       getBody().findByText(safeapps.noSavedBatchesStr).should('be.visible')
       getBody().findByText(safeapps.backToTransactionStr).should('be.visible')
+
+      // Clear the uploaded draft: the app persists it in its own localStorage, and with
+      // testIsolation off the next tests would land on the batch view instead of the dropzone
+      getBody().findByText(safeapps.backToTransactionStr).click()
+      getBody().findByText(safeapps.createBatchStr).click()
+      getBody().findByRole('button', { name: safeapps.cancelBtnStr }).click()
+      getBody().findByText(safeapps.clearTransactionListStr)
+      getBody().findByRole('button', { name: safeapps.confirmClearTransactionListStr }).click()
+      getBody().findAllByText('choose a file').should('be.visible')
     })
     cy.readFile('cypress/downloads/E2E test.json').should('exist')
   })

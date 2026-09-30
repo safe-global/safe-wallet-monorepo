@@ -18,6 +18,7 @@ import { RootState } from '@/src/store'
 import { useTheme } from '@/src/theme/hooks/useTheme'
 import { selectChainById } from '@/src/store/chains'
 import usePendingTxs from '@/src/hooks/usePendingTxs'
+import { HeaderQrButton } from '@/src/features/WalletConnect/Wallet/components/HeaderQrButton'
 
 const nameLabelProps = {
   fontSize: '$5',
@@ -127,6 +128,7 @@ export const Navbar = () => {
 
         <XStack gap="$2" alignItems="center">
           <PendingTxBadge amount={amount} onPress={() => router.push('/pending-transactions')} />
+          <HeaderQrButton />
           <NetworkSelector
             chainLogoUri={activeChain?.chainLogoUri}
             chainName={activeChain?.chainName}

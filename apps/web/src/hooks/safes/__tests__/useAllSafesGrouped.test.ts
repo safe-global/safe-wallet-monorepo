@@ -1,5 +1,5 @@
 import * as allSafes from '../useAllSafes'
-import { _getMultiChainAccounts, useAllSafesGrouped } from '../useAllSafesGrouped'
+import { _buildSafeItems, _getMultiChainAccounts, useAllSafesGrouped } from '../useAllSafesGrouped'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
@@ -16,6 +16,42 @@ describe('useAllSafesGrouped', () => {
       const { result } = renderHook(() => useAllSafesGrouped())
 
       expect(result.current).toEqual({ allMultiChainSafes: undefined, allSingleSafes: undefined })
+    })
+
+    it('enumerates owned safes by default', () => {
+      const spy = jest.spyOn(allSafes, 'default').mockReturnValue(undefined)
+
+      renderHook(() => useAllSafesGrouped())
+
+      expect(spy).toHaveBeenCalledWith(true)
+    })
+
+    it('forwards fetchOwnedSafes=false to skip the owners enumeration', () => {
+      const spy = jest.spyOn(allSafes, 'default').mockReturnValue(undefined)
+
+      renderHook(() => useAllSafesGrouped(undefined, false))
+
+      expect(spy).toHaveBeenCalledWith(false)
+    })
+  })
+
+  describe('_buildSafeItems', () => {
+    // Overview/owned addresses are checksummed; space-safe addresses may differ in case. The owner
+    // match must be case-insensitive, otherwise owned safes silently render read-only.
+    const CHECKSUMMED = '0xAbC0000000000000000000000000000000000123'
+
+    it('matches ownership case-insensitively', () => {
+      const result = _buildSafeItems({ '1': [CHECKSUMMED] }, {}, { '1': [CHECKSUMMED.toLowerCase()] }, {})
+
+      expect(result).toHaveLength(1)
+      expect(result[0].isReadOnly).toBe(false)
+    })
+
+    it('marks a safe read-only when the wallet owns a different address on that chain', () => {
+      const other = '0xDef0000000000000000000000000000000000456'.toLowerCase()
+      const result = _buildSafeItems({ '1': [CHECKSUMMED] }, {}, { '1': [other] }, {})
+
+      expect(result[0].isReadOnly).toBe(true)
     })
   })
 

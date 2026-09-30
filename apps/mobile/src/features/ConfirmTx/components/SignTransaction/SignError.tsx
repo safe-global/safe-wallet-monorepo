@@ -39,7 +39,7 @@ export function SignError({ description }: { description?: string }) {
                 </LargeHeaderTitle>
 
                 <Text textAlign="center" fontSize="$4" width="80%">
-                  {description || 'There was an error executing this transaction.'}
+                  {description || 'Could not sign this transaction. Nothing was submitted.'}
                 </Text>
               </View>
             </View>

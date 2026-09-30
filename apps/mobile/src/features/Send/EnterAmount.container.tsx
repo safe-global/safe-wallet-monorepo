@@ -15,7 +15,6 @@ import { RecipientHeader } from './components/RecipientHeader'
 import { FooterAction } from './components/FooterAction'
 import { NonceBottomSheet } from './components/NonceBottomSheet'
 import { CustomNonceModal } from './components/CustomNonceModal'
-import { ProposerBottomSheet } from './components/ProposerBottomSheet'
 import { useAmountInput, useTokenAmountValidation } from './hooks/useAmountInput'
 import { useFiatConversion } from './hooks/useFiatConversion'
 import { useMaxAmount } from './hooks/useMaxAmount'
@@ -23,8 +22,6 @@ import { useNonceSelection } from './hooks/useNonceSelection'
 import { useTokenBalance } from './hooks/useTokenBalance'
 import { useSendTransaction } from './hooks/useSendTransaction'
 import { useEnsureActiveSigner } from './hooks/useEnsureActiveSigner'
-import { useProposerSheet } from './hooks/useProposerSheet'
-import { Address } from '@/src/types/address'
 
 const keyboardBehavior = 'padding' as const
 
@@ -102,7 +99,6 @@ export function EnterAmountContainer() {
   const { activeSigner, availableSigners, ensureActiveSigner } = useEnsureActiveSigner()
 
   useEffect(() => ensureActiveSigner(), [])
-  const proposer = useProposerSheet({ safeAddress: activeSafe.address, inputRef })
   const { submitError, handleReview, isSubmitting } = useSendTransaction({
     recipientAddress,
     tokenAddress,
@@ -110,7 +106,7 @@ export function EnterAmountContainer() {
     decimals,
     isValid: isValid && isTokenDataReady,
     selectedNonce: nonce.selectedNonce ?? nonce.recommendedNonce,
-    sender: activeSigner?.value,
+    hasSigner: !!activeSigner,
   })
 
   return (
@@ -182,7 +178,6 @@ export function EnterAmountContainer() {
         availableSigners={availableSigners}
         isSubmitting={isSubmitting}
         onReview={handleReview}
-        onOpenSignerSheet={proposer.handleOpenProposerSheet}
       />
 
       <NonceBottomSheet
@@ -203,14 +198,6 @@ export function EnterAmountContainer() {
         currentNonce={nonce.currentNonce ?? 0}
         onSave={nonce.handleSaveCustomNonce}
         onCancel={nonce.handleCancelCustomNonce}
-      />
-
-      <ProposerBottomSheet
-        ref={proposer.proposerSheetRef}
-        availableSigners={availableSigners}
-        selectedAddress={activeSigner?.value as Address | undefined}
-        onSelectSigner={proposer.handleSelectProposer}
-        onChange={proposer.handleProposerSheetChange}
       />
     </KeyboardAvoidingView>
   )

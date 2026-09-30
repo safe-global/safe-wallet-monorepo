@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { Alert } from 'react-native'
 import { useAccount, useAppKit, useWalletInfo } from '@reown/appkit-react-native'
+import { getEip155ChainId } from '@safe-global/utils/features/walletconnect/utils'
 import { selectActiveSafe } from '@/src/store/activeSafeSlice'
 import { useAppSelector } from '@/src/store/hooks'
 import Logger from '@/src/utils/logger'
@@ -83,7 +84,7 @@ export function useConnect({ flow }: UseConnectOptions) {
   // Normalize to a canonical decimal CAIP-2 id so comparisons against Reown's
   // `caipNetworkId` (e.g. `eip155:1`) don't silently fail on zero-padded or
   // hex-encoded chainId strings from upstream config.
-  const expectedCaipId: `eip155:${number}` | null = activeSafe ? `eip155:${parseInt(activeSafe.chainId, 10)}` : null
+  const expectedCaipId = activeSafe ? getEip155ChainId(String(parseInt(activeSafe.chainId, 10))) : null
 
   const clearSwitchTimeout = () => {
     if (switchTimeoutRef.current) {

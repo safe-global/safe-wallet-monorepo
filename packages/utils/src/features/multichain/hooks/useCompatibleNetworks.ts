@@ -1,8 +1,12 @@
-import { hasCanonicalDeployment, hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { type SafeVersion } from '@safe-global/types-kit'
 import {
-  getCompatibilityFallbackHandlerDeployments,
+  getSafeToL2SetupVersionByAddress,
+  hasCanonicalDeployment,
+  hasMatchingDeployment,
+  identifyOfficialFallbackHandler,
+  TRUSTED_DEPLOYMENT_VERSIONS,
+} from '@safe-global/utils/services/contracts/deployments'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import {
   getProxyFactoryDeployments,
   getSafeL2SingletonDeployments,
   getSafeSingletonDeployments,
@@ -11,8 +15,6 @@ import {
 } from '@safe-global/safe-deployments'
 import { type Chain as ChainInfo } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-
-const SUPPORTED_VERSIONS: SafeVersion[] = ['1.4.1', '1.3.0']
 
 /**
  * Returns all chains where the creations's masterCopy and factory are deployed.
@@ -36,13 +38,13 @@ export const useCompatibleNetworks = (
       getSafeSingletonDeployments,
       masterCopy,
       config.chainId,
-      SUPPORTED_VERSIONS,
+      TRUSTED_DEPLOYMENT_VERSIONS,
     )
     const isL2MasterCopy = hasMatchingDeployment(
       getSafeL2SingletonDeployments,
       masterCopy,
       config.chainId,
-      SUPPORTED_VERSIONS,
+      TRUSTED_DEPLOYMENT_VERSIONS,
     )
     const masterCopyExists = isL1MasterCopy || isL2MasterCopy
 
@@ -50,22 +52,23 @@ export const useCompatibleNetworks = (
       getProxyFactoryDeployments,
       factoryAddress,
       config.chainId,
-      SUPPORTED_VERSIONS,
+      TRUSTED_DEPLOYMENT_VERSIONS,
     )
-    const fallbackHandlerExists = hasMatchingDeployment(
-      getCompatibilityFallbackHandlerDeployments,
-      fallbackHandler,
-      config.chainId,
-      SUPPORTED_VERSIONS,
-    )
+    // Any official Compatibility- or ExtensibleFallbackHandler deployment across the trusted versions counts
+    const fallbackHandlerExists = Boolean(identifyOfficialFallbackHandler(fallbackHandler, config.chainId))
 
     // We only need to check that it is nonzero as useSafeCreationData already validates that it is the setupToL2 call otherwise
     const includesSetupToL2 = to !== ZERO_ADDRESS
 
-    // If the creation includes the setupToL2 call, the contract needs to be deployed on the chain
+    // If the creation includes the setupToL2 call, the same release of the contract needs to be deployed on the chain
+    const setupToL2Version = getSafeToL2SetupVersionByAddress(to)
     const areSetupToL2ConditionsMet =
       !includesSetupToL2 ||
-      hasCanonicalDeployment(getSafeToL2SetupDeployments({ network: config.chainId, version: '1.4.1' }), config.chainId)
+      (!!setupToL2Version &&
+        hasCanonicalDeployment(
+          getSafeToL2SetupDeployments({ network: config.chainId, version: setupToL2Version }),
+          config.chainId,
+        ))
 
     // If the masterCopy is L1 on a L2 chain, includes the setupToL2 Call or the Migration contract exists
     const isMigrationRequired = isL1MasterCopy && !includesSetupToL2 && config.l2

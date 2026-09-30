@@ -2,6 +2,8 @@ import {
   authSlice,
   setIsOidcLoginPending,
   selectIsOidcLoginPending,
+  setSessionCheckPending,
+  selectIsSessionCheckPending,
   setAuthenticated,
   setUnauthenticated,
   setLastUsedSpace,
@@ -141,6 +143,44 @@ describe('authSlice', () => {
       const state = authSlice.reducer(prev, setIsOidcLoginPending(false))
 
       expect(state.isOidcLoginPending).toBe(false)
+    })
+  })
+
+  describe('setSessionCheckPending', () => {
+    it('should default to false', () => {
+      const state = reducer(undefined, { type: 'unknown' })
+
+      expect(state.isSessionCheckPending).toBe(false)
+    })
+
+    it('should set isSessionCheckPending', () => {
+      const pending = reducer(undefined, setSessionCheckPending(true))
+      expect(pending.isSessionCheckPending).toBe(true)
+
+      const settled = reducer(pending, setSessionCheckPending(false))
+      expect(settled.isSessionCheckPending).toBe(false)
+    })
+
+    it('should be cleared by setAuthenticated', () => {
+      const pending = reducer(undefined, setSessionCheckPending(true))
+      const state = reducer(pending, setAuthenticated(Date.now() + 60000))
+
+      expect(state.isSessionCheckPending).toBe(false)
+    })
+
+    it('should be cleared by setUnauthenticated', () => {
+      const pending = reducer(undefined, setSessionCheckPending(true))
+      const state = reducer(pending, setUnauthenticated())
+
+      expect(state.isSessionCheckPending).toBe(false)
+    })
+  })
+
+  describe('selectIsSessionCheckPending', () => {
+    it('should return the current pending state', () => {
+      const state = reducer(undefined, setSessionCheckPending(true))
+
+      expect(selectIsSessionCheckPending({ auth: state } as unknown as RootState)).toBe(true)
     })
   })
 

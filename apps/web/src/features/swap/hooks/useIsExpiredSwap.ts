@@ -29,6 +29,13 @@ const useIsExpiredSwap = (txInfo: TransactionInfo) => {
   useEffect(() => {
     if (!isSwapOrderTxInfo(txInfo)) return
 
+    // A fulfilled order can no longer expire. Cancelled orders are NOT exempt:
+    // they can still sit in the queue, where isExpired blocks stale actions.
+    if (txInfo.status === 'fulfilled') {
+      setIsExpired(false)
+      return
+    }
+
     const delay = getExpiryDelay(txInfo.validUntil)
 
     if (delay === 0) {

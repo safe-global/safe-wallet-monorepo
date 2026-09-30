@@ -52,8 +52,17 @@ const isEtherscanResult = (data: unknown): data is EtherscanResult => {
  * @see https://docs.etherscan.io/api-endpoints/gas-tracker
  */
 const parseEtherscanOracleResult = (result: EtherscanResult, gweiFactor: string): EstimatedGasPrice => {
-  const maxFeePerGas = BigInt(Number(result.FastGasPrice) * Number(gweiFactor))
-  const baseFee = BigInt(Number(result.suggestBaseFee) * Number(gweiFactor))
+  const maxFeePerGasNum = Number(result.FastGasPrice) * Number(gweiFactor)
+  const baseFeeNum = Number(result.suggestBaseFee) * Number(gweiFactor)
+
+  if (!Number.isFinite(maxFeePerGasNum) || !Number.isFinite(baseFeeNum)) {
+    throw new Error(
+      `Invalid Etherscan oracle values: FastGasPrice=${result.FastGasPrice}, suggestBaseFee=${result.suggestBaseFee}`,
+    )
+  }
+
+  const maxFeePerGas = BigInt(Math.round(maxFeePerGasNum))
+  const baseFee = BigInt(Math.round(baseFeeNum))
 
   return {
     maxFeePerGas,
@@ -77,7 +86,13 @@ const fetchGasOracle = async (gasPriceOracle: GasPriceOracle): Promise<Estimated
   if (isEtherscanResult(data)) {
     return parseEtherscanOracleResult(data, gweiFactor)
   }
-  return { gasPrice: BigInt(data[gasParameter] * Number(gweiFactor)) }
+  const gasPriceNum = Number(data[gasParameter]) * Number(gweiFactor)
+
+  if (!Number.isFinite(gasPriceNum)) {
+    throw new Error(`Invalid oracle value: ${gasParameter}=${data[gasParameter]}`)
+  }
+
+  return { gasPrice: BigInt(Math.round(gasPriceNum)) }
 }
 
 // These typeguards are necessary because the GAS_PRICE_TYPE enum uses uppercase while the config service uses lowercase values

@@ -1,19 +1,19 @@
-import { Box, Typography } from '@mui/material'
-import InfoIcon from '@mui/icons-material/Info'
+import { InfoIcon } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
 import css from './styles.module.css'
 
 const GasTooHighBanner = () => {
   return (
-    <Box className={css.banner}>
-      <Box className={css.iconContainer}>
+    <div className={css.banner}>
+      <div className={css.iconContainer}>
         <InfoIcon className={css.icon} />
-      </Box>
-      <Box className={css.messageContainer}>
-        <Typography className={css.message}>
+      </div>
+      <div className={css.messageContainer}>
+        <Typography variant="paragraph-small" className={css.message}>
           Gas prices are too high right now for sponsoring. Please try again later or use your connected wallet.
         </Typography>
-      </Box>
-    </Box>
+      </div>
+    </div>
   )
 }
 

@@ -5,12 +5,13 @@ import * as constants from '../../support/constants'
 import * as wallet from '../../support/utils/wallet'
 import * as owner from './owners.pages'
 
-export const welcomeLoginScreen = '[data-testid="welcome-login"]'
 const ownerInput = 'input[name^="owners"][name$="name"]'
 const ownerAddress = 'input[name^="owners"][name$="address"]'
-const thresholdInput = 'input[name="threshold"]'
 export const removeOwnerBtn = 'button[aria-label="Remove signer"]'
-const createNewSafeBtn = '[data-testid="create-safe-btn"]'
+// Welcome "My accounts" redesign (V2): creation lives behind the "Add accounts" chooser rather than a
+// standalone create-safe button.
+const addAccountsChooserBtn = '[data-testid="open-add-accounts-chooser-button"]'
+const createNewAccountOption = '[data-testid="add-accounts-create-new"]'
 const continueWithWalletBtn = 'Continue with Private key'
 export const accountInfoHeader = '[data-testid="open-account-center"]'
 export const reviewStepOwnerInfo = '[data-testid="review-step-owner-info"]'
@@ -34,7 +35,6 @@ export const addFundsSection = '[data-testid="add-funds-section"]'
 export const noTokensAlert = '[data-testid="no-tokens-alert"]'
 const networkCheckbox = '[data-testid="network-checkbox"]'
 const cancelIcon = '[data-testid="CancelIcon"]'
-const thresholdItem = '[data-testid="threshold-item"]'
 export const payNowLaterMessageBox = '[data-testid="pay-now-later-message-box"]'
 export const safeSetupOverview = '[data-testid="safe-setup-overview"]'
 export const networksLogoList = '[data-testid="network-list"]'
@@ -46,6 +46,7 @@ export const cfSafeInfo = '[data-testid="safe-info"]'
 export const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
 export const continueWithWalletBtnConnected = '[data-testid="continue-with-wallet-btn"]'
 const networkSelectorItem = '[data-testid="network-selector-item"]'
+const signInToWorkspaceBtn = '[data-testid="sign-in-to-workspace-btn"]'
 
 const policy1_2 = '1/1 policy'
 export const walletName = 'test1-sepolia-safe'
@@ -55,30 +56,74 @@ export const addSignerStr = 'Add signer'
 export const accountRecoveryStr = 'Account recovery'
 export const sendTokensStr = 'Send tokens'
 const noWalletConnectedMsg = 'No wallet connected'
-export const deployWalletStr = 'about to deploy this Safe Account'
-export const yourSafeAccountPreviewStr = 'Your Safe Account preview'
+export const deployWalletStr = 'about to deploy this Safe account'
+export const yourSafeAccountPreviewStr = 'Your Safe account preview'
 
 export function waitForConnectionMsgDisappear() {
   cy.contains(noWalletConnectedMsg).should('not.exist')
 }
 export function checkNotificationsSwitchIs(status) {
-  cy.get(notificationsSwitch).find('input').should(`be.${status}`)
+  cy.get(notificationsSwitch).should(
+    status === constants.enabledStates.disabled ? 'have.attr' : 'not.have.attr',
+    'data-disabled',
+  )
 }
 
 export function clickOnActivateAccountBtn(index) {
-  cy.get(activateAccountBtn).eq(index).click()
+  // Wallet checks gate this button; it starts disabled and a click then is a silent no-op.
+  cy.get(activateAccountBtn).eq(index).should('be.enabled').click()
 }
 
-export function clickOnFinalActivateAccountBtn(index) {
-  cy.get(activateFlowAccountBtn).click()
+const submitErrorMsg = 'Could not submit the transaction. Try again.'
+const errorMessage = '[data-testid="error-message"]'
+
+export function clickOnFinalActivateAccountBtn(retriesLeft = 2) {
+  cy.get(activateFlowAccountBtn).should('be.enabled').click()
+  // Wait for the submission to resolve: on success the tx-flow modal closes; on a
+  // retryable RPC error the app shows a submission error and re-enables the button.
+  cy.get('body', { timeout: 180000 }).should(($body) => {
+    const flowStillOpen = $body.find(activateFlowAccountBtn).length > 0
+    const hasSubmitError = $body.text().includes(submitErrorMsg)
+    expect(!flowStillOpen || hasSubmitError, 'deployment submitted or retryable error shown').to.be.true
+  })
+  cy.get('body').then(($body) => {
+    const needsRetry = $body.find(activateFlowAccountBtn).length > 0 && $body.text().includes(submitErrorMsg)
+    if (!needsRetry) return
+    if (retriesLeft === 0) {
+      // Expand the error's Details section (when present) and include its text in the failure.
+      cy.get(errorMessage)
+        .last()
+        .then(($err) => {
+          if ($err.find('button:contains("Details")').length) {
+            cy.wrap($err).contains('button', 'Details').click()
+          }
+        })
+      cy.get(errorMessage)
+        .last()
+        .invoke('text')
+        .then((details) => {
+          throw new Error(
+            `Safe activation kept failing to submit after 3 attempts. Error shown: ${details || submitErrorMsg}`,
+          )
+        })
+      return
+    }
+    cy.wait(10000)
+    clickOnFinalActivateAccountBtn(retriesLeft - 1)
+  })
 }
 
 export function clickOnQRCodeSwitch() {
-  cy.get(qrCodeSwitch).click()
+  // Force: the dialog overlay covers the switch while the open animation settles
+  cy.get(qrCodeSwitch).click({ force: true })
 }
 
 export function checkQRCodeSwitchStatus(state) {
-  cy.get(qrCodeSwitch).find('input').should(state)
+  cy.get(qrCodeSwitch).should(
+    'have.attr',
+    'aria-checked',
+    state === constants.checkboxStates.checked ? 'true' : 'false',
+  )
 }
 
 export function checkInitialStepsDisplayed() {
@@ -116,11 +161,16 @@ export function selectRelayOption() {
 
 export function cancelWalletCreation() {
   cy.get(cancelBtn).click()
-  cy.get('button').contains(continueWithWalletBtn).should('be.visible')
+  cy.url().should('include', constants.welcomeAccountUrl)
 }
 
 export function clickOnBackBtn() {
   main.clickOnBackBtn(backBtn)
+}
+
+export function clickOnSignInToWorkspaceBtn() {
+  cy.get(signInToWorkspaceBtn).should('be.visible').click()
+  cy.get(reviewStepNextBtn).should('not.be.disabled')
 }
 
 export function clickOnReviewStepNextBtn() {
@@ -129,8 +179,25 @@ export function clickOnReviewStepNextBtn() {
 }
 
 export function clickOnLetsGoBtn() {
-  cy.get(creationModalLetsGoBtn).click()
+  // After activation the modal only opens once the deployment is mined and indexed, which can
+  // take well over a minute on Sepolia when the RPC is throttled.
+  cy.get(creationModalLetsGoBtn, { timeout: 180000 }).click()
   return cy.get(creationModalLetsGoBtn, { timeout: 60000 }).should('not.exist')
+}
+
+// Reads the created safe's address so assertions target the exact safe, not other
+// same-creator safes synced in after "Sign in to workspace".
+export function getCreatedSafeAddress() {
+  return cy
+    .get(cfSafeInfo)
+    .invoke('text')
+    .then((text) => {
+      const match = text.match(/0x[0-9a-fA-F]{40}/)
+      if (!match) {
+        throw new Error(`Could not find a safe address in the creation success screen: "${text}"`)
+      }
+      return match[0]
+    })
 }
 
 export function verifyPolicy1_1() {
@@ -151,7 +218,16 @@ export function verifyNextBtnIsEnabled() {
 }
 
 export function clickOnCreateNewSafeBtn() {
-  cy.get(createNewSafeBtn).click().wait(1000)
+  // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
+  cy.get(addAccountsChooserBtn).should('be.visible').click()
+  cy.wait(1000)
+  cy.get('body').then(($body) => {
+    if (!$body.find(`${createNewAccountOption}:visible`).length) {
+      cy.get(addAccountsChooserBtn).filter(':visible').first().click()
+    }
+  })
+  cy.get(createNewAccountOption).should('be.visible').click()
+  cy.wait(1000)
 }
 
 export function clickOnContinueWithWalletBtn() {
@@ -161,12 +237,6 @@ export function clickOnContinueWithWalletBtn() {
 export function verifyConnectWalletBtnDisplayed() {
   return cy.get(connectWalletBtn).should('be.visible')
 }
-export function clickOnConnectWalletBtn() {
-  cy.get(welcomeLoginScreen).within(() => {
-    verifyConnectWalletBtnDisplayed().should('be.enabled').click().wait(1000)
-  })
-}
-
 export function typeWalletName(name) {
   cy.get(main.nameInput).type(name).should('have.value', name)
 }
@@ -193,7 +263,8 @@ export function selectMultiNetwork(index, network) {
 }
 
 export function clickOnNetwrokCheckbox() {
-  cy.get(networkCheckbox).eq(0).click()
+  // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
+  cy.get(networkCheckbox).eq(0).closest('li[role="option"]').click()
 }
 export function enterNetwork(index, network) {
   cy.get('input').eq(index).type(network)
@@ -225,10 +296,6 @@ export function verifyOwnerName(name, index) {
 
 export function verifyOwnerAddress(address, index) {
   cy.get(ownerAddress).eq(index).should('have.value', address)
-}
-
-export function verifyThreshold(number) {
-  cy.get(thresholdInput).should('have.value', number)
 }
 
 export function clickOnSignerAddressInput(index) {
@@ -264,8 +331,8 @@ export function addNewOwner(name, address, index) {
 }
 
 export function updateThreshold(number) {
-  cy.get(thresholdInput).parent().click()
-  cy.get(thresholdItem).contains(number).click()
+  owner.clickOnThresholdDropdown()
+  owner.getThresholdOptions().contains(number).trigger('mousemove').click()
 }
 
 export function removeOwner(index) {
@@ -312,31 +379,28 @@ function getOwnerAddressInput(index) {
   return `input[name="owners.${index}.address"]`
 }
 
-export function assertCFSafeThresholdAndSigners(chainId, threshold, expectedOwnersCount, lsdata) {
-  const localStorageData = lsdata
-  const data = JSON.parse(localStorageData)
-  let thresholdFound = false
+export function assertCFSafeThresholdAndSigners(chainId, threshold, expectedOwnersCount, lsdata, safeAddress) {
+  const data = JSON.parse(lsdata)
+  const chainSafes = data[chainId] || {}
+  const matchedAddress = Object.keys(chainSafes).find((addr) => addr.toLowerCase() === safeAddress.toLowerCase())
+  const safe = matchedAddress ? chainSafes[matchedAddress] : undefined
 
-  for (const address in data[chainId]) {
-    const safe = data[chainId][address]
-
-    if (safe.props.safeAccountConfig.threshold === threshold) {
-      thresholdFound = true
-
-      const ownersCount = safe.props.safeAccountConfig.owners.length
-      if (ownersCount !== expectedOwnersCount) {
-        throw new Error(
-          `Safe at address ${address} on chain ID ${chainId} has ${ownersCount} owners, expected ${expectedOwnersCount}.`,
-        )
-      }
-
-      console.log(`Safe with threshold ${threshold} and ${expectedOwnersCount} owners exists on chain ID ${chainId}.`)
-      break
-    }
+  if (!safe) {
+    throw new Error(`No safe found at address ${safeAddress} on chain ID ${chainId}.`)
   }
 
-  if (!thresholdFound) {
-    throw new Error(`No safe found with threshold ${threshold} on chain ID ${chainId}.`)
+  const actualThreshold = safe.props.safeAccountConfig.threshold
+  if (actualThreshold !== threshold) {
+    throw new Error(
+      `Safe at address ${safeAddress} on chain ID ${chainId} has threshold ${actualThreshold}, expected ${threshold}.`,
+    )
+  }
+
+  const ownersCount = safe.props.safeAccountConfig.owners.length
+  if (ownersCount !== expectedOwnersCount) {
+    throw new Error(
+      `Safe at address ${safeAddress} on chain ID ${chainId} has ${ownersCount} owners, expected ${expectedOwnersCount}.`,
+    )
   }
 }
 
@@ -369,7 +433,7 @@ export function visitWelcomeAccountPage(chain = 'sep') {
 }
 
 export function connectWalletAndCreateSafe(signer) {
-  wallet.connectSigner(signer)
+  wallet.connectSignerViaStorage(signer)
   owner.waitForConnectionStatus()
   clickOnCreateNewSafeBtn()
 }

@@ -10,7 +10,7 @@ import { useContractsGetContractV1Query as useGetContractQuery } from '@safe-glo
 import { isSmartContract } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 
-const THIS_SAFE_ACCOUNT = 'This Safe Account'
+const THIS_SAFE_ACCOUNT = 'This Safe account'
 const UNVERIFIED_CONTRACT = 'Unverified contract'
 
 const useIsContractAddress = (address?: string): boolean => {

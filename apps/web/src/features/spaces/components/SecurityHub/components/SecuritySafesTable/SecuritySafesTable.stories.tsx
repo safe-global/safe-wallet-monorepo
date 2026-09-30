@@ -70,14 +70,13 @@ const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecuritySafesTable',
+  tags: ['autodocs', 'skip-visual-test'],
   component: SecuritySafesTable,
   decorators: [setup.decorator],
   parameters: {
     ...setup.parameters,
     layout: 'fullscreen',
-    chromatic: { disableSnapshot: true },
   },
-  tags: ['autodocs'],
 } satisfies Meta<typeof SecuritySafesTable>
 
 export default meta

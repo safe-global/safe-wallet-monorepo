@@ -13,34 +13,33 @@ const txs = {
   tx4: '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x35aa6e1de3ebc7c5aebe461b4b16adf28a258c9e78d4eb1a48121f1a0a8a58aa',
 }
 
-describe('Transaction share block tests', { defaultCommandTimeout: 30000 }, () => {
+describe('Transaction share link tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
     staticSafes = await getSafes(CATEGORIES.static)
   })
 
-  it('Verify share tx block URL exists on Tx details in Queued list when additional signature is required', () => {
+  it('Verify share tx link exists on Tx details in Queued list when additional signature is required', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + txs.tx1)
-    main.verifyElementsExist([create_tx.txShareBlock])
+    main.verifyElementsExist([create_tx.txShareLinkBtn])
   })
 
-  it('Verify that share block exists in the executed tx', () => {
+  it('Verify that share link exists in the executed tx', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + txs.tx4)
-    main.verifyElementsExist([create_tx.txShareBlock])
-    create_tx.checkCopyBtnExistsInShareblock()
+    main.verifyElementsExist([create_tx.txShareLinkBtn])
   })
 
-  it('Verify that share block is displayed for the proposed for signing txs', () => {
+  it('Verify that share link is displayed for the proposed for signing txs', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
-    main.verifyElementsExist([create_tx.txShareBlock])
+    main.verifyElementsExist([create_tx.txShareLinkBtn])
   })
 
-  it('Verify click on the Copy link, copies the correct URL', () => {
+  it('Verify click on the share link copies the correct URL', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
-    main.verifyElementsExist([create_tx.txShareBlock])
+    main.verifyElementsExist([create_tx.txShareLinkBtn])
     create_tx.verifyCopiedURL()
   })
 
-  it('Verify the tracking for the Share block. GA: Copy deeplink', () => {
+  it('Verify the tracking for the share link. GA: Copy deeplink', () => {
     const shareBlockCopiedLink = [
       {
         eventAction: events.txCopyShareBlockLink.action,
@@ -50,7 +49,7 @@ describe('Transaction share block tests', { defaultCommandTimeout: 30000 }, () =
       },
     ]
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
-    main.verifyElementsExist([create_tx.txShareBlock])
+    main.verifyElementsExist([create_tx.txShareLinkBtn])
     create_tx.verifyCopiedURL()
 
     getEvents()

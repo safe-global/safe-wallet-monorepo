@@ -8,12 +8,15 @@ import type { CombinedState } from '@reduxjs/toolkit/query'
 export const CREDENTIAL_ROUTES = [
   /\/v1\/users/,
   /\/v1\/spaces/,
+  /\/v1\/billing/,
   /\/v1\/auth/,
   /\/v2\/register\/notifications$/,
   /\/v2\/chains\/[^/]+\/notifications\/devices/,
 ]
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'
+
+const SUBSCRIPTIONS_ROUTE = /^\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/
 
 export function isCredentialRoute(url: string) {
   return IS_BEHIND_IAP || CREDENTIAL_ROUTES.some((route) => url.match(route))
@@ -78,6 +81,14 @@ export const rawBaseQuery = fetchBaseQuery({
   },
 })
 
+// An interpolated path param that resolved to '', e.g. `/v1/chains//safes//messages`.
+export const hasEmptyPathSegment = (url: string): boolean =>
+  url
+    .split('?')[0]
+    .split('/')
+    .slice(1)
+    .some((segment) => segment === '')
+
 export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
   args,
   api,
@@ -90,6 +101,16 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   }
 
   const urlEnd = typeof args === 'string' ? args : args.url
+
+  if (hasEmptyPathSegment(urlEnd)) {
+    return {
+      error: {
+        status: 'CUSTOM_ERROR',
+        error: `Refusing to request ${urlEnd}: a path parameter is empty`,
+      },
+    }
+  }
+
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
 
   // Check for credential override in extraOptions (this is where RTK Query passes the options)
@@ -111,6 +132,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
   // Apply platform-specific response handling
   if (response.meta?.response) {
     await customHandleResponse(response.meta.response, urlEnd)
+  }
+
+  if (response.error?.status === 404 && SUBSCRIPTIONS_ROUTE.test(urlEnd)) {
+    return { data: [], meta: response.meta }
   }
 
   return response

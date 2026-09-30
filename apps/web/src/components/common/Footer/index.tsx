@@ -1,35 +1,29 @@
 import type { ReactElement, ReactNode } from 'react'
-import { SvgIcon, Typography } from '@mui/material'
-import GitHubIcon from '@mui/icons-material/GitHub'
-import Link from 'next/link'
+import { Typography } from '@/components/ui/typography'
+import { Github } from 'lucide-react'
+import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
 import ExternalLink from '../ExternalLink'
-import MUILink from '@mui/material/Link'
+import { Link } from '@/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
 import type { FooterProps } from './footer.type'
 
 const footerPages = [
   AppRoutes.settings.index,
   AppRoutes.imprint,
-  AppRoutes.privacy,
   AppRoutes.cookie,
-  AppRoutes.terms,
   AppRoutes.licenses,
+  AppRoutes.welcome.accounts,
+  AppRoutes.welcome.spaces,
 ]
 
 const FooterLink = ({ children, href }: { children: ReactNode; href: string }): ReactElement => {
-  return href ? (
-    <Link href={href} passHref legacyBehavior>
-      <MUILink>{children}</MUILink>
-    </Link>
-  ) : (
-    <MUILink>{children}</MUILink>
-  )
+  return href ? <Link render={<NextLink href={href} />}>{children}</Link> : <Link>{children}</Link>
 }
 
 const Footer: React.FC<FooterProps> = ({
@@ -59,13 +53,17 @@ const Footer: React.FC<FooterProps> = ({
         {isOfficialHost ? (
           <>
             <li>
-              <Typography variant="caption">&copy;{copyrightYear} Safe Labs GmbH</Typography>
+              <Typography variant="paragraph-mini">&copy;{copyrightYear} Safe Labs GmbH</Typography>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
+              <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+                Terms
+              </ExternalLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.privacy)}>Privacy</FooterLink>
+              <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+                Privacy
+              </ExternalLink>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
@@ -83,7 +81,11 @@ const Footer: React.FC<FooterProps> = ({
             )}
             {helpCenter && (
               <li>
-                <ExternalLink href={HELP_CENTER_URL} noIcon sx={{ span: { textDecoration: 'underline' } }}>
+                <ExternalLink
+                  href={HELP_CENTER_URL}
+                  noIcon
+                  className="[&_span]:underline [&_span]:decoration-primary/40"
+                >
                   Help
                 </ExternalLink>
               </li>
@@ -95,8 +97,7 @@ const Footer: React.FC<FooterProps> = ({
 
         <li>
           <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`} noIcon>
-            {versionIcon && <SvgIcon component={GitHubIcon} inheritViewBox fontSize="inherit" sx={{ mr: 0.5 }} />}v
-            {APP_VERSION}
+            {versionIcon && <Github className="mr-1 inline size-3" />}v{APP_VERSION}
           </ExternalLink>
         </li>
 

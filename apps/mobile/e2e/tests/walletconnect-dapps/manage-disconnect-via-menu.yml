@@ -1,0 +1,61 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Disconnect via the row's 3-dots menu: menu → Disconnect → confirm sheet →
+# Disconnect → success toast + row removed (empty state shown).
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'e2eWcSeedSession'
+
+# Open the connected-apps list.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-connected-apps-entry'
+    timeout: 10000
+- tapOn:
+    id: 'settings-connected-apps-entry'
+- extendedWaitUntil:
+    visible:
+      id: 'connected-dapp-row'
+    timeout: 10000
+
+# Open the 3-dots menu. The menu items are OS-rendered (@react-native-menu),
+# so the Disconnect item is only reachable by its visible text.
+- tapOn:
+    id: 'connected-dapp-menu-e2e-session-topic'
+- extendedWaitUntil:
+    visible:
+      text: 'Disconnect'
+    timeout: 5000
+- tapOn:
+    text: 'Disconnect'
+
+# Confirm sheet → Disconnect → toast "Uniswap disconnected" (2.5s window).
+- extendedWaitUntil:
+    visible:
+      id: 'disconnect-confirm-button'
+    timeout: 10000
+- tapOn:
+    id: 'disconnect-confirm-button'
+- extendedWaitUntil:
+    visible:
+      text: 'Uniswap disconnected'
+    timeout: 10000
+
+# Row removed; the empty state is the positive anchor for the removal.
+- extendedWaitUntil:
+    visible:
+      text: 'No connected apps.'
+    timeout: 10000
+- assertNotVisible:
+    id: 'connected-dapp-row'

@@ -1,14 +1,9 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ProposalTypes, SessionTypes } from '@walletconnect/types'
 import { EIP155, BlockedBridges, WarnedBridges, WarnedBridgeNames } from '../constants'
+import { getEip155ChainId, isPairingUri } from '@safe-global/utils/features/walletconnect/utils'
 
-export const isPairingUri = (uri: string): boolean => {
-  return uri.startsWith('wc:')
-}
-
-export const getEip155ChainId = (chainId: string): string => {
-  return `${EIP155}:${chainId}`
-}
+export { isPairingUri, getEip155ChainId }
 
 export const stripEip155Prefix = (eip155Address: string): string => {
   return eip155Address.split(':').pop() ?? ''

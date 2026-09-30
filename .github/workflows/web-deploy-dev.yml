@@ -15,20 +15,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: write
-      id-token: write
-
-    name: Deploy to dev/staging
 
     steps:
       # Post a PR comment before deploying
       - name: Post a comment while building
         if: github.event.number
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: praul
           message: |
@@ -37,23 +37,138 @@ jobs:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           repo-token-user-login: 'github-actions[bot]'
 
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - uses: ./.github/actions/yarn
 
       - uses: ./.github/actions/build
+        env:
+          DATADOG_API_KEY: ${{ secrets.DATADOG_API_KEY }}
+          NEXT_PUBLIC_BEAMER_ID: ${{ secrets.NEXT_PUBLIC_BEAMER_ID }}
+          NEXT_PUBLIC_BLOCKAID_CLIENT_ID: ${{ secrets.NEXT_PUBLIC_BLOCKAID_CLIENT_ID }}
+          NEXT_PUBLIC_BRAND_LOGO: ${{ secrets.NEXT_PUBLIC_BRAND_LOGO }}
+          NEXT_PUBLIC_BRAND_NAME: ${{ secrets.NEXT_PUBLIC_BRAND_NAME }}
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: ${{ secrets.NEXT_PUBLIC_CONFIG_SERVICE_KEY }}
+          NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_APPLICATION_ID }}
+          NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_CLIENT_TOKEN }}
+          NEXT_PUBLIC_DATADOG_RUM_ENV: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_ENV }}
+          NEXT_PUBLIC_DATADOG_RUM_SERVICE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SERVICE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SESSION_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_SITE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_SITE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACE_SAMPLE_RATE }}
+          NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED: ${{ secrets.NEXT_PUBLIC_DATADOG_RUM_TRACING_ENABLED }}
+          NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS: ${{ secrets.NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_OPTIONS_STAGING }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_PRODUCTION }}
+          NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIREBASE_VAPID_KEY_STAGING }}
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION }}
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: ${{ secrets.NEXT_PUBLIC_GATEWAY_URL_STAGING }}
+          NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
+          NEXT_PUBLIC_HYPERNATIVE_CALENDLY: ${{ secrets.NEXT_PUBLIC_HYPERNATIVE_CALENDLY }}
+          NEXT_PUBLIC_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN }}
+          NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_IS_BEHIND_IAP: ${{ secrets.NEXT_PUBLIC_IS_BEHIND_IAP }}
+          NEXT_PUBLIC_IS_OFFICIAL_HOST: ${{ secrets.NEXT_PUBLIC_IS_OFFICIAL_HOST }}
+          NEXT_PUBLIC_PROD_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_PROD_GA_TRACKING_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_PROD_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_PROD_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_PYLON_APP_ID: ${{ secrets.NEXT_PUBLIC_PYLON_APP_ID }}
+          NEXT_PUBLIC_PYLON_CHAT_URL: ${{ secrets.NEXT_PUBLIC_PYLON_CHAT_URL }}
+          NEXT_PUBLIC_SAFENET_CHAIN_ID: ${{ secrets.NEXT_PUBLIC_SAFENET_CHAIN_ID }}
+          NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS: ${{ secrets.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS }}
+          NEXT_PUBLIC_SAFENET_EXPLORER_URL: ${{ secrets.NEXT_PUBLIC_SAFENET_EXPLORER_URL }}
+          NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES: ${{ secrets.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES }}
+          NEXT_PUBLIC_SAFENET_RPC_URLS: ${{ secrets.NEXT_PUBLIC_SAFENET_RPC_URLS }}
+          NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_GA_TRACKING_ID }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN }}
+          NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING: ${{ secrets.NEXT_PUBLIC_SAFE_APPS_INFURA_TOKEN_DEVSTAGING }}
+          NEXT_PUBLIC_SAFE_STATUS_PAGE_URL: ${{ secrets.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL }}
+          NEXT_PUBLIC_SAFE_VERSION: ${{ secrets.NEXT_PUBLIC_SAFE_VERSION }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_ALLOWLIST_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID: ${{ secrets.NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID }}
+          NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALIAS_DOMAIN }}
+          NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS: ${{ secrets.NEXT_PUBLIC_SUPPORT_CHAT_ALLOWED_PARENTS }}
+          NEXT_PUBLIC_TENDERLY_ORG_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_ORG_NAME }}
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME: ${{ secrets.NEXT_PUBLIC_TENDERLY_PROJECT_NAME }}
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: ${{ secrets.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL }}
+          NEXT_PUBLIC_TEST_GA_TRACKING_ID: ${{ secrets.NEXT_PUBLIC_TEST_GA_TRACKING_ID }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_PRODUCTION }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY_STAGING }}
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+          NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
+
+      - name: Upload app build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          secrets: ${{ toJSON(secrets) }}
-          # if: startsWith(github.ref, 'refs/heads/main')
+          name: web-out
+          path: apps/web/out
+          retention-days: 1
+          include-hidden-files: true
+
+  storybook:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - uses: ./.github/actions/yarn
 
       - uses: ./.github/actions/build-storybook
+        env:
+          NEXT_PUBLIC_HUBSPOT_CONFIG: ${{ secrets.NEXT_PUBLIC_HUBSPOT_CONFIG }}
+
+      - name: Upload Storybook build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          secrets: ${{ toJSON(secrets) }}
+          name: web-storybook
+          path: apps/web/out/storybook
+          retention-days: 1
+          include-hidden-files: true
+
+  deploy:
+    needs: [build, storybook]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    name: Deploy to dev/staging
+
+    steps:
+      # This job also runs when a build failed, so that the PR comment below reports the failure
+      - name: Stop if a build failed
+        if: needs.build.result != 'success' || needs.storybook.result != 'success'
+        run: exit 1
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: web-out
+          path: apps/web/out
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: web-storybook
+          path: apps/web/out/storybook
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -92,7 +207,7 @@ jobs:
       # Comment
       - name: Post a deployment link in the PR
         if: always() && github.event.number
-        uses: mshick/add-pr-comment@8e4927817251f1ff60c001f04568532b38e0b4a0 # v3.11.0
+        uses: mshick/add-pr-comment@ec328af66588ab8f77cdeb2c264f14aba45bbf59 # v3.12.0
         with:
           message-id: praul
           message: |

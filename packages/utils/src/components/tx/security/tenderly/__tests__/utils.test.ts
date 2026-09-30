@@ -9,6 +9,7 @@ import {
   getCallTraceErrors,
   getSimulationStatus,
   getSimulationLink,
+  getPublicSimulatorLink,
 } from '../utils'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import type { SafeTransaction, SafeSignature } from '@safe-global/types-kit'
@@ -297,6 +298,29 @@ describe('getSimulationStatus', () => {
       isSuccess: false,
       isCallTraceError: false,
       isError: false,
+    })
+  })
+})
+
+describe('getPublicSimulatorLink', () => {
+  it('points at the public simulator with the inner call pre-filled and sent from the Safe', () => {
+    const link = new URL(
+      getPublicSimulatorLink({
+        chainId: '1',
+        from: '0x1234567890123456789012345678901234567890',
+        to: '0x00000000000000000000000000000000000000aa',
+        value: '1000',
+        data: '0xa9059cbb',
+      }),
+    )
+
+    expect(link.origin + link.pathname).toBe('https://dashboard.tenderly.co/simulator/new')
+    expect(Object.fromEntries(link.searchParams)).toEqual({
+      network: '1',
+      from: '0x1234567890123456789012345678901234567890',
+      contractAddress: '0x00000000000000000000000000000000000000aa',
+      value: '1000',
+      rawFunctionInput: '0xa9059cbb',
     })
   })
 })

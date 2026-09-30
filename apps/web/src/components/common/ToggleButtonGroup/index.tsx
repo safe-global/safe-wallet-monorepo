@@ -1,37 +1,6 @@
 import type { ReactNode, ReactElement } from 'react'
 import React from 'react'
-import {
-  ToggleButtonGroup as MuiToggleButtonGroup,
-  ToggleButton,
-  toggleButtonGroupClasses,
-  styled,
-  svgIconClasses,
-  Box,
-} from '@mui/material'
-
-// @ts-ignore
-const StyledMuiToggleButtonGroup = styled(MuiToggleButtonGroup)(({ theme }) => ({
-  '&': {
-    backgroundColor: theme.palette.background.paper,
-  },
-  [`& .${toggleButtonGroupClasses.grouped}`]: {
-    margin: theme.spacing(0.5),
-    padding: theme.spacing(0.5),
-    border: 0,
-    borderRadius: theme.shape.borderRadius,
-    [`&.${toggleButtonGroupClasses.disabled}`]: {
-      border: 0,
-    },
-  },
-  [`& .${toggleButtonGroupClasses.middleButton},& .${toggleButtonGroupClasses.lastButton}`]: {
-    marginLeft: -1,
-    borderLeft: '1px solid transparent',
-  },
-  [`& .${svgIconClasses.root}`]: {
-    width: 16,
-    height: 16,
-  },
-}))
+import { Toggle } from '@/components/ui/toggle'
 
 interface ToggleButtonGroupProps {
   value?: number
@@ -45,26 +14,30 @@ interface ToggleButtonGroupProps {
 export const ToggleButtonGroup = ({ value = 0, children, onChange }: ToggleButtonGroupProps): ReactElement | null => {
   const [currentValue, setCurrentValue] = React.useState(value)
 
-  const changeView = (_: React.MouseEvent, newValue: number) => {
-    if (newValue != null) {
+  const changeView = (newValue: number) => {
+    if (newValue !== currentValue) {
       setCurrentValue(newValue)
       onChange?.(newValue)
     }
   }
 
   return (
-    <StyledMuiToggleButtonGroup
-      size="small"
-      value={currentValue}
-      exclusive
-      onChange={changeView}
+    <div
+      role="group"
       aria-label="text alignment"
+      className="inline-flex gap-1 rounded-md bg-[var(--color-background-paper)] p-0.5 [&_svg]:size-4"
     >
       {children.map(({ title }, index) => (
-        <ToggleButton key={index} value={index}>
-          <Box px={1}>{title}</Box>
-        </ToggleButton>
+        <Toggle
+          key={index}
+          size="sm"
+          pressed={currentValue === index}
+          onPressedChange={() => changeView(index)}
+          className="rounded-md border-0 px-2 py-0.5"
+        >
+          <span className="px-1">{title}</span>
+        </Toggle>
       ))}
-    </StyledMuiToggleButtonGroup>
+    </div>
   )
 }

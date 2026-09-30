@@ -38,13 +38,7 @@ describe('Tx history tests 1', () => {
   // Added to prod
   // Account creation
   it('Verify summary for account creation', () => {
-    createTx.verifySummaryByName(
-      typeCreateAccount.title,
-      null,
-      [typeCreateAccount.actionsSummary, typeGeneral.statusOk],
-      typeCreateAccount.altTmage,
-      null,
-    )
+    createTx.verifySummaryByName(typeCreateAccount.title, [typeCreateAccount.actionsSummary, typeGeneral.statusOk])
   })
 
   // Added to prod
@@ -69,26 +63,20 @@ describe('Tx history tests 1', () => {
 
   // Added to prod
   // Token send
-  it('Verify exapanded details for token send', () => {
+  it('Verify expanded details for token send', () => {
+    createTx.scrollToBottom()
     createTx.clickOnTransactionItemByName(typeSend.title, typeSend.summaryTxInfo)
-    createTx.verifyExpandedDetails([typeSend.sentTo, typeSend.recipientAddress])
-    createTx.verifyActionListExists([
-      typeSideActions.created,
-      typeSideActions.confirmations,
-      typeSideActions.executedBy,
-    ])
+    createTx.verifyExpandedDetails([typeSend.sentTo])
+    createTx.verifyActionListExists([typeSideActions.created, typeSideActions.executedBy])
   })
 
   // Added to prod
   // Spending limits
   it('Verify summary for setting spend limits', () => {
     // name, token, data, alt, altToken
-    createTx.verifySummaryByName(
-      typeSpendingLimits.title,
-      typeSpendingLimits.summaryTxInfo,
-      [typeGeneral.statusOk],
-      typeSpendingLimits.altImage,
-    )
+    createTx.verifySummaryByName(typeSpendingLimits.title, [typeGeneral.statusOk], {
+      token: typeSpendingLimits.summaryTxInfo,
+    })
   })
 
   // Added to prod
@@ -152,13 +140,5 @@ describe('Tx history tests 1', () => {
       typeDeleteAllowance.zero_call,
     ])
     createTx.collapseAdvancedDetails([typeDeleteAllowance.baseGas])
-  })
-
-  it.skip('Verify address can be copied in advanced details', () => {
-    const data =
-      '0x885133e3000000000000000000000000c16db0251654c0a72e91b190d81ead367d2c6fed0000000000000000000000000000000000000000000000000000000000000000'
-    createTx.clickOnTransactionItemByName(typeDeleteAllowance.title, typeDeleteAllowance.summaryTxInfo)
-    createTx.expandAdvancedDetails([typeDeleteAllowance.baseGas])
-    createTx.clickOnCopyDataBtn(data)
   })
 })

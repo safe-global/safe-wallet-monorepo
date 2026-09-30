@@ -1,7 +1,6 @@
 import React from 'react'
 import { render, screen, renderWithUserEvent } from '@/tests/test-utils'
 import { AnalysisDetailsDropdown } from '../AnalysisDetailsDropdown'
-import { Box } from '@mui/material'
 
 describe('AnalysisDetailsDropdown', () => {
   beforeEach(() => {
@@ -155,9 +154,9 @@ describe('AnalysisDetailsDropdown', () => {
   describe('Content Wrapper', () => {
     it('should apply contentWrapper when provided', () => {
       const contentWrapper = (children: React.ReactNode) => (
-        <Box data-testid="wrapped-content" sx={{ padding: 2 }}>
+        <div data-testid="wrapped-content" className="p-4">
           {children}
-        </Box>
+        </div>
       )
 
       render(

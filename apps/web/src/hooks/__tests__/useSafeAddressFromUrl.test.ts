@@ -12,23 +12,23 @@ jest.mock('next/compat/router', () => ({
   })),
 }))
 
+const mockIsHydrated = jest.fn(() => true)
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockIsHydrated(),
+}))
+
 // Tests for the useSafeAddress hook
 describe('useSafeAddress hook', () => {
-  const originalLocation = window.location
+  const originalLocation = { href: window.location.href }
 
   beforeEach(() => {
+    mockIsHydrated.mockReturnValue(true)
     // Reset location.search so the fallback doesn't pick up stale values
-    Object.defineProperty(window, 'location', {
-      value: { ...originalLocation, search: '' },
-      writable: true,
-    })
+    window.history.replaceState(null, '', window.location.pathname)
   })
 
   afterAll(() => {
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-      writable: true,
-    })
+    window.history.replaceState(null, '', originalLocation.href)
   })
 
   it('should return the safe address', () => {
@@ -76,10 +76,7 @@ describe('useSafeAddress hook', () => {
       query: {},
     }))
 
-    Object.defineProperty(window, 'location', {
-      value: { ...originalLocation, search: '?safe=eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d' },
-      writable: true,
-    })
+    window.history.replaceState(null, '', '?safe=eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d')
 
     const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('0x220866B1A2219f40e72f5c628B65D54268cA3A9D')
@@ -87,6 +84,27 @@ describe('useSafeAddress hook', () => {
 
   it('should return empty address when router is null (not mounted)', () => {
     ;(useRouter as any).mockImplementation(() => null)
+
+    const { result } = renderHook(() => useSafeAddressFromUrl())
+    expect(result.current).toBe('')
+  })
+
+  it('should return an empty address before hydration even when the URL has one', () => {
+    mockIsHydrated.mockReturnValue(false)
+    ;(useRouter as any).mockImplementation(() => ({
+      pathname: '/safe/home',
+      query: { safe: 'eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d' },
+    }))
+
+    const { result } = renderHook(() => useSafeAddressFromUrl())
+    expect(result.current).toBe('')
+  })
+
+  it('should return an empty address before hydration when the address only comes from location.search', () => {
+    mockIsHydrated.mockReturnValue(false)
+    ;(useRouter as any).mockImplementation(() => ({ pathname: '/safe/home', query: {} }))
+
+    window.history.replaceState(null, '', '?safe=eth:0x220866b1a2219f40e72f5c628b65d54268ca3a9d')
 
     const { result } = renderHook(() => useSafeAddressFromUrl())
     expect(result.current).toBe('')

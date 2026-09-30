@@ -1,10 +1,15 @@
-import { render } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import { HnAnalysisGroupCard } from './index'
-import type { AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard'
-import { AnalysisGroupCard } from '@/features/safe-shield/components/AnalysisGroupCard'
+import type { AnalysisGroupCardProps } from '@/features/safe-shield'
+import { AnalysisGroupCard } from '@/features/safe-shield'
+import React from 'react'
 
 jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({
-  AnalysisGroupCard: jest.fn(() => <div data-testid="analysis-group-card">AnalysisGroupCard</div>),
+  AnalysisGroupCard: jest.fn(({ footer }: AnalysisGroupCardProps) => (
+    <div data-testid="analysis-group-card">
+      <div data-testid="footer-slot">{footer}</div>
+    </div>
+  )),
 }))
 
 jest.mock('../HypernativeLogo', () => ({
@@ -41,5 +46,18 @@ describe('HnAnalysisGroupCard', () => {
 
     const receivedProps = mockAnalysisGroupCard.mock.calls[0][0] as AnalysisGroupCardProps
     expect(receivedProps.footer).toBeDefined()
+  })
+
+  it('renders the overflow row above the "by Hypernative" footer when provided', () => {
+    render(<HnAnalysisGroupCard data={{}} overflowRow={<div data-testid="overflow-row">+2 More</div>} />)
+
+    expect(screen.getByTestId('overflow-row')).toBeInTheDocument()
+    expect(screen.getByText('by')).toBeInTheDocument()
+  })
+
+  it('does not render an overflow row when none is provided', () => {
+    render(<HnAnalysisGroupCard data={{}} />)
+
+    expect(screen.queryByTestId('overflow-row')).not.toBeInTheDocument()
   })
 })

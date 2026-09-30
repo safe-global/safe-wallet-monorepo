@@ -47,19 +47,16 @@ const handleRelayWatcherError = (
 }
 
 /***
- * Gelato endpoint is not reliable at times
- * and sometimes it returns no response yet the transaction might have been submitted to the blockchain.
- *
- * Case 1: Transaction was executed but since we're not getting response from Gelato,
+ * Case 1: Transaction was executed but we're not getting response from the relayer,
  * we would be polling it for 3 minutes. For the user it would be like the transaction is stuck.
  *
  * That is why the relayer is running together with the indexing watcher.
  * IF the indexing watcher finds out that the transaction was executed successfully,
- * the Gelato watcher will be stopped.
+ * the relayer watcher will be stopped.
  *
  * Case 2: The transaction was not successful executed we would be polling it for 3 minutes,
  *  both relayer and indexer,
- *  but after 3 minutes the Gelato watcher is gonna timeout and clean up the transaction from pending
+ * but after 3 minutes the relayer watcher is gonna timeout and clean up the transaction from pending
  *
  *
  */
@@ -68,7 +65,12 @@ const startRelayWatcher = (listenerApi: AppListenerEffectAPI, txId: string, task
   if (!baseUrl) {
     logger.error('CGW base URL not configured for relay watcher', { txId, taskId })
     listenerApi.dispatch(
-      setPendingTxStatus({ txId, chainId, status: PendingStatus.FAILED, error: 'CGW base URL not configured' }),
+      setPendingTxStatus({
+        txId,
+        chainId,
+        status: PendingStatus.FAILED,
+        error: 'Could not track this transaction. Check the network explorer.',
+      }),
     )
     return
   }

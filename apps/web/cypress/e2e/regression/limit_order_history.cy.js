@@ -44,7 +44,7 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
       const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
       const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
 
-      create_tx.verifySummaryByName(swapsHistory.limitorder_title, null, [typeGeneral.statusOk])
+      create_tx.verifySummaryByName(swapsHistory.limitorder_title, [typeGeneral.statusOk])
       main.verifyElementsExist([create_tx.altImgUsdc, create_tx.altImgUsdt], create_tx.altImgLimitOrder)
       create_tx.verifyExpandedDetails([swapsHistory.sellOrder, swapsHistory.sell, usdc, eq, swapsHistory.filled])
       create_tx.clickOnAdvancedDetails()

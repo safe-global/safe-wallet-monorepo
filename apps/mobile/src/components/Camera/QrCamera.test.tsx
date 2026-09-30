@@ -1,4 +1,5 @@
 import React from 'react'
+import { Text } from 'react-native'
 import { fireEvent, render } from '@/src/tests/test-utils'
 import { QrCamera } from './QrCamera'
 
@@ -78,5 +79,32 @@ describe('QrCamera', () => {
     fireEvent.press(getByTestId('camera-lens-wrapper'))
 
     expect(onActivateCamera).toHaveBeenCalledTimes(1)
+  })
+
+  it('renders centerOverlay instead of the permission CTA when provided (granted)', () => {
+    const onActivateCamera = jest.fn()
+    const { getByText, queryByTestId } = renderQrCamera({
+      permission: 'granted',
+      isCameraActive: false,
+      centerOverlay: <Text>overlay-content</Text>,
+      onActivateCamera,
+    })
+
+    expect(getByText('overlay-content')).toBeTruthy()
+    // The "Continue" activation button is suppressed while an overlay owns the lens.
+    expect(queryByTestId('camera-continue')).toBeNull()
+  })
+
+  it('does not activate the camera when tapping the lens while centerOverlay owns it', () => {
+    const onActivateCamera = jest.fn()
+    const { getByTestId } = renderQrCamera({
+      permission: 'granted',
+      isCameraActive: false,
+      centerOverlay: <Text>overlay-content</Text>,
+      onActivateCamera,
+    })
+
+    fireEvent.press(getByTestId('camera-lens-wrapper'))
+    expect(onActivateCamera).not.toHaveBeenCalled()
   })
 })

@@ -20,7 +20,7 @@ export interface TrustSafeParams {
  *
  * Used by:
  * - SafeShieldContext (for untrusted Safe warning)
- * - useSafeSelectionModal (for single additions)
+ * - useTrustedSafesModal (for single additions)
  *
  * @returns trustSafe - function to add a Safe to the trusted list
  */
@@ -56,7 +56,7 @@ export function useTrustSafe() {
       dispatch(
         showNotification({
           title: 'Safe confirmed',
-          message: 'This Safe has been added to your trusted list',
+          message: 'This Safe has been added to your accounts',
           groupKey: `pin-safe-success-${address}`,
           variant: 'success',
         }),

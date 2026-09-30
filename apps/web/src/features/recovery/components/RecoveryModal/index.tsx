@@ -1,13 +1,12 @@
-import { Backdrop, Fade } from '@mui/material'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
 
-import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
 import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'
 import { RecoveryProposalCard } from '../RecoveryCards/RecoveryProposalCard'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
+import { useIsRecoverer } from '../../hooks/useIsRecoverer'
 import madProps from '@/utils/mad-props'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -15,7 +14,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function InternalRecoveryModal({
   isOwner,
@@ -95,11 +94,13 @@ function InternalRecoveryModal({
   }, [router])
 
   return (
-    <Fade in={!!modal}>
-      <Backdrop open={!!modal} sx={{ zIndex: 3, bgcolor: ({ palette }) => palette.background.main }}>
-        {modal}
-      </Backdrop>
-    </Fade>
+    <div
+      className={`fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 ${
+        modal ? 'opacity-100' : 'pointer-events-none opacity-0'
+      }`}
+    >
+      {modal}
+    </div>
   )
 }
 

@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import useAutoScan, { type AutoScanServices } from '../useAutoScan'
 import type { ScanContext, ScanResult, ScannerId, SecurityScanner } from '@/features/security/types'
-import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub'
+import type { SpaceSafeEntry, SelectedSafe } from '../../components/SecurityHub'
 
 // useSafeScanContext is mocked to return the value we inject via `mockScanContext`
 // so these tests stay focused on queue/scanner orchestration, not the context builder.
@@ -187,9 +187,11 @@ describe('useAutoScan', () => {
     )
   })
 
-  it('advances past failing scanners — queue still drains', async () => {
+  it('does not commit a partial scan (a scanner failed) but still drains the queue', async () => {
     const onComplete = jest.fn()
-    // One pass + one fail; the Safe should still complete and the queue should drain.
+    // One pass + one fail: the Safe's result set is incomplete, so it must NOT be
+    // committed (committing a partial set would shift the gauge score between scans).
+    // The queue must still advance so it doesn't hang.
     const passing = mkScanner('account_setup', mkResult({ status: 'clear' }))
     const failing = mkFailingScanner('modules')
     const services = mkServices([passing, failing])
@@ -202,11 +204,78 @@ describe('useAutoScan', () => {
       result.current.startScan()
     })
 
+    // Queue drains: scanning key released and the run stops.
+    await waitFor(() => expect(result.current.isRunning).toBe(false))
+    expect(result.current.scanningKeys.has(`${SAFE_A}:${CHAIN}`)).toBe(false)
+    // Partial scan is NOT committed anywhere…
+    expect(onComplete).not.toHaveBeenCalled()
+    expect(services.setCachedScan).not.toHaveBeenCalled()
+    // …and the incomplete state is surfaced so the gauge can keep the prior score.
+    expect(result.current.scanIncomplete).toBe(true)
+  })
+
+  it('commits a complete scan and reports scanIncomplete=false', async () => {
+    const onComplete = jest.fn()
+    const a = mkScanner('account_setup', mkResult({ status: 'clear' }))
+    const b = mkScanner('modules', mkResult({ status: 'clear' }))
+    const services = mkServices([a, b])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, onComplete))
+
+    act(() => {
+      result.current.startScan()
+    })
+
     await waitFor(() => expect(onComplete).toHaveBeenCalledTimes(1))
-    // Passing result is recorded; failing one is omitted (not rethrown)
-    const [, , , results] = onComplete.mock.calls[0]
-    expect(results).toHaveProperty('account_setup')
-    expect(results).not.toHaveProperty('modules')
+    expect(services.setCachedScan).toHaveBeenCalledTimes(1)
+    expect(result.current.scanIncomplete).toBe(false)
+  })
+
+  it('resets scanIncomplete when a fresh scan starts', async () => {
+    const onComplete = jest.fn()
+    const passing = mkScanner('account_setup', mkResult({ status: 'clear' }))
+    const failing = mkFailingScanner('modules')
+    const services = mkServices([passing, failing])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, onComplete))
+
+    act(() => {
+      result.current.startScan()
+    })
+    await waitFor(() => expect(result.current.scanIncomplete).toBe(true))
+
+    // Starting a new scan clears the stale incomplete flag immediately.
+    act(() => {
+      result.current.startScan()
+    })
+    expect(result.current.scanIncomplete).toBe(false)
+  })
+
+  it('marks scanIncomplete when a target is bailed past', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const onComplete = jest.fn()
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+
+    // scanContext never resolves for SAFE_A → bail path fires.
+    mockScanContext = null
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, onComplete))
+
+    act(() => {
+      result.current.startScan()
+    })
+
+    await act(async () => {
+      jest.advanceTimersByTime(10_000)
+    })
+
+    await waitFor(() => expect(result.current.scanIncomplete).toBe(true))
+    expect(onComplete).not.toHaveBeenCalled()
   })
 
   it('sets justCompleted briefly after the queue drains, then clears it', async () => {
@@ -264,6 +333,128 @@ describe('useAutoScan', () => {
     await waitFor(() => expect(result.current.scanningKeys.has(`${SAFE_A}:${CHAIN}`)).toBe(false))
     // SAFE_B runs normally and completes.
     await waitFor(() => expect(onComplete).toHaveBeenCalledWith(SAFE_B, CHAIN, expect.any(Number), expect.any(Object)))
+  })
+
+  it('flags isRescanning while a manual re-scan runs and clears it when done', async () => {
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, jest.fn()))
+
+    act(() => {
+      result.current.startScan({ isManual: true })
+    })
+    expect(result.current.isRescanning).toBe(true)
+
+    // Let the scan finish, then advance past the minimum-visible window.
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    act(() => {
+      jest.advanceTimersByTime(1_000)
+    })
+    expect(result.current.isRunning).toBe(false)
+    expect(result.current.isRescanning).toBe(false)
+  })
+
+  it('keeps a manual re-scan visible for a minimum duration even if it finishes instantly', async () => {
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, jest.fn()))
+
+    act(() => {
+      result.current.startScan({ isManual: true })
+    })
+
+    // Let the fast scanner resolve + effects flush WITHOUT advancing the min-visible timer.
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    // Scan already completed, but the "Scanning..." state must still be showing.
+    expect(result.current.isRunning).toBe(true)
+
+    // Once the minimum window (1s) elapses, it finishes.
+    act(() => {
+      jest.advanceTimersByTime(1_000)
+    })
+    expect(result.current.isRunning).toBe(false)
+  })
+
+  it('does not hold an automatic scan open for the minimum duration', async () => {
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, jest.fn()))
+
+    act(() => {
+      result.current.startScan()
+    })
+
+    // Automatic scan finishes as soon as the scanner resolves — no minimum-visible hold.
+    await waitFor(() => expect(result.current.isRunning).toBe(false))
+  })
+
+  it('does not flag isRescanning for an automatic scan', () => {
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+    mockScanContext = mkContext()
+
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, jest.fn()))
+
+    act(() => {
+      result.current.startScan()
+    })
+    expect(result.current.isRunning).toBe(true)
+    expect(result.current.isRescanning).toBe(false)
+  })
+
+  it('does not bail while the tab is hidden, then resumes the countdown on return', async () => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {})
+    const setVisibility = (state: 'visible' | 'hidden') => {
+      Object.defineProperty(document, 'visibilityState', { value: state, configurable: true })
+      document.dispatchEvent(new Event('visibilitychange'))
+    }
+
+    const scanner = mkScanner('account_setup')
+    const services = mkServices([scanner])
+    // Context never resolves so only the bail timer can advance the queue.
+    mockScanContext = null
+    const queue = [mkSelected(SAFE_A)]
+    const { result } = renderHook(() => useAutoScan(queue, [mkSafe(SAFE_A)], {}, services, jest.fn()))
+
+    act(() => {
+      result.current.startScan()
+    })
+
+    // Tab hidden: even well past the bail window, the scan must NOT be marked incomplete.
+    act(() => {
+      setVisibility('hidden')
+    })
+    act(() => {
+      jest.advanceTimersByTime(10_000)
+    })
+    expect(result.current.scanIncomplete).toBe(false)
+    expect(result.current.scanningKeys.has(`${SAFE_A}:${CHAIN}`)).toBe(true)
+
+    // Back to the tab: the countdown restarts and bails after the window elapses.
+    // Advance well past any reasonable bail window so the test is robust to its value.
+    act(() => {
+      setVisibility('visible')
+    })
+    await act(async () => {
+      jest.advanceTimersByTime(10_000)
+    })
+    await waitFor(() => expect(result.current.scanIncomplete).toBe(true))
   })
 
   it('removes the scanned key from scanningKeys when its scanners complete', async () => {

@@ -4,7 +4,7 @@ import {
   TransactionTokenType,
   TransferDirection,
 } from '@safe-global/store/gateway/types'
-import { render } from '@/tests/test-utils'
+import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import TransferTxInfo from '.'
 import { faker } from '@faker-js/faker'
 import { parseUnits } from 'ethers'
@@ -52,7 +52,7 @@ const renderTransferTxInfo = ({
   return {
     recipient,
     sender,
-    ...render(
+    ...renderWithUserEvent(
       <TransferTxInfo
         imitation={imitation}
         trusted={trusted}
@@ -108,8 +108,8 @@ describe('TransferTxInfo', () => {
   })
 
   describe('should render untrusted', () => {
-    it('outgoing tx', () => {
-      const { recipient, getByText, queryByText, getByLabelText } = renderTransferTxInfo({
+    it('outgoing tx', async () => {
+      const { recipient, getByText, queryByText, container, user } = renderTransferTxInfo({
         trusted: false,
         tokenTrusted: false,
       })
@@ -117,13 +117,20 @@ describe('TransferTxInfo', () => {
       expect(getByText('1 TST')).toBeInTheDocument()
       expect(getByText(recipient)).toBeInTheDocument()
       expect(queryByText('malicious', { exact: false })).toBeNull()
+
+      // The untrusted-token warning text is now Base UI tooltip content, revealed on hover
+      const warningTrigger = container.querySelector('.leading-4[data-slot="tooltip-trigger"]') as HTMLElement
+      await user.hover(warningTrigger)
       expect(
-        getByLabelText('This token isn\u2019t verified on major token lists', { exact: false }),
+        await screen.findByText('verified on major token lists', {
+          exact: false,
+          selector: '[data-slot="tooltip-content"]',
+        }),
       ).toBeInTheDocument()
     })
 
-    it('incoming tx', () => {
-      const { sender, getByText, queryByText, queryByLabelText } = renderTransferTxInfo({
+    it('incoming tx', async () => {
+      const { sender, getByText, queryByText, container, user } = renderTransferTxInfo({
         direction: TransferDirection.INCOMING,
         trusted: false,
         tokenValue: parseUnits('12.34', 18).toString(),
@@ -132,8 +139,14 @@ describe('TransferTxInfo', () => {
       expect(getByText('12.34 TST')).toBeInTheDocument()
       expect(getByText(sender)).toBeInTheDocument()
       expect(queryByText('malicious', { exact: false })).toBeNull()
+
+      const warningTrigger = container.querySelector('.leading-4[data-slot="tooltip-trigger"]') as HTMLElement
+      await user.hover(warningTrigger)
       expect(
-        queryByLabelText('This token isn\u2019t verified on major token lists', { exact: false }),
+        await screen.findByText('verified on major token lists', {
+          exact: false,
+          selector: '[data-slot="tooltip-content"]',
+        }),
       ).toBeInTheDocument()
     })
   })
@@ -182,12 +195,13 @@ describe('TransferTxInfo', () => {
   })
 
   describe('fiat value display', () => {
-    it('should show fiat value when useTransferFiatValue returns a value', () => {
+    it('should show fiat value when useTransferFiatValue returns a value', async () => {
       useTransferFiatValueSpy.mockReturnValue(1000)
 
-      const { getByLabelText } = renderTransferTxInfo()
+      const { user } = renderTransferTxInfo()
 
-      expect(getByLabelText('$ 1,000.00')).toBeInTheDocument()
+      await user.hover(screen.getByText('$ 1,000'))
+      expect(await screen.findByText('$ 1,000.00', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
     })
 
     it('should not show fiat value when useTransferFiatValue returns null', () => {
@@ -196,14 +210,15 @@ describe('TransferTxInfo', () => {
       expect(queryByLabelText(/^\$/)).not.toBeInTheDocument()
     })
 
-    it('should show a different fiat value when hook returns a different amount', () => {
+    it('should show a different fiat value when hook returns a different amount', async () => {
       useTransferFiatValueSpy.mockReturnValue(500)
 
-      const { getByLabelText } = renderTransferTxInfo({
+      const { user } = renderTransferTxInfo({
         tokenValue: parseUnits('5', 18).toString(),
       })
 
-      expect(getByLabelText('$ 500.00')).toBeInTheDocument()
+      await user.hover(screen.getByText('$ 500'))
+      expect(await screen.findByText('$ 500.00', { selector: '[data-slot="tooltip-content"]' })).toBeInTheDocument()
     })
   })
 })

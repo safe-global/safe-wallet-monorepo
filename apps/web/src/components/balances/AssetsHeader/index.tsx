@@ -2,7 +2,7 @@ import { useMemo, type ReactElement, type ReactNode } from 'react'
 
 import NavTabs from '@/components/common/NavTabs'
 import PageHeader from '@/components/common/PageHeader'
-import { balancesNavItems } from '@/components/sidebar/SidebarNavigation/config'
+import { balancesNavItems } from '@/components/common/NavTabs/navItemsConfig'
 
 import css from '@/components/common/PageHeader/styles.module.css'
 import { useCurrentChain } from '@/hooks/useChains'

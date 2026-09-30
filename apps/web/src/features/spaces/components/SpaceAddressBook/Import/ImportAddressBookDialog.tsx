@@ -1,50 +1,51 @@
 import { FormProvider, useForm } from 'react-hook-form'
-import {
-  Alert,
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Container,
-  DialogActions,
-  DialogContent,
-  InputAdornment,
-  SvgIcon,
-  TextField,
-  Typography,
-} from '@mui/material'
-
-import ModalDialog from '@/components/common/ModalDialog'
-import ContactsList from './ContactsList'
-import React, { useCallback, useMemo, useState } from 'react'
-import useAllAddressBooks from '@/hooks/useAllAddressBooks'
-import css from '../../AddAccounts/styles.module.css'
-import SearchIcon from '@/public/images/common/search.svg'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
+
+import { Alert } from '@/components/ui/alert'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { SearchInput } from '@/components/ui/search-input'
+import DialogActions from '@/components/common/DialogActions'
+
+import ContactsList from './ContactsList'
+import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useContactSearch } from '../useContactSearch'
 import { createContactItems, flattenAddressBook } from '../utils'
 import useChains from '@/hooks/useChains'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId, useGetSpaceAddressBook, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
+import type { SerializedError } from '@reduxjs/toolkit'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type ImportContactsFormValues = {
-  contacts: Record<string, string | undefined> // e.g. "1:0x123": "Alice"
+  contacts: Record<string, string | undefined>
 }
+
+const SUCCESS_CLOSE_DELAY_MS = 500
 
 const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) => {
   const [error, setError] = useState<string>()
   const [searchQuery, setSearchQuery] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
+  const handleCloseRef = useRef(handleClose)
   const { configs } = useChains()
   const dispatch = useAppDispatch()
   const spaceId = useCurrentSpaceId()
+  const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
 
   const allAddressBooks = useAllAddressBooks()
+  const spaceContacts = useGetSpaceAddressBook()
   const allContactItems = useMemo(
     () =>
       flattenAddressBook(allAddressBooks).filter((contactItem) =>
@@ -53,21 +54,33 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
     [allAddressBooks, configs],
   )
 
+  const hasNoImportableContacts = useMemo(
+    () =>
+      allContactItems.length === 0 ||
+      allContactItems.every((contactItem) =>
+        spaceContacts.some((spaceContact) => sameAddress(spaceContact.address, contactItem.address)),
+      ),
+    [allContactItems, spaceContacts],
+  )
+
+  useEffect(() => {
+    handleCloseRef.current = handleClose
+  })
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
+
+  useEffect(() => () => handleSearch.cancel(), [handleSearch])
   const filteredEntries = useContactSearch(allContactItems, searchQuery)
 
   const formMethods = useForm<ImportContactsFormValues>({
-    mode: 'onChange',
-    defaultValues: {
-      contacts: {},
-    },
+    defaultValues: { contacts: {} },
   })
 
-  const { handleSubmit, formState, watch } = formMethods
+  const { handleSubmit, watch } = formMethods
 
   const selectedContacts = watch('contacts')
-  const selectedContactsLength = Object.values(selectedContacts).filter(Boolean)
+  const selectedCount = Object.values(selectedContacts).filter(Boolean).length
 
   const onSubmit = handleSubmit(async (data) => {
     setError(undefined)
@@ -77,117 +90,85 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
       setIsSubmitting(true)
 
       const result = await upsertAddressBook({
-        spaceId: Number(spaceId),
+        spaceId: spaceId ?? '',
         upsertAddressBookItemsDto: { items: contactItems },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
-        setError('Something went wrong. Please try again.')
+        setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
       }
 
+      const contactCount = contactItems.length
+      const networkCount = new Set(contactItems.flatMap((item) => item.chainIds)).size
+      const successMessage = getImportSuccessMessage({
+        count: contactCount,
+        networkCount,
+        bookLabel: workspaceAddressBookLabel,
+      })
+
       dispatch(
         showNotification({
-          message: `Imported contact(s)`,
+          message: successMessage,
           variant: 'success',
           groupKey: 'import-contacts-success',
         }),
       )
 
-      trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT)
+      trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT, { [MixpanelEventParams.ENTRY_COUNT]: contactCount })
 
-      handleClose()
+      setIsSuccess(true)
     } catch (e) {
-      setError('Something went wrong. Please try again.')
+      setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     } finally {
       setIsSubmitting(false)
     }
   })
 
+  useEffect(() => {
+    if (!isSuccess) return
+    const timer = setTimeout(() => handleCloseRef.current(), SUCCESS_CLOSE_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [isSuccess])
+
   return (
-    <ModalDialog
-      open
-      onClose={handleClose}
-      hideChainIndicator
-      fullScreen
-      PaperProps={{ sx: { backgroundColor: 'border.background' } }}
-    >
-      <DialogContent sx={{ display: 'flex', alignItems: 'center' }}>
-        <Container fixed maxWidth="sm" disableGutters>
-          <Typography component="div" variant="h1" mb={3}>
-            Import address book
-          </Typography>
-          <Card sx={{ border: '0' }}>
-            <FormProvider {...formMethods}>
-              <form onSubmit={onSubmit}>
-                <Box px={2} pt={2} mb={2}>
-                  <TextField
-                    id="search-by-name"
-                    placeholder="Search"
-                    aria-label="Search contact list by name or address"
-                    variant="filled"
-                    hiddenLabel
-                    onChange={(e) => {
-                      handleSearch(e.target.value)
-                    }}
-                    className={css.search}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SvgIcon
-                            component={SearchIcon}
-                            inheritViewBox
-                            fontWeight="bold"
-                            fontSize="small"
-                            sx={{
-                              color: 'var(--color-border-main)',
-                              '.MuiInputBase-root.Mui-focused &': { color: 'var(--color-text-primary)' },
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                      disableUnderline: true,
-                    }}
-                    fullWidth
-                    size="small"
-                  />
-                </Box>
+    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent padding="none">
+        <DialogHeader divided>
+          <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
+        </DialogHeader>
 
-                {searchQuery ? (
-                  <ContactsList contactItems={filteredEntries} />
-                ) : (
-                  <ContactsList contactItems={allContactItems} />
-                )}
+        <FormProvider {...formMethods}>
+          <form onSubmit={onSubmit}>
+            <div className="px-4 pt-4 mb-2">
+              <SearchInput
+                id="search-by-name"
+                placeholder="Search"
+                aria-label="Search contact list by name or address"
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+            </div>
 
-                {error && (
-                  <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
-                  </Alert>
-                )}
+            <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
 
-                <DialogActions>
-                  <Button data-testid="cancel-btn" onClick={handleClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    disabled={!formState.isValid || isSubmitting}
-                    disableElevation
-                  >
-                    {isSubmitting ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      `Import contacts (${selectedContactsLength.length})`
-                    )}
-                  </Button>
-                </DialogActions>
-              </form>
-            </FormProvider>
-          </Card>
-        </Container>
+            <DialogFooter divided className="items-stretch">
+              {error && <Alert variant="destructive">{error}</Alert>}
+
+              <DialogActions
+                onCancel={handleClose}
+                cancelTestId="cancel-btn"
+                confirmLabel={`Import contacts (${selectedCount})`}
+                confirmType="submit"
+                confirmLoading={isSubmitting}
+                confirmDisabled={selectedCount === 0 || isSuccess}
+                confirmTooltip={hasNoImportableContacts ? 'You have no new contacts to import.' : undefined}
+              />
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
-    </ModalDialog>
+    </Dialog>
   )
 }
 

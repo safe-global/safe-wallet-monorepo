@@ -2,25 +2,23 @@ import { useCallback, useEffect, useState } from 'react'
 import type { Delay } from '@gnosis.pm/zodiac'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getRecoveryState } from '@/features/recovery/services/recovery-state'
+import { getRecoveryState } from '../../services/recovery-state'
 import { useAppDispatch } from '@/store'
 import { isCustomTxInfo, isMultiSendTxInfo, isTransactionListItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addListener } from '@reduxjs/toolkit'
 import { txHistorySlice } from '@/store/txHistorySlice'
-import { RecoveryEvent, recoverySubscribe } from '@/features/recovery/services/recoveryEvents'
+import { RecoveryEvent, recoverySubscribe } from '../../services/recoveryEvents'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecoveryState } from '@/features/recovery/services/recovery-state'
+import type { RecoveryState } from '../../services/recovery-state'
 import { useIntervalCounter } from '@safe-global/utils/hooks/useIntervalCounter'
 
 const REFRESH_DELAY = 5 * 60 * 1_000 // 5 minutes
 
 export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<RecoveryState> {
   const web3ReadOnly = useWeb3ReadOnly()
-  const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const dispatch = useAppDispatch()
 
@@ -89,13 +87,12 @@ export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<Rec
 
   return useAsync<RecoveryState>(
     () => {
-      if (!delayModifiers || delayModifiers.length === 0 || !chain?.transactionService || !web3ReadOnly) {
+      if (!delayModifiers || delayModifiers.length === 0 || !web3ReadOnly) {
         return
       }
 
       return getRecoveryState({
         delayModifiers,
-        transactionService: chain.transactionService,
         safeAddress,
         provider: web3ReadOnly,
         chainId: safe.chainId,
@@ -103,16 +100,7 @@ export function useRecoveryState(delayModifiers?: Array<Delay>): AsyncResult<Rec
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      delayModifiers,
-      counter,
-      refetchDep,
-      chain?.transactionService,
-      web3ReadOnly,
-      safeAddress,
-      safe.chainId,
-      safe.version,
-    ],
+    [delayModifiers, counter, refetchDep, web3ReadOnly, safeAddress, safe.chainId, safe.version],
     false,
   )
 }

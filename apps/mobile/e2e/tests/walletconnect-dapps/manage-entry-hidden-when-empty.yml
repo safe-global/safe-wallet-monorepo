@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Empty state: with no sessions in the slice, the "Connected apps" settings
+# entry must not render at all (ConnectedDappsEntry returns null at count 0).
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+# Open account settings. Anchor on the Signers row (rendered just above the
+# connected-apps slot) to prove the screen loaded before the negative assert.
+- tapOn: 'Account, tab, 3 of 3'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-signers-list-item'
+    timeout: 10000
+
+- assertNotVisible:
+    id: 'settings-connected-apps-entry'

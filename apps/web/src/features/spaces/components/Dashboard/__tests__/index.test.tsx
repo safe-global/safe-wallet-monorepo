@@ -19,8 +19,16 @@ const MOCK_TX_ID = 'multisig_0xbbbb_123'
 
 // ---- Module mocks ----
 
+// Cut the DialogActions -> CheckWallet -> safeCoreSDK -> chains.ts import chain (circular AppRoutes) in unit tests.
+jest.mock('@/components/common/CheckWallet', () => ({
+  __esModule: true,
+  default: ({ children }: { children: (ok: boolean) => unknown }) => children(true),
+}))
+
+const mockReplace = jest.fn()
+let mockQuery: Record<string, string> = {}
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: mockReplace, pathname: '/spaces', query: mockQuery }),
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -64,16 +72,35 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
+const mockUseSafeProAnnouncementModal = jest.fn()
+
+jest.mock('@/features/safe-pro-announcement', () => ({
+  SafeProFeature: { name: 'safe-pro-announcement' },
+  useSafeProAnnouncementModal: (...args: unknown[]) => mockUseSafeProAnnouncementModal(...args),
+}))
+
 jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, jest.fn()]))
+
+const mockUseSpacePlan = jest.fn()
+const mockUseWorkspaceLock = jest.fn()
+const mockUseCheckoutReturn = jest.fn()
+jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockUseSpacePlan() }))
+jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockUseWorkspaceLock() }))
+jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({ useCheckoutReturn: () => mockUseCheckoutReturn() }))
+jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
+}))
+
+const mockUseHasFeature = jest.fn()
+jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 
 jest.mock('@/hooks/safes', () => ({
   flattenSafeItems: jest.fn((items: unknown[]) => items),
 }))
 
 // Stub sub-components irrelevant to tracking
-jest.mock('../MembersCard', () => () => null)
-jest.mock('../SpacesCTACard', () => () => null)
-jest.mock('../ImportAddressBookCard', () => () => null)
 jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
@@ -111,6 +138,8 @@ function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: strin
   ;(useLoadFeature as jest.Mock).mockReturnValue({
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
     AccountsWidget: () => null,
+    SafeProAnnouncementModal: ({ open }: { open: boolean }) =>
+      open ? <div data-testid="safe-pro-announcement-modal" /> : null,
     $isReady: true,
   })
 }
@@ -138,6 +167,11 @@ const restoreDefaultMocks = () => {
     refetch: jest.fn(),
   })
   useSpaceAccountsDataMock.mockReturnValue({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })
+  mockUseHasFeature.mockReturnValue(false)
+  mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
+  mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
+  mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
+  mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
 }
 
 // ---- Tests ----
@@ -318,5 +352,76 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
         [MixpanelEventParams.TX_ID]: secondTxId,
       },
     ])
+  })
+})
+
+describe('SpaceDashboard – Safe Pro announcement', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature()
+  })
+
+  it('does not show the announcement while the hook keeps it closed', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId('safe-pro-announcement-modal')).not.toBeInTheDocument()
+  })
+
+  it('shows the announcement when the hook opens it', () => {
+    mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: true, setIsOpen: jest.fn() })
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('safe-pro-announcement-modal')).toBeInTheDocument()
+  })
+
+  it('stays unarmed before a workspace resolves', () => {
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(undefined)
+
+    render(<SpaceDashboard />)
+
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
+  })
+
+  it('stays unarmed over an invite preview', () => {
+    ;(useIsInvited as jest.Mock).mockReturnValue(true)
+
+    render(<SpaceDashboard />)
+
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, trialPeriodDays: 60 })
+  })
+
+  it('keeps rendering the dashboard under the lock modal and silences the announcement', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
+  })
+
+  it('keeps the announcement when the Workspace is not locked', () => {
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
+
+    render(<SpaceDashboard />)
+
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(true)
+  })
+
+  it('holds the announcement back while the lock is still resolving', () => {
+    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, trialPeriodDays: null })
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+    expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 })

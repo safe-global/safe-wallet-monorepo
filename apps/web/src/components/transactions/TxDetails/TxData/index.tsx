@@ -49,6 +49,7 @@ const TxData = ({
   txDetails,
   trusted,
   imitation,
+  executingSafeAddress,
   children,
 }: PropsWithChildren<{
   txInfo: TransactionDetails['txInfo']
@@ -56,6 +57,9 @@ const TxData = ({
   txDetails?: TransactionDetails
   trusted: boolean
   imitation: boolean
+  // Safe whose context the txData executes in. Only needed when it can't be derived from
+  // `txDetails.safeAddress` (e.g. ExecTransaction, which renders a preview without txDetails).
+  executingSafeAddress?: string
 }>): ReactElement => {
   const chainId = useChainId()
   const { SwapOrder } = useLoadFeature(SwapFeature)
@@ -145,7 +149,11 @@ const TxData = ({
 
       {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
         <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-          <Multisend txData={txData} isExecuted={!!txDetails?.executedAt} />
+          <Multisend
+            txData={txData}
+            isExecuted={!!txDetails?.executedAt}
+            executingSafeAddress={executingSafeAddress ?? txDetails?.safeAddress}
+          />
         </ObservabilityErrorBoundary>
       )}
     </>

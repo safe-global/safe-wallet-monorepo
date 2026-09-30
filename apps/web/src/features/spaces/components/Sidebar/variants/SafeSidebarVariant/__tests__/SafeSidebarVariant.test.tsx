@@ -5,6 +5,7 @@ import type {
   SafeWorkspaceHeaderBackToSpace,
   SafeWorkspaceHeaderAddToWorkspace,
   ResolvedSidebarItem,
+  ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '../../../types'
 import { AppRoutes } from '@/config/routes'
@@ -18,6 +19,23 @@ const mockUseAppSelector = jest.fn()
 jest.mock('@/store', () => ({
   useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
 }))
+
+const mockUseUsersGetWithWalletsV1Query = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
+  useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
+}))
+
+const CURRENT_USER_ID = 7
+const adminMembersForCurrentUser = [
+  {
+    role: 'ADMIN' as const,
+    status: 'ACTIVE' as const,
+    name: '',
+    invitedBy: null,
+    inviteExpiresAt: null,
+    user: { id: CURRENT_USER_ID },
+  },
+]
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({
@@ -36,8 +54,8 @@ jest.mock('@/features/counterfactual', () => ({
   useIsCounterfactualSafe: () => mockUseIsCounterfactualSafe(),
 }))
 
-jest.mock('../../../hooks/useSidebarHydrated', () => ({
-  useSidebarHydrated: () => mockUseSidebarHydrated(),
+jest.mock('@/hooks/useIsHydrated', () => ({
+  useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
 jest.mock('../../../NewTransactionButton', () => ({
@@ -53,23 +71,33 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
 }))
 
 jest.mock('@/features/spaces', () => ({
-  getDeterministicColor: (name: string) => `color-${name}`,
   useCurrentSpaceId: () => '42',
 }))
 
+jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
+  useSpaceBackLink: () => ({ handleBackToSpace: jest.fn() }),
+}))
+
+jest.mock('@/utils/colors', () => ({
+  getDeterministicColor: (name: string) => `color-${name}`,
+}))
+
 jest.mock('../../NavItem', () => ({
-  NavItem: ({ item }: { item: ResolvedSidebarItem }) => (
-    <div data-testid={`sidebar-item-${item.label.toLowerCase()}`}>
-      {item.label}
-      {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
-    </div>
-  ),
+  NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
+    item ? (
+      <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
+        {item.label}
+        {!!item.badge && <span aria-label={`${item.badge} ${item.label} notifications`}>{item.badge}</span>}
+        {item.indicator && <span aria-hidden />}
+      </div>
+    ) : null,
 }))
 
 jest.mock('@/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  SidebarSeparator: ({ className }: { className?: string }) => <hr className={className} />,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenu: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (
@@ -134,11 +162,19 @@ jest.mock('../../../config', () => ({
   },
 }))
 
+jest.mock('../../SidebarDeveloperGroup', () => ({
+  SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
+    <div data-testid="developer-group" data-loading={isLoading}>
+      Developer group
+    </div>
+  ),
+}))
+
 jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">
-        Add Safe to workspace
+        Add Safe to Workspace
       </button>
     ) : (
       <div data-testid="space-selector-default">Space selector</div>
@@ -162,8 +198,8 @@ const createAddHeader = (
 
 const MockIcon = () => <div>Icon</div>
 
-const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): ResolvedSidebarItem => ({
-  icon: MockIcon as unknown as ResolvedSidebarItem['icon'],
+const createMockNavItem = (overrides: Partial<ResolvedSidebarNavItem> = {}): ResolvedSidebarNavItem => ({
+  icon: MockIcon as unknown as ResolvedSidebarNavItem['icon'],
   label: 'Item',
   href: '/item',
   isActive: false,
@@ -173,7 +209,7 @@ const createMockNavItem = (overrides: Partial<ResolvedSidebarItem> = {}): Resolv
 })
 
 describe('SafeSidebarVariant', () => {
-  const mockMainNavItems: ResolvedSidebarItem[] = [
+  const mockMainNavItems: ResolvedSidebarNavItem[] = [
     createMockNavItem({ label: 'Overview', href: '/home', link: { pathname: '/home', query: { spaceId: null } } }),
     createMockNavItem({
       label: 'Transactions',
@@ -202,6 +238,7 @@ describe('SafeSidebarVariant', () => {
     mockUseIsCounterfactualSafe.mockReturnValue(false)
     mockUseSidebarHydrated.mockReturnValue(true)
     mockUseAppSelector.mockReturnValue(true)
+    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: CURRENT_USER_ID } })
   })
 
   it('renders all navigation sections', () => {
@@ -232,7 +269,7 @@ describe('SafeSidebarVariant', () => {
     )
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-    expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+    expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
   })
 
   it('still renders backToSpace workspace header when Safe is counterfactual', () => {
@@ -251,7 +288,7 @@ describe('SafeSidebarVariant', () => {
   })
 
   it('renders all main navigation items', () => {
-    const allNavItems: ResolvedSidebarItem[] = [
+    const allNavItems: ResolvedSidebarNavItem[] = [
       createMockNavItem({ label: 'Overview', href: AppRoutes.home, link: { pathname: AppRoutes.home, query: {} } }),
       createMockNavItem({
         label: 'Assets',
@@ -386,8 +423,8 @@ describe('SafeSidebarVariant', () => {
 
     it('passes spaces array to addToWorkspace variant', () => {
       const spaces = [
-        { id: 1, name: 'Team', safeCount: 5 },
-        { id: 2, name: 'Personal', safeCount: 2 },
+        { id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 5, members: adminMembersForCurrentUser },
+        { id: 2, uuid: 'uuid-2', name: 'Personal', safeCount: 2, members: adminMembersForCurrentUser },
       ]
       render(
         <SafeSidebarVariant
@@ -412,12 +449,12 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
     })
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {
       mockUseIsCounterfactualSafe.mockReturnValue(true)
-      const spaces = [{ id: 1, name: 'Team', safeCount: 0 }]
+      const spaces = [{ id: 1, uuid: 'uuid-1', name: 'Team', safeCount: 0 }]
 
       render(
         <SafeSidebarVariant
@@ -448,8 +485,10 @@ describe('SafeSidebarVariant', () => {
     it('renders correct number of spaces in addToWorkspace when multiple spaces provided', () => {
       const spaces = Array.from({ length: 5 }, (_, i) => ({
         id: i + 1,
+        uuid: `uuid-${i + 1}`,
         name: `Space ${i + 1}`,
         safeCount: 0,
+        members: adminMembersForCurrentUser,
       }))
 
       render(
@@ -659,6 +698,38 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.getByTestId('new-tx-btn')).toBeInTheDocument()
+    })
+  })
+
+  // The group is self-contained (it reads the config and owns the production guard), so its own tests
+  // cover what it renders. Here we only pin down that this variant mounts it, last.
+  describe('Developer group', () => {
+    it('mounts the developer group after the DeFi group', () => {
+      const { container } = render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+        />,
+      )
+
+      expect(screen.getByTestId('developer-group')).toBeInTheDocument()
+
+      const text = container.textContent ?? ''
+      expect(text.indexOf('Developer group')).toBeGreaterThan(text.indexOf('Defi'))
+    })
+
+    it('forwards the loading state to the group', () => {
+      render(
+        <SafeSidebarVariant
+          workspaceHeader={createBackHeader()}
+          mainNavItems={mockMainNavItems}
+          defiGroup={mockDefiGroup}
+          isLoading
+        />,
+      )
+
+      expect(screen.getByTestId('developer-group')).toHaveAttribute('data-loading', 'true')
     })
   })
 })

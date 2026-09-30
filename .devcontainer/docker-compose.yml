@@ -1,0 +1,50 @@
+# SPDX-License-Identifier: FSL-1.1-MIT
+
+# Dev container Compose file.
+# This is the only Compose file referenced from devcontainer.json, so the
+# Compose project directory is .devcontainer/. Paths below use '..' to
+# reach the repo root.
+services:
+  devcontainer:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      # Workspace bind mount; ':cached' improves macOS file-system perf.
+      - ..:/workspaces/safe-wallet-monorepo:cached
+      # Persist Claude Code auth/config across container rebuilds.
+      # If the host directory does not exist Docker creates an empty one.
+      # ${HOME:?...} fails fast with a clear error if HOME is unset (e.g. CI).
+      - ${HOME:?HOME must be set to mount the Claude config volume}/.claude-docker:/home/node/.claude
+      # SSH agent forwarding:
+      #   - Docker Desktop (macOS/Windows): SSH_AUTH_SOCK is unset on the host,
+      #     so the default /run/host-services/ssh-auth.sock magic path is used.
+      #   - Linux: export SSH_AUTH_SOCK on the host (usually already set by your
+      #     agent) and Compose bind-mounts it into the container.
+      - ${SSH_AUTH_SOCK:-/run/host-services/ssh-auth.sock}:/ssh-agent
+    environment:
+      - SSH_AUTH_SOCK=/ssh-agent
+      - NEXT_PUBLIC_INFURA_TOKEN
+      - NEXT_PUBLIC_WC_PROJECT_ID
+      - NEXT_PUBLIC_IS_OFFICIAL_HOST
+      - NEXT_PUBLIC_PROD_MIXPANEL_TOKEN
+      - NEXT_PUBLIC_STAGING_MIXPANEL_TOKEN
+    # Keep the container alive for VS Code to attach to.
+    command: sleep infinity
+    working_dir: /workspaces/safe-wallet-monorepo
+    # Reservations/limits within the Docker Desktop VM. Raise the VM's own
+    # Memory/CPU/Disk ceiling in Docker Desktop → Settings → Resources first;
+    # these only apportion what the VM already has. The legacy top-level
+    # mem_limit/cpus apply outside Swarm in every Compose version; the
+    # `deploy:` block is duplicated for modern compose CLIs.
+    mem_limit: 16g
+    mem_reservation: 8g
+    cpus: 4
+    deploy:
+      resources:
+        limits:
+          memory: 16G
+          cpus: 4
+        reservations:
+          memory: 8G
+          cpus: 4

@@ -1,15 +1,16 @@
 import { type MouseEvent, useState } from 'react'
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import { SvgIcon } from '@mui/material'
-import IconButton from '@mui/material/IconButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
-import MenuItem from '@mui/material/MenuItem'
-import ContextMenu from '@/components/common/ContextMenu'
+import { Download, EllipsisVertical } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import css from './styles.module.css'
+import {
+  type GetSpaceResponse,
+  useLazyAddressBooksGetAddressBookItemsV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
+import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
 import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
@@ -23,22 +24,28 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | undefined>()
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const dispatch = useAppDispatch()
+  const [fetchAddressBook, { isFetching: isDownloading }] = useLazyAddressBooksGetAddressBookItemsV1Query()
 
-  const handleOpenContextMenu = (e: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>) => {
+  const handleDownload = async (e: MouseEvent) => {
     e.stopPropagation()
-    setAnchorEl(e.currentTarget)
-  }
-
-  const handleCloseContextMenu = (e: Event) => {
-    e.stopPropagation()
-    setAnchorEl(undefined)
+    try {
+      const { data } = await fetchAddressBook({ spaceId: space.uuid }).unwrap()
+      downloadCsv(`workspace-${space.uuid}-address-book.csv`, spaceAddressBookToCsv(data))
+    } catch {
+      dispatch(
+        showNotification({
+          message: 'Failed to download the shared address book. Please try again.',
+          variant: 'error',
+          groupKey: 'download-address-book-error',
+        }),
+      )
+    }
   }
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
-    setAnchorEl(undefined)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -48,31 +55,47 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   return (
     <>
-      <IconButton
-        className={css.spaceActions}
-        size="small"
-        onClick={handleOpenContextMenu}
-        data-testid="space-card-context-menu-button"
-      >
-        <MoreVertIcon sx={({ palette }) => ({ color: palette.border.main })} />
-      </IconButton>
-      <ContextMenu anchorEl={anchorEl} open={!!anchorEl} onClose={handleCloseContextMenu}>
-        <MenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
-          <ListItemIcon>
-            <SvgIcon component={EditIcon} inheritViewBox fontSize="small" color="success" />
-          </ListItemIcon>
-          <ListItemText>Rename</ListItemText>
-        </MenuItem>
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground"
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Open space actions"
+              data-testid="space-card-context-menu-button"
+            />
+          }
+        >
+          <EllipsisVertical />
+        </DropdownMenuTrigger>
 
-        <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-          <MenuItem data-testid="remove-button" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-            <ListItemIcon>
-              <SvgIcon component={DeleteIcon} inheritViewBox fontSize="small" color="error" />
-            </ListItemIcon>
-            <ListItemText>Remove</ListItemText>
-          </MenuItem>
-        </Track>
-      </ContextMenu>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
+            <EditIcon className="text-[var(--color-success-main)]" />
+            <span>Rename</span>
+          </DropdownMenuItem>
+
+          <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
+            <DropdownMenuItem data-testid="remove-button" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
+              <DeleteIcon className="text-[var(--color-error-main)]" />
+              <span>Remove</span>
+            </DropdownMenuItem>
+          </Track>
+
+          <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK} label={SPACE_LABELS.space_context_menu}>
+            <DropdownMenuItem
+              data-testid="download-address-book-button"
+              disabled={isDownloading}
+              onClick={handleDownload}
+            >
+              <Download className="text-muted-foreground" />
+              <span>Download shared address book</span>
+            </DropdownMenuItem>
+          </Track>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       {open[ModalType.RENAME] && <UpdateSpaceDialog space={space} onClose={handleCloseModal} />}
 

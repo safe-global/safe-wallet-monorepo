@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import RefreshPositionsButton from './index'
 import { toBeHex } from 'ethers'
@@ -24,7 +23,7 @@ const meta: Meta<typeof RefreshPositionsButton> = {
           settings: {
             currency: 'usd',
             hiddenTokens: {},
-            shortName: { copy: true, qr: true },
+            shortName: { qr: true },
             theme: {},
             env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
             signing: { onChainSigning: false, blindSigning: false },
@@ -41,9 +40,9 @@ const meta: Meta<typeof RefreshPositionsButton> = {
           },
         }}
       >
-        <Paper sx={{ padding: 4 }}>
+        <div className="bg-background rounded-lg p-8">
           <Story />
-        </Paper>
+        </div>
       </StoreDecorator>
     ),
   ],

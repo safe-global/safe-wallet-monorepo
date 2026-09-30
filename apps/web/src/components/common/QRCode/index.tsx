@@ -1,17 +1,21 @@
 import QRCodeReact from 'qrcode.react'
-import { Skeleton } from '@mui/material'
-import { useTheme } from '@mui/material/styles'
+import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useDarkMode } from '@/hooks/useDarkMode'
 import type { ReactElement } from 'react'
 
 const QR_LOGO_SIZE = 20
 
 const QRCode = ({ value, size }: { value?: string; size: number }): ReactElement => {
-  const { palette } = useTheme()
+  const isDarkMode = useDarkMode()
+  const palette = isDarkMode ? darkPalette : lightPalette
 
   return value ? (
     <QRCodeReact
       value={value}
       size={size}
+      role="img"
+      aria-label="QR code"
       bgColor={palette.background.paper}
       fgColor={palette.text.primary}
       imageSettings={{
@@ -22,7 +26,7 @@ const QRCode = ({ value, size }: { value?: string; size: number }): ReactElement
       }}
     />
   ) : (
-    <Skeleton variant="rectangular" width={size} height={size} />
+    <Skeleton className="rounded-none" style={{ width: size, height: size }} />
   )
 }
 

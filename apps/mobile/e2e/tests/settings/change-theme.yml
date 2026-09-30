@@ -59,9 +59,18 @@ tags:
 # Navigate to Theme Settings
 # ============================================
 
-# Tap "Appearance" row (opens floating menu)
-- tapOn:
+# Verify Appearance row shows "Auto" as selected
+- assertVisible:
+    id: 'app-settings-appearance-button'
     text: '.*Auto.*'
+
+# Tap the Appearance row trigger (opens native theme menu).
+# The trigger shows the current preference, which defaults to "Auto".
+- tapOn:
+    id: 'app-settings-appearance-button'
+
+# Wait for the native menu animation to settle before interacting with options
+- waitForAnimationToEnd
 
 # Wait for menu to appear (MenuView component)
 # The menu should show theme options
@@ -102,7 +111,7 @@ tags:
 
 # Verify Appearance row now shows "Dark" as selected
 - assertVisible:
-    id: 'settings-screen-header-more-settings-button'
+    id: 'app-settings-appearance-button'
     text: '.*Dark.*'
 
 # Verify dark theme is actually applied by checking theme testID
@@ -115,8 +124,10 @@ tags:
 
 # Tap "Appearance" row
 - tapOn:
-    id: 'settings-screen-header-more-settings-button'
-    text: '.*Dark.*'
+    id: 'app-settings-appearance-button'
+
+# Wait for the native menu animation to settle before interacting with options
+- waitForAnimationToEnd
 
 # Tap "Light" option
 - tapOn:
@@ -128,7 +139,7 @@ tags:
 
 # Verify Appearance row shows "Light" as selected
 - assertVisible:
-    id: 'settings-screen-header-more-settings-button'
+    id: 'app-settings-appearance-button'
     text: '.*Light.*'
 
 # Verify light theme is actually applied by checking theme testID
@@ -139,10 +150,12 @@ tags:
 # Change to Auto (System) Theme
 # ============================================
 
-# Navigate to App Settings
+# Tap the Appearance row trigger
 - tapOn:
-    id: 'settings-screen-header-more-settings-button'
-    text: '.*Light.*'
+    id: 'app-settings-appearance-button'
+
+# Wait for the native menu animation to settle before interacting with options
+- waitForAnimationToEnd
 
 # Tap "Auto" option
 - tapOn:
@@ -154,7 +167,7 @@ tags:
 
 # Verify Appearance row shows "Auto" as selected
 - assertVisible:
-    id: 'settings-screen-header-more-settings-button'
+    id: 'app-settings-appearance-button'
     text: '.*Auto.*'
 
 # Verify auto theme is applied (will resolve to system theme: light or dark)

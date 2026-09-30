@@ -27,6 +27,16 @@ maestro test tests/transactions/pending/__suite__.yml
 maestro test tests/transactions/pending/send-transaction.yml
 ```
 
+### Biometric enrollment (required for signer-import tests)
+
+The signer-import flows (`tests/onboarding/import-signer*.yml`) go through the
+biometrics opt-in screen. Without biometrics enrolled, tapping "Enable
+biometrics" hits a dead-end "Set up biometrics" alert. CI enrolls biometrics
+automatically (see the `notifyutil` enrollment step in
+`apps/mobile/.eas/build/build-and-maestro-test.yml`); for local runs, run that
+same enrollment command once per booted simulator. It resets when the simulator
+is erased or cold-booted, so re-run it after that.
+
 ## Structure
 
 ```

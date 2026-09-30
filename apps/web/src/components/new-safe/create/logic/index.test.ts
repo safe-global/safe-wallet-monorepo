@@ -5,6 +5,7 @@ import {
   relaySafeCreation,
   getRedirect,
   createNewUndeployedSafeWithoutSalt,
+  estimateSafeCreationGas,
 } from '@/components/new-safe/create/logic/index'
 import { chainBuilder } from '@/tests/builders/chains'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -137,6 +138,48 @@ describe('create/logic', () => {
       }
     })
   })
+  describe('estimateSafeCreationGas', () => {
+    it('estimates against the factory of the replayed creation, not the version-derived one', async () => {
+      // A replayed creation whose factory differs from the safeVersion's canonical
+      // factory (e.g. a 1.5.0 Safe created through the 1.4.1 SafeProxyFactory) —
+      // estimating against the wrong factory deploys different proxy bytecode and
+      // underestimates the gas, making the real activation run out of gas.
+      const replayedProps: ReplayedSafeProps = {
+        factoryAddress: getProxyFactoryDeployment({ version: '1.4.1', network: '1' })?.defaultAddress!,
+        masterCopy: getSafeL2SingletonDeployment({ version: '1.5.0', network: '1' })?.defaultAddress!,
+        saltNonce: '0',
+        safeVersion: '1.5.0',
+        safeAccountConfig: {
+          owners: [faker.finance.ethereumAddress()],
+          threshold: 1,
+          to: ZERO_ADDRESS,
+          data: EMPTY_DATA,
+          fallbackHandler: faker.finance.ethereumAddress(),
+          paymentReceiver: ZERO_ADDRESS,
+        },
+      }
+      const estimatedGas = faker.number.bigInt()
+      const estimateGas = jest.fn().mockResolvedValue(estimatedGas)
+      const provider = { estimateGas } as unknown as JsonRpcProvider
+      const from = faker.finance.ethereumAddress()
+
+      const gas = await estimateSafeCreationGas(
+        chainBuilder().with({ chainId: '1' }).build(),
+        provider,
+        from,
+        replayedProps,
+      )
+
+      expect(estimateGas).toHaveBeenCalledWith(
+        expect.objectContaining({
+          from,
+          to: replayedProps.factoryAddress,
+        }),
+      )
+      expect(gas).toBe(estimatedGas)
+    })
+  })
+
   describe('getRedirect', () => {
     it("should redirect to home for any redirect that doesn't start with /apps", () => {
       const expected = {
@@ -307,6 +350,44 @@ describe('create/logic', () => {
       })
     })
 
+    it('should pair 1.5.0 creations with the 1.5.0 SafeToL2Setup', () => {
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const chainSetup = chainBuilder()
+        .with({ chainId: '137' })
+        // Multichain creation is toggled on
+        .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
+        .with({ recommendedMasterCopyVersion: '1.5.0' })
+        .with({ l2: true })
+        .build()
+
+      const safeL2SingletonDeployment = getSafeL2SingletonDeployment({
+        version: '1.5.0',
+        network: '137',
+      })?.defaultAddress
+
+      const safeToL2SetupDeployment = getSafeToL2SetupDeployment({ version: '1.5.0', network: chainSetup.chainId })
+      const safeToL2SetupAddress = safeToL2SetupDeployment?.networkAddresses[chainSetup.chainId]
+      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
+
+      expect(createNewUndeployedSafeWithoutSalt('1.5.0', safeSetup, chainSetup)).toEqual({
+        safeAccountConfig: {
+          ...safeSetup,
+          fallbackHandler: getFallbackHandlerDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+          to: safeToL2SetupAddress,
+          data:
+            safeL2SingletonDeployment &&
+            safeToL2SetupInterface.encodeFunctionData('setupToL2', [safeL2SingletonDeployment]),
+          paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+        },
+        safeVersion: '1.5.0',
+        masterCopy: getSafeSingletonDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+        factoryAddress: getProxyFactoryDeployment({ version: '1.5.0', network: '137' })?.defaultAddress,
+      })
+    })
+
     it('should use l2 masterCopy and no migration on zkSync', () => {
       const safeSetup = {
         owners: [faker.finance.ethereumAddress()],
@@ -335,6 +416,43 @@ describe('create/logic', () => {
         safeVersion: '1.3.0',
         masterCopy: getSafeL2SingletonDeployment({ version: '1.3.0', network: '324' })?.defaultAddress,
         factoryAddress: getProxyFactoryDeployment({ version: '1.3.0', network: '324' })?.defaultAddress,
+      })
+    })
+
+    it('creates zksync-flavour (EraVM) Safes on a zk-flagged chain, even with multichain creation on', () => {
+      // Production CGW sets `zk: false` for zkSync Era, so real zkSync creations resolve the
+      // canonical (EVM) contracts — EraVM Safes cannot upgrade past 1.4.1 (no zksync flavour
+      // from 1.5.0). This documents the EraVM path for any chain still flagged `zk: true`.
+      const safeSetup = {
+        owners: [faker.finance.ethereumAddress()],
+        threshold: 1,
+      }
+      const zkChain = chainBuilder()
+        .with({ chainId: '324' })
+        .with({ features: [FEATURES.COUNTERFACTUAL, FEATURES.MULTI_CHAIN_SAFE_CREATION] as any })
+        .with({ recommendedMasterCopyVersion: '1.4.1' })
+        .with({ l2: true })
+        .with({ zk: true })
+        .build()
+
+      const ZKSYNC_L1_141 = '0xC35F063962328aC65cED5D4c3fC5dEf8dec68dFa'
+      const ZKSYNC_L2_141 = '0x610fcA2e0279Fa1F8C00c8c2F71dF522AD469380'
+      const ZKSYNC_SETUP_TO_L2 = '0x199A9df0224031c20Cc27083A4164c9c8F1Bcb39'
+      const ZKSYNC_FALLBACK_HANDLER = '0x9301E98DD367135f21bdF66f342A249c9D5F9069'
+      const ZKSYNC_PROXY_FACTORY = '0xc329D02fd8CB2fc13aa919005aF46320794a8629'
+      const safeToL2SetupInterface = Safe_to_l2_setup__factory.createInterface()
+
+      expect(createNewUndeployedSafeWithoutSalt('1.4.1', safeSetup, zkChain)).toEqual({
+        safeAccountConfig: {
+          ...safeSetup,
+          fallbackHandler: ZKSYNC_FALLBACK_HANDLER,
+          to: ZKSYNC_SETUP_TO_L2,
+          data: safeToL2SetupInterface.encodeFunctionData('setupToL2', [ZKSYNC_L2_141]),
+          paymentReceiver: ECOSYSTEM_ID_ADDRESS,
+        },
+        safeVersion: '1.4.1',
+        masterCopy: ZKSYNC_L1_141,
+        factoryAddress: ZKSYNC_PROXY_FACTORY,
       })
     })
 

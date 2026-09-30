@@ -34,18 +34,6 @@
   width: 100%;
 }
 
-.notAvailableChip {
-  font-size: 11px;
-  font-weight: 400;
-  text-transform: none;
-  letter-spacing: 1px;
-  background-color: var(--color-border-main);
-  color: var(--color-text-primary);
-  height: 20px;
-  border-radius: 6px;
-  padding: 2px 8px;
-}
-
 .notAvailableTitle {
   color: var(--color-text-secondary);
   font-family: 'DM Sans', sans-serif;

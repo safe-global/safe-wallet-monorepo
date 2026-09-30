@@ -15,16 +15,32 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
-import { getDeterministicColor } from '@/features/spaces'
 import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNTS_LIMIT, SPACE_SELECTOR_NAME_MAX_LENGTH, SPACES_LIMIT } from '../../constants'
+import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
+import { SPACES_LIMIT } from '@/features/spaces/constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
 import { truncateSpaceName } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
-import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { useSafeAddressFromUrl, useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import useChainId from '@/hooks/useChainId'
+import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
+import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { getDeterministicColor } from '@/utils/colors'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { useSpacePlan } from '../../../../hooks/useSpacePlan'
+import { useSpaceSafeLimit } from '../../../../hooks/useSpaceSafeLimit'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
+import { trialLabel } from '../../../../hooks/billing/subscription'
 
-const MENU_ITEM_CLASS = 'gap-3 min-h-9 px-2 py-2'
+export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
+
+const MENU_ITEM_CLASS = 'cursor-pointer gap-3 min-h-9 px-2 py-2'
 
 interface SpaceSelectorDropdownProps {
   selectedSpace?: SpaceItem
@@ -43,38 +59,45 @@ export const SpaceSelectorDropdown = ({
   const [isOpen, setIsOpen] = useState(false)
   const menuId = useId()
   const spaceName = selectedSpace?.name ?? ''
+  const isSafePro = useIsSafeProEnabled()
+  const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
-  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to workspace' : 'Open workspace selector'
+  const triggerAriaLabel = triggerVariant === 'addToWorkspace' ? 'Add Safe to Workspace' : 'Open Workspace selector'
   const safe = useSafeQueryParam() || undefined
+  const safeAddress = useSafeAddressFromUrl()
+  const chainId = useChainId()
 
   const { addToSpace, loadingSpaceId } = useAddSafeToSpace({ spaces, onSpaceAdded })
-  const spaceId = selectedSpace?.id?.toString()
+  const spaceId = selectedSpace?.uuid
+  const isSignedIn = useAppSelector(isAuthenticated)
+  const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isSignedIn })
 
   const spaceColors = useMemo(
-    () => Object.fromEntries(spaces.map((s) => [s.id, getDeterministicColor(s.name)])),
+    () => Object.fromEntries(spaces.map((s) => [s.uuid, getDeterministicColor(s.name)])),
     [spaces],
   )
 
-  const handleSelectSpace = async (targetSpaceId: number) => {
+  const handleSelectSpace = async (targetSpaceId: string) => {
     if (triggerVariant === 'addToWorkspace') {
       const success = await addToSpace(targetSpaceId)
       if (success) setIsOpen(false)
     } else {
-      const targetSpace = spaces.find((s) => s.id === targetSpaceId)
+      const targetSpace = spaces.find((s) => s.uuid === targetSpaceId)
       trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: String(targetSpaceId) },
+        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: targetSpaceId },
         {
-          from_workspace_id: selectedSpace?.id !== undefined ? String(selectedSpace.id) : undefined,
-          to_workspace_id: String(targetSpaceId),
+          from_workspace_id: selectedSpace?.uuid,
+          to_workspace_id: targetSpaceId,
           source: 'sidebar',
           safe_count: targetSpace?.safeCount ?? 0,
         },
       )
       router.push({
         pathname: router.pathname,
-        query: { ...router.query, spaceId: targetSpaceId.toString() },
+        query: { ...router.query, spaceId: targetSpaceId },
       })
     }
   }
@@ -89,44 +112,30 @@ export const SpaceSelectorDropdown = ({
     router.push(AppRoutes.welcome.spaces)
   }
 
-  const renderMenuItemWithTooltip = (menuItem: ReactElement, space: SpaceItem) => {
-    const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
-    if (!isAtLimit) return menuItem
-    return (
-      <Tooltip key={space.id}>
-        <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-        <TooltipContent side="right">{`You can have up to ${SAFE_ACCOUNTS_LIMIT} Safes per workspace`}</TooltipContent>
-      </Tooltip>
-    )
-  }
+  const isAddToWorkspace = triggerVariant === 'addToWorkspace'
+
+  const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)
 
   const renderSpaceMenuItem = (space: SpaceItem) => {
-    const isAtLimit = triggerVariant === 'addToWorkspace' && space.safeCount >= SAFE_ACCOUNTS_LIMIT
-    const isDisabled = loadingSpaceId !== null || isAtLimit
-    const spaceColor = spaceColors[space.id]
+    const isAdmin = isAdminOfSpace(space)
+    const spaceColor = spaceColors[space.uuid]
 
-    const menuItem = (
-      <DropdownMenuItem
-        key={space.id}
-        onClick={() => void handleSelectSpace(space.id)}
-        disabled={isDisabled}
-        className={cn(MENU_ITEM_CLASS, selectedSpace?.id === space.id && css.navItemActive)}
-      >
-        <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
-          <AvatarFallback className={css.spaceSelectorItemAvatarFallback} style={{ backgroundColor: spaceColor }}>
-            {space.name.charAt(0).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
-        <span className="flex-1">{space.name}</span>
-        {loadingSpaceId === space.id ? (
-          <Loader2 className="ml-auto size-4 animate-spin" />
-        ) : selectedSpace?.id === space.id ? (
-          <Check className="ml-auto size-4" />
-        ) : null}
-      </DropdownMenuItem>
+    return (
+      <SpaceMenuRow
+        key={space.uuid}
+        space={space}
+        spaceColor={spaceColor}
+        isAdmin={isAdmin}
+        isAddToWorkspace={isAddToWorkspace}
+        isSelected={selectedSpace?.uuid === space.uuid}
+        loadingSpaceId={loadingSpaceId}
+        chainId={chainId}
+        safeAddress={safeAddress}
+        isOpen={isOpen}
+        isSignedIn={isSignedIn}
+        onSelect={() => void handleSelectSpace(space.uuid)}
+      />
     )
-
-    return renderMenuItemWithTooltip(menuItem, space)
   }
 
   const handleOpenChange = (open: boolean) => {
@@ -157,9 +166,9 @@ export const SpaceSelectorDropdown = ({
         {triggerVariant === 'addToWorkspace' ? (
           <>
             <span className={css.addSafeToWorkspaceRing}>
-              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} strokeWidth={2.5} />
+              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to Workspace</span>
           </>
         ) : (
           <>
@@ -172,17 +181,27 @@ export const SpaceSelectorDropdown = ({
               </AvatarFallback>
             </Avatar>
             <div className={css.spaceSelectorText}>
-              {spaceName ? (
-                <Tooltip>
-                  <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
-                  <TooltipContent side="top">{spaceName}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <span className={css.spaceSelectorName} />
-              )}
-              <span className={css.spaceSelectorSubtitle}>Workspace</span>
+              <span className="flex items-center gap-1">
+                {spaceName ? (
+                  <Tooltip>
+                    <TooltipTrigger render={<span className={css.spaceSelectorName} />}>{displayName}</TooltipTrigger>
+                    <TooltipContent side="top">{spaceName}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <span className={css.spaceSelectorName} />
+                )}
+              </span>
+              <span
+                className={cn(
+                  css.spaceSelectorSubtitle,
+                  'block truncate',
+                  !isSafePro ? 'text-muted-foreground' : isTrialEndingSoon ? 'text-warning-strong' : 'text-green-500',
+                )}
+              >
+                {planLabel}
+              </span>
             </div>
-            <ChevronsUpDown className="ml-auto size-4 shrink-0" aria-hidden />
+            <ChevronsUpDown className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
           </>
         )}
       </DropdownMenuTrigger>
@@ -195,25 +214,6 @@ export const SpaceSelectorDropdown = ({
         data-testid="space-selector-menu"
       >
         <div className={cn(css.groupLabel, 'mb-1')}>Workspaces</div>
-        {selectedSpace && (
-          <div className="flex items-center gap-2 px-2 py-1.5">
-            <Avatar className={css.spaceSelectorAvatar}>
-              <AvatarFallback
-                className={css.spaceSelectorAvatarFallback}
-                style={{ backgroundColor: selectedSpaceColor }}
-              >
-                {initial}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className={css.textSmallBold}>{selectedSpace.name}</div>
-              <div className={css.textMini}>Workspace</div>
-            </div>
-          </div>
-        )}
-
-        {triggerVariant === 'default' ? <DropdownMenuSeparator /> : null}
-
         {spaces.map((space) => renderSpaceMenuItem(space))}
 
         <DropdownMenuSeparator className="my-1" />
@@ -223,7 +223,7 @@ export const SpaceSelectorDropdown = ({
           const addSpaceMenuItem = (
             <DropdownMenuItem onClick={handleCreateSpace} disabled={isAtSpacesLimit} className={MENU_ITEM_CLASS}>
               <Plus className={`size-5 flex-shrink-0 ${css.dropdownIcon}`} />
-              <span>Add new workspace</span>
+              <span>Add new Workspace</span>
             </DropdownMenuItem>
           )
 
@@ -232,7 +232,7 @@ export const SpaceSelectorDropdown = ({
           return (
             <Tooltip key="add-space-tooltip">
               <TooltipTrigger render={<div className="block w-full" />}>{addSpaceMenuItem}</TooltipTrigger>
-              <TooltipContent side="right">Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+              <TooltipContent side="right">Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
             </Tooltip>
           )
         })()}
@@ -244,4 +244,102 @@ export const SpaceSelectorDropdown = ({
       </DropdownMenuContent>
     </DropdownMenu>
   )
+}
+
+interface SpaceMenuRowProps {
+  space: SpaceItem
+  spaceColor: string | undefined
+  isAdmin: boolean
+  isAddToWorkspace: boolean
+  isSelected: boolean
+  loadingSpaceId: string | null
+  chainId: string
+  safeAddress: string
+  isOpen: boolean
+  isSignedIn: boolean
+  onSelect: () => void
+}
+
+const SpaceMenuRow = ({
+  space,
+  spaceColor,
+  isAdmin,
+  isAddToWorkspace,
+  isSelected,
+  loadingSpaceId,
+  chainId,
+  safeAddress,
+  isOpen,
+  isSignedIn,
+  onSelect,
+}: SpaceMenuRowProps): ReactElement => {
+  // Only check membership while the dropdown is open AND the user is signed in
+  // AND we have a safe/chain to check against. RTK Query caches the result via
+  // keepUnusedDataFor, so reopening within the cache window is free.
+  const shouldCheckMembership = isOpen && isAddToWorkspace && isSignedIn && Boolean(safeAddress) && Boolean(chainId)
+  const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId: space.uuid }, { skip: !shouldCheckMembership })
+
+  const isAlreadyAdded = useMemo(() => {
+    if (!shouldCheckMembership || !spaceSafes) return false
+    return spaceSafes.safes[chainId]?.some((addr) => sameAddress(addr, safeAddress)) ?? false
+  }, [shouldCheckMembership, spaceSafes, chainId, safeAddress])
+  // Seats are per address: a Safe the Workspace already holds on another chain takes none.
+  const holdsSeat = useMemo(
+    () =>
+      Boolean(spaceSafes) &&
+      Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
+        addresses.some((addr) => sameAddress(addr, safeAddress)),
+      ),
+    [spaceSafes, safeAddress],
+  )
+  const { limit } = useSpaceSafeLimit(shouldCheckMembership ? space.uuid : null)
+  const atSafeLimit = isAddToWorkspace && isSpaceAtSafeLimit(space.safeCount, limit) && !holdsSeat
+
+  const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (!isAdmin || atSafeLimit || isAlreadyAdded))
+
+  const menuItem = (
+    <DropdownMenuItem
+      onClick={onSelect}
+      disabled={isDisabled}
+      className={cn(MENU_ITEM_CLASS, isSelected && css.navItemActive)}
+    >
+      <Avatar className={cn('size-8 shrink-0', css.spaceSelectorItemAvatar)}>
+        <AvatarFallback className={css.spaceSelectorItemAvatarFallback} style={{ backgroundColor: spaceColor }}>
+          {space.name.charAt(0).toUpperCase()}
+        </AvatarFallback>
+      </Avatar>
+      <span className="flex-1">{space.name}</span>
+      {loadingSpaceId === space.uuid ? (
+        <Loader2 className="ml-auto size-4 animate-spin" />
+      ) : isSelected ? (
+        <Check className="ml-auto size-4" />
+      ) : null}
+    </DropdownMenuItem>
+  )
+
+  if (!isAddToWorkspace) return menuItem
+
+  if (isAlreadyAdded) {
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<div className="block w-full" />}>{menuItem}</TooltipTrigger>
+        <TooltipContent side="right">{SAFE_ALREADY_IN_WORKSPACE_TOOLTIP}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  if (!isAdmin) {
+    return <AdminOnlyWorkspaceTooltip isAdmin={false}>{menuItem}</AdminOnlyWorkspaceTooltip>
+  }
+
+  if (atSafeLimit) {
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
+        <TooltipContent side="right">{`You can have up to ${limit} Safes per Workspace`}</TooltipContent>
+      </Tooltip>
+    )
+  }
+
+  return menuItem
 }

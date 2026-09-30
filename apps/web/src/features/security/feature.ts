@@ -22,7 +22,7 @@ import {
   formatTimestamp,
   withScannerTimeout,
 } from './data/scanners/utils'
-import { getStrengthLevel, getStrengthColor } from './data/securityScoring'
+import { getScoreBand } from './data/scoreBands'
 import { isKnownModuleByName } from './data/scanners/modules'
 import { getCachedScan, setCachedScan } from './data/scanResultsCache'
 
@@ -38,8 +38,7 @@ const feature: SecurityContract = {
   formatTimestamp,
   withScannerTimeout,
   isKnownModuleByName,
-  getStrengthLevel,
-  getStrengthColor,
+  getScoreBand,
   // Module-level cache accessors
   getCachedScan,
   setCachedScan,

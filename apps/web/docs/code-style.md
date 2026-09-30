@@ -89,6 +89,6 @@ When writing utility scripts or complex logic, follow these patterns to keep cyc
    }
    ```
 
-4. **Keep functions under 20 lines** – Extract when longer
+4. **Long functions are a smell, not a trigger** – past ~20 lines, look for a responsibility to isolate (see [docs/ai/when-to-extract-a-function.md](../../../docs/ai/when-to-extract-a-function.md)); never split by line count alone
 5. **Maximum 3 levels of nesting** – Refactor if deeper
 6. **Single responsibility** – One function, one job

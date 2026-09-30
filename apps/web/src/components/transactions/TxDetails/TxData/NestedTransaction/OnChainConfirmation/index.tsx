@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton } from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NestedTransaction } from '../NestedTransaction'
@@ -35,7 +35,7 @@ export const OnChainConfirmation = ({
       ) : txDetailsError ? (
         <ErrorMessage>Could not load details on hash to approve.</ErrorMessage>
       ) : (
-        <Skeleton />
+        <Skeleton className="h-5 w-full" />
       )}
     </NestedTransaction>
   )

@@ -1,11 +1,11 @@
 import InfoWidget from '@/components/new-safe/create/InfoWidget'
-import { Grid } from '@mui/material'
-import type { AlertColor } from '@mui/material'
 import { type ReactElement } from 'react'
+
+export type CreateSafeInfoVariant = 'info' | 'success' | 'warning' | 'error'
 
 export type CreateSafeInfoItem = {
   title: string
-  variant: AlertColor
+  variant: CreateSafeInfoVariant
   steps: { title: string; text: string | ReactElement }[]
 }
 
@@ -21,31 +21,25 @@ const CreateSafeInfos = ({
   }
 
   return (
-    <Grid item xs={12}>
-      <Grid
-        container
-        direction="column"
-        sx={{
-          gap: 3,
-        }}
-      >
+    <div className="col-span-12">
+      <div className="flex flex-col gap-6">
         {staticHint && (
-          <Grid item>
+          <div>
             <InfoWidget title={staticHint.title} variant={staticHint.variant} steps={staticHint.steps} />
-          </Grid>
+          </div>
         )}
         {dynamicHint && (
-          <Grid item>
+          <div>
             <InfoWidget
               title={dynamicHint.title}
               variant={dynamicHint.variant}
               steps={dynamicHint.steps}
               startExpanded
             />
-          </Grid>
+          </div>
         )}
-      </Grid>
-    </Grid>
+      </div>
+    </div>
   )
 }
 

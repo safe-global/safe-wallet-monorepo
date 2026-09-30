@@ -1,0 +1,1 @@
+export { MixpanelTracingProvider } from './provider'

@@ -1,0 +1,166 @@
+import type { ReactNode } from 'react'
+import { useParams } from 'next/navigation'
+import useChainId from '@/hooks/useChainId'
+import { renderHook } from '@/tests/test-utils'
+import * as useWalletHook from '@/hooks/wallets/useWallet'
+import * as useChains from '@/hooks/useChains'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+
+// mock useRouter
+jest.mock('next/navigation', () => ({
+  useParams: jest.fn(() => ({})),
+}))
+
+describe('useChainId hook', () => {
+  // Reset mocks before each test
+  beforeEach(() => {
+    jest.restoreAllMocks()
+    ;(useParams as any).mockImplementation(() => ({}))
+
+    window.history.replaceState(null, '', '/')
+  })
+
+  it('should read location.search if useRouter query.safe is empty', () => {
+    ;(useParams as any).mockImplementation(() => ({}))
+
+    window.history.replaceState(
+      null,
+      '',
+      '/balances?safe=avax:0x0000000000000000000000000000000000000123&redirect=true',
+    )
+
+    const { result } = renderHook(() => useChainId())
+
+    expect(result.current).toEqual('43114')
+  })
+
+  it('should read location.search if useRouter query.chain is empty', () => {
+    ;(useParams as any).mockImplementation(() => ({}))
+
+    window.history.replaceState(null, '', '/welcome?chain=matic')
+
+    const { result } = renderHook(() => useChainId())
+
+    expect(result.current).toEqual('137')
+  })
+
+  it('should return the default chainId if no query params', () => {
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('11155111')
+  })
+
+  it('should return the chainId based on the chain query', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      chain: 'gno',
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('100')
+  })
+
+  it('should return the chainId from the safe address', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'matic:0x0000000000000000000000000000000000000000',
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('137')
+  })
+
+  it('should return an empty chainId for a shortName no config knows', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'rhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '4663', shortName: 'robinhood' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
+  it('should resolve a shortName only the runtime config knows', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'robinhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '4663', shortName: 'robinhood' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('4663')
+  })
+
+  it('should return an empty chainId while the chain config is still loading', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'robinhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({ configs: [] }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
+  it('should not fall back to the wallet chain for an unresolvable shortName', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'rhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useWalletHook, 'default').mockImplementation(() => ({ chainId: '1337' }) as ConnectedWallet)
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '1337' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
+  it('should return the wallet chain id if no chain in the URL and no last chain id', () => {
+    ;(useParams as any).mockImplementation(() => ({}))
+
+    jest.spyOn(useWalletHook, 'default').mockImplementation(
+      () =>
+        ({
+          chainId: '1337',
+        }) as ConnectedWallet,
+    )
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '1337' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('1337')
+  })
+})
+
+describe('useChainId under a SafeScope', () => {
+  it('returns the scope chain even when the URL names another one', () => {
+    ;(useParams as any).mockImplementation(() => ({}))
+    window.history.replaceState(null, '', '/spaces/policies?safe=sep:0x0000000000000000000000000000000000000123')
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeScopeContext.Provider
+        value={{
+          scope: {
+            chainId: '137',
+            safeAddress: '0x0000000000000000000000000000000000000456',
+            scopeKey: '137:0x0000000000000000000000000000000000000456',
+            safeLoaded: false,
+            safeLoading: true,
+          },
+          setScope: jest.fn(),
+          clearScope: jest.fn(),
+        }}
+      >
+        {children}
+      </SafeScopeContext.Provider>
+    )
+    const { result } = renderHook(() => useChainId(), { wrapper })
+    expect(result.current).toBe('137')
+  })
+})

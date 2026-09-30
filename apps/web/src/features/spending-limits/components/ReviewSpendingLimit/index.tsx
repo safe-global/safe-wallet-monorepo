@@ -1,7 +1,8 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { Typography, Alert, Box } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
 
 import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'
@@ -44,32 +45,13 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   }, [spendingLimits, data])
 
   useEffect(() => {
-    if (!chain || !data) return
+    // Decimals arrive with the balances; building without them would throw a transient error.
+    if (!chain || !data || decimals == null) return
 
-    createNewSpendingLimitTx(
-      data,
-      spendingLimits,
-      chainId,
-      chain,
-      safe.modules,
-      safe.deployed,
-      decimals,
-      existingSpendingLimit,
-    )
+    createNewSpendingLimitTx(data, spendingLimits, chainId, chain, safe.modules, safe.deployed, decimals)
       .then(setSafeTx)
       .catch(setSafeTxError)
-  }, [
-    chain,
-    chainId,
-    decimals,
-    existingSpendingLimit,
-    data,
-    safe.modules,
-    safe.deployed,
-    setSafeTx,
-    setSafeTxError,
-    spendingLimits,
-  ])
+  }, [chain, chainId, decimals, data, safe.modules, safe.deployed, setSafeTx, setSafeTxError, spendingLimits])
 
   const isOneTime = data?.resetTime === '0'
   const resetTime = useMemo(() => {
@@ -101,14 +83,9 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
         <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
           {existingAmount && existingAmount !== data?.amount && (
             <>
-              <Typography
-                data-testid="old-token-amount"
-                color="error"
-                sx={{ textDecoration: 'line-through' }}
-                component="span"
-              >
+              <span data-testid="old-token-amount" className="text-destructive line-through">
                 {existingAmount}
-              </Typography>
+              </span>
               →
             </>
           )}
@@ -116,7 +93,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
       )}
 
       <TxDetailsRow label="Beneficiary" grid>
-        <Box data-testid="beneficiary-address">
+        <div data-testid="beneficiary-address">
           <EthHashInfo
             address={data?.beneficiary || ''}
             shortAddress={false}
@@ -124,7 +101,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
             showCopyButton
             showAvatar={false}
           />
-        </Box>
+        </div>
       </TxDetailsRow>
 
       <TxDetailsRow label="Reset time" grid>
@@ -135,20 +112,13 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
                 <>
                   {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
                     <>
-                      <Typography
-                        data-testid="old-reset-time"
-                        color="error"
-                        component="span"
-                        sx={{
-                          textDecoration: 'line-through',
-                        }}
-                      >
+                      <span data-testid="old-reset-time" className="text-destructive line-through">
                         {oldResetTime}
-                      </Typography>
+                      </span>
                       {' → '}
                     </>
                   )}
-                  <Typography component="span">{resetTime}</Typography>
+                  <span>{resetTime}</span>
                 </>
               }
               isOneTime={existingSpendingLimit.resetTimeMin === '0'}
@@ -164,8 +134,9 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
       </TxDetailsRow>
 
       {existingSpendingLimit && (
-        <Alert severity="warning" sx={{ border: 'unset' }}>
-          <Typography data-testid="limit-replacement-warning" fontWeight={700}>
+        <Alert variant="warning" outlined={false} className="border-none">
+          <AlertSeverityIcon variant="warning" />
+          <Typography data-testid="limit-replacement-warning" className="font-bold">
             You are about to replace an existing spending limit
           </Typography>
         </Alert>

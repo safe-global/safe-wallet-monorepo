@@ -7,7 +7,7 @@
   border-radius: 8px;
   flex-wrap: nowrap;
   display: grid;
-  grid-template-columns: 1fr 100px;
+  grid-template-columns: minmax(0, 1fr) 100px;
   align-items: center;
   gap: var(--space-2);
   min-height: 50px;
@@ -108,6 +108,10 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+  /* long unbreakable method names (e.g. addOwnerWithThreshold) must break instead of
+     overflowing the grid cell under the confirmations chip */
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .txDescription img {
@@ -130,7 +134,7 @@
     flex-direction: column;
     align-items: flex-start;
     flex-wrap: wrap;
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-1);
   }
 

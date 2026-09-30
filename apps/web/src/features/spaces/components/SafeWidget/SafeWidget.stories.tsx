@@ -18,6 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
  */
 
 const meta: Meta<typeof SafeWidget> = {
+  title: 'Features/Spaces/SafeWidget',
   component: SafeWidget,
   tags: ['autodocs'],
   decorators: [
@@ -81,6 +82,23 @@ export const Assets: Story = {
         actionNode={<span className="text-sm font-medium text-muted-foreground">$1.12M</span>}
       />
       <SafeWidget.Footer count={14} text="View all assets" />
+    </SafeWidget>
+  ),
+}
+
+export const WithViewAllHeader: Story = {
+  render: () => (
+    <SafeWidget title="Accounts" action={<SafeWidget.ViewAll count={14} onClick={() => console.log('View all')} />}>
+      <SafeWidget.Item
+        label="Treasury"
+        info="0x8675…bca19b"
+        startNode={
+          <Avatar>
+            <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">TR</AvatarFallback>
+          </Avatar>
+        }
+        actionNode={<span className="text-sm font-medium text-muted-foreground">$123.72K</span>}
+      />
     </SafeWidget>
   ),
 }

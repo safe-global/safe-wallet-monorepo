@@ -16,6 +16,7 @@ const mockRegisterDelegate = jest.fn()
 // Mock ethers Wallet
 jest.mock('ethers', () => {
   return {
+    ...jest.requireActual('ethers'),
     Wallet: class {
       address = OWNER_ADDRESS
       privateKey = TEST_PRIVATE_KEY

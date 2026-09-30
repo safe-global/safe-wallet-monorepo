@@ -71,6 +71,22 @@ describe('WalletLogin', () => {
     })
   })
 
+  it('shows the wallet icon in the brand green on the secondary style only', () => {
+    jest.spyOn(useWallet, 'default').mockReturnValue(null)
+    jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
+
+    const secondary = render(
+      <WalletLogin onLogin={jest.fn()} onContinue={jest.fn()} buttonStyle="walletBtnSecondary" />,
+    )
+    const button = secondary.getByTestId('connect-wallet-btn')
+    expect(button.querySelector('svg')).toBeInTheDocument()
+    expect(button).toHaveClass('[&_svg]:text-green-400')
+    secondary.unmount()
+
+    const primary = render(<WalletLogin onLogin={jest.fn()} onContinue={jest.fn()} />)
+    expect(primary.getByTestId('connect-wallet-btn')).not.toHaveClass('[&_svg]:text-green-400')
+  })
+
   it('should invoke the callback if user actively connects', async () => {
     const mockOnLogin = jest.fn()
     const mockOnContinue = jest.fn()
@@ -94,62 +110,6 @@ describe('WalletLogin', () => {
 
     await waitFor(() => {
       expect(mockOnLogin).toHaveBeenCalled()
-    })
-  })
-
-  describe('fullWidth prop', () => {
-    it('should apply fullWidth to button when wallet is connected', async () => {
-      const mockOnLogin = jest.fn()
-      const mockOnContinue = jest.fn()
-      const walletAddress = toBeHex('0x1', 20)
-      jest.spyOn(useWallet, 'default').mockReturnValue({
-        address: walletAddress,
-        chainId: '5',
-        label: 'MetaMask',
-        provider: {} as unknown as EIP1193Provider,
-      })
-      jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
-
-      const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={true} />)
-
-      const button = await result.findByRole('button')
-      expect(button).toHaveClass('MuiButton-fullWidth')
-    })
-
-    it('should apply fullWidth to connect wallet button', async () => {
-      const mockOnLogin = jest.fn()
-      const mockOnContinue = jest.fn()
-      jest.spyOn(useWallet, 'default').mockReturnValue(null)
-      jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
-
-      const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={true} />)
-
-      const button = await result.findByRole('button')
-      expect(button).toHaveClass('MuiButton-fullWidth')
-    })
-
-    it('should not apply fullWidth when prop is false', async () => {
-      const mockOnLogin = jest.fn()
-      const mockOnContinue = jest.fn()
-      jest.spyOn(useWallet, 'default').mockReturnValue(null)
-      jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
-
-      const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} fullWidth={false} />)
-
-      const button = await result.findByRole('button')
-      expect(button).not.toHaveClass('MuiButton-fullWidth')
-    })
-
-    it('should not apply fullWidth when prop is not provided', async () => {
-      const mockOnLogin = jest.fn()
-      const mockOnContinue = jest.fn()
-      jest.spyOn(useWallet, 'default').mockReturnValue(null)
-      jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
-
-      const result = render(<WalletLogin onLogin={mockOnLogin} onContinue={mockOnContinue} />)
-
-      const button = await result.findByRole('button')
-      expect(button).not.toHaveClass('MuiButton-fullWidth')
     })
   })
 })

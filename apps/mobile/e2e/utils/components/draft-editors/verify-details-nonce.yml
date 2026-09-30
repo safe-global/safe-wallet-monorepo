@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+tags:
+  - util
+---
+# Assert the transaction details show the same nonce as the confirm-screen row:
+# copy the row value, open details, assert it there, return. Works for any nonce
+# (the recommended value is dynamic), so it's reusable after every nonce change.
+
+- runScript:
+    file: ../../../utils/scripts/defaults.js
+
+- copyTextFrom:
+    id: 'nonce-row-value'
+
+# Center the details button clear of the pinned footer before tapping.
+- scrollUntilVisible:
+    element:
+      id: 'transaction-details-button'
+    direction: UP
+    centerElement: true
+- tapOn:
+    id: 'transaction-details-button'
+- extendedWaitUntil:
+    visible:
+      text: 'Nonce'
+    timeout: ${output.defaults.draftUiTimeout}
+- assertVisible: '${maestro.copiedText}'
+- tapOn:
+    id: 'go-back'
+- extendedWaitUntil:
+    visible:
+      id: 'nonce-row'
+    timeout: ${output.defaults.draftNetworkTimeout}

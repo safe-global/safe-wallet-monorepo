@@ -80,7 +80,7 @@ tags:
 
 # Verify description text appears
 - assertVisible:
-    text: 'Choose which tokens to display in your assets list.*'
+    text: '.*Learn more about default tokens.*'
 
 # Test toggling the suspicious tokens filter
 - tapOn:

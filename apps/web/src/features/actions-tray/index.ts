@@ -20,6 +20,8 @@ import type { ActionsTrayContract } from './contract'
 
 export type { ActionsTrayContract } from './contract'
 
+export { default as ActionsTray } from './components/ActionsTray'
+
 export const ActionsTrayFeature: FeatureHandle<ActionsTrayContract> = {
   name: 'actions-tray',
   useIsEnabled: () => true,

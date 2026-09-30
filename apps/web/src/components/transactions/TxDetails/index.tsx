@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
-import { Box, CircularProgress } from '@mui/material'
+import { Spinner } from '@/components/ui/spinner'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -24,7 +24,9 @@ import {
 } from '@/utils/transaction-guards'
 import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import classNames from 'classnames'
 import css from './styles.module.css'
+import { Card } from '@/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
@@ -138,13 +140,13 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                 trusted={isTrustedTransfer}
                 imitation={isImitationTransaction}
               >
-                <Box ref={decodedDataRef}>
+                <div ref={decodedDataRef}>
                   <DecodedData
                     txData={txDetails.txData}
                     toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
                     isWarningEnabled
                   />
-                </Box>
+                </div>
               </TxData>
             </ObservabilityErrorBoundary>
           </div>
@@ -205,7 +207,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
 
           {isQueue && (
-            <Box className={css.buttons}>
+            <div className={css.buttons}>
               {isTxFromProposer ? (
                 <>
                   {!expiredSwap &&
@@ -226,7 +228,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
                   <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
                 </>
               )}
-            </Box>
+            </div>
           )}
         </div>
       )}
@@ -237,9 +239,11 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 const TxDetails = ({
   txSummary,
   txDetails,
+  contrastSurface = false,
 }: {
   txSummary: Transaction
   txDetails?: TransactionDetails // optional
+  contrastSurface?: boolean
 }): ReactElement => {
   const chainId = useChainId()
   const { safe } = useSafeInfo()
@@ -263,12 +267,19 @@ const TxDetails = ({
   }, [safe.txQueuedTag, refetch, txDetails, isUninitialized])
 
   return (
-    <div className={css.container}>
+    <Card
+      size={contrastSurface ? 'none' : 'default'}
+      radius={contrastSurface ? 'none' : 'lg'}
+      // eslint-disable-next-line no-restricted-syntax -- contrast variant clears the surface (bg-transparent) so css.containerContrast can paint it; nested-surface token
+      className={classNames(css.container, contrastSurface && 'bg-transparent', {
+        [css.containerContrast]: contrastSurface,
+      })}
+    >
       {txDetailsData ? (
         <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} />
       ) : loading ? (
         <div className={css.loading}>
-          <CircularProgress />
+          <Spinner className="size-10" />
         </div>
       ) : (
         error && (
@@ -277,7 +288,7 @@ const TxDetails = ({
           </div>
         )
       )}
-    </div>
+    </Card>
   )
 }
 

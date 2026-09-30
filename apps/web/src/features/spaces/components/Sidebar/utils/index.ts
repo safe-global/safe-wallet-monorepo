@@ -8,3 +8,6 @@ export const truncateSpaceName = (name: string, maxLength: number): string =>
 
 export const getSidebarItemTestId = (label: string): string =>
   `sidebar-item-${label.trim().toLowerCase().replace(/\s+/g, '-')}`
+
+/** Action items are keyed by their stable id rather than their label, which is free to change. */
+export const getSidebarActionItemTestId = (id: string): string => `sidebar-${id}-item`

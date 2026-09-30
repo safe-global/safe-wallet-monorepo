@@ -2,15 +2,15 @@ import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as modal from './modals.page.js'
 import * as navigation from './navigation.page.js'
-import { safeHeaderInfo } from './import_export.pages.js'
 import * as file from './import_export.pages.js'
-import safes from '../../fixtures/safes/static.js'
 import * as address_book from './address_book.page.js'
 import * as create_wallet from '../pages/create_wallet.pages.js'
 
 export const chainLogo = '[data-testid="chain-logo"]'
 const safeIcon = '[data-testid="safe-icon"]'
 const sidebarContainer = '[data-testid="sidebar-container"]'
+const sidebarTopBar = '[data-testid="sidebar-top-bar"]'
+const sidebarTrigger = '[data-testid="sidebar-trigger"]'
 const openSafesIcon = '[data-testid="open-safes-icon"]'
 const qrModalBtn = '[data-testid="qr-modal-btn"]'
 export const copyAddressBtn = '[data-testid="copy-address-btn"]'
@@ -21,7 +21,6 @@ const sideBarListItemNeedHelp = '[data-testid="list-item-need-help"]'
 export const sidebarSettingsItem = '[data-testid="sidebar-settings-item"]'
 export const sidebarListItem = '[data-testid="sidebar-list-item"]'
 export const sideSafeListItem = '[data-testid="safe-list-item"]'
-const sidebarSafeHeader = '[data-testid="safe-header-info"]'
 const sidebarSafeContainer = '[data-testid="sidebar-safe-container"]'
 const safeItemOptionsBtn = '[data-testid="safe-options-btn"]'
 export const safeItemOptionsRenameBtn = '[data-testid="rename-btn"]'
@@ -31,7 +30,6 @@ const nameInput = '[data-testid="name-input"]'
 const saveBtn = '[data-testid="save-btn"]'
 const deleteBtn = '[data-testid="delete-btn"]'
 const readOnlyVisibility = '[data-testid="read-only-visibility"]'
-const currencySection = '[data-testid="currency-section"]'
 const missingSignatureInfo = '[data-testid="missing-signature-info"]'
 const queuedTxInfo = '[data-testid="queued-tx-info"]'
 const expandSafesList = '[data-testid="expand-safes-list"]'
@@ -89,9 +87,12 @@ export function checkSafesCountInPopverList(number) {
 }
 
 export function clickOnSafeInPopover(safe) {
-  cy.get(nestedSafeListPopover).within(() => {
-    cy.contains(safe).click()
-  })
+  // Rows are overlay links: the content layer is pointer-events-none, so click the row's
+  // covering "Open Safe" anchor directly (force: the copy button sits above its center).
+  cy.get(nestedSafeListPopover)
+    .contains('[data-testid="safe-list-item"]', safe)
+    .find('a[aria-label="Open Safe"]')
+    .click({ force: true })
 }
 
 export function clickOnParentSafeInBreadcrumb() {
@@ -113,9 +114,7 @@ export function checkParentSafeInBreadcrumb(name, address) {
 
 export function checkNestedSafeInBreadcrumb(name) {
   cy.get(breadcrumpContainer).within(() => {
-    cy.get(nestedSafeItem).within(() => {
-      cy.get('p').should('contain', name)
-    })
+    cy.get(nestedSafeItem).should('contain', name)
   })
 }
 
@@ -151,9 +150,8 @@ export const sideBarSafesPendingActions = {
   safe1: '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
   safe1short: '0x5912...fFdb',
 }
-export const testSafeHeaderDetails = ['2/2', safes.SEP_STATIC_SAFE_9_SHORT]
 const receiveAssetsStr = 'Receive assets'
-const emptyPinnedListStr = 'Watch any Safe Account to keep an eye on its activity'
+const emptyPinnedListStr = 'Watch any Safe account to keep an eye on its activity'
 const emptySafeListStr = "You don't have any safes yet"
 const accountsRegex = /(My accounts|Accounts) \((\d+)\)/
 const confirmTxStr = (number) => `${number} to confirm`
@@ -295,11 +293,6 @@ export function verifyNetworkIsDisplayed(netwrok) {
     })
 }
 
-export function verifySafeHeaderDetails(details) {
-  main.checkTextsExistWithinElement(safeHeaderInfo, details)
-  main.verifyElementsExist([safeIcon, currencySection])
-}
-
 export function clickOnQRCodeBtn() {
   cy.get(sidebarContainer).within(() => {
     cy.get(qrModalBtn).should('have.length', 1).click()
@@ -390,6 +383,14 @@ export function openSidebar() {
   cy.wait(500)
   showAllSafes()
   main.verifyElementsExist([sidebarSafeContainer])
+}
+
+export function collapseSidebar() {
+  cy.get(sidebarTrigger).click()
+}
+
+export function verifySidebarCollapsed() {
+  cy.get(sidebarTopBar).should('have.attr', 'data-sidebar-state', 'collapsed')
 }
 
 export function verifyAddedSafesExist(safes) {
@@ -587,16 +588,6 @@ export function clickOnSaveBtn() {
 
 function verifyModalRemoved() {
   main.verifyElementsCount(modal.modalTitle, 0)
-}
-
-export function checkCurrencyInHeader(currency) {
-  cy.get(sidebarSafeHeader).within(() => {
-    cy.get(currencySection).contains(currency)
-  })
-}
-
-export function checkSafeAddressInHeader(address) {
-  main.verifyValuesExist(sidebarSafeHeader, address)
 }
 
 export function verifyPinnedListIsEmpty() {

@@ -1,23 +1,20 @@
-import NumberField from '@/components/common/NumberField'
+import { _formatNumber } from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
-import { Autocomplete, type MenuItemProps, MenuItem } from '@mui/material'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
-import { PSEUDO_APPROVAL_VALUES } from './utils/approvals'
+import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'
-
-const ApprovalOption = ({ menuItemProps, value }: { menuItemProps: MenuItemProps; value: string }) => {
-  return (
-    <MenuItem key={value} {...menuItemProps}>
-      {value}
-    </MenuItem>
-  )
-}
+import InfoIcon from '@/public/images/notifications/info.svg'
+import { TokenType } from '@safe-global/store/gateway/types'
+import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@/utils/cn'
 
 export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: ApprovalInfo; readOnly: boolean }) => {
   const { control } = useFormContext()
-  const selectValues = Object.values(PSEUDO_APPROVAL_VALUES)
+  const selectValues: string[] = Object.values(PSEUDO_APPROVAL_VALUES)
   const {
     field: { ref, onBlur, onChange, value },
     fieldState,
@@ -37,97 +34,81 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   })
 
   const helperText = fieldState.error?.message ?? (fieldState.isDirty ? 'Save to apply changes' : '')
+  const hasError = !!fieldState.error
 
-  const label = `${approvalMethodDescription[tx.method](tx.tokenInfo?.symbol ?? '')}`
-  const options = selectValues
+  const symbol = tx.tokenInfo?.symbol ?? ''
+  const labelText = approvalMethodDescription[tx.method](symbol)
+  const showAmountTooltip = tx.tokenInfo?.type === TokenType.ERC20
+  const inputId = `${name}-approval-amount`
+
+  // On free-text entry, reformat the number; preset values (e.g. "Unlimited amount") pass through untouched.
+  const handleInputChange = (next: string) => {
+    onChange(selectValues.includes(next) ? next : _formatNumber(next))
+  }
 
   return (
-    <Autocomplete
-      freeSolo
-      fullWidth
-      options={options}
-      renderOption={(props, value: string) => <ApprovalOption key={value} menuItemProps={props} value={value} />}
-      value={value}
-      // On option select or free text entry
-      onInputChange={(_, value) => {
-        onChange(value)
-      }}
-      disableClearable
-      selectOnFocus={!readOnly}
+    <Combobox
+      items={selectValues}
+      // `value` must be bound alongside `inputValue`: Base UI resets the input to the selected
+      // value when the popup closes, so leaving selection uncontrolled wipes a typed amount. It
+      // also feeds the default single-selection filter, which otherwise treats the typed amount as
+      // a search query and hides every preset.
+      value={value ?? ''}
+      onValueChange={(next) => handleInputChange(typeof next === 'string' ? next : '')}
+      inputValue={value ?? ''}
+      onInputValueChange={handleInputChange}
       readOnly={readOnly}
-      componentsProps={{
-        paper: {
-          elevation: 2,
-        },
-      }}
-      renderInput={(params) => {
-        // Extract Autocomplete's ref from params
-        const autocompleteRef = params.inputProps.ref
+      inputRef={ref}
+    >
+      <Field data-invalid={hasError}>
+        <FieldLabel htmlFor={inputId} className={hasError ? 'text-destructive' : undefined}>
+          {showAmountTooltip ? (
+            <span className="inline-flex items-center gap-1">
+              {labelText}
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex" />}>
+                  <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+                </TooltipTrigger>
+                <TooltipContent>Enter a decimal amount (e.g. 1.5), not a raw wei value.</TooltipContent>
+              </Tooltip>
+            </span>
+          ) : (
+            labelText
+          )}
+        </FieldLabel>
 
-        // Create combined ref that applies both Autocomplete's and react-hook-form's refs
-        const combinedRef = (node: HTMLInputElement | null) => {
-          // Apply Autocomplete's ref
-          if (typeof autocompleteRef === 'function') {
-            autocompleteRef(node)
-          } else if (autocompleteRef && typeof autocompleteRef === 'object' && 'current' in autocompleteRef) {
-            ;(autocompleteRef as React.RefObject<HTMLInputElement | null>).current = node
-          }
-          // Apply react-hook-form's ref
-          if (typeof ref === 'function') {
-            ref(node)
-          } else if (ref && typeof ref === 'object' && 'current' in ref) {
-            ;(ref as React.RefObject<HTMLInputElement | null>).current = node
-          }
-        }
+        <ComboboxInput
+          id={inputId}
+          name={name}
+          readOnly={readOnly}
+          showTrigger={!readOnly}
+          autoComplete="off"
+          aria-invalid={hasError}
+          onBlur={onBlur}
+          onFocus={(event) => {
+            if (!readOnly) {
+              event.target.select()
+            }
+          }}
+          className={cn('w-full', css.approvalAmount)}
+        />
 
-        // Remove ref from inputProps since we'll pass it via NumberField's forwardRef
-        const { ref: _, ...inputPropsWithoutRef } = params.inputProps
+        {!readOnly && (
+          <ComboboxContent>
+            <ComboboxList>
+              {(item: string) => (
+                <ComboboxItem key={item} value={item}>
+                  {item}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        )}
 
-        return (
-          <NumberField
-            ref={combinedRef}
-            {...params}
-            label={label}
-            name={name}
-            fullWidth
-            helperText={helperText}
-            onFocus={(field) => {
-              if (!readOnly) {
-                field.target.select()
-              }
-            }}
-            margin="dense"
-            variant="standard"
-            error={!!fieldState.error}
-            size="small"
-            onBlur={onBlur}
-            InputProps={{
-              ...params.InputProps,
-              sx: {
-                flexWrap: 'nowrap !important',
-                '&::before': {
-                  border: 'none !important',
-                },
-                '&::after': {
-                  display: readOnly ? 'none' : undefined,
-                },
-                border: 'none !important',
-              },
-            }}
-            inputProps={{
-              ...inputPropsWithoutRef,
-              className: css.approvalAmount,
-            }}
-            InputLabelProps={{
-              ...params.InputLabelProps,
-              shrink: true,
-              sx: {
-                color: (theme) => (readOnly ? `${theme.palette.text.secondary} !important` : undefined),
-              },
-            }}
-          />
-        )
-      }}
-    />
+        {helperText && (
+          <FieldDescription className={hasError ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
+        )}
+      </Field>
+    </Combobox>
   )
 }

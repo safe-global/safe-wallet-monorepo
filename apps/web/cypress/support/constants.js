@@ -45,13 +45,16 @@ export const sepoliaSafeName = 'sepolia-safe'
 export const goerliToken = /G(ö|oe)rli Ether/
 
 export const spaceDashboardUrl = '/spaces?spaceId='
-export const spaceUrl = '/spaces/settings?spaceId='
 export const spaceMembersUrl = '/spaces/members?spaceId='
 export const spaceSafeAccountsUrl = '/spaces/safe-accounts?spaceId='
 export const spaceAddressBookUrl = '/spaces/address-book?spaceId='
-export const userSettingsUrl = '/user-settings'
+export const spaceSettingsGeneralUrl = '/spaces/settings/general?spaceId='
+export const spaceSettingsAccountUrl = '/spaces/settings/account?spaceId='
+export const spaceSettingsAboutUrl = '/spaces/settings/about?spaceId='
+export const spaceSecurityUrl = '/spaces/security?spaceId='
+export const spaceActivityUrl = '/spaces/activity?spaceId='
 export const prodbaseUrl = 'https://app.safe.global'
-export const swapWidget = 'https://swap.cow.finance/#/11155111/widget/swap/'
+export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
 export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
@@ -114,11 +117,13 @@ export const relayPath = '/relay/'
 export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_spam=false'
 
 export const usersEndpoint = '**/v1/users'
+export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
 export const spacesEndpoint = '**/**/spaces*'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'
 export const spacesAddressBookEndpoint = '**/v1/spaces/*/address-book'
+export const spacesEntitlementsEndpoint = '**/v1/spaces/*/entitlements'
 export const proposeEndpoint = '/**/propose*'
 export const appsEndpoint = '**/v1/**/safe-apps*'
 export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
@@ -126,7 +131,10 @@ export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
 export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
-export const collectiblesEndpoint = '**/collectibles*'
+// Must stay scoped to the API path: a bare '**/collectibles*' also matches the Vite dev-server
+// module URL for store/gateway/AUTO_GENERATED/collectibles.ts, and fulfilling that with JSON
+// kills the whole app on load (module MIME type error).
+export const collectiblesEndpoint = '**/v2/**/safes/**/collectibles*'
 export const chainsEndpoint = '**/v2/chains'
 export const chainConfigEndpoint = '**/v2/chains/*'
 export const safeInfoEndpoint = '**/v1/chains/*/safes/*'
@@ -135,6 +143,7 @@ export const portfolioEndpoint = '**/v1/portfolio/**'
 export const positionsEndpoint = '**/v1/**/safes/**/positions/**'
 export const masterCopiesEndpoint = '**/v1/**/about/master-copies*'
 export const targetedMessagingEndpoint = '**/v1/targeted-messaging/**'
+export const delegatesEndpoint = '**/v2/chains/*/delegates*'
 
 export const indexStatusUrl = 'https://status.safe.global'
 
@@ -249,15 +258,15 @@ export const addressBookErrrMsg = {
   invalidFormat: 'Invalid address format',
   invalidChecksum: 'Invalid address checksum',
   exceedChars: 'Maximum 50 symbols',
-  ownSafeManage: 'The Safe Account cannot own itself',
-  ownSafe: 'Cannot use Safe Account itself as signer',
-  alreadyAdded: 'Address already added',
-  ownerAdded: 'Signer is already added',
-  failedResolve: 'Failed to resolve the address',
+  ownSafeManage: 'Cannot use Safe account itself as signer',
+  ownSafe: 'Cannot use Safe account itself as signer',
+  alreadyAdded: 'This address is already a signer of this Safe Account',
+  ownerAdded: 'This address is already a signer of this Safe Account',
+  failedResolve: 'ENS name not available on Sepolia',
   emptyAddress: 'Owner',
-  safeAlreadyAdded: 'Safe Account is already added',
+  safeAlreadyAdded: 'Safe account is already added',
   prefixMismatch: "doesn't match the current chain",
-  ownSafeGuardian: 'The Safe Account cannot be a Recoverer of itself',
+  ownSafeGuardian: 'The Safe account cannot be a Recoverer of itself',
   invalidPrefix(prefix) {
     return `"${prefix}" doesn't match the current chain`
   },
@@ -287,8 +296,6 @@ export const addresBookContacts = {
   },
 }
 
-export const termsUrl = '/terms'
-export const privacyUrl = '/privacy'
 export const licensesUrl = '/licenses'
 export const imprintUrl = '/imprint'
 export const cookiePolicyUrl = '/cookie'
@@ -319,7 +326,17 @@ export const localStorageKeys = {
   SAFE_v2__SafeApps__browserPermissions: 'SAFE_v2__SafeApps__browserPermissions',
   SAFE_v2__SafeApps__infoModal: 'SAFE_v2__SafeApps__infoModal',
   SAFE_v2__undeployedSafes: 'SAFE_v2__undeployedSafes',
-  SAFE_v2__batch: 'SAFE_v2__batch',
+  SAFE_v2__pendingCfDeletes: 'SAFE_v2__pendingCfDeletes',
   SAFE_v2__visitedSafes: 'SAFE_v2__visitedSafes',
   SAFE_v2__auth: 'SAFE_v2__auth',
+  SAFE_v2__lastWallet: 'SAFE_v2__lastWallet',
+  SAFE_v2__safeProAnnouncementSeen: 'SAFE_v2__safeProAnnouncementSeen',
 }
+
+export const sessionStorageKeys = {
+  SAFE_v2__classicViewEnabled: 'SAFE_v2__classicViewEnabled',
+  SAFE_v2__privateKeyModulePK: 'SAFE_v2__privateKeyModulePK',
+}
+
+// Follows the chain config's recommendedMasterCopyVersion, so it changes when that does.
+export const safeProxyFactoryLabel = 'SafeProxyFactory 1.5.0'

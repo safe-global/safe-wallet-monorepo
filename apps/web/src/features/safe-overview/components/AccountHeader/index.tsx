@@ -1,10 +1,10 @@
 import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import { Skeleton } from '@mui/material'
 import { Settings } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
-import { DashboardHeader } from '@/features/spaces/components/Dashboard/DashboardHeader'
+import { DashboardHeader } from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
@@ -12,13 +12,13 @@ import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { AppRoutes } from '@/config/routes'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 
-const QrModal = dynamic(() => import('@/components/sidebar/QrCodeButton/QrModal'))
+const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
 const AccountHeader = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
@@ -78,11 +78,7 @@ const AccountHeader = (): ReactElement => {
         onReceive={safe.deployed ? handleReceive : undefined}
         onBuildTransaction={safe.deployed ? handleBuildTransaction : undefined}
         otherActions={
-          <Button
-            variant="outline"
-            className="!border-[var(--color-border-light)] bg-transparent hover:bg-muted/50"
-            onClick={handleManageSafe}
-          >
+          <Button variant="surface" size="action" onClick={handleManageSafe}>
             <Settings className="size-4" />
             Manage Safe
           </Button>
@@ -102,10 +98,10 @@ const SafeAccountHeaderSkeleton = (): ReactElement => {
   return (
     <div className="mb-10 flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <Skeleton variant="rounded" width={80} height={16} />
-        <Skeleton variant="rounded" width={200} height={30} />
+        <Skeleton className="h-[16px] w-[80px]" />
+        <Skeleton className="h-[30px] w-[200px]" />
       </div>
-      <Skeleton variant="rounded" width={500} height={36} />
+      <Skeleton className="h-[36px] w-[500px]" />
     </div>
   )
 }

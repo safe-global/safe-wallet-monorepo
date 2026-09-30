@@ -1,4 +1,4 @@
-import { Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 import { useHiddenTokenCounts } from '@/hooks/useHiddenTokenCounts'
 
 interface HiddenTokensInfoProps {
@@ -23,19 +23,12 @@ export const HiddenTokensInfo = ({ onOpenManageTokens }: HiddenTokensInfoProps) 
   }
 
   return (
-    <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '14px' }}>
+    <Typography variant="paragraph-mini" className="text-[14px] text-[var(--color-text-secondary)]">
       {parts.join(' and ')}.{' '}
       <Typography
-        component="span"
-        variant="caption"
+        variant="paragraph-mini"
         onClick={onOpenManageTokens}
-        sx={{
-          color: 'primary.light',
-          textDecoration: 'underline',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: 'normal',
-        }}
+        className="cursor-pointer text-[14px] text-[var(--color-primary-light)] underline"
       >
         Manage Tokens
       </Typography>

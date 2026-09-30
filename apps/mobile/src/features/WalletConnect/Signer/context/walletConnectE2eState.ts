@@ -4,6 +4,7 @@
  * TestCtrls buttons call set() to configure mock connection results.
  * WalletConnectContext.e2e.tsx subscribes via useSyncExternalStore.
  */
+import { createE2eStore } from '@/src/tests/e2e-maestro/createE2eStore'
 
 export interface WalletConnectE2eState {
   // ── Scenario directives — drive what the next mock call should do ────────
@@ -55,38 +56,4 @@ const initialState: WalletConnectE2eState = {
   hasProvider: false,
 }
 
-let listeners: (() => void)[] = []
-let state: WalletConnectE2eState = { ...initialState }
-
-function notifyListeners() {
-  for (const listener of listeners) {
-    try {
-      listener()
-    } catch (error) {
-      console.error('[E2E] walletConnectE2eState listener error:', error)
-    }
-  }
-}
-
-function get(): WalletConnectE2eState {
-  return state
-}
-
-function set(next: Partial<WalletConnectE2eState>) {
-  state = { ...state, ...next }
-  notifyListeners()
-}
-
-function reset() {
-  state = { ...initialState }
-  notifyListeners()
-}
-
-function subscribe(listener: () => void): () => void {
-  listeners.push(listener)
-  return () => {
-    listeners = listeners.filter((l) => l !== listener)
-  }
-}
-
-export const walletConnectE2eState = { get, set, reset, subscribe }
+export const walletConnectE2eState = createE2eStore('walletConnectE2eState', initialState)

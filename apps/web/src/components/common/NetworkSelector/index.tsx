@@ -1,28 +1,21 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
-import { useDarkMode } from '@/hooks/useDarkMode'
-import { useTheme } from '@mui/material/styles'
 import Link from 'next/link'
-import {
-  Box,
-  ButtonBase,
-  CircularProgress,
-  Collapse,
-  Divider,
-  MenuItem,
-  Select,
-  Skeleton,
-  Stack,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Spinner } from '@/components/ui/spinner'
+import { Separator } from '@/components/ui/separator'
+import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { SearchInput } from '@/components/ui/search-input'
 import partition from 'lodash/partition'
-import ExpandMoreIcon from '@mui/icons-material/KeyboardArrowDownRounded'
+import { ChevronDownIcon, InfoIcon } from 'lucide-react'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { type ReactElement, useCallback, useMemo, useState } from 'react'
+import { type KeyboardEvent, type ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -34,7 +27,8 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { InfoOutlined } from '@mui/icons-material'
+import { cn } from '@/utils/cn'
+
 export const getNetworkLink = (
   router: NextRouter,
   safeAddress: string,
@@ -85,24 +79,30 @@ const UndeployedNetworkMenuItem = ({
 
   return (
     <Track {...OVERVIEW_EVENTS.ADD_NEW_NETWORK} label={OVERVIEW_LABELS.top_bar}>
-      <Tooltip data-testid="add-network-tooltip" title="Add network" arrow placement="left">
-        <MenuItem
-          value={chain.chainId}
-          sx={{ '&:hover': { backgroundColor: 'inherit' } }}
-          onClick={() => onSelect(chain)}
-          disabled={isDisabled}
+      <Tooltip>
+        <TooltipTrigger
+          data-testid="add-network-tooltip"
+          render={
+            <button
+              type="button"
+              className={css.undeployedItem}
+              onClick={() => !isDisabled && onSelect(chain)}
+              disabled={isDisabled}
+            />
+          }
         >
-          <Box className={css.item}>
+          <span className={css.item}>
             <ChainIndicator responsive={isSelected} chainId={chain.chainId} inline />
             {isDisabled ? (
-              <Typography variant="caption" component="span" className={css.comingSoon}>
+              <Typography variant="paragraph-mini" className={css.comingSoon}>
                 Not available
               </Typography>
             ) : (
               <PlusIcon className={css.plusIcon} />
             )}
-          </Box>
-        </MenuItem>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="left">Add network</TooltipContent>
       </Tooltip>
     </Track>
   )
@@ -110,32 +110,22 @@ const UndeployedNetworkMenuItem = ({
 
 const NetworkSkeleton = () => {
   return (
-    <Stack
-      direction="row"
-      spacing={1}
-      sx={{
-        alignItems: 'center',
-        p: '4px 0px',
-      }}
-    >
-      <Skeleton variant="circular" width="24px" height="24px" />
-      <Skeleton variant="rounded" sx={{ flexGrow: 1 }} />
-    </Stack>
+    <div className="flex items-center gap-2 py-1">
+      <Skeleton className="size-6 rounded-full" />
+      <Skeleton className="h-4 grow rounded-md" />
+    </div>
   )
 }
 
 const TestnetDivider = () => {
   return (
-    <Divider sx={{ m: '0px !important', '& .MuiDivider-wrapper': { p: '0px 16px' } }}>
-      <Typography
-        variant="overline"
-        sx={{
-          color: 'border.main',
-        }}
-      >
+    <div className="my-0 flex items-center gap-2 px-4">
+      <Separator className="flex-1" />
+      <Typography variant="paragraph-mini" className="text-[var(--color-border-main)] uppercase">
         Testnets
       </Typography>
-    </Divider>
+      <Separator className="flex-1" />
+    </div>
   )
 }
 
@@ -187,35 +177,23 @@ const UndeployedNetworks = ({
 
   if (safeCreationLoading) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          my: 1,
-        }}
-      >
-        <CircularProgress size={18} />
-      </Box>
+      <div className="my-2 flex items-center justify-center">
+        <Spinner className="size-[18px]" />
+      </div>
     )
   }
 
   const errorMessage =
     safeCreationDataError || (safeCreationData && noAvailableNetworks) ? (
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{
-          alignItems: 'center',
-        }}
-      >
+      <div className="flex items-center gap-2">
         {safeCreationDataError?.message && (
-          <Tooltip title={safeCreationDataError?.message}>
-            <InfoOutlined color="info" fontSize="medium" />
+          <Tooltip>
+            <TooltipTrigger render={<InfoIcon className="text-[var(--color-info-main)] size-5" />} />
+            <TooltipContent>{safeCreationDataError?.message}</TooltipContent>
           </Tooltip>
         )}
         <Typography>Adding another network is not possible for this Safe. </Typography>
-      </Stack>
+      </div>
     ) : isUnsupportedSafeCreationVersion ? (
       'This account was created from an outdated mastercopy. Adding another network is not possible.'
     ) : (
@@ -224,22 +202,9 @@ const UndeployedNetworks = ({
 
   if (errorMessage) {
     return (
-      <Box
-        sx={{
-          px: 2,
-          py: 1,
-        }}
-      >
-        <Typography
-          sx={{
-            color: 'text.secondary',
-            fontSize: '14px',
-            maxWidth: 300,
-          }}
-        >
-          {errorMessage}
-        </Typography>
-      </Box>
+      <div className="px-4 py-2">
+        <Typography className="text-muted-foreground max-w-[300px] text-sm">{errorMessage}</Typography>
+      </div>
     )
   }
 
@@ -254,35 +219,20 @@ const UndeployedNetworks = ({
   }
 
   return (
-    <>
-      <ButtonBase className={css.listSubHeader} onClick={onShowAllNetworks} tabIndex={-1}>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            alignItems: 'center',
-          }}
-        >
-          <div data-testid="show-all-networks">Show all networks</div>
+    <Collapsible open={open} onOpenChange={onShowAllNetworks}>
+      <CollapsibleTrigger className={css.listSubHeader} tabIndex={-1}>
+        <span className="flex items-center gap-2">
+          <span data-testid="show-all-networks">Show all networks</span>
 
-          <ExpandMoreIcon
-            fontSize="small"
-            sx={{
-              transform: open ? 'rotate(180deg)' : undefined,
-            }}
-          />
-        </Stack>
-      </ButtonBase>
-      <Collapse in={open} timeout="auto" unmountOnExit>
+          <ChevronDownIcon className={open ? 'size-4 rotate-180' : 'size-4'} />
+        </span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
         {!safeCreationData ? (
-          <Box
-            sx={{
-              p: '0px 16px',
-            }}
-          >
+          <div className="px-4">
             <NetworkSkeleton />
             <NetworkSkeleton />
-          </Box>
+          </div>
         ) : (
           <>
             {prodNets.map((chain) => (
@@ -294,7 +244,7 @@ const UndeployedNetworks = ({
             ))}
           </>
         )}
-      </Collapse>
+      </CollapsibleContent>
       {replayOnChain && safeCreationData && (
         <CreateSafeOnSpecificChain
           chain={replayOnChain}
@@ -305,7 +255,7 @@ const UndeployedNetworks = ({
           safeCreationResult={safeCreationResult}
         />
       )}
-    </>
+    </Collapsible>
   )
 }
 
@@ -313,14 +263,28 @@ const NetworkSelector = ({
   onChainSelect,
   offerSafeCreation = false,
   compactButton = false,
+  triggerClassName,
 }: {
   onChainSelect?: () => void
   offerSafeCreation?: boolean
   compactButton?: boolean
+  triggerClassName?: string
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
-  const isDarkMode = useDarkMode()
-  const theme = useTheme()
+  const [search, setSearch] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
+  const rowRefs = useRef(new Map<string, HTMLElement>())
+
+  const registerRow = useCallback(
+    (chainId: string) => (node: HTMLElement | null) => {
+      if (!node) return
+      rowRefs.current.set(chainId, node)
+      return () => {
+        rowRefs.current.delete(chainId)
+      }
+    },
+    [],
+  )
   const { configs } = useChains()
   const chainId = useChainId()
   const router = useRouter()
@@ -344,13 +308,18 @@ const NetworkSelector = ({
     ])
   }, [chainId, configs, isSafeOpened, safeAddress, safesGrouped.allMultiChainSafes])
 
+  const query = search.trim().toLowerCase()
+
   const [testNets, prodNets] = useMemo(
     () =>
       partition(
-        configs.filter((config) => availableChainIds.includes(config.chainId)),
+        configs.filter(
+          (config) =>
+            availableChainIds.includes(config.chainId) && (!query || config.chainName.toLowerCase().includes(query)),
+        ),
         (config) => config.isTestnet,
       ),
-    [availableChainIds, configs],
+    [availableChainIds, configs, query],
   )
 
   const renderMenuItem = useCallback(
@@ -363,15 +332,21 @@ const NetworkSelector = ({
       }
 
       return (
-        <MenuItem
+        <SelectItem
           data-testid="network-selector-item"
           key={chainId}
+          ref={registerRow(chainId)}
           value={chainId}
-          sx={{ '&:hover': { backgroundColor: isSelected ? 'transparent' : 'inherit' } }}
-          disableRipple={isSelected}
-          onClick={onSwitchNetwork}
+          className={css.menuItem}
         >
-          <Link href={getNetworkLink(router, safeAddress, chain)} onClick={onChainSelect} className={css.item}>
+          <Link
+            href={getNetworkLink(router, safeAddress, chain)}
+            onClick={() => {
+              onSwitchNetwork()
+              onChainSelect?.()
+            }}
+            className={css.item}
+          >
             <ChainIndicator
               responsive={isSelected}
               chainId={chain.chainId}
@@ -379,83 +354,116 @@ const NetworkSelector = ({
               onlyLogo={compactButton && isSelected}
             />
           </Link>
-        </MenuItem>
+        </SelectItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, compactButton],
+    [configs, onChainSelect, router, safeAddress, compactButton, registerRow],
   )
 
-  const handleClose = () => {
-    setOpen(false)
+  // base-ui's highlighted-row index goes stale when the list shrinks; focusing a row resets it via onFocus.
+  const focusRow = (edge: 'first' | 'last') => {
+    const rendered = [...prodNets, ...testNets]
+    const chain = edge === 'first' ? rendered[0] : rendered[rendered.length - 1]
+    if (!chain) return
+    rowRefs.current.get(chain.chainId)?.focus()
   }
 
-  const handleOpen = () => {
-    setOpen(true)
-    offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      event.stopPropagation()
+      focusRow(event.key === 'ArrowDown' ? 'first' : 'last')
+      return
+    }
+
+    // base-ui reads printable keys as list typeahead, which would take over the field; Escape must still reach it.
+    if (event.key !== 'Escape') {
+      event.stopPropagation()
+    }
+  }
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    // This component stays mounted across close, so the next opening would start filtered.
+    setSearch('')
+    if (nextOpen) {
+      offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
+    }
+  }
+
+  const handleClose = () => {
+    handleOpenChange(false)
+  }
+
+  const renderSelectedValue = () => {
+    const chain = configs.find((chain) => chain.chainId === chainId)
+    if (!chain) return null
+    return <ChainIndicator responsive chainId={chain.chainId} inline onlyLogo={compactButton} />
   }
 
   return configs.length ? (
-    <Select
-      open={open}
-      onClose={handleClose}
-      onOpen={handleOpen}
-      value={chainId}
-      size="small"
-      className={css.select}
-      variant="standard"
-      IconComponent={ExpandMoreIcon}
-      renderValue={(value) => renderMenuItem(value, true)}
-      MenuProps={{
-        transitionDuration: 0,
-        sx: {
-          '& .MuiPaper-root': {
-            overflow: 'auto',
-            minWidth: '260px !important',
-          },
-          ...(isDarkMode
-            ? {
-                '& .Mui-selected, & .Mui-selected:hover': {
-                  backgroundColor: `${theme.palette.secondary.background} !important`,
-                },
-              }
-            : {}),
-        },
-      }}
-      sx={{
-        backgroundColor: 'transparent',
-        '& .MuiInput-root::before': {
-          borderBottom: 'none',
-        },
-        '& .MuiInput-root::after': {
-          borderBottom: 'none',
-        },
-        '& .MuiSelect-select': {
-          py: 0,
-        },
-        ...(compactButton && {
-          '& .MuiSelect-icon': {
-            fontSize: 16,
-          },
-        }),
-      }}
-    >
-      {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}
+    <Select open={open} onOpenChange={handleOpenChange} value={chainId}>
+      <SelectTrigger
+        variant={triggerClassName ? undefined : 'ghost'}
+        className={cn(
+          // eslint-disable-next-line no-restricted-syntax -- h-full fills the header row; the `ghost` variant owns the stripped bg/border/shadow/padding
+          triggerClassName ?? 'h-full',
+        )}
+        iconWrapperClassName={compactButton ? 'text-base' : undefined}
+        aria-label="Network"
+      >
+        <SelectValue>{renderSelectedValue}</SelectValue>
+      </SelectTrigger>
+      {/* outline-hidden: base-ui focuses the popup on open, and typing makes that ring :focus-visible. */}
+      <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
+        {/* Negative offsets bleed this header over the scrolling list's padding: keep in step with the `p-1.5` on SelectPrimitive.List. */}
+        <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
+          {/* rounded-[6px] is the popup's 12px corner less this header's 6px inset, to stay concentric. */}
+          <SearchInput
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in
+            className="rounded-[6px] shadow-xs"
+            placeholder="Search networks"
+            aria-label="Search networks"
+            ref={searchRef}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch('')}
+            onKeyDown={handleSearchKeyDown}
+            autoComplete="off"
+            data-testid="network-selector-search-input"
+          />
+        </div>
 
-      {testNets.length > 0 && <TestnetDivider />}
+        {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
-      {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
+        {testNets.length > 0 && <TestnetDivider />}
 
-      {offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
-        <UndeployedNetworks
-          chains={configs}
-          deployedChains={availableChainIds}
-          safeAddress={safeAddress}
-          closeNetworkSelect={handleClose}
-        />
-      )}
+        {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
+
+        {/* role=status: the rows vanish without focus moving, so nothing else announces the empty list. */}
+        {query && prodNets.length === 0 && testNets.length === 0 && (
+          <p
+            role="status"
+            className="px-4 py-6 text-center text-sm text-muted-foreground"
+            data-testid="network-selector-empty"
+          >
+            No networks match your search
+          </p>
+        )}
+
+        {!query && offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
+          <UndeployedNetworks
+            chains={configs}
+            deployedChains={availableChainIds}
+            safeAddress={safeAddress}
+            closeNetworkSelect={handleClose}
+          />
+        )}
+      </SelectContent>
     </Select>
   ) : (
-    <Skeleton width={94} height={31} sx={{ mx: 2 }} />
+    <Skeleton className="mx-2 h-[31px] w-[94px]" />
   )
 }
 

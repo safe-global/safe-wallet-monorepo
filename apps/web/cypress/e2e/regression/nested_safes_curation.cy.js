@@ -209,12 +209,7 @@ describe('Nested safes curation tests', () => {
       // Currently 1 safe selected, select another valid safe
       nsafes.verifySelectedSafesCount(1)
       // Click on a different valid safe (second one)
-      cy.get('[data-testid="nested-safe-list"]')
-        .find('[data-testid="safe-list-item"]')
-        .filter(':not(:has([data-testid="suspicious-safe-warning"]))')
-        .eq(1)
-        .find('input[type="checkbox"]')
-        .click()
+      nsafes.clickValidSafeCheckbox(1)
       nsafes.verifySelectedSafesCount(2)
 
       nsafes.clickOnSaveManageBtn()

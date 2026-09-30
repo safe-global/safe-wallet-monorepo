@@ -1,4 +1,5 @@
-import { Box, Button, DialogContent, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import SafeLogo from '@/public/images/logo-no-text.svg'
 
@@ -17,37 +18,37 @@ const CaptchaModal = ({ open, onWidgetContainerReady, error, onRetry }: CaptchaM
       // Keep mounted so the widget container stays in DOM for Turnstile to render into
       keepMounted
     >
-      <DialogContent>
-        <Box display="flex" flexDirection="column" alignItems="center" gap={3} pt={4} pb={3}>
+      <div className="p-6">
+        <div className="flex flex-col items-center gap-6 pt-8 pb-6">
           <SafeLogo alt="Safe logo" width={56} height={56} />
 
-          <Box textAlign="center">
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
+          <div className="text-center">
+            <Typography variant="h4" align="center" className="mb-2 font-bold">
               Let us know it&apos;s you
             </Typography>
 
-            <Typography variant="body2" color="text.secondary" maxWidth={360} mx="auto">
+            <Typography
+              variant="paragraph-small"
+              align="center"
+              className="mx-auto max-w-[360px] text-muted-foreground"
+            >
               A quick check to confirm you&apos;re human — it helps us deliver the highest level of security.
             </Typography>
-          </Box>
+          </div>
 
           {error ? (
             <>
-              <Typography variant="body2" color="error">
+              <Typography variant="paragraph-small" className="text-destructive">
                 Verification failed. Please try again.
               </Typography>
 
-              {onRetry && (
-                <Button variant="contained" onClick={onRetry}>
-                  Retry
-                </Button>
-              )}
+              {onRetry && <Button onClick={onRetry}>Retry</Button>}
             </>
           ) : null}
 
-          <Box ref={onWidgetContainerReady} />
-        </Box>
-      </DialogContent>
+          <div ref={onWidgetContainerReady} />
+        </div>
+      </div>
     </ModalDialog>
   )
 }

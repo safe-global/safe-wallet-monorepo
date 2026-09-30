@@ -33,7 +33,7 @@ tags:
     id: 'continue-button'
 - assertVisible:
     id: 'add-signers-form-screen'
-- assertVisible: 'Not imported signers'
+- assertVisible: 'Import your signers to unlock account'
 - assertVisible:
     id: 'signer-0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0'
 - tapOn:

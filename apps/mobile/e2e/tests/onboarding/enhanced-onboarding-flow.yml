@@ -165,5 +165,5 @@ tags:
     id: 'home-tab'
 
 # Verify Safe account is displayed
-- assertVisible: '0x9BFC...4596.*'
+- assertVisible: 'My test safe.*0x9BFC...4596.*'
 - assertVisible: 'Sepolia'

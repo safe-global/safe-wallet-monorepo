@@ -21,7 +21,6 @@ const config: StorybookConfig = {
   addons: [
     '@storybook/addon-onboarding',
     '@storybook/addon-links',
-    '@chromatic-com/storybook',
     '@storybook/addon-themes',
     '@storybook/addon-designs',
     '@storybook/addon-docs',
@@ -60,9 +59,24 @@ const config: StorybookConfig = {
       'mocks/useIsOfficialHost.ts',
     )
 
+    // Mock useBytecodeComparison so unsupported-mastercopy warnings can render their
+    // migrate/cli states in Storybook without a live web3 provider fetching bytecode
+    ;(config.resolve.alias as Record<string, string>)['@/hooks/useBytecodeComparison'] = path.resolve(
+      __dirname,
+      'mocks/useBytecodeComparison.ts',
+    )
+
     // Mock next/image to bypass the image loader stub that fails on static imports
     // This resolves the "unsupported file type: undefined" error when building Storybook
     ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
+
+    // Mock next/navigation so app-router hooks (usePathname/useRouter/useSearchParams)
+    // resolve without nextjs.appDirectory, which would otherwise disable the
+    // pages-router (next/router) mock the rest of the app depends on.
+    ;(config.resolve.alias as Record<string, string>)['next/navigation'] = path.resolve(
+      __dirname,
+      'mocks/nextNavigation.js',
+    )
 
     // Remove the next-image-loader-stub that causes "unsupported file type" errors
     // when processing static image imports in Storybook builds

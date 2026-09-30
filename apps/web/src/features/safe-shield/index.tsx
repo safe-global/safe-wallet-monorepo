@@ -5,7 +5,8 @@ import { SAFE_SHIELD_EVENTS, trackEvent } from '@/services/analytics'
 import { useHypernativeOAuth, useIsHypernativeEligible } from '@/features/hypernative'
 
 const SafeShieldWidget = (): ReactElement => {
-  const { recipient, contract, threat, deadlock, safeTx, safeAnalysis, addToTrustedList } = useSafeShield()
+  const { recipient, contract, threat, deadlock, safeTx, safeAnalysis, addToTrustedList, hasProFeatures, isSafePro } =
+    useSafeShield()
   const hypernativeAuth = useHypernativeOAuth()
   const { isHypernativeEligible, isHypernativeGuard, loading: eligibilityLoading } = useIsHypernativeEligible()
   const showHnInfo = !eligibilityLoading && isHypernativeEligible
@@ -29,8 +30,17 @@ const SafeShieldWidget = (): ReactElement => {
       showHypernativeActiveStatus={showHnActiveStatus}
       safeAnalysis={safeAnalysis}
       onAddToTrustedList={addToTrustedList}
+      hasProFeatures={hasProFeatures}
+      isSafePro={isSafePro}
     />
   )
 }
 
 export default SafeShieldWidget
+
+// Recipient analysis hook (used by tx-flow)
+export { useRecipientAnalysis } from './hooks/useRecipientAnalysis'
+
+// Analysis card components (used by hypernative)
+export { AnalysisGroupCard, type AnalysisGroupCardProps } from './components/AnalysisGroupCard'
+export { AnalysisGroupCardDisabled } from './components/ThreatAnalysis/AnalysisGroupCardDisabled'

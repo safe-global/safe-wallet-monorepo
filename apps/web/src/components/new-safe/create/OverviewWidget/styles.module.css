@@ -1,23 +1,24 @@
-.card {
-  border: 1px solid var(--color-border-light);
-  width: 100%;
-}
-
+/* Horizontal inset matches the Card's own slot padding (px-6) so the header and the rows share one
+   left edge with the rest of the app's cards. */
 .header {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2);
+  gap: var(--space-1);
+  padding: 0 var(--space-3) var(--space-2);
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 0 var(--space-3);
 }
 
 .row {
-  padding: var(--space-2);
   display: flex;
-  flex-grow: 1;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid var(--color-border-light);
   gap: var(--space-1);
 }

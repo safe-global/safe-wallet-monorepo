@@ -11,6 +11,7 @@ import Spaces from '@/pages/welcome/spaces'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
+  pathname: '/welcome/spaces',
   features: { spaces: true },
   shadcn: true,
 })

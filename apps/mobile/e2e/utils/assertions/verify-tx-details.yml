@@ -8,7 +8,8 @@ tags:
 # This flow asserts that the transaction details button is visible
 # Most transaction views will have this button, but some may not
 
+# The button (Tamagui Button) is a single accessibility element: its label is
+# exposed on the element itself, not as a descendant text node, so match by text.
 - assertVisible:
     id: 'transaction-details-button'
-    containsDescendants:
-      - text: 'Transaction details'
+    text: 'Transaction details'

@@ -1,24 +1,28 @@
-import type { PropsWithChildren, ReactElement } from 'react'
-import { Box, Stack, SvgIcon, Typography, type StackProps } from '@mui/material'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import type { ComponentProps, PropsWithChildren, ReactElement } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { Typography } from '@/components/ui/typography'
 import LockIcon from '@/public/images/common/lock-small.svg'
 
 /**
  * Displays a disabled analysis group card that shows the children content as a title and a lock icon.
  */
-export const AnalysisGroupCardDisabled = ({ children, ...props }: PropsWithChildren<StackProps>): ReactElement => {
+export const AnalysisGroupCardDisabled = ({
+  children,
+  className,
+  ...props
+}: PropsWithChildren<ComponentProps<'div'>>): ReactElement => {
   return (
-    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ padding: '12px' }} {...props}>
-      <Stack direction="row" alignItems="center" gap={1}>
-        <SvgIcon component={LockIcon} inheritViewBox sx={{ width: 16, height: 16, color: 'text.disabled' }} />
-        <Typography variant="body2" color="text.disabled">
+    <div className={`flex flex-row items-center justify-between p-3 ${className ?? ''}`} {...props}>
+      <div className="flex flex-row items-center gap-2">
+        <LockIcon className="size-4 text-[var(--color-text-disabled)]" />
+        <Typography variant="paragraph-small" className="text-[var(--color-text-disabled)]">
           {children}
         </Typography>
-      </Stack>
+      </div>
 
-      <Box sx={{ width: 16, height: 16, padding: 0 }}>
-        <KeyboardArrowDownIcon sx={({ palette }) => ({ width: 16, height: 16, color: palette.text.disabled })} />
-      </Box>
-    </Stack>
+      <div className="size-4 p-0">
+        <ChevronDown className="size-4 text-[var(--color-text-disabled)]" />
+      </div>
+    </div>
   )
 }

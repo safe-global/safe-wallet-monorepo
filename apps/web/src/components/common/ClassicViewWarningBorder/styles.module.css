@@ -1,7 +1,0 @@
-.border {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  pointer-events: none;
-  border: 3px solid var(--color-warning-main);
-}

@@ -20,8 +20,7 @@ describe('Safe Copilot tests', { defaultCommandTimeout: 30000 }, () => {
   // ========================================
 
   it('[Widget General] Verify that Safe Shield empty state is shown on New Transaction start before scanning', () => {
-    cy.visit(constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_30)
-    wallet.connectSigner(signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.MATIC_STATIC_SAFE_30)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     copilot.verifySafeShieldDisplayed()

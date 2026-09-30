@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { DataRow } from './DataRow'
-import { Paper } from '@mui/material'
 
 const meta = {
+  title: 'Components/Common/DataRow',
   component: DataRow,
   parameters: {
     componentSubtitle: 'A simple label<=>value pair row for a table',
@@ -49,9 +49,9 @@ export const StringValue: Story = {
   },
   decorators: [
     (Story) => (
-      <Paper sx={{ padding: 2 }}>
+      <div className="rounded-lg bg-card p-4">
         <Story />
-      </Paper>
+      </div>
     ),
   ],
 }

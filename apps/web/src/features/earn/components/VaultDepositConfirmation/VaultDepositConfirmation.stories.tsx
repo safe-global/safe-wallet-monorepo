@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import VaultDepositConfirmation from './index'
 import { mockVaultDepositTxInfo, mockVaultDepositTxInfoWithoutAdditionalRewards } from './mockData'
 
 const meta = {
+  title: 'Features/Earn/VaultDepositConfirmation',
   component: VaultDepositConfirmation,
   decorators: [
     (Story) => {
       return (
         <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@/utils/cn'
 
@@ -23,8 +24,15 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `size` ('default' | 'sm'), `className`
+ * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'),
+ *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand'),
+ *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
+ *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
+ *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
+ *
+ * `className` is layout-only. Padding, gap, radius, background and borders belong to `size`/`variant`/`radius`.
+ * The Card-family ESLint guard enforces this.
  *
  * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=179:29234
  *
@@ -34,16 +42,91 @@ import { cn } from '@/utils/cn'
  *
  * Changelog:
  * - 2026-01-29: Removed shadow-xs and ring-1 to match Figma (no elevation/border)
+ * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
+ * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
+ *   orthogonal to `variant`, so it composes with `outlined`
+ * - 2026-09-02: Added `variant="muted-secondary"` (bg-muted-secondary) from the Figma DS, for plan cards
+ * - 2026-09-02: Added `radius="lg-xl"` (rounded-lg-xl, 20px) from the Figma DS, for plan cards
+ * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
+ * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
+ * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
  */
-function Card({ className, size = 'default', ...props }: React.ComponentProps<'div'> & { size?: 'default' | 'sm' }) {
+const cardVariants = cva(
+  'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
+  {
+    variants: {
+      variant: {
+        default: '',
+        outlined: 'border border-border',
+        muted: 'bg-muted',
+        /* For a card nested inside a `muted` one. Translucent on purpose: over `muted` it resolves to
+           the design's #fafafa in light mode, and in dark mode it keeps stepping toward the dialog
+           surface instead of hard-coding a hex that would flip the nesting. */
+        'muted-nested': 'bg-card/50',
+        'muted-secondary': 'bg-muted-secondary',
+        brand:
+          'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',
+      },
+      surface: {
+        default: '',
+        sunken: 'bg-surface-sunken',
+      },
+      size: {
+        default: 'gap-6 py-6',
+        sm: 'gap-4 py-4',
+        lg: 'gap-8 py-8',
+        none: 'gap-0 py-0',
+      },
+      radius: {
+        lg: 'rounded-lg',
+        'lg-xl': 'rounded-lg-xl',
+        xl: 'rounded-xl',
+        none: 'rounded-none',
+      },
+      selected: {
+        true: 'border-2 border-mint shadow-lg',
+        false: 'border-2 border-transparent',
+      },
+      elevated: {
+        true: 'shadow-lg',
+        false: '',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      surface: 'default',
+      size: 'default',
+      radius: 'lg',
+    },
+  },
+)
+
+type CardProps<TElement extends React.ElementType = 'div'> = {
+  as?: TElement
+} & VariantProps<typeof cardVariants> &
+  Omit<React.ComponentPropsWithoutRef<TElement>, 'as' | keyof VariantProps<typeof cardVariants>>
+
+function Card<TElement extends React.ElementType = 'div'>({
+  as,
+  className,
+  size = 'default',
+  variant = 'default',
+  surface = 'default',
+  radius = 'lg',
+  selected,
+  elevated,
+  ...props
+}: CardProps<TElement>) {
+  const Component = as ?? 'div'
+
   return (
-    <div
+    <Component
       data-slot="card"
       data-size={size}
-      className={cn(
-        'bg-card text-card-foreground gap-6 overflow-hidden rounded-xl py-6 text-sm has-[>img:first-child]:pt-0 data-[size=sm]:gap-4 data-[size=sm]:py-4 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
-        className,
-      )}
+      data-variant={variant}
+      data-surface={surface}
+      data-radius={radius}
+      className={cn(cardVariants({ size, variant, surface, radius, selected, elevated }), className)}
       {...props}
     />
   )
@@ -54,7 +137,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-header"
       className={cn(
-        'gap-1 rounded-t-xl px-6 group-data-[size=sm]/card:px-4 [.border-b]:pb-6 group-data-[size=sm]/card:[.border-b]:pb-4 group/card-header @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]',
+        'gap-1 rounded-t-xl px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 [.border-b]:pb-6 group-data-[size=sm]/card:[.border-b]:pb-4 group-data-[size=lg]/card:[.border-b]:pb-8 group/card-header @container/card-header grid auto-rows-min items-start has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]',
         className,
       )}
       {...props}
@@ -87,7 +170,16 @@ function CardAction({ className, ...props }: React.ComponentProps<'div'>) {
 }
 
 function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
-  return <div data-slot="card-content" className={cn('px-6 group-data-[size=sm]/card:px-4', className)} {...props} />
+  return (
+    <div
+      data-slot="card-content"
+      className={cn(
+        'px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0',
+        className,
+      )}
+      {...props}
+    />
+  )
 }
 
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
@@ -95,7 +187,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card-footer"
       className={cn(
-        'rounded-b-xl px-6 group-data-[size=sm]/card:px-4 [.border-t]:pt-6 group-data-[size=sm]/card:[.border-t]:pt-4 flex items-center',
+        'rounded-b-xl px-6 group-data-[size=sm]/card:px-4 group-data-[size=lg]/card:px-8 group-data-[size=none]/card:px-0 [.border-t]:pt-6 group-data-[size=sm]/card:[.border-t]:pt-4 group-data-[size=lg]/card:[.border-t]:pt-8 flex items-center',
         className,
       )}
       {...props}

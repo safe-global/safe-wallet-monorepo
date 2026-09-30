@@ -27,6 +27,9 @@ import { Separator } from '@/components/ui/separator'
  * @remarks
  * Key Props:
  * - Field: `orientation` ('vertical' | 'horizontal'), `invalid`
+ * - Field: `errorPlacement` ('inline' | 'floating') — `floating` takes the error out of flow so it
+ *   cannot grow the field and re-align neighbouring controls. Only use it where there is clearance
+ *   below: a floating error overlaps whatever follows, and is painted over by any opaque sibling.
  * - FieldLegend: `variant` ('legend' | 'label') — see Base UI
  */
 
@@ -73,6 +76,11 @@ function FieldGroup({ className, ...props }: React.ComponentProps<'div'>) {
 
 const fieldVariants = cva('data-[invalid=true]:text-destructive gap-3 group/field flex w-full', {
   variants: {
+    errorPlacement: {
+      inline: '',
+      floating:
+        'relative [&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:inset-x-0 [&_[data-slot=field-error]]:top-full',
+    },
     orientation: {
       vertical: 'flex-col [&>*]:w-full [&>.sr-only]:w-auto',
       horizontal:
@@ -82,6 +90,7 @@ const fieldVariants = cva('data-[invalid=true]:text-destructive gap-3 group/fiel
     },
   },
   defaultVariants: {
+    errorPlacement: 'inline',
     orientation: 'vertical',
   },
 })
@@ -89,6 +98,7 @@ const fieldVariants = cva('data-[invalid=true]:text-destructive gap-3 group/fiel
 function Field({
   className,
   orientation = 'vertical',
+  errorPlacement,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof fieldVariants>) {
   return (
@@ -96,7 +106,7 @@ function Field({
       role="group"
       data-slot="field"
       data-orientation={orientation}
-      className={cn(fieldVariants({ orientation }), className)}
+      className={cn(fieldVariants({ orientation, errorPlacement }), className)}
       {...props}
     />
   )

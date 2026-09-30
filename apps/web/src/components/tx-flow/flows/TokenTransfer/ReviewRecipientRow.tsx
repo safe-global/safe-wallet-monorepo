@@ -4,7 +4,6 @@ import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmount
 import SendToBlock from '@/components/tx/SendToBlock'
 import type { TokenTransferParams } from '.'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
-import { Stack } from '@mui/material'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; name: string }) => {
@@ -21,12 +20,17 @@ const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; nam
   )
 
   return (
-    <Stack gap={2}>
+    <div className="flex flex-col gap-4">
       {token && (
-        <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} fiatConversion={token.fiatConversion} />
+        <SendAmountBlock
+          amountInWei={amountInWei}
+          tokenInfo={token.tokenInfo}
+          fiatConversion={token.fiatConversion}
+          compact
+        />
       )}
       <SendToBlock address={params.recipient} name={name} avatarSize={32} />
-    </Stack>
+    </div>
   )
 }
 

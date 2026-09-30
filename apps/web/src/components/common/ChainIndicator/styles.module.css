@@ -26,13 +26,22 @@
   justify-content: flex-start;
 }
 
-.onlyLogo {
+/* Compounded with both indicator variants so it wins on specificity rather than source order. A bare
+   `.onlyLogo` ties with `.indicator`, so the `max-width: 899.95px` rule below — which comes later —
+   put the 35px floor back on small screens. Logo-only badges render inside a 24px round
+   `overflow-hidden` wrapper, so that floor pushed the logo out of the clip and cut it in half. */
+.indicator.onlyLogo,
+.inlineIndicator.onlyLogo,
+.withLogo.onlyLogo {
   min-width: 0;
 }
 
 @media (max-width: 899.95px) {
   .indicator {
     min-width: 35px;
+  }
+  .onlyLogo {
+    min-width: 0;
   }
   .responsive {
     min-width: 0;

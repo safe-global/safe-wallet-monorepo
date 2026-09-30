@@ -10,12 +10,14 @@ import {
   getMultiSendDeployments,
   getFallbackHandlerDeployment,
   getCompatibilityFallbackHandlerDeployments,
+  getExtensibleFallbackHandlerDeployments,
   getProxyFactoryDeployment,
   getProxyFactoryDeployments,
   getSignMessageLibDeployment,
   getSignMessageLibDeployments,
   getCreateCallDeployment,
   getCreateCallDeployments,
+  getSafeToL2SetupDeployment,
   getSimulateTxAccessorDeployments,
 } from '@safe-global/safe-deployments'
 import type { SingletonDeployment, DeploymentFilter, SingletonDeploymentV2 } from '@safe-global/safe-deployments'
@@ -144,6 +146,14 @@ export const getChainAgnosticAddress = (
 }
 
 /**
+ * Safe versions whose canonical companion deployments (CompatibilityFallbackHandler,
+ * MultiSend, SignMessageLib, …) the app trusts. Only 1.3.0+ is listed — earlier
+ * versions shipped different or no canonical companion contracts. Extend this when
+ * a new Safe version's contracts are rolled out.
+ */
+export const TRUSTED_DEPLOYMENT_VERSIONS: SafeVersion[] = ['1.3.0', '1.4.1', '1.5.0']
+
+/**
  * Checks if any of the deployments returned by the `getDeployments` function for the given `network` and `versions` contain a deployment for the `contractAddress`
  *
  * @param getDeployments function to get the contract deployments
@@ -165,6 +175,100 @@ export const hasMatchingDeployment = (
     }
     const deployedAddresses = toNetworkAddressList(deployments.networkAddresses[network] ?? [])
     return deployedAddresses.some((deployedAddress) => sameAddress(deployedAddress, contractAddress))
+  })
+}
+
+export type OfficialFallbackHandlerType = 'compatibility' | 'extensible'
+
+/**
+ * Identifies which official Safe fallback handler deployment an address matches on the
+ * given chain, across the trusted deployment versions. The single source of truth for
+ * "is this fallback handler official" — 1.5.0 ships TWO official handlers, so checking
+ * only the CompatibilityFallbackHandler tables misses the ExtensibleFallbackHandler.
+ *
+ * Note: CoW's TWAP handler is CoW's own ExtensibleFallbackHandler instance and is NOT
+ * covered here — callers that trust it must check it separately.
+ *
+ * @param contractAddress fallback handler address to identify
+ * @param network chainId that is getting checked
+ * @returns the matching handler type, or undefined if the address matches no official deployment
+ */
+export const identifyOfficialFallbackHandler = (
+  contractAddress: string,
+  network: string,
+): OfficialFallbackHandlerType | undefined => {
+  if (
+    hasMatchingDeployment(
+      getCompatibilityFallbackHandlerDeployments,
+      contractAddress,
+      network,
+      TRUSTED_DEPLOYMENT_VERSIONS,
+    )
+  ) {
+    return 'compatibility'
+  }
+  if (
+    hasMatchingDeployment(
+      getExtensibleFallbackHandlerDeployments,
+      contractAddress,
+      network,
+      TRUSTED_DEPLOYMENT_VERSIONS,
+    )
+  ) {
+    return 'extensible'
+  }
+  return undefined
+}
+
+/** SafeToL2Setup releases, newest first. There is no 1.3.0 release — the contract was introduced with 1.4.1. */
+export const SAFE_TO_L2_SETUP_VERSIONS = ['1.5.0', '1.4.1'] as const
+export type SafeToL2SetupVersion = (typeof SAFE_TO_L2_SETUP_VERSIONS)[number]
+
+/**
+ * Returns the SafeToL2Setup version that pairs with the given Safe version when
+ * building a (multichain) creation — 1.5.0 Safes use the 1.5.0 setup contract,
+ * everything from 1.4.1 up uses the 1.4.1 one.
+ *
+ * Only meaningful for `safeVersion >= 1.4.1` — the setup contract does not exist
+ * for earlier versions; callers gate on that before including a setup call.
+ */
+export const getSafeToL2SetupVersion = (safeVersion: string): SafeToL2SetupVersion =>
+  semverSatisfies(safeVersion, '>=1.5.0') ? '1.5.0' : '1.4.1'
+
+/**
+ * Identifies which SafeToL2Setup release a `setup()` `to` address belongs to, or
+ * undefined for addresses that are no known SafeToL2Setup deployment. Use this to
+ * recognise multichain creations regardless of the Safe version they were built at.
+ */
+export const getSafeToL2SetupVersionByAddress = (address: string | undefined): SafeToL2SetupVersion | undefined => {
+  if (!address) return undefined
+  return SAFE_TO_L2_SETUP_VERSIONS.find((version) =>
+    sameAddress(getSafeToL2SetupDeployment({ version })?.defaultAddress, address),
+  )
+}
+
+/**
+ * Checks whether an implementation address is an official Safe singleton for the
+ * given version. Matches against BOTH the L1 and L2 singleton tables and ALL
+ * deployment variants (canonical, eip155, zksync). Official singletons live at
+ * deterministic addresses, so this is chain-agnostic and needs no RPC.
+ */
+export const isOfficialMasterCopy = (implementation: string | undefined, version: string): boolean => {
+  if (!implementation) {
+    return false
+  }
+
+  const [clean] = version.split('+')
+  const singletonTables = [
+    getSafeSingletonDeployments({ version: clean }),
+    getSafeL2SingletonDeployments({ version: clean }),
+  ]
+
+  return singletonTables.some((deployment) => {
+    if (!deployment) {
+      return false
+    }
+    return Object.values(deployment.deployments).some((variant) => sameAddress(variant?.address, implementation))
   })
 }
 

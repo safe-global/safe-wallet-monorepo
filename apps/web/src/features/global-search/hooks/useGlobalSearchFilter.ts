@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
-import { useSectionVisibility } from '@/features/global-search/components/SearchSection/SectionVisibilityContext'
+import { useSectionVisibility } from '../components/SearchSection/SectionVisibilityContext'
 import useSearchFilter from '@/hooks/useSearchFilter'
 
 type FilterFn<T> = (item: T, query: string) => boolean

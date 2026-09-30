@@ -7,6 +7,12 @@ import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 import { getRecoveredSafeInfo } from '../transaction-list'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
+import { Errors, logError } from '@/services/exceptions'
+
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: jest.fn(),
+}))
 
 describe('getRecoveredSafeInfo', () => {
   describe('non-MultiSend', () => {
@@ -102,7 +108,8 @@ describe('getRecoveredSafeInfo', () => {
         data: '0x',
       }
 
-      expect(() => getRecoveredSafeInfo(safe, transaction)).toThrowError('Unexpected transaction')
+      expect(getRecoveredSafeInfo(safe, transaction)).toBeUndefined()
+      expect(logError).toHaveBeenCalledWith(Errors._811, new Error('Unexpected transaction'))
     })
   })
 

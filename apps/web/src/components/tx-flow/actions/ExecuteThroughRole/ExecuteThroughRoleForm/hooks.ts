@@ -1,10 +1,12 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { getModuleTransactionId } from '@/services/transactions'
+import { isExpectedEstimationError } from '@/utils/transaction-errors'
 import { backOff } from 'exponential-backoff'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   type ChainId,
   chains,
@@ -326,14 +328,14 @@ export const useGasLimit = (
   const [gasLimit, gasLimitError, gasLimitLoading] = useAsync<bigint | undefined>(async () => {
     if (!web3ReadOnly || !tx) return
 
-    return web3ReadOnly.estimateGas(tx)
-  }, [web3ReadOnly, tx])
-
-  useEffect(() => {
-    if (gasLimitError) {
-      logError(Errors._612, gasLimitError.message)
+    try {
+      return await web3ReadOnly.estimateGas(tx)
+    } catch (e) {
+      // A revert or a throttle is the estimate's expected answer, not a fault.
+      if (!isExpectedEstimationError(e)) logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      throw e
     }
-  }, [gasLimitError])
+  }, [web3ReadOnly, tx])
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

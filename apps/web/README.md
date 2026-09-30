@@ -77,7 +77,7 @@ Here's the list of all the environment variables:
 | `NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID`    | Hypernative outreach ID for production                                                                                                                                                                                                  |
 | `NEXT_PUBLIC_STAGING_HYPERNATIVE_OUTREACH_ID` | Hypernative outreach ID for staging                                                                                                                                                                                                     |
 | `NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS`            | Ecosystem ID address                                                                                                                                                                                                                    |
-| `NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT`      | Maximum number of Safe accounts allowed in Spaces                                                                                                                                                                                       |
+| `NEXT_PUBLIC_SPACES_SAFE_ACCOUNTS_LIMIT`      | Maximum number of Safe accounts per Workspace while Safe Pro is off                                                                                                                                                                     |
 | `NEXT_PUBLIC_IS_BEHIND_IAP`                   | Set to `true` when the app is behind an Identity-Aware Proxy                                                                                                                                                                            |
 | `NEXT_PUBLIC_HYPERNATIVE_API_BASE_URL`        | [Hypernative](https://hypernative.io) API base URL for threat analysis. Production: `https://api.hypernative.xyz`                                                                                                                       |
 | `NEXT_PUBLIC_HYPERNATIVE_CLIENT_ID`           | Hypernative OAuth client ID. Defaults to `SAFE_WALLET_WEB` for production                                                                                                                                                               |
@@ -202,10 +202,6 @@ To create a new component from a template:
 yarn workspace @safe-global/web cmp MyNewComponent
 ```
 
-## Pre-push hooks
-
-This repo has a pre-push hook that runs the linter (always) and the tests (if the `RUN_TESTS_ON_PUSH` env variable is set to true) before pushing. If you want to skip the hooks, you can use the `--no-verify` flag.
-
 ## Storybook
 
 This project uses Storybook for developing and documenting UI components in isolation.
@@ -226,6 +222,6 @@ This app is built using the following frameworks:
 - [Next.js 15](https://nextjs.org/)
 - [React 19](https://react.dev/)
 - [Redux Toolkit](https://redux-toolkit.js.org/)
-- [MUI v6](https://mui.com/)
+- [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/)
 - [ethers.js v6](https://docs.ethers.org/v6/)
 - [web3-onboard](https://onboard.blocknative.com/)

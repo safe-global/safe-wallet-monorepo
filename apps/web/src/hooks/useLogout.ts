@@ -2,6 +2,8 @@ import { useCallback } from 'react'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
+import useOnboard from '@/hooks/wallets/useOnboard'
+import useWallet from '@/hooks/wallets/useWallet'
 
 const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 
@@ -14,9 +16,19 @@ const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
  *
  * Sets a transient flag in sessionStorage so that after the redirect lands back in the app,
  * `useLogoutCallback` can reconcile with the backend via /v1/auth/me.
+ *
+ * Disconnects the connected wallet first: the logout triggers a full page navigation, so without
+ * this the wallet would be auto-reconnected on the next load via the `lastWallet` storage key.
  */
 const useLogout = () => {
-  const logout = useCallback(() => {
+  const onboard = useOnboard()
+  const wallet = useWallet()
+
+  const logout = useCallback(async () => {
+    if (onboard && wallet) {
+      await onboard.disconnectWallet({ label: wallet.label })
+    }
+
     sessionStorage.setItem(LOGGING_OUT_KEY, '1')
 
     const redirectUrl = new URL(AppRoutes.welcome.spaces, window.location.origin).toString()
@@ -36,7 +48,7 @@ const useLogout = () => {
     document.body.appendChild(form)
     form.submit()
     document.body.removeChild(form)
-  }, [])
+  }, [onboard, wallet])
 
   return { logout }
 }

@@ -102,7 +102,7 @@ export const estimateBatchDeploymentTransaction = async (
   ])
 
   const safeFunctionToEstimate: string = fallbackHandlerContract.encode('simulate', [
-    simulateTxAccessorAddress,
+    simulateTxAccessorAddress as `0x${string}`,
     transactionDataToEstimate as `0x${string}`,
   ])
 

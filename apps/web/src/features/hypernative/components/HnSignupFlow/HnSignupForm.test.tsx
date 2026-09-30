@@ -1,8 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import HnSignupForm from './HnSignupForm'
-import * as HubSpotFormModule from '@/features/hypernative/components/HubSpotForm/HubSpotForm'
+import * as HubSpotFormModule from '../HubSpotForm/HubSpotForm'
 
-jest.mock('@/features/hypernative/components/HubSpotForm/HubSpotForm', () => ({
+jest.mock('../HubSpotForm/HubSpotForm', () => ({
   __esModule: true,
   default: jest.fn(() => <div data-testid="hubspot-form-mock">HubSpot Form</div>),
 }))
@@ -89,8 +89,8 @@ describe('HnSignupForm', () => {
   it('should render background column', () => {
     const { container } = render(<HnSignupForm {...defaultProps} />)
 
-    // Check for the background column by checking for the grid structure
-    const gridItems = container.querySelectorAll('[class*="Grid2"]')
-    expect(gridItems.length).toBeGreaterThan(1)
+    // Check for the two-column layout: content column + background column
+    expect(container.querySelector('[class*="backgroundColumn"]')).toBeInTheDocument()
+    expect(container.querySelector('[class*="formColumn"]')).toBeInTheDocument()
   })
 })

@@ -32,6 +32,7 @@ jest.mock('react-native-device-crypto', () => ({
   encrypt: jest.fn(),
   decrypt: jest.fn(),
   deleteKey: jest.fn(),
+  authenticateWithBiometry: jest.fn(),
 }))
 
 jest.mock('react-native-keychain', () => {
@@ -155,6 +156,8 @@ jest.mock('@gorhom/bottom-sheet', () => {
         return null
       },
     }),
+    // Matches the unsafe variant of the real hook outside a sheet
+    useBottomSheetInternal: () => null,
   }
 })
 

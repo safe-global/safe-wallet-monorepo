@@ -116,7 +116,6 @@ describe('useLoadBalances', () => {
           currency: 'USD',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -148,7 +147,6 @@ describe('useLoadBalances', () => {
           currency: 'EUR',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -177,7 +175,6 @@ describe('useLoadBalances', () => {
           currency: 'USD',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -195,7 +192,7 @@ describe('useLoadBalances', () => {
   })
 
   test('only use default list if feature is enabled', async () => {
-    jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
+    const balancesQuerySpy = jest.spyOn(balancesQueries, 'useBalancesGetBalancesV1Query').mockImplementation(() => ({
       currentData: mockBalanceAllTokens,
       isLoading: false,
       error: undefined,
@@ -209,7 +206,6 @@ describe('useLoadBalances', () => {
           currency: 'EUR',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -223,6 +219,16 @@ describe('useLoadBalances', () => {
       expect(result.current[0]?.fiatTotal).toEqual(mockBalanceAllTokens.fiatTotal)
       expect(result.current[1]).toBeUndefined()
     })
+
+    expect(balancesQuerySpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: '5',
+        fiatCode: 'EUR',
+        safeAddress,
+        trusted: false,
+      }),
+      expect.any(Object),
+    )
   })
 
   test('use trusted filter for default list and reload on settings change', async () => {
@@ -243,7 +249,6 @@ describe('useLoadBalances', () => {
           currency: 'EUR',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},
@@ -272,7 +277,6 @@ describe('useLoadBalances', () => {
           currency: 'EUR',
           hiddenTokens: {},
           shortName: {
-            copy: true,
             qr: true,
           },
           theme: {},

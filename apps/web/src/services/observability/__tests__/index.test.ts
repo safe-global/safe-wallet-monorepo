@@ -15,7 +15,7 @@ describe('Observability Module', () => {
           error: jest.fn(),
           debug: jest.fn(),
         })),
-        captureException: jest.fn(),
+        captureError: jest.fn(),
       }
 
       jest.isolateModules(() => {
@@ -28,37 +28,6 @@ describe('Observability Module', () => {
 
         expect(mockProvider.init).toHaveBeenCalledTimes(1)
       })
-    })
-
-    it('should be a no-op on server-side', () => {
-      const windowSpy = jest.spyOn(global, 'window', 'get')
-      windowSpy.mockReturnValue(undefined as any)
-
-      const mockProvider = {
-        name: 'Mock',
-        init: jest.fn().mockResolvedValue(undefined),
-        getLogger: jest.fn(() => ({
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
-          debug: jest.fn(),
-        })),
-        captureException: jest.fn(),
-      }
-
-      jest.isolateModules(() => {
-        jest.doMock('../factory', () => ({
-          createObservabilityProvider: jest.fn(() => mockProvider),
-        }))
-
-        const { initObservability } = require('../index')
-        initObservability()
-
-        // Should not call init on server-side
-        expect(mockProvider.init).not.toHaveBeenCalled()
-      })
-
-      windowSpy.mockRestore()
     })
 
     it('should handle initialization errors gracefully', async () => {
@@ -74,7 +43,7 @@ describe('Observability Module', () => {
           error: jest.fn(),
           debug: jest.fn(),
         })),
-        captureException: jest.fn(),
+        captureError: jest.fn(),
       }
 
       await jest.isolateModulesAsync(async () => {
@@ -95,7 +64,7 @@ describe('Observability Module', () => {
     })
   })
 
-  describe('captureException', () => {
+  describe('captureError', () => {
     it('should delegate to provider', () => {
       const mockProvider = {
         name: 'Mock',
@@ -106,7 +75,7 @@ describe('Observability Module', () => {
           error: jest.fn(),
           debug: jest.fn(),
         })),
-        captureException: jest.fn(),
+        captureError: jest.fn(),
       }
 
       jest.isolateModules(() => {
@@ -114,40 +83,68 @@ describe('Observability Module', () => {
           createObservabilityProvider: jest.fn(() => mockProvider),
         }))
 
-        const { captureException } = require('../index')
-        const error = new Error('test error')
-        const context = { userId: '123', componentStack: 'Component Stack' }
+        const { captureError } = require('../index')
+        const observed = {
+          error: new Error('test error'),
+          isUserFacing: true,
+          code: 100,
+          tags: { componentStack: 'Component Stack' },
+        }
 
-        captureException(error, context)
+        captureError(observed)
 
-        expect(mockProvider.captureException).toHaveBeenCalledWith(error, context)
+        expect(mockProvider.captureError).toHaveBeenCalledWith(observed)
+      })
+    })
+  })
+
+  describe('provider injection', () => {
+    const makeMockProvider = (name: string) => ({
+      name,
+      init: jest.fn().mockResolvedValue(undefined),
+      getLogger: jest.fn(() => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() })),
+      captureError: jest.fn(),
+    })
+
+    it('fully replaces the default provider with consumer-provided providers', () => {
+      const defaultProvider = makeMockProvider('Default')
+      const injected = makeMockProvider('Injected')
+
+      jest.isolateModules(() => {
+        jest.doMock('../factory', () => ({
+          createObservabilityProvider: jest.fn(() => defaultProvider),
+        }))
+
+        const { initObservability, captureError } = require('../index')
+        initObservability([injected])
+
+        expect(injected.init).toHaveBeenCalledTimes(1)
+        expect(defaultProvider.init).not.toHaveBeenCalled()
+
+        const observed = { error: new Error('boom'), isUserFacing: true }
+        captureError(observed)
+        expect(injected.captureError).toHaveBeenCalledWith(observed)
+        expect(defaultProvider.captureError).not.toHaveBeenCalled()
       })
     })
 
-    it('should work without context', () => {
-      const mockProvider = {
-        name: 'Mock',
-        init: jest.fn(),
-        getLogger: jest.fn(() => ({
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
-          debug: jest.fn(),
-        })),
-        captureException: jest.fn(),
-      }
+    it('fans errors out to every injected provider', () => {
+      const provider1 = makeMockProvider('One')
+      const provider2 = makeMockProvider('Two')
 
       jest.isolateModules(() => {
         jest.doMock('../factory', () => ({
-          createObservabilityProvider: jest.fn(() => mockProvider),
+          createObservabilityProvider: jest.fn(() => makeMockProvider('Default')),
         }))
 
-        const { captureException } = require('../index')
-        const error = new Error('test error')
+        const { initObservability, captureError } = require('../index')
+        initObservability([provider1, provider2])
 
-        captureException(error)
+        const observed = { error: new Error('Code 601'), isUserFacing: false, code: 601 }
+        captureError(observed)
 
-        expect(mockProvider.captureException).toHaveBeenCalledWith(error, undefined)
+        expect(provider1.captureError).toHaveBeenCalledWith(observed)
+        expect(provider2.captureError).toHaveBeenCalledWith(observed)
       })
     })
   })
@@ -165,7 +162,7 @@ describe('Observability Module', () => {
         name: 'Mock',
         init: jest.fn(),
         getLogger: jest.fn(() => mockLogger),
-        captureException: jest.fn(),
+        captureError: jest.fn(),
       }
 
       jest.isolateModules(() => {

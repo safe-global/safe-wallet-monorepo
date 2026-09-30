@@ -27,3 +27,7 @@
   align-items: center;
   color: var(--color-border-main);
 }
+
+.secondaryText a {
+  color: var(--color-text-primary);
+}

@@ -1,11 +1,20 @@
-import { Alert, Button, DialogActions, DialogContent, Typography } from '@mui/material'
-import ModalDialog from '@/components/common/ModalDialog'
-import { type GetSpaceResponse, useMembersSelfRemoveV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 import { useState } from 'react'
-import { showNotification } from '@/store/notificationsSlice'
+import { useRouter } from 'next/router'
+import { LogOut } from 'lucide-react'
+import { type GetSpaceResponse, useMembersSelfRemoveV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from '@/components/ui/alert-dialog'
+import DialogActions from '@/components/common/DialogActions'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 
@@ -13,7 +22,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
   const [error, setError] = useState<string>()
   const router = useRouter()
   const dispatch = useAppDispatch()
-  const [leaveSpace] = useMembersSelfRemoveV1Mutation()
+  const [leaveSpace, { isLoading }] = useMembersSelfRemoveV1Mutation()
 
   const onLeave = async () => {
     if (!space) return
@@ -21,18 +30,13 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
     setError(undefined)
 
     try {
-      const res = await leaveSpace({ spaceId: space.id })
-
-      if (res.error) {
-        throw new Error(JSON.stringify(res.error))
-      }
-
+      await leaveSpace({ spaceId: space.uuid }).unwrap()
       onClose()
 
       trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })
       dispatch(
         showNotification({
-          message: `Left workspace ${space.name}.`,
+          message: `Left Workspace ${space.name}.`,
           variant: 'success',
           groupKey: 'leave-space-success',
         }),
@@ -41,31 +45,47 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
       console.error(e)
-      setError('Error leaving the workspace. Please try again.')
+      setError('Error leaving the Workspace. Please try again.')
     }
   }
 
   return (
-    <ModalDialog dialogTitle="Leave workspace" hideChainIndicator open onClose={onClose}>
-      <DialogContent sx={{ mt: 2 }}>
-        <Typography mb={2}>
-          Are you sure you want to leave this workspace? You won’t be able to access its data anymore.
+    <AlertDialog open onOpenChange={(open) => !open && !isLoading && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-center justify-center size-10 rounded-full bg-destructive/10 text-destructive shrink-0">
+            <LogOut className="size-5" />
+          </div>
+          <AlertDialogTitle>Leave Workspace</AlertDialogTitle>
+          <AlertDialogDescription>
+            You&apos;ll lose access to <span className="font-semibold text-foreground">{space?.name}</span> immediately.
+            An admin can re-invite you later.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <Typography variant="paragraph-small" color="muted">
+          Your wallet and any linked Safe accounts are not affected.
         </Typography>
 
         {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
+          <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
+            <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
-      </DialogContent>
 
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button data-testid="space-confirm-leave-button" variant="danger" onClick={onLeave}>
-          Leave workspace
-        </Button>
-      </DialogActions>
-    </ModalDialog>
+        <DialogActions
+          onCancel={onClose}
+          cancelDisabled={isLoading}
+          confirmLabel="Leave Workspace"
+          onConfirm={onLeave}
+          confirmDisabled={isLoading || !space}
+          confirmLoading={isLoading}
+          confirmDestructive
+          confirmTestId="space-confirm-leave-button"
+        />
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
 

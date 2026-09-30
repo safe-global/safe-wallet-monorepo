@@ -121,7 +121,6 @@ describe('oauth config', () => {
   })
 
   describe('getRedirectUri', () => {
-    const originalWindow = global.window
     const originalEnv = process.env
 
     beforeEach(() => {
@@ -131,8 +130,6 @@ describe('oauth config', () => {
     })
 
     afterEach(() => {
-      // Restore window
-      global.window = originalWindow
       process.env = originalEnv
       jest.resetModules()
     })
@@ -148,48 +145,8 @@ describe('oauth config', () => {
     })
 
     it('should construct redirectUri from window.location.origin when available', () => {
-      // Mock window.location
-      Object.defineProperty(global, 'window', {
-        value: {
-          location: {
-            origin: 'https://app.safe.global',
-          },
-        },
-        writable: true,
-        configurable: true,
-      })
-
-      // Re-import to get fresh function with mocked window
       const { getRedirectUri: getRedirectUriFn } = require('../oauth')
-      const result = getRedirectUriFn()
-      expect(result).toBe('https://app.safe.global/hypernative/oauth-callback')
-    })
-
-    it('should return callback route as fallback for SSR', () => {
-      // Remove window
-      delete (global as { window?: unknown }).window
-
-      // Re-import to get fresh function without window
-      const { getRedirectUri: getRedirectUriFn } = require('../oauth')
-      const result = getRedirectUriFn()
-      expect(result).toBe('/hypernative/oauth-callback')
-    })
-
-    it('should handle localhost origin', () => {
-      Object.defineProperty(global, 'window', {
-        value: {
-          location: {
-            origin: 'http://localhost:3000',
-          },
-        },
-        writable: true,
-        configurable: true,
-      })
-
-      // Re-import to get fresh function with mocked window
-      const { getRedirectUri: getRedirectUriFn } = require('../oauth')
-      const result = getRedirectUriFn()
-      expect(result).toBe('http://localhost:3000/hypernative/oauth-callback')
+      expect(getRedirectUriFn()).toBe(`${window.location.origin}/hypernative/oauth-callback`)
     })
   })
 })

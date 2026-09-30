@@ -4,9 +4,12 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
+import { plans, signInToSpaces, stubWorkspacePlan } from '../../support/spaces-login.js'
+import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
+export const safeProLock = '[data-testid="safe-pro-lock"]'
 const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
@@ -37,18 +40,17 @@ const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
 
-const actionSectionItem = () => {
-  return cy.get('[data-testid="CodeIcon"]').parent()
-}
-
 export const timePeriodOptions = {
   oneTime: 'One time',
   fiveMin: '5 minutes',
   thirtyMin: '30 minutes',
   oneHr: '1 hour',
+  oneDay: '1 day',
+  oneWeek: '1 week',
+  oneMonth: '1 month',
 }
 
-const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input').first()
+const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
 const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
 
 export const actionNames = {
@@ -75,11 +77,7 @@ export function verifyOldValuesAreDisplayed() {
 }
 
 export function verifyActionNamesAreDisplayed(names) {
-  main.verifyValuesExist(actionSectionItem, names)
-}
-
-export function verifySpendingLimitBtnIsDisabled() {
-  cy.get(newSpendingLimitBtn).should('be.disabled')
+  main.verifyValuesExist(actionItem, names)
 }
 
 export function verifySpendingLimitsIcons() {
@@ -104,7 +102,6 @@ export function checkMaxValue() {
 
   main.extractDigitsToArray(tokenSelector, maxValue)
   cy.get(tokenAmountFld)
-    .find('input')
     .invoke('val')
     .then((value) => {
       expect(maxValue).to.contain(value)
@@ -160,7 +157,7 @@ export function clickOnTimePeriodDropdown() {
 }
 
 export function selectTimePeriod(period) {
-  cy.get(timePeriodItem).contains(period).click()
+  main.selectDropdownOption(timePeriodItem, period)
 }
 
 export function checkTimeDropdownOptions() {
@@ -173,12 +170,12 @@ export function checkTimeDropdownOptions() {
 }
 
 export function verifyDefaultTimeIsSet() {
-  cy.get(timePeriodSection).scrollIntoView().find('div').contains(timePeriodOptions.oneTime).should('be.visible')
+  cy.get(timePeriodSection).scrollIntoView().contains(timePeriodOptions.oneTime).should('be.visible')
 }
 
 export function visitSpendingLimitsPage(safe) {
   cy.visit(constants.setupUrl + safe)
-  cy.get(spendingLimitsSection).should('be.visible')
+  cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnNewSpendingLimitBtn() {
@@ -187,7 +184,7 @@ export function clickOnNewSpendingLimitBtn() {
 }
 
 export function enterSpendingLimitAmount(amount) {
-  cy.get(tokenAmountFld).find('input').clear().type(amount)
+  cy.get(tokenAmountFld).clear().type(amount)
 }
 
 export function enterBeneficiaryAddress(address) {
@@ -203,7 +200,9 @@ export function checkBeneficiaryENS(ens) {
 }
 
 export function verifyValidAddressShowsNoErrors() {
+  // The label is a sibling of the input inside the Field wrapper, not a descendant of it.
   cy.get(beneficiarySection)
+    .closest('[data-slot="field"]')
     .find('label')
     .should('not.contain', invalidAddressFormatErrorMsg)
     .and('not.contain', invalidCharErrorStr)
@@ -218,7 +217,7 @@ export function verifyCharErrorValidation() {
 }
 
 export function verifyNumberAmountEntered(amount) {
-  cy.get(tokenAmountFld).find('input').should('have.value', amount)
+  cy.get(tokenAmountFld).should('have.value', amount)
 }
 
 export function verifyActionCount(count) {
@@ -246,4 +245,13 @@ export function verifyDecodedTxSummary(names) {
 export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
+}
+
+/** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
+export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
+
+/** Signs the wallet in to Workspaces with the Workspace on `plan`. Business includes policies, Starter does not. */
+export function signInOnPlan(signer, plan) {
+  stubWorkspacePlan(plan, [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }])
+  signInToSpaces(signer)
 }

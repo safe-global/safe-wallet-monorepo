@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useIsRecoverer } from '@/features/recovery/hooks/useIsRecoverer'
+import { useIsRecoverer } from '@/features/recovery'
 import { useIsSpendingLimitBeneficiary } from '@/features/spending-limits'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Role } from '../config'

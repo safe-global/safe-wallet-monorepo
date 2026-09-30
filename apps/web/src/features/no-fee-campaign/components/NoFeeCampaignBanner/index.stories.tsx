@@ -6,7 +6,7 @@ import { RouterDecorator } from '@/stories/routerDecorator'
 const meta = {
   title: 'Features/NoFeeCampaign/NoFeeCampaignBanner',
   component: NoFeeCampaignBanner,
-  tags: ['autodocs'],
+  tags: ['autodocs', 'skip-visual-test'],
   parameters: {
     layout: 'padded',
     visualTest: { disable: true },

@@ -1,7 +1,8 @@
 import type { DataDecoded, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { formatUnits, id } from 'ethers'
-import type { AnyAppDataDocVersion, latest } from '@cowprotocol/app-data'
+import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
+import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 
@@ -41,6 +42,7 @@ export const TWAP_FALLBACK_HANDLER_NETWORKS = [
   '232',
   '59144',
   '9745',
+  '57073',
 ]
 
 export const getExecutionPrice = (
@@ -208,6 +210,20 @@ export const UiOrderTypeToOrderType = (orderType: UiOrderType): TradeType => {
       return TradeType.ADVANCED
   }
 }
+
+/**
+ * Normalizes a CoW widget `ON_CHANGE_TRADE_PARAMS` payload into the local swap representation.
+ *
+ * The widget's `orderType` is CoW's `UiOrderType` (which includes members we don't model, e.g.
+ * `HOOKS`/`YIELD`); it is mapped to our local {@link UiOrderType} by value, falling back to `SWAP`
+ * for anything unrecognized. Token addresses are optional in the payload and normalized to `''`
+ * (the widget's "no asset" convention).
+ */
+export const parseCowTradeParams = (params: OnTradeParamsPayload) => ({
+  uiOrderType: UiOrderType[params.orderType as keyof typeof UiOrderType] ?? UiOrderType.SWAP,
+  sellAsset: params.sellToken?.address ?? '',
+  buyAsset: params.buyToken?.address ?? '',
+})
 
 export const isSettingTwapFallbackHandler = (decodedData: DataDecoded) => {
   return (

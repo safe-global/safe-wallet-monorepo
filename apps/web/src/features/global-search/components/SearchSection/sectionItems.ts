@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { AccountsSection } from './sections/Accounts'
 import { NavigateToSection } from './sections/NavigateTo'
@@ -12,7 +13,7 @@ export interface SectionItemProps {
 export interface SectionItem {
   label: string
   useActivate: () => boolean
-  renderItem: (props: SectionItemProps) => React.ReactNode
+  Component: ComponentType<SectionItemProps>
 }
 
 const useAlwaysActive = () => true
@@ -33,16 +34,16 @@ export const sectionItems: SectionItem[] = [
   {
     label: 'Navigate to',
     useActivate: useAlwaysActive,
-    renderItem: NavigateToSection,
+    Component: NavigateToSection,
   },
   {
     label: 'Safe accounts',
     useActivate: useIsInSpace,
-    renderItem: AccountsSection,
+    Component: AccountsSection,
   },
   {
-    label: 'Trusted safes',
+    label: 'My accounts',
     useActivate: useNotInSpace,
-    renderItem: TrustedSafesSection,
+    Component: TrustedSafesSection,
   },
 ]

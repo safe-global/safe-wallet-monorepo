@@ -15,7 +15,7 @@ export function createDefaultSettings(isDarkMode: boolean) {
     currency: 'usd',
     hiddenTokens: {},
     tokenList: TOKEN_LISTS.ALL,
-    shortName: { copy: true, qr: true },
+    shortName: { qr: true },
     theme: { darkMode: isDarkMode },
     env: { tenderly: { url: '', accessToken: '' }, rpc: {} },
     signing: { onChainSigning: false, blindSigning: false },

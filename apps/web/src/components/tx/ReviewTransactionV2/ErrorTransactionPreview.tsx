@@ -1,20 +1,11 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
-import { Box, Typography } from '@mui/material'
+import { Typography } from '@/components/ui/typography'
 
 const ErrorTransactionPreview = () => (
   <TxCard>
-    <Box
-      minHeight="38svh"
-      display="flex"
-      alignItems="center"
-      justifyContent="center"
-      mb={5}
-      data-testid="error-transaction-preview"
-    >
-      <Typography variant="body1" fontWeight={700}>
-        Error loading preview. Please try again.
-      </Typography>
-    </Box>
+    <div className="mb-10 flex min-h-[38svh] items-center justify-center" data-testid="error-transaction-preview">
+      <Typography variant="paragraph-bold">Error loading preview. Please try again.</Typography>
+    </div>
   </TxCard>
 )
 

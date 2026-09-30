@@ -1,0 +1,17 @@
+/* Scoped tweaks for the staking promo banner (defaults from PromoBanner otherwise). */
+
+.stakingPromoBanner {
+  --promo-banner-radius: 24px;
+}
+
+/* 24px padding (targets PromoBanner's root div) */
+.stakingPromoBanner > div {
+  padding: 24px;
+}
+
+/* Coin illustration: 55px wide, aligned to the top */
+.stakingPromoBanner img {
+  width: 55px;
+  height: auto;
+  align-self: flex-start;
+}

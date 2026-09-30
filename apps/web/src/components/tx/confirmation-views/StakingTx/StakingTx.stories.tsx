@@ -1,18 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { Paper } from '@mui/material'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import StakingTx from './index'
 import { mockStakingDepositTxInfo, mockStakingExitTxInfo, mockStakingWithdrawTxInfo } from './mockData'
 
 const meta = {
+  title: 'Components/TxFlow/ConfirmationViews/StakingTx',
   component: StakingTx,
   decorators: [
     (Story) => {
       return (
-        <StoreDecorator initialState={{}}>
-          <Paper sx={{ padding: 2 }}>
+        <StoreDecorator
+          // The lazy StakeFeature only loads when the current chain (default: Sepolia in dev/storybook)
+          // has the STAKING flag.
+          initialState={{ chains: { data: [{ chainId: '11155111', chainName: 'Sepolia', features: ['STAKING'] }] } }}
+        >
+          <div className="rounded-lg bg-background p-4">
             <Story />
-          </Paper>
+          </div>
         </StoreDecorator>
       )
     },

@@ -29,8 +29,33 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+export const Open: Story = {
+  render: () => (
+    <Drawer defaultOpen>
+      <DrawerTrigger asChild>
+        <Button>Open Drawer</Button>
+      </DrawerTrigger>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>Drawer Title</DrawerTitle>
+          <DrawerDescription>Drawer description goes here.</DrawerDescription>
+        </DrawerHeader>
+        <div style={{ padding: '1rem' }}>
+          <p className="text-sm">Drawer content area.</p>
+        </div>
+        <DrawerFooter>
+          <Button>Save</Button>
+          <DrawerClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  ),
+}
+
 export const AllVariants: Story = {
-  tags: ['!chromatic'],
+  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
@@ -44,7 +69,7 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger>
+            <DrawerTrigger asChild>
               <Button>Open Drawer</Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -57,7 +82,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Save</Button>
-                <DrawerClose>
+                <DrawerClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DrawerClose>
               </DrawerFooter>
@@ -77,7 +102,7 @@ export const AllVariants: Story = {
           }}
         >
           <Drawer>
-            <DrawerTrigger>
+            <DrawerTrigger asChild>
               <Button>Open with Footer</Button>
             </DrawerTrigger>
             <DrawerContent>
@@ -90,7 +115,7 @@ export const AllVariants: Story = {
               </div>
               <DrawerFooter>
                 <Button>Submit</Button>
-                <DrawerClose>
+                <DrawerClose asChild>
                   <Button variant="outline">Cancel</Button>
                 </DrawerClose>
               </DrawerFooter>

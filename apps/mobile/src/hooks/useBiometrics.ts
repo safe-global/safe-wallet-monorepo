@@ -31,11 +31,15 @@ export function useBiometrics() {
   const biometricsType = useAppSelector((state: RootState) => state.biometrics.type)
   const userAttempts = useAppSelector((state: RootState) => state.biometrics.userAttempts)
 
-  const openBiometricSettings = () => {
+  const openBiometricSettings = async () => {
     if (Platform.OS === 'ios') {
-      Linking.openURL('app-settings:')
-    } else {
-      Linking.openSettings()
+      await Linking.openURL('app-settings:')
+      return
+    }
+    try {
+      await Linking.sendIntent('android.settings.BIOMETRIC_ENROLL')
+    } catch {
+      await Linking.openSettings()
     }
   }
 
@@ -43,11 +47,11 @@ export function useBiometrics() {
     Alert.alert(
       'Set up biometrics',
       Platform.OS === 'ios'
-        ? 'Set up Face ID or Touch ID in iOS Settings to enable biometrics in Safe.'
-        : 'Set up fingerprint in your device Settings to enable biometrics in Safe.',
+        ? 'Open the Settings app and enable Face ID or Touch ID under "Face ID & Passcode", then return to Safe.'
+        : 'Set up fingerprint or face unlock in your device settings to enable biometrics in Safe.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Open Settings', onPress: openBiometricSettings },
+        { text: 'Open settings', onPress: openBiometricSettings },
       ],
       { cancelable: true },
     )

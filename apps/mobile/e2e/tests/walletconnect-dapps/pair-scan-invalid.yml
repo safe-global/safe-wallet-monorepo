@@ -1,0 +1,40 @@
+appId: ${APP_ID}
+tags:
+  - walletconnect-dapps
+---
+# Invalid QR: open scanner → inject a non-wc string → error overlay → Try again
+# → scanner resets to scanning.
+
+- runFlow:
+    file: ../../utils/setup/app-start.yml
+
+- tapOn:
+    id: 'e2eWcDappsBase'
+- assertVisible:
+    id: 'home-tab'
+
+- tapOn:
+    id: 'navbar-qr-button'
+
+# Inject a non-wc value — isPairingUri rejects it before any pairing attempt.
+- tapOn:
+    id: 'e2e-scan-input'
+- inputText: 'https://example.com/not-a-wc-uri'
+- tapOn:
+    id: 'e2e-scan-submit'
+
+# Error overlay: the Try again button only renders in the error state, so its
+# presence proves the unrecognised-QR path. (The "Unrecognised QR code" copy
+# shares one merged accessibility label with the button, so anchor on the id.)
+- extendedWaitUntil:
+    visible:
+      id: 'wc-scan-try-again'
+    timeout: 5000
+
+# Try again resets the scanner: the error overlay (and its button) clears.
+- tapOn:
+    id: 'wc-scan-try-again'
+- extendedWaitUntil:
+    notVisible:
+      id: 'wc-scan-try-again'
+    timeout: 5000

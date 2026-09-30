@@ -10,6 +10,33 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
+import * as cfServices from '@/features/counterfactual/services'
+import * as multichain from '@/features/multichain'
+import * as createLogic from '@/components/new-safe/create/logic'
+import * as web3 from '@/hooks/wallets/web3'
+import * as analytics from '@/services/analytics'
+import * as notificationsSlice from '@/store/notificationsSlice'
+import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
+import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+
+// The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+  useSpaceSafeCount: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: jest.fn(),
+}))
+
+const mockUseIsAdmin = useIsAdmin as jest.Mock
+const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
+const mockUseSpaceSafeLimit = useSpaceSafeLimit as jest.Mock
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockChain = {
   chainId: '100',
@@ -33,6 +60,9 @@ describe('NetworkFee', () => {
 describe('ReviewStep', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseSpaceSafeCount.mockReturnValue(undefined)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
   })
 
   it('should display a pay now pay later option for counterfactual safe setups', () => {
@@ -72,6 +102,7 @@ describe('ReviewStep', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       },
     })
@@ -165,40 +196,338 @@ describe('ReviewStep', () => {
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
   })
 
-  it('should display the execution method for counterfactual safes if the user selects pay now and there is relaying', async () => {
-    const mockMultiChain = [
-      {
-        chainId: '100',
-        chainName: 'Gnosis Chain',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-      {
-        chainId: '1',
-        chainName: 'Ethereum',
-        l2: false,
-        nativeCurrency: {
-          symbol: 'ETH',
-        },
-      },
-    ] as Chain[]
-    const mockData: NewSafeFormData = {
+  const authReduxState = {
+    auth: {
+      sessionExpiresAt: Date.now() + 60000,
+      lastUsedSpace: null,
+      isStoreHydrated: true,
+      cfSafeSynced: false,
+      isOidcLoginPending: false,
+      isSessionCheckPending: false,
+    },
+  }
+
+  const buildMultiChainData = (): NewSafeFormData => {
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+    return {
       name: 'Test',
-      networks: mockMultiChain,
+      networks: [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain],
       threshold: 1,
       owners: [{ name: '', address: '0x1' }],
       saltNonce: 0,
       safeVersion: LATEST_SAFE_VERSION as SafeVersion,
     }
-    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
-    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+  }
 
-    const { getByText } = render(
-      <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+  it('shows the selector with Pay now disabled for multichain creation', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    const { getByTestId, getByText } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+      { initialReduxState: authReduxState },
     )
 
+    expect(getByTestId('pay-now-later-message-box')).toBeInTheDocument()
     expect(getByText(/activate your account/)).toBeInTheDocument()
+    expect(getByText(/Start exploring the accounts now/)).toBeInTheDocument()
+    expect(getByText('Not available for multiple networks')).toBeInTheDocument()
+    expect(getByTestId('pay-now-execution-method').querySelector('input')).toBeDisabled()
+    expect(screen.getByRole('radio', { name: /Pay later/i })).toBeChecked()
+  })
+
+  it('disables creation for multichain until the user signs in (Pay later writes to the backend)', () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+
+    // No auth state provided -> the user is not authenticated.
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).toBeDisabled()
+  })
+
+  it('does not block multichain creation when counterfactual is disabled', () => {
+    // Counterfactual off -> no PayLater forcing, no sign-in gate (direct deployment path).
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+
+    const { getByTestId } = render(
+      <ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+    )
+
+    expect(getByTestId('review-step-next-btn')).not.toBeDisabled()
+  })
+
+  it('creates counterfactual safes on each network for multichain when authenticated', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(persistSpy).toHaveBeenCalledTimes(mockData.networks.length)
+    expect(persistSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
+    )
+  })
+
+  it('does not fire the awaiting-execution event for already-deployed safes', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(eventSpy).not.toHaveBeenCalledWith(cfServices.SafeCreationEvent.AWAITING_EXECUTION, expect.anything())
+  })
+
+  it('does not track a counterfactual creation for already-deployed safes', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const trackSpy = jest.spyOn(analytics, 'trackEvent')
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(trackSpy).not.toHaveBeenCalledWith(analytics.CREATE_SAFE_EVENTS.CREATED_SAFE, expect.anything())
+    expect(trackSpy).not.toHaveBeenCalledWith(expect.objectContaining({ label: 'counterfactual' }))
+  })
+
+  it('shows an info toast naming the chains where the Safe was already deployed', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    // Both networks (Gnosis Chain + Ethereum) resolved as already-deployed.
+    expect(showNotificationSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variant: 'info',
+        groupKey: 'cf-safe-already-deployed',
+        message: expect.stringMatching(/already deployed on Gnosis Chain, Ethereum/),
+      }),
+    )
+  })
+
+  it('does not show the already-deployed toast when the Safe was newly created', async () => {
+    const mockData = buildMultiChainData()
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    expect(showNotificationSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ groupKey: 'cf-safe-already-deployed' }),
+    )
+  })
+
+  it('surfaces the persist error message when counterfactual creation fails', async () => {
+    const mockData = buildMultiChainData()
+    const backendMessage = 'Safe account name is too long'
+
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockData.networks[0])
+    jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+    jest
+      .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+      .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+    jest
+      .spyOn(multichain, 'predictAddressBasedOnReplayData')
+      .mockResolvedValue('0x0000000000000000000000000000000000000001')
+    jest
+      .spyOn(cfServices, 'persistCounterfactualSafe')
+      .mockResolvedValue({ ok: false, error: new Error(backendMessage) })
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+      initialReduxState: authReduxState,
+    })
+
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('review-step-next-btn'))
+    })
+
+    // The backend's message is shown, not the generic wallet-error fallback.
+    expect(screen.getByText(backendMessage)).toBeInTheDocument()
+  })
+
+  describe('at the Workspace seat limit', () => {
+    const spaceReduxState = { auth: { ...authReduxState.auth, lastUsedSpace: MOCK_SPACE_UUID } }
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+
+    // Earlier renders persist `auth` (lastUsedSpace: null); hydration would otherwise override the initial state.
+    beforeEach(() => window.localStorage.clear())
+
+    const mockCreation = () => {
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainWithFeatures)
+      jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+      jest
+        .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+        .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+      jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+      jest
+        .spyOn(multichain, 'predictAddressBasedOnReplayData')
+        .mockResolvedValue('0x0000000000000000000000000000000000000001')
+      return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    }
+
+    const singleChainData = (): NewSafeFormData => ({
+      name: 'Test',
+      networks: [chainWithFeatures],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    })
+
+    it('tells an admin upfront that the Safe will be created outside the Workspace and passes the plan limit on', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      const persistSpy = mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.getByTestId('space-seat-limit-notice')).toHaveTextContent(
+        'This Workspace is at its limit of 20 Safe accounts. The new Safe will be created in My accounts, outside the Workspace.',
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: MOCK_SPACE_UUID, spaceSafeCount: 20, spaceSafeLimit: 20 }),
+      )
+    })
+
+    it('shows no notice below the plan limit', () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(19)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
+    it('shows no notice to a member who cannot add Safes to the Workspace anyway', () => {
+      mockUseIsAdmin.mockReturnValue(false)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
+    it('hides the notice once Pay now is selected, since only Pay later adds the Safe to the Workspace', () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      act(() => {
+        fireEvent.click(screen.getByText('Pay now'))
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
   })
 })

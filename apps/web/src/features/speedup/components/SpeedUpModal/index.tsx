@@ -1,9 +1,9 @@
 import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
-import DialogContent from '@mui/material/DialogContent'
-import { Box, Button, CircularProgress, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
-import DialogActions from '@mui/material/DialogActions'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -20,12 +20,13 @@ import { isWalletRejection } from '@/utils/wallets'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
+import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import CheckWallet from '@/components/common/CheckWallet'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -44,11 +45,14 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
+  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()
   const chainInfo = useCurrentChain()
   const safeAddress = useSafeAddress()
+  const isWrongChain = useIsWrongChain()
+  // Sole authorization: a replacement needs the original (from, nonce), so only the submitter can send one
   const hasActions = signerAddress && signerAddress === wallet?.address
   const dispatch = useAppDispatch()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
@@ -94,7 +98,11 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
         )
         const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
-        trackEvent({ ...TX_EVENTS.SPEED_UP, label: txType })
+        const gasPaymentSource = isGtfChain ? (isGtfSafePaid(safeTx.data) ? 'safe' : 'signing_wallet') : undefined
+        trackEvent(
+          { ...TX_EVENTS.SPEED_UP, label: txType },
+          gasPaymentSource ? { [MixpanelEventParams.GAS_PAYMENT_SOURCE]: gasPaymentSource } : undefined,
+        )
       } else {
         await dispatchCustomTxSpeedUp(
           txOptions as Omit<TransactionOptions, 'nonce'> & { nonce: number },
@@ -121,7 +129,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
       const error = asError(e)
       setWaitingForConfirmation(false)
       if (!isWalletRejection(error)) {
-        trackError(ErrorCodes._814, error)
+        trackError(ErrorCodes._814, error, { txHash })
         dispatch(
           showNotification({
             message: 'Speed up failed',
@@ -137,6 +145,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     dispatch,
     gasLimit,
     handleClose,
+    isGtfChain,
     onboard,
     pendingTx,
     safeAddress,
@@ -155,21 +164,21 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
   if (safeTxHasSignatures) {
     return (
-      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction">
-        <DialogContent sx={{ p: '24px !important' }}>
-          <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
-            <SvgIcon inheritViewBox component={RocketSpeedup} sx={{ width: 90, height: 90 }} />
-          </Box>
+      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction" forceBackdrop>
+        <div className="p-6">
+          <div className="mb-4 flex items-center justify-center">
+            <RocketSpeedup className="size-[90px]" />
+          </div>
 
           <Typography data-testid="speedup-summary">
             This will speed up the pending transaction by{' '}
-            <Typography component="span" fontWeight={700}>
+            <Typography as="span" variant="paragraph-bold" className="inline">
               replacing
             </Typography>{' '}
             the original gas parameters with new ones.
           </Typography>
 
-          <Box mt={2}>
+          <div className="mt-4">
             {speedUpFee && signerNonce && (
               <GasParams
                 params={{
@@ -184,47 +193,37 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
                 willRelay={false}
               />
             )}
-          </Box>
-          <Box sx={{ '&:not(:empty)': { mt: 3 } }}>
-            <NetworkWarning />
-          </Box>
-        </DialogContent>
+          </div>
+          <div className="[&:not(:empty)]:mt-6">
+            <NetworkWarning action="speed up a transaction" />
+          </div>
+        </div>
 
-        <DialogActions>
-          <Button onClick={onCancel}>Cancel</Button>
+        <div className="flex items-center justify-between gap-2 p-4 pb-6">
+          <Button variant="ghost" onClick={onCancel}>
+            Cancel
+          </Button>
 
-          <Tooltip title="Speed up transaction">
-            <CheckWallet checkNetwork={!isDisabled}>
-              {(isOk) => (
-                <Button
-                  color="primary"
-                  disabled={!isOk || isDisabled}
-                  onClick={onSubmit}
-                  variant="contained"
-                  disableElevation
-                >
-                  {isDisabled ? <CircularProgress size={20} /> : 'Confirm'}
-                </Button>
-              )}
-            </CheckWallet>
-          </Tooltip>
-        </DialogActions>
+          <Button disabled={isDisabled || isWrongChain} onClick={onSubmit}>
+            {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
+          </Button>
+        </div>
       </ModalDialog>
     )
   }
 
   return (
-    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction">
-      <DialogContent sx={{ p: '24px !important' }}>
-        <Box display="flex" justifyContent="center" alignItems="center" mb={2}>
-          <SvgIcon inheritViewBox component={RocketSpeedup} sx={{ width: 90, height: 90 }} />
-        </Box>
+    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction" forceBackdrop>
+      <div className="p-6">
+        <div className="mb-4 flex items-center justify-center">
+          <RocketSpeedup className="size-[90px]" />
+        </div>
 
         <Typography data-testid="speedup-summary">
           Is this transaction taking too long? Speed it up by using the &quot;speed up&quot; option in your connected
           wallet.
         </Typography>
-      </DialogContent>
+      </div>
     </ModalDialog>
   )
 }

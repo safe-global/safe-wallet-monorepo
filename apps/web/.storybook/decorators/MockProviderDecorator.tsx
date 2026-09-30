@@ -1,7 +1,6 @@
 import React, { type ReactNode } from 'react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { StoryContext } from 'storybook/internal/csf'
-import { Paper } from '@mui/material'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 
 type MockProviderDecoratorProps = {
@@ -33,7 +32,13 @@ export const MockProviderDecorator = ({
   paperPadding = 2,
   shadcn = false,
 }: MockProviderDecoratorProps) => {
-  const content = withPaper ? <Paper sx={{ p: paperPadding }}>{children}</Paper> : children
+  const content = withPaper ? (
+    <div className="bg-card rounded-lg" style={{ padding: paperPadding * 8 }}>
+      {children}
+    </div>
+  ) : (
+    children
+  )
 
   const wrapped = (
     <StoreDecorator initialState={initialState} context={context}>

@@ -6,12 +6,12 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
-import { Tooltip } from '@mui/material'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsGnosisPaySafe } from '@/features/gnosispay'
 
-type CheckWalletProps = {
+export type CheckWalletProps = {
   children: (ok: boolean) => ReactElement
   allowSpendingLimit?: boolean
   allowNonOwner?: boolean
@@ -31,8 +31,8 @@ type CheckWalletProps = {
 
 enum Message {
   WalletNotConnected = 'Please connect your wallet',
-  SDKNotInitialized = 'SDK is not initialized yet',
-  NotSafeOwner = 'Your connected wallet is not a signer of this Safe Account',
+  SDKNotInitialized = 'Still loading. Try again in a moment.',
+  NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',
   SafeNotActivated = 'You need to activate the Safe before transacting',
 }
 
@@ -111,8 +111,19 @@ const CheckWallet = ({
   if (noTooltip) return children(false)
 
   return (
-    <Tooltip title={message}>
-      <span onClick={wallet ? undefined : connectWallet}>{children(false)}</span>
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span
+            data-testid="check-wallet-tooltip-trigger"
+            aria-label={message}
+            onClick={wallet ? undefined : connectWallet}
+          />
+        }
+      >
+        {children(false)}
+      </TooltipTrigger>
+      <TooltipContent>{message}</TooltipContent>
     </Tooltip>
   )
 }

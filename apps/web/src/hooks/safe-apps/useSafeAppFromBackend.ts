@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { useLazySafeAppsGetSafeAppsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { Errors, logError } from '@/services/exceptions'
@@ -16,28 +15,27 @@ const useSafeAppFromBackend = (url: string, chainId: string): AsyncResult<SafeAp
     // But for the request it has to be an exact match.
     const retryUrl = url.endsWith('/') ? trimTrailingSlash(url) : `${url}/`
 
-    let result = await trigger({
-      chainId,
-      clientUrl: window.location.origin,
-      url,
-    }).unwrap()
-
-    if (!result[0]) {
-      result = await trigger({
+    try {
+      let result = await trigger({
         chainId,
         clientUrl: window.location.origin,
-        url: retryUrl,
+        url,
       }).unwrap()
-    }
 
-    return result?.[0]
+      if (!result[0]) {
+        result = await trigger({
+          chainId,
+          clientUrl: window.location.origin,
+          url: retryUrl,
+        }).unwrap()
+      }
+
+      return result?.[0]
+    } catch (e) {
+      logError(Errors._900, e)
+      throw e
+    }
   }, [chainId, url, trigger])
-
-  useEffect(() => {
-    if (error) {
-      logError(Errors._900, error.message)
-    }
-  }, [error])
 
   return [backendApp, error, loading]
 }

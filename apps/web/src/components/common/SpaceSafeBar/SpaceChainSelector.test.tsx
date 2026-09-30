@@ -1,10 +1,19 @@
 import type { ReactElement, ReactNode } from 'react'
 import { render, screen } from '@testing-library/react'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
 import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
+import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import type { ChainSelectorBlockProps } from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
+import type { ChainSelectorBlockProps } from '@/features/spaces'
 
+jest.mock('next/router', () => ({
+  useRouter: jest.fn(),
+}))
+jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
+  useSafeAppUrl: jest.fn(),
+}))
 jest.mock('./hooks/useSpaceChainSelector')
 jest.mock(
   '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock',
@@ -65,6 +74,8 @@ const multiChain = [
 
 describe('SpaceChainSelector', () => {
   beforeEach(() => {
+    jest.mocked(useRouter).mockReturnValue({ pathname: '/', query: {} } as unknown as ReturnType<typeof useRouter>)
+    jest.mocked(useSafeAppUrl).mockReturnValue(undefined)
     mockUseSpaceChainSelector.mockReturnValue({
       deployedChains: singleChain,
       selectedChainId: '1',
@@ -172,6 +183,46 @@ describe('SpaceChainSelector', () => {
       expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
         'Changing the network is not allowed in this screen',
       )
+    })
+  })
+
+  describe('when inside an opened Safe App', () => {
+    it('disables ChainSelectorBlock on /apps/open with an appUrl', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.open,
+        query: { appUrl: 'https://example-safe-app.test' },
+      } as unknown as ReturnType<typeof useRouter>)
+      jest.mocked(useSafeAppUrl).mockReturnValue('https://example-safe-app.test')
+
+      render(<SpaceChainSelector />)
+
+      expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-disabled', 'true')
+      expect(screen.getByTestId('tooltip-content')).toHaveTextContent(
+        'Changing the network is not allowed in this screen',
+      )
+    })
+
+    it('does not disable ChainSelectorBlock on /apps/open without an appUrl', () => {
+      jest
+        .mocked(useRouter)
+        .mockReturnValue({ pathname: AppRoutes.apps.open, query: {} } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceChainSelector />)
+
+      expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-disabled', 'false')
+      expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
+    })
+
+    it('does not disable ChainSelectorBlock on /apps/custom', () => {
+      jest.mocked(useRouter).mockReturnValue({
+        pathname: AppRoutes.apps.custom,
+        query: { safe: 'eth:0xSafe1' },
+      } as unknown as ReturnType<typeof useRouter>)
+
+      render(<SpaceChainSelector />)
+
+      expect(screen.getByTestId('chain-selector-block')).toHaveAttribute('data-disabled', 'false')
+      expect(screen.queryByTestId('tooltip')).not.toBeInTheDocument()
     })
   })
 })

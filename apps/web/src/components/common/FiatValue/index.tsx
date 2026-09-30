@@ -1,11 +1,9 @@
-import type { CSSProperties, ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import { Tooltip, Typography } from '@mui/material'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { formatCurrency, formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
-
-const style = { whiteSpace: 'nowrap' } as CSSProperties
 
 const FiatValue = ({
   value,
@@ -32,30 +30,46 @@ const FiatValue = ({
   }, [preciseFiat])
 
   if (fiat == null) {
-    return (
-      <Typography component="span" color="text.secondary">
-        --
-      </Typography>
-    )
+    return <span className="text-muted-foreground">--</span>
   }
 
-  return (
-    <Tooltip title={precise ? undefined : preciseFiat}>
-      <span suppressHydrationWarning style={style}>
+  if (precise || !preciseFiat) {
+    return (
+      <span suppressHydrationWarning className="whitespace-nowrap">
         {precise ? (
           <>
             {whole}
-            {decimals && (
-              <Typography component="span" color="text.secondary" fontSize="inherit" fontWeight="inherit">
-                {decimals}
-              </Typography>
-            )}
+            {decimals && <span className="text-muted-foreground">{decimals}</span>}
             {endCurrency}
           </>
         ) : (
           fiat
         )}
       </span>
+    )
+  }
+
+  // `fiat` is abbreviated above ~$100k and the tooltip carrying the full number is hover-only, so
+  // the precise figure would never reach a screen reader — announce it separately, matching the
+  // `aria-label` this used to carry. Only when it differs: below $1 both formats produce the same
+  // string, and emitting it twice would duplicate the value for text selection and `getByText`.
+  const content = (
+    <span suppressHydrationWarning className="whitespace-nowrap">
+      {fiat === preciseFiat ? (
+        fiat
+      ) : (
+        <>
+          <span aria-hidden>{fiat}</span>
+          <span className="sr-only">{preciseFiat}</span>
+        </>
+      )}
+    </span>
+  )
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={content} />
+      <TooltipContent>{preciseFiat}</TooltipContent>
     </Tooltip>
   )
 }

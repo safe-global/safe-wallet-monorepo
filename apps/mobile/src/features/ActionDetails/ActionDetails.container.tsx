@@ -1,25 +1,20 @@
 import { useLocalSearchParams } from 'expo-router'
 import React, { useMemo } from 'react'
 import { ScrollView } from 'tamagui'
-import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 import { LargeHeaderTitle, NavBarTitle } from '@/src/components/Title'
 import { useScrollableHeader } from '@/src/navigation/useScrollableHeader'
-import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { Alert } from '@/src/components/Alert'
 
 import { LoadingTx } from '../ConfirmTx/components/LoadingTx'
 import ActionsDetails from './ActionsDetails'
+import { useTransactionData } from '@/src/features/ConfirmTx/hooks/useTransactionData'
 
 export function ActionDetailsContainer() {
   const { txId, action, actionName } = useLocalSearchParams<{ txId: string; actionName: string; action: string }>()
   const parsedAction = useMemo(() => JSON.parse(action), [action])
-  const activeSafe = useDefinedActiveSafe()
 
-  const { data, isFetching, isError } = useTransactionsGetTransactionByIdV1Query({
-    chainId: activeSafe.chainId,
-    id: txId,
-  })
+  const { data, isFetching, isError } = useTransactionData(txId)
 
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle>{actionName}</NavBarTitle>,

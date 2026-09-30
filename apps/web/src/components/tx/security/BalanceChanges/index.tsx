@@ -4,7 +4,10 @@ import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useHasFeature } from '@/hooks/useChains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { Box, Chip, CircularProgress, Grid, SvgIcon, Tooltip, Typography } from '@mui/material'
+import { Chip } from '@/components/ui/chip'
+import { Spinner } from '@/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import { TokenType } from '@safe-global/store/gateway/types'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
@@ -39,15 +42,17 @@ const FungibleBalanceChange = ({
 
   return (
     <>
-      <Typography variant="body2" mx={1}>
+      <Typography variant="paragraph-small" className="mx-2">
         {change.value ? formatAmount(change.value) : 'unknown'}
       </Typography>
       <TokenIcon size={16} logoUri={logoUri} tokenSymbol={asset.symbol} />
-      <Typography variant="body2" fontWeight={700} display="inline" ml={0.5}>
+      <Typography variant="paragraph-small-bold" className="ml-1 inline">
         {asset.symbol}
       </Typography>
       <span style={{ margin: 'auto' }} />
-      <Chip className={css.categoryChip} label={asset.type} />
+      <Chip size="auto" shape="tag">
+        {asset.type}
+      </Chip>
     </>
   )
 }
@@ -58,11 +63,11 @@ const NFTBalanceChange = ({ change, asset }: { asset: TokenAssetDetailsDto; chan
   return (
     <>
       {asset.symbol ? (
-        <Typography variant="body2" fontWeight={700} display="inline" ml={1}>
+        <Typography variant="paragraph-small-bold" className="ml-2 inline">
           {asset.symbol}
         </Typography>
       ) : (
-        <Typography variant="body2" ml={1}>
+        <Typography variant="paragraph-small" className="ml-2">
           <EthHashInfo
             address={asset.address}
             chainId={chainId}
@@ -76,11 +81,13 @@ const NFTBalanceChange = ({ change, asset }: { asset: TokenAssetDetailsDto; chan
           />
         </Typography>
       )}
-      <Typography variant="subtitle2" className={css.nftId} ml={1}>
+      <Typography variant="paragraph-small-bold" className={`${css.nftId} ml-2`}>
         #{Number(change.token_id)}
       </Typography>
       <span style={{ margin: 'auto' }} />
-      <Chip className={css.categoryChip} label="NFT" />
+      <Chip size="auto" shape="tag">
+        NFT
+      </Chip>
     </>
   )
 }
@@ -99,16 +106,16 @@ const BalanceChange = ({
   diff: FungibleDiffDto | NftDiffDto
 }) => {
   return (
-    <Grid item xs={12} md={12}>
-      <Box className={css.balanceChange}>
+    <div className="w-full">
+      <div className={css.balanceChange}>
         {positive ? <ArrowDownwardIcon /> : <ArrowOutwardIcon />}
         {isNftDiff(diff) ? (
           <NFTBalanceChange asset={asset as TokenAssetDetailsDto} change={diff} />
         ) : (
           <FungibleBalanceChange asset={asset} change={diff} />
         )}
-      </Box>
-    </Grid>
+      </div>
+    </div>
   )
 }
 const BalanceChangesDisplay = () => {
@@ -124,13 +131,8 @@ const BalanceChangesDisplay = () => {
   if (threatLoading) {
     return (
       <div className={css.loader}>
-        <CircularProgress
-          size={22}
-          sx={{
-            color: ({ palette }) => palette.text.secondary,
-          }}
-        />
-        <Typography variant="body2" color="text.secondary">
+        <Spinner className="size-[22px] text-[var(--color-text-secondary)]" />
+        <Typography variant="paragraph-small" className="text-muted-foreground">
           Calculating...
         </Typography>
       </div>
@@ -138,21 +140,21 @@ const BalanceChangesDisplay = () => {
   }
   if (threatError) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ justifySelf: 'flex-end' }}>
+      <Typography variant="paragraph-small" className="text-muted-foreground justify-self-end">
         Could not calculate balance changes.
       </Typography>
     )
   }
   if (totalBalanceChanges === 0) {
     return (
-      <Typography variant="body2" color="text.secondary" sx={{ justifySelf: 'flex-end' }}>
+      <Typography variant="paragraph-small" className="text-muted-foreground justify-self-end">
         No balance change detected
       </Typography>
     )
   }
 
   return (
-    <Grid container className={css.balanceChanges}>
+    <div className={`flex flex-wrap ${css.balanceChanges}`}>
       <>
         {balanceChange?.map((change, assetIdx) => (
           <>
@@ -165,7 +167,7 @@ const BalanceChangesDisplay = () => {
           </>
         ))}
       </>
-    </Grid>
+    </div>
   )
 }
 
@@ -178,30 +180,20 @@ export const BalanceChanges = () => {
 
   return (
     <div className={css.box}>
-      <Typography variant="subtitle2" fontWeight={700} flexShrink={0}>
+      <Typography variant="paragraph-small-bold" className="shrink-0">
         Balance change
-        <Tooltip
-          title={
-            <>
-              The balance change gives an overview of the implications of a transaction. You can see which assets will
-              be sent and received after the transaction is executed.
-            </>
-          }
-          arrow
-          placement="top"
-        >
-          <span>
-            <SvgIcon
-              component={InfoIcon}
-              inheritViewBox
-              color="border"
-              fontSize="small"
-              sx={{
-                verticalAlign: 'middle',
-                ml: 0.5,
-              }}
-            />
-          </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span>
+                <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
+              </span>
+            }
+          />
+          <TooltipContent>
+            The balance change gives an overview of the implications of a transaction. You can see which assets will be
+            sent and received after the transaction is executed.
+          </TooltipContent>
         </Tooltip>
       </Typography>
       <ObservabilityErrorBoundary fallback={<div>Error showing balance changes</div>}>

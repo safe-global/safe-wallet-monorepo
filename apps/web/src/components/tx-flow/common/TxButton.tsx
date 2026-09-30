@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { Button, type ButtonProps } from '@mui/material'
 
+import { Button } from '@/components/ui/button'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
@@ -15,22 +15,13 @@ import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 
-const buttonSx = {
-  '& svg path': { fill: 'currentColor' },
-}
+const buttonClasses = 'h-[58px] w-full px-6 text-base [&_svg_path]:fill-current'
 
-export const SendTokensButton = ({ onClick, sx }: { onClick: () => void; sx?: ButtonProps['sx'] }) => {
+export const SendTokensButton = ({ onClick }: { onClick: () => void; sx?: object }) => {
   return (
     <Track {...MODALS_EVENTS.SEND_FUNDS}>
-      <Button
-        data-testid="send-tokens-btn"
-        onClick={onClick}
-        variant="contained"
-        size="xlarge"
-        sx={sx ?? buttonSx}
-        fullWidth
-        startIcon={<AssetsIcon width={20} />}
-      >
+      <Button data-testid="send-tokens-btn" onClick={onClick} className={buttonClasses}>
+        <AssetsIcon width={20} />
         Send tokens
       </Button>
     </Track>
@@ -47,18 +38,16 @@ export const TxBuilderButton = () => {
 
   return (
     <Track {...MODALS_EVENTS.CONTRACT_INTERACTION}>
-      <Link href={txBuilder.link} passHref style={{ width: '100%' }}>
-        <Button
-          variant="outlined"
-          size="xlarge"
-          sx={buttonSx}
-          fullWidth
-          onClick={onClick}
-          startIcon={<img src="/images/apps/tx-builder.png" height={24} width="auto" alt="Transaction Builder" />}
-        >
-          Transaction Builder
-        </Button>
-      </Link>
+      <Button
+        variant="outline"
+        className={buttonClasses}
+        onClick={onClick}
+        render={<Link href={txBuilder.link} style={{ width: '100%' }} />}
+      >
+        {/* Sized via classes: Tailwind's preflight (img { height: auto }) overrides the height attribute. */}
+        <img src="/images/apps/tx-builder.png" className="h-6 w-auto" alt="Transaction Builder" />
+        Transaction Builder
+      </Button>
     </Track>
   )
 }
@@ -91,14 +80,8 @@ export const MakeASwapButton = () => {
   }
 
   return (
-    <Button
-      variant="contained"
-      size="xlarge"
-      sx={buttonSx}
-      fullWidth
-      startIcon={<SwapIcon width={20} />}
-      onClick={onClick}
-    >
+    <Button className={buttonClasses} onClick={onClick}>
+      <SwapIcon width={20} />
       Swap tokens
     </Button>
   )

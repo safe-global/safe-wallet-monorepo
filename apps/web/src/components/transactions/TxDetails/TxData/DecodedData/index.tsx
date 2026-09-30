@@ -1,6 +1,5 @@
 import type { AddressInfo, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import { Stack, Typography } from '@mui/material'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { MethodDetails } from '@/components/transactions/TxDetails/TxData/DecodedData/MethodDetails'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
@@ -49,7 +48,7 @@ const DecodedData = ({
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
 
   return (
-    <Stack spacing={2}>
+    <div className="flex flex-col gap-4">
       {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
       <DelegateCallWarning txData={txData} showWarning={isWarningEnabled} />
 
@@ -64,11 +63,11 @@ const DecodedData = ({
       {txData.dataDecoded ? (
         <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
       ) : txData.hexData ? (
-        <Typography data-testid="hexData" variant="body2" component="div">
+        <div data-testid="hexData" className="text-sm">
           <HexEncodedData title="Data" hexData={txData.hexData} />
-        </Typography>
+        </div>
       ) : null}
-    </Stack>
+    </div>
   )
 }
 
