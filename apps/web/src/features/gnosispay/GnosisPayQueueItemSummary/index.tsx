@@ -1,78 +1,69 @@
-import { Accordion, AccordionSummary, Box, Button, Typography } from '@mui/material'
-import { useContext, type ReactElement } from 'react'
+import { type ReactElement, type SyntheticEvent, useContext } from 'react'
+import classNames from 'classnames'
 import css from '@/components/transactions/TxSummary/styles.module.css'
+import TxListAccordionItem from '@/components/transactions/TxListItem/TxListAccordionItem'
 import DateTime from '@/components/common/DateTime'
-import { type GnosisPayTxItem } from '@/store/gnosisPayTxsSlice'
 import TxStatusChip from '@/components/transactions/TxStatusChip'
-import CooldownButton from '@/components/common/CooldownButton'
+import { Button } from '@/components/ui/button'
+import { type GnosisPayTxItem } from '@/store/gnosisPayTxsSlice'
 import { TxModalContext } from '@/components/tx-flow'
 import ExecuteGnosisPayTx from '../ExecuteGnosisPayTx'
 import SkipExpiredGnosisPay from '../SkipExpiredGnosisPayTxs'
+import { useNow } from '../hooks/useNow'
+
+const noop = () => {}
 
 export function GnosisPayQueueItemSummary({ item }: { item: GnosisPayTxItem }): ReactElement {
-  const isExecutable = Date.now() > item.executableAt
   const { setTxFlow } = useContext(TxModalContext)
+  const now = useNow()
 
-  const onExecute = () => {
+  const remainingSeconds = Math.ceil((item.executableAt - now) / 1_000)
+  const isExecutable = remainingSeconds <= 0
+  const isExpired = now >= item.expiresAt
+
+  const onExecute = (e: SyntheticEvent) => {
+    e.stopPropagation()
     setTxFlow(<ExecuteGnosisPayTx gnosisPayTx={item} />)
   }
 
-  const onSkip = () => {
+  const onSkip = (e: SyntheticEvent) => {
+    e.stopPropagation()
     setTxFlow(<SkipExpiredGnosisPay />)
   }
 
-  const isExpired = Date.now() >= item.expiresAt
+  const summary = (
+    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue)}>
+      <div data-testid="nonce" className={css.nonce} style={{ gridArea: 'nonce' }}>
+        {item.queueNonce}
+      </div>
 
-  return (
-    <Accordion disableGutters elevation={0} expanded={false}>
-      <AccordionSummary sx={{ justifyContent: 'flex-start', overflowX: 'auto' }}>
-        <Box className={css.gridContainer}>
-          <Box gridArea="nonce">
-            <Typography>{item.queueNonce}</Typography>
-          </Box>
-          <Box gridArea="type">
-            <Typography>Gnosis Pay Delay</Typography>
-          </Box>
+      <div data-testid="tx-type" className={css.type} style={{ gridArea: 'type' }}>
+        Gnosis Pay Delay
+      </div>
 
-          <Box gridArea="date" data-testid="tx-date" className={css.date}>
-            <DateTime value={item.executableAt} />
-          </Box>
+      <div data-testid="tx-date" className={css.date} style={{ gridArea: 'date' }}>
+        <DateTime value={item.executableAt} />
+      </div>
 
-          <Box gridArea="status">
-            {isExpired ? (
-              <TxStatusChip color="error">Expired</TxStatusChip>
-            ) : isExecutable ? (
-              <TxStatusChip color="success">Ready</TxStatusChip>
-            ) : (
-              <TxStatusChip color="info">Cooldown</TxStatusChip>
-            )}
-          </Box>
-
-          <Box gridArea="actions" mr={2} display="flex" justifyContent="center">
-            {isExpired ? (
-              <Button variant="contained" size="small" onClick={onSkip}>
-                Skip
-              </Button>
-            ) : isExecutable ? (
-              <Button variant="contained" size="small" onClick={onExecute}>
-                Execute
-              </Button>
-            ) : (
-              <CooldownButton
-                cooldown={(item.executableAt - Date.now()) / 1000}
-                startDisabled
-                variant="contained"
-                size="small"
-                onClick={onExecute}
-              >
-                Execute
-              </CooldownButton>
-            )}
-          </Box>
-        </Box>
-      </AccordionSummary>
-    </Accordion>
+      <div className={css.actions} style={{ gridArea: 'actions' }}>
+        {isExpired ? (
+          <>
+            <TxStatusChip color="error">Expired</TxStatusChip>
+            <Button onClick={onSkip}>Skip</Button>
+          </>
+        ) : (
+          <>
+            <TxStatusChip color={isExecutable ? 'success' : 'info'}>{isExecutable ? 'Ready' : 'Cooldown'}</TxStatusChip>
+            <Button data-testid="execute-btn" onClick={onExecute} disabled={!isExecutable} className="tabular-nums">
+              {isExecutable ? 'Execute' : `Execute in ${remainingSeconds}s`}
+            </Button>
+          </>
+        )}
+      </div>
+    </div>
   )
+
+  return <TxListAccordionItem value={[]} onValueChange={noop} summary={summary} details={null} />
 }
 
 export default GnosisPayQueueItemSummary

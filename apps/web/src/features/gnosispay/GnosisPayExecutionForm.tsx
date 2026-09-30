@@ -1,17 +1,13 @@
 import { TxModalContext } from '@/components/tx-flow'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext, useState, useMemo } from 'react'
-import {
-  CircularProgress,
-  Box,
-  Button,
-  CardActions,
-  Divider,
-  Alert,
-  Typography,
-  SvgIcon,
-  AlertTitle,
-} from '@mui/material'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
@@ -20,7 +16,6 @@ import { useIsExecutionLoop } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 // Imports inside this file are part of the lazy GP chunk — pulling
 // `useIsGnosisPayOwner` (zodiac) and `useGnosisPayDelayModifier`
@@ -153,6 +148,7 @@ export const GnosisPayExecutionForm = ({
   const cannotPropose = !isOwner
   const submitDisabled =
     (!safeTx && !queuedGnosisPayTx) ||
+    !delayModifierNonces ||
     !isSubmittable ||
     disableSubmit ||
     isExecutionLoop ||
@@ -160,61 +156,59 @@ export const GnosisPayExecutionForm = ({
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <Alert severity="info" sx={{ mb: 2, border: 0 }} icon={false}>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <SvgIcon
-              component={GnosisPayIcon}
-              inheritViewBox
-              sx={{ width: 24, height: 24, flexShrink: 0 }}
-              aria-label="Gnosis Pay"
-            />
-            <Typography variant="subtitle2" fontWeight={700}>
-              Gnosis Pay
-            </Typography>
-          </Box>
-          {queuedGnosisPayTx ? (
-            <Typography>
-              This is an activated Gnosis Pay Safe. You are about to execute the next transaction in the Delay queue of
-              the Safe.
-            </Typography>
-          ) : (
-            <Typography>
-              This is an activated Gnosis Pay Safe. Transaction executions have a delay of 3 minutes and require two
-              transactions: <br />
-              <ul>
-                <li>Announce / Queue a new transaction</li>
-                <li>Execute the transaction after waiting for 3 minutes</li>
-              </ul>
-            </Typography>
-          )}
+    <form onSubmit={handleSubmit}>
+      <div className="mb-4 flex flex-col gap-4">
+        <Alert variant="info">
+          <GnosisPayIcon className="size-5" aria-label="Gnosis Pay" />
+          <AlertTitle>Gnosis Pay</AlertTitle>
+          <AlertDescription>
+            {queuedGnosisPayTx ? (
+              <p>
+                This is an activated Gnosis Pay Safe. You are about to execute the next transaction in the Delay queue
+                of the Safe.
+              </p>
+            ) : (
+              <>
+                <p>
+                  This is an activated Gnosis Pay Safe. Transaction executions have a delay of 3 minutes and require two
+                  transactions:
+                </p>
+                <ul className="list-disc pl-5">
+                  <li>Announce / Queue a new transaction</li>
+                  <li>Execute the transaction after waiting for 3 minutes</li>
+                </ul>
+              </>
+            )}
+          </AlertDescription>
         </Alert>
 
         {txWarnings.length > 0 && (
-          <Alert severity="warning" sx={{ mb: 2, border: 0, position: 'relative' }}>
-            <AlertTitle>
-              <b>Potential problems</b>
-            </AlertTitle>
-            <ul>
-              {txWarnings.map((txWarning, idx) => (
-                <li key={idx}>{txWarning}</li>
-              ))}
-            </ul>
+          <Alert variant="warning" outlined={false}>
+            <AlertSeverityIcon variant="warning" />
+            <AlertTitle>Potential problems</AlertTitle>
+            <AlertDescription>
+              <ul className="list-disc pl-5">
+                {txWarnings.map((txWarning, idx) => (
+                  <li key={idx}>{txWarning}</li>
+                ))}
+              </ul>
+            </AlertDescription>
           </Alert>
         )}
 
         {isNotNextInQueue && (
-          <Alert severity="warning" sx={{ mb: 2, border: 0, position: 'relative' }} icon={false}>
-            <AlertTitle>
-              <b>Unknown queued transaction</b>
-            </AlertTitle>
-            There are one or more transactions in front of this one in the Delay queue. You have to skip or execute that
-            one first.
+          <Alert variant="warning" outlined={false}>
+            <AlertSeverityIcon variant="warning" />
+            <AlertTitle>Unknown queued transaction</AlertTitle>
+            <AlertDescription>
+              There are one or more transactions in front of this one in the Delay queue. You have to skip or execute
+              that one first.
+            </AlertDescription>
           </Alert>
         )}
 
-        {/* Error messages */}
+        <NetworkWarning />
+
         {cannotPropose ? (
           <NonOwnerError />
         ) : (
@@ -225,28 +219,23 @@ export const GnosisPayExecutionForm = ({
           )
         )}
 
-        {submitError && (
-          <Box mt={1}>
-            <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-          </Box>
-        )}
+        {submitError && <TxSubmitError error={submitError} />}
+      </div>
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+      <Separator bleed="6" className="my-7" />
 
-        <CardActions>
-          {/* Submit button */}
-          {/* allowGnosisPaySafe lets read-only viewers past CheckWallet; the
-              actual owner gate is enforced via `cannotPropose` in submitDisabled. */}
-          <CheckWallet allowGnosisPaySafe>
-            {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || submitDisabled} sx={{ minWidth: '112px' }}>
-                {!isSubmittable ? <CircularProgress size={20} /> : 'Execute'}
-              </Button>
-            )}
-          </CheckWallet>
-        </CardActions>
-      </form>
-    </>
+      <TxCardActions>
+        {/* allowGnosisPaySafe lets read-only viewers past CheckWallet; the
+            actual owner gate is enforced via `cannotPropose` in submitDisabled. */}
+        <CheckWallet allowGnosisPaySafe checkNetwork={!submitDisabled}>
+          {(isOk) => (
+            <Button variant="default" size="submit" type="submit" disabled={!isOk || submitDisabled}>
+              {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
+            </Button>
+          )}
+        </CheckWallet>
+      </TxCardActions>
+    </form>
   )
 }
 

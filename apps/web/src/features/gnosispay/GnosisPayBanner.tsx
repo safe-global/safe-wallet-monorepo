@@ -1,4 +1,4 @@
-import { Alert, Box, SvgIcon, Typography } from '@mui/material'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
 import { useIsGnosisPaySafe } from './hooks/useIsGnosisPaySafe'
 
@@ -13,22 +13,13 @@ export const GnosisPayBanner = () => {
   if (!isGnosisPaySafe) return null
 
   return (
-    <Alert severity="info" icon={false} sx={{ mb: 2 }}>
-      <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-        <SvgIcon
-          component={GnosisPayIcon}
-          inheritViewBox
-          sx={{ width: 20, height: 20, flexShrink: 0 }}
-          aria-label="Gnosis Pay"
-        />
-        <Typography variant="body2" component="span" fontWeight={700}>
-          Gnosis Pay
-        </Typography>
-        <Typography variant="body2" component="span">
-          — Transactions on this Safe are queued through a Delay modifier with a 3-minute cooldown before they can be
-          executed.
-        </Typography>
-      </Box>
+    <Alert variant="info" className="mb-4">
+      <GnosisPayIcon className="size-5" aria-label="Gnosis Pay" />
+      <AlertTitle>Gnosis Pay</AlertTitle>
+      <AlertDescription>
+        Transactions on this Safe are queued through a Delay modifier with a 3-minute cooldown before they can be
+        executed.
+      </AlertDescription>
     </Alert>
   )
 }

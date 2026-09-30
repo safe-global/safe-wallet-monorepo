@@ -1,11 +1,13 @@
 import { type JsonRpcProvider, isAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+// The services barrel re-exports recovery-sender (zodiac); this helper is on the eager CheckWallet path.
+// eslint-disable-next-line no-restricted-imports
 import {
   isGenericProxy,
   getGenericProxyMasterCopy,
   isGnosisProxy,
   getGnosisProxyMasterCopy,
-} from '@/features/recovery/services'
+} from '@/features/recovery/services/proxies'
 
 export const GNOSIS_PAY_DELAY_MODIFIER_ADDRESS = '0x4a97e65188a950dd4b0f21f9b5434daee0bbf9f5'
 export const GNOSIS_CHAIN_ID = '100'

@@ -1,13 +1,15 @@
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
-import { Button, CardActions, Divider, Typography } from '@mui/material'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@/components/ui/typography'
 import { useGnosisPayDelayModifier } from './hooks/useGnosisPayDelayModifier'
 import SendToBlock from '@/components/tx/SendToBlock'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { camelCaseToSpaces } from '@safe-global/utils/utils/formatters'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
-import ErrorMessage from '@/components/tx/ErrorMessage'
+import TxSubmitError from '@/components/tx/TxSubmitError'
 import FieldsGrid from '@/components/tx/FieldsGrid'
 import { type SyntheticEvent, useCallback, useContext, useState } from 'react'
 import { didRevert } from '@/utils/ethers-utils'
@@ -70,31 +72,29 @@ const SkipExpiredGnosisPayTx = () => {
   return (
     <TxCard>
       <form onSubmit={handleSubmit}>
-        <Typography>This transaction skips all queued and expired transactions.</Typography>
+        <div className="mb-4 flex flex-col gap-4">
+          <Typography>This transaction skips all queued and expired transactions.</Typography>
 
-        {delayModifierAddress && <SendToBlock address={delayModifierAddress} title="Interact with" />}
-        <FieldsGrid title="Method">
-          <Typography variant="overline" fontWeight="bold" color="border.main">
-            {camelCaseToSpaces('skipExpired')}
-          </Typography>
-        </FieldsGrid>
+          {delayModifierAddress && <SendToBlock address={delayModifierAddress} title="Interact with" />}
+          <FieldsGrid title="Method">
+            <Typography variant="paragraph-small-bold">{camelCaseToSpaces('skipExpired')}</Typography>
+          </FieldsGrid>
 
-        {submitError && (
-          <ErrorMessage error={submitError}>Error submitting the transaction. Please try again.</ErrorMessage>
-        )}
+          {submitError && <TxSubmitError error={submitError} />}
+        </div>
 
-        <Divider className={commonCss.nestedDivider} sx={{ pt: 3 }} />
+        <Separator bleed="6" className="my-7" />
 
-        <CardActions>
-          {/* Submit button, anyone can skip expired txs */}
+        <TxCardActions>
+          {/* Anyone can skip expired txs */}
           <CheckWallet allowNonOwner>
             {(isOk) => (
-              <Button variant="contained" type="submit" disabled={!isOk || !isSubmittable} sx={{ minWidth: '112px' }}>
-                Execute
+              <Button variant="default" size="submit" type="submit" disabled={!isOk || !isSubmittable}>
+                {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
               </Button>
             )}
           </CheckWallet>
-        </CardActions>
+        </TxCardActions>
       </form>
     </TxCard>
   )
