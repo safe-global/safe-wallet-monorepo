@@ -106,7 +106,6 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   label: seatsLabel(offer.seats),
   seats: typeof offer.seats === 'number' ? offer.seats : null,
   price: offer.price,
-  amountMinor: offer.amountMinor,
   originalPrice: offer.billingCycle === 'year' && monthly?.price != null ? monthly.price * 12 : null,
   features: offer.features,
 })

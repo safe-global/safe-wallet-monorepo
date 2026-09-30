@@ -71,26 +71,13 @@ describe('paymentLinks', () => {
   })
 
   it('sums line items in whole currency units and reads the cycle', () => {
-    expect(_getPrice(business10)).toEqual({ price: 499, amountMinor: 49_900, currency: 'eur', billingCycle: 'month' })
-    expect(_getPrice(business10Yearly)).toEqual({
-      price: 5389,
-      amountMinor: 538_900,
-      currency: 'eur',
-      billingCycle: 'year',
-    })
-    expect(_getPrice(link({ id: 'x', lineItems: priced(1_000, 'month', 3) }))).toMatchObject({
-      price: 30,
-      amountMinor: 3_000,
-    })
+    expect(_getPrice(business10)).toEqual({ price: 499, currency: 'eur', billingCycle: 'month' })
+    expect(_getPrice(business10Yearly)).toEqual({ price: 5389, currency: 'eur', billingCycle: 'year' })
+    expect(_getPrice(link({ id: 'x', lineItems: priced(1_000, 'month', 3) }))).toMatchObject({ price: 30 })
   })
 
   it('returns a null price without priced line items', () => {
-    expect(_getPrice(link({ id: 'x' }))).toEqual({
-      price: null,
-      amountMinor: null,
-      currency: 'eur',
-      billingCycle: null,
-    })
+    expect(_getPrice(link({ id: 'x' }))).toEqual({ price: null, currency: 'eur', billingCycle: null })
     expect(_getPrice(link({ id: 'x', lineItems: [{ price: { unitAmount: null } }] }))).toMatchObject({ price: null })
   })
 
@@ -126,7 +113,6 @@ describe('paymentLinks', () => {
       planName: 'Business',
       seats: 10,
       price: 499,
-      amountMinor: 49_900,
       currency: 'eur',
       billingCycle: 'month',
       trialPeriodDays: 60,

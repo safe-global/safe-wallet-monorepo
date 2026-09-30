@@ -1,14 +1,18 @@
 import {
   COMPARE_SECTIONS_V2,
   ENTERPRISE_TIER,
+  getCardFeaturesV2,
   getPlanContentV2,
+  MULTIPLE_WORKSPACES,
+  NAMED_ACCOUNT_MANAGER,
   PLAN_CONTENT_V2,
   PLAN_FEATURES,
   PLAN_ORDER,
+  SLAS,
   WORKSPACE_2FA,
 } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { canManageV2, getPlanCtaV2, getTiersV2 } from '../planCardsV2'
+import { canManageV2, getPlanCtaV2, getPlanPriceV2, getTiersV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -47,57 +51,84 @@ describe('PLAN_CONTENT_V2', () => {
     expect(Object.keys(PLAN_CONTENT_V2)).toEqual(PLAN_ORDER)
   })
 
-  it('never repeats a feature between plans', () => {
-    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures)
-    expect(new Set(features).size).toBe(features.length)
+  it('lists more on each card than on the one before it, keeping everything the lower plan has', () => {
+    const lists = PLAN_ORDER.map((plan) => getCardFeaturesV2(plan) ?? [])
+
+    lists.slice(1).forEach((list, index) => {
+      const lower = lists[index]
+      expect(list.length).toBeGreaterThan(lower.length)
+      lower.filter((label) => !/sponsored transactions/.test(label)).forEach((label) => expect(list).toContain(label))
+    })
   })
 
-  it('keeps every launch card feature, counting what each plan inherits', () => {
-    const SPONSORSHIP = /sponsored transactions/
+  it('keeps 2FA and API access off the cards but in the compare table', () => {
+    const cardLabels = PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? [])
+    const tableRows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows.map((row) => row.feature))
+
+    expect(cardLabels.filter((label) => label === WORKSPACE_2FA || /API/.test(label))).toEqual([])
+    expect(tableRows).toEqual(expect.arrayContaining([WORKSPACE_2FA, 'API access']))
+  })
+
+  it('keeps every other launch card feature', () => {
     const renamed: Record<string, string> = {
       '10 sponsored transactions / month': '10 sponsored transactions per month',
       '50 sponsored transactions / month': '50 sponsored transactions per month',
       'Policy engine': 'Policy engine & spending limits',
-      'MFA authentication': WORKSPACE_2FA,
     }
+    const dropped = /MFA|API access/
 
-    PLAN_ORDER.forEach((plan, index) => {
-      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].additionalFeatures)
-      const own = PLAN_CONTENT_V2[plan].additionalFeatures
-      PLAN_FEATURES[plan].forEach((launchFeature) => {
-        const feature = renamed[launchFeature] ?? launchFeature
-        // A sponsorship quota replaces the inherited one, so each plan must state its own.
-        expect(SPONSORSHIP.test(feature) ? own : inherited).toContain(feature)
+    PLAN_ORDER.forEach((plan) => {
+      const labels = getCardFeaturesV2(plan) ?? []
+      PLAN_FEATURES[plan]
+        .filter((feature) => !dropped.test(feature))
+        .forEach((feature) => expect(labels).toContain(renamed[feature] ?? feature))
+    })
+  })
+
+  it('adds the Enterprise-only terms to the Enterprise card and marks them Enterprise-only in the table', () => {
+    const enterpriseOnly = [MULTIPLE_WORKSPACES, NAMED_ACCOUNT_MANAGER, SLAS]
+    const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
+
+    expect(getCardFeaturesV2('Enterprise')).toEqual(expect.arrayContaining(enterpriseOnly))
+    enterpriseOnly.forEach((feature) => {
+      expect(getCardFeaturesV2('Business')).not.toContain(feature)
+      expect(rows.find((row) => row.feature === feature)?.values).toEqual({
+        Starter: false,
+        Business: false,
+        Enterprise: true,
       })
     })
   })
 
   it('agrees with the comparison table on what each plan includes', () => {
     const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
-    const listed = new Set(Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures))
+    const listed = new Set(PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? []))
 
-    PLAN_ORDER.forEach((plan, index) => {
-      const inherited = PLAN_ORDER.slice(0, index + 1).flatMap((name) => PLAN_CONTENT_V2[name].additionalFeatures)
+    PLAN_ORDER.forEach((plan) => {
+      const labels = getCardFeaturesV2(plan) ?? []
       const value = (feature: string) => rows.find((row) => row.feature === feature)?.values?.[plan]
       rows
         .filter((row) => listed.has(row.feature))
-        .forEach((row) => expect(row.values?.[plan]).toBe(inherited.includes(row.feature)))
+        .forEach((row) => expect(row.values?.[plan]).toBe(labels.includes(row.feature)))
 
-      const own = PLAN_CONTENT_V2[plan].additionalFeatures
-      expect(own).toContainEqual(expect.stringContaining(`${value('Sponsored transactions per month')} sponsored`))
-      expect(own).toContain(`${value('API access')} API access`)
+      expect(labels).toContainEqual(expect.stringContaining(`${value('Sponsored transactions per month')} sponsored`))
     })
   })
 
+  it('leads the compare table with operations and has no catch-all section', () => {
+    expect(COMPARE_SECTIONS_V2.map((section) => section.title)).toEqual(['Operations', 'Security', 'Support', 'Limits'])
+  })
+
   it('leaves the coming-soon fee payment out of every plan', () => {
-    const features = Object.values(PLAN_CONTENT_V2).flatMap((content) => content.additionalFeatures)
-    expect(features.filter((feature) => /pay (fees|gas)/i.test(feature))).toEqual([])
+    const labels = PLAN_ORDER.flatMap((plan) => getCardFeaturesV2(plan) ?? [])
+    expect(labels.filter((label) => /pay (fees|gas)/i.test(label))).toEqual([])
   })
 
   it('looks content up by plan name, ignoring names outside the catalog', () => {
     expect(getPlanContentV2('Business')).toBe(PLAN_CONTENT_V2.Business)
     expect(getPlanContentV2('Safe Pro')).toBeUndefined()
     expect(getPlanContentV2('toString')).toBeUndefined()
+    expect(getCardFeaturesV2('Safe Pro')).toBeUndefined()
   })
 })
 
@@ -170,5 +201,31 @@ describe('canManageV2', () => {
     { canManage: undefined, current: undefined, expected: false },
   ])('is $expected for canManage $canManage and plan $current', ({ canManage, current, expected }) => {
     expect(canManageV2(canManage, current)).toBe(expected)
+  })
+})
+
+describe('getPlanPriceV2', () => {
+  it('shows the monthly total', () => {
+    expect(getPlanPriceV2(tier(), option({ price: 669 }))).toEqual({
+      headline: '€669',
+      suffix: '/mo',
+      line: 'Billed monthly · excl. VAT',
+    })
+  })
+
+  it('shows the yearly total on a yearly offer', () => {
+    expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ price: 17_424 }))).toEqual({
+      headline: '€17,424',
+      suffix: '/yr',
+      line: 'Billed yearly · excl. VAT',
+    })
+  })
+
+  it('shows custom pricing without a price', () => {
+    expect(getPlanPriceV2(ENTERPRISE_TIER, ENTERPRISE_TIER.options[0])).toEqual({
+      headline: 'Custom',
+      suffix: 'Annual term',
+      line: 'Pricing by agreement · Billed annually',
+    })
   })
 })

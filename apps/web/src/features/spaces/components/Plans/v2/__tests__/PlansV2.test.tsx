@@ -17,13 +17,12 @@ const expectPlansClick = (location: SAFE_PRO_PLANS_LABELS) =>
     { [MixpanelEventParams.LOCATION]: location },
   )
 
-const offer = (planName: string, seats: number, amountMinor: number): PlanOffer => ({
+const offer = (planName: string, seats: number, cents: number): PlanOffer => ({
   paymentLinkId: `pl_${planName}_${seats}`,
   priceId: `price_${planName}_${seats}`,
   planName,
   seats,
-  price: amountMinor / 100,
-  amountMinor,
+  price: cents / 100,
   currency: 'eur',
   billingCycle: 'month',
   trialPeriodDays: null,

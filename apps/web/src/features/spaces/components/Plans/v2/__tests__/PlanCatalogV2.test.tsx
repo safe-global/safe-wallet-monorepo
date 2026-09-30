@@ -9,8 +9,7 @@ const option = (billingCycle: 'month' | 'year'): PlanSeatOption => ({
   priceId: `price_b20${billingCycle}`,
   label: '20 Safe accounts',
   seats: 20,
-  price: null,
-  amountMinor: billingCycle === 'year' ? 1_742_400 : 166_900,
+  price: billingCycle === 'year' ? 17_424 : 1669,
   originalPrice: null,
 })
 
@@ -27,14 +26,17 @@ describe('PlanCatalogV2', () => {
   it('advertises the yearly saving with the v2 label', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
 
-    expect(screen.getByText('Save ~13%')).toBeInTheDocument()
+    expect(screen.getByText('· save 13%')).toHaveClass('text-muted-foreground')
     expect(screen.queryByText(YEARLY_SAVINGS_LABEL)).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
+    expect(screen.getByText('· save 13%')).toHaveClass('text-foreground')
   })
 
   it('shows no saving when no plan has a yearly price', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), ENTERPRISE_TIER]} />)
 
-    expect(screen.queryByText('Save ~13%')).not.toBeInTheDocument()
+    expect(screen.queryByText(/save 13%/)).not.toBeInTheDocument()
   })
 
   it('tells a member who is not an admin why there are no buttons', () => {
@@ -45,10 +47,13 @@ describe('PlanCatalogV2', () => {
 
   it('switches every card to its yearly price from the billing-cycle toggle', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
-    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('€1,669/mo billed monthly')
+    expect(screen.getByText('€1,669')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('Billed monthly · excl. VAT')
 
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
 
-    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('€1,452/mo · €17,424 billed yearly')
+    expect(screen.getByText('€17,424')).toBeInTheDocument()
+    expect(screen.getByText('/yr')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('Billed yearly · excl. VAT')
   })
 })

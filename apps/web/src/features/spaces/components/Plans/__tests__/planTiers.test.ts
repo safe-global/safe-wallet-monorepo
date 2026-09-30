@@ -98,17 +98,6 @@ describe('planTiers', () => {
     ])
   })
 
-  it('carries the minor amount Stripe charges onto the seat option', () => {
-    const [tier] = _offersToTiers([
-      {
-        name: 'Starter',
-        offers: [offer({ paymentLinkId: 's2m', planName: 'Starter', price: 10, amountMinor: 1_500 })],
-      },
-    ])
-
-    expect(tier.options[0].amountMinor).toBe(1_500)
-  })
-
   it('rebuilds the current plan card from the subscription and the seats entitlement', () => {
     expect(_subscriptionToTier(subscription(), 20)).toMatchObject({
       id: 'current',

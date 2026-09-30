@@ -9,13 +9,12 @@ import PlansV2 from './PlansV2'
 
 const setup = createMockStory({ scenario: 'efSafe', layout: 'paper', shadcn: true })
 
-const offer = (planName: string, seats: number, amountMinor: number, billingCycle: 'month' | 'year'): PlanOffer => ({
+const offer = (planName: string, seats: number, cents: number, billingCycle: 'month' | 'year'): PlanOffer => ({
   paymentLinkId: `pl_${planName}_${seats}_${billingCycle}`,
   priceId: `price_${planName}_${seats}_${billingCycle}`,
   planName,
   seats,
-  price: amountMinor / 100,
-  amountMinor,
+  price: cents / 100,
   currency: 'eur',
   billingCycle,
   trialPeriodDays: null,
@@ -102,5 +101,5 @@ export const MemberReadOnly: Story = { args: { readOnly: true } }
 
 /** The comparison with every section open and the Business column marked current. */
 export const CompareExpanded: Story = {
-  render: () => <CompareFeaturesCard currentPlan="Business" isExpanded onExpandedChange={() => {}} />,
+  render: () => <CompareFeaturesCard currentPlanName="Business" isExpanded onExpandedChange={() => {}} />,
 }

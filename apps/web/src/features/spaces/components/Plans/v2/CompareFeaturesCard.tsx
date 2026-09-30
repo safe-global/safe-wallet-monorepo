@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,7 +21,9 @@ const TABLE_ID = `${COMPARE_FEATURES_ID}-table`
 const TITLE_ID = `${COMPARE_FEATURES_ID}-title`
 const PLANS = PLAN_ORDER
 
-const tint = (isCurrent: boolean) => isCurrent && 'bg-mint/25'
+/** Collapsed, the table shows this many features clearly and the next few fading out under the button. */
+export const VISIBLE_FEATURES = 5
+const PEEK_FEATURES = 2
 
 const CompareValue = ({ value, isCurrent }: { value: CompareValueV2; isCurrent: boolean }) => {
   if (value === true) {
@@ -45,22 +47,34 @@ const CompareValue = ({ value, isCurrent }: { value: CompareValueV2; isCurrent: 
   return <>{value}</>
 }
 
-const CompareRow = ({ row, currentPlan }: { row: CompareRowV2; currentPlan?: string }) => (
-  <TableRow className="hover:bg-transparent">
+const CompareRow = ({
+  row,
+  currentPlanName,
+  isFolded,
+  isExpanded,
+  ref,
+}: {
+  row: CompareRowV2
+  currentPlanName?: string
+  isFolded: boolean
+  isExpanded: boolean
+  ref?: Ref<HTMLTableRowElement>
+}) => (
+  <TableRow ref={ref} inert={isFolded} aria-hidden={isFolded || undefined} className="hover:bg-transparent">
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal">
       <span className="flex items-center gap-2">
         {row.feature}
         {row.isComingSoon && (
-          <Badge variant="mint" size="status" shape="status">
+          <Badge variant="subtle" size="status" shape="status">
             {COMPARE_COPY_V2.soon}
           </Badge>
         )}
       </span>
     </TableHead>
     {PLANS.map((plan) => (
-      <TableCell key={plan} className={cn('px-4 py-3', tint(plan === currentPlan))}>
+      <TableCell key={plan} className="px-4 py-3">
         {row.values ? (
-          <CompareValue value={row.values[plan]} isCurrent={plan === currentPlan} />
+          <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
         ) : (
           <span className="sr-only">{COMPARE_COPY_V2.soon}</span>
         )}
@@ -77,23 +91,24 @@ const SECTION_STAGGER_MS = 45
 
 type TableHeights = { collapsed: number; full: number }
 
-/** Full and header-plus-first-section heights of the table's scroll container, so a horizontal scrollbar is never clipped. */
+/** Full height, and the height down to the last peeking row, of the table's scroll container. */
 const useTableHeights = (
   tableRef: RefObject<HTMLTableElement | null>,
-  firstSectionRef: RefObject<HTMLTableSectionElement | null>,
+  lastPeekRowRef: RefObject<HTMLTableRowElement | null>,
   isExpanded: boolean,
 ): TableHeights | undefined => {
   const [heights, setHeights] = useState<TableHeights>()
 
   useLayoutEffect(() => {
     const table = tableRef.current
-    const firstSection = firstSectionRef.current
+    const lastPeekRow = lastPeekRowRef.current
     const container = table?.parentElement
-    if (!table || !firstSection || !container) return
+    if (!table || !lastPeekRow || !container) return
     const measure = () => {
       const full = container.offsetHeight
+      const rowBottom = lastPeekRow.getBoundingClientRect().bottom - table.getBoundingClientRect().top
       // 0 means not laid out yet (e.g. jsdom), so don't clip.
-      setHeights(full > 0 ? { full, collapsed: firstSection.offsetTop + firstSection.offsetHeight } : undefined)
+      setHeights(full > 0 ? { full, collapsed: Math.min(rowBottom, full) } : undefined)
     }
     measure()
     if (typeof ResizeObserver === 'undefined') return
@@ -101,33 +116,70 @@ const useTableHeights = (
     observer.observe(container)
     observer.observe(table)
     return () => observer.disconnect()
-  }, [tableRef, firstSectionRef, isExpanded])
+  }, [tableRef, lastPeekRowRef, isExpanded])
 
   return heights
 }
 
-const CompareHeaderRow = ({ currentPlan }: { currentPlan?: string }) => (
-  <TableHeader>
+/** Whether the marker at the table's top has scrolled above the viewport, so the sticky header is pinned. */
+const useIsScrolledPast = (markerRef: RefObject<HTMLElement | null>, isActive: boolean): boolean => {
+  const [isPast, setPast] = useState(false)
+
+  useEffect(() => {
+    const marker = markerRef.current
+    if (!isActive || !marker || typeof IntersectionObserver === 'undefined') return
+    const observer = new IntersectionObserver(([entry]) =>
+      setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+    )
+    observer.observe(marker)
+    return () => observer.disconnect()
+  }, [markerRef, isActive])
+
+  return isActive && isPast
+}
+
+const CompareHeaderRow = ({
+  currentPlanName,
+  isExpanded,
+  isStuck,
+}: {
+  currentPlanName?: string
+  isExpanded: boolean
+  isStuck: boolean
+}) => (
+  <TableHeader
+    data-stuck={isStuck || undefined}
+    className={cn(
+      isExpanded && 'sticky top-0 z-10 bg-card transition-shadow duration-200 ease-out',
+      isStuck && 'shadow-hairline-lg',
+    )}
+  >
     <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
-      <TableHead scope="col" className="h-auto w-[34%] px-4 py-2.5 font-semibold">
+      <TableHead scope="col" className="h-auto w-[28%] px-4 py-2.5 align-top font-semibold">
         {COMPARE_COPY_V2.featureColumn}
       </TableHead>
-      {PLANS.map((plan) => (
-        <TableHead
-          key={plan}
-          scope="col"
-          className={cn('h-auto px-4 py-2.5 font-semibold', tint(plan === currentPlan))}
-        >
-          <span className="flex items-center gap-2">
-            {plan}
-            {plan === currentPlan && (
-              <Badge variant="mint" size="status" shape="status">
-                {COMPARE_COPY_V2.current}
-              </Badge>
+      {PLANS.map((plan) => {
+        const isCurrent = plan === currentPlanName
+        return (
+          <TableHead
+            key={plan}
+            scope="col"
+            className={cn(
+              'h-auto px-4 py-2.5 align-top font-semibold',
+              isExpanded && isCurrent && 'bg-muted-secondary bg-linear-to-t from-mint/15 to-transparent',
             )}
-          </span>
-        </TableHead>
-      ))}
+          >
+            <span className="flex items-center gap-2">
+              {plan}
+              {isCurrent && (
+                <Badge variant="mint" size="status" shape="status">
+                  {COMPARE_COPY_V2.current}
+                </Badge>
+              )}
+            </span>
+          </TableHead>
+        )
+      })}
     </TableRow>
   </TableHeader>
 )
@@ -136,20 +188,20 @@ const CompareSection = ({
   section,
   index,
   isExpanded,
-  currentPlan,
-  ref,
+  currentPlanName,
+  lastPeekRowRef,
 }: {
   section: CompareSectionV2
   index: number
   isExpanded: boolean
-  currentPlan?: string
-  ref?: Ref<HTMLTableSectionElement>
+  currentPlanName?: string
+  lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
   const isFoldable = index > 0
   const isFolded = isFoldable && !isExpanded
+  const lastPeekRow = Math.min(VISIBLE_FEATURES + PEEK_FEATURES, section.rows.length) - 1
   return (
     <TableBody
-      ref={ref}
       inert={isFolded}
       aria-hidden={isFolded || undefined}
       style={{ '--section-delay': `${80 + (index - 1) * SECTION_STAGGER_MS}ms` } as CSSProperties}
@@ -169,28 +221,37 @@ const CompareSection = ({
           {section.title}
         </TableHead>
       </TableRow>
-      {section.rows.map((row) => (
-        <CompareRow key={row.feature} row={row} currentPlan={currentPlan} />
+      {section.rows.map((row, rowIndex) => (
+        <CompareRow
+          key={row.feature}
+          ref={index === 0 && rowIndex === lastPeekRow ? lastPeekRowRef : undefined}
+          row={row}
+          currentPlanName={currentPlanName}
+          isFolded={!isFoldable && !isExpanded && rowIndex >= VISIBLE_FEATURES}
+          isExpanded={isExpanded}
+        />
       ))}
     </TableBody>
   )
 }
 
 export default function CompareFeaturesCard({
-  currentPlan,
+  currentPlanName,
   isExpanded,
   onExpandedChange,
   ref,
 }: {
   /** Current plan, including free access. */
-  currentPlan?: string
+  currentPlanName?: string
   isExpanded: boolean
   onExpandedChange: (isExpanded: boolean) => void
   ref?: Ref<HTMLElement>
 }) {
   const tableRef = useRef<HTMLTableElement>(null)
-  const firstSectionRef = useRef<HTMLTableSectionElement>(null)
-  const heights = useTableHeights(tableRef, firstSectionRef, isExpanded)
+  const lastPeekRowRef = useRef<HTMLTableRowElement>(null)
+  const topMarkerRef = useRef<HTMLSpanElement>(null)
+  const heights = useTableHeights(tableRef, lastPeekRowRef, isExpanded)
+  const isHeaderStuck = useIsScrolledPast(topMarkerRef, isExpanded)
   const tableStyle: CSSProperties | undefined = heights
     ? { height: isExpanded ? heights.full : heights.collapsed }
     : undefined
@@ -204,80 +265,83 @@ export default function CompareFeaturesCard({
       className="scroll-mt-6 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       data-testid="compare-features"
     >
-      <Card radius="xl" size="none">
-        <div className="flex flex-col p-2">
-          <div className="flex flex-col gap-2">
-            <button
-              type="button"
-              aria-expanded={isExpanded}
-              aria-controls={TABLE_ID}
-              onClick={() => onExpandedChange(!isExpanded)}
-              className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <span className="flex flex-col gap-0.5">
-                <Typography variant="h4" id={TITLE_ID}>
-                  {COMPARE_COPY_V2.title}
-                </Typography>
-                <Typography variant="paragraph-small" color="muted">
-                  {COMPARE_COPY_V2.subtitle}
-                </Typography>
-              </span>
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
-                <ChevronDown
-                  aria-hidden
-                  className={cn(
-                    'size-4.5 transition-transform duration-[420ms] ease-soft motion-reduce:transition-none',
-                    isExpanded && 'rotate-180',
-                  )}
-                />
-              </span>
-            </button>
+      <Card radius="xl" size="none" className="overflow-clip">
+        <div className="flex flex-col gap-2 p-2">
+          <button
+            type="button"
+            aria-expanded={isExpanded}
+            aria-controls={TABLE_ID}
+            onClick={() => onExpandedChange(!isExpanded)}
+            className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <span className="flex flex-col gap-0.5">
+              <Typography variant="h4" id={TITLE_ID}>
+                {COMPARE_COPY_V2.title}
+              </Typography>
+              <Typography variant="paragraph-small" color="muted">
+                {COMPARE_COPY_V2.subtitle}
+              </Typography>
+            </span>
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+              <ChevronDown
+                aria-hidden
+                className={cn(
+                  'size-4.5 transition-transform duration-[420ms] ease-soft motion-reduce:transition-none',
+                  isExpanded && 'rotate-180',
+                )}
+              />
+            </span>
+          </button>
 
+          <div className="@container relative">
+            <span ref={topMarkerRef} aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" />
             <div
               id={TABLE_ID}
               data-testid="compare-features-table"
               style={tableStyle}
               className={cn(
-                'overflow-hidden rounded-xl bg-card motion-reduce:transition-none',
+                // `clip`, not `hidden`, so the sticky header follows the page scroll; it can only once the table fits.
+                'overflow-clip rounded-xl bg-card motion-reduce:transition-none @2xl:[&_[data-slot=table-container]]:overflow-visible',
                 isExpanded ? HEIGHT_TRANSITION.expand : HEIGHT_TRANSITION.collapse,
               )}
             >
               <Table ref={tableRef} className="min-w-160 table-fixed">
-                <CompareHeaderRow currentPlan={currentPlan} />
+                <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} isStuck={isHeaderStuck} />
                 {COMPARE_SECTIONS_V2.map((section, index) => (
                   <CompareSection
                     key={section.title}
-                    ref={index === 0 ? firstSectionRef : undefined}
+                    lastPeekRowRef={index === 0 ? lastPeekRowRef : undefined}
                     section={section}
                     index={index}
                     isExpanded={isExpanded}
-                    currentPlan={currentPlan}
+                    currentPlanName={currentPlanName}
                   />
                 ))}
               </Table>
             </div>
-          </div>
 
-          <div
-            inert={isExpanded}
-            aria-hidden={isExpanded || undefined}
-            className={cn(
-              'grid transition-[grid-template-rows,opacity] duration-300 ease-soft motion-reduce:transition-none',
-              isExpanded ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
-            )}
-          >
-            <div className="overflow-hidden">
-              <div className="pt-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  weight="semibold"
-                  className="w-full"
-                  onClick={() => onExpandedChange(true)}
-                >
-                  {COMPARE_COPY_V2.showAll}
-                </Button>
-              </div>
+            <div
+              inert={isExpanded}
+              aria-hidden={isExpanded || undefined}
+              data-testid="compare-features-fade"
+              className={cn(
+                'absolute inset-x-0 bottom-0 flex h-28 items-end justify-center rounded-b-xl pb-5 transition-opacity duration-300 ease-soft motion-reduce:transition-none',
+                isExpanded ? 'pointer-events-none opacity-0' : 'opacity-100',
+              )}
+            >
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-b-xl bg-linear-to-b from-card/0 to-card backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                weight="semibold"
+                className="relative"
+                onClick={() => onExpandedChange(true)}
+              >
+                {COMPARE_COPY_V2.showAll}
+              </Button>
             </div>
           </div>
         </div>

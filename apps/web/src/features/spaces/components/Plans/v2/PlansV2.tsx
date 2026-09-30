@@ -65,7 +65,7 @@ export default function PlansV2({
       />
       <CompareFeaturesCard
         ref={compareRef}
-        currentPlan={currentPlanName}
+        currentPlanName={currentPlanName}
         isExpanded={isCompareExpanded}
         onExpandedChange={setCompareExpanded}
       />

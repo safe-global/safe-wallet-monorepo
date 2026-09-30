@@ -1,8 +1,8 @@
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { ENTERPRISE_TIER, PLAN_CONTENT_V2 } from '../../planCatalog'
+import { ENTERPRISE_TIER, getCardFeaturesV2, PLAN_CARD_COPY_V2, PLAN_CONTENT_V2 } from '../../planCatalog'
 import type { PlanSeatOption, PlanTier } from '../../types'
 import type { CurrentPlan } from '../../types'
 import { PlanCardV2 } from '../PlanCardV2'
@@ -39,13 +39,12 @@ const currentTier = (
   currentPriceId,
 })
 
-const option = (seats: number, amountMinor: number): PlanSeatOption => ({
+const option = (seats: number, cents: number): PlanSeatOption => ({
   paymentLinkId: `pl_b${seats}m`,
   priceId: `price_b${seats}m`,
   label: `${seats} Safe accounts`,
   seats,
-  price: amountMinor / 100,
-  amountMinor,
+  price: cents / 100,
   originalPrice: null,
 })
 
@@ -59,22 +58,22 @@ const BUSINESS: PlanTier = {
 }
 
 describe('PlanCardV2', () => {
-  it('shows who the plan is for, the per-Safe price and the amount charged', () => {
+  it('shows who the plan is for and the monthly total', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 
     expect(screen.getByText(PLAN_CONTENT_V2.Business.description)).toBeInTheDocument()
-    expect(screen.getByText('€83.45')).toBeInTheDocument()
-    expect(screen.getByText('/Safe/mo')).toBeInTheDocument()
-    expect(screen.getByTestId('plan-price-line')).toHaveTextContent('€1,669/mo billed monthly · excl. VAT')
+    expect(screen.getByText('€1,669')).toBeInTheDocument()
+    expect(screen.getByText('/mo')).toBeInTheDocument()
+    expect(screen.queryByText('/Safe/mo')).not.toBeInTheDocument()
+    expect(screen.getByTestId('plan-price-line')).toHaveTextContent('Billed monthly · excl. VAT')
   })
 
-  it('lists only what the plan adds, under its heading, instead of the Stripe selling points', () => {
+  it('lists everything the plan includes instead of the Stripe selling points', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 
-    expect(screen.getByText(PLAN_CONTENT_V2.Business.featuresHeading)).toBeInTheDocument()
-    PLAN_CONTENT_V2.Business.additionalFeatures.forEach((feature) =>
-      expect(screen.getByText(feature)).toBeInTheDocument(),
-    )
+    expect(screen.getByText(PLAN_CARD_COPY_V2.featuresHeading)).toBeInTheDocument()
+    const features = getCardFeaturesV2('Business') ?? []
+    features.forEach((feature) => expect(screen.getByText(feature)).toBeInTheDocument())
     expect(screen.queryByText('A Stripe selling point')).not.toBeInTheDocument()
   })
 
@@ -98,8 +97,7 @@ describe('PlanCardV2', () => {
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     await user.click(await screen.findByRole('option', { name: '5 Safe accounts' }))
 
-    expect(screen.getByText('€133.80')).toBeInTheDocument()
-    expect(screen.getByTestId('plan-price-line')).toHaveTextContent('€669/mo billed monthly · excl. VAT')
+    expect(screen.getByText('€669')).toBeInTheDocument()
   })
 
   it('carries no plan badge', () => {
@@ -114,7 +112,7 @@ describe('PlanCardV2', () => {
     expect(screen.getByText('Custom')).toBeInTheDocument()
     expect(screen.getByText('Annual term')).toBeInTheDocument()
     expect(screen.getByTestId('plan-price-line')).toHaveTextContent('Pricing by agreement · Billed annually')
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', SUPPORT_CHAT_URL)
+    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('hands the picked offer to onSubscribe', () => {
@@ -151,12 +149,12 @@ describe('PlanCardV2', () => {
     expect(businessCard).toHaveClass('group/plan')
     within(businessCard)
       .getAllByTestId('plan-feature-check')
-      .forEach((check) => expect(check).toHaveClass('group-hover/plan:bg-foreground'))
+      .forEach((check) => expect(check).toHaveClass('bg-muted', 'group-hover/plan:bg-foreground'))
     expect(
       within(businessCard)
         .getAllByTestId('plan-feature-check')
         .map((check) => check.style.getPropertyValue('--check-delay')),
-    ).toEqual(PLAN_CONTENT_V2.Business.additionalFeatures.map((_, index) => `${index * 15}ms`))
+    ).toEqual((getCardFeaturesV2('Business') ?? []).map((_, index) => `${index * 15}ms`))
   })
 
   it('gives only the Business card the filled button, whose arrow nudges while the others reveal one', () => {

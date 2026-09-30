@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen, within } from '@testing-library/react'
 import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
@@ -80,6 +80,10 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 const mockUseIsSafeProEnabled = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+const mockUseIsSafeProPlansV2Enabled = jest.fn(() => false)
+jest.mock('../../../../../hooks/useIsSafeProPlansV2Enabled', () => ({
+  useIsSafeProPlansV2Enabled: () => mockUseIsSafeProPlansV2Enabled(),
+}))
 const mockPlans: {
   tierName: string
   isTrialing: boolean
@@ -1140,5 +1144,30 @@ describe('SpaceSelectorDropdown', () => {
         expect(screen.queryByTestId('space-selector-pro-chip')).not.toBeInTheDocument()
       },
     )
+
+    describe('with Plans v2 on', () => {
+      beforeEach(() => mockUseIsSafeProPlansV2Enabled.mockReturnValue(true))
+      afterEach(() => mockUseIsSafeProPlansV2Enabled.mockReturnValue(false))
+
+      it.each([
+        [20, 'Free access', false],
+        [14, 'Free access', false],
+        [7, 'Free access · 7 days left', true],
+      ])('daysLeft=%s → muted "%s" behind a dot, warning=%s', (daysLeft, label, isWarning) => {
+        mockUseIsSafeProEnabled.mockReturnValue(true)
+        mockPlans.isTrialing = true
+        mockPlans.isTrialEndingSoon = daysLeft <= 7
+        mockPlans.plan = { daysLeft }
+        const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
+
+        render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
+
+        const subtitle = screen.getByText(label)
+        expect(subtitle).toHaveClass('text-muted-foreground')
+        expect(subtitle).not.toHaveClass('text-green-500')
+        const dot = within(subtitle).getByTestId('status-dot')
+        expect(dot.hasAttribute('data-warning')).toBe(isWarning)
+      })
+    })
   })
 })

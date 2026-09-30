@@ -1,6 +1,6 @@
 import { ENTERPRISE_TIER, PLAN_CARD_COPY_V2 } from '../planCatalog'
-import { getPlanCta } from '../planTiers'
-import type { CurrentPlan, PlanCta, PlanPick, PlanTier } from '../types'
+import { formatPlanPrice, getPlanCta, priceSuffix } from '../planTiers'
+import type { CurrentPlan, PlanCta, PlanPick, PlanSeatOption, PlanTier } from '../types'
 
 /** v2 cards: "Manage plan" moves to the status panel, Enterprise changes go through sales. */
 export type PlanCtaV2 =
@@ -24,4 +24,22 @@ export const canManageV2 = (canManage: boolean | undefined, currentPlan: Current
 export const getTiersV2 = (tiers: PlanTier[]): PlanTier[] => {
   const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
   return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
+}
+
+export type PlanPriceV2 = { headline: string; suffix: string; line: string }
+
+/** Same totals as the launch page: €669/mo, or the full yearly amount per year. */
+export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPriceV2 => {
+  if (option.price === null) {
+    return {
+      headline: PLAN_CARD_COPY_V2.custom,
+      suffix: PLAN_CARD_COPY_V2.customSuffix,
+      line: PLAN_CARD_COPY_V2.customLine,
+    }
+  }
+  return {
+    headline: formatPlanPrice(option.price, tier.currency),
+    suffix: priceSuffix(tier.billingCycle),
+    line: tier.billingCycle === 'year' ? PLAN_CARD_COPY_V2.billedYearly : PLAN_CARD_COPY_V2.billedMonthly,
+  }
 }

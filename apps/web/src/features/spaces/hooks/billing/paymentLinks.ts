@@ -48,15 +48,12 @@ export const getPlanDescriptions = (metadata: Metadata): string[] => {
 const toCycle = (interval: string | undefined): BillingCycle | null =>
   interval === 'month' || interval === 'year' ? interval : null
 
-export const _getPrice = (
-  link: PaymentLink,
-): Pick<PlanOffer, 'price' | 'amountMinor' | 'currency' | 'billingCycle'> => {
+export const _getPrice = (link: PaymentLink): Pick<PlanOffer, 'price' | 'currency' | 'billingCycle'> => {
   const items = readLineItems(link)
   const cents = items.reduce((sum, item) => sum + (item.price?.unitAmount ?? 0) * (item.quantity ?? 1), 0)
 
   return {
     price: cents > 0 ? cents / 100 : null,
-    amountMinor: cents > 0 ? cents : null,
     currency: (items[0]?.price?.currency ?? 'eur').toLowerCase(),
     billingCycle: toCycle(items[0]?.price?.recurring?.interval),
   }

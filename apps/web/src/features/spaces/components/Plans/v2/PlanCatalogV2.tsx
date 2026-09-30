@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { ArrowDown } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
+import { cn } from '@/utils/cn'
 import { READ_ONLY_NOTE } from '../PlanCards'
 import { COMPARE_COPY_V2, PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getVisibleTiers } from '../planTiers'
@@ -31,7 +31,7 @@ export default function PlanCatalogV2({
   return (
     <Card radius="xl" size="sm">
       <CardContent>
-        <div className="flex flex-col gap-4">
+        <div className="@container flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
             <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
               <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
@@ -39,9 +39,9 @@ export default function PlanCatalogV2({
                 <TabsTrigger value="year">
                   {PLAN_CARD_COPY_V2.yearly}
                   {hasYearly && (
-                    <Badge variant="mint" size="status" shape="status">
-                      {PLAN_CARD_COPY_V2.yearlySavings}
-                    </Badge>
+                    <span className={cn('font-normal', cycle === 'year' ? 'text-foreground' : 'text-muted-foreground')}>
+                      · {PLAN_CARD_COPY_V2.yearlySavings}
+                    </span>
                   )}
                 </TabsTrigger>
               </TabsList>
@@ -62,7 +62,7 @@ export default function PlanCatalogV2({
           </div>
 
           {/* One shared row track per card section (the cards subgrid into it), so rows align whatever wraps. */}
-          <div className="flex flex-col gap-5 md:grid md:auto-cols-fr md:grid-flow-col md:grid-rows-[auto_auto_auto_1fr_auto] md:gap-x-5 md:gap-y-0">
+          <div className="flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
             {visible.map((tier) => (
               <PlanCardV2 key={tier.id} tier={tier} {...actions} />
             ))}
