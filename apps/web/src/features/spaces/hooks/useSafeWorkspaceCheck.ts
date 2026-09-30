@@ -23,7 +23,8 @@ import { MemberStatus } from './useSpaceMembers'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { AppRoutes } from '@/config/routes'
 
-export type SafeWorkspaceAction = 'none' | 'wait' | 'signIn' | 'remove' | 'removeNotMember'
+/** `none` also covers a check that cannot decide yet because its data is still loading. */
+export type SafeWorkspaceAction = 'none' | 'signIn' | 'remove' | 'removeNotMember'
 
 export type SafeWorkspaceState = {
   /** The raw `spaceId` query param, before validation. */
@@ -42,10 +43,10 @@ export type SafeWorkspaceState = {
 /** The action for a signed-in user, from the membership and the Safes of the Workspace. */
 const getMemberAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
   if (state.hasNoAccess) return 'removeNotMember'
-  if (state.membershipStatus === undefined) return 'wait'
+  if (state.membershipStatus === undefined) return 'none'
   if (state.membershipStatus === MemberStatus.INVITED) return 'none'
   if (state.membershipStatus !== MemberStatus.ACTIVE) return 'removeNotMember'
-  if (state.isSafeInSpace === undefined) return 'wait'
+  if (state.isSafeInSpace === undefined) return 'none'
   return state.isSafeInSpace ? 'none' : 'remove'
 }
 
@@ -53,7 +54,7 @@ const getMemberAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
 export const getSafeWorkspaceAction = (state: SafeWorkspaceState): SafeWorkspaceAction => {
   if (!state.isSafeRoute || state.rawSpaceId === undefined) return 'none'
   if (parseSpaceId(state.rawSpaceId) === null) return 'remove'
-  if (state.isSessionPending) return 'wait'
+  if (state.isSessionPending) return 'none'
   if (!state.isSignedIn) return 'signIn'
   return getMemberAction(state)
 }
