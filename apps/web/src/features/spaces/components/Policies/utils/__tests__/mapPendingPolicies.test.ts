@@ -11,7 +11,7 @@ import {
 } from '../../mocks/policies'
 import type { PolicyTokenInfo } from '../../types'
 import { mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
-import { isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
+import { getPendingTxId, isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 
 const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
 
@@ -254,5 +254,13 @@ describe('isPendingChangeIndexed', () => {
 
   it('should not match an active policy on another Safe', () => {
     expect(isPendingChangeIndexed({ ...queued, safe: { ...queued.safe, chainId: '137' } }, active())).toBe(false)
+  })
+})
+
+describe('getPendingTxId', () => {
+  it('builds the CGW multisig id from the Safe and the safeTxHash', () => {
+    const policy = mockPendingPolicy()
+
+    expect(getPendingTxId(policy)).toBe(`multisig_${policy.safe.address}_${policy.safeTxHash}`)
   })
 })

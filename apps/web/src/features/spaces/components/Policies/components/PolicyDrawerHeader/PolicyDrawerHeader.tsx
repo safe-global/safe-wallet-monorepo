@@ -8,8 +8,8 @@ import type { PolicyStatus } from '../../types'
 export type PolicyDrawerHeaderProps = {
   icon: LucideIcon
   title: string
-  /** Absent while the status is still being read, which the header fills with a skeleton. */
-  status?: PolicyStatus
+  /** Absent while the status is still being read, which the header fills with a skeleton; null shows no chip. */
+  status?: PolicyStatus | null
 }
 
 const PolicyDrawerHeader = ({ icon: Icon, title, status }: PolicyDrawerHeaderProps): ReactElement => (
@@ -19,7 +19,7 @@ const PolicyDrawerHeader = ({ icon: Icon, title, status }: PolicyDrawerHeaderPro
     </div>
     <DrawerTitle size="lg">{title}</DrawerTitle>
     <div className="ml-auto">
-      {status ? (
+      {status === null ? null : status ? (
         <PolicyStatusChip status={status} />
       ) : (
         <Skeleton className="h-6 w-24 rounded-lg" data-testid="policy-status-skeleton" />

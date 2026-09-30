@@ -8,11 +8,14 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { mockStarterPlan } from '../mocks/plan'
 import {
   asActivePolicy,
+  mockActivatingPolicy,
   mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
+  mockPendingPolicy,
   mockPolicies,
   mockProposerPolicy,
 } from '../mocks/policies'
+import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
@@ -45,12 +48,15 @@ jest.mock('../../../hooks/useSpaceSafeOverviews', () => ({
   useSpaceSafeOverviews: () => ({ ownedByChain: {}, isOwnershipResolved: true }),
 }))
 
+jest.mock('../SpendingLimitDetails/hooks/usePendingPolicyTransaction')
+
 jest.mock('../SpendingLimitFlow', () => ({
   __esModule: true,
   default: () => <div data-testid="spending-limit-flow" />,
 }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
+const mockUsePendingPolicyTransaction = jest.mocked(usePendingPolicyTransaction)
 
 const renderWithTxModal = () => {
   const setTxFlow = jest.fn()
@@ -489,6 +495,51 @@ describe('Policies', () => {
       rerender(<Policies policies={[]} />)
 
       expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+    })
+
+    describe('a pending spending limit', () => {
+      beforeEach(() => {
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [] })
+      })
+
+      it('should, when its row is clicked, open the side panel in its pending state', () => {
+        render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('Pending signatures')).toBeInTheDocument()
+      })
+
+      it('should, for a row already executed and waiting for the indexer, open the panel as executed', () => {
+        render(<Policies policies={[mockActivatingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+      })
+
+      it('should keep its panel open after the row leaves the queue, so the panel can say why', () => {
+        const { rerender } = render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], outcome: 'deleted' })
+        rerender(<Policies policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was deleted.')).toBeInTheDocument()
+      })
+
+      it('should keep its panel open once the row turns activating, and say it was executed', () => {
+        const { rerender } = render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], outcome: 'executed' })
+        rerender(<Policies policies={[mockActivatingPolicy()]} />)
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+      })
     })
 
     it('should, when a table row is clicked, report the policy it belongs to', () => {
