@@ -16,7 +16,7 @@ import {
   outcomeLine,
   signedAndWaitingLine,
   signAndExecuteLine,
-} from './copy'
+} from './messages'
 
 export type Viewer = {
   address?: string

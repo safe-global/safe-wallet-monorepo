@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
-import { EDIT_UNAVAILABLE_HELPER, TX_LOAD_FAILED_HELPER } from '../../copy'
+import { EDIT_UNAVAILABLE_HELPER, TX_LOAD_FAILED_HELPER } from '../../messages'
 import type { SpendingLimitDrawerState } from '../../resolveState'
 import { CopyTransactionLink } from '../CopyTransactionLink'
 
