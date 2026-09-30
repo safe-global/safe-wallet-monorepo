@@ -139,7 +139,7 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByTestId(ADD_ROW)).not.toHaveAttribute('title')
   })
 
-  it('navigates to /new-safe/create with the originating page as `next` when "Create new Safe" is clicked', () => {
+  it('navigates to /new-safe/create with the Workspace and the originating page as `next` when "Create new Safe" is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
@@ -147,7 +147,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
@@ -193,7 +193,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
@@ -206,7 +206,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 

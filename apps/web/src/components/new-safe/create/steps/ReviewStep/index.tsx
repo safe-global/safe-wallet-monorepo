@@ -69,9 +69,10 @@ import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
+import { isAuthenticated } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -189,13 +190,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
-  const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceId = useUrlSpaceId()
+  const isAdminOfActiveSpace = useIsAdmin(spaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
   const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
   const willStayOutsideSpace =
     isUserAuthenticated &&
-    normalizeSpaceId(spaceId) !== null &&
+    spaceId !== null &&
     isAdminOfActiveSpace &&
     isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
@@ -311,7 +312,10 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
         await router?.push({
           pathname: AppRoutes.home,
-          query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
+          query: {
+            safe: `${successfulChains[0].chain.shortName}:${safeAddress}`,
+            ...(spaceId && { spaceId }),
+          },
         })
 
         // Only counterfactual chains are awaiting activation.

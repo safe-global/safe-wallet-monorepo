@@ -4,8 +4,7 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
-import { plans, signInToSpaces, stubWorkspacePlan } from '../../support/spaces-login.js'
-import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
+import { LS_NAMESPACE } from '../../../src/config/constants'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
@@ -174,7 +173,11 @@ export function verifyDefaultTimeIsSet() {
 }
 
 export function visitSpendingLimitsPage(safe) {
-  cy.visit(constants.setupUrl + safe)
+  cy.visit(constants.setupUrl + safe, {
+    onBeforeLoad(win) {
+      Object.entries(safeProOffStorage).forEach(([key, value]) => win.localStorage.setItem(key, JSON.stringify(value)))
+    },
+  })
   cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
 }
 
@@ -247,11 +250,8 @@ export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }
 
-/** Appended to a Safe's settings URL so the Workspace the plan is stubbed for is the active one. */
-export const workspaceParam = '&spaceId=' + staticSpaces.dashboardWithSafes.uuid
-
-/** Signs the wallet in to Workspaces with the Workspace on `plan`. Business includes policies, Starter does not. */
-export function signInOnPlan(signer, plan) {
-  stubWorkspacePlan(plan, [{ feature: 'policies', type: 'binary', enabled: plan === plans.business }])
-  signInToSpaces(signer)
-}
+/**
+ * Local storage that turns SAFE_PRO off through the feature flag override (dev builds only), so
+ * the Safe Pro gate does not replace the spending limit actions with its upsell.
+ */
+export const safeProOffStorage = { [`${LS_NAMESPACE}featureFlagOverrides`]: { SAFE_PRO: false } }

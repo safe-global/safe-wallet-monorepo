@@ -166,6 +166,17 @@ describe('SafeAccountsTable', () => {
     expect(screen.queryByTestId('account-sort-workspaces')).not.toBeInTheDocument()
   })
 
+  it('only resolves Workspace membership when the Workspaces column is shown', () => {
+    const { rerender } = render(<SafeAccountsTable items={items} />)
+    expect(mockUseSafeAccountRows).toHaveBeenLastCalledWith(items, expect.any(Map), true)
+
+    rerender(<SafeAccountsTable items={items} columns={['name', 'networks', 'balance']} />)
+    expect(mockUseSafeAccountRows).toHaveBeenLastCalledWith(items, expect.any(Map), false)
+
+    rerender(<SafeAccountsTable items={items} columns={['name', 'workspaces']} />)
+    expect(mockUseSafeAccountRows).toHaveBeenLastCalledWith(items, expect.any(Map), true)
+  })
+
   it('does not render checkboxes without a selection prop', () => {
     render(<SafeAccountsTable items={items} />)
     expect(screen.queryByTestId('select-0xB')).not.toBeInTheDocument()

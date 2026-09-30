@@ -6,6 +6,7 @@ import { getPolicyIcon } from '../utils/policyIcon'
 import { getPolicyLabel } from '../utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { PendingBanner } from './components/PendingBanner'
 import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
@@ -46,6 +47,7 @@ const isPendingDrawer = (props: SpendingLimitDrawerProps): props is PendingSpend
 const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
   const chain = useChain(policy.safe.chainId)
+  const spaceId = useUrlSpaceId()
   // Derived here rather than asked of the caller: the policy already carries the module and the chain.
   const enforcedByHref =
     chain && policy.enforcement.via === 'module'
@@ -72,7 +74,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
             {...overview}
             appliesTo={{
               ...safe,
-              href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address),
+              href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             enforcedByHref={enforcedByHref}
           />

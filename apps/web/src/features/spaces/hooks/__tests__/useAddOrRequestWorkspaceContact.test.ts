@@ -75,7 +75,11 @@ describe('useAddOrRequestWorkspaceContact', () => {
 
     await expect(addOrRequest({ ...CONTACT, name: '  Nicole  ' })).resolves.toBe('added')
     expect(notifications()).toEqual([
-      expect.objectContaining({ variant: 'success', message: 'Contact added to Workspace address book' }),
+      expect.objectContaining({
+        variant: 'success',
+        message: 'Contact added to Workspace address book',
+        autoHideDuration: 7000,
+      }),
     ])
 
     expect(upsert).toHaveBeenCalledWith([CONTACT])
@@ -93,6 +97,7 @@ describe('useAddOrRequestWorkspaceContact', () => {
       expect.objectContaining({
         variant: 'info',
         message: 'This contact will be added to the Workspace address book on admin approval',
+        autoHideDuration: 7000,
       }),
     ])
 
@@ -156,6 +161,7 @@ describe('useAddOrRequestWorkspaceContact', () => {
       expect.objectContaining({
         variant: 'info',
         message: 'A request to add this contact to the Workspace address book is already pending admin approval',
+        autoHideDuration: 7000,
       }),
     ])
     expect(trackEvent).not.toHaveBeenCalled()

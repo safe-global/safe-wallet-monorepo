@@ -53,6 +53,11 @@ describe('DeleteSpaceDialog', () => {
     expect(screen.getByText(/My Workspace/)).toBeInTheDocument()
   })
 
+  it('should, when rendered, label the confirmation input with the prompt that contains the space name', () => {
+    renderDialog()
+    expect(screen.getByLabelText('Type My Workspace to confirm')).toBe(screen.getByTestId('space-confirm-name-input'))
+  })
+
   it('confirm button is disabled when the input is empty', () => {
     renderDialog()
     expect(screen.getByTestId('space-confirm-delete-button')).toBeDisabled()

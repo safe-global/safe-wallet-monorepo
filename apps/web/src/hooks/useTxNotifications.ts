@@ -29,6 +29,7 @@ import { getGs026Message } from '@safe-global/utils/services/exceptions/contract
 import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import { useIsTxFlowOpenRef } from '@/components/tx-flow/useIsTxFlowOpen'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const TxNotifications = {
   [TxEvent.SIGN_FAILED]: 'Failed to sign. Please try again.',
@@ -62,9 +63,10 @@ const getNotificationLink = (
   safeAddress: string,
   txId: string | undefined,
   txHash: string | undefined,
+  spaceId: string | null,
 ): ReturnType<typeof getTxLink> | ReturnType<typeof getExplorerLink> | undefined => {
   if (!chain) return undefined
-  if (txId) return getTxLink(txId, chain, safeAddress)
+  if (txId) return getTxLink(txId, chain, safeAddress, spaceId)
   if (txHash) return getExplorerLink(txHash, chain.blockExplorerUriTemplate)
   return undefined
 }
@@ -76,6 +78,7 @@ const useTxNotifications = (): void => {
   const safeAddress = useSafeAddress()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isTxFlowOpenRef = useIsTxFlowOpenRef()
+  const spaceId = useUrlSpaceId()
 
   /**
    * Show notifications of a transaction's lifecycle
@@ -174,7 +177,7 @@ const useTxNotifications = (): void => {
                   : undefined,
             groupKey,
             variant: isError ? Variant.ERROR : isSuccess ? Variant.SUCCESS : Variant.INFO,
-            link: getNotificationLink(txChain, txSafeAddress, txId, txHash),
+            link: getNotificationLink(txChain, txSafeAddress, txId, txHash, spaceId),
           }),
         )
       }),
@@ -183,7 +186,7 @@ const useTxNotifications = (): void => {
     return () => {
       unsubFns.forEach((unsub) => unsub())
     }
-  }, [dispatch, safeAddress, chain, configs, trigger, isTxFlowOpenRef])
+  }, [dispatch, safeAddress, chain, configs, trigger, isTxFlowOpenRef, spaceId])
 
   /**
    * If there's at least one transaction awaiting confirmations, show a notification for it
@@ -225,13 +228,13 @@ const useTxNotifications = (): void => {
       showNotification({
         variant: 'info',
         message: 'A transaction requires your confirmation.',
-        link: chain && getTxLink(txId, chain, safeAddress),
+        link: chain && getTxLink(txId, chain, safeAddress, spaceId),
         groupKey: txId,
       }),
     )
 
     notifiedAwaitingTxIds.current.push(txId)
-  }, [chain, dispatch, isOwner, notifications, safeAddress, txsAwaitingConfirmation])
+  }, [chain, dispatch, isOwner, notifications, safeAddress, txsAwaitingConfirmation, spaceId])
 }
 
 export default useTxNotifications

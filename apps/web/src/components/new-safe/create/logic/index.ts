@@ -191,6 +191,7 @@ export const getRedirect = (
 
   // Go to the dashboard if no specific redirect is provided
   if (!redirectUrl || !redirectUrl.startsWith(AppRoutes.apps.index)) {
+    // eslint-disable-next-line no-restricted-syntax -- Only Pay later adds a new Safe to the Workspace (persistCounterfactualSafe)
     return { pathname: AppRoutes.home, query: { safe: address } }
   }
 
