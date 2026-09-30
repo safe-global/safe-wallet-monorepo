@@ -1,28 +1,28 @@
 import { type Delay } from '@gnosis.pm/zodiac'
-import { type SafeTransactionData } from '@safe-global/types-kit'
+import { type MetaTransactionData, OperationType } from '@safe-global/types-kit'
 import { useCallback } from 'react'
 
-export const useGnosisPayActions = (delayModifier?: Delay, safeTxData?: SafeTransactionData) => {
+export const useGnosisPayActions = (delayModifier?: Delay, txData?: MetaTransactionData) => {
   const enqueueTx = useCallback(() => {
-    if (!delayModifier || !safeTxData) {
+    if (!delayModifier || !txData) {
       return undefined
     }
 
     return delayModifier.execTransactionFromModule(
-      safeTxData.to,
-      safeTxData.value,
-      safeTxData.data,
-      safeTxData.operation,
+      txData.to,
+      txData.value,
+      txData.data,
+      txData.operation ?? OperationType.Call,
     )
-  }, [delayModifier, safeTxData])
+  }, [delayModifier, txData])
 
   const executeTx = useCallback(() => {
-    if (!delayModifier || !safeTxData) {
+    if (!delayModifier || !txData) {
       return undefined
     }
 
-    return delayModifier.executeNextTx(safeTxData.to, safeTxData.value, safeTxData.data, safeTxData.operation)
-  }, [delayModifier, safeTxData])
+    return delayModifier.executeNextTx(txData.to, txData.value, txData.data, txData.operation ?? OperationType.Call)
+  }, [delayModifier, txData])
 
   return { enqueueTx, executeTx }
 }

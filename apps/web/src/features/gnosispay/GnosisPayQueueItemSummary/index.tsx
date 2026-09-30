@@ -5,7 +5,7 @@ import TxListAccordionItem from '@/components/transactions/TxListItem/TxListAcco
 import DateTime from '@/components/common/DateTime'
 import TxStatusChip from '@/components/transactions/TxStatusChip'
 import { Button } from '@/components/ui/button'
-import { type GnosisPayTxItem } from '@/store/gnosisPayTxsSlice'
+import { type GnosisPayTxItem } from '../types'
 import { TxModalContext } from '@/components/tx-flow'
 import ExecuteGnosisPayTx from '../ExecuteGnosisPayTx'
 import SkipExpiredGnosisPay from '../SkipExpiredGnosisPayTxs'
@@ -19,7 +19,7 @@ export function GnosisPayQueueItemSummary({ item }: { item: GnosisPayTxItem }): 
 
   const remainingSeconds = Math.ceil((item.executableAt - now) / 1_000)
   const isExecutable = remainingSeconds <= 0
-  const isExpired = now >= item.expiresAt
+  const isExpired = item.expiresAt !== null && now >= item.expiresAt
 
   const onExecute = (e: SyntheticEvent) => {
     e.stopPropagation()

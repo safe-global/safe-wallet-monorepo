@@ -1,7 +1,8 @@
 import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
+import { RiskConfirmation } from '@/components/tx-flow/features/RiskConfirmation'
 import GnosisPayExecutionForm from './GnosisPayExecutionForm'
-import { type GnosisPayTxItem } from '@/store/gnosisPayTxsSlice'
+import { type GnosisPayTxItem } from './types'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useContext, useEffect } from 'react'
 import SafeTxProvider, { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -12,7 +13,7 @@ const ExecuteGnosisPayModal = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }
   const { setSafeTx } = useContext(SafeTxContext)
 
   const [fakeSafeTx] = useAsync(() => {
-    return createTx(gnosisPayTx.safeTxData)
+    return createTx(gnosisPayTx.txData)
   }, [gnosisPayTx])
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const ExecuteGnosisPayModal = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }
 
   return (
     <TxCard>
+      <RiskConfirmation />
       <GnosisPayExecutionForm queuedGnosisPayTx={gnosisPayTx} />
     </TxCard>
   )

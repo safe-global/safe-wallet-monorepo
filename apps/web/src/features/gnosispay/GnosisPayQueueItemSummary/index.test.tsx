@@ -1,18 +1,17 @@
 import { act, render } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
-import { safeTxDataBuilder } from '@/tests/builders/safeTx'
-import { type GnosisPayTxItem } from '@/store/gnosisPayTxsSlice'
+import { type GnosisPayTxItem } from '../types'
 import { GnosisPayQueueItemSummary } from './index'
 
 const COOLDOWN_MS = 180_000
 const EXPIRATION_MS = 1_800_000
 
-const buildItem = (): GnosisPayTxItem => ({
-  safeAddress: faker.finance.ethereumAddress(),
+const buildItem = (overrides: Partial<GnosisPayTxItem> = {}): GnosisPayTxItem => ({
   queueNonce: faker.number.int({ max: 100 }),
+  txData: { to: faker.finance.ethereumAddress(), value: '0', data: '0x' },
   executableAt: Date.now() + COOLDOWN_MS,
-  expiresAt: Date.now() + EXPIRATION_MS,
-  safeTxData: safeTxDataBuilder().build(),
+  expiresAt: Date.now() + COOLDOWN_MS + EXPIRATION_MS,
+  ...overrides,
 })
 
 const advance = (ms: number) => act(() => jest.advanceTimersByTime(ms))
@@ -60,13 +59,30 @@ describe('GnosisPayQueueItemSummary', () => {
     expect(getByText('Ready')).toBeInTheDocument()
   })
 
+  it('keeps Execute available until the expiration window after the cooldown has passed', () => {
+    const { getByTestId } = render(<GnosisPayQueueItemSummary item={buildItem()} />)
+
+    advance(COOLDOWN_MS + EXPIRATION_MS - 1_000)
+
+    expect(getByTestId('execute-btn')).toBeEnabled()
+  })
+
   it('offers Skip instead of Execute once the transaction has expired', () => {
     const { getByRole, getByText, queryByTestId } = render(<GnosisPayQueueItemSummary item={buildItem()} />)
 
-    advance(EXPIRATION_MS)
+    advance(COOLDOWN_MS + EXPIRATION_MS)
 
     expect(getByText('Expired')).toBeInTheDocument()
     expect(getByRole('button', { name: 'Skip' })).toBeEnabled()
     expect(queryByTestId('execute-btn')).not.toBeInTheDocument()
+  })
+
+  it('never offers Skip when the Delay modifier has no expiration', () => {
+    const { getByTestId, queryByRole } = render(<GnosisPayQueueItemSummary item={buildItem({ expiresAt: null })} />)
+
+    advance(COOLDOWN_MS + EXPIRATION_MS * 10)
+
+    expect(getByTestId('execute-btn')).toBeEnabled()
+    expect(queryByRole('button', { name: 'Skip' })).not.toBeInTheDocument()
   })
 })

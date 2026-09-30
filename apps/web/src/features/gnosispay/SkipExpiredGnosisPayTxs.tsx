@@ -15,15 +15,12 @@ import { type SyntheticEvent, useCallback, useContext, useState } from 'react'
 import { didRevert } from '@/utils/ethers-utils'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
-import { useAppDispatch } from '@/store'
-import { skipExpired } from '@/store/gnosisPayTxsSlice'
-import useSafeAddress from '@/hooks/useSafeAddress'
 import { TxModalContext } from '@/components/tx-flow'
+import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
+import { refreshGnosisPayQueue } from './hooks/useGnosisPayQueue'
 
 const SkipExpiredGnosisPayTx = () => {
   const [delayModifier] = useGnosisPayDelayModifier()
-  const dispatch = useAppDispatch()
-  const safeAddress = useSafeAddress()
   const { setTxFlow } = useContext(TxModalContext)
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
@@ -59,7 +56,7 @@ const SkipExpiredGnosisPayTx = () => {
       if (didRevert(receipt)) {
         throw new Error('Transaction reverted by EVM')
       }
-      dispatch(skipExpired({ safeAddress }))
+      refreshGnosisPayQueue()
       setTxFlow(undefined)
     } catch (_err) {
       const err = asError(_err)
@@ -80,6 +77,8 @@ const SkipExpiredGnosisPayTx = () => {
             <Typography variant="paragraph-small-bold">{camelCaseToSpaces('skipExpired')}</Typography>
           </FieldsGrid>
 
+          <NetworkWarning />
+
           {submitError && <TxSubmitError error={submitError} />}
         </div>
 
@@ -87,7 +86,7 @@ const SkipExpiredGnosisPayTx = () => {
 
         <TxCardActions>
           {/* Anyone can skip expired txs */}
-          <CheckWallet allowNonOwner>
+          <CheckWallet allowNonOwner checkNetwork>
             {(isOk) => (
               <Button variant="default" size="submit" type="submit" disabled={!isOk || !isSubmittable}>
                 {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}

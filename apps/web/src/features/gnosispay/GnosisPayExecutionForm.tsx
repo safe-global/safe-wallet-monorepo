@@ -27,9 +27,9 @@ import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getGnosisPayTxWarnings } from './utils/getGnosisPayTxWarnings'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useAppDispatch } from '@/store'
-import { type GnosisPayTxItem, enqueueTransaction, removeFirst } from '@/store/gnosisPayTxsSlice'
+import { type GnosisPayTxItem } from './types'
 import { useGnosisPayActions } from './hooks/useGnosisPayActions'
+import { refreshGnosisPayQueue } from './hooks/useGnosisPayQueue'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
 type SubmitCallback = (txId: string, isExecuted?: boolean) => void
@@ -53,7 +53,6 @@ export const GnosisPayExecutionForm = ({
   disableSubmit?: boolean
   onSubmit?: SubmitCallback
 }): ReactElement => {
-  const dispatch = useAppDispatch()
   // Form state
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
@@ -66,16 +65,15 @@ export const GnosisPayExecutionForm = ({
 
   const { enqueueTx, executeTx } = useGnosisPayActions(
     delayModifier?.delayModifier,
-    safeTx?.data ?? queuedGnosisPayTx?.safeTxData,
+    safeTx?.data ?? queuedGnosisPayTx?.txData,
   )
 
   const [delayModifierNonces] = useAsync(async () => {
     if (!delayModifier?.delayModifier) {
       return
     }
-    const queueNonce = await delayModifier.delayModifier.queueNonce()
     const txNonce = await delayModifier.delayModifier.txNonce()
-    return { queueNonce, txNonce }
+    return { txNonce }
   }, [delayModifier])
 
   const txWarnings = useMemo(() => getGnosisPayTxWarnings(safeTx, safeInfo.safe), [safeInfo.safe, safeTx])
@@ -109,16 +107,7 @@ export const GnosisPayExecutionForm = ({
         if (didRevert(receipt)) {
           throw new Error('Transaction reverted by EVM')
         }
-        // Success, we update some data
-        dispatch(
-          enqueueTransaction({
-            executableAt: Date.now() + 1000 * 60 * 3,
-            expiresAt: Date.now() + 1000 * 60 * 30,
-            queueNonce: Number(delayModifierNonces.queueNonce),
-            safeAddress: safeInfo.safeAddress,
-            safeTxData: safeTx.data,
-          }),
-        )
+        refreshGnosisPayQueue()
         onSubmit?.(receipt.hash)
         // We close the modal
         setTxFlow(undefined)
@@ -131,8 +120,7 @@ export const GnosisPayExecutionForm = ({
         if (didRevert(receipt)) {
           throw new Error('Transaction reverted by EVM')
         }
-        // We remove it from the queue and close the modal
-        dispatch(removeFirst({ safeAddress: safeInfo.safeAddress }))
+        refreshGnosisPayQueue()
         onSubmit?.(receipt.hash, true)
         setTxFlow(undefined)
       }
