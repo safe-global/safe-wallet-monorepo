@@ -21,10 +21,12 @@ const PolicyOverview = ({
   enforcedBy,
   enforcedByHref,
 }: PolicyOverviewProps): ReactElement => {
-  const items: DrawerListItem[] = [{ label: 'Safe account', content: <AccountIdentity {...appliesTo} /> }]
+  const items: DrawerListItem[] = [
+    { label: 'Safe account', content: <AccountIdentity {...appliesTo} showCopyButton /> },
+  ]
 
   if (initiatedBy) {
-    items.push({ label: 'Initiated by', content: <AccountIdentity {...initiatedBy} /> })
+    items.push({ label: 'Initiated by', content: <AccountIdentity {...initiatedBy} showCopyButton /> })
   }
 
   if (lastUpdated) {

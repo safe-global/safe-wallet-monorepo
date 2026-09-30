@@ -176,6 +176,20 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
   })
 
+  it('offers to copy every spender and the Safe account', () => {
+    const policy = mockActiveSpendingLimit()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 1)
+  })
+
+  it('offers to copy the Safe account in the signatures section of a pending policy too', () => {
+    const policy = mockPendingPolicy()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 2)
+  })
+
   it("links the Safe account to that Safe's settings page", () => {
     jest.spyOn(useChains, 'useChain').mockReturnValue(chainBuilder().with({ chainId: '1', shortName: 'eth' }).build())
 
