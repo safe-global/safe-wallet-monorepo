@@ -1,10 +1,12 @@
 import {
   MOCK_SAFE_NAME,
   MOCK_VIEWERS,
+  asActivePolicy,
   mockActiveSpendingLimit,
   mockFullySignedPending,
   mockPendingPolicy,
   mockPendingRemoval,
+  mockUnenforcedPolicy,
 } from '../mocks/policies'
 import { resolveSpendingLimitDrawerState } from './resolveState'
 
@@ -38,6 +40,23 @@ describe('active states', () => {
       disabled: true,
       helper: 'Only signers of this Safe account can edit this spending limit.',
     })
+  })
+})
+
+describe('unenforced state', () => {
+  const UNENFORCED = {
+    kind: 'unenforced',
+    action: 'manage',
+    disabled: true,
+    helper: 'The allowance module is not enabled on this Safe account, so this limit is not enforced.',
+  }
+
+  it.each([
+    ['a signer', MOCK_VIEWERS.signer],
+    ['a non-signer', MOCK_VIEWERS.nonSigner],
+    ['no wallet', MOCK_VIEWERS.disconnected],
+  ])('offers %s nothing to manage while the module is disabled', (_case, viewer) => {
+    expect(resolve(asActivePolicy(mockUnenforcedPolicy()), viewer)).toEqual(UNENFORCED)
   })
 })
 
@@ -145,5 +164,12 @@ describe('operation', () => {
       bannerTitle: 'This spending limit is still active until the removal is executed.',
       bannerLine2: 'Sign and execute the transaction to remove it.',
     })
+  })
+})
+
+describe('activating rows', () => {
+  it('are not drawer policies, so they never resolve to the manage action', () => {
+    // @ts-expect-error an executed change waiting for the indexer has nothing to manage or sign
+    resolve({ ...mockPendingPolicy(), status: 'activating' }, MOCK_VIEWERS.signer)
   })
 })

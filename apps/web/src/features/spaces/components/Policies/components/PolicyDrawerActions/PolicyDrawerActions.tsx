@@ -6,7 +6,7 @@ import { Typography } from '@/components/ui/typography'
 
 export type PolicyDrawerActionsProps = {
   actionLabel: string
-  onClick: () => void
+  onClick?: () => void
   hint?: string
   variant?: 'default' | 'secondary'
   disabled?: boolean

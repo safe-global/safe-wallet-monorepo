@@ -82,6 +82,48 @@ describe('ProposerDrawer', () => {
     expect(screen.getByText('Only signers of this Treasury can delete or edit this Proposer role.')).toBeInTheDocument()
   })
 
+  it('tells the user to remove a parent Safe grant from the Safe settings', () => {
+    render(
+      <ProposerDrawer
+        open
+        onClose={jest.fn()}
+        status={ProposerStatus.ACTIVE}
+        overview={OVERVIEW}
+        nestedSafeGrant={{
+          safeName: 'Marketing',
+          parentSafeName: 'Ops',
+          settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${OVERVIEW.appliesTo.address}` } },
+        }}
+        actionLabel="Remove proposer"
+        actionDisabled
+        onAction={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Remove this proposer on the Safe account level')).toBeInTheDocument()
+    expect(screen.getByTestId('nested-safe-grant-notice')).toHaveTextContent('The parent Safe account, Ops')
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+      'href',
+      `/settings/setup?safe=eth%3A${OVERVIEW.appliesTo.address}`,
+    )
+    expect(screen.getByRole('button', { name: 'Remove proposer' })).toBeDisabled()
+  })
+
+  it('shows no nested Safe notice for a role granted by a signer', () => {
+    render(
+      <ProposerDrawer
+        open
+        onClose={jest.fn()}
+        status={ProposerStatus.ACTIVE}
+        overview={OVERVIEW}
+        actionLabel="Remove proposer"
+        onAction={jest.fn()}
+      />,
+    )
+
+    expect(screen.queryByTestId('nested-safe-grant-notice')).not.toBeInTheDocument()
+  })
+
   it('renders the pending variant with its alert, signature section and overview', () => {
     render(
       <ProposerDrawer
@@ -122,7 +164,7 @@ describe('ProposerDrawer', () => {
     render(<ProposerDrawer open onClose={jest.fn()} isLoading />)
 
     expect(screen.getByText('Proposer role')).toBeInTheDocument()
-    expect(screen.getByTestId('proposer-status-skeleton')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-skeleton')).toBeInTheDocument()
     expect(screen.getByText('Policy overview')).toBeInTheDocument()
     expect(screen.getAllByTestId('account-identity-skeleton')).toHaveLength(3)
     expect(screen.getByTestId('policy-drawer-actions-skeleton')).toBeInTheDocument()

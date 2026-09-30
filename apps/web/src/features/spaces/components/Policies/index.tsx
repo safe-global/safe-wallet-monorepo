@@ -1,7 +1,5 @@
 import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
-import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
@@ -15,11 +13,12 @@ import ProposerIntroDialog from './ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
+import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isProposerPolicy, type Policy, type Proposer, type ProposerPolicy } from './types'
+import { isActiveSpendingLimitPolicy, isProposerPolicy, type Policy } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -61,8 +60,6 @@ const Policies = ({
   onSelectPolicy,
   locked,
 }: PoliciesProps): ReactElement => {
-  const isSettled = !isLoading && !isError
-
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -71,14 +68,21 @@ const Policies = ({
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
-  const [openProposer, setOpenProposer] = useState<{ policy: ProposerPolicy; proposer: Proposer } | null>(null)
+  const [openPolicyId, setOpenPolicyId] = useState<string | null>(null)
 
   const openPolicy = useCallback((policy: Policy) => {
-    if (!isProposerPolicy(policy)) return
-
-    const [proposer] = policy.data.proposers
-    if (proposer) setOpenProposer({ policy, proposer })
+    // TODO(WA-3646): widen to isSpendingLimitPolicy once the panel can take a queued policy.
+    if (isProposerPolicy(policy) || isActiveSpendingLimitPolicy(policy)) setOpenPolicyId(policy.id)
   }, [])
+
+  const closeDetails = useCallback(() => setOpenPolicyId(null), [])
+
+  // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
+  // policy that leaves the response takes its panel with it.
+  const openedPolicy = useMemo(
+    () => policies.find((policy) => policy.id === openPolicyId) ?? null,
+    [policies, openPolicyId],
+  )
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -170,16 +174,6 @@ const Policies = ({
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Policies
         </Typography>
-
-        {isSettled && (
-          <Typography variant="paragraph-medium">
-            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-            automatically.{' '}
-            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-              Learn more
-            </ExternalLink>
-          </Typography>
-        )}
       </div>
 
       {isLoading ? (
@@ -229,7 +223,13 @@ const Policies = ({
         onProceed={proceedToProposerFlow}
       />
 
-      {openProposer && <ProposerDetails {...openProposer} onClose={() => setOpenProposer(null)} />}
+      {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
+        <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
+      )}
+
+      {openedPolicy && isActiveSpendingLimitPolicy(openedPolicy) && (
+        <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
+      )}
     </div>
   )
 }

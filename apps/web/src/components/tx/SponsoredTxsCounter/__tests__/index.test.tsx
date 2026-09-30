@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import SponsoredTxsCounter, { _formatResetsAt } from '../index'
 
 describe('SponsoredTxsCounter', () => {
@@ -19,11 +19,23 @@ describe('SponsoredTxsCounter', () => {
     expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
   })
 
-  it('shows the free allowance and points to Workspaces otherwise', () => {
+  it('shows the free daily allowance with its per-day limit in a tooltip otherwise', async () => {
+    const { user } = renderWithUserEvent(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isPro={false} />)
+
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('3 free transactions left today')
+    expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
+
+    await user.hover(screen.getByTestId('sponsored-txs-info'))
+    expect(
+      await screen.findByText('5 transactions per day for free', { selector: '[data-slot="tooltip-content"]' }),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the upgrade nudge and drops the tooltip when the free daily limit is unknown', () => {
     render(<SponsoredTxsCounter left={0} quota={null} resetsAt={null} isPro={false} />)
 
-    expect(screen.getByTestId('sponsored-txs-counter')).toHaveTextContent('0 sponsored transactions left')
-    expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('0 free transactions left today')
+    expect(screen.queryByTestId('sponsored-txs-info')).not.toBeInTheDocument()
     expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveAttribute('href', '/welcome/spaces')
     expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveTextContent('Upgrade to')
   })

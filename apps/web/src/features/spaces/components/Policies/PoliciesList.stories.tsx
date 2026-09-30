@@ -2,9 +2,12 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/preview'
 import {
   asActivePolicy,
+  mockActiveSpendingLimit,
   mockLongPolicyList,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
+  mockPendingRemoval,
+  mockPendingUpdate,
   mockPolicies,
   mockProposerPolicy,
   mockRecoveryPolicy,
@@ -42,6 +45,13 @@ export const PendingSpendingLimit: Story = {
   args: { policies: [mockPendingPolicy()] },
 }
 
+/** An active limit alongside a queued edit and removal of it, plus an unrelated queued creation. */
+export const WithQueuedChanges: Story = {
+  args: {
+    policies: [mockActiveSpendingLimit(), mockPendingUpdate(), mockPendingRemoval(), mockPendingPolicy()],
+  },
+}
+
 /** Off-chain access, not an on-chain policy — so no token icons and no module. */
 export const ProposerGrant: Story = {
   args: { policies: [asActivePolicy(mockProposerPolicy())] },
@@ -64,7 +74,7 @@ export const NoSearchResults: Story = {
   args: { policies: mockPolicies() },
   play: async ({ canvasElement }) => {
     const { userEvent, within } = await import('storybook/test')
-    const search = within(canvasElement).getByPlaceholderText('by name, address or network')
+    const search = within(canvasElement).getByPlaceholderText('Search')
     await userEvent.type(search, 'zzzz')
   },
 }

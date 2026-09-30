@@ -99,3 +99,35 @@
   background-position: bottom;
   background-size: 100% 1px;
 }
+
+/* A `data-sticky` column pins on mobile while the rest scrolls beneath it */
+@media (width < 768px) {
+  [data-slot='table-container']:has(> .table [data-sticky]) {
+    clip-path: inset(0 0 0 1px);
+  }
+
+  .table thead th[data-sticky],
+  .table tbody td[data-sticky] {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    border-left-color: var(--card);
+  }
+  .table tbody td[data-sticky] {
+    background-color: var(--card);
+  }
+  .table thead tr th[data-sticky] {
+    background-color: var(--card);
+    background-clip: border-box;
+    border-radius: 0;
+  }
+  .table thead tr th[data-sticky]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background-color: var(--muted);
+    border-start-start-radius: var(--radius-lg);
+    border-end-start-radius: var(--radius-lg);
+  }
+}

@@ -1,52 +1,53 @@
 import type { ReactElement } from 'react'
-import { DrawerFooter } from '@/components/common/Drawer'
-import CopyButton from '@/components/common/CopyButton'
-import { Button } from '@/components/ui/button'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
+import { EDIT_UNAVAILABLE_HELPER } from '../../copy'
 import type { SpendingLimitDrawerState } from '../../resolveState'
+import { CopyTransactionLink } from '../CopyTransactionLink'
+
+type PendingSpendingLimitActions = {
+  transactionLink: string
+  onReviewTransaction: () => void
+}
 
 export type SpendingLimitActionsProps = {
   state: SpendingLimitDrawerState
-  transactionLink: string
-  onEdit: () => void
-  onReviewTransaction: () => void
   onConnectWallet: () => void
+  onEdit?: () => void
+  pending?: PendingSpendingLimitActions
 }
 
 const SpendingLimitActions = ({
   state,
-  transactionLink,
-  onEdit,
-  onReviewTransaction,
   onConnectWallet,
-}: SpendingLimitActionsProps): ReactElement => {
-  if (state.action === 'connect') {
-    return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
-  }
-
-  // Editing covers removal too: the edit flow can drop individual limits or all of them.
-  if (state.kind === 'active') {
-    return <PolicyDrawerActions actionLabel="Edit" onClick={onEdit} hint={state.helper} disabled={state.disabled} />
-  }
-
+  onEdit,
+  pending,
+}: SpendingLimitActionsProps): ReactElement | null => {
   switch (state.action) {
-    case 'review':
-      return <PolicyDrawerActions actionLabel="Review transaction" onClick={onReviewTransaction} />
+    case 'connect':
+      return <PolicyDrawerActions actionLabel="Connect wallet" onClick={onConnectWallet} hint={state.helper} />
 
-    case 'copy-link':
+    // Editing covers removal too: the edit flow can drop individual limits or all of them.
+    case 'manage':
       return (
-        <DrawerFooter>
-          <div className="flex *:w-full">
-            <CopyButton text={transactionLink} initialToolTipText="Copy transaction link">
-              <Button className="w-full">Copy transaction link</Button>
-            </CopyButton>
-          </div>
-        </DrawerFooter>
+        <PolicyDrawerActions
+          actionLabel="Edit"
+          onClick={onEdit}
+          hint={state.helper ?? (onEdit ? undefined : EDIT_UNAVAILABLE_HELPER)}
+          disabled={state.disabled || !onEdit}
+        />
       )
 
-    // A new pending action must pick a branch above rather than silently rendering a copy button.
+    case 'review':
+      return pending ? (
+        <PolicyDrawerActions actionLabel="Review transaction" onClick={pending.onReviewTransaction} />
+      ) : null
+
+    case 'copy-link':
+      return pending ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
+
+    // A new action must pick a branch above rather than silently rendering nothing.
     default: {
-      const exhaustive: never = state.action
+      const exhaustive: never = state
       return exhaustive
     }
   }

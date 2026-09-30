@@ -21,6 +21,7 @@ import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
+import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -96,6 +97,7 @@ export const SafeShieldDisplay = ({
         hasProFeatures,
         hasSimulation,
         isSimulationSuccess,
+        isContractCall: isContractCall(safeTx),
       }),
     [
       threatResults,
@@ -105,6 +107,7 @@ export const SafeShieldDisplay = ({
       hasProFeatures,
       hasSimulation,
       isSimulationSuccess,
+      safeTx,
     ],
   )
 

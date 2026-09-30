@@ -1,16 +1,17 @@
 import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
-import { getPolicyLabel, getPolicySummary } from '../utils/policyLabel'
+import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { getPolicyTokens } from '../utils/policyTokens'
-import { hasSpendingLimitData, type Policy } from '../types'
+import { isSpendingLimitPolicy, type Policy } from '../types'
 
-/** Searches the policies held in the browser. The space address book is not searched: a policy carries no names. */
+type SafeNameResolver = ReturnType<typeof useSafeNameResolver>
 
 type SearchablePolicy = {
   policy: Policy
-  rule: string
-  summary: string
+  names: string
+  /** Kept apart from `names` so a hit can be traced back to the spender. */
+  spenderNames: string[]
   safeAddress: string
   /** The spenders or proposers a policy grants something to. */
   parties: string
@@ -18,36 +19,66 @@ type SearchablePolicy = {
   tokens: string
 }
 
-const getParties = (policy: Policy): string[] => {
-  if (hasSpendingLimitData(policy)) return policy.data.spenders.map((spender) => spender.spender)
-  if (policy.type === 'proposer') return policy.data.proposers.map((proposer) => proposer.proposer)
-  return []
+export type PolicySearchResult = {
+  policies: Policy[]
+  matchedSpenderNames: Map<string, string>
 }
 
-const toSearchable = (policy: Policy, chainNames: Map<string, string>): SearchablePolicy => ({
+const getSpenders = (policy: Policy): string[] =>
+  isSpendingLimitPolicy(policy) ? policy.data.spenders.map((spender) => spender.spender) : []
+
+const getProposers = (policy: Policy): string[] =>
+  policy.type === 'proposer' ? policy.data.proposers.map((proposer) => proposer.proposer) : []
+
+const getProposerLabels = (policy: Policy): string[] => {
+  if (policy.type !== 'proposer') return []
+  return policy.data.proposers.flatMap((proposer) => proposer.delegatedBy.map((grant) => grant.label))
+}
+
+const getSearchableNames = (policy: Policy, resolveName: SafeNameResolver): string[] => {
+  const { chainId } = policy.safe
+
+  return [
+    resolveName(policy.safe.address, chainId),
+    ...getProposers(policy).map((proposer) => resolveName(proposer, chainId)),
+    ...getProposerLabels(policy),
+  ]
+}
+
+const toSearchable = (
+  policy: Policy,
+  chainNames: Map<string, string>,
+  resolveName: SafeNameResolver,
+): SearchablePolicy => ({
   policy,
-  rule: getPolicyLabel(policy),
-  summary: getPolicySummary(policy),
+  names: getSearchableNames(policy, resolveName).filter(Boolean).join(' '),
+  spenderNames: getSpenders(policy)
+    .map((spender) => resolveName(spender, policy.safe.chainId))
+    .filter(Boolean),
   safeAddress: policy.safe.address,
-  parties: getParties(policy).join(' '),
+  parties: [...getSpenders(policy), ...getProposers(policy)].join(' '),
   network: [chainNames.get(policy.safe.chainId), policy.safe.chainId].filter(Boolean).join(' '),
   tokens: getPolicyTokens(policy)
     .map((token) => token.symbol)
     .join(' '),
 })
 
-const usePolicySearch = (policies: Policy[], query: string): Policy[] => {
+const usePolicySearch = (policies: Policy[], query: string): PolicySearchResult => {
   const { configs } = useChains()
+  const resolveName = useSafeNameResolver()
 
   const chainNames = useMemo(() => new Map(configs.map((chain) => [chain.chainId, chain.chainName])), [configs])
-  const searchable = useMemo(() => policies.map((policy) => toSearchable(policy, chainNames)), [policies, chainNames])
+  const searchable = useMemo(
+    () => policies.map((policy) => toSearchable(policy, chainNames, resolveName)),
+    [policies, chainNames, resolveName],
+  )
 
   const fuse = useMemo(
     () =>
       new Fuse(searchable, {
         keys: [
-          { name: 'rule' },
-          { name: 'summary' },
+          { name: 'names' },
+          { name: 'spenderNames' },
           { name: 'safeAddress' },
           { name: 'parties' },
           { name: 'network' },
@@ -56,14 +87,24 @@ const usePolicySearch = (policies: Policy[], query: string): Policy[] => {
         threshold: 0.2,
         findAllMatches: true,
         ignoreLocation: true,
+        includeMatches: true,
       }),
     [searchable],
   )
 
-  return useMemo(
-    () => (query ? fuse.search(query).map((result) => result.item.policy) : policies),
-    [fuse, query, policies],
-  )
+  return useMemo(() => {
+    if (!query) return { policies, matchedSpenderNames: new Map() }
+
+    const results = fuse.search(query)
+    const matchedSpenderNames = new Map<string, string>()
+
+    for (const { item, matches } of results) {
+      const spenderName = matches?.find((match) => match.key === 'spenderNames')?.value
+      if (spenderName) matchedSpenderNames.set(item.policy.id, spenderName)
+    }
+
+    return { policies: results.map((result) => result.item.policy), matchedSpenderNames }
+  }, [fuse, query, policies])
 }
 
 export default usePolicySearch

@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
-import { Drawer, DrawerBody, DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
-import { Badge, BadgeDot } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { PolicyDrawerActions, PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions'
+import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
+import { NestedSafeGrantNotice, type NestedSafeGrantNoticeProps } from './components/NestedSafeGrantNotice'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
-import { getProposerStatusColor, getProposerStatusLabel } from './utils'
+import { toPolicyStatus } from './utils'
 import { ProposerVariantContent } from './variants'
 import type { ProposerVariantContentProps } from './variants/types'
 
@@ -15,6 +15,8 @@ type ProposerDrawerActionProps = {
   actionHint?: string
   actionVariant?: 'default' | 'secondary'
   actionDisabled?: boolean
+  /** Set when a parent Safe granted the role: removing it needs that Safe, which the drawer cannot connect. */
+  nestedSafeGrant?: NestedSafeGrantNoticeProps
 }
 
 /** Everything the drawer shows once loaded: the status variant and its action. */
@@ -36,21 +38,21 @@ const ProposerDrawer = (props: ProposerDrawerProps): ReactElement => {
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel="Proposer role">
-      <DrawerHeader>
-        <div className="flex size-10 items-center justify-center rounded-lg bg-success-subtle">
-          <UserRoundPen className="size-4 text-success-strong" />
-        </div>
-        <DrawerTitle size="lg">Proposer role</DrawerTitle>
+      <PolicyDrawerHeader
+        icon={UserRoundPen}
+        title="Proposer role"
+        status={props.isLoading ? undefined : toPolicyStatus(props.status)}
+      />
+      <DrawerBody>
         {props.isLoading ? (
-          <Skeleton className="ml-auto h-6 w-24 rounded-lg" data-testid="proposer-status-skeleton" />
+          <ProposerOverviewSkeleton />
         ) : (
-          <Badge variant={getProposerStatusColor(props.status)} size="status" shape="status" className="ml-auto">
-            <BadgeDot />
-            {getProposerStatusLabel(props.status)}
-          </Badge>
+          <div className="flex flex-col gap-4">
+            {props.nestedSafeGrant && <NestedSafeGrantNotice {...props.nestedSafeGrant} />}
+            <ProposerVariantContent {...props} />
+          </div>
         )}
-      </DrawerHeader>
-      <DrawerBody>{props.isLoading ? <ProposerOverviewSkeleton /> : <ProposerVariantContent {...props} />}</DrawerBody>
+      </DrawerBody>
       {props.isLoading ? (
         <PolicyDrawerActionsSkeleton />
       ) : (

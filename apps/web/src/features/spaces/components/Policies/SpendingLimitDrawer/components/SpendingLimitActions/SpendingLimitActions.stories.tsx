@@ -8,9 +8,8 @@ const meta = {
   component: SpendingLimitActions,
   parameters: { layout: 'centered' },
   args: {
-    transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c',
+    pending: { transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c', onReviewTransaction: fn() },
     onEdit: fn(),
-    onReviewTransaction: fn(),
     onConnectWallet: fn(),
   },
   decorators: [(Story) => <div className="w-[400px]">{Story()}</div>],

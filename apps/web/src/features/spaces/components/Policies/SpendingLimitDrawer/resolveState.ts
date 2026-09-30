@@ -4,6 +4,7 @@ import {
   CONNECT_TO_SIGN_LINE,
   NOT_A_SIGNER_HELPER,
   PENDING_BANNER_TITLE,
+  UNENFORCED_HELPER,
   connectHelper,
   executeLine,
   signedAndWaitingLine,
@@ -13,7 +14,7 @@ import {
 export type Viewer = {
   address?: string
   isSigner: boolean
-  hasSigned: boolean
+  hasSigned?: boolean
 }
 
 export type ActiveDrawerState = {
@@ -21,6 +22,13 @@ export type ActiveDrawerState = {
   action: 'manage' | 'connect'
   disabled: boolean
   helper?: string
+}
+
+export type UnenforcedDrawerState = {
+  kind: 'unenforced'
+  action: 'manage'
+  disabled: true
+  helper: string
 }
 
 export type PendingDrawerState = {
@@ -34,9 +42,19 @@ export type PendingDrawerState = {
   required: number
 }
 
-export type SpendingLimitDrawerState = ActiveDrawerState | PendingDrawerState
+export type SpendingLimitDrawerState = ActiveDrawerState | UnenforcedDrawerState | PendingDrawerState
 
-export type DrawerPolicy = (SpendingLimitPolicy & { status: 'active' }) | PendingSpendingLimitPolicy
+export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
+
+export type DrawerPolicy = ActiveDrawerPolicy | (PendingSpendingLimitPolicy & { status: 'pending' })
+
+/** A module that is present but not enabled enforces nothing, so no wallet makes this limit manageable. */
+const resolveUnenforced = (): UnenforcedDrawerState => ({
+  kind: 'unenforced',
+  action: 'manage',
+  disabled: true,
+  helper: UNENFORCED_HELPER,
+})
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
@@ -78,5 +96,8 @@ export const resolveSpendingLimitDrawerState = (
   policy: DrawerPolicy,
   viewer: Viewer,
   safeName: string,
-): SpendingLimitDrawerState =>
-  policy.status === 'pending' ? resolvePending(policy, viewer, safeName) : resolveActive(viewer)
+): SpendingLimitDrawerState => {
+  if (policy.status === 'pending') return resolvePending(policy, viewer, safeName)
+
+  return policy.enabled ? resolveActive(viewer) : resolveUnenforced()
+}

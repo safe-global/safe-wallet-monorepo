@@ -1,5 +1,7 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import {
+  MOCK_ADDRESSES,
+  MOCK_SAFES,
   asActivePolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
@@ -9,28 +11,69 @@ import {
 } from '../mocks/policies'
 import PoliciesList from '../PoliciesList'
 
+const mockResolveName = jest.fn()
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: () => undefined,
+  useSafeNameResolver: () => mockResolveName,
+}))
+
 describe('PoliciesList', () => {
+  beforeEach(() => {
+    mockResolveName.mockReturnValue('')
+  })
+
   it('should, when given policies, render the Add policy button, the search field and the sort control', () => {
     render(<PoliciesList policies={mockPolicies()} />)
 
     expect(screen.getByTestId('add-policy-button')).toHaveTextContent('Add policy')
-    expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
     expect(screen.getByTestId('policies-sort')).toBeInTheDocument()
+  })
+
+  it('should show the limited actions hint by default', () => {
+    render(<PoliciesList policies={mockPolicies()} />)
+
+    expect(screen.getByTestId('policies-limited-actions-hint')).toBeInTheDocument()
+  })
+
+  it('should hide the limited actions hint when hasLimitedActions is false', () => {
+    render(<PoliciesList policies={mockPolicies()} hasLimitedActions={false} />)
+
+    expect(screen.queryByTestId('policies-limited-actions-hint')).not.toBeInTheDocument()
   })
 
   it('should, when a search matches one policy, render only that policy', () => {
     render(<PoliciesList policies={mockPolicies()} />)
-    fireEvent.change(screen.getByPlaceholderText('by name, address or network'), { target: { value: 'Proposer' } })
+    fireEvent.change(screen.getByPlaceholderText('Search'), {
+      target: { value: MOCK_SAFES.grants.address },
+    })
 
-    const rules = screen.getAllByTestId('policy-cell-rule')
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+  })
 
-    expect(rules).toHaveLength(1)
-    expect(rules[0]).toHaveTextContent('Proposer')
+  it('should, when the search is a spender name, show the policy with the spender it matched', () => {
+    mockResolveName.mockImplementation((address: string) => (address === MOCK_ADDRESSES.alice ? 'Act1' : ''))
+
+    render(<PoliciesList policies={mockPolicies()} />)
+    fireEvent.change(screen.getByPlaceholderText('Search'), {
+      target: { value: 'Act1' },
+    })
+
+    expect(screen.getAllByTestId('policy-matched-spender').length).toBeGreaterThan(0)
+    expect(screen.getAllByTestId('policy-matched-spender')[0]).toHaveTextContent('Spender: Act1')
+  })
+
+  it('should, when the search is a rule name, not match: the type filter selects on the rule', () => {
+    render(<PoliciesList policies={mockPolicies()} />)
+    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'Proposer' } })
+
+    expect(screen.getByTestId('policies-no-results')).toBeInTheDocument()
   })
 
   it('should, when a search matches nothing, say so instead of rendering an empty table', () => {
     render(<PoliciesList policies={mockPolicies()} />)
-    fireEvent.change(screen.getByPlaceholderText('by name, address or network'), { target: { value: 'zzzznothing' } })
+    fireEvent.change(screen.getByPlaceholderText('Search'), { target: { value: 'zzzznothing' } })
 
     expect(screen.getByTestId('policies-no-results')).toHaveTextContent('No policies found')
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
@@ -39,10 +82,10 @@ describe('PoliciesList', () => {
   it('should, when the search is cleared, show every policy again', async () => {
     const { user } = renderWithUserEvent(<PoliciesList policies={mockPolicies()} />)
 
-    await user.type(screen.getByPlaceholderText('by name, address or network'), 'zzzznothing')
+    await user.type(screen.getByPlaceholderText('Search'), 'zzzznothing')
     await user.click(screen.getByTestId('search-clear'))
 
-    expect(screen.getByPlaceholderText('by name, address or network')).toHaveValue('')
+    expect(screen.getByPlaceholderText('Search')).toHaveValue('')
     expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
   })
 

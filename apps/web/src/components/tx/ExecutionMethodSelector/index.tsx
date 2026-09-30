@@ -228,7 +228,7 @@ const _ExecutionMethodSelector = ({
       ) : showsSponsoredTxs && relays && sponsoredTxs ? (
         <SponsoredTxsCounter
           left={sponsoredTxs.isPro ? sponsoredTxs.left : relays.remaining}
-          quota={sponsoredTxs.meter?.quota ?? null}
+          quota={sponsoredTxs.isPro ? (sponsoredTxs.meter?.quota ?? null) : relays.limit}
           resetsAt={sponsoredTxs.meter?.resetsAt ?? null}
           isPro={sponsoredTxs.isPro}
         />

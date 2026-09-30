@@ -1,6 +1,9 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
+import NextLink, { type LinkProps } from 'next/link'
 import { blo } from 'blo'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
+import CopyAddressButton from '@/components/common/CopyAddressButton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -9,10 +12,31 @@ import { Typography } from '@/components/ui/typography'
 export type AccountIdentityProps = {
   address: string
   name?: string
+  showCopyButton?: boolean
+  href?: LinkProps['href']
 }
 
-const AccountIdentity = ({ address, name }: AccountIdentityProps): ReactElement => {
+const AccountIdentity = ({ address, name, showCopyButton, href }: AccountIdentityProps): ReactElement => {
   const { displayName, shortAddress } = getSafeDisplayInfo(name ?? '', address)
+
+  const withLink = (label: ReactNode): ReactNode =>
+    href ? (
+      <NextLink href={href} className="flex min-w-0 text-inherit hover:underline">
+        {label}
+      </NextLink>
+    ) : (
+      label
+    )
+
+  const addressLabel = (
+    <Typography
+      variant={name ? 'paragraph-mini' : 'paragraph-mini-medium'}
+      color={name ? 'muted' : undefined}
+      className="truncate font-mono"
+    >
+      {shortAddress}
+    </Typography>
+  )
 
   return (
     <div className="flex min-w-0 items-center gap-2">
@@ -23,24 +47,23 @@ const AccountIdentity = ({ address, name }: AccountIdentityProps): ReactElement 
 
       {/* `text-left` because the drawer list right-aligns its content column */}
       <span className="flex min-w-0 flex-col text-left">
-        {name && (
-          <Typography variant="paragraph-mini-medium" className="truncate">
-            {name}
-          </Typography>
-        )}
-        <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
-          <TooltipTrigger render={<span />} className="flex min-w-0">
-            {/* Without a name the address is the account's only label, so it stops reading as muted metadata */}
-            <Typography
-              variant={name ? 'paragraph-mini' : 'paragraph-mini-medium'}
-              color={name ? 'muted' : undefined}
-              className="truncate font-mono"
-            >
-              {shortAddress}
-            </Typography>
-          </TooltipTrigger>
-          <TooltipContent className="pointer-events-none select-none font-mono">{address}</TooltipContent>
-        </Tooltip>
+        {name &&
+          withLink(
+            <Typography variant="paragraph-mini-medium" className="truncate">
+              {name}
+            </Typography>,
+          )}
+        <span className="flex min-w-0 items-center gap-1">
+          <Tooltip delay={TOOLTIP_DELAY_MS} disableHoverablePopup>
+            <TooltipTrigger render={<span />} className="flex min-w-0">
+              {/* Without a name the address is the account's only label, so it stops reading as muted metadata */}
+              {name ? addressLabel : withLink(addressLabel)}
+            </TooltipTrigger>
+            <TooltipContent className="pointer-events-none select-none font-mono">{address}</TooltipContent>
+          </Tooltip>
+
+          {showCopyButton && <CopyAddressButton address={checksumAddress(address)} />}
+        </span>
       </span>
     </div>
   )

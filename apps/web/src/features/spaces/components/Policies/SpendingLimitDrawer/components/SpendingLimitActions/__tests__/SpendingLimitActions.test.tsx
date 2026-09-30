@@ -8,9 +8,8 @@ const setup = (state: SpendingLimitDrawerState) =>
   render(
     <SpendingLimitActions
       state={state}
-      transactionLink={TRANSACTION_LINK}
+      pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
       onEdit={jest.fn()}
-      onReviewTransaction={jest.fn()}
       onConnectWallet={jest.fn()}
     />,
   )
@@ -21,9 +20,8 @@ describe('SpendingLimitActions', () => {
     const { user } = renderWithUserEvent(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'connect', disabled: false, helper: 'Connect a signer wallet to edit.' }}
-        transactionLink={TRANSACTION_LINK}
+        pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
         onEdit={jest.fn()}
-        onReviewTransaction={jest.fn()}
         onConnectWallet={onConnectWallet}
       />,
     )
@@ -58,9 +56,7 @@ describe('SpendingLimitActions', () => {
     const { user } = renderWithUserEvent(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'manage', disabled: false }}
-        transactionLink={TRANSACTION_LINK}
         onEdit={onEdit}
-        onReviewTransaction={jest.fn()}
         onConnectWallet={jest.fn()}
       />,
     )
@@ -82,6 +78,49 @@ describe('SpendingLimitActions', () => {
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
     expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
+  })
+
+  it('manage: keeps the non-signer reason ahead of the coming-soon line', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'active',
+          action: 'manage',
+          disabled: true,
+          helper: 'Only signers of this Safe account can edit this spending limit.',
+        }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
+    expect(screen.queryByText('Editing a spending limit is coming soon.')).not.toBeInTheDocument()
+  })
+
+  it('manage: keeps an unenforced policy out of the edit flow', () => {
+    setup({
+      kind: 'unenforced',
+      action: 'manage',
+      disabled: true,
+      helper: 'The allowance module is not enabled on this Safe account, so this limit is not enforced.',
+    })
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(
+      screen.getByText('The allowance module is not enabled on this Safe account, so this limit is not enforced.'),
+    ).toBeInTheDocument()
+  })
+
+  it('manage: disables editing while no edit flow is supplied', () => {
+    render(
+      <SpendingLimitActions
+        state={{ kind: 'active', action: 'manage', disabled: false }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
   })
 
   describe('copy-link', () => {

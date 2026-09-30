@@ -1,13 +1,20 @@
 import type { ReactElement } from 'react'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Typography } from '@/components/ui/typography'
-import { useHypernativeOAuth } from '@/features/hypernative'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
-export const HypernativeLoginLine = (): ReactElement | null => {
-  const { isAuthenticated, isTokenExpired, initiateLogin } = useHypernativeOAuth()
+// Passed only for Safes eligible for Hypernative (guard or allowlist)
+export const HypernativeLoginLine = ({
+  hypernativeAuth,
+}: {
+  hypernativeAuth?: HypernativeAuthStatus
+}): ReactElement | null => {
+  if (!hypernativeAuth) return null
+
+  const { isAuthenticated, isTokenExpired, initiateLogin } = hypernativeAuth
   if (isAuthenticated && !isTokenExpired) return null
 
   const login = () => {

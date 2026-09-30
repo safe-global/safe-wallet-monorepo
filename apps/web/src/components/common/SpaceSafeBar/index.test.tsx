@@ -527,16 +527,13 @@ describe('SpaceSafeBar', () => {
     },
   )
 
-  it.each([['/terms'], ['/privacy'], ['/licenses'], ['/imprint'], ['/cookie']])(
-    'renders nothing on static page %s',
-    (pathname) => {
-      mockUsePathname.mockReturnValue(pathname)
-      mockUseRouter.mockReturnValue({ pathname })
+  it.each([['/licenses'], ['/imprint'], ['/cookie']])('renders nothing on static page %s', (pathname) => {
+    mockUsePathname.mockReturnValue(pathname)
+    mockUseRouter.mockReturnValue({ pathname })
 
-      const { queryByTestId } = render(<SpaceSafeBar />)
-      expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
-      expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
-      expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
-    },
-  )
+    const { queryByTestId } = render(<SpaceSafeBar />)
+    expect(queryByTestId('safe-selector-dropdown')).not.toBeInTheDocument()
+    expect(queryByTestId('nested-safes-button')).not.toBeInTheDocument()
+    expect(queryByTestId('space-chain-selector')).not.toBeInTheDocument()
+  })
 })
