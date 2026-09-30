@@ -32,7 +32,7 @@ export type PolicyTokenInfo = {
 export type PendingAllowanceChange = 'added' | 'changed' | 'removed'
 
 export type PolicyAllowance = {
-  /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
+  /** Active allowances carry it in `tokenMetadata`; queued changes are looked up via the CGW tokens endpoint. */
   token: PolicyTokenInfo
   /** Base units. */
   amount: string
