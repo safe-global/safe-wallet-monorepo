@@ -127,13 +127,25 @@ const createSetAllowanceMetaTx = (allowance: DesiredAllowance, moduleAddress: st
 }
 
 /**
- * One multiSend for a whole policy: enable the AllowanceModule if needed, register every new
- * spender, then one `setAllowance` per (spender, token) with that row's own reset period. This
- * order is the contract CGW relies on when decoding a queued policy (WA-3154).
+ * Builds one multiSend for a whole new policy.
+ *
+ * @param desired - Every row of the form, one entry per spender and token.
+ * @param existingSpendingLimits - What the Safe already holds, to tell a new spender from a known one.
+ * @param chainId - The Safe's chain, which decides the module deployment.
+ * @param chain - That chain's config, needed to build `enableModule`.
+ * @param safeModules - The Safe's enabled modules, to tell whether the AllowanceModule is on.
+ * @param deployed - Whether the Safe exists on chain; a counterfactual one enables the module too.
+ * @param scope - Which Safe to send as, when it is not the one in context.
+ * @returns A multiSend: `enableModule` if needed, `addDelegate` per new spender, then one
+ *   `setAllowance` per row with that row's own reset period.
+ * @throws On every unmet precondition — see the remark.
+ *
+ * @remarks
+ * The call order is the contract CGW relies on when decoding a queued policy (WA-3154).
  *
  * Never resolves `undefined`: the review step feeds the result straight into `setSafeTx`, so a
- * silent `undefined` leaves `ReviewTransaction` on its skeleton forever with no error and no chain
- * interaction (WA-2305 / CUS-132). Every unmet precondition therefore throws.
+ * silent `undefined` would leave `ReviewTransaction` on its skeleton forever, with no error and no
+ * chain interaction (WA-2305 / CUS-132).
  */
 export const createSpendingLimitsTx = async (
   desired: readonly DesiredAllowance[],
@@ -179,8 +191,24 @@ const hasChanges = (edit: SpendingLimitEdit): boolean =>
   edit.removedDelegates.length > 0
 
 /**
- * One multiSend for an edit. Clearing precedes unregistering because `removeDelegate` leaves the stored
- * allowance behind, which re-adding the spender later would resurrect.
+ * Builds one multiSend for an edit — the difference only, not the whole policy.
+ *
+ * @param edit - The difference from {@link buildSpendingLimitEdit}.
+ * @param existingSpendingLimits - What the Safe holds, to spot a limit already spent from.
+ * @param chainId - The Safe's chain, which decides the module deployment.
+ * @param safeModules - The Safe's enabled modules; an edit needs the module already on.
+ * @param deployed - Whether the Safe exists on chain.
+ * @param scope - Which Safe to send as, when it is not the one in context.
+ * @returns A multiSend in this order: `addDelegate` for every spender written to, `resetAllowance`
+ *   where the old limit had been spent from, `setAllowance`, `deleteAllowance`, `removeDelegate`.
+ * @throws If the edit changes nothing, if the module is not enabled, or if a write names unknown
+ *   decimals or the same (spender, token) twice.
+ *
+ * @remarks
+ * `addDelegate` goes to every spender written to, not only new ones: it returns silently for a known
+ * delegate, while `setAllowance` reverts for an unknown one, so one redundant call buys immunity to
+ * a baseline a queued transaction has already made stale. Clearing precedes unregistering because
+ * `removeDelegate` leaves the stored allowance behind, which re-adding the spender would resurrect.
  */
 export const createSpendingLimitEditTx = async (
   edit: SpendingLimitEdit,

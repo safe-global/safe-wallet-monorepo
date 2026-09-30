@@ -11,8 +11,11 @@ export const BASELINE_LOAD_ERROR =
   "The Safe account's current spending limits could not be read, so this policy cannot be edited right now."
 
 export type BaselineGateProps = {
+  /** The limits once read; `undefined` while the read is still out. */
   limits?: SpendingLimitState[]
+  /** Set if the read failed, in which case the form never opens. */
   error?: Error
+  /** Rendered only once the baseline is in hand, which is what the form is seeded from. */
   children: (limits: SpendingLimitState[]) => ReactElement
 }
 

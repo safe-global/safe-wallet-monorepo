@@ -5,11 +5,19 @@ import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 
 export const UNKNOWN_TOKEN_IN_POLICY_ERROR = 'A token in this policy could not be resolved. Go back and pick it again.'
 
+/** Either every row resolved, or the first reason none of them can be. */
 export type DesiredAllowancesResult =
   | { desired: DesiredAllowance[]; error?: undefined }
   | { desired?: undefined; error: Error }
 
-/** Every row of the form as the builder wants it; decimals come from the option the selector offered. */
+/**
+ * Turns the form into the flat list the transaction builders take.
+ *
+ * @param values - The form as it stands.
+ * @param tokens - The options the token selector offered, which carry the decimals.
+ * @returns `{ desired }` with one entry per spender and token, or `{ error }` if a row names a token
+ *   no longer among the options — its decimals are then unknown and no amount can be converted.
+ */
 export const buildDesiredAllowances = (
   values: SpendingLimitPolicyFormValues,
   tokens: readonly TokenOption[],
@@ -34,7 +42,10 @@ export const buildDesiredAllowances = (
   return { desired }
 }
 
-/** The first of them the Safe already holds, if any — changing that one is the edit flow's job. */
+/**
+ * @returns The first desired allowance the Safe already holds, if any — changing that one is the
+ *   edit flow's job, so the create flow refuses it.
+ */
 export const findExistingAllowance = (
   desired: readonly DesiredAllowance[],
   existing: readonly SpendingLimitState[],

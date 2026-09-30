@@ -9,6 +9,18 @@ const toLimit = (limit: SpendingLimitState): LimitFormValues => ({
   resetTime: limit.resetTimeMin,
 })
 
+/**
+ * Turns the limits the chain holds into the values the edit form opens with.
+ *
+ * @param safe - The form's Safe field: a `"<chainId>:<address>"` key, not a bare address.
+ * @param limits - The limits the Safe holds, flat — one entry per spender and token.
+ * @returns Form values with one spender card per distinct spender, each carrying that spender's
+ *   token rows, amounts formatted for a person to read and periods in minutes.
+ *
+ * @remarks
+ * `safeFormatUnits`, not `formatVisualAmount`: the latter adds thousands separators, which the form
+ * would later hand to `parseUnits`.
+ */
 export const toSpendingLimitFormValues = (
   safe: string,
   limits: readonly SpendingLimitState[],

@@ -34,7 +34,19 @@ const toRemovedRow = (limit: SpendingLimitState): LimitSummary => {
 const withSpend = (row: LimitSummary, onChain: SpendingLimitState): LimitSummary =>
   onChain.spent === '0' ? row : { ...row, spent: onChain.spent }
 
-/** An edit describes a change, so dropped rows are added back rather than silently disappearing. */
+/**
+ * Builds the confirm step's model for an edit: every row marked against what the chain holds.
+ *
+ * @param values - The edited form.
+ * @param baseline - The limits the Safe holds, read over RPC.
+ * @param sources - Chain and address-book lookups the shared summary model needs.
+ * @returns The summary model with each row marked `added` / `changed` / `unchanged` / `removed`,
+ *   `previous` set on the two that moved, and `spent` where a changed limit has been drawn on.
+ *
+ * @remarks
+ * An edit describes a change, so rows the form dropped are added back rather than silently
+ * disappearing — a removal the signer cannot see is the one thing this screen must not do.
+ */
 export const toEditSummaryModel = (
   values: SpendingLimitPolicyFormValues,
   baseline: readonly SpendingLimitState[],

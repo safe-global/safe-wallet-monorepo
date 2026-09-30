@@ -3,10 +3,7 @@ import { isSameAllowance, isSpendingLimitFor } from '@/features/spending-limits/
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { filledLimits, type FilledLimit } from './filledLimits'
 
-/**
- * The same rule the transaction is built from, so `Next` opens exactly when there is something to sign.
- * A half-typed amount cannot be parsed into base units, and an unproven match is not a match.
- */
+/** @returns `true` when the row matches the chain; a half-typed amount cannot, so it counts as changed. */
 const matchesChain = (row: FilledLimit, onChain: SpendingLimitState): boolean => {
   try {
     return isSameAllowance({ amount: row.amount, resetTime: row.resetTime }, onChain)
@@ -16,8 +13,16 @@ const matchesChain = (row: FilledLimit, onChain: SpendingLimitState): boolean =>
 }
 
 /**
- * Compared against the chain, never against the values the form mounted with, which the review step
- * replaces. Only a proven `false` disables submission: what cannot be settled here goes through.
+ * Tells whether an edit has changed anything the chain does not already hold.
+ *
+ * @param baseline - The limits the Safe holds, read over RPC.
+ * @param values - The form as it stands.
+ * @returns `false` only when every complete row matches the chain and nothing was added or dropped.
+ *
+ * @remarks
+ * Judged against the chain, never against the values the form mounted with, which the review step
+ * replaces. Only a proven `false` disables submission, and {@link isSameAllowance} is the same rule
+ * the transaction is built from, so `Next` opens exactly when there is something to sign.
  */
 export const hasEditChanges = (
   baseline: readonly SpendingLimitState[],

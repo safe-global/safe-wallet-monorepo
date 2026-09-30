@@ -4,6 +4,7 @@ import { isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { filledLimits } from './filledLimits'
 
+/** What an edit would take away, counted for the notice that stands in for the removed rows. */
 export type PendingRemovals = {
   /** On-chain spenders the form no longer carries at all. */
   spenders: string[]
@@ -11,6 +12,13 @@ export type PendingRemovals = {
   limits: number
 }
 
+/**
+ * Works out what the form has dropped since it opened.
+ *
+ * @param baseline - The limits the Safe holds, read over RPC.
+ * @param values - The form as it stands, half-typed rows included.
+ * @returns The spenders that would lose every limit, and how many limits would go in total.
+ */
 export const findPendingRemovals = (
   baseline: readonly SpendingLimitState[],
   values: SpendingLimitPolicyFormValues,
@@ -28,6 +36,7 @@ export const findPendingRemovals = (
   return { spenders, limits: gone.length }
 }
 
+/** The notice's two lines: what goes, and what that means before the transaction executes. */
 export type RemovalCopy = { title: string; description: string }
 
 const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`
@@ -35,6 +44,14 @@ const plural = (count: number, noun: string): string => `${count} ${noun}${count
 const STAYS_IN_FORCE = 'They can still be spent until this transaction is executed.'
 const POLICY_GOES = 'Executing it removes the spending limit from this Safe account entirely.'
 
+/**
+ * Puts what would be removed into words.
+ *
+ * @param removals - The counts from {@link findPendingRemovals}.
+ * @param isEmptyPolicy - Whether the form has no spender left, which removes the policy itself and
+ *   so earns a second sentence.
+ * @returns The notice's title and description.
+ */
 export const describeRemovals = (removals: PendingRemovals, isEmptyPolicy: boolean): RemovalCopy => {
   const limits = plural(removals.limits, 'limit')
   const title =

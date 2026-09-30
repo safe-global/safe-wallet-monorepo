@@ -124,6 +124,14 @@ export const getReferencedTokens = (
   })
 }
 
-/** A policy of a type the page does not render, or with data of another type's shape, is left out. */
+/**
+ * Turns the gateway's active policies into the shapes the Policies table renders.
+ *
+ * @param dtos - Active policies as the gateway returns them.
+ * @param resolveToken - Looks a token up by chain and address; unknown tokens fall back to base units.
+ * @returns One entry per policy the page can render. Left out: a policy of a type the page does not
+ *   render, one whose data has another type's shape, and a spending limit whose allowances are all
+ *   gone — deleting the last allowance leaves the module enabled, so the gateway keeps returning it.
+ */
 export const mapActivePolicies = (dtos: ActivePolicyDto[], resolveToken: ResolveTokenInfo): Policy[] =>
   dtos.flatMap((dto) => toPolicies(dto, resolveToken))
