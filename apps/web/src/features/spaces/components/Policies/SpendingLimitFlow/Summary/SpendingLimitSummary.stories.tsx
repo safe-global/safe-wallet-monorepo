@@ -23,6 +23,12 @@ const ETH: LimitSummaryToken = {
   decimals: 18,
   logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
 }
+const LINK_TOKEN: LimitSummaryToken = {
+  address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
+  symbol: 'LINK',
+  decimals: 18,
+  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0x514910771AF9Ca656af840dff83E8264EcF986CA.png',
+}
 const USDC_TOKEN: LimitSummaryToken = {
   address: USDC,
   symbol: 'USDC',
@@ -146,6 +152,76 @@ export const TestPeriodOnSepolia: Story = {
     policy: {
       safe: treasury(SEPOLIA),
       spenders: [spender(ALICE, 'Alice', [{ token: ETH, amount: '0.01', resetTimeMin: '30' }])],
+    },
+  },
+}
+
+/**
+ * An edit: every row is marked against what the chain holds, and the rows the form dropped are put
+ * back. Alice keeps ETH untouched, has her USDC cut (with a spend to reset) and loses LINK; Carol is
+ * new; Bob is gone entirely, so each of his rows is struck out.
+ */
+export const Edit: Story = {
+  args: {
+    policy: {
+      safe: treasury(),
+      spenders: [
+        spender(ALICE, 'Alice', [
+          { token: ETH, amount: '0.5466', resetTimeMin: '0', change: 'unchanged' },
+          {
+            token: USDC_TOKEN,
+            amount: '150',
+            resetTimeMin: '43200',
+            change: 'changed',
+            previous: { amount: '250', resetTimeMin: '43200' },
+            spent: '80000000',
+          },
+          {
+            token: LINK_TOKEN,
+            amount: '25',
+            resetTimeMin: '10080',
+            change: 'removed',
+            previous: { amount: '25', resetTimeMin: '10080' },
+          },
+        ]),
+        spender(CAROL, 'Carol', [{ token: USDC_TOKEN, amount: '500', resetTimeMin: '1440', change: 'added' }]),
+        spender(BOB, 'Bob', [
+          {
+            token: ETH,
+            amount: '1',
+            resetTimeMin: '10080',
+            change: 'removed',
+            previous: { amount: '1', resetTimeMin: '10080' },
+          },
+          {
+            token: USDC_TOKEN,
+            amount: '250',
+            resetTimeMin: '43200',
+            change: 'removed',
+            previous: { amount: '250', resetTimeMin: '43200' },
+          },
+        ]),
+      ],
+    },
+  },
+}
+
+/** Only the half that moved shows both sides: the amount holds, the period does not. */
+export const EditPeriodOnly: Story = {
+  args: {
+    policy: {
+      safe: treasury(),
+      spenders: [
+        spender(ALICE, 'Alice', [
+          {
+            token: ETH,
+            amount: '0.5466',
+            resetTimeMin: '43200',
+            change: 'changed',
+            previous: { amount: '0.5466', resetTimeMin: '1440' },
+          },
+        ]),
+      ],
     },
   },
 }

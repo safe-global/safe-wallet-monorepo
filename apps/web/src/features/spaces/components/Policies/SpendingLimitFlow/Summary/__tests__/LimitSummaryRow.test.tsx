@@ -100,7 +100,9 @@ describe('LimitSummaryRow', () => {
 
       render(<LimitSummaryRow limit={limit} chainId="1" />)
 
-      expect(screen.getByTestId('spending-limit-summary-frequency')).toHaveTextContent('Daily → Monthly')
+      const frequency = screen.getByTestId('spending-limit-summary-frequency')
+      expect(frequency).toHaveTextContent('Daily')
+      expect(frequency).toHaveTextContent('Monthly')
     })
 
     it('marks a removed row', () => {
