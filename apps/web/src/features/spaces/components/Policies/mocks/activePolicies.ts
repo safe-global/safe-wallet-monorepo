@@ -1,5 +1,4 @@
-import type { ActivePolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { TokenMetadata } from '@/store/api/gateway/policyTokenInfos'
+import type { ActivePolicyDto, Erc20TokenMetadataDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from './policies'
 
 /** Shaped like the CGW `policies/active` response. */
@@ -20,6 +19,7 @@ export const mockSpendingLimitDto = (overrides: Partial<ActivePolicyDto> = {}): 
         allowances: [
           {
             tokenAddress: MOCK_TOKENS.usdc.address,
+            tokenMetadata: mockUsdcMetadata(),
             amount: '1500000000',
             spent: '1000000000',
             resetPeriodMinutes: 43_200,
@@ -47,7 +47,7 @@ export const mockProposerDto = (overrides: Partial<ActivePolicyDto> = {}): Activ
   ...overrides,
 })
 
-export const mockUsdcMetadata = (): TokenMetadata => ({
+export const mockUsdcMetadata = (): Erc20TokenMetadataDto => ({
   type: 'ERC20',
   address: MOCK_TOKENS.usdc.address,
   symbol: MOCK_TOKENS.usdc.symbol,

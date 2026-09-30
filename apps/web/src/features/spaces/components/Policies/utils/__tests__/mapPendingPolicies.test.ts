@@ -21,7 +21,7 @@ const resolveKnownTokens: ResolveTokenInfo = (_chainId, address) => {
   return undefined
 }
 
-const activeRows = () => mapActivePolicies([mockSpendingLimitDto()], resolveKnownTokens)
+const activeRows = () => mapActivePolicies([mockSpendingLimitDto()])
 
 const withChanges = (changes: ReturnType<typeof mockPendingDto>['data']['changes']) =>
   mockPendingDto({ data: { ...mockPendingDto().data, changes } })

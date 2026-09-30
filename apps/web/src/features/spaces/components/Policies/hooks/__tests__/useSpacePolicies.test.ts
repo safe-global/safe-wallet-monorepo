@@ -1,10 +1,9 @@
 import { renderHook } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
-import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
+import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
@@ -126,48 +125,16 @@ describe('useSpacePolicies', () => {
     expect(result.current.policies).toHaveLength(1)
   })
 
-  it('should, when policies reference tokens, look their metadata up and stay loading until it is in', () => {
+  it('should, when active policies carry their token metadata, render it without a lookup', () => {
     mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
-    mockTokenInfosQuery.mockReturnValue({ ...idle, isLoading: true })
-
-    const { result } = renderHook(() => useSpacePolicies())
-
-    expect(mockTokenInfosQuery).toHaveBeenCalledWith({ tokens: [{ chainId: '1', address: MOCK_TOKENS.usdc.address }] })
-    expect(result.current.isLoading).toBe(true)
-  })
-
-  it('should, when the metadata is in, render the token with its symbol and decimals', () => {
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
-    mockTokenInfosQuery.mockReturnValue({
-      ...idle,
-      currentData: { [`1:${MOCK_TOKENS.usdc.address.toLowerCase()}`]: mockUsdcMetadata() },
-    })
-
-    const { result } = renderHook(() => useSpacePolicies())
-    const [policy] = result.current.policies
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
-
-    expect(result.current.isLoading).toBe(false)
-    expect(policy.data.spenders[0].allowances[0].token).toEqual(MOCK_TOKENS.usdc)
-  })
-
-  it('should, when an allowance is in the native currency, take it from the chain config without a lookup', () => {
-    const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
-    dto.data.spenders[0].allowances[0].tokenAddress = ZERO_ADDRESS
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [dto] })
 
     const { result } = renderHook(() => useSpacePolicies())
     const [policy] = result.current.policies
     if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
 
     expect(mockTokenInfosQuery).toHaveBeenCalledWith(skipToken)
-    expect(policy.data.spenders[0].allowances[0].token).toEqual({
-      address: ZERO_ADDRESS,
-      symbol: 'ETH',
-      decimals: 18,
-      logoUri: 'https://logo/eth.png',
-    })
+    expect(result.current.isLoading).toBe(false)
+    expect(policy.data.spenders[0].allowances[0].token).toEqual(MOCK_TOKENS.usdc)
   })
 
   it('should, when the space has only proposer grants, not look any token up', () => {

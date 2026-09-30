@@ -700,9 +700,40 @@ export type OffChainEnforcementDto = {
   /** Where the grant is held */
   source: 'delegates'
 }
+export type NativeTokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20TokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'ERC20'
+}
 export type SpendingLimitAllowanceDto = {
   /** The token the limit applies to; zero address for native */
   tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** Per-window ceiling, in base units */
   amount: string
   /** Spent in the current window, in base units */
