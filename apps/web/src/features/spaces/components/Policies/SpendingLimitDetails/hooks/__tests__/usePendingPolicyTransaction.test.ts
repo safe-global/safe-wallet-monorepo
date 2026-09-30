@@ -99,11 +99,23 @@ describe('usePendingPolicyTransaction', () => {
     expect(result.current.outcome).toBe(outcome)
   })
 
-  it('reads a 404 as deleted', () => {
+  it('reads a 404 as deleted once the row has left the pending list', () => {
+    mockQuery({ error: { status: 404, data: {} } })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy, true))
+
+    expect(result.current.outcome).toBe('deleted')
+  })
+
+  it('treats a 404 for a row still listed as a failed load, and keeps polling', () => {
     mockQuery({ error: { status: 404, data: {} } })
     const { result } = renderHook(() => usePendingPolicyTransaction(policy))
 
-    expect(result.current.outcome).toBe('deleted')
+    expect(result.current.outcome).toBeUndefined()
+    expect(result.current.onRetry).toBeDefined()
+    expect(mockUseQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+    )
   })
 
   it('does not call a transaction gone when the request merely failed, and offers a retry', () => {

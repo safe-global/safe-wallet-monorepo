@@ -36,7 +36,7 @@ export type PendingPolicyTransaction = {
   /** Fresher than the pending DTO, which CGW caches separately. */
   confirmationsSubmitted?: number
   outcome?: PendingTxOutcome
-  /** Set when loading failed with anything but a 404. */
+  /** Set when loading failed, unless a 404 confirms the transaction was deleted. */
   onRetry?: () => void
 }
 
@@ -63,7 +63,8 @@ export const usePendingPolicyTransaction = (
   }, [isUnlisted, refetch])
 
   const transaction = useMemo<PendingPolicyTransaction>(() => {
-    if (error && 'status' in error && error.status === 404) return { confirmedBy: [], outcome: 'deleted' }
+    // A 404 while the row is still listed may be CGW lagging, so only the list leaving confirms a deletion.
+    if (isUnlisted && error && 'status' in error && error.status === 404) return { confirmedBy: [], outcome: 'deleted' }
     if (!currentData) return error ? { confirmedBy: [], onRetry: refetch } : { confirmedBy: [] }
 
     const execution = isMultisigDetailedExecutionInfo(currentData.detailedExecutionInfo)
@@ -76,7 +77,7 @@ export const usePendingPolicyTransaction = (
       confirmationsSubmitted: execution?.confirmations.length,
       outcome: OUTCOME_BY_STATUS[currentData.txStatus],
     }
-  }, [currentData, error, refetch])
+  }, [currentData, error, isUnlisted, refetch])
 
   useEffect(() => {
     setIsSettled(Boolean(transaction.outcome))
