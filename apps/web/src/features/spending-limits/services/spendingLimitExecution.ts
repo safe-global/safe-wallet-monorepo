@@ -56,9 +56,12 @@ export type DesiredAllowance = {
 const allowanceKey = (beneficiary: string, tokenAddress: string): string =>
   `${beneficiary.toLowerCase()}:${tokenAddress.toLowerCase()}`
 
-const assertValidAllowances = (desired: readonly DesiredAllowance[]): void => {
-  if (desired.length === 0) throw new Error(EMPTY_SPENDING_LIMITS_ERROR)
-
+/**
+ * What every `setAllowance` needs to be safe to emit: parseable decimals, and one write per key, since
+ * the module stores an allowance per (delegate, token) and a second write to the same key silently wins.
+ * Whether an empty set is legal is the caller's to say — an edit that only removes limits writes nothing.
+ */
+const assertWritableAllowances = (desired: readonly DesiredAllowance[]): void => {
   const seen = new Set<string>()
   for (const allowance of desired) {
     if (!Number.isInteger(allowance.decimals)) throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
@@ -66,6 +69,11 @@ const assertValidAllowances = (desired: readonly DesiredAllowance[]): void => {
     if (seen.has(key)) throw new Error(DUPLICATE_SPENDING_LIMIT_ERROR)
     seen.add(key)
   }
+}
+
+const assertValidAllowances = (desired: readonly DesiredAllowance[]): void => {
+  if (desired.length === 0) throw new Error(EMPTY_SPENDING_LIMITS_ERROR)
+  assertWritableAllowances(desired)
 }
 
 const findExistingLimit = (
@@ -188,6 +196,7 @@ export const createSpendingLimitEditTx = async (
   if (!isEnabled) throw new Error(MODULE_NOT_ENABLED_ERROR)
 
   const writes = [...edit.added, ...edit.modified]
+  assertWritableAllowances(writes)
 
   // `addDelegate` returns silently for a delegate the module already knows, while `setAllowance`
   // reverts for one it does not. Registering every spender written to therefore costs one call and

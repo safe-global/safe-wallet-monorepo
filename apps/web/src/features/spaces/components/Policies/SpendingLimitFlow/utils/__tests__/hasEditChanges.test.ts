@@ -59,6 +59,30 @@ describe('hasEditChanges', () => {
     ).toBe(false)
   })
 
+  it('sees no change when an amount is retyped with a leading zero', () => {
+    expect(
+      hasEditChanges(
+        baseline,
+        form([
+          [ALICE, USDC, '0100', '1440'],
+          [BOB, DAI, '5', '0'],
+        ]),
+      ),
+    ).toBe(false)
+  })
+
+  it('counts an amount the chain cannot parse as a change rather than throwing', () => {
+    expect(
+      hasEditChanges(
+        baseline,
+        form([
+          [ALICE, USDC, '100.1234567', '1440'],
+          [BOB, DAI, '5', '0'],
+        ]),
+      ),
+    ).toBe(true)
+  })
+
   it('sees no change when a spender is deleted and added back as they were', () => {
     expect(
       hasEditChanges(

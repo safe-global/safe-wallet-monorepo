@@ -9,7 +9,7 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { describeFrequency } from './frequency'
 import { CHANGE_BADGE } from './constants'
-import type { LimitChange, LimitSummary } from './types'
+import type { LimitSummary } from './types'
 
 const TOKEN_ICON_SIZE = 24
 
@@ -63,7 +63,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
   // Only the half that moved shows both of its values.
   const showsPreviousAmount = isChanged && limit.previous !== undefined && limit.previous.amount !== limit.amount
   const showsPreviousLabel = isChanged && previousLabel !== undefined && previousLabel !== label
-  const badge = limit.change ? CHANGE_BADGE[limit.change as LimitChange] : undefined
+  const badge = limit.change ? CHANGE_BADGE[limit.change] : undefined
   const spendReset = describeSpendReset(limit)
 
   return (

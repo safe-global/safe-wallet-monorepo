@@ -1,37 +1,34 @@
 import type { SpendingLimitState } from '@/features/spending-limits'
+import { isSameAllowance, isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import { filledLimits } from './filledLimits'
-import { toSpendingLimitFormValues } from './prefill'
-
-/** `100.00` and `100` are one limit: the chain stores base units, not the spelling. */
-const normaliseAmount = (amount: string): string =>
-  amount.includes('.') ? amount.replace(/0+$/, '').replace(/\.$/, '') : amount
-
-/** Keyed by spender and token, so re-adding a row where it was reads as the same policy. */
-const toRows = (values: SpendingLimitPolicyFormValues): Map<string, string> =>
-  new Map(
-    filledLimits(values).map((row) => [
-      `${row.address.toLowerCase()}:${row.tokenAddress.toLowerCase()}`,
-      `${normaliseAmount(row.amount)}|${Number(row.resetTime)}`,
-    ]),
-  )
+import { filledLimits, type FilledLimit } from './filledLimits'
 
 /**
- * Compared against the form the chain state produces, not the values the form mounted with, which the
- * review step replaces. Only a `false` disables submission: what cannot be settled here goes through.
+ * The same rule the transaction is built from, so `Next` opens exactly when there is something to sign.
+ * A half-typed amount cannot be parsed into base units, and an unproven match is not a match.
+ */
+const matchesChain = (row: FilledLimit, onChain: SpendingLimitState): boolean => {
+  try {
+    return isSameAllowance({ amount: row.amount, resetTime: row.resetTime }, onChain)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Compared against the chain, never against the values the form mounted with, which the review step
+ * replaces. Only a proven `false` disables submission: what cannot be settled here goes through.
  */
 export const hasEditChanges = (
   baseline: readonly SpendingLimitState[],
   values: SpendingLimitPolicyFormValues,
 ): boolean => {
-  const before = toRows(toSpendingLimitFormValues(values.safe, baseline))
-  const after = toRows(values)
+  const rows = filledLimits(values)
+  if (rows.length !== baseline.length) return true
 
-  if (before.size !== after.size) return true
-
-  for (const [key, limit] of before) {
-    if (after.get(key) !== limit) return true
-  }
-
-  return false
+  // Equal counts and every row matching one of them leaves nothing unaccounted for on either side.
+  return rows.some((row) => {
+    const onChain = baseline.find((limit) => isSpendingLimitFor(limit, row.address, row.tokenAddress))
+    return onChain === undefined || !matchesChain(row, onChain)
+  })
 }

@@ -286,6 +286,16 @@ describe('createSpendingLimitEditTx', () => {
     expect(decodeBatch().find((call) => call.name === 'removeDelegate')?.args).toEqual([BOB, false])
   })
 
+  it('rejects two writes naming the same spender and token', async () => {
+    await expect(build({ added: [allowance()], modified: [allowance({ amount: '2' })] })).rejects.toThrow(
+      DUPLICATE_SPENDING_LIMIT_ERROR,
+    )
+  })
+
+  it('rejects a write whose token decimals the chain never resolved', async () => {
+    await expect(build({ added: [allowance({ decimals: NaN })] })).rejects.toThrow(UNKNOWN_TOKEN_DECIMALS_ERROR)
+  })
+
   it('registers a new spender before setting their first allowance', async () => {
     await build({ added: [allowance({ beneficiary: BOB })], addedDelegates: [BOB] })
 
