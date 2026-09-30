@@ -26,6 +26,7 @@ import {
   addressBookListener,
   elevationListener,
   spaceSafesEntitlementsListener,
+  planChangeSyncListener,
   trialReminderListener,
 } from './slices'
 import * as slices from './slices'
@@ -139,6 +140,7 @@ const listeners = [
   addressBookListener,
   elevationListener,
   spaceSafesEntitlementsListener,
+  planChangeSyncListener,
   trialReminderListener,
   forbiddenSessionListener,
 ]

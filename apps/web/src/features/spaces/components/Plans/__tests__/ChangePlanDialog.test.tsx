@@ -17,11 +17,6 @@ jest.mock('../../../hooks/billing/useChangePlan', () => ({
     ...mockState,
   }),
 }))
-const mockTrim = jest.fn()
-let mockTrimState: Record<string, unknown> = {}
-jest.mock('../../../hooks/billing/useSeatTrim', () => ({
-  useSeatTrim: () => ({ trim: mockTrim, isTrimming: false, error: undefined, ...mockTrimState }),
-}))
 
 const pick: PlanPick = {
   tier: {
@@ -63,8 +58,6 @@ describe('ChangePlanDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockState = {}
-    mockTrimState = {}
-    mockTrim.mockResolvedValue(true)
   })
 
   it('previews the picked price on open and shows a skeleton until it arrives', () => {
@@ -114,10 +107,10 @@ describe('ChangePlanDialog', () => {
 
     await waitFor(() => expect(onChanged).toHaveBeenCalled())
     expect(onClose).not.toHaveBeenCalled()
-    expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter')
+    expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', [])
   })
 
-  it('removes the Safes left out before the change and says so in the summary', async () => {
+  it('sends the Safes left out with the change and says so in the summary', async () => {
     mockState = { preview }
     mockChangePlan.mockResolvedValue(true)
     const removed = [{ chainId: '1', address: '0xB' }]
@@ -138,15 +131,14 @@ describe('ChangePlanDialog', () => {
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
-    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
-    expect(mockTrim).toHaveBeenCalledWith(removed)
-    expect(mockTrim.mock.invocationCallOrder[0]).toBeLessThan(mockChangePlan.mock.invocationCallOrder[0])
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', removed))
+    expect(mockChangePlan).toHaveBeenCalledTimes(1)
   })
 
-  it('stops before the change when the removal fails and shows why', async () => {
-    mockState = { preview }
-    mockTrim.mockResolvedValue(false)
-    mockTrimState = { error: 'We couldn’t update the Workspace. Please try again.' }
+  it('keeps the dialog open with the server message when the change fails after the Safes were removed', async () => {
+    const message = 'Your Safes were removed, but the plan change failed. Please try again.'
+    mockState = { preview, changeError: { status: 502, data: { message } } }
+    mockChangePlan.mockResolvedValue(false)
     const onClose = jest.fn()
     render(
       <ChangePlanDialog
@@ -161,11 +153,10 @@ describe('ChangePlanDialog', () => {
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
-    await waitFor(() => expect(mockTrim).toHaveBeenCalled())
-    expect(mockChangePlan).not.toHaveBeenCalled()
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalled())
     expect(onClose).not.toHaveBeenCalled()
-    expect(screen.getByText('We couldn’t update the Workspace. Please try again.')).toBeInTheDocument()
-    expect(screen.queryByTestId('change-plan-removed-note')).toBeInTheDocument()
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
   })
 
   it('keeps the dialog open and shows the error when the change is rejected', async () => {
@@ -226,7 +217,7 @@ describe('ChangePlanDialog', () => {
     expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
-    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', []))
   })
 
   it('surfaces a preview error instead of the breakdown', () => {
