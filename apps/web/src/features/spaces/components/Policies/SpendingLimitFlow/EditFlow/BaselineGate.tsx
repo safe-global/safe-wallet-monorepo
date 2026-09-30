@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { WalletCards } from 'lucide-react'
+import SpendingLimitIcon from '../SpendingLimitIcon'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -11,18 +11,12 @@ export const BASELINE_LOAD_ERROR =
   "The Safe account's current spending limits could not be read, so this policy cannot be edited right now."
 
 export type BaselineGateProps = {
-  /** Undefined until the chain has answered. */
   limits?: SpendingLimitState[]
   error?: Error
   children: (limits: SpendingLimitState[]) => ReactElement
 }
 
-const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
-
-/**
- * `TxFlow` is not mounted yet, so the wait wears the same chrome it will. The Safe Shield rail is left
- * out rather than stubbed: its provider belongs to `TxFlow`, and there is no transaction to screen yet.
- */
+/** `TxFlow` is not mounted yet, so the wait wears its chrome; the Safe Shield rail belongs to it, not here. */
 const Chrome = ({ children }: { children: ReactElement }): ReactElement => (
   <TxLayoutBase
     title={EDIT_STEP_TITLE}
@@ -61,10 +55,7 @@ const FormSkeleton = (): ReactElement => (
   </div>
 )
 
-/**
- * The edit form describes a change to what the chain holds, so it stays out of reach until that is
- * known: a form filled in over a failed read would produce a delta against nothing.
- */
+/** A form filled in over a failed read would describe a change against nothing, so it waits. */
 const BaselineGate = ({ limits, error, children }: BaselineGateProps): ReactElement => {
   if (error) {
     return (

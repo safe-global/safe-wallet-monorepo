@@ -85,7 +85,6 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
           </Button>
         )}
 
-        {/* Dimmed as a whole: an edit cannot change who a delegate is, and the field has to say so. */}
         <div className={cn('flex flex-col gap-1', isFixed && 'cursor-not-allowed opacity-50')}>
           <AddressBookInput
             name={spenderAddressPath(spenderIndex)}

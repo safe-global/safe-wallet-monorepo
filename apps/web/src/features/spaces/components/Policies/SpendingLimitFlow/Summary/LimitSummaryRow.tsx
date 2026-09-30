@@ -13,11 +13,7 @@ import type { LimitChange, LimitSummary } from './types'
 
 const TOKEN_ICON_SIZE = 24
 
-/**
- * Four fixed columns — token, amount, frequency, verdict — so neighbouring rows line up instead of
- * drifting with their content. The verdict column only exists where there is a verdict to show, and
- * the frequency column is wide enough for the longest label so it never has to truncate one.
- */
+/** Fixed columns so rows line up; the frequency one fits the longest label rather than truncating it. */
 const COLUMNS = 'grid grid-cols-[24px_minmax(0,1fr)_7.75rem] items-center gap-x-3 gap-y-1'
 const COLUMNS_WITH_VERDICT = 'grid grid-cols-[24px_minmax(0,1fr)_7.75rem_6rem] items-center gap-x-3 gap-y-1'
 
@@ -47,7 +43,7 @@ type LimitSummaryRowProps = {
   chainId: string
 }
 
-/** The token is named once, in the icon column, so the amounts either side of an arrow stay plain text. */
+/** The token is named once, in the icon column, so the amounts themselves stay plain text. */
 const Amount = ({ amount, limit, struck }: { amount: string; limit: LimitSummary; struck?: boolean }): ReactElement => {
   const { value, decimals } = toDisplayAmount(amount, limit.token.decimals)
 
@@ -64,7 +60,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
   const previousLabel = limit.previous ? describeFrequency(limit.previous.resetTimeMin, chainId).label : undefined
   const isRemoved = limit.change === 'removed'
   const isChanged = limit.change === 'changed'
-  // Only the half that moved gets both sides; an arrow between two identical values reads as noise.
+  // Only the half that moved shows both of its values.
   const showsPreviousAmount = isChanged && limit.previous !== undefined && limit.previous.amount !== limit.amount
   const showsPreviousLabel = isChanged && previousLabel !== undefined && previousLabel !== label
   const badge = limit.change ? CHANGE_BADGE[limit.change as LimitChange] : undefined
@@ -77,7 +73,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
           <TokenIcon logoUri={limit.token.logoUri} tokenSymbol={limit.token.symbol} size={TOKEN_ICON_SIZE} noRadius />
         </span>
 
-        {/* Stacked, not joined by an arrow: at this width the pair wraps, and a trailing arrow reads as a typo. */}
+        {/* Stacked: at this width an arrow between the two values wraps and reads as a typo. */}
         <span className="flex min-w-0 flex-col overflow-hidden">
           {showsPreviousAmount && limit.previous && <Amount amount={limit.previous.amount} limit={limit} struck />}
           <Amount amount={limit.amount} limit={limit} struck={isRemoved} />

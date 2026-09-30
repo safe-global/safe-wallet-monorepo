@@ -4,7 +4,7 @@ import {
   getDeployedSpendingLimitModuleAddress,
   getSpendingLimitContract,
 } from './spendingLimitContracts'
-import { isSpendingLimitFor } from './spendingLimitMatching'
+import { distinctAddresses, isSpendingLimitFor } from './spendingLimitMatching'
 import type { SpendingLimitDelta } from './spendingLimitDelta'
 import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import {
@@ -67,13 +67,6 @@ const assertValidPairs = (pairs: readonly SpendingLimitPair[]): void => {
     seen.add(key)
   }
 }
-
-const uniqueBeneficiaries = (pairs: readonly SpendingLimitPair[]): string[] =>
-  pairs.reduce<string[]>(
-    (unique, pair) =>
-      unique.some((known) => sameAddress(known, pair.beneficiary)) ? unique : [...unique, pair.beneficiary],
-    [],
-  )
 
 const findExistingLimit = (
   existing: readonly SpendingLimitState[],
@@ -153,7 +146,7 @@ export const createSpendingLimitsTx = async (
     txs.push(await createEnableModuleMetaTx(sdk, chain, deployed, allowanceModule.address))
   }
 
-  for (const beneficiary of uniqueBeneficiaries(pairs)) {
+  for (const beneficiary of distinctAddresses(pairs.map((pair) => pair.beneficiary))) {
     const isDelegate = existingSpendingLimits.some((limit) => sameAddress(limit.beneficiary, beneficiary))
     if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
   }
@@ -178,10 +171,8 @@ const hasChanges = (delta: SpendingLimitDelta): boolean =>
   delta.removedDelegates.length > 0
 
 /**
- * One multiSend for an edit: register every spender written to, write every added and changed limit,
- * clear the dropped ones, then unregister the spenders left with nothing. Clearing precedes
- * unregistering because `removeDelegate` leaves stored allowances behind, which re-adding the spender
- * later would resurrect.
+ * One multiSend for an edit. Clearing precedes unregistering because `removeDelegate` leaves the stored
+ * allowance behind, which re-adding the spender later would resurrect.
  */
 export const createSpendingLimitEditTx = async (
   delta: SpendingLimitDelta,
@@ -201,7 +192,7 @@ export const createSpendingLimitEditTx = async (
   // `addDelegate` returns silently for a delegate the module already knows, while `setAllowance`
   // reverts for one it does not. Registering every spender written to therefore costs one call and
   // survives a baseline that a transaction queued in the meantime has already made stale.
-  const txs: MetaTransactionData[] = uniqueBeneficiaries(writes).map((delegate) =>
+  const txs: MetaTransactionData[] = distinctAddresses(writes.map((pair) => pair.beneficiary)).map((delegate) =>
     createAddDelegateTx(delegate, address),
   )
 

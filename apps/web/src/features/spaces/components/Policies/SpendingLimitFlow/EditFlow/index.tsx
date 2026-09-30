@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { WalletCards } from 'lucide-react'
+import SpendingLimitIcon from '../SpendingLimitIcon'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { buildSafeScopeKey } from '@/components/tx-flow/safe-scope/utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
@@ -14,14 +14,9 @@ import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '../constants'
 import BaselineGate from './BaselineGate'
 import { EditModeProvider } from './EditModeContext'
 
-const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
-
 const noop = () => {}
 
-/**
- * The form describes the Safe's whole policy, so it is seeded from what the chain holds — read here
- * rather than inside `TxFlow`, whose `initialData` is taken once at mount.
- */
+/** Read here rather than inside `TxFlow`, whose `initialData` is taken once at mount. */
 const EditFlowBody = ({ safe }: { safe: PolicySafe }): ReactElement => {
   const { limits, error } = useExistingSpendingLimits()
 

@@ -2,6 +2,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
+import { filledLimits } from './filledLimits'
 
 export type PendingRemovals = {
   /** On-chain spenders the form no longer carries at all. */
@@ -10,24 +11,12 @@ export type PendingRemovals = {
   limits: number
 }
 
-/** Rows still being typed describe no limit yet, so they neither keep nor remove one. */
-const filledPairs = (values: SpendingLimitPolicyFormValues) =>
-  values.spenders
-    .filter((spender) => spender.address)
-    .flatMap((spender) =>
-      spender.limits
-        .filter((limit) => limit.tokenAddress)
-        .map((limit) => ({ address: spender.address, tokenAddress: limit.tokenAddress })),
-    )
-
 export const findPendingRemovals = (
   baseline: readonly SpendingLimitState[],
   values: SpendingLimitPolicyFormValues,
 ): PendingRemovals => {
-  const kept = filledPairs(values)
-  const gone = baseline.filter(
-    (limit) => !kept.some((pair) => isSpendingLimitFor(limit, pair.address, pair.tokenAddress)),
-  )
+  const kept = filledLimits(values)
+  const gone = baseline.filter((limit) => !kept.some((row) => isSpendingLimitFor(limit, row.address, row.tokenAddress)))
 
   const keptSpenders = values.spenders.map((spender) => spender.address).filter(Boolean)
   const spenders = gone.reduce<string[]>((unique, limit) => {

@@ -148,4 +148,17 @@ describe('buildSpendingLimitDelta', () => {
       removedDelegates: [],
     })
   })
+
+  it('plans a modification when the chain reported no decimals to compare against', () => {
+    const unknownDecimals = spendingLimitStateBuilder()
+      .with({
+        beneficiary: ALICE,
+        amount: '100',
+        resetTimeMin: '1440',
+        token: { address: USDC, symbol: 'USDC', decimals: null, logoUri: '' },
+      })
+      .build()
+
+    expect(buildSpendingLimitDelta([desired()], [unknownDecimals]).modified).toEqual([desired()])
+  })
 })

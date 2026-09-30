@@ -156,11 +156,7 @@ export const TestPeriodOnSepolia: Story = {
   },
 }
 
-/**
- * An edit: every row is marked against what the chain holds, and the rows the form dropped are put
- * back. Alice keeps ETH untouched, has her USDC cut (with a spend to reset) and loses LINK; Carol is
- * new; Bob is gone entirely, so each of his rows is struck out.
- */
+/** Every verdict at once: Alice keeps, changes and loses one; Carol is new; Bob is gone entirely. */
 export const Edit: Story = {
   args: {
     policy: {

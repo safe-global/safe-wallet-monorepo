@@ -1,8 +1,7 @@
-import { parseUnits } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SpendingLimitState } from '../types'
 import type { SpendingLimitPair } from './spendingLimitExecution'
-import { isSpendingLimitFor } from './spendingLimitMatching'
+import { distinctAddresses, isSameAllowance, isSpendingLimitFor } from './spendingLimitMatching'
 
 export type RemovedSpendingLimit = {
   beneficiary: string
@@ -17,16 +16,6 @@ export type SpendingLimitDelta = {
   removedDelegates: string[]
 }
 
-const isUnchanged = (pair: SpendingLimitPair, existing: SpendingLimitState): boolean =>
-  parseUnits(pair.amount, pair.decimals) === BigInt(existing.amount) &&
-  Number(pair.resetTime) === Number(existing.resetTimeMin)
-
-const distinctAddresses = (addresses: readonly string[]): string[] =>
-  addresses.reduce<string[]>(
-    (unique, address) => (unique.some((known) => sameAddress(known, address)) ? unique : [...unique, address]),
-    [],
-  )
-
 const lacks = (addresses: readonly string[], address: string): boolean =>
   !addresses.some((known) => sameAddress(known, address))
 
@@ -40,7 +29,7 @@ export const buildSpendingLimitDelta = (
   for (const pair of desired) {
     const existing = onChain.find((limit) => isSpendingLimitFor(limit, pair.beneficiary, pair.tokenAddress))
     if (!existing) added.push(pair)
-    else if (!isUnchanged(pair, existing)) modified.push(pair)
+    else if (!isSameAllowance({ amount: pair.amount, resetTime: pair.resetTime }, existing)) modified.push(pair)
   }
 
   const removed = onChain

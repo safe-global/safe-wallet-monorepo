@@ -40,11 +40,7 @@ const isSpendingLimitData = (data: ActivePolicyDto['data']): data is SpendingLim
 
 const isProposerData = (data: ActivePolicyDto['data']): data is ProposerPolicyDataDto => 'proposers' in data
 
-/**
- * The allowance module stays enabled once its last allowance is deleted, so a fully revoked policy keeps
- * coming back with nothing in it. A policy that grants nothing is not one the page has anything to say
- * about, so it is dropped here rather than rendered as an empty row.
- */
+/** Deleting the last allowance leaves the module enabled, so a revoked policy keeps coming back empty. */
 const hasNoAllowances = (data: SpendingLimitPolicyDataDto): boolean =>
   data.spenders.every((spender) => spender.allowances.length === 0)
 

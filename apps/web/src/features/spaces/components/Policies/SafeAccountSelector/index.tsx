@@ -34,11 +34,7 @@ export type SafeAccountSelectorProps = {
   isError?: boolean
   onRetry?: () => void
   disabled?: boolean
-  /**
-   * Shows the picked account without offering the others, dimmed so it reads as a field that cannot be
-   * edited. Not the `Select`'s own `disabled`, which would swallow the pointer events the copy button
-   * needs; the dimming is applied to the account, and the copy button stays live beside it.
-   */
+  /** Dimmed, but not the `Select`'s `disabled`, which would swallow the pointer events the copy button needs. */
   readOnly?: boolean
   label?: string
   /** Must match the rule `accounts` was filtered by. */

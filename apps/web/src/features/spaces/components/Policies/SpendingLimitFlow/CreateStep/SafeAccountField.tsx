@@ -13,7 +13,6 @@ export type SafeAccountFieldProps = {
   hasWallet: boolean
   /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
-  /** An edit is scoped to one Safe, so the field shows it without offering the others. */
   readOnly?: boolean
 }
 

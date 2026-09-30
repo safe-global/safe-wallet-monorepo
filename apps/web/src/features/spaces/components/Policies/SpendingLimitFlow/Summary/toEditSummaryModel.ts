@@ -1,7 +1,7 @@
-import { parseUnits } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitState } from '@/features/spending-limits'
+import { isSameAllowance } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { toPolicySummaryModel, type PolicySummarySources } from './toPolicySummaryModel'
 import type { LimitSummary, SpenderSummary, SpendingLimitSummaryModel } from './types'
@@ -12,21 +12,6 @@ const asPrevious = (limit: SpendingLimitState): PreviousLimit => ({
   amount: safeFormatUnits(limit.amount, limit.token.decimals),
   resetTimeMin: limit.resetTimeMin,
 })
-
-/**
- * Compared in base units: `100` and `100.00` are the same limit, and only the chain's units settle it.
- * Without decimals there are no base units to compare, so the row is called changed rather than
- * silently passed off as untouched.
- */
-const isSameLimit = (row: LimitSummary, onChain: SpendingLimitState): boolean => {
-  const { decimals } = onChain.token
-  if (decimals == null) return false
-
-  return (
-    parseUnits(row.amount, decimals) === BigInt(onChain.amount) &&
-    Number(row.resetTimeMin) === Number(onChain.resetTimeMin)
-  )
-}
 
 /** A limit the form dropped still has to be shown, so it is rebuilt from what the chain holds. */
 const toRemovedRow = (limit: SpendingLimitState): LimitSummary => {
@@ -49,10 +34,7 @@ const toRemovedRow = (limit: SpendingLimitState): LimitSummary => {
 const withSpend = (row: LimitSummary, onChain: SpendingLimitState): LimitSummary =>
   onChain.spent === '0' ? row : { ...row, spent: onChain.spent }
 
-/**
- * The create summary describes a policy; an edit has to describe a change, so every row is marked against
- * what the chain holds and the rows the form dropped are added back rather than silently disappearing.
- */
+/** An edit describes a change, so dropped rows are added back rather than silently disappearing. */
 export const toEditSummaryModel = (
   values: SpendingLimitPolicyFormValues,
   baseline: readonly SpendingLimitState[],
@@ -69,7 +51,9 @@ export const toEditSummaryModel = (
 
       const marked: LimitSummary = {
         ...row,
-        change: isSameLimit(row, existing) ? 'unchanged' : 'changed',
+        change: isSameAllowance({ amount: row.amount, resetTime: row.resetTimeMin }, existing)
+          ? 'unchanged'
+          : 'changed',
         previous: asPrevious(existing),
       }
       return withSpend(marked, existing)
