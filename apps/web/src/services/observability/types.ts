@@ -39,6 +39,13 @@ export interface ErrorContext {
    * dashboards before any reclassification decision is made.
    */
   httpStatus?: number
+  /**
+   * 1-based index of the attempt that failed, set only by call sites that
+   * genuinely retry. Emitted verbatim (and as an `isRetry` flag for `> 1`), so
+   * distinct failures can be counted separately from retry noise, and it keeps
+   * each attempt of a retry loop a distinct event rather than a duplicate.
+   */
+  attempt?: number
 }
 
 /**

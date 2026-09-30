@@ -19,7 +19,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
 
   return (
     <SpaceSettingsSection>
-      <SpaceSettingsSectionTitle>Manage workspace</SpaceSettingsSectionTitle>
+      <SpaceSettingsSectionTitle>Manage Workspace</SpaceSettingsSectionTitle>
 
       <div
         className={cn('flex items-center justify-start gap-6 py-4 first:pt-0', isAdmin && 'border-b border-border/60')}
@@ -30,12 +30,12 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               render={
                 <span tabIndex={0}>
                   <Button variant="destructive" data-testid="space-leave-button" disabled>
-                    Leave workspace
+                    Leave Workspace
                   </Button>
                 </span>
               }
             />
-            <TooltipContent side="top">You are the last active admin and cannot leave the workspace.</TooltipContent>
+            <TooltipContent side="top">You are the last active admin and cannot leave the Workspace.</TooltipContent>
           </Tooltip>
         ) : (
           <Button
@@ -47,7 +47,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
             }}
           >
-            Leave workspace
+            Leave Workspace
           </Button>
         )}
       </div>
@@ -62,7 +62,7 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
             }}
           >
-            Delete workspace
+            Delete Workspace
           </Button>
         </div>
       )}

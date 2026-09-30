@@ -183,11 +183,10 @@ export default defineConfig(({ mode }) => {
       // this, the entire shadcn/Tailwind layer is silently dropped and the
       // PageLayout positioning collapses.
       tailwindcss(),
-      // MDX support for .md/.mdx imports (terms, cookie, privacy pages).
-      // Mirrors the remark plugin list documented in
-      // docs/migration/state/plan.md and matches what apps/web's next.config.mjs
-      // uses through @mdx-js/loader. Must run BEFORE react() so React's
-      // JSX transform sees the compiled MDX output.
+      // MDX support for .md/.mdx imports (cookie page).
+      // Mirrors the remark plugin list apps/web's next.config.mjs uses through
+      // @mdx-js/loader. Must run BEFORE react() so React's JSX transform sees
+      // the compiled MDX output.
       mdx({
         remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkHeadingId, remarkGfm],
       }),

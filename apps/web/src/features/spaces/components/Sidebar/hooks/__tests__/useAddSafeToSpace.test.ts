@@ -53,7 +53,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: {
-          message: 'Successfully added Safe to workspace.',
+          message: 'Successfully added Safe to Workspace.',
           variant: 'success',
           groupKey: 'add-safe-to-workspace-success',
         },
@@ -89,7 +89,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. API error',
+          message: 'Failed to add Safe to Workspace. API error',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -161,7 +161,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         type: 'notifications/add',
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. Network failure',
+          message: 'Failed to add Safe to Workspace. Network failure',
           variant: 'error',
           groupKey: 'add-safe-to-workspace-error',
         }),
@@ -183,7 +183,7 @@ describe('useAddSafeToSpace', () => {
 
   it('extracts the message from a FetchBaseQueryError data payload', async () => {
     mockAddSafeToSpace.mockResolvedValue({
-      error: { status: 409, data: { message: 'Safe already exists in this workspace' } },
+      error: { status: 409, data: { message: 'Safe already exists in this Workspace' } },
     })
     const { result } = renderHook(() => useAddSafeToSpace({ spaces: [] }))
 
@@ -194,7 +194,7 @@ describe('useAddSafeToSpace', () => {
     expect(mockDispatch).toHaveBeenCalledWith(
       expect.objectContaining({
         payload: expect.objectContaining({
-          message: 'Failed to add Safe to workspace. Safe already exists in this workspace',
+          message: 'Failed to add Safe to Workspace. Safe already exists in this Workspace',
           variant: 'error',
         }),
       }),
@@ -215,7 +215,7 @@ describe('useAddSafeToSpace', () => {
       expect.objectContaining({
         payload: expect.objectContaining({
           message:
-            "Failed to add Safe to workspace. Couldn't connect to the server. Please check your connection and try again.",
+            "Failed to add Safe to Workspace. Couldn't connect to the server. Please check your connection and try again.",
           variant: 'error',
         }),
       }),
@@ -286,7 +286,7 @@ describe('useAddSafeToSpace', () => {
         expect.objectContaining({
           type: 'notifications/add',
           payload: expect.objectContaining({
-            message: 'Failed to add Safe to workspace. ',
+            message: 'Failed to add Safe to Workspace. ',
             variant: 'error',
           }),
         }),

@@ -37,22 +37,19 @@ describe('Proposers 2 tests', () => {
     tx.verifyTxConfirmBtnDisabled()
   })
 
-  it('Verify a proposer cannot edit himself', () => {
+  it('Verify a proposer can rename any proposer, as renaming is a local address book edit', () => {
     wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    proposer.verifyEditProposerBtnDisabled(proposerAddress)
+    proposer.verifyEditProposerBtnEnabled(proposerAddress)
   })
 
-  it('Verify a proposer cannot edit or remove other proposers', () => {
+  it('Verify a proposer cannot remove other proposers', () => {
     wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
   })
 
   it('Verify that deleting a proposer is only possible by creator', () => {
     wallet.connectSignerViaStorage(signer3, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    proposer.verifyEditProposerBtnDisabled(proposerAddress_2)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
-    proposer.verifyEditProposerBtnDisabled(proposerAddress)
     proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
   })
 })

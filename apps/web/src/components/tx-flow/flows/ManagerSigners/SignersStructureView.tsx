@@ -10,7 +10,7 @@ import type { ReactElement } from 'react'
 import AddIcon from '@/public/images/common/add.svg'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
-import TxCard from '../../common/TxCard'
+import TxCard, { TxCardActions } from '../../common/TxCard'
 import OwnerRow from '@/components/new-safe/OwnerRow'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
@@ -49,7 +49,7 @@ export function SignersStructureView(props: Props): ReactElement {
 
           <Separator bleed="6" />
 
-          <div className="flex items-center justify-end pt-4">
+          <TxCardActions>
             <Button
               data-testId="submit-next"
               type="submit"
@@ -57,7 +57,7 @@ export function SignersStructureView(props: Props): ReactElement {
             >
               Next
             </Button>
-          </div>
+          </TxCardActions>
         </form>
       </FormProvider>
     </TxCard>

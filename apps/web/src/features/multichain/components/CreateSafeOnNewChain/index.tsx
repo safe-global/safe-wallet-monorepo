@@ -29,8 +29,9 @@ import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
-import { normalizeSpaceId } from '@/utils/spaces'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -55,8 +56,24 @@ const ReplaySafeDialog = ({
   const customRpc = useAppSelector(selectRpc)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const resolvedSpaceId = normalizeSpaceId(spaceId)
+  const isAdminOfActiveSpace = useIsAdmin(resolvedSpaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
+  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
+  const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
+    { spaceId: resolvedSpaceId ?? '' },
+    { skip: !isUserAuthenticated || resolvedSpaceId === null },
+  )
+  // Seats are per address: another chain of a Safe already in the space takes none.
+  const holdsSeatInSpace = Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
+    addresses.some((address) => sameAddress(address, safeAddress)),
+  )
+  const willStayOutsideSpace =
+    isUserAuthenticated &&
+    resolvedSpaceId !== null &&
+    isAdminOfActiveSpace &&
+    !holdsSeatInSpace &&
+    isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
   const dispatch = useAppDispatch()
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -119,10 +136,17 @@ const ReplaySafeDialog = ({
         isUserAuthenticated,
         isAdminOfActiveSpace,
         spaceSafeCount,
+        spaceSafeLimit,
+        holdsSeatInSpace,
         provider,
         dispatch,
       })
       if (!persistResult.ok) {
+        if (persistResult.stepUpPending) {
+          // Nothing to show, but the dialog must not close as if the network had been added.
+          hasError = true
+          return
+        }
         setCreationError(persistResult.error)
         hasError = true
         dispatch(
@@ -215,6 +239,15 @@ const ReplaySafeDialog = ({
                 The Safe will use the initial setup of the copied Safe. Any changes to owners, threshold, modules or the
                 Safe&apos;s version will not be reflected in the copy.
               </ErrorMessage>
+
+              {willStayOutsideSpace && (
+                <div data-testid="space-seat-limit-notice">
+                  <ErrorMessage level="info">
+                    This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new network will be added in
+                    My accounts, outside the Workspace.
+                  </ErrorMessage>
+                </div>
+              )}
 
               {safeCreationDataLoading ? (
                 <div className="flex flex-col items-center gap-2">

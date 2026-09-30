@@ -6,7 +6,6 @@ import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@/public/images/notifications/info.svg'
-import { Errors, logError } from '@/services/exceptions'
 import { getRecoveryUpsertTransactions } from '@/features/recovery/services'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
@@ -24,7 +23,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
-  const { setSafeTx, safeTxError, setSafeTxError } = useContext(SafeTxContext)
+  const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const periods = useRecoveryPeriods()
 
   const { data } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
@@ -46,12 +45,6 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
       .then(setSafeTx)
       .catch(setSafeTxError)
   }, [data, safe.chainId, safeAddress, setSafeTx, setSafeTxError, web3ReadOnly])
-
-  useEffect(() => {
-    if (safeTxError) {
-      logError(Errors._809, safeTxError.message)
-    }
-  }, [safeTxError])
 
   const isEdit = !!data?.moduleAddress
 

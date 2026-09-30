@@ -87,7 +87,7 @@ export const NarrowTrigger: Story = {
           </DropdownMenuItem>
           <DropdownMenuItem variant="destructive">
             <Trash2 />
-            Remove from workspace
+            Remove from Workspace
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -18,8 +18,11 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'destructive' | 'surface')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface')
+ *   `ghost-muted`: the Figma Ghost, muted at rest; `ghost` keeps the foreground
  * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `weight` ('medium' | 'semibold')
+ * - `accentIcon` (boolean): brand-green icon on a primary CTA
  * - `render`
  * - `className`
  */
@@ -48,6 +51,15 @@ const buttonVariants = cva(
           'bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground',
         ghost:
           'hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
+        // Remove/clear affordance that sits inside the thing it deletes (a card's corner ✕ or
+        // trash). Reads as quiet secondary text at rest and only resolves to `destructive` under
+        // the cursor, so a row of them does not turn a form into a wall of red. Pair with
+        // `size="icon-circle"` for the round disc the hover tint paints.
+        'ghost-destructive':
+          'text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20',
+        // Figma's Ghost reads muted at rest; `ghost` keeps the foreground for the 130+ existing icon buttons.
+        'ghost-muted':
+          'text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground',
         destructive:
           'bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30',
         // Card-surface CTA: reads as a raised card on a coloured/promo surface (Earn/Stake/
@@ -74,22 +86,35 @@ const buttonVariants = cva(
         action: "h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5",
         // Modal / flow / settings submit button: the action pill plus a stable minimum width so
         // the label can swap (e.g. "Execute" → spinner) without the button resizing. Replaces the
-        // per-call magic min-w-[82/112/114/122px]. Pair with a `w-full lg:w-auto` wrapper for the
-        // full-width-on-mobile flow submit pattern. Same `h-9` as `action` — a dialog footer should
-        // not be taller than the CTA it mirrors on the page.
+        // per-call magic min-w-[82/112/114/122px]. In a tx flow it shares one row with the Back
+        // button at every width (see TxCardActions), so never make it full-width. Same `h-9` as
+        // `action` — a dialog footer should not be taller than the CTA it mirrors on the page.
         submit: "h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5",
         // Full-screen onboarding / flow footer CTA: the taller 48px scale used by the Spaces
-        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset; pair with a
-        // `w-full xl:flex-1` wrapper for the stacked-mobile → row-on-xl layout.
+        // onboarding Back/Continue buttons. Use via the OnboardingFooter preset, which shares one
+        // row between them and stacks only when a long label leaves no room.
         xl: 'h-12 gap-2 px-6',
         icon: 'size-9',
         'icon-xs': "size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8 in-data-[slot=button-group]:rounded-sm',
+        // 24px disc around a 16px glyph: the icon-button geometry the design system uses for a
+        // control tucked into a corner. `icon-xs` shares the box but keeps the square-ish radius
+        // and a 12px glyph, which reads as a different control.
+        'icon-circle': "size-6 rounded-full [&_svg:not([class*='size-'])]:size-4",
+      },
+      weight: {
+        medium: '',
+        semibold: 'font-semibold',
+      },
+      // Brand-green icon on a primary CTA (Safe Pro "Start free access" pattern).
+      accentIcon: {
+        true: '[&_svg]:text-green-400 dark:[&_svg]:text-primary-foreground',
       },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      weight: 'medium',
     },
   },
 )
@@ -110,13 +135,15 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  weight = 'medium',
+  accentIcon,
   render,
   nativeButton,
   disabled,
   focusableWhenDisabled,
   ...props
 }: ButtonProps) {
-  const buttonClassName = cn(buttonVariants({ variant, size, className }))
+  const buttonClassName = cn(buttonVariants({ variant, size, weight, accentIcon, className }))
 
   if (isAnchorRender(render)) {
     const anchorProps = props as React.ComponentPropsWithoutRef<'a'>

@@ -7,7 +7,7 @@ const defaultProps = {
   title: 'Spending limit',
   description: 'Let spenders access assets without collecting signatures.',
   Icon: WalletCards,
-  isAvailable: true,
+  action: 'Set policy',
   onClick: jest.fn(),
 }
 
@@ -25,37 +25,64 @@ describe('PolicyCatalogueTile', () => {
   it('states the policy name and what it does', () => {
     render(<PolicyCatalogueTile {...defaultProps} />)
 
-    expect(screen.getByRole('button', { name: /Spending limit/ })).toBeInTheDocument()
+    expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Let spenders access assets without collecting signatures.')).toBeInTheDocument()
   })
 
-  it('calls onClick when an available tile is clicked', async () => {
-    const { user } = renderWithUserEvent(<PolicyCatalogueTile {...defaultProps} />)
-
-    await user.click(screen.getByRole('button', { name: /Spending limit/ }))
-
-    expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
-  })
-
-  it('marks an unavailable tile as Soon and disabled', () => {
-    render(<PolicyCatalogueTile {...defaultProps} isAvailable={false} />)
-
-    expect(screen.getByText('Soon')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Spending limit/ })).toHaveAttribute('aria-disabled', 'true')
-  })
-
-  it('does not mark an available tile as Soon', () => {
+  it('should, when rendered, name the button after its action and the policy', () => {
     render(<PolicyCatalogueTile {...defaultProps} />)
 
-    expect(screen.queryByText('Soon')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Spending limit/ })).not.toHaveAttribute('aria-disabled')
+    expect(screen.getByRole('button', { name: 'Set policy: Spending limit' })).toHaveTextContent('Set policy')
   })
 
-  it('still calls onClick for an unavailable tile so the click can be tracked', async () => {
-    const { user } = renderWithUserEvent(<PolicyCatalogueTile {...defaultProps} isAvailable={false} />)
+  it('should, when the button is clicked, call onClick once', async () => {
+    const { user } = renderWithUserEvent(<PolicyCatalogueTile {...defaultProps} />)
 
-    await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+    await user.click(screen.getByRole('button', { name: 'Set policy: Spending limit' }))
 
     expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('should, when locked, render how many accounts have the policy', () => {
+    render(<PolicyCatalogueTile {...defaultProps} locked accountCount={{ applied: 0, total: 6 }} />)
+
+    expect(screen.getByTestId('policy-account-count')).toHaveTextContent('0 / 6 Accounts')
+  })
+
+  it('should, when locked, keep the Set policy button and call onClick from it', async () => {
+    const { user } = renderWithUserEvent(
+      <PolicyCatalogueTile {...defaultProps} locked accountCount={{ applied: 0, total: 6 }} />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Set policy: Spending limit' }))
+
+    expect(defaultProps.onClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('should, when locked without an account count, render no account counter', () => {
+    render(<PolicyCatalogueTile {...defaultProps} locked />)
+
+    expect(screen.queryByTestId('policy-account-count')).not.toBeInTheDocument()
+    expect(screen.getByTestId('policy-locked-icon')).toBeInTheDocument()
+  })
+
+  it('should, when not locked, render no account counter', () => {
+    render(<PolicyCatalogueTile {...defaultProps} />)
+
+    expect(screen.queryByTestId('policy-account-count')).not.toBeInTheDocument()
+  })
+
+  it('should, when locked, show a lock on the Set policy button and keep its accessible name', () => {
+    render(<PolicyCatalogueTile {...defaultProps} locked accountCount={{ applied: 0, total: 6 }} />)
+
+    const button = screen.getByRole('button', { name: 'Set policy: Spending limit' })
+
+    expect(button).toContainElement(screen.getByTestId('policy-locked-icon'))
+  })
+
+  it('should, when not locked, show no lock on the button', () => {
+    render(<PolicyCatalogueTile {...defaultProps} />)
+
+    expect(screen.queryByTestId('policy-locked-icon')).not.toBeInTheDocument()
   })
 })

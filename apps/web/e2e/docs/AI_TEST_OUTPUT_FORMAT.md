@@ -191,7 +191,7 @@ Use web-first assertions only. Never extract text manually and assert on the raw
 
 ```typescript
 // ✅ Good — web-first, auto-retrying, role-based
-await expect(page.getByRole('alert')).toContainText('Email is required')
+await expect(page.getByRole('alert').filter({ hasText: 'Email is required' })).toBeVisible()
 await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled()
 await expect(page.getByRole('heading', { name: user.name })).toBeVisible()
 

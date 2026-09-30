@@ -30,10 +30,12 @@ export const ANALYTICS_LABELS = {
     SWAP_OWNER: 'owner_swap',
     CHANGE_THRESHOLD: 'owner_threshold_change',
     DELETE_GUARD: 'guard_remove',
+    DELETE_MODULE_GUARD: 'module_guard_remove',
     DISABLE_MODULE: 'module_remove',
     ENABLE_MODULE: 'module_enable',
     SET_FALLBACK_HANDLER: 'fallback_handler_set',
     SET_GUARD: 'guard_set',
+    SET_MODULE_GUARD: 'module_guard_set',
     CHANGE_MASTER_COPY: 'safe_update',
   } as const satisfies Record<SettingsInfoType, string>,
 

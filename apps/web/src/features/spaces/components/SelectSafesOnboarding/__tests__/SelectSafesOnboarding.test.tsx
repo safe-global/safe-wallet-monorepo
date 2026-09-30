@@ -1,4 +1,4 @@
-import { render, screen, act } from '@/tests/test-utils'
+import { render, screen, act, fireEvent } from '@/tests/test-utils'
 import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
@@ -9,6 +9,11 @@ jest.mock('@/features/spaces/constants', () => ({
 }))
 
 jest.mock('@/hooks/useIsSurveyEnabled')
+let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 10, isError: false }
+const mockRetryLimit = jest.fn()
+jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
+}))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
 
 // Captured props from OnboardingSafesList renders
@@ -56,19 +61,33 @@ jest.mock('../hooks/useOnboardingSafes', () => ({
   }),
 }))
 
+let mockStep: 'select' | 'name' = 'select'
+const mockShowSelectStep = jest.fn()
+
 jest.mock('../hooks/useOnboardingSubmit', () => ({
   __esModule: true,
   default: function useOnboardingSubmitMock() {
     const { useForm } = require('react-hook-form')
-    const formMethods = useForm({ defaultValues: { selectedSafes: {} } })
+    const formMethods = useForm({ defaultValues: { selectedSafes: {}, names: {} } })
     return {
       formMethods,
       onSubmit: jest.fn((e?: Event) => e?.preventDefault?.()),
-      selectedSafesLength: 0,
+      selectedSafesLength: mockStep === 'name' ? 1 : 0,
       error: undefined,
       isSubmitting: false,
+      isAddressBookReady: true,
+      step: mockStep,
+      safesToName: mockStep === 'name' ? mockTrustedSafes : [],
+      showSelectStep: mockShowSelectStep,
     }
   },
+}))
+
+jest.mock('../../NameAccounts', () => ({
+  ...jest.requireActual('../../NameAccounts'),
+  NameAccountsFields: ({ items }: { items: unknown[] }) => (
+    <div data-testid="name-accounts-fields" data-count={items.length} />
+  ),
 }))
 
 let mockWalletValue: { address: string } | null = { address: '0xWallet' }
@@ -82,6 +101,13 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
+jest.mock('../../Plans/CheckoutReturnModals', () => ({
+  __esModule: true,
+  default: ({ trialCtaLabel }: { trialCtaLabel?: string }) => (
+    <div data-testid="checkout-return-modals">{trialCtaLabel}</div>
+  ),
+}))
+
 const makeSafe = (chainId: string, address: string) => ({
   chainId,
   address,
@@ -89,6 +115,22 @@ const makeSafe = (chainId: string, address: string) => ({
   isReadOnly: false,
   lastVisited: 0,
   name: undefined,
+})
+
+describe('SelectSafesOnboarding — Stripe return', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  it('confirms the trial on landing with a Get started CTA', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
+  })
 })
 
 describe('SelectSafesOnboarding — selection wiring', () => {
@@ -99,6 +141,7 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     mockOwnedSafes = []
     mockFlagged = new Set<string>()
     mockWalletValue = { address: '0xWallet' }
+    mockSafeLimit = { limit: 10, isError: false }
   })
 
   it('shows a selected-count of the per-workspace cap instead of a select-all control', () => {
@@ -129,6 +172,23 @@ describe('SelectSafesOnboarding — selection wiring', () => {
     act(() => onToggle({ key: '1:0xA', variant: 'single', address: '0xA', source: makeSafe('1', '0xA') }, true))
 
     expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 10 selected')
+  })
+
+  it('shows no limit and locks the list while the limit is unknown', () => {
+    mockSafeLimit = { limit: undefined, isError: false }
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent(/^\s*0 selected$/)
+    expect(capturedListProps.isAtLimit).toBe(true)
+    expect(screen.queryByTestId('safe-limit-error')).not.toBeInTheDocument()
+  })
+
+  it('offers a retry when the limit fails to load', () => {
+    mockSafeLimit = { limit: undefined, isError: true }
+    render(<SelectSafesOnboarding />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(mockRetryLimit).toHaveBeenCalled()
   })
 })
 
@@ -190,5 +250,46 @@ describe('SelectSafesOnboarding — step counter reflects the survey flag', () =
     mockedUseIsSurveyEnabled.mockReturnValue(true)
     render(<SelectSafesOnboarding />)
     expect(screen.getByRole('group', { name: 'Step 2 of 4' })).toBeInTheDocument()
+  })
+})
+
+describe('SelectSafesOnboarding — naming step', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    capturedListProps = {}
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+    mockStep = 'name'
+  })
+
+  afterEach(() => {
+    mockStep = 'select'
+  })
+
+  it('replaces the list with the name fields and keeps the step counter on step 2', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByText('Name your Safe accounts')).toBeInTheDocument()
+    expect(screen.getByTestId('name-accounts-fields')).toHaveAttribute('data-count', '1')
+    expect(screen.queryByTestId('onboarding-safes-list')).not.toBeInTheDocument()
+    expect(screen.getByRole('group', { name: /Step 2 of/ })).toBeInTheDocument()
+  })
+
+  it('submits with an "Add accounts" label and hides the skip link', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('select-safes-continue-button')).toHaveTextContent('Add accounts')
+    expect(screen.queryByTestId('select-safes-skip-link')).not.toBeInTheDocument()
+  })
+
+  it('goes back to the selection step instead of the previous onboarding page', () => {
+    render(<SelectSafesOnboarding />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+
+    expect(mockShowSelectStep).toHaveBeenCalled()
+    expect(mockHandleBack).not.toHaveBeenCalled()
   })
 })

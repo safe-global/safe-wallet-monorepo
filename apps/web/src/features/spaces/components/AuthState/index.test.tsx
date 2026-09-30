@@ -8,17 +8,20 @@ const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
+let mockPathname = '/spaces/security'
 let mockIsAuthenticated = true
 let mockIsOidcLoginPending = false
+let mockIsSessionCheckPending = false
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ replace: mockReplace, pathname: '/spaces/security' }),
+  useRouter: () => ({ replace: mockReplace, pathname: mockPathname }),
 }))
 
 jest.mock('@/store', () => ({
   useAppSelector: (selector: string) => {
     if (selector === 'isAuthenticated') return mockIsAuthenticated
     if (selector === 'selectIsOidcLoginPending') return mockIsOidcLoginPending
+    if (selector === 'selectIsSessionCheckPending') return mockIsSessionCheckPending
     return undefined
   },
   useAppDispatch: () => mockDispatch,
@@ -27,6 +30,7 @@ jest.mock('@/store', () => ({
 jest.mock('@/store/authSlice', () => ({
   isAuthenticated: 'isAuthenticated',
   selectIsOidcLoginPending: 'selectIsOidcLoginPending',
+  selectIsSessionCheckPending: 'selectIsSessionCheckPending',
   setLastUsedSpace: (id: string) => ({ type: 'setLastUsedSpace', payload: id }),
 }))
 
@@ -49,11 +53,6 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => mockUseHasFeature(),
 }))
 
-jest.mock('../SignedOutState', () => ({
-  __esModule: true,
-  default: () => <div data-testid="signed-out" />,
-}))
-
 jest.mock('../UnauthorizedState', () => ({
   __esModule: true,
   default: () => <div data-testid="unauthorized" />,
@@ -69,11 +68,20 @@ jest.mock('@/features/spaces/utils', () => ({
 }))
 
 jest.mock('@/config/routes', () => ({
-  AppRoutes: { welcome: { spaces: '/welcome/spaces' } },
+  AppRoutes: { welcome: { spaces: '/welcome/spaces' }, spaces: { index: '/spaces', plans: '/spaces/plans' } },
 }))
 
 jest.mock('@/features/spaces', () => ({
   MemberStatus: { ACTIVE: 'ACTIVE' },
+}))
+
+jest.mock('../Plans/TrialEndingModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="trial-ending-modal" data-space={spaceId} />,
+}))
+jest.mock('../Plans/WorkspaceLockModal', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="workspace-lock-modal" data-space={spaceId} />,
 }))
 
 describe('AuthState', () => {
@@ -81,6 +89,8 @@ describe('AuthState', () => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
     mockIsOidcLoginPending = false
+    mockIsSessionCheckPending = false
+    mockPathname = '/spaces/security'
     mockIsUnauthorized.mockReturnValue(false)
     mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
@@ -172,6 +182,22 @@ describe('AuthState', () => {
     )
 
     expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('mounts the lock modal next to the page instead of redirecting a locked Workspace', () => {
+    render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(screen.getByTestId('children')).toBeInTheDocument()
+    expect(screen.getByTestId('workspace-lock-modal')).toHaveAttribute(
+      'data-space',
+      '11111111-1111-1111-1111-111111111111',
+    )
+    expect(screen.getByTestId('trial-ending-modal')).toBeInTheDocument()
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
@@ -278,7 +304,7 @@ describe('AuthState', () => {
     expect(queryByTestId('loading')).not.toBeNull()
   })
 
-  it('does not redirect when the user is signed out', () => {
+  it('shows the loading state without redirecting when the user is signed out', () => {
     mockIsAuthenticated = false
     mockIsUnauthorized.mockReturnValue(true)
 
@@ -289,7 +315,21 @@ describe('AuthState', () => {
     )
 
     expect(mockReplace).not.toHaveBeenCalled()
-    expect(queryByTestId('signed-out')).not.toBeNull()
+    expect(queryByTestId('loading')).not.toBeNull()
+    expect(queryByTestId('children')).toBeNull()
+  })
+
+  it('shows the loading state instead of the page while the session is being verified', () => {
+    mockIsSessionCheckPending = true
+
+    const { queryByTestId } = render(
+      <AuthState spaceId="11111111-1111-1111-1111-111111111111">
+        <div data-testid="children" />
+      </AuthState>,
+    )
+
+    expect(queryByTestId('loading')).not.toBeNull()
+    expect(queryByTestId('children')).toBeNull()
   })
 
   it('does not redirect when the user is still authorized', () => {

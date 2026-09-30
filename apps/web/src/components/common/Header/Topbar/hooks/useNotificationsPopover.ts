@@ -2,6 +2,7 @@ import { useMemo, useState, type MouseEvent } from 'react'
 
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
+  selectCenterNotifications,
   selectNotifications,
   readNotification,
   closeNotification,
@@ -15,7 +16,10 @@ export const NOTIFICATION_CENTER_LIMIT = 4
 const useNotificationsPopover = () => {
   useShowNotificationsRenewalMessage()
   const dispatch = useAppDispatch()
-  const notifications = useAppSelector(selectNotifications)
+  const notifications = useAppSelector(selectCenterNotifications)
+  // Opening the bell dismisses every visible toast, errors included — so that sweep needs the
+  // unfiltered list.
+  const allNotifications = useAppSelector(selectNotifications)
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null)
   const [showAll, setShowAll] = useState<boolean>(false)
   const open = Boolean(anchorEl)
@@ -44,7 +48,7 @@ const useNotificationsPopover = () => {
     if (!open) {
       trackEvent(OVERVIEW_EVENTS.NOTIFICATION_CENTER)
 
-      notifications.forEach(({ isDismissed, id }) => {
+      allNotifications.forEach(({ isDismissed, id }) => {
         if (!isDismissed) {
           dispatch(closeNotification({ id }))
         }

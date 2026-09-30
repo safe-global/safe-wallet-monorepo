@@ -3,6 +3,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 /**
  * Renew a pending invitation (resends the email for email invites).
@@ -18,6 +19,7 @@ const useRenewInvite = (member: MemberDto) => {
 
     const { error } = await renewInvite({ spaceId, userId: member.user.id })
 
+    if (isElevationRequiredError(error)) return
     if (error) {
       dispatch(
         showNotification({

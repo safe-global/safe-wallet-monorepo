@@ -12,7 +12,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { Eip1193Provider, JsonRpcSigner } from 'ethers'
 import { isHardwareWallet, isWalletConnect } from '@/utils/wallets'
 import { getChainConfig } from '@/utils/chains'
-import { createWeb3, getWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { createWeb3 } from '@/hooks/wallets/web3'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { toQuantity } from 'ethers'
 import { connectWallet, getConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type OnboardAPI } from '@web3-onboard/core'
@@ -20,8 +21,34 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { UncheckedJsonRpcSigner } from '@/utils/providers/UncheckedJsonRpcSigner'
 import get from 'lodash/get'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { hasActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import { logError } from '@/services/exceptions'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 
-export const getAndValidateSafeSDK = (): Safe => {
+/**
+ * The SDK for the Safe being transacted on.
+ *
+ * With a `scope` (Space-level flow) it is that Safe's own instance — never the app-wide one, even if the
+ * scoped one is not ready yet. Without one it is the app-wide SDK that `useInitSafeCoreSDK` binds to the URL Safe —
+ * unless a `SafeScopeProvider` is mounted and the caller simply forgot to pass its scope, in which
+ * case falling back to that URL-Safe SDK would silently sign for the wrong Safe, so this throws instead.
+ */
+export const getAndValidateSafeSDK = (scope?: TxSenderScope): Safe => {
+  if (scope) {
+    if (!scope.sdk) {
+      throw new Error('The Safe SDK for the selected Safe account is not initialized yet.')
+    }
+    return scope.sdk
+  }
+
+  if (hasActiveScope()) {
+    // A Space-level flow is open but this caller did not pass its scope: it is about to use the URL
+    // Safe's SDK. Safe-level routes never hit this (no provider mounted).
+    logError(ErrorCodes._822, 'getAndValidateSafeSDK called without a scope while a SafeScopeProvider is mounted')
+    throw new Error('A Safe account must be selected before transacting in this flow.')
+  }
+
   const safeSDK = getSafeSDK()
   if (!safeSDK) {
     throw new Error(
@@ -31,7 +58,14 @@ export const getAndValidateSafeSDK = (): Safe => {
   return safeSDK
 }
 
-export const getSafeProvider = () => {
+export const getSafeProvider = (scope?: TxSenderScope) => {
+  if (scope) {
+    if (!scope.web3ReadOnly) {
+      throw new Error('The provider for the selected Safe account is not initialized yet.')
+    }
+    return new SafeProvider({ provider: scope.web3ReadOnly._getConnection().url })
+  }
+
   const provider = getWeb3ReadOnly()
   if (!provider) {
     throw new Error('Provider not found.')
@@ -140,8 +174,8 @@ export const getUncheckedSigner = async (provider: Eip1193Provider) => {
   return new UncheckedJsonRpcSigner(browserProvider, (await browserProvider.getSigner()).address)
 }
 
-export const getSafeSDKWithSigner = async (provider: Eip1193Provider): Promise<Safe> => {
-  const sdk = getAndValidateSafeSDK()
+export const getSafeSDKWithSigner = async (provider: Eip1193Provider, scope?: TxSenderScope): Promise<Safe> => {
+  const sdk = getAndValidateSafeSDK(scope)
 
   return sdk.connect({ provider })
 }
@@ -155,8 +189,12 @@ export const isDelegateCall = (safeTx: SafeTransaction): boolean => {
 }
 
 // TODO: This is a workaround and a duplication of sdk.executeTransaction but it returns the encoded tx instead of executing it.
-export const prepareTxExecution = async (safeTransaction: SafeTransaction, provider: Eip1193Provider) => {
-  const sdk = await getSafeSDKWithSigner(provider)
+export const prepareTxExecution = async (
+  safeTransaction: SafeTransaction,
+  provider: Eip1193Provider,
+  scope?: TxSenderScope,
+) => {
+  const sdk = await getSafeSDKWithSigner(provider, scope)
 
   if (!sdk.getContractManager().safeContract) {
     throw new Error('Safe is not deployed')
@@ -202,8 +240,8 @@ export const prepareTxExecution = async (safeTransaction: SafeTransaction, provi
 }
 
 // TODO: This is a duplication of sdk.approveTransactionHash but it returns the encoded tx instead of executing it.
-export const prepareApproveTxHash = async (hash: string, provider: Eip1193Provider) => {
-  const sdk = await getSafeSDKWithSigner(provider)
+export const prepareApproveTxHash = async (hash: string, provider: Eip1193Provider, scope?: TxSenderScope) => {
+  const sdk = await getSafeSDKWithSigner(provider, scope)
 
   const safeContract = sdk.getContractManager().safeContract
 

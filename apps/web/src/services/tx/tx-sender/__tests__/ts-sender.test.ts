@@ -1,4 +1,6 @@
+import { waitFor } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { SpaceRelayDto } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import type Safe from '@safe-global/protocol-kit'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
@@ -8,6 +10,7 @@ import {
   createTx,
   createExistingTx,
   createRejectTx,
+  dispatchTxConfirmation,
   dispatchTxExecution,
   dispatchTxProposal,
   dispatchTxSigning,
@@ -231,74 +234,6 @@ describe('txSender', () => {
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSED', {
         txId: '123',
         nonce: 0,
-        signerAddress: undefined,
-        chainId: '4',
-        safeAddress: '0x123',
-      })
-    })
-
-    it('should dispatch a SIGNATURE_PROPOSED event if tx has signatures and an id', async () => {
-      server.use(
-        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
-          return HttpResponse.json({
-            txId: '123',
-            txInfo: {
-              type: 'Custom',
-              to: { value: '0x123' },
-              dataSize: '100',
-              isCancellation: false,
-            },
-            timestamp: Date.now(),
-            txStatus: 'AWAITING_CONFIRMATIONS',
-          })
-        }),
-      )
-
-      const tx = createMockSafeTransaction({
-        to: '0x123',
-        data: '0x0',
-      })
-      tx.addSignature(generatePreValidatedSignature('0x1234567890123456789012345678901234567890'))
-
-      const proposedTx = await dispatchTxProposal({
-        chainId: '4',
-        safeAddress: '0x123',
-        sender: '0x456',
-        safeTx: tx,
-        txId: '345',
-      })
-
-      expect(proposedTx.txId).toBe('123')
-
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
-        txId: '123',
-        signerAddress: '0x456',
-        nonce: 0,
-        chainId: '4',
-        safeAddress: '0x123',
-      })
-    })
-
-    it('should fail to propose a signature', async () => {
-      server.use(
-        http.post(`${GATEWAY_URL}/v1/chains/4/transactions/0x123/propose`, () => {
-          return HttpResponse.json({ message: 'Invalid transaction' }, { status: 400 })
-        }),
-      )
-
-      const tx = await createTx({
-        to: '0x123',
-        value: '1',
-        data: '0x0',
-      })
-
-      await expect(
-        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, txId: '345' }),
-      ).rejects.toThrow()
-
-      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
-        txId: '345',
-        error: expect.any(Error),
         chainId: '4',
         safeAddress: '0x123',
       })
@@ -324,6 +259,190 @@ describe('txSender', () => {
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSE_FAILED', {
         error: expect.any(Error),
       })
+    })
+  })
+
+  describe('dispatchTxConfirmation', () => {
+    const SAFE_ADDRESS = '0x123'
+    const OTHER_SIGNER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
+    const TX_ID = `multisig_${SAFE_ADDRESS}_${TX_HASH}`
+    const CONFIRMATIONS_URL = `${GATEWAY_URL}/v1/chains/4/transactions/${TX_HASH}/confirmations`
+    const PROPOSE_URL = `${GATEWAY_URL}/v1/chains/4/transactions/${SAFE_ADDRESS}/propose`
+
+    const confirmationResponse = {
+      txId: TX_ID,
+      safeAddress: SAFE_ADDRESS,
+      txHash: null,
+      txStatus: 'AWAITING_CONFIRMATIONS',
+      txInfo: { type: 'Custom', to: { value: '0x123' }, dataSize: '100', isCancellation: false },
+      detailedExecutionInfo: { type: 'MULTISIG', nonce: 0, confirmationsRequired: 3, confirmations: [] },
+    }
+
+    const createSignedTx = (...signers: string[]) => {
+      const tx = createMockSafeTransaction({ to: '0x123', data: '0x0' })
+      signers.forEach((signer) => tx.addSignature(generatePreValidatedSignature(signer)))
+      return tx
+    }
+
+    it('should send the signature to the confirmations endpoint and dispatch SIGNATURE_PROPOSED', async () => {
+      const proposeHandler = jest.fn()
+      let capturedBody: unknown
+
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json(confirmationResponse)
+        }),
+        http.post(PROPOSE_URL, () => {
+          proposeHandler()
+          return HttpResponse.json({ txId: TX_ID })
+        }),
+      )
+
+      const tx = createSignedTx(OTHER_SIGNER, SIGNER_ADDRESS)
+
+      const confirmedTx = await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: SIGNER_ADDRESS,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      expect(confirmedTx).toEqual(confirmationResponse)
+      expect(capturedBody).toEqual({ signature: generatePreValidatedSignature(SIGNER_ADDRESS).data })
+      expect(proposeHandler).not.toHaveBeenCalled()
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSED', {
+        txId: TX_ID,
+        signerAddress: SIGNER_ADDRESS,
+        nonce: 0,
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+      })
+    })
+
+    it('should look up the signature by sender regardless of address casing', async () => {
+      let capturedBody: unknown
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json(confirmationResponse)
+        }),
+      )
+
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: OTHER_SIGNER.toUpperCase().replace('0X', '0x'),
+        safeTx: createSignedTx(OTHER_SIGNER),
+        txId: TX_ID,
+      })
+
+      expect(capturedBody).toEqual({ signature: generatePreValidatedSignature(OTHER_SIGNER).data })
+    })
+
+    it('should add each subsequent signature as a confirmation without re-proposing', async () => {
+      const proposeHandler = jest.fn()
+      const capturedBodies: unknown[] = []
+
+      server.use(
+        http.post(CONFIRMATIONS_URL, async ({ request }) => {
+          capturedBodies.push(await request.json())
+          return HttpResponse.json(confirmationResponse)
+        }),
+        http.post(PROPOSE_URL, () => {
+          proposeHandler()
+          return HttpResponse.json({ txId: TX_ID })
+        }),
+      )
+
+      const tx = createSignedTx(SIGNER_ADDRESS)
+
+      tx.addSignature(generatePreValidatedSignature(OTHER_SIGNER))
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: OTHER_SIGNER,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      const THIRD_SIGNER = '0x9999999999999999999999999999999999999999'
+      tx.addSignature(generatePreValidatedSignature(THIRD_SIGNER))
+      await dispatchTxConfirmation({
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+        sender: THIRD_SIGNER,
+        safeTx: tx,
+        txId: TX_ID,
+      })
+
+      expect(proposeHandler).not.toHaveBeenCalled()
+      expect(capturedBodies).toEqual([
+        { signature: generatePreValidatedSignature(OTHER_SIGNER).data },
+        { signature: generatePreValidatedSignature(THIRD_SIGNER).data },
+      ])
+      expect(txEvents.txDispatch).toHaveBeenCalledTimes(2)
+      expect(txEvents.txDispatch).toHaveBeenNthCalledWith(
+        1,
+        'SIGNATURE_PROPOSED',
+        expect.objectContaining({ signerAddress: OTHER_SIGNER }),
+      )
+      expect(txEvents.txDispatch).toHaveBeenNthCalledWith(
+        2,
+        'SIGNATURE_PROPOSED',
+        expect.objectContaining({ signerAddress: THIRD_SIGNER }),
+      )
+    })
+
+    it('should dispatch SIGNATURE_PROPOSE_FAILED when the gateway rejects the confirmation', async () => {
+      server.use(
+        http.post(CONFIRMATIONS_URL, () => HttpResponse.json({ message: 'Invalid signature' }, { status: 422 })),
+      )
+
+      await expect(
+        dispatchTxConfirmation({
+          chainId: '4',
+          safeAddress: SAFE_ADDRESS,
+          sender: SIGNER_ADDRESS,
+          safeTx: createSignedTx(SIGNER_ADDRESS),
+          txId: TX_ID,
+        }),
+      ).rejects.toThrow('Invalid signature')
+
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('SIGNATURE_PROPOSE_FAILED', {
+        txId: TX_ID,
+        error: expect.any(Error),
+        chainId: '4',
+        safeAddress: SAFE_ADDRESS,
+      })
+      expect(txEvents.txDispatch).not.toHaveBeenCalledWith('SIGNATURE_PROPOSED', expect.anything())
+    })
+
+    it('should fail without calling the gateway when the sender has not signed', async () => {
+      const confirmationsHandler = jest.fn()
+      server.use(
+        http.post(CONFIRMATIONS_URL, () => {
+          confirmationsHandler()
+          return HttpResponse.json(confirmationResponse)
+        }),
+      )
+
+      await expect(
+        dispatchTxConfirmation({
+          chainId: '4',
+          safeAddress: SAFE_ADDRESS,
+          sender: SIGNER_ADDRESS,
+          safeTx: createSignedTx(OTHER_SIGNER),
+          txId: TX_ID,
+        }),
+      ).rejects.toThrow(`No signature from ${SIGNER_ADDRESS} found on transaction ${TX_ID}`)
+
+      expect(confirmationsHandler).not.toHaveBeenCalled()
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'SIGNATURE_PROPOSE_FAILED',
+        expect.objectContaining({ txId: TX_ID }),
+      )
     })
   })
 
@@ -564,6 +683,100 @@ describe('txSender', () => {
 
       expect(receivedBody.safeTxHash).toBe('0x1234567890')
     })
+
+    it("relays at the Workspace's expense when a sponsoring space is given, without the chain-only gas limit", async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.3.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as unknown as Awaited<ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>>)
+
+      let receivedBody: SpaceRelayDto | undefined
+      const chainRelay = jest.fn()
+      const entitlementsRead = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () => {
+          chainRelay()
+          return HttpResponse.json({ taskId: '0xchain' })
+        }),
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
+          receivedBody = (await request.json()) as SpaceRelayDto
+          return HttpResponse.json({ taskId: '0xspace' })
+        }),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
+      )
+
+      await dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, 100000, true, undefined, 'space-1')
+
+      expect(chainRelay).not.toHaveBeenCalled()
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+      expect(receivedBody).toEqual({
+        to: safeAddress,
+        data: '0xabcd',
+        version: '1.3.0',
+        safeTxHash: '0x1234567890',
+        acceptUnverifiedSimulation: true,
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
+    })
+
+    it('types a spent sponsored allowance (402) and re-reads the Workspace entitlements', async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.3.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as unknown as Awaited<ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>>)
+      const entitlementsRead = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
+          HttpResponse.json(
+            {
+              code: 'QUOTA_EXCEEDED',
+              message: 'Quota exceeded for sponsored_transactions: 50 of 50 used.',
+              feature: 'sponsored_transactions',
+              quota: 50,
+              used: 50,
+              resetsAt: '2026-11-01T00:00:00.000Z',
+            },
+            { status: 402 },
+          ),
+        ),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
+      )
+
+      await expect(
+        dispatchTxRelay(safeTx, safe, 'multisig_0x1', chain, undefined, undefined, undefined, 'space-1'),
+      ).rejects.toMatchObject({
+        name: 'QuotaExceededError',
+        feature: 'sponsored_transactions',
+        quota: 50,
+        resetsAt: '2026-11-01T00:00:00.000Z',
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'FAILED',
+        expect.objectContaining({ error: expect.objectContaining({ name: 'QuotaExceededError' }) }),
+      )
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+    })
   })
 
   describe('dispatchBatchExecutionRelay', () => {
@@ -623,6 +836,29 @@ describe('txSender', () => {
         chainId: '5',
         safeAddress,
       })
+    })
+
+    it("relays the batch at the Workspace's expense when a sponsoring space is given", async () => {
+      const mockMultisendAddress = zeroPadValue('0x1234', 20)
+      const safeAddress = toBeHex('0x567', 20)
+      const txs = [{ txId: 'multisig_0x01', detailedExecutionInfo: { type: 'MULTISIG' } } as TransactionDetails]
+      const multisendContractMock = {
+        encode: jest.fn(() => '0xfefe'),
+        getAddress: () => mockMultisendAddress,
+      } as unknown as MultiSendCallOnlyContractImplementationType
+
+      let receivedBody: SpaceRelayDto | undefined
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, async ({ request }) => {
+          receivedBody = (await request.json()) as SpaceRelayDto
+          return HttpResponse.json({ taskId: '0xspace' })
+        }),
+      )
+
+      await dispatchBatchExecutionRelay(txs, multisendContractMock, '0x1234', '5', safeAddress, '1.3.0', 'space-1')
+
+      expect(receivedBody).toEqual({ to: mockMultisendAddress, data: '0xfefe', version: '1.3.0' })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
     })
   })
 })

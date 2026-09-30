@@ -12,7 +12,7 @@ import { WalletConnectFeature } from '@/features/walletconnect'
 import { useDraftBatch } from '@/features/batching'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectNotifications } from '@/store/notificationsSlice'
+import { selectCenterNotifications } from '@/store/notificationsSlice'
 import { openGlobalSearch } from '@/features/global-search/store'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -77,17 +77,18 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
   const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
-  const notifications = useAppSelector(selectNotifications)
+  const notifications = useAppSelector(selectCenterNotifications)
   const spaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
   const pathname = usePathname()
   const isWelcomeListRoute = pathname === AppRoutes.welcome.accounts || pathname === AppRoutes.welcome.spaces
   const urlSafeAddress = useSafeAddressFromUrl()
   const isSettingsWithoutSafe = pathname?.startsWith(AppRoutes.settings.index) === true && !urlSafeAddress
+  const isPoliciesRoute = pathname === AppRoutes.spaces.policies
   // Routes with no Safe context show the bare logo on the left instead of the safe selector or
   // the search input. It's a 24px mark that always fits beside the actions, so it opts out of
   // the wrapping the two wide variants need — logo left, actions right, at every width.
-  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute
+  const showLogo = isSettingsWithoutSafe || isWelcomeListRoute || isPoliciesRoute
   const safeAddress = useSafeAddress()
   const isProposer = useIsWalletProposer()
   const isSafeOwner = useIsSafeOwner()
@@ -98,7 +99,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
   // On space routes we show the global search input by default, but when a transaction
   // modal is open (e.g. Send via the Actions Tray) the URL keeps the space pathname —
   // swap in the SpaceSafeBar so the user can see the Safe they're transacting against.
-  const showSpaceSafeBar = !isSpaceRoute || Boolean(txFlow)
+  // It needs a `safeAddress` to mean anything: a flow that picks its Safe inside its own steps (the
+  // policy flows) never touches the URL, so the bar would render an empty selector over the Space.
+  const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
   // Which wrap threshold and slot height apply follow the context variant — see the constants above.
   const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP

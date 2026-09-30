@@ -1,6 +1,6 @@
 import {
   useThreatAnalysis as useThreatAnalysisUtils,
-  useThreatAnalysisWithGuard,
+  useFinalizedThreatAnalysis,
 } from '@safe-global/utils/features/safe-shield/hooks'
 import { useAppSelector } from '@/src/store/hooks'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
@@ -27,7 +27,7 @@ export function useThreatAnalysis(overrideSafeTx?: SafeTransaction) {
     safeVersion: safe.version || undefined,
   })
 
-  return useThreatAnalysisWithGuard(threat, {
+  return useFinalizedThreatAnalysis(threat, {
     safeTx: overrideSafeTx,
     safeAddress,
     safeVersion: safe.version,

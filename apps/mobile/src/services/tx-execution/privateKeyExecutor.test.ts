@@ -3,6 +3,7 @@ import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeInfo } from '@/src/types/address'
 import { executePrivateKeyTx } from './privateKeyExecutor'
+import { PrivateKeyUnavailableError } from './errors'
 import { createMockChain, createMockSafeInfo } from '@safe-global/test'
 
 const mockExecuteTx = jest.fn()
@@ -121,6 +122,7 @@ describe('executePrivateKeyTx', () => {
       mockGetPrivateKey.mockResolvedValue(undefined)
 
       await expect(executePrivateKeyTx(defaultParams)).rejects.toThrow('Private key not found')
+      await expect(executePrivateKeyTx(defaultParams)).rejects.toBeInstanceOf(PrivateKeyUnavailableError)
 
       expect(mockExecuteTx).not.toHaveBeenCalled()
     })

@@ -87,6 +87,8 @@ const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-but
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addAddressInput = '[data-testid="add-address-input"]'
+const nameAccountsRegion = '[data-testid="name-accounts-region"]'
+const nameAccountInput = '[data-testid="account-name-input"]'
 const networkSelector = '[data-testid="network-selector"]'
 const networkItem = '[data-testid="network-item"]'
 
@@ -116,9 +118,9 @@ const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
 // The signed-out /welcome/spaces keeps the Topbar, which renders its own generic "Connect Wallet"
 // button with the same data-testid as the sign-in card's button — so the card button is matched by
-// its "Continue with wallet" text instead of by index.
+// its "Connect wallet" text instead of by index.
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
-const workspaceWalletBtnText = 'Continue with wallet'
+const workspaceWalletBtnText = 'Connect wallet'
 const onboardV2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'
@@ -162,7 +164,7 @@ export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
-export const deleteSpaceConfirmationMsg = (name) => `Deleted workspace ${name}`
+export const deleteSpaceConfirmationMsg = (name) => `Deleted Workspace ${name}`
 export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
@@ -256,7 +258,7 @@ export function verifyOnSingleSpaceDashboard(spaceName) {
     .should('include', constants.spaceDashboardUrl)
     .and('include', 'spaceId=')
     .and('not.include', onboardingCreateSpacePath)
-  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).scrollIntoView().should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -291,7 +293,7 @@ export function openSpaceByName(name) {
 }
 
 export function clickOnSpaceSelector(spaceName) {
-  cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
+  cy.get(spaceSelectorBtn, { timeout: 15000 }).scrollIntoView().should('be.visible').click()
   if (spaceName) {
     cy.get(spaceSelectorMenu).contains(spaceName).click()
   }
@@ -604,7 +606,7 @@ export function openAddAccountsToWorkspace() {
     })
 }
 
-export function addAccountManually(address, network) {
+export function addAccountManually(address, network, name = 'E2E account') {
   openAddAccountsToWorkspace()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
   selectNetwork(network)
@@ -612,8 +614,11 @@ export function addAccountManually(address, network) {
   cy.get(addAddressInput).find('input').should('have.value', address)
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
   cy.get(addAccountsBtn).should('be.enabled').click()
-  // Added accounts land in the Safe accounts table; FullAddress keeps the whole address in the DOM.
+  cy.get(nameAccountsRegion).should('be.visible')
+  cy.get(nameAccountInput).first().clear().type(name)
+  cy.get(addAccountsBtn).should('be.enabled').click()
   cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
+  cy.contains(name, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================

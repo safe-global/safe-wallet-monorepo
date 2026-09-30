@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { Errors, logError } from '@/services/exceptions'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
@@ -17,16 +17,16 @@ const useSafeAppFromManifest = (
   chainId: string,
   safeAppData?: SafeAppData,
 ): UseSafeAppFromManifestReturnType => {
-  const [data, error, isLoading] = useAsync<SafeAppDataWithPermissions>(() => {
-    if (appUrl && chainId && safeAppData) return fetchSafeAppFromManifest(appUrl, chainId)
+  const [data, , isLoading] = useAsync<SafeAppDataWithPermissions>(() => {
+    if (!appUrl || !chainId || !safeAppData) return
+
+    return fetchSafeAppFromManifest(appUrl, chainId).catch((e) => {
+      logError(Errors._903, `${appUrl}, ${asError(e).message}`)
+      throw e
+    })
   }, [appUrl, chainId, safeAppData])
 
   const emptyApp = useMemo(() => getEmptySafeApp(appUrl, safeAppData), [appUrl, safeAppData])
-
-  useEffect(() => {
-    if (!error) return
-    logError(Errors._903, `${appUrl}, ${asError(error).message}`)
-  }, [appUrl, error])
 
   return { safeApp: data || emptyApp, isLoading }
 }

@@ -59,6 +59,7 @@ export enum TxFlowType {
   REPLACE_OWNER = 'replace-owner',
   SETUP_RECOVERY = 'setup-recovery',
   SETUP_SPENDING_LIMIT = 'setup-spending-limit',
+  SETUP_SPACE_SPENDING_LIMIT = 'setup-space-spending-limit',
   SIGN_MESSAGE_ON_CHAIN = 'sign-message-on-chain',
   SIGNERS_STRUCTURE = 'signers-structure',
   START_RECOVERY = 'propose-recovery',

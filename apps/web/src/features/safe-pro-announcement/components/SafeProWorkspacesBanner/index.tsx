@@ -6,11 +6,15 @@ import { cn } from '@/utils/cn'
 import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
+import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
   const isDarkMode = useDarkMode()
+  const isLive = useIsSafeProEnabled()
 
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>
@@ -22,14 +26,21 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
 
           <div className="flex w-full min-w-0 flex-1 flex-col items-start gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <div className="flex min-w-0 flex-1 flex-col items-start">
-              <Typography variant="paragraph-large-bold">Workspaces move to Safe Pro on Oct 6, 2026</Typography>
+              <Typography variant="paragraph-large-bold">{safeProMoveHeadline(isLive)}</Typography>
               <Typography variant="paragraph-small" color="muted">
                 Your Safe accounts remain free in My accounts.
               </Typography>
             </div>
 
             <Button
-              render={<a href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" />}
+              render={
+                <a
+                  onClick={() => trackSafeProBannerClick('workspaces_list')}
+                  href={SAFE_PRO_ANNOUNCEMENT_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
+              }
               className={cn('shrink-0', css.learnMore)}
             >
               Learn more

@@ -20,13 +20,14 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type Consequence = { variant: 'danger' | 'success'; text: string }
 
 const CONSEQUENCES: Consequence[] = [
-  { variant: 'danger', text: 'Members lose access to this workspace immediately.' },
+  { variant: 'danger', text: 'Members lose access to this Workspace immediately.' },
   { variant: 'danger', text: 'Member list and Safe account names are deleted.' },
-  { variant: 'success', text: 'Linked Safe accounts keep working — only the workspace is removed.' },
+  { variant: 'success', text: 'Linked Safe accounts keep working — only the Workspace is removed.' },
 ]
 
 const ConsequenceRow = ({ variant, text }: Consequence) => (
@@ -65,7 +66,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
       trackEvent({ ...SPACE_EVENTS.DELETE_SPACE })
       dispatch(
         showNotification({
-          message: `Deleted workspace ${space.name}.`,
+          message: `Deleted Workspace ${space.name}.`,
           variant: 'success',
           groupKey: 'delete-space-success',
         }),
@@ -73,8 +74,9 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
 
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
-      setError('Error deleting the workspace. Please try again.')
+      setError('Error deleting the Workspace. Please try again.')
     }
   }
 
@@ -85,7 +87,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
           <div className="flex items-center justify-center size-10 rounded-full bg-destructive/10 text-destructive shrink-0">
             <AlertTriangle className="size-5" />
           </div>
-          <AlertDialogTitle>Delete workspace</AlertDialogTitle>
+          <AlertDialogTitle>Delete Workspace</AlertDialogTitle>
           <AlertDialogDescription>This action is permanent and cannot be undone.</AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -119,7 +121,7 @@ const DeleteSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undef
         <AlertDialogFooter>
           <DialogActions
             onCancel={onClose}
-            confirmLabel="Delete workspace"
+            confirmLabel="Delete Workspace"
             onConfirm={onDelete}
             confirmDestructive
             confirmDisabled={!canConfirm}

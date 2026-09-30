@@ -18,6 +18,25 @@ import * as analytics from '@/services/analytics'
 import * as notificationsSlice from '@/store/notificationsSlice'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+
+// The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+  useSpaceSafeCount: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: jest.fn(),
+}))
+
+const mockUseIsAdmin = useIsAdmin as jest.Mock
+const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
+const mockUseSpaceSafeLimit = useSpaceSafeLimit as jest.Mock
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockChain = {
   chainId: '100',
@@ -41,6 +60,9 @@ describe('NetworkFee', () => {
 describe('ReviewStep', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseSpaceSafeCount.mockReturnValue(undefined)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
   })
 
   it('should display a pay now pay later option for counterfactual safe setups', () => {
@@ -80,6 +102,7 @@ describe('ReviewStep', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       },
     })
@@ -180,6 +203,7 @@ describe('ReviewStep', () => {
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     },
   }
 
@@ -408,5 +432,102 @@ describe('ReviewStep', () => {
 
     // The backend's message is shown, not the generic wallet-error fallback.
     expect(screen.getByText(backendMessage)).toBeInTheDocument()
+  })
+
+  describe('at the Workspace seat limit', () => {
+    const spaceReduxState = { auth: { ...authReduxState.auth, lastUsedSpace: MOCK_SPACE_UUID } }
+    const chainWithFeatures = { ...mockChain, features: [] } as Chain
+
+    // Earlier renders persist `auth` (lastUsedSpace: null); hydration would otherwise override the initial state.
+    beforeEach(() => window.localStorage.clear())
+
+    const mockCreation = () => {
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainWithFeatures)
+      jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+      jest
+        .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+        .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+      jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+      jest
+        .spyOn(multichain, 'predictAddressBasedOnReplayData')
+        .mockResolvedValue('0x0000000000000000000000000000000000000001')
+      return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    }
+
+    const singleChainData = (): NewSafeFormData => ({
+      name: 'Test',
+      networks: [chainWithFeatures],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    })
+
+    it('tells an admin upfront that the Safe will be created outside the Workspace and passes the plan limit on', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      const persistSpy = mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.getByTestId('space-seat-limit-notice')).toHaveTextContent(
+        'This Workspace is at its limit of 20 Safe accounts. The new Safe will be created in My accounts, outside the Workspace.',
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: MOCK_SPACE_UUID, spaceSafeCount: 20, spaceSafeLimit: 20 }),
+      )
+    })
+
+    it('shows no notice below the plan limit', () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(19)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
+    it('shows no notice to a member who cannot add Safes to the Workspace anyway', () => {
+      mockUseIsAdmin.mockReturnValue(false)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+
+    it('hides the notice once Pay now is selected, since only Pay later adds the Safe to the Workspace', () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockCreation()
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: spaceReduxState,
+      })
+
+      act(() => {
+        fireEvent.click(screen.getByText('Pay now'))
+      })
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
   })
 })

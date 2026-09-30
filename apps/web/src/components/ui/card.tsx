@@ -24,8 +24,10 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'), `variant` ('default' | 'outlined' | 'muted'),
- *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'xl' | 'none', default 'lg'),
+ * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'),
+ *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand'),
+ *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
+ *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -43,6 +45,11 @@ import { cn } from '@/utils/cn'
  * - 2026-07-10: Added `size="lg"` (gap-8/py-8, slot px-8); flipped the default `radius` xl→lg (`--radius-lg`, 16px)
  * - 2026-08-25: Added `surface="sunken"` (bg-surface-sunken) for inset cards nested on the page surface;
  *   orthogonal to `variant`, so it composes with `outlined`
+ * - 2026-09-02: Added `variant="muted-secondary"` (bg-muted-secondary) from the Figma DS, for plan cards
+ * - 2026-09-02: Added `radius="lg-xl"` (rounded-lg-xl, 20px) from the Figma DS, for plan cards
+ * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
+ * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
+ * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -52,6 +59,13 @@ const cardVariants = cva(
         default: '',
         outlined: 'border border-border',
         muted: 'bg-muted',
+        /* For a card nested inside a `muted` one. Translucent on purpose: over `muted` it resolves to
+           the design's #fafafa in light mode, and in dark mode it keeps stepping toward the dialog
+           surface instead of hard-coding a hex that would flip the nesting. */
+        'muted-nested': 'bg-card/50',
+        'muted-secondary': 'bg-muted-secondary',
+        brand:
+          'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',
       },
       surface: {
         default: '',
@@ -65,8 +79,17 @@ const cardVariants = cva(
       },
       radius: {
         lg: 'rounded-lg',
+        'lg-xl': 'rounded-lg-xl',
         xl: 'rounded-xl',
         none: 'rounded-none',
+      },
+      selected: {
+        true: 'border-2 border-mint shadow-lg',
+        false: 'border-2 border-transparent',
+      },
+      elevated: {
+        true: 'shadow-lg',
+        false: '',
       },
     },
     defaultVariants: {
@@ -90,6 +113,8 @@ function Card<TElement extends React.ElementType = 'div'>({
   variant = 'default',
   surface = 'default',
   radius = 'lg',
+  selected,
+  elevated,
   ...props
 }: CardProps<TElement>) {
   const Component = as ?? 'div'
@@ -101,7 +126,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-variant={variant}
       data-surface={surface}
       data-radius={radius}
-      className={cn(cardVariants({ size, variant, surface, radius }), className)}
+      className={cn(cardVariants({ size, variant, surface, radius, selected, elevated }), className)}
       {...props}
     />
   )

@@ -41,18 +41,20 @@ const MsgDetails = ({ msg }: { msg: MessageItem }): ReactElement => {
         <div className={txDetailsCss.shareLink}>
           <MsgShareLink safeMessageHash={msg.messageHash} />
         </div>
-        <div className={txDetailsCss.txData}>
-          <InfoDetails title="Created by:">
-            <EthHashInfo
-              address={msg.proposedBy.value || ''}
-              name={msg.proposedBy.name}
-              customAvatar={msg.proposedBy.logoUri || undefined}
-              shortAddress={false}
-              showCopyButton
-              hasExplorer
-            />
-          </InfoDetails>
-        </div>
+        {msg.proposedBy && (
+          <div className={txDetailsCss.txData}>
+            <InfoDetails title="Created by:">
+              <EthHashInfo
+                address={msg.proposedBy.value}
+                name={msg.proposedBy.name}
+                customAvatar={msg.proposedBy.logoUri || undefined}
+                shortAddress={false}
+                showCopyButton
+                hasExplorer
+              />
+            </InfoDetails>
+          </div>
+        )}
 
         {verifyingContract && (
           <div className={txDetailsCss.txData}>

@@ -1,5 +1,4 @@
 import type { TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useEffect } from 'react'
 import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { Errors, logError } from '@/services/exceptions'
 import useSafeInfo from '../useSafeInfo'
@@ -27,7 +26,10 @@ const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
       // For undeployed safes, return empty once safe info confirms not deployed
       if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTxHistory(effectiveChainId, effectiveAddress, hideUntrustedTxs, hideImitationTxs)
+      return getTxHistory(effectiveChainId, effectiveAddress, hideUntrustedTxs, hideImitationTxs).catch((e) => {
+        logError(Errors._602, e)
+        throw e
+      })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -41,12 +43,6 @@ const useLoadTxHistory = (): AsyncResult<TransactionItemPage> => {
     ],
     false,
   )
-
-  // Log errors
-  useEffect(() => {
-    if (!error) return
-    logError(Errors._602, error.message)
-  }, [error])
 
   return [data, error, loading]
 }

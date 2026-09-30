@@ -12,6 +12,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const RemoveMemberDialog = ({
   userId,
@@ -56,6 +57,7 @@ const RemoveMemberDialog = ({
 
       handleClose()
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       setErrorMessage('An unexpected error occurred while removing the member.')
     }
   }

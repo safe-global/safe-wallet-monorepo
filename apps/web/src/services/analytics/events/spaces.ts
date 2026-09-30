@@ -95,6 +95,10 @@ export const SPACE_EVENTS = {
     action: 'Submit add accounts',
     category: SPACE_CATEGORY,
   },
+  NAME_ACCOUNTS_STEP: {
+    action: 'Open name accounts step',
+    category: SPACE_CATEGORY,
+  },
   ADD_ACCOUNT_MANUALLY_MODAL: {
     action: 'Open add account manually modal',
     category: SPACE_CATEGORY,
@@ -195,6 +199,10 @@ export const SPACE_EVENTS = {
   },
   IMPORT_ADDRESS_BOOK_SUBMIT: {
     action: 'Submit import address book',
+    category: SPACE_CATEGORY,
+  },
+  EXPORT_ADDRESS_BOOK: {
+    action: 'Export address book',
     category: SPACE_CATEGORY,
   },
   EDIT_ADDRESS: {
@@ -321,6 +329,7 @@ export enum SPACE_LABELS {
   member_list = 'member_list',
   invite_list = 'invite_list',
   add_accounts_modal = 'add_accounts_modal',
+  onboarding = 'onboarding',
   space_settings = 'space_settings',
   space_context_menu = 'space_context_menu',
   space_breadcrumbs = 'space_breadcrumbs',

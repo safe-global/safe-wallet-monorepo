@@ -20,5 +20,5 @@ export interface PendingDelegation {
   confirmations: MessageConfirmation[]
   preparedSignature: string | null
   creationTimestamp: number
-  proposedBy: AddressInfo
+  proposedBy: AddressInfo | null
 }

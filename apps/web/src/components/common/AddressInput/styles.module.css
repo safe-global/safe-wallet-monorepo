@@ -10,6 +10,11 @@
   color: var(--foreground);
 }
 
+.inputWrapper:has(:focus-visible) {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+}
+
 .inputWrapper.error {
   border-color: var(--color-error-main);
 }

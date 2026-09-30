@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button'
+import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useContext, useMemo, useState } from 'react'
@@ -10,9 +11,11 @@ import CheckWallet from '@/components/common/CheckWallet'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { CreateNestedSafeFlow } from '@/components/tx-flow/flows'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
@@ -22,12 +25,54 @@ import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import SettingsCard from '@/components/settings/SettingsCard'
 
+function RenameNestedSafeButton({
+  address,
+  chainId,
+  isOk,
+  onRename,
+}: {
+  address: string
+  chainId: string
+  isOk: boolean
+  onRename: () => void
+}): ReactElement {
+  const { canRename } = useAddressBookWriteScope(address, [chainId])
+  const disabled = !isOk || !canRename
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span>
+            <Button
+              data-testid="rename-nested-safe-btn"
+              variant="ghost"
+              size="icon-sm"
+              onClick={onRename}
+              disabled={disabled}
+            >
+              <EditIcon className="size-4 text-muted-foreground" />
+            </Button>
+          </span>
+        }
+      />
+      {!canRename ? (
+        <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>
+      ) : (
+        isOk && <TooltipContent>Rename nested Safe</TooltipContent>
+      )}
+    </Tooltip>
+  )
+}
+
 export function NestedSafesList(): ReactElement | null {
   const isEnabled = useHasFeature(FEATURES.NESTED_SAFES)
   const { setTxFlow } = useContext(TxModalContext)
   const [addressToRename, setAddressToRename] = useState<string | null>(null)
 
   const { safe, safeLoaded, safeAddress } = useSafeInfo()
+  const { scope: renameScope } = useAddressBookWriteScope(safeAddress, [safe.chainId])
+  const nameToRename = useSafeDisplayName(addressToRename ?? '', safe.chainId)
   const { currentData: ownedSafes } = useOwnersGetSafesByOwnerV1Query(
     { chainId: safe.chainId, ownerAddress: safeAddress },
     { skip: !isEnabled || !safeLoaded },
@@ -51,23 +96,12 @@ export function NestedSafesList(): ReactElement | null {
                 <CheckWallet>
                   {(isOk) => (
                     <Track {...NESTED_SAFE_EVENTS.RENAME}>
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <span>
-                              <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                onClick={() => setAddressToRename(nestedSafe)}
-                                disabled={!isOk}
-                              >
-                                <EditIcon className="size-4 text-muted-foreground" />
-                              </Button>
-                            </span>
-                          }
-                        />
-                        {isOk && <TooltipContent>Rename nested Safe</TooltipContent>}
-                      </Tooltip>
+                      <RenameNestedSafeButton
+                        address={nestedSafe}
+                        chainId={safe.chainId}
+                        isOk={isOk}
+                        onRename={() => setAddressToRename(nestedSafe)}
+                      />
                     </Track>
                   )}
                 </CheckWallet>
@@ -77,7 +111,7 @@ export function NestedSafesList(): ReactElement | null {
         },
       }
     })
-  }, [ownedSafes])
+  }, [ownedSafes, safe.chainId])
 
   if (!isEnabled) {
     return null
@@ -120,8 +154,9 @@ export function NestedSafesList(): ReactElement | null {
       {addressToRename && (
         <EntryDialog
           handleClose={() => setAddressToRename(null)}
-          defaultValues={{ name: '', address: addressToRename }}
+          defaultValues={{ name: nameToRename, address: addressToRename }}
           chainIds={[safe.chainId]}
+          scope={renameScope}
           disableAddressInput
         />
       )}

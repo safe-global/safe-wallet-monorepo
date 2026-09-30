@@ -26,13 +26,8 @@
   background-color: #2e2e2e;
 }
 
-:global(.dark) .banner:hover .proChip {
-  color: var(--primary-foreground);
-  background-color: #7ffab7;
-}
-
 :global(.dark) .learnMore {
-  background-color: #7ffab7;
+  background-color: var(--color-static-text-brand);
 }
 
 :global(.dark) .arrow {

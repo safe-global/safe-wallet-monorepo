@@ -14,7 +14,7 @@ const meta = {
     disabled: { control: 'boolean' },
     children: { control: 'text' },
   },
-  args: { children: 'Create workspace' },
+  args: { children: 'Create Workspace' },
 } satisfies Meta<typeof SubmitButton>
 
 export default meta
@@ -27,9 +27,9 @@ export const AllVariants: Story = {
       <div>
         <h3 className="mb-4 text-lg font-semibold">States</h3>
         <div className="flex flex-wrap items-center gap-4">
-          <SubmitButton>Create workspace</SubmitButton>
-          <SubmitButton loading>Create workspace</SubmitButton>
-          <SubmitButton disabled>Create workspace</SubmitButton>
+          <SubmitButton>Create Workspace</SubmitButton>
+          <SubmitButton loading>Create Workspace</SubmitButton>
+          <SubmitButton disabled>Create Workspace</SubmitButton>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">
           The label swaps to a spinner while <code>loading</code> without the button resizing (the <code>submit</code>{' '}

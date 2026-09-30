@@ -1,6 +1,6 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
-import { STEP_UP_FAILED_MESSAGE } from '../../constants'
+import { STEP_UP_CANCELLED, STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning, stepUpSettled } from '../../store'
 import { saveStepUpTrip } from '../../utils/stepUpReplay'
 
@@ -40,13 +40,10 @@ jest.mock('next/router', () => ({
 const TRIP_ACTION = { endpoint: 'membersInviteUserV1', args: { spaceId: '7' } } as const
 
 describe('useStepUpCallback', () => {
-  const originalLocation = window.location
+  const originalLocation = { href: window.location.href }
 
   const setSearch = (search: string) => {
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...originalLocation, search, pathname: '/spaces/members' },
-    })
+    window.history.replaceState(null, '', `/spaces/members${search}`)
   }
 
   beforeEach(() => {
@@ -59,7 +56,7 @@ describe('useStepUpCallback', () => {
   })
 
   afterEach(() => {
-    Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
+    window.history.replaceState(null, '', originalLocation.href)
   })
 
   it('should, when no trip is in flight, do nothing', async () => {
@@ -91,9 +88,34 @@ describe('useStepUpCallback', () => {
     })
   })
 
-  it('should, when the callback carries an error, notify and clean the URL', async () => {
+  it('should, when the user cancelled the challenge, clean the URL without notifying', async () => {
     saveStepUpTrip(TRIP_ACTION)
-    setSearch('?spaceId=42&error=access_denied&error_description=mfa_required')
+    setSearch(
+      `?spaceId=42&error=${STEP_UP_CANCELLED.error}&error_description=${encodeURIComponent(STEP_UP_CANCELLED.description)}`,
+    )
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalled()
+    })
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'notifications/showNotification' }))
+    expect(mockReconcileAuth).not.toHaveBeenCalled()
+    expect(mockReplayStepUpAction).not.toHaveBeenCalled()
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces/members', query: { spaceId: '42' } }, undefined, {
+      shallow: true,
+    })
+  })
+
+  it.each([
+    ['server_error', 'The authorization server encountered an unexpected condition'],
+    ['temporarily_unavailable', undefined],
+    ['authentication_failed', undefined],
+    ['access_denied', 'Cannot read property of undefined'],
+  ])('should, when the callback carries the %s error, notify and clean the URL', async (error, description) => {
+    saveStepUpTrip(TRIP_ACTION)
+    setSearch(`?spaceId=42&error=${error}${description ? `&error_description=${encodeURIComponent(description)}` : ''}`)
 
     renderHook(() => useStepUpCallback())
 
@@ -104,7 +126,6 @@ describe('useStepUpCallback', () => {
       })
     })
 
-    expect(mockReconcileAuth).not.toHaveBeenCalled()
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/spaces/members', query: { spaceId: '42' } }, undefined, {
       shallow: true,
@@ -222,5 +243,43 @@ describe('useStepUpCallback', () => {
       expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
     })
     expect(mockReplayStepUpAction).not.toHaveBeenCalled()
+  })
+
+  describe('back-forward cache restore', () => {
+    const restoreFromCache = (persisted: boolean) => {
+      const event = new Event('pageshow') as PageTransitionEvent
+      Object.defineProperty(event, 'persisted', { value: persisted })
+      window.dispatchEvent(event)
+    }
+
+    it('should, when the page is restored with the trip still stored, discard it so nothing replays later', () => {
+      renderHook(() => useStepUpCallback())
+      saveStepUpTrip(TRIP_ACTION)
+
+      restoreFromCache(true)
+
+      expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
+      expect(mockReplayStepUpAction).not.toHaveBeenCalled()
+    })
+
+    it('should, when the page is restored, settle the phase so the launch screen comes down at once', () => {
+      renderHook(() => useStepUpCallback())
+      mockDispatch.mockClear()
+
+      restoreFromCache(true)
+
+      expect(mockDispatch).toHaveBeenCalledWith(stepUpSettled())
+    })
+
+    it('should, when the page loads normally rather than from the cache, leave a stored trip and the phase alone', () => {
+      renderHook(() => useStepUpCallback())
+      saveStepUpTrip(TRIP_ACTION)
+      mockDispatch.mockClear()
+
+      restoreFromCache(false)
+
+      expect(sessionStorage.getItem('oidc_step_up')).not.toBeNull()
+      expect(mockDispatch).not.toHaveBeenCalledWith(stepUpSettled())
+    })
   })
 })

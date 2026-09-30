@@ -7,11 +7,19 @@ on:
     paths:
       - apps/mobile/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   pull_request:
     paths:
       - apps/mobile/**
       - packages/**
       - .github/workflows/mobile-unit-tests.yml
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 jobs:
   test-and-coverage:

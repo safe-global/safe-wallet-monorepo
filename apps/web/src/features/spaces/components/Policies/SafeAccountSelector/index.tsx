@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import LoadError from './components/LoadError'
+import LoadError from '../components/LoadError'
+import { SKELETON_ROW_COUNT } from '../constants'
 import NoEligibleAccounts from './components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
@@ -13,8 +14,14 @@ import SafeAccountRow, {
   SafeAccountRowSkeleton,
   SafeAccountSummary,
 } from './components/SafeAccountRow'
-import { ELIGIBILITY_HELPER_TEXT, SAFE_ACCOUNT_SELECTOR_LABEL, SAFE_ACCOUNT_SELECTOR_PLACEHOLDER } from './constants'
+import {
+  getEligibilityCopy,
+  INELIGIBILITY_TEXT,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+  SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
+} from './constants'
 import { isSafeAccountGroup, type SafeAccountEntry } from './types'
+import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {
   /** Already filtered and grouped — see `useEligibleSafeAccounts`. */
@@ -27,6 +34,8 @@ export type SafeAccountSelectorProps = {
   onRetry?: () => void
   disabled?: boolean
   label?: string
+  /** Must match the rule `accounts` was filtered by. */
+  signersOnly?: boolean
   helperText?: ReactNode
   /** Defaults to `useConnectWallet()`. Also serves the disconnected state's action. */
   onSwitchWallet?: () => void
@@ -37,8 +46,6 @@ export type SafeAccountSelectorProps = {
   name?: string
   id?: string
 }
-
-const SKELETON_ROW_COUNT = 3
 
 /** Height of the picked state's two-line identity. Every state reserves it so the field never jumps. */
 const TRIGGER_CONTENT_HEIGHT = 'min-h-9'
@@ -56,7 +63,8 @@ const SafeAccountSelector = ({
   onRetry,
   disabled = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
-  helperText = ELIGIBILITY_HELPER_TEXT,
+  signersOnly = false,
+  helperText = getEligibilityCopy(signersOnly).helperText,
   onSwitchWallet,
   hasWallet = true,
   errorMessage,
@@ -69,12 +77,9 @@ const SafeAccountSelector = ({
 
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
-  const selectedAccount = useMemo(() => {
-    if (!value) return undefined
-    return accounts
-      .flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
-      .find((account) => account.id === value)
-  }, [accounts, value])
+  const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
+  const ineligibilityText = selectedAccount?.ineligibleReason && INELIGIBILITY_TEXT[selectedAccount.ineligibleReason]
+  const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {
     if (isLoading) {
@@ -86,7 +91,13 @@ const SafeAccountSelector = ({
     }
 
     if (accounts.length === 0) {
-      return <NoEligibleAccounts hasWallet={hasWallet} onSwitchWallet={onSwitchWallet ?? connectWallet} />
+      return (
+        <NoEligibleAccounts
+          hasWallet={hasWallet}
+          signersOnly={signersOnly}
+          onSwitchWallet={onSwitchWallet ?? connectWallet}
+        />
+      )
     }
 
     return accounts.map((entry) =>
@@ -119,7 +130,7 @@ const SafeAccountSelector = ({
         <SelectTrigger
           id={fieldId}
           aria-label={label}
-          aria-invalid={errorMessage ? true : undefined}
+          aria-invalid={shownError ? true : undefined}
           data-testid="safe-account-selector"
           className="w-full"
         >
@@ -155,9 +166,9 @@ const SafeAccountSelector = ({
         </SelectContent>
       </Select>
 
-      {errorMessage ? (
+      {shownError ? (
         <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {errorMessage}
+          {shownError}
         </Typography>
       ) : (
         <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">

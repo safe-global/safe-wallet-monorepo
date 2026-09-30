@@ -69,7 +69,7 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
             <Typography align="left">Taking too long?</Typography>
           </AlertTitle>
           <AlertDescription>Try to speed up with better gas parameters.</AlertDescription>
-          <AlertAction>
+          <AlertAction className="top-1/2">
             <Button variant="outline" className="text-foreground" onClick={onOpen}>{`Speed up >`}</Button>
           </AlertAction>
         </Alert>

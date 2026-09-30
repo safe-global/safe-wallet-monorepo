@@ -19,7 +19,7 @@ import * as gtfHooks from '@/features/gtf'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor } from '@testing-library/react'
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -78,6 +78,38 @@ describe('CreateTokenTransfer', () => {
     const { getAllByText } = renderCreateTokenTransfer()
 
     expect(getAllByText('Recipient address')[0]).toBeInTheDocument()
+  })
+
+  // With `delayError`, react-hook-form parked the "Invalid address format" from the typed search text
+  // in a form-wide timer that setValue never cancelled and that the blur of ANY field flushed.
+  it('does not bring back the search-text validation error when another field blurs', async () => {
+    jest.useFakeTimers()
+    try {
+      const contact = '0x1111111111111111111111111111111111111111'
+      const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
+        {},
+        { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
+      )
+
+      // waitFor advances the fake timers, so the debounced labels settle deterministically.
+      fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
+      await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
+
+      fireEvent.click(getByText('E2E Contact'))
+      await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
+      await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
+
+      // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
+      act(() => getByTestId('token-amount-field').focus())
+      act(() => getByTestId('max-btn').focus())
+      // A flushed stale error lands on the next tick; the label would show it after its 500ms
+      // display debounce, which is only scheduled once that first render has happened.
+      act(() => jest.advanceTimersByTime(100))
+      act(() => jest.advanceTimersByTime(1000))
+      expect(queryByText('Invalid address format')).not.toBeInTheDocument()
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it('should display a type selection if a spending limit token is selected', () => {

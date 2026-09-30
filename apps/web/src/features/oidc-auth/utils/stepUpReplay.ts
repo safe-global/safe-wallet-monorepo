@@ -1,10 +1,10 @@
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { SerializedError, ThunkAction, UnknownAction } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { STEP_UP_FAILED_MESSAGE } from '../constants'
 import { isElevationRequiredError } from './elevation'
 
 const STEP_UP_KEY = 'oidc_step_up'
@@ -29,6 +29,7 @@ const REPLAYABLE_ENDPOINTS = {
   addressBooksUpsertAddressBookItemsV1: 'Address book updated',
   addressBooksDeleteByAddressV1: 'Address removed from the address book',
   addressBookRequestsApproveRequestV1: 'Address book request approved',
+  billingUpdateSubscriptionV1: 'Plan updated',
 } as const
 
 type ReplayableEndpoint = keyof typeof REPLAYABLE_ENDPOINTS
@@ -85,6 +86,9 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   }
 }
 
+// Built on demand: tests mock the generated modules partially, and a module-load spread would read `undefined`.
+const replayableEndpoints = () => ({ ...cgwApi.endpoints, ...billingApi.endpoints })
+
 type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 
 /**
@@ -97,21 +101,19 @@ type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
-  cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
+  replayableEndpoints()[endpoint].initiate as unknown as ReplayInitiator
 
 export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
-    // Rejected again means the user never finished verifying, so the usual
-    // "verify your identity" text would ask them to redo what they walked away from.
-    const message = isElevationRequiredError(result.error)
-      ? STEP_UP_FAILED_MESSAGE
-      : getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE
+    // Rejected again means the user walked away from the challenge, which is a
+    // cancellation and not something to report back to them.
+    if (isElevationRequiredError(result.error)) return
 
     dispatch(
       showNotification({
-        message,
+        message: getRtkQueryErrorMessage(result.error) || REPLAY_FAILED_MESSAGE,
         variant: 'error',
         groupKey: 'step-up-replay-failed',
       }),
@@ -121,6 +123,19 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
 
   // The success message must not appear while the lists still show the old data.
   // This thunk returns one promise per running query, not a single promise.
+  await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
+
+  // The replay runs during page load, so a query it invalidates can still be in
+  // flight when the mutation completes. RTK Query does not start a second fetch
+  // for such a query, and its `delayed` invalidation does not wait for it either:
+  // the pending counter behind it is also decremented by the rejection that a
+  // duplicate `initiate` of the same in-flight query produces, so the counter is
+  // zero while the first request is still open. The query then keeps the response
+  // it gets, which may have been produced before the write. Invalidating again
+  // once nothing is in flight fetches every affected query with the written data.
+  // Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates one of these two tags; refetching the other is harmless.
+  dispatch(cgwApi.util.invalidateTags(['spaces']))
+  dispatch(billingApi.util.invalidateTags(['billing']))
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(

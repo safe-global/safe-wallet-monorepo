@@ -8,6 +8,7 @@ import EnvironmentVariables from '..'
 import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
+import { reloadPage } from '@/utils/navigation'
 
 // Mock chain data
 const mockChain = chainBuilder()
@@ -16,6 +17,8 @@ const mockChain = chainBuilder()
   .build()
 
 // Mock hooks
+jest.mock('@/utils/navigation')
+
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(() => '1'),
@@ -50,9 +53,6 @@ describe('EnvironmentVariables', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    // Mock location.reload
-    delete (window as any).location
-    window.location = { reload: jest.fn() } as any
   })
 
   afterEach(() => {
@@ -115,6 +115,31 @@ describe('EnvironmentVariables', () => {
     await waitFor(() => {
       expect(rpcInput).toHaveValue(mockRpcUrl)
     })
+  })
+
+  it('should mask the Tenderly access token until the user reveals it', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: mockTenderlyUrl, accessToken: mockTenderlyToken } },
+        },
+      },
+    })
+
+    const tenderlyTokenInput = screen.getByLabelText('Tenderly access token') as HTMLInputElement
+    // Never a password field, so password managers leave it alone; the masking is CSS only.
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+    expect(tenderlyTokenInput).toHaveAttribute('data-1p-ignore')
+    expect(tenderlyTokenInput).toHaveAttribute('data-lpignore', 'true')
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show access token' }))
+    expect(tenderlyTokenInput).not.toHaveClass('[-webkit-text-security:disc]')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide access token' }))
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
   })
 
   it('should show reset button when value is entered', async () => {
@@ -191,8 +216,7 @@ describe('EnvironmentVariables', () => {
       expect(state.settings.env.tenderly.url).toBe(mockTenderlyUrl)
       expect(state.settings.env.tenderly.accessToken).toBe(mockTenderlyToken)
 
-      // Check that location.reload was called
-      expect(window.location.reload).toHaveBeenCalled()
+      expect(reloadPage).toHaveBeenCalled()
     })
   })
 

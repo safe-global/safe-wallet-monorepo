@@ -282,13 +282,7 @@ const CONFIG_SERVICE_CHAINS: Chain[] = [
       'trust',
       'walletLink',
     ],
-    features: [
-      FEATURES.DOMAIN_LOOKUP,
-      FEATURES.ERC721,
-      FEATURES.SAFE_APPS,
-      FEATURES.SAFE_TX_GAS_OPTIONAL,
-      FEATURES.SPENDING_LIMIT,
-    ],
+    features: [FEATURES.ERC721, FEATURES.SAFE_APPS, FEATURES.SAFE_TX_GAS_OPTIONAL, FEATURES.SPENDING_LIMIT],
     balancesProvider: {
       chainName: null,
       enabled: false,
@@ -552,7 +546,6 @@ const CONFIG_SERVICE_CHAINS: Chain[] = [
       'walletLink',
     ],
     features: [
-      FEATURES.DOMAIN_LOOKUP,
       FEATURES.EIP1559,
       FEATURES.ERC721,
       FEATURES.SAFE_APPS,
@@ -600,7 +593,6 @@ const CONFIG_SERVICE_CHAINS: Chain[] = [
     gasPrice: [{ type: 'fixed' as const, weiValue: '24000000000' }],
     disabledWallets: ['fortmatic', 'lattice', 'tally'],
     features: [
-      FEATURES.DOMAIN_LOOKUP,
       FEATURES.EIP1559,
       FEATURES.ERC721,
       FEATURES.SAFE_APPS,
@@ -658,13 +650,7 @@ const CONFIG_SERVICE_CHAINS: Chain[] = [
       'trust',
       'walletLink',
     ],
-    features: [
-      FEATURES.DOMAIN_LOOKUP,
-      FEATURES.ERC721,
-      FEATURES.SAFE_APPS,
-      FEATURES.SAFE_TX_GAS_OPTIONAL,
-      FEATURES.SPENDING_LIMIT,
-    ],
+    features: [FEATURES.ERC721, FEATURES.SAFE_APPS, FEATURES.SAFE_TX_GAS_OPTIONAL, FEATURES.SPENDING_LIMIT],
     balancesProvider: {
       chainName: null,
       enabled: false,

@@ -2,7 +2,6 @@ import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -27,7 +26,7 @@ import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
-import CheckWallet from '@/components/common/CheckWallet'
+import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -52,6 +51,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const onboard = useOnboard()
   const chainInfo = useCurrentChain()
   const safeAddress = useSafeAddress()
+  const isWrongChain = useIsWrongChain()
+  // Sole authorization: a replacement needs the original (from, nonce), so only the submitter can send one
   const hasActions = signerAddress && signerAddress === wallet?.address
   const dispatch = useAppDispatch()
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
@@ -144,6 +145,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     dispatch,
     gasLimit,
     handleClose,
+    isGtfChain,
     onboard,
     pendingTx,
     safeAddress,
@@ -162,7 +164,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
   if (safeTxHasSignatures) {
     return (
-      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction">
+      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction" forceBackdrop>
         <div className="p-6">
           <div className="mb-4 flex items-center justify-center">
             <RocketSpeedup className="size-[90px]" />
@@ -170,7 +172,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
           <Typography data-testid="speedup-summary">
             This will speed up the pending transaction by{' '}
-            <Typography variant="paragraph-bold" className="inline">
+            <Typography as="span" variant="paragraph-bold" className="inline">
               replacing
             </Typography>{' '}
             the original gas parameters with new ones.
@@ -193,7 +195,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
             )}
           </div>
           <div className="[&:not(:empty)]:mt-6">
-            <NetworkWarning />
+            <NetworkWarning action="speed up a transaction" />
           </div>
         </div>
 
@@ -202,25 +204,16 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
             Cancel
           </Button>
 
-          <Tooltip>
-            <TooltipTrigger render={<span className="inline-flex" />}>
-              <CheckWallet checkNetwork={!isDisabled}>
-                {(isOk) => (
-                  <Button disabled={!isOk || isDisabled} onClick={onSubmit}>
-                    {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
-                  </Button>
-                )}
-              </CheckWallet>
-            </TooltipTrigger>
-            <TooltipContent>Speed up transaction</TooltipContent>
-          </Tooltip>
+          <Button disabled={isDisabled || isWrongChain} onClick={onSubmit}>
+            {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
+          </Button>
         </div>
       </ModalDialog>
     )
   }
 
   return (
-    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction">
+    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction" forceBackdrop>
       <div className="p-6">
         <div className="mb-4 flex items-center justify-center">
           <RocketSpeedup className="size-[90px]" />

@@ -25,6 +25,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -103,6 +104,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
         upsertAddressBookItemsDto: { items: [addressBookItem] },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return
@@ -130,7 +132,7 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
         <FormProvider {...methods}>
           <form onSubmit={onSubmit}>
             <div className="px-6 py-4">
-              <Typography className="mb-4">Edit contact details. Anyone in the workspace can see it.</Typography>
+              <Typography className="mb-4">Edit contact details. Anyone in the Workspace can see it.</Typography>
               <div className="flex flex-col gap-6">
                 <div className="pt-2">
                   <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />

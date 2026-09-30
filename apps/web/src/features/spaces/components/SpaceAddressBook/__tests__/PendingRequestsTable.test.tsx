@@ -7,7 +7,8 @@ import PendingRequestsTable from '../PendingRequestsTable'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Builder } from '@/tests/Builder'
 
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => false }))
+const mockUseIsMobile = jest.fn(() => false)
+jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
@@ -76,6 +77,36 @@ const requestBuilder = () =>
   })
 
 describe('PendingRequestsTable', () => {
+  beforeEach(() => {
+    mockUseIsMobile.mockReturnValue(false)
+  })
+
+  it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    const request = requestBuilder().with({ name }).build()
+
+    const { unmount } = render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.getByText(name)).toHaveClass('truncate')
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<PendingRequestsTable requests={[request]} />)
+    expect(screen.getByText(name)).not.toHaveClass('truncate')
+    expect(screen.queryByText('Address')).not.toBeInTheDocument()
+  })
+
+  it('moves the address under the name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const request = requestBuilder().with({ requestedBy: faker.internet.email() }).build()
+
+    render(<PendingRequestsTable requests={[request]} />)
+
+    const nameCell = screen.getByText(request.name).closest('td')
+    expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
+    expect(screen.getByTestId('eth-hash-info')).toHaveTextContent(request.address)
+  })
+
   it('renders a highlighted full address in the "Requested by" cell when requestedBy is an address', () => {
     const requestedBy = faker.finance.ethereumAddress()
     render(<PendingRequestsTable requests={[requestBuilder().with({ requestedBy }).build()]} />)

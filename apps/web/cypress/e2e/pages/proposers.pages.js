@@ -15,6 +15,33 @@ const safeAsProposerMessage = 'Cannot add Safe account itself as proposer'
 const proposedTxMessage = 'This transaction was created by a proposer. Please review and either confirm or reject it.'
 const proposerAddedMsg = 'Proposer added successfully!'
 
+const proposerColumn = 0
+const creatorColumn = 1
+
+// The section renders null until the delegates request resolves, which outruns the default 10s.
+const proposerSectionTimeout = 30000
+
+function getProposersSection() {
+  return cy.get(proposersSection, { timeout: proposerSectionTimeout })
+}
+
+function getProposerRow(address) {
+  return getProposersSection().find(addressBook.tableRow).contains(address).parents('tr')
+}
+
+// `should` with a callback retries, unlike the `each`-plus-flag it replaces: proposer names arrive
+// from the address book migration a tick after the table first renders.
+function verifyColumnContains(columnIndex, values) {
+  values.forEach((value) => {
+    getProposersSection()
+      .find(addressBook.tableRow)
+      .should(($rows) => {
+        const found = $rows.toArray().some((row) => Cypress.$(row).find('td').eq(columnIndex).text().includes(value))
+        expect(found, `Value "${value}" should be found in td:eq(${columnIndex}) within proposersSection`).to.be.true
+      })
+  })
+}
+
 export function verifyPropsalStatusExists() {
   cy.get(create_tx.proposalStatus).should('exist')
 }
@@ -45,55 +72,22 @@ export function clickOnSubmitProposerBtn() {
   verifyProposerSuccessMsgDisplayed()
 }
 
+export function saveProposerName() {
+  addressBook.clickOnSaveEntryBtn()
+  cy.get(addressBook.entryDialog).should('not.exist')
+}
+
 export function checkCreatorAddress(data) {
-  cy.get(proposersSection).within(() => {
-    Object.entries(data).forEach(([key, value]) => {
-      let found = false
-      cy.get(addressBook.tableRow)
-        .each(($row) => {
-          cy.wrap($row)
-            .find('td')
-            .eq(1)
-            .then(($cell) => {
-              if ($cell.text().includes(value)) {
-                found = true
-              }
-            })
-        })
-        .then(() => {
-          expect(found, `Value "${value}" should be found in td:eq(1) within proposersSection`).to.be.true
-        })
-    })
-  })
+  verifyColumnContains(creatorColumn, data)
 }
 
 export function checkProposerData(data) {
-  cy.get(proposersSection).within(() => {
-    Object.entries(data).forEach(([key, value]) => {
-      let found = false
-
-      cy.get(addressBook.tableRow)
-        .each(($row) => {
-          cy.wrap($row)
-            .find('td')
-            .eq(0)
-            .then(($cell) => {
-              if ($cell.text().includes(value)) {
-                found = true
-              }
-            })
-        })
-        .then(() => {
-          expect(found, `Value "${value}" should be found in td:eq(0) within proposersSection`).to.be.true
-        })
-    })
-  })
+  verifyColumnContains(proposerColumn, data)
 }
 
 export function clickOnEditProposerBtn(address) {
-  cy.get(proposersSection).within(() => {
-    cy.get(addressBook.tableRow).contains(address).parents('tr').find(editProposerBtn).click()
-  })
+  getProposerRow(address).find(editProposerBtn).click()
+  cy.get(addressBook.entryDialog).should('be.visible')
 }
 
 export function confirmProposerDeletion(index) {
@@ -132,14 +126,10 @@ export function verifyProposerSuccessMsgDisplayed() {
   cy.contains(proposerAddedMsg).should('exist')
 }
 
-export function verifyEditProposerBtnDisabled(address) {
-  cy.get(proposersSection).within(() => {
-    cy.get(addressBook.tableRow).contains(address).parents('tr').find(editProposerBtn).should('be.disabled')
-  })
+export function verifyEditProposerBtnEnabled(address) {
+  getProposerRow(address).find(editProposerBtn).should('be.enabled')
 }
 
 export function verifyDeleteProposerBtnIsDisabled(address) {
-  cy.get(proposersSection).within(() => {
-    cy.get(addressBook.tableRow).contains(address).parents('tr').find(deleteProposerBtn).should('be.disabled')
-  })
+  getProposerRow(address).find(deleteProposerBtn).should('be.disabled')
 }

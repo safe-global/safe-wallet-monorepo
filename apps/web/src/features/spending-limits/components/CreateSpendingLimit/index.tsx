@@ -1,10 +1,9 @@
-import { useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useEffect, useMemo } from 'react'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
@@ -18,18 +17,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
-
-export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
-  // Without a selected token we don't know the decimals, so the amount can't be range-checked yet.
-  if (decimals == null) return
-  // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
-  try {
-    const amount = parseUnits(val, decimals ?? 'Gwei')
-    AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
-  } catch (e) {
-    return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'
-  }
-}
+import { validateSpendingLimitAmount } from '../../services/spendingLimitValidation'
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()
@@ -44,7 +32,7 @@ const CreateSpendingLimit = () => {
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control } = formMethods
+  const { handleSubmit, watch, control, formState, getValues, trigger } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
@@ -55,16 +43,23 @@ const CreateSpendingLimit = () => {
     ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
     : undefined
 
+  const tokenDecimals = selectedToken?.tokenInfo.decimals
+
   const validateSpendingLimit = useCallback(
-    (value: string) => {
-      return (
-        validateAmount(value) ||
-        validateDecimalLength(value, selectedToken?.tokenInfo.decimals) ||
-        _validateSpendingLimit(value, selectedToken?.tokenInfo.decimals)
-      )
-    },
-    [selectedToken?.tokenInfo.decimals],
+    (value: string) =>
+      validateAmount(value) ||
+      validateDecimalLength(value, tokenDecimals) ||
+      validateSpendingLimitAmount(value, tokenDecimals),
+    [tokenDecimals],
   )
+
+  // react-hook-form only evaluates `isValid` on mount, so a prefilled amount must be re-checked
+  // once the selected token (and therefore its decimals) becomes known or is lost.
+  useEffect(() => {
+    if (getValues(SpendingLimitFields.amount)) {
+      trigger(SpendingLimitFields.amount)
+    }
+  }, [tokenDecimals, getValues, trigger])
 
   if (!isSupported) {
     return <SpendingLimitNotSupported />
@@ -114,7 +109,7 @@ const CreateSpendingLimit = () => {
           </div>
 
           <TxCardActions>
-            <Button data-testid="next-btn" type="submit">
+            <Button data-testid="next-btn" type="submit" disabled={!formState.isValid}>
               Next
             </Button>
           </TxCardActions>

@@ -160,12 +160,14 @@ const useCounterfactualSafeSync = () => {
       try {
         await fetchAndMerge()
       } catch (firstError) {
-        logError(Errors._650, firstError)
+        // Attempts are tagged so the two failures of one sync stay separable in
+        // analytics instead of reading as a duplicated event.
+        logError(Errors._650, firstError, { attempt: 1 })
         await new Promise((resolve) => setTimeout(resolve, SYNC_RETRY_DELAY_MS))
         try {
           await fetchAndMerge()
         } catch (retryError) {
-          logError(Errors._650, retryError)
+          logError(Errors._650, retryError, { attempt: 2 })
         }
       }
       // Settle regardless of outcome — leaving consumers waiting forever is worse

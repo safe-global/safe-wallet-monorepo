@@ -70,8 +70,8 @@ import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
-import { normalizeSpaceId } from '@/utils/spaces'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { isSpaceAtSafeLimit, normalizeSpaceId } from '@/utils/spaces'
 import { AppRoutes } from '@/config/routes'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -192,6 +192,12 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const spaceId = useAppSelector(lastUsedSpace)
   const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
+  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
+  const willStayOutsideSpace =
+    isUserAuthenticated &&
+    normalizeSpaceId(spaceId) !== null &&
+    isAdminOfActiveSpace &&
+    isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -376,6 +382,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isUserAuthenticated,
           isAdminOfActiveSpace,
           spaceSafeCount,
+          spaceSafeLimit,
           isMultiChainCreation: isMultiChainDeployment,
           provider,
           dispatch,
@@ -383,7 +390,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
-          setSubmitError(result.error.message)
+          if (!result.stepUpPending) setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }
 
@@ -511,6 +518,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             {showNetworkWarning && (
               <div className="mt-6">
                 <NetworkWarning action="create a Safe account" />
+              </div>
+            )}
+
+            {effectivePayMethod === PayMethod.PayLater && willStayOutsideSpace && (
+              <div className="mt-4" data-testid="space-seat-limit-notice">
+                <ErrorMessage level="info">
+                  This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new Safe will be created in My
+                  accounts, outside the Workspace.
+                </ErrorMessage>
               </div>
             )}
 

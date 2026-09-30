@@ -5,6 +5,10 @@ on:
     paths:
       - apps/tx-builder/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
   push:
     branches:
       - main
@@ -12,6 +16,10 @@ on:
     paths:
       - apps/tx-builder/**
       - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

@@ -24,6 +24,7 @@ export enum MixpanelEvent {
   EURCV_BOOST_EXPLORE_CLICKED = 'EURCV Boost Explore Clicked',
   EURCV_BOOST_BANNER_CLICKED = 'EURCV Boost Banner Clicked',
   EURCV_BOOST_BANNER_DISMISSED = 'EURCV Boost Banner Dismissed',
+  SAFE_PRO_BANNER_CLICKED = 'Safe Pro Banner Clicked',
   TRANSACTION_STARTED = 'Transaction Started',
   TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
   TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
@@ -86,6 +87,7 @@ export enum MixpanelEvent {
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
+  POLICY_UPSELL_UPGRADE_CLICKED = 'Policy Upsell Upgrade Clicked',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -150,6 +152,9 @@ export enum MixpanelEventParams {
   RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
   RPC_HOST = 'RPC Host',
   HTTP_STATUS = 'HTTP Status',
+  ERROR_ATTEMPT = 'Error Attempt',
+  IS_RETRY = 'Is Retry',
+  ERROR_OCCURRENCES = 'Error Occurrences',
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
   MEMBER_ROLE = 'Member Role',

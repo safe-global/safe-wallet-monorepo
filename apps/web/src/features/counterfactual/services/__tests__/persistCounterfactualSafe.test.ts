@@ -3,6 +3,8 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 import { removeUndeployedSafe } from '../../store/undeployedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -92,8 +94,14 @@ const baseArgs = {
   name: 'MySafe',
   payMethod: PayMethod.PayLater,
   isAdminOfActiveSpace: true,
+  spaceSafeLimit: 40,
   provider: mockProvider,
 }
+
+const quotaExceeded = (quota?: number) => ({
+  status: 402,
+  data: { code: 'QUOTA_EXCEEDED', message: 'Quota exceeded for safe_seats: 20 of 20 used.', quota, used: quota },
+})
 
 describe('persistCounterfactualSafe', () => {
   beforeEach(() => {
@@ -159,7 +167,7 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).not.toHaveBeenCalled()
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toMatch(/backend/i)
+    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
   })
 
   it('surfaces the backend message when the user-endpoint POST fails with a non-409 error', async () => {
@@ -344,7 +352,29 @@ describe('persistCounterfactualSafe', () => {
     })
     expect(replayImpl).not.toHaveBeenCalled()
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
-    if (!result.ok) expect(result.error.message).toMatch(/space/i)
+    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
+  })
+
+  it('translates the gateway elevation marker instead of putting it in front of the user', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') {
+        return { error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } } }
+      }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(result.ok).toBe(false)
+    if (!result.ok) {
+      expect(result.error.message).not.toContain(ELEVATION_REQUIRED_ERROR)
+      expect(result.error.message).toBe(ELEVATION_REQUIRED_MESSAGE)
+    }
   })
 
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
@@ -546,6 +576,190 @@ describe('persistCounterfactualSafe', () => {
     expect(spaceInitiate).toHaveBeenCalled()
     expect(showNotificationImpl).not.toHaveBeenCalled()
     expect(result.ok).toBe(true)
+  })
+
+  it("skips the space POST at the plan's seat quota and names that quota in the toast", async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 20,
+      spaceSafeLimit: 20,
+      dispatch,
+    })
+
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variant: 'info',
+        groupKey: 'cf-safe-space-limit',
+        message:
+          "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",
+      }),
+    )
+    expect(result.ok).toBe(true)
+  })
+
+  it('POSTs to the space endpoint below the plan quota even when the static cap would be reached', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 40,
+      spaceSafeLimit: 100,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+  })
+
+  it('POSTs to the space endpoint on an unlimited plan regardless of the count', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 400,
+      spaceSafeLimit: null,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+  })
+
+  it('leaves the decision to the backend while the seat limit is unknown', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 400,
+      spaceSafeLimit: undefined,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Safe created in My accounts. The Workspace is at its seat limit, so it wasn't added there.",
+      }),
+    )
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('POSTs to the space endpoint at the limit when the Safe address already holds a seat there', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 20,
+      spaceSafeLimit: 20,
+      holdsSeatInSpace: true,
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+  })
+
+  it('keeps the Safe in My accounts and toasts the quota when the space POST returns 402 QUOTA_EXCEEDED', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: quotaExceeded(20) }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeCount: 19,
+      spaceSafeLimit: 20,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(enqueueImpl).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variant: 'info',
+        groupKey: 'cf-safe-space-limit',
+        message:
+          "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",
+      }),
+    )
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('does not roll back a 402 during multi-chain creation (seats are per address, so no chain was left behind)', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: quotaExceeded(20) }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      isMultiChainCreation: true,
+      spaceSafeLimit: 20,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('falls back to the plan limit in the toast when the 402 body carries no quota', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
+      return action
+    }) as unknown as AppDispatch
+
+    await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceSafeLimit: 5,
+      dispatch,
+    })
+
+    expect(showNotificationImpl).toHaveBeenCalledWith(
+      expect.objectContaining({ message: expect.stringContaining('limit of 5 Safe accounts') }),
+    )
+  })
+
+  it('rolls back on a 402 that is not a quota error', async () => {
+    const dispatch = jest.fn((action) => {
+      if (action.type === 'space-create-thunk') return { error: { status: 402, data: { message: 'Payment required' } } }
+      return action
+    }) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      dispatch,
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalled()
+    expect(replayImpl).not.toHaveBeenCalled()
+    expect(result.ok).toBe(false)
   })
 
   it('does not show the skip toast when the user is admin and the space POST succeeds', async () => {

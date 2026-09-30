@@ -33,6 +33,7 @@ const authState = (signedIn: boolean): RootState['auth'] => ({
   isStoreHydrated: true,
   cfSafeSynced: false,
   isOidcLoginPending: false,
+  isSessionCheckPending: false,
 })
 
 // Renders the hook against a real store so the actual selectors (isAuthenticated,

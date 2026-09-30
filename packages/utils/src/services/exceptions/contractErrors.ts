@@ -179,7 +179,59 @@ export const getContractErrorMessage = (code: GsCode, params?: ContractErrorPara
 /** How the given code should be handled in the product. */
 export const getContractErrorHandling = (code: GsCode): ContractErrorHandling => CONTRACT_ERRORS[code].handling
 
+const PLACEHOLDER_RE = /\{\w+\}/
+
+/**
+ * The message for an error's GS code when we have copy specific to that code, so a caller
+ * showing its own generic wording can replace it with the real cause.
+ *
+ * `undefined` means keep your own wording: either the code shares
+ * `CONTRACT_ERROR_FALLBACK` (nothing specific to say) or a placeholder could not be filled
+ * from `params` — a raw `{token}` must never reach the user.
+ */
+export const getSpecificContractErrorMessage = (
+  error?: { message?: string; reason?: string; code?: unknown } | null,
+  params?: ContractErrorParams,
+): string | undefined => {
+  const code = getGsCodeFromError(error)
+  if (!code) return undefined
+
+  const message = getContractErrorMessage(code, params)
+
+  return message === CONTRACT_ERROR_FALLBACK || PLACEHOLDER_RE.test(message) ? undefined : message
+}
+
 /** Resolve a specific GS026 cause to its message. */
 export const getGs026Message = (reason: Gs026Reason): string => GS026_MESSAGES[reason]
+
+const REVERT_MESSAGE = /execution reverted|reverted with the following/i
+
+/**
+ * Whether a failure is the chain saying the call reverts, as opposed to the node
+ * being unreachable.
+ *
+ * Lives here rather than next to the web transaction-error helpers so that the
+ * analytics layer can reuse it: those helpers pull a custom-error ABI registry
+ * that builds several `ethers.Interface` instances at module scope, and the
+ * analytics provider is imported during app bootstrap.
+ */
+export const isRevertError = (error: unknown): boolean => {
+  if (!error) return false
+
+  const err = error as { code?: unknown; reason?: string; message?: string }
+
+  // A known GS revert reason is definitive.
+  if (getGsCodeFromError(err)) return true
+
+  // ethers marks a reverted eth_call/estimateGas as CALL_EXCEPTION.
+  if (err.code === 'CALL_EXCEPTION') return true
+
+  // viem/ethers revert text. "reverted with" is anchored to the phrasings those
+  // clients actually emit, so an infra failure worded "… reverted with a
+  // connection timeout" is not read as a revert.
+  if (typeof err.message === 'string' && REVERT_MESSAGE.test(err.message)) return true
+
+  return false
+}
 
 export default CONTRACT_ERRORS

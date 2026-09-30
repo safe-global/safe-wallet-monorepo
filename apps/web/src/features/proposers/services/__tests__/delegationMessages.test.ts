@@ -104,6 +104,8 @@ describe('delegationMessages', () => {
           nestedSafe: nestedSafeAddress,
           label: 'Test',
         }),
+        safeAppInfo: null,
+        safeAppId: null,
       }
 
       let callCount = 0
@@ -172,6 +174,8 @@ describe('delegationMessages', () => {
           nestedSafe: nestedSafeAddress,
           label: 'Test',
         }),
+        safeAppInfo: null,
+        safeAppId: null,
       }
 
       let callCount = 0

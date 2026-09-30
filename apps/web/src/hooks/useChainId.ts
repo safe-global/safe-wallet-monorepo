@@ -1,8 +1,10 @@
+import { useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { parse, type ParsedUrlQuery } from 'querystring'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 import useWallet from './wallets/useWallet'
 import useChains from './useChains'
 
@@ -13,7 +15,14 @@ const getLocationQuery = (): ParsedUrlQuery => {
   return query
 }
 
-export const useUrlChainId = (): string | undefined => {
+// `absent` and `unknown` stay distinct because only `absent` may fall back to a default chain.
+export type UrlChain =
+  | { status: 'absent' }
+  | { status: 'pending'; shortName: string }
+  | { status: 'unknown'; shortName: string }
+  | { status: 'resolved'; chainId: string }
+
+export const useUrlChain = (): UrlChain => {
   const queryParams = useParams()
   const { configs } = useChains()
 
@@ -25,9 +34,17 @@ export const useUrlChainId = (): string | undefined => {
   const { prefix } = parsePrefixedAddress(safe)
   const shortName = prefix || chain
 
-  if (!shortName) return undefined
+  const chainId = shortName
+    ? chains[shortName] || configs.find((item) => item.shortName === shortName)?.chainId
+    : undefined
+  const hasConfigs = configs.length > 0
 
-  return chains[shortName] || configs.find((item) => item.shortName === shortName)?.chainId
+  return useMemo(() => {
+    if (!shortName) return { status: 'absent' }
+    if (chainId) return { status: 'resolved', chainId }
+    // The static EIP-3770 list misses chains only the runtime config knows.
+    return hasConfigs ? { status: 'unknown', shortName } : { status: 'pending', shortName }
+  }, [shortName, chainId, hasConfigs])
 }
 
 const useWalletChainId = (): string | undefined => {
@@ -39,10 +56,16 @@ const useWalletChainId = (): string | undefined => {
 }
 
 const useChainId = (): string => {
-  const urlChainId = useUrlChainId()
+  const scope = useSafeScope()
+  const urlChain = useUrlChain()
   const walletChainId = useWalletChainId()
 
-  return urlChainId || walletChainId || String(DEFAULT_CHAIN_ID)
+  if (scope?.chainId) return scope.chainId
+  if (urlChain.status === 'resolved') return urlChain.chainId
+  // A default here would query the wrong chain for the Safe in the URL; '' makes consumers skip.
+  if (urlChain.status !== 'absent') return ''
+
+  return walletChainId || String(DEFAULT_CHAIN_ID)
 }
 
 export default useChainId

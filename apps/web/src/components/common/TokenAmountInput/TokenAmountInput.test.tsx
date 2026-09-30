@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import { FormProvider, useForm, useFieldArray } from 'react-hook-form'
+import { FormProvider, useForm, useFieldArray, useWatch } from 'react-hook-form'
 import TokenAmountInput from './index'
 import { TokenAmountFields } from '@/components/tx-flow/flows/TokenTransfer/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -211,7 +211,84 @@ const SubmitTestWrapper = ({
   )
 }
 
+// Derives the selected token from the form like RecipientRow does, so a token pick reaches the
+// amount validators.
+const TokenSwitchTestWrapper = () => {
+  const methods = useForm({
+    defaultValues: {
+      recipients: [{ recipient: '', [TokenAmountFields.tokenAddress]: ZERO_ADDRESS, [TokenAmountFields.amount]: '' }],
+    },
+    mode: 'onChange',
+  })
+  const tokenAddress = useWatch({ control: methods.control, name: 'recipients.0.tokenAddress' })
+  const selectedToken = mockBalances.find((b) => b.tokenInfo.address === tokenAddress)
+
+  return (
+    <FormProvider {...methods}>
+      <TokenAmountInput
+        balances={mockBalances}
+        selectedToken={selectedToken}
+        maxAmount={BigInt(selectedToken?.balance || '0')}
+        fieldArray={{ name: 'recipients', index: 0 }}
+        deps={['recipients']}
+      />
+    </FormProvider>
+  )
+}
+
+const pickToken = async (name: string) => {
+  await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
+  await userEvent.click(await screen.findByText(name))
+}
+
 describe('TokenAmountInput', () => {
+  describe('Token change', () => {
+    it('keeps the typed amount when a different token is picked', async () => {
+      render(<TokenSwitchTestWrapper />)
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '0.5')
+      await pickToken('USD Coin')
+
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+    })
+
+    it('re-validates the kept amount against the new token', async () => {
+      render(<TokenSwitchTestWrapper />)
+
+      await userEvent.type(screen.getByTestId('token-amount-field'), '0.0000001')
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+
+      await pickToken('USD Coin')
+
+      expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
+      expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
+    })
+  })
+
+  describe('Error display timing', () => {
+    it('holds an amount error back while typing but clears it at once', async () => {
+      render(<TokenSwitchTestWrapper />)
+      const amountField = screen.getByTestId('token-amount-field')
+
+      await userEvent.type(amountField, '0.')
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
+
+      await userEvent.type(amountField, '5')
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      expect(screen.getByText('Amount')).toBeInTheDocument()
+
+      // Breaking the value differently right away must not flash the previous message.
+      await userEvent.clear(amountField)
+      await userEvent.type(amountField, '1.')
+      expect(amountField).toHaveValue('1.')
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      expect(screen.queryByText('Should have 1 to 18 decimals')).not.toBeInTheDocument()
+      expect(await screen.findByText('Should have 1 to 18 decimals')).toBeInTheDocument()
+    })
+  })
+
   describe('Submitted values', () => {
     it('keeps the picked token address in the submitted payload', async () => {
       const onSubmit = jest.fn()
@@ -449,13 +526,13 @@ describe('TokenAmountInput', () => {
       )
     }
 
-    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', () => {
+    it('keeps the typed value neutral while the label goes destructive on an insufficient-funds error', async () => {
       render(<ErroredWrapper defaultAmount="0.0159" />)
 
       const amountField = screen.getByTestId('token-amount-field')
 
-      // The label swaps in the error message and turns destructive...
-      expect(screen.getByText('Insufficient funds')).toHaveClass('text-destructive')
+      // The label swaps in the error message (after the display debounce) and turns destructive...
+      expect(await screen.findByText('Insufficient funds')).toHaveClass('text-destructive')
       // ...but the typed value stays the normal foreground colour, not red.
       expect(amountField).toHaveDisplayValue('0.0159')
       expect(amountField).toHaveClass('text-foreground')

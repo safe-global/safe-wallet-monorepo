@@ -113,8 +113,8 @@ export const useFlowActivationGuard: UseGuard = () => {
       // (possibly empty) or a 404 confirming the user has no spaces. On any
       // other error (401/403 from cleared cookies, network failure, 5xx),
       // assume the user has spaces so we don't bounce them into create-space.
-      // The auth listener / reconcileAuth flow will clean up the stale auth
-      // state and re-trigger the guard with a correct isSiweAuthenticated.
+      // forbiddenSessionListener confirms a 403 against /v1/auth/me, clears the
+      // stale auth state and re-triggers the guard with a correct isSiweAuthenticated.
       const isNotFound = !!error && (error as { status?: unknown }).status === 404
       const transientError = !!error && !isNotFound
       if (transientError) {

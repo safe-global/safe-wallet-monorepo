@@ -15,6 +15,7 @@ import {
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@/components/ui/button'
@@ -39,8 +40,6 @@ const HIDDEN_ROUTES = [
   AppRoutes.newSafe.create,
   AppRoutes.newSafe.advancedCreate,
   AppRoutes.newSafe.load,
-  AppRoutes.terms,
-  AppRoutes.privacy,
   AppRoutes.licenses,
   AppRoutes.imprint,
   AppRoutes.cookie,
@@ -91,7 +90,7 @@ function SignInWorkspaceCta({ label, onSignIn }: { label: string; onSignIn: () =
   return (
     <div className="flex flex-col items-center gap-3 px-4 py-8 text-center" data-testid="dropdown-signin-cta">
       <p className="text-sm text-muted-foreground">
-        Sign in to a workspace to collaborate on Safe accounts with your team.
+        Sign in to a Workspace to collaborate on Safe accounts with your team.
       </p>
       <Button variant="secondary" size="sm" onClick={onSignIn} data-testid="dropdown-signin-btn">
         {label}
@@ -172,6 +171,7 @@ function SpaceSafeBar() {
   const [selectedTab, setSelectedTab] = useState<DropdownTab | null>(null)
   const [search, setSearch] = useState('')
   const [renameTarget, setRenameTarget] = useState<SafeRenameTarget | null>(null)
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address, renameTarget?.chainIds ?? [])
   const connectWallet = useConnectWallet()
   const trustedSafesModal = useTrustedSafesModal()
   const isAboveOverlay = useIsTopbarAboveOverlay()
@@ -220,11 +220,12 @@ function SpaceSafeBar() {
 
   // Manual sort turns the active tab's list into a drag-to-reorder list. The order persists to the
   // same scope the welcome/workspace tables use — trusted for My accounts, this space for the
-  // workspace tab — so every surface stays in sync. Disabled while searching (a drop would persist a
-  // partial order). The Workspace tab has no scope outside a space, so it isn't reorderable there.
+  // workspace tab — so every surface stays in sync. The Workspace tab has no scope outside a space,
+  // so it isn't reorderable there. Kept defined while searching so the dropdown doesn't swap the list
+  // component (which steals focus from the search input); dragging is disabled there instead.
   const reorderScope = activeTab === 'local' ? TRUSTED_ORDER_SCOPE : spaceId ? getSpaceOrderScope(spaceId) : undefined
   const handleReorder =
-    orderBy === OrderByOption.MANUAL && !search.trim() && reorderScope
+    orderBy === OrderByOption.MANUAL && reorderScope
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
@@ -262,7 +263,7 @@ function SpaceSafeBar() {
   const emptyStateOverride =
     activeTab === 'workspace' && !isInSpaceContext ? (
       <SignInWorkspaceCta
-        label={isSignedIn ? 'View workspaces' : 'Sign in'}
+        label={isSignedIn ? 'View Workspaces' : 'Sign in'}
         onSignIn={() => router.push({ pathname: AppRoutes.welcome.spaces })}
       />
     ) : activeTab === 'local' && !hasWallet ? (
@@ -326,6 +327,7 @@ function SpaceSafeBar() {
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
+          scope={renameScope}
           disableAddressInput
           // Above the safe-selector popup (shadcn --z-overlay) so the rename dialog layers on
           // top of the open dropdown instead of behind it.

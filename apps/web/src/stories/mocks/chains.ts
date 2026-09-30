@@ -17,6 +17,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   spaces: false,
   oidcAuth: false,
   switchAuthenticator: false,
+  twoFactorAwarenessBanner: false,
   safeStaking: false,
 }
 
@@ -33,6 +34,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   spaces: 'SPACES',
   oidcAuth: 'OIDC_AUTH',
   switchAuthenticator: 'SWITCH_AUTHENTICATOR',
+  twoFactorAwarenessBanner: 'TWO_FACTOR_AWARENESS_BANNER',
   safeStaking: 'SAFE_STAKING',
 }
 

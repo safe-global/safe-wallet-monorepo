@@ -1,0 +1,16 @@
+/* Soft brand-green halo behind the logo. Static, unlike the launch screen's: a pulsing logo on a
+   state that has finished failing reads as "still loading". */
+.halo {
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--color-static-text-brand) 20%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+/* Dark-mode logo: mask the SVG and fill with the theme primary, mirroring SafeLogo. */
+.logoDarkFill {
+  background-color: var(--primary);
+  mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+  -webkit-mask: url(/images/logo-no-text.svg) center / contain no-repeat;
+}

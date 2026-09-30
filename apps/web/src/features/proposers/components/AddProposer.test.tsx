@@ -158,7 +158,7 @@ describe('AddProposer signing logic', () => {
     it('does not save the name locally when the delegate request fails', async () => {
       const failingAddDelegate = jest
         .fn()
-        .mockReturnValue({ unwrap: () => Promise.reject(new Error('delegate rejected')) })
+        .mockReturnValue({ unwrap: () => Promise.reject(new Error('Request failed with status 500')) })
       mockUseAddDelegateV2.mockReturnValue([failingAddDelegate, {} as never])
 
       const { getByLabelText, getByTestId, findByText } = render(
@@ -289,6 +289,77 @@ describe('AddProposer signing logic', () => {
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
       expect(queryByText(SMART_CONTRACT_PROPOSER_INFO)).toBeNull()
+    })
+  })
+
+  describe('error copy', () => {
+    const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
+    const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
+    const mockGetSigner = getAssertedChainSigner as jest.MockedFunction<typeof getAssertedChainSigner>
+    const mockUseAddDelegateV2 = useDelegatesPostDelegateV2Mutation as jest.MockedFunction<
+      typeof useDelegatesPostDelegateV2Mutation
+    >
+
+    const submitProposer = async (addDelegateV2: jest.Mock) => {
+      mockUseAddDelegateV2.mockReturnValue([addDelegateV2, {} as never])
+
+      const utils = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+
+      act(() => {
+        fireEvent.change(utils.getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
+        fireEvent.change(utils.getByLabelText(/Name/i), { target: { value: faker.person.firstName() } })
+      })
+
+      await waitFor(() => expect(utils.getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('submit-proposer-btn'))
+      })
+
+      return utils
+    }
+
+    beforeEach(() => {
+      mockUseWallet.mockReturnValue({
+        address: fakerChecksummedAddress(),
+        chainId: '1',
+        label: 'MetaMask',
+        provider: MockEip1193Provider,
+      })
+
+      mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
+
+      mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
+
+      useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+    })
+
+    it('names the owner who already signed instead of the generic error', async () => {
+      const owner = '0x4c3c38a459F0bAABB763290111B66ed01b5fEfA2'
+      const addDelegateV2 = jest.fn().mockReturnValue({
+        unwrap: () => Promise.reject({ status: 400, data: { message: `Signature for owner ${owner} already exists` } }),
+      })
+
+      const { findByText, queryByText } = await submitProposer(addDelegateV2)
+
+      expect(
+        await findByText(
+          'The owner 0x4c3c...EfA2 already confirmed this request. Sign with a different owner to continue.',
+        ),
+      ).toBeInTheDocument()
+      expect(queryByText('Error adding proposer')).toBeNull()
+    })
+
+    it('shows the rejected-signature copy when the wallet rejects', async () => {
+      jest
+        .spyOn(proposerUtils, 'signProposerTypedData')
+        .mockRejectedValue(Object.assign(new Error('denied'), { code: 'ACTION_REJECTED' }))
+
+      const { findByText } = await submitProposer(jest.fn())
+
+      expect(await findByText('The signature request was rejected. Try again to continue.')).toBeInTheDocument()
     })
   })
 })

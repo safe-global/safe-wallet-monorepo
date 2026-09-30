@@ -16,15 +16,18 @@ import { useAppDispatch } from '@/store'
 import { openCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { APP_HOMEPAGE, APP_VERSION } from '@/config/version'
-import { BRAND_NAME } from '@/config/constants'
+import { BRAND_NAME, SAFE_PRO_TERMS_URL, SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
+import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { useLoadFeature } from '@/features/__core__'
 import { SupportChatFeature, useSupportChat } from '@/features/support-chat'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
@@ -40,18 +43,41 @@ type LegalLink = {
   external?: boolean
 }
 
+const proChip = (
+  <span className="block h-4 w-6">
+    <ProChip className="size-full" />
+  </span>
+)
+
+const SAFE_PRO_LEGAL_LINKS: LegalLink[] = [
+  {
+    title: 'Pro User Terms & Conditions',
+    description: 'For using Safe Pro',
+    href: SAFE_PRO_USER_TERMS_URL,
+    icon: proChip,
+    external: true,
+  },
+  {
+    title: 'Pro Terms & Conditions',
+    description: 'For using Safe Pro',
+    href: SAFE_PRO_TERMS_URL,
+    icon: proChip,
+    external: true,
+  },
+]
+
 const LEGAL_LINKS: LegalLink[] = [
   {
     title: 'Terms & Conditions',
     description: 'For using Safe{Wallet}',
-    href: AppRoutes.terms,
+    href: TERMS_URL,
     icon: <FileText className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },
   {
     title: 'Privacy Policy',
     description: 'What we collect and why',
-    href: AppRoutes.privacy,
+    href: PRIVACY_URL,
     icon: <Shield className="h-4 w-4 text-muted-foreground" />,
     external: true,
   },
@@ -119,6 +145,10 @@ const AboutPage = () => {
   const { config, user } = useSupportChat()
   const isOfficialHost = useIsOfficialHost()
   const showSupport = !$isDisabled && isOfficialHost
+  const isAnnounced = useIsSafeProAnnouncementEnabled()
+  const isSafePro = useIsSafeProEnabled()
+  const showSafeProLinks = isAnnounced || isSafePro
+  const legalLinks = showSafeProLinks ? [...SAFE_PRO_LEGAL_LINKS, ...LEGAL_LINKS] : LEGAL_LINKS
 
   const handleContactSupportClick = useCallback(() => {
     setSupportOpen(true)
@@ -179,7 +209,7 @@ const AboutPage = () => {
         <SpaceSettingsSectionTitle>Legal &amp; Policies</SpaceSettingsSectionTitle>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 -mx-2">
-          {LEGAL_LINKS.map((link) => (
+          {legalLinks.map((link) => (
             <LinkRow key={link.title} {...link} />
           ))}
           <Button

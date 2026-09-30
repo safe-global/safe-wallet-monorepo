@@ -105,7 +105,6 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
         })) || [],
     },
     mode: 'onChange',
-    delayError: 500,
   })
 
   const { handleSubmit, control, watch, formState } = formMethods
@@ -266,7 +265,7 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
               <Separator bleed="6" />
 
               <TxCardActions>
-                <Button type="submit" size="submit" disabled={!formState.isValid} className="w-full lg:w-auto">
+                <Button type="submit" size="submit" disabled={!formState.isValid}>
                   Next
                 </Button>
               </TxCardActions>

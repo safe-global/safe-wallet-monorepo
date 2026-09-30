@@ -232,7 +232,7 @@ describe('space address book utils', () => {
   describe('getRenameContactTooltip', () => {
     it('appends the validation error to the rename prompt', () => {
       expect(getRenameContactTooltip('Invalid characters')).toBe(
-        'Rename this contact to add it to the workspace. Invalid characters',
+        'Rename this contact to add it to the Workspace. Invalid characters',
       )
     })
   })

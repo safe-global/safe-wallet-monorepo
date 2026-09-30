@@ -7,6 +7,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 interface MemberInvite {
   // Can be a wallet address, ENS name, or email.
@@ -96,6 +97,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         inviteUsersDto: { users: usersToInvite },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         return

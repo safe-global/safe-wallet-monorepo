@@ -72,17 +72,17 @@ const CounterfactualSuccessScreen = () => {
           <Typography data-testid="account-success-message" variant="h3" className="mb-2 font-bold">
             {isCFCreation ? 'Your account is almost set!' : 'Your account is all set!'}
           </Typography>
-          <Typography variant="paragraph-small">
+          <Typography variant="paragraph-small" as="p">
             {isCFCreation
               ? `Activate the account ${isMultiChain ? 'per network' : ''} to unlock all features of your smart wallet.`
               : 'Start your journey to the smart account security now.'}
           </Typography>
-          <Typography variant="paragraph-small">
+          <Typography variant="paragraph-small" as="p">
             {isCFCreation && isMultiChain
               ? `You can use the address below to receive funds on the selected ${
                   isMultiChain ? 'networks' : 'network'
                 }.`
-              : `Use your address to receive funds ${chainName ? `on ${chainName}` : ''}`}
+              : `Use your address to receive funds${chainName ? ` on ${chainName}` : ''}.`}
           </Typography>
         </div>
 

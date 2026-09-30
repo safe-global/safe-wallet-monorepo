@@ -1,4 +1,4 @@
-import { CookieAndTermBanner } from 'src/components/common/CookieAndTermBanner'
+import { CookieAndTermBanner } from '@/components/common/CookieAndTermBanner'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { Typography } from '@/components/ui/typography'
 import type { NextPage } from 'next'

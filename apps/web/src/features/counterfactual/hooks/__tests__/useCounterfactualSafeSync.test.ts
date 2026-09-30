@@ -474,4 +474,25 @@ describe('useCounterfactualSafeSync', () => {
 
     jest.useRealTimers()
   })
+
+  it('tags each failed sync attempt so the retry stays distinguishable from the first failure', async () => {
+    // Both attempts share the same error code 2s apart, so without the attempt
+    // facet they are indistinguishable duplicates in analytics.
+    jest.useFakeTimers()
+
+    userFailureCount = 2
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    await act(async () => {})
+    await act(async () => {
+      jest.advanceTimersByTime(2000)
+    })
+    await act(async () => {})
+
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 1 })
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 2 })
+
+    jest.useRealTimers()
+  })
 })

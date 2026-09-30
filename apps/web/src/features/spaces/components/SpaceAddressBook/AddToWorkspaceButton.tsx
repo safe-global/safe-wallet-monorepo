@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Check, Plus } from 'lucide-react'
 import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
@@ -12,14 +14,16 @@ import { Spinner } from '@/components/ui/spinner'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { validateContactName } from './utils'
 import { sanitizeName } from '@safe-global/utils/validation/names'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type AddToWorkspaceButtonProps = {
   address: string
   name: string
   chainIds: string[]
+  isCompact?: boolean
 }
 
-const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonProps) => {
+const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorkspaceButtonProps) => {
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -39,6 +43,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
         upsertAddressBookItemsDto: { items: [{ name: sanitizeName(name), address, chainIds }] },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({
@@ -54,7 +59,7 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
       setAdded(true)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace',
+          message: 'Contact added to Workspace',
           variant: 'success',
           groupKey: 'add-to-workspace-success',
         }),
@@ -68,17 +73,36 @@ const AddToWorkspaceButton = ({ address, name, chainIds }: AddToWorkspaceButtonP
     }
   }
 
+  const label = added ? 'Added' : 'Add to Workspace'
+  const icon = added ? <Check className="size-4" /> : <Plus className="size-4" />
+
+  // Compact has no room for the label, so it moves into the accessible name and a tooltip
   const button = (
-    <Button variant="outline" size="sm" onClick={handleAdd} disabled={isSubmitting || added || !!nameError}>
-      {isSubmitting ? <Spinner className="size-3.5" /> : added ? 'Added' : 'Add to workspace'}
+    <Button
+      variant="outline"
+      size={isCompact ? 'icon-sm' : 'sm'}
+      aria-label={isCompact ? label : undefined}
+      onClick={handleAdd}
+      disabled={isSubmitting || added || !!nameError}
+    >
+      {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
     </Button>
   )
 
-  if (!nameError) {
+  if (nameError) {
+    return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
+  }
+
+  if (!isCompact) {
     return button
   }
 
-  return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 export default AddToWorkspaceButton

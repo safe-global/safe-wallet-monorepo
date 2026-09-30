@@ -11,7 +11,8 @@ import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
-import { MasterCopyDeployer, useMasterCopies } from '@/hooks/useMasterCopies'
+import { useMasterCopies } from '@/hooks/useMasterCopies'
+import { MasterCopyDeployer } from '@/services/contracts/masterCopies'
 import { useBytecodeComparison } from '@/hooks/useBytecodeComparison'
 
 export type MastercopyMigration = {

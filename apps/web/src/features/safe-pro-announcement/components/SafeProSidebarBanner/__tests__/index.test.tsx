@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import SafeProSidebarBanner from '../index'
 
@@ -18,5 +18,20 @@ describe('SafeProSidebarBanner', () => {
     expect(cta).toHaveAttribute('target', '_blank')
     expect(cta).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.getAllByRole('link')).toHaveLength(1)
+  })
+
+  it('has no close button unless it can be dismissed', () => {
+    render(<SafeProSidebarBanner />)
+
+    expect(screen.queryByRole('button', { name: 'Dismiss' })).not.toBeInTheDocument()
+  })
+
+  it('calls onDismiss from the close button', () => {
+    const onDismiss = jest.fn()
+    render(<SafeProSidebarBanner onDismiss={onDismiss} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
+
+    expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 })

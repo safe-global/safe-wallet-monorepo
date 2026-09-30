@@ -13,6 +13,7 @@ import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
@@ -60,6 +61,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
         }),
       )
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
       isAwaitingCacheSync.current = false
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))

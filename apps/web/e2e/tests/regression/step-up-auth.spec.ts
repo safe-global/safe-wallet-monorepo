@@ -91,10 +91,13 @@ function captureAuthorizeRequest(page: Page) {
 async function openRemoveDialog(page: Page): Promise<void> {
   await page.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
-  await page.getByRole('menuitem', { name: 'Remove from workspace' }).click()
+  await page.getByRole('menuitem', { name: 'Remove from Workspace' }).click()
 }
 
 const readStepUpRecord = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STEP_UP_KEY)
+
+// Next.js renders its route announcer with role="alert" too, so a bare getByRole('alert') trips strict mode once a toast shows.
+const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
 
 test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
@@ -137,7 +140,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
   })
 
-  test('that it discards the pending action and reports failure when the challenge is abandoned', async ({
+  test('that it discards the pending action without reporting an error when the challenge is abandoned', async ({
     safePage,
   }) => {
     await openRemoveDialog(safePage)
@@ -146,13 +149,17 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
 
     await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
 
-    await expect(safePage.getByRole('alert')).toContainText('Verification was not completed')
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
+    await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
+    await expect(safePage.getByText('elevation_required')).toBeHidden()
   })
 
   test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {
     await safePage.addInitScript(
       ({ key, address, spaceId }) => {
+        // Init scripts also run in child frames; Beamer's iframe shares this sessionStorage while it is still about:blank and would write the record back after the app has removed it.
+        if (window !== window.top) return
+
         window.sessionStorage.setItem(
           key,
           JSON.stringify({
@@ -194,7 +201,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await openRemoveDialog(safePage)
     await safePage.getByRole('button', { name: 'Remove' }).click()
 
-    await expect(safePage.getByRole('alert')).toContainText('Safe account removed')
+    await expect(toast(safePage, 'Safe account removed')).toBeVisible()
     expect(removalCalls).toBe(2)
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
@@ -215,7 +222,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await openRemoveDialog(safePage)
     await safePage.getByRole('button', { name: 'Remove' }).click()
 
-    await expect(safePage.getByRole('alert')).toBeVisible()
+    await expect(toast(safePage, 'Internal error')).toBeVisible()
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
 })

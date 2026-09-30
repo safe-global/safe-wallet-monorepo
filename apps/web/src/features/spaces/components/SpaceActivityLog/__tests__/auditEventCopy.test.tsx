@@ -24,22 +24,22 @@ describe('getAuditEventDescription', () => {
     [
       'SPACE_CREATED',
       { eventType: 'SPACE_CREATED' as const, payload: { name: 'Treasury' } },
-      'created the workspace Treasury',
+      'created the Workspace Treasury',
     ],
     [
       'SPACE_UPDATED (rename)',
       { eventType: 'SPACE_UPDATED' as const, payload: { old: { name: 'A' }, new: { name: 'B' } } },
-      'renamed the workspace from A to B',
+      'renamed the Workspace from A to B',
     ],
     [
       'SPACE_UPDATED (no name change)',
       { eventType: 'SPACE_UPDATED' as const, payload: { old: {}, new: {} } },
-      'updated the workspace',
+      'updated the Workspace',
     ],
     [
       'SPACE_DELETED',
       { eventType: 'SPACE_DELETED' as const, payload: { name: 'Treasury' } },
-      'deleted the workspace Treasury',
+      'deleted the Workspace Treasury',
     ],
     [
       'MEMBER_INVITED',
@@ -76,12 +76,12 @@ describe('getAuditEventDescription', () => {
       'changed the role of bob from member to admin',
     ],
     ['MEMBER_ALIAS_UPDATED', { eventType: 'MEMBER_ALIAS_UPDATED' as const }, 'updated their alias'],
-    ['MEMBER_REMOVED', { eventType: 'MEMBER_REMOVED' as const, targetUser: 'bob' }, 'removed bob from the workspace'],
-    ['MEMBER_LEFT', { eventType: 'MEMBER_LEFT' as const }, 'left the workspace'],
+    ['MEMBER_REMOVED', { eventType: 'MEMBER_REMOVED' as const, targetUser: 'bob' }, 'removed bob from the Workspace'],
+    ['MEMBER_LEFT', { eventType: 'MEMBER_LEFT' as const }, 'left the Workspace'],
     [
       'MEMBER_LEFT (account deleted)',
       { eventType: 'MEMBER_LEFT' as const, payload: { targetUserId: 2, accountDeleted: true } },
-      'left the workspace (account deleted)',
+      'left the Workspace (account deleted)',
     ],
     ['SAFE_ADDED', { eventType: 'SAFE_ADDED' as const, payload: { safes: [{}, {}] } }, 'added 2 Safe accounts'],
     ['SAFE_ADDED (missing safes)', { eventType: 'SAFE_ADDED' as const, payload: {} }, 'added Safe accounts'],
@@ -139,6 +139,32 @@ describe('getAuditEventDescription', () => {
       { eventType: 'ADDRESS_BOOK_DELETED' as const, payload: { address: '0xabc', name: 'Carol' } },
       'removed the contact Carol (0xabc)',
     ],
+    [
+      'ADDRESS_BOOK_REQUEST_CREATED',
+      {
+        eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const,
+        payload: { address: '0x3333333333333333333333333333333333333333', name: 'Dave' },
+      },
+      'requested to add the contact Dave (0x3333333333333333333333333333333333333333) to Workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_CREATED (no contact details)',
+      { eventType: 'ADDRESS_BOOK_REQUEST_CREATED' as const, payload: {} },
+      'requested to add a contact to Workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_REJECTED',
+      {
+        eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const,
+        payload: { address: '0x4444444444444444444444444444444444444444', name: 'Erin' },
+      },
+      'rejected the request to add the contact Erin (0x4444444444444444444444444444444444444444) to Workspace',
+    ],
+    [
+      'ADDRESS_BOOK_REQUEST_REJECTED (no contact details)',
+      { eventType: 'ADDRESS_BOOK_REQUEST_REJECTED' as const, payload: {} },
+      'rejected the request to add a contact to Workspace',
+    ],
   ])('describes %s', (_label, overrides, expected) => {
     expect(describeEvent(overrides)).toBe(expected)
   })
@@ -164,6 +190,8 @@ describe('getAuditEventDescription', () => {
       'SAFE_REMOVED',
       'ADDRESS_BOOK_UPSERTED',
       'ADDRESS_BOOK_DELETED',
+      'ADDRESS_BOOK_REQUEST_CREATED',
+      'ADDRESS_BOOK_REQUEST_REJECTED',
     ]
     for (const eventType of eventTypes) {
       expect(describeEvent({ eventType, targetUser: null, payload: {} })).not.toBe('')
@@ -177,7 +205,7 @@ describe('getAuditEventDescription', () => {
         targetUser: null,
         payload: { targetUserId: 2 },
       }),
-    ).toBe('removed a former member from the workspace')
+    ).toBe('removed a former member from the Workspace')
   })
 
   it('prefers an explicitly passed target display (member name) over the server string', () => {
@@ -187,7 +215,7 @@ describe('getAuditEventDescription', () => {
       payload: { targetUserId: 2 },
     })
     const { container } = render(<div>{getAuditEventDescription(event, 'Alice Member')}</div>)
-    expect(container.textContent).toBe('removed Alice Member from the workspace')
+    expect(container.textContent).toBe('removed Alice Member from the Workspace')
   })
 
   it('returns the server-resolved target verbatim (full address) in the default target display', () => {
@@ -212,6 +240,6 @@ describe('getAuditEventDescription', () => {
         targetUser: 'Former member',
         payload: { targetUserId: 2 },
       }),
-    ).toBe('removed Former member from the workspace')
+    ).toBe('removed Former member from the Workspace')
   })
 })

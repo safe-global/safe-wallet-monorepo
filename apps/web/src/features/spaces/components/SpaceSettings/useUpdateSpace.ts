@@ -9,6 +9,7 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type UpdateSpaceFormData = {
   name: string
@@ -34,13 +35,14 @@ export const useUpdateSpace = (space: GetSpaceResponse | undefined, onSuccess?: 
       dispatch(
         showNotification({
           variant: 'success',
-          message: 'Updated workspace name',
+          message: 'Updated Workspace name',
           groupKey: 'space-update-name',
         }),
       )
 
       onSuccess?.()
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))
     }

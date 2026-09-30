@@ -20,7 +20,10 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
-import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
+import { cn } from '@/utils/cn'
+import AddressCell from './AddressCell'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -87,6 +90,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     setLoadingId(requestId)
     try {
       const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({
@@ -100,7 +104,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace address book',
+          message: 'Contact added to Workspace address book',
           variant: 'success',
           groupKey: 'approve-success',
         }),
@@ -150,16 +154,21 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       sticky: true,
       minWidth: 120,
       emphasis: 'strong',
-      cell: (req) => (
-        <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
-          <span className="min-w-0 truncate">{req.name}</span>
-          {spaceAddresses.has(req.address.toLowerCase()) && (
-            <Tooltip>
-              <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
-              <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
-            </Tooltip>
-          )}
-        </span>
+      // Compact drops the address column, so the address rides under the name and a long name
+      // wraps into the width that frees up instead of truncating.
+      cell: (req, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+            <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
+            {spaceAddresses.has(req.address.toLowerCase()) && (
+              <Tooltip>
+                <TooltipTrigger render={<Badge variant="outline">Already in Workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing Workspace entry for this address.</TooltipContent>
+              </Tooltip>
+            )}
+          </span>
+          {isCompact && <AddressCell address={req.address} isCompact />}
+        </div>
       ),
     },
     {
@@ -167,20 +176,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       header: 'Address',
       width: '30%',
       minWidth: 240,
-      cell: (req, { isCompact }) => (
-        <div className="text-[0.8em] font-mono">
-          <EthHashInfo
-            address={req.address}
-            shortAddress={isCompact}
-            showPrefix={false}
-            showName={false}
-            highlight4bytes
-            hasExplorer
-            showCopyButton
-            avatarSize={24}
-          />
-        </div>
-      ),
+      priority: 'secondary',
+      cell: (req) => <AddressCell address={req.address} />,
     },
     {
       id: 'chains',

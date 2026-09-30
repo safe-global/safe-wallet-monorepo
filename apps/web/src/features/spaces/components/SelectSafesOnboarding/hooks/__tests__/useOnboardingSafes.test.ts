@@ -1,6 +1,7 @@
 import * as allOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
+import * as useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { renderHook } from '@/tests/test-utils'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
@@ -43,6 +44,22 @@ describe('useOnboardingSafes', () => {
     expect(result.current.trustedSafes.map((s) => s.address)).toEqual(
       expect.arrayContaining(['0xTrusted1', '0xTrusted2']),
     )
+  })
+
+  it('names a trusted Safe after its workspace address book entry', () => {
+    jest
+      .spyOn(useGetSpaceAddressBook, 'default')
+      .mockReturnValue([
+        { address: '0xTrusted1', name: 'Named Safe', chainIds: ['1'] } as ReturnType<
+          typeof useGetSpaceAddressBook.default
+        >[number],
+      ])
+
+    const { result } = renderHook(() => useOnboardingSafes(), {
+      initialReduxState: { addedSafes: { '1': { '0xTrusted1': { owners: [], threshold: 1 } } } },
+    })
+
+    expect(result.current.trustedSafes[0].name).toBe('Named Safe')
   })
 
   it('returns owned safes from API', () => {

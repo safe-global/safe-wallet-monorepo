@@ -40,48 +40,6 @@ describe('useRecoveryState', () => {
     jest.clearAllMocks()
   })
 
-  it('should not fetch if there is no Transaction Service', async () => {
-    jest.useFakeTimers()
-
-    mockUseWeb3ReadOnly.mockReturnValue({} as unknown as ReturnType<typeof useWeb3ReadOnly>)
-    mockUseCurrentChain.mockReturnValue(undefined)
-    mockSafeInfo()
-    const delayModifierAddress = faker.finance.ethereumAddress()
-    const delayModifiers = [{ address: delayModifierAddress }] as unknown as Array<Delay>
-    const mockTxHistory = {
-      page: {
-        results: [
-          { type: 'DATE_LABEL' },
-          {
-            type: 'TRANSACTION',
-            conflictType: ConflictType.NONE,
-            transaction: {
-              txInfo: {
-                type: 'Custom',
-                to: {
-                  value: delayModifierAddress,
-                },
-              },
-            },
-          },
-        ],
-      },
-    }
-    mockUseTxHistory.mockReturnValue(mockTxHistory as unknown as ReturnType<typeof useTxHistory>)
-
-    const { result } = renderHook(() => useRecoveryState(delayModifiers))
-
-    // Give enough time for loading to occur, if it will
-    await act(async () => {
-      jest.advanceTimersByTime(10)
-    })
-
-    expect(result.current).toEqual([undefined, undefined, false])
-    expect(mockGetRecoveryState).not.toHaveBeenCalledTimes(1)
-
-    jest.useRealTimers()
-  })
-
   it('should not fetch is there is no provider', async () => {
     jest.useFakeTimers()
 

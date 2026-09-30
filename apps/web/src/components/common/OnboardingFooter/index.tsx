@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
@@ -24,9 +23,10 @@ type OnboardingFooterProps = {
 /**
  * OnboardingFooter — the Back / Continue footer for the full-screen Spaces
  * onboarding flows. Owns the taller `size="xl"` (48px) CTA scale, the Back
- * (secondary) + Continue (primary) treatment, the left/right chevrons, the
- * loading → spinner swap, and the stacked-mobile → row-on-xl layout. Reach for
- * this instead of hand-building the footer so every onboarding step matches.
+ * (secondary) + Continue (primary) treatment, the loading → spinner swap, and
+ * the layout: both buttons share one row, each taking half of it, and stack
+ * full-width only when a long label leaves no room. Reach for this instead of
+ * hand-building the footer so every onboarding step matches.
  */
 const OnboardingFooter = ({
   onBack,
@@ -40,17 +40,9 @@ const OnboardingFooter = ({
   continueLoading = false,
   continueTestId,
 }: OnboardingFooterProps) => (
-  <div className="flex flex-col-reverse gap-3 xl:flex-row xl:items-center">
+  <div className="flex flex-wrap items-center gap-3">
     {onBack && (
-      <Button
-        type="button"
-        variant="secondary"
-        size="xl"
-        onClick={onBack}
-        disabled={backDisabled}
-        className="w-full xl:flex-1"
-      >
-        <ChevronLeft />
+      <Button type="button" variant="secondary" size="xl" onClick={onBack} disabled={backDisabled} className="flex-1">
         {backLabel}
       </Button>
     )}
@@ -61,16 +53,9 @@ const OnboardingFooter = ({
       onClick={onContinue}
       disabled={continueDisabled || continueLoading}
       data-testid={continueTestId}
-      className="w-full xl:flex-1"
+      className="flex-1"
     >
-      {continueLoading ? (
-        <Spinner />
-      ) : (
-        <>
-          {continueLabel}
-          <ChevronRight />
-        </>
-      )}
+      {continueLoading ? <Spinner /> : continueLabel}
     </Button>
   </div>
 )

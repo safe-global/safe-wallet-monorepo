@@ -61,10 +61,10 @@ export function getAuditEventDescription(
       const name = asString(payload.name)
       return name ? (
         <>
-          created the workspace <Em>{name}</Em>
+          created the Workspace <Em>{name}</Em>
         </>
       ) : (
-        'created the workspace'
+        'created the Workspace'
       )
     }
     case 'SPACE_UPDATED': {
@@ -73,20 +73,20 @@ export function getAuditEventDescription(
       if (oldName && newName) {
         return (
           <>
-            renamed the workspace from <Em>{oldName}</Em> to <Em>{newName}</Em>
+            renamed the Workspace from <Em>{oldName}</Em> to <Em>{newName}</Em>
           </>
         )
       }
-      return 'updated the workspace'
+      return 'updated the Workspace'
     }
     case 'SPACE_DELETED': {
       const name = asString(payload.name)
       return name ? (
         <>
-          deleted the workspace <Em>{name}</Em>
+          deleted the Workspace <Em>{name}</Em>
         </>
       ) : (
-        'deleted the workspace'
+        'deleted the Workspace'
       )
     }
     case 'MEMBER_INVITED': {
@@ -129,11 +129,11 @@ export function getAuditEventDescription(
     case 'MEMBER_REMOVED':
       return (
         <>
-          removed <Em>{target}</Em> from the workspace
+          removed <Em>{target}</Em> from the Workspace
         </>
       )
     case 'MEMBER_LEFT':
-      return payload.accountDeleted === true ? 'left the workspace (account deleted)' : 'left the workspace'
+      return payload.accountDeleted === true ? 'left the Workspace (account deleted)' : 'left the Workspace'
     case 'SAFE_ADDED': {
       const count = asCount(payload.safes)
       return count > 0 ? `added ${pluralize(count, 'Safe account')}` : 'added Safe accounts'
@@ -178,6 +178,26 @@ export function getAuditEventDescription(
         </>
       ) : (
         'removed a contact'
+      )
+    }
+    case 'ADDRESS_BOOK_REQUEST_CREATED': {
+      const contact = asContact(payload)
+      return hasContactDetail(contact) ? (
+        <>
+          requested to add the contact <ContactRef contact={contact} /> to Workspace
+        </>
+      ) : (
+        'requested to add a contact to Workspace'
+      )
+    }
+    case 'ADDRESS_BOOK_REQUEST_REJECTED': {
+      const contact = asContact(payload)
+      return hasContactDetail(contact) ? (
+        <>
+          rejected the request to add the contact <ContactRef contact={contact} /> to Workspace
+        </>
+      ) : (
+        'rejected the request to add a contact to Workspace'
       )
     }
     default:

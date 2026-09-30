@@ -14,6 +14,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type DeleteContactDialogProps = {
   name: string
@@ -39,6 +40,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
       trackEvent({ ...SPACE_EVENTS.REMOVE_ADDRESS_SUBMIT })
       const response = await deleteEntry({ spaceId: spaceId ?? '', address })
 
+      if (isElevationRequiredError(response.error)) return
       if (response.error) {
         setError('Something went wrong deleting the contact. Please try again.')
         return

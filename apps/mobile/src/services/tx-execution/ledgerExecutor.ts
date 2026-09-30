@@ -2,6 +2,7 @@ import { getUserNonce } from '@/src/services/web3'
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { ledgerExecutionService } from '@/src/services/ledger/ledger-execution.service'
 import { ledgerDMKService } from '@/src/services/ledger/ledger-dmk.service'
+import logger from '@/src/utils/logger'
 import { store } from '@/src/store'
 import { selectSignerByAddress } from '@/src/store/signersSlice'
 import type { EstimatedFeeValues } from '@/src/store/estimatedFeeSlice'
@@ -47,7 +48,9 @@ export const executeLedgerTx = async ({
     throw new Error('Ledger signer missing derivation path')
   }
 
-  // Execute with Ledger
+  // Pre-broadcast nonce, like the other executors: the pending-tx watcher tracks the wallet nonce from here.
+  const walletNonce = await getUserNonce(chain, signerAddress)
+
   const { hash } = await ledgerExecutionService.executeTransaction({
     chain,
     activeSafe,
@@ -57,11 +60,12 @@ export const executeLedgerTx = async ({
     feeParams,
   })
 
-  // Get wallet nonce for tracking
-  const walletNonce = await getUserNonce(chain, signerAddress)
-
-  // Disconnect to prevent DMK background pinger from continuing after execution
-  await ledgerDMKService.disconnect()
+  // The transaction is already broadcast; a failed disconnect must not surface as an execution failure.
+  try {
+    await ledgerDMKService.disconnect()
+  } catch (error) {
+    logger.warn('Ledger disconnect after execution failed:', error)
+  }
 
   return {
     // From here on, the transaction tracking in the app assumes the execution was done with a private key

@@ -149,6 +149,7 @@ describe('useTransactionType', () => {
           type: 'something else' as TransactionInfoType,
         }),
         safeAppInfo: {
+          id: 1,
           name: 'somename',
           url: 'http://google.com',
           logoUri: 'myurl.com',

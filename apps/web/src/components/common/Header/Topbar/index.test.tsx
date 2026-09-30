@@ -52,9 +52,10 @@ jest.mock('@/features/batching', () => ({
   useDraftBatch: () => [],
 }))
 
+const mockUseSafeAddress = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
-  default: () => '',
+  default: () => mockUseSafeAddress(),
 }))
 
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
@@ -147,6 +148,7 @@ describe('Topbar', () => {
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseSafeAddress.mockReturnValue('')
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -175,6 +177,16 @@ describe('Topbar', () => {
     expect(screen.queryByLabelText(/unread messages/)).not.toBeInTheDocument()
   })
 
+  it('does not count errors in the badge', () => {
+    const initialReduxState: Partial<RootState> = {
+      notifications: [createNotification(), createNotification({ variant: 'error' })],
+    }
+
+    render(<Topbar />, { initialReduxState })
+
+    expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
+  })
+
   it('does not count read notifications in the badge', () => {
     const initialReduxState: Partial<RootState> = {
       notifications: [createNotification({ isRead: true }), createNotification()],
@@ -198,8 +210,9 @@ describe('Topbar', () => {
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
     })
 
-    it('renders SpaceSafeBar on space routes when a transaction modal is open', () => {
+    it('renders SpaceSafeBar on space routes when a transaction modal is open for a Safe', () => {
       mockIsSpaceRoute.mockReturnValue(true)
+      mockUseSafeAddress.mockReturnValue('0x1234567890123456789012345678901234567890')
       const txModalValue: TxModalContextType = {
         txFlow: <div data-testid="mock-tx-flow" />,
         setTxFlow: jest.fn(),
@@ -211,6 +224,48 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+
+    // The policy flows pick their Safe inside step 1 and never set the URL Safe, so the bar would
+    // render an empty Safe selector over the Space.
+    it('keeps the search input on space routes when the open flow has no Safe of its own', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUseSafeAddress.mockReturnValue('')
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+    })
+
+    it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces/policies')
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => <div data-testid="global-search-input" />,
+        WalletConnectWidget: () => null,
+      })
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+      expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('global-search-input')).not.toBeInTheDocument()
     })
 
     it('renders SafeLogo on settings routes when no safe address is in the URL', () => {

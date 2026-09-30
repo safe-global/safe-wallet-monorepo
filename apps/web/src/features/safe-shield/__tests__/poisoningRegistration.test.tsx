@@ -25,6 +25,7 @@ jest.mock('@/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: jest.fn(() => true) }))
+jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }) }))
 jest.mock('@/features/myAccounts', () => ({ useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })) }))
 jest.mock('@/features/hypernative', () => ({ useAuthToken: jest.fn(() => [{ token: undefined }]) }))
 

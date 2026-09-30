@@ -3,6 +3,7 @@ import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
@@ -318,7 +319,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
 
               {error && (
                 <div className="mt-4">
-                  <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
+                  <ErrorMessage error={error}>{getProposerErrorText(error, 'Error adding proposer')}</ErrorMessage>
                 </div>
               )}
 

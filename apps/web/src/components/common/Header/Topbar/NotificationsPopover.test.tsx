@@ -115,6 +115,17 @@ describe('NotificationsPopover', () => {
     expect(screen.getByText('2')).toBeInTheDocument()
   })
 
+  it('does not show errors in the unread count', () => {
+    const initialReduxState: Partial<RootState> = {
+      notifications: [createNotification(), createNotification({ variant: 'error' })],
+    }
+
+    render(<PopoverOpener />, { initialReduxState })
+    fireEvent.click(screen.getByTestId('open-trigger'))
+
+    expect(screen.getByText('1')).toBeInTheDocument()
+  })
+
   it('does not show unread count when all notifications are read', () => {
     const initialReduxState: Partial<RootState> = {
       notifications: [createNotification({ isRead: true })],

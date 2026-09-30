@@ -81,6 +81,7 @@ export const AllVariants: Story = {
           <SearchInput placeholder="Empty" />
           <SearchInput defaultValue="0x1234…abcd" />
           <SearchInput placeholder="Disabled" disabled />
+          <SearchInput value="ethereum" onChange={() => {}} onClear={() => {}} />
         </div>
       </div>
     </div>

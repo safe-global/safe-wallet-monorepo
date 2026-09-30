@@ -75,6 +75,18 @@ const longNamedTreasury = account(ETHEREUM, TREASURY, {
   name: 'Foundation treasury — long-term reserves and grant disbursements',
 })
 
+const notActivated = account(SEPOLIA, PAYROLL, {
+  name: 'New treasury',
+  threshold: 2,
+  owners: 3,
+  ineligibleReason: 'not-activated',
+})
+
+const [partlyActivatedGroup] = groupSafeAccounts([
+  account(ETHEREUM, UNNAMED_MULTI, { name: 'Grants', threshold: 2, owners: 4, fiatTotal: '910.5' }),
+  account(POLYGON, UNNAMED_MULTI, { name: 'Grants', threshold: 2, owners: 4, ineligibleReason: 'not-activated' }),
+])
+
 const defaultAccounts: SafeAccountEntry[] = [treasury, opsGroup, payroll, unnamedSafe]
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', layout: 'none', shadcn: true })
@@ -146,6 +158,10 @@ export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
 
+export const NoEligibleSignerAccounts: Story = {
+  args: { accounts: [], signersOnly: true },
+}
+
 /** No wallet connected: the prompt is to connect one, not to switch. */
 export const NoWallet: Story = {
   args: { accounts: [], hasWallet: false },
@@ -157,6 +173,10 @@ export const LongSafeName: Story = {
     accounts: [longNamedTreasury],
     value: longNamedTreasury.id,
   },
+}
+
+export const NotActivatedAccounts: Story = {
+  args: { accounts: [treasury, notActivated, partlyActivatedGroup] },
 }
 
 export const Disabled: Story = {

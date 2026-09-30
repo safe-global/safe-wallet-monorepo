@@ -1,7 +1,7 @@
 import { addressIsNotSmartContract, encodeEIP1271Signature, signProposerTypedDataForSafe } from './utils'
 import { faker } from '@faker-js/faker'
 import { getAddress } from 'ethers'
-import type { JsonRpcSigner } from 'ethers'
+import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import * as web3Utils from '@safe-global/utils/utils/web3'
 import * as delegateUtils from '@safe-global/utils/services/delegates'
 
@@ -230,7 +230,17 @@ describe('addressIsNotSmartContract', () => {
     const address = getAddress(faker.finance.ethereumAddress())
 
     await expect(addressIsNotSmartContract(chainId, message)(address)).resolves.toBe(message)
-    expect(isSmartContractWallet).toHaveBeenCalledWith(chainId, address)
+    expect(isSmartContractWallet).toHaveBeenCalledWith(chainId, address, undefined)
+  })
+
+  it('checks the code through the given provider', async () => {
+    isSmartContractWallet.mockResolvedValue(false)
+    const provider = {} as JsonRpcProvider
+    const address = getAddress(faker.finance.ethereumAddress())
+
+    await addressIsNotSmartContract(chainId, message, provider)(address)
+
+    expect(isSmartContractWallet).toHaveBeenCalledWith(chainId, address, provider)
   })
 
   it('returns undefined for an EOA', async () => {

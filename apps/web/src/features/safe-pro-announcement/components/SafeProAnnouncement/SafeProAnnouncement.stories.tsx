@@ -7,6 +7,9 @@ const meta = {
   title: 'Features/SafePro/SafeProAnnouncement',
   tags: ['autodocs'],
   decorators: [withMockProvider({ shadcn: true })],
+  args: {
+    location: 'plans_page',
+  },
 } satisfies Meta<typeof SafeProAnnouncement>
 
 export default meta

@@ -6,6 +6,7 @@ import type { MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERA
 import { createMockStory } from '@/stories/mocks'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { AppRoutes } from '@/config/routes'
+import { PendingStatus } from '@/store/pendingTxsSlice'
 import { SAFE_ADDRESSES } from '../../../../../../config/test/msw/fixtures'
 import TxSummary from './index'
 import {
@@ -198,6 +199,31 @@ export const HistorySwapOrder: Story = {
 export const AllTypesStacked: Story = {
   name: 'All types stacked (queue)',
   render: () => <TxCardStack items={queueAllTypes} />,
+}
+
+const pendingSetup = createMockStory({
+  scenario: 'efSafe',
+  wallet: 'owner',
+  layout: 'none',
+  pathname: AppRoutes.transactions.queue,
+  store: {
+    pendingTxs: {
+      [queueNativeTransfer.transaction.id]: {
+        chainId: '1',
+        safeAddress: SAFE_ADDRESSES.efSafe.address,
+        nonce: 28,
+        status: PendingStatus.SIGNING,
+        signerAddress: SAFE_ADDRESSES.efSafe.address,
+      },
+    },
+  },
+})
+
+/** A pending row's status sits in the action column, so its cells line up with a plain row's. */
+export const PendingNextToQueued: Story = {
+  name: 'Pending next to queued',
+  decorators: [pendingSetup.decorator],
+  render: () => <TxCardStack items={[queueNativeTransfer, queueErc20Transfer]} />,
 }
 
 export const AllTypesStackedHistory: Story = {

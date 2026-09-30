@@ -118,7 +118,9 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
               <DataStack>
                 <TxDetailsRow label="To" grid={grid}>
                   <ToWrapper>
-                    <NameChip txData={txData} txInfo={txInfo} />
+                    <span className={grid ? 'inline-flex -ml-2.5' : undefined}>
+                      <NameChip txData={txData} txInfo={txInfo} />
+                    </span>
 
                     <Typography
                       variant="paragraph-small"
