@@ -711,691 +711,1387 @@ exports[`./index.stories EmptyBalance 1`] = `
       class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-card rounded-lg p-4"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+        data-radius="lg"
+        data-size="none"
+        data-slot="card"
+        data-surface="default"
+        data-variant="default"
       >
         <div
-          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
-          data-radius="lg"
-          data-size="none"
-          data-slot="card"
-          data-surface="default"
-          data-variant="default"
+          class="container"
         >
           <div
-            class="container"
+            class="w-full mb-4"
           >
             <div
-              class="w-full mb-4"
+              class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
+              data-testid="table-container"
             >
               <div
-                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
-                data-testid="table-container"
+                class="relative w-full overflow-x-auto"
+                data-slot="table-container"
               >
-                <div
-                  class="relative w-full overflow-x-auto"
-                  data-slot="table-container"
+                <table
+                  aria-labelledby="tableTitle"
+                  class="w-full caption-bottom text-sm compactTable"
+                  data-slot="table"
                 >
-                  <table
-                    aria-labelledby="tableTitle"
-                    class="w-full caption-bottom text-sm compactTable"
-                    data-slot="table"
+                  <thead
+                    class="[&_tr]:border-b"
+                    data-slot="table-header"
                   >
-                    <thead
-                      class="[&_tr]:border-b"
-                      data-slot="table-header"
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
                     >
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 35%;"
                       >
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 35%;"
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Asset
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Price
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Balance
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
                         >
                           <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
+                            data-slot="tooltip-trigger"
+                            id="base-ui-_r_3_"
                           >
-                            Asset
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
+                            Weight
                           </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 17%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
                         >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
+                          Value
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            Price
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 86px; text-align: right;"
+                      >
+                        <span
+                          class="text-sm"
                         >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            Balance
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
-                        >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            <span
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_3_"
-                            >
-                              Weight
-                            </span>
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 17%; text-align: right;"
-                        >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            Value
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 86px; text-align: right;"
-                        >
-                          <span
-                            class="text-sm"
-                          >
-                            Actions
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      class="[&_tr:last-child]:border-0 tableBody"
-                      data-slot="table-body"
+                          Actions
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="[&_tr:last-child]:border-0 tableBody"
+                    data-slot="table-body"
+                  >
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
                     >
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="token"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div
-                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
-              />
             </div>
+            <div
+              class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories SafenetStaking 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="bg-card rounded-lg p-4"
+    >
+      <div
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+        data-radius="lg"
+        data-size="none"
+        data-slot="card"
+        data-surface="default"
+        data-variant="default"
+      >
+        <div
+          class="container"
+        >
+          <div
+            class="w-full mb-4"
+          >
+            <div
+              class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
+              data-testid="table-container"
+            >
+              <div
+                class="relative w-full overflow-x-auto"
+                data-slot="table-container"
+              >
+                <table
+                  aria-labelledby="tableTitle"
+                  class="w-full caption-bottom text-sm compactTable"
+                  data-slot="table"
+                >
+                  <thead
+                    class="[&_tr]:border-b"
+                    data-slot="table-header"
+                  >
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                    >
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 35%;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Asset
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Price
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Balance
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          <span
+                            data-slot="tooltip-trigger"
+                            id="base-ui-_r_5_"
+                          >
+                            Weight
+                          </span>
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 17%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Value
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 86px; text-align: right;"
+                      >
+                        <span
+                          class="text-sm"
+                        >
+                          Actions
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="[&_tr:last-child]:border-0 tableBody"
+                    data-slot="table-body"
+                  >
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="m-0 text-base leading-6 font-normal"
+                              data-slot="typography"
+                              data-variant="paragraph"
+                            >
+                              <div
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
+                                data-slot="skeleton"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div
+              class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
+            />
           </div>
         </div>
       </div>
@@ -1415,691 +2111,687 @@ exports[`./index.stories WhalePortfolio 1`] = `
       class="bg-card rounded-lg p-4"
     >
       <div
-        class="bg-card rounded-lg p-4"
+        class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
+        data-radius="lg"
+        data-size="none"
+        data-slot="card"
+        data-surface="default"
+        data-variant="default"
       >
         <div
-          class="bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col gap-0 py-0 rounded-lg mb-4 border-4 border-transparent"
-          data-radius="lg"
-          data-size="none"
-          data-slot="card"
-          data-surface="default"
-          data-variant="default"
+          class="container"
         >
           <div
-            class="container"
+            class="w-full mb-4"
           >
             <div
-              class="w-full mb-4"
+              class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
+              data-testid="table-container"
             >
               <div
-                class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
-                data-testid="table-container"
+                class="relative w-full overflow-x-auto"
+                data-slot="table-container"
               >
-                <div
-                  class="relative w-full overflow-x-auto"
-                  data-slot="table-container"
+                <table
+                  aria-labelledby="tableTitle"
+                  class="w-full caption-bottom text-sm compactTable"
+                  data-slot="table"
                 >
-                  <table
-                    aria-labelledby="tableTitle"
-                    class="w-full caption-bottom text-sm compactTable"
-                    data-slot="table"
+                  <thead
+                    class="[&_tr]:border-b"
+                    data-slot="table-header"
                   >
-                    <thead
-                      class="[&_tr]:border-b"
-                      data-slot="table-header"
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
                     >
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 35%;"
                       >
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 35%;"
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Asset
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Price
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
+                        >
+                          Balance
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 16%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
                         >
                           <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
+                            data-slot="tooltip-trigger"
+                            id="base-ui-_r_7_"
                           >
-                            Asset
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
+                            Weight
                           </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 17%; text-align: right;"
+                      >
+                        <span
+                          class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
+                          role="button"
+                          tabindex="0"
                         >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
+                          Value
+                          <svg
+                            aria-hidden="true"
+                            class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
+                            fill="none"
+                            height="24"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            viewBox="0 0 24 24"
+                            width="24"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            Price
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
+                            <path
+                              d="m21 16-4 4-4-4"
+                            />
+                            <path
+                              d="M17 20V4"
+                            />
+                            <path
+                              d="m3 8 4-4 4 4"
+                            />
+                            <path
+                              d="M7 4v16"
+                            />
+                          </svg>
+                        </span>
+                      </th>
+                      <th
+                        class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                        data-slot="table-head"
+                        style="width: 86px; text-align: right;"
+                      >
+                        <span
+                          class="text-sm"
                         >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            Balance
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 16%; text-align: right;"
-                        >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            <span
-                              data-slot="tooltip-trigger"
-                              id="base-ui-_r_5_"
-                            >
-                              Weight
-                            </span>
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 17%; text-align: right;"
-                        >
-                          <span
-                            class="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-sm select-none"
-                            role="button"
-                            tabindex="0"
-                          >
-                            Value
-                            <svg
-                              aria-hidden="true"
-                              class="lucide lucide-arrow-up-down size-3.5 opacity-0 transition-opacity group-hover/sort:opacity-50 group-focus-visible/sort:opacity-50"
-                              fill="none"
-                              height="24"
-                              stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              viewBox="0 0 24 24"
-                              width="24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="m21 16-4 4-4-4"
-                              />
-                              <path
-                                d="M17 20V4"
-                              />
-                              <path
-                                d="m3 8 4-4 4 4"
-                              />
-                              <path
-                                d="M7 4v16"
-                              />
-                            </svg>
-                          </span>
-                        </th>
-                        <th
-                          class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
-                          data-slot="table-head"
-                          style="width: 86px; text-align: right;"
-                        >
-                          <span
-                            class="text-sm"
-                          >
-                            Actions
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody
-                      class="[&_tr:last-child]:border-0 tableBody"
-                      data-slot="table-body"
+                          Actions
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody
+                    class="[&_tr:last-child]:border-0 tableBody"
+                    data-slot="table-body"
+                  >
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
                     >
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="token"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
-                        >
-                          <div
-                            class="overflow-hidden transition-all"
-                          >
-                            <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr
-                        class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
-                        data-slot="table-row"
-                        data-testid="table-row"
-                        tabindex="-1"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
                       >
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-asset"
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="token"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="m-0 text-base leading-6 font-normal"
-                                data-slot="typography"
-                                data-variant="paragraph"
-                              >
-                                <div
-                                  class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
-                                  data-slot="skeleton"
-                                />
-                              </div>
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-price"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-balance"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    <tr
+                      class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                      data-slot="table-row"
+                      data-testid="table-row"
+                      tabindex="-1"
+                    >
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-asset"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="token"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[26px] w-[26px] rounded-md"
+                              data-slot="skeleton"
+                            />
                             <div
                               class="m-0 text-base leading-6 font-normal"
                               data-slot="typography"
                               data-variant="paragraph"
                             >
                               <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                                class="bg-muted rounded-md animate-pulse h-4 w-[80px]"
                                 data-slot="skeleton"
                               />
                             </div>
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-weight"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-price"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-value"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-balance"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="m-0 text-base leading-6 font-normal"
-                              data-slot="typography"
-                              data-variant="paragraph"
-                            >
-                              <div
-                                class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                        <td
-                          class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
-                          data-slot="table-cell"
-                          data-testid="table-cell-actions"
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-weight"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
                         >
                           <div
-                            class="overflow-hidden transition-all"
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
                           >
                             <div
-                              class="flex flex-row justify-end gap-2"
-                            >
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                              <div
-                                class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
-                                data-slot="skeleton"
-                              />
-                            </div>
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
                           </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-value"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="m-0 text-base leading-6 font-normal"
+                            data-slot="typography"
+                            data-variant="paragraph"
+                          >
+                            <div
+                              class="bg-muted rounded-md animate-pulse h-4 w-[32px]"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                      <td
+                        class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                        data-slot="table-cell"
+                        data-testid="table-cell-actions"
+                      >
+                        <div
+                          class="overflow-hidden transition-all"
+                        >
+                          <div
+                            class="flex flex-row justify-end gap-2"
+                          >
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[28px] w-[28px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                            <div
+                              class="bg-muted animate-pulse h-[24px] w-[24px] rounded-md"
+                              data-slot="skeleton"
+                            />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
-              <div
-                class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
-              />
             </div>
+            <div
+              class="flex h-[52px] items-center border-t border-[var(--color-background-main)] px-4 rounded-b-lg rounded-t-none bg-[var(--color-background-paper)]"
+            />
           </div>
         </div>
       </div>
