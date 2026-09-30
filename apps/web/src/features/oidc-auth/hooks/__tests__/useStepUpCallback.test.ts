@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
 import { STEP_UP_CANCELLED, STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning, stepUpSettled } from '../../store'
-import { saveStepUpTrip } from '../../utils/stepUpReplay'
+import { addStepUpFollowUps, saveStepUpTrip } from '../../utils/stepUpReplay'
 
 const mockReplace = jest.fn()
 const mockReconcileAuth = jest.fn()
@@ -199,7 +199,19 @@ describe('useStepUpCallback', () => {
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockReplayStepUpAction).toHaveBeenCalledWith(mockDispatch, TRIP_ACTION)
+      expect(mockReplayStepUpAction).toHaveBeenCalledWith(mockDispatch, TRIP_ACTION, undefined)
+    })
+  })
+
+  it('should, when the trip carries follow-ups, send them after the interrupted action', async () => {
+    const followUp = { endpoint: 'membersRemoveUserV1', args: { spaceId: '7', userId: 3 } } as const
+    saveStepUpTrip(TRIP_ACTION)
+    addStepUpFollowUps([followUp])
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(mockReplayStepUpAction).toHaveBeenCalledWith(mockDispatch, TRIP_ACTION, [followUp])
     })
   })
 

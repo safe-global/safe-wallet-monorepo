@@ -1,6 +1,10 @@
 import { renderHook } from '@/tests/test-utils'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUpsertWorkspaceSafeName, useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
+import {
+  useUpsertWorkspaceSafeName,
+  useUpsertWorkspaceSafeNames,
+  useWorkspaceSafeNamesFollowUp,
+} from '../useUpsertWorkspaceSafeName'
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
 
@@ -127,5 +131,37 @@ describe('useUpsertWorkspaceSafeNames — address book not read', () => {
       error: 'The Workspace address book is unavailable. Try again in a moment.',
     })
     expect(upsert).not.toHaveBeenCalled()
+  })
+})
+
+describe('useWorkspaceSafeNamesFollowUp', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('builds the names write with each entry chainIds merged, without sending it', () => {
+    const upsert = setup({ addressBook: [{ address: ADDRESS, name: 'Old', chainIds: ['137'] }] })
+    const { result } = renderHook(() => useWorkspaceSafeNamesFollowUp())
+
+    expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).toEqual({
+      endpoint: 'addressBooksUpsertAddressBookItemsV1',
+      args: {
+        spaceId: SPACE_ID,
+        upsertAddressBookItemsDto: { items: [{ name: 'Treasury', address: ADDRESS, chainIds: ['137', '1'] }] },
+      },
+    })
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('returns nothing for an empty list', () => {
+    setup()
+    const { result } = renderHook(() => useWorkspaceSafeNamesFollowUp())
+
+    expect(result.current([])).toBeUndefined()
+  })
+
+  it('returns nothing while the address book is not read yet', () => {
+    setup({ isLoading: true })
+    const { result } = renderHook(() => useWorkspaceSafeNamesFollowUp())
+
+    expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).toBeUndefined()
   })
 })

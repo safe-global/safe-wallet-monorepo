@@ -39,6 +39,10 @@ export type PendingStepUpAction = {
   args: unknown
 }
 
+type EndpointArgs<E extends ReplayableEndpoint> = Parameters<ReturnType<typeof replayableEndpoints>[E]['initiate']>[0]
+
+export type StepUpFollowUp = { [E in ReplayableEndpoint]: { endpoint: E; args: EndpointArgs<E> } }[ReplayableEndpoint]
+
 const REPLAY_FAILED_MESSAGE = 'Verification succeeded, but the action could not be completed. Please try again.'
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
@@ -57,6 +61,8 @@ export const getReplayableAction = (action: UnknownAction): PendingStepUpAction 
 export type StepUpTrip = {
   /** Missing when the endpoint that was rejected is not in the list above. */
   action?: PendingStepUpAction
+  /** Requests the same submit still had to send after the rejected one, sent in this order after it. */
+  followUps?: PendingStepUpAction[]
 }
 
 export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
@@ -64,6 +70,33 @@ export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
     sessionStorage.setItem(STEP_UP_KEY, JSON.stringify({ ...action, createdAt: Date.now() }))
   } catch {
     // A storage failure must not block the redirect; the session still elevates.
+  }
+}
+
+const toReplayableAction = (value: unknown): PendingStepUpAction | undefined =>
+  isRecord(value) && typeof value.endpoint === 'string' && isReplayableEndpoint(value.endpoint)
+    ? { endpoint: value.endpoint, args: value.args }
+    : undefined
+
+/**
+ * Adds requests to the trip the listener has just saved for a rejected request. This runs in time
+ * because the redirect starts in an effect, after the caller's `await` on that request continues.
+ */
+export const addStepUpFollowUps = (followUps: Array<StepUpFollowUp | undefined>): void => {
+  const added = followUps.filter((followUp) => followUp !== undefined)
+  if (added.length === 0) return
+
+  try {
+    const raw = sessionStorage.getItem(STEP_UP_KEY)
+    if (!raw) return
+    const trip: unknown = JSON.parse(raw)
+    // Without the rejected request, the follow-ups would be sent without what they depend on.
+    if (!isRecord(trip) || !toReplayableAction(trip)) return
+
+    const existing = Array.isArray(trip.followUps) ? trip.followUps : []
+    sessionStorage.setItem(STEP_UP_KEY, JSON.stringify({ ...trip, followUps: [...existing, ...added] }))
+  } catch {
+    // The rejected request is still sent again; only the rest of the submit is lost.
   }
 }
 
@@ -78,9 +111,15 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
     const parsed: unknown = JSON.parse(raw)
     if (!isRecord(parsed) || typeof parsed.createdAt !== 'number') return undefined
     if (Date.now() - parsed.createdAt > STEP_UP_MAX_AGE_MS) return undefined
-    if (typeof parsed.endpoint !== 'string' || !isReplayableEndpoint(parsed.endpoint)) return {}
+    const action = toReplayableAction(parsed)
+    if (!action) return {}
 
-    return { action: { endpoint: parsed.endpoint, args: parsed.args } }
+    if (!Array.isArray(parsed.followUps)) return { action }
+    const followUps = parsed.followUps.map(toReplayableAction)
+    // Sending only some of them could skip a request a later one depends on.
+    if (followUps.some((followUp) => followUp === undefined)) return { action }
+
+    return { action, followUps: followUps.filter((followUp) => followUp !== undefined) }
   } catch {
     return undefined
   }
@@ -103,10 +142,15 @@ type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, Ro
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
   replayableEndpoints()[endpoint].initiate as unknown as ReplayInitiator
 
-export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
-  const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
+export const replayStepUpAction = async (
+  dispatch: AppDispatch,
+  pending: PendingStepUpAction,
+  followUps: PendingStepUpAction[] = [],
+): Promise<void> => {
+  for (const action of [pending, ...followUps]) {
+    const result = await dispatch(asReplayInitiator(action.endpoint)(action.args))
+    if (!result.error) continue
 
-  if (result.error) {
     // Rejected again means the user walked away from the challenge, which is a
     // cancellation and not something to report back to them.
     if (isElevationRequiredError(result.error)) return

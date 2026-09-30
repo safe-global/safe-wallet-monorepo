@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import AddAccounts from '../index'
+import { saveStepUpTrip, takeStepUpTrip } from '@/features/oidc-auth/utils/stepUpReplay'
 
 jest.mock('@/features/address-poisoning', () => ({
   useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
@@ -106,6 +107,13 @@ jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: () => false,
   useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false, isError: mockAddressBookError }),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
+  useWorkspaceSafeNamesFollowUp: () => (items: Array<{ address: string; name: string; chainIds: string[] }>) =>
+    items.length > 0
+      ? {
+          endpoint: 'addressBooksUpsertAddressBookItemsV1',
+          args: { spaceId: '1', upsertAddressBookItemsDto: { items } },
+        }
+      : undefined,
   getChainIdsParam: () => '',
 }))
 
@@ -423,6 +431,30 @@ describe('AddAccounts — naming step', () => {
     })
     expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([
       { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
+    ])
+  })
+
+  it('saves the names with the step-up trip when adding the Safes needs step-up', async () => {
+    sessionStorage.clear()
+    saveStepUpTrip({ endpoint: 'spaceSafesCreateV1', args: {} })
+    mockAddSafesToSpace.mockResolvedValue({ error: { status: 403, data: { message: 'elevation_required' } } })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    await waitFor(() => expect(sessionStorage.getItem('oidc_step_up')).toContain('followUps'))
+    expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled()
+    expect(takeStepUpTrip()?.followUps).toEqual([
+      {
+        endpoint: 'addressBooksUpsertAddressBookItemsV1',
+        args: {
+          spaceId: '1',
+          upsertAddressBookItemsDto: { items: [{ address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] }] },
+        },
+      },
     ])
   })
 

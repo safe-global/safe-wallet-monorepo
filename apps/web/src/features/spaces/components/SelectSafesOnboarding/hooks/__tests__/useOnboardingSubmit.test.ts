@@ -5,6 +5,7 @@ import type { SafeItem } from '@/hooks/safes'
 import type { MultiChainSafeItem } from '@/hooks/safes'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../../constants'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
+import { saveStepUpTrip, takeStepUpTrip } from '@/features/oidc-auth/utils/stepUpReplay'
 
 const mockChains: Chain[] = []
 
@@ -80,6 +81,13 @@ jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   ...jest.requireActual('@/features/spaces/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
+  useWorkspaceSafeNamesFollowUp: () => (items: Array<{ address: string; name: string; chainIds: string[] }>) =>
+    items.length > 0
+      ? {
+          endpoint: 'addressBooksUpsertAddressBookItemsV1',
+          args: { spaceId: '42', upsertAddressBookItemsDto: { items } },
+        }
+      : undefined,
 }))
 
 const mockDispatch = jest.fn()
@@ -816,5 +824,84 @@ describe('useOnboardingSubmit — naming step', () => {
     act(() => result.current.showSelectStep())
 
     expect(result.current.step).toBe('select')
+  })
+})
+
+describe('useOnboardingSubmit — step-up', () => {
+  const onSuccess = jest.fn()
+  const ADDRESS = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'
+  const ELEVATION_REQUIRED = { error: { status: 403, data: { message: 'elevation_required' } } }
+
+  const submitWithName = async (result: { current: ReturnType<typeof useOnboardingSubmit> }) => {
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    sessionStorage.clear()
+    mockSpaceSafes = []
+    mockRouterQuery = {}
+    mockAddedSafes = {}
+    mockSpaceAddressBook = []
+    mockAddressBookError = false
+    mockAddSafesToSpace.mockResolvedValue({ data: {} })
+    mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
+    mockUpsertWorkspaceNames.mockResolvedValue({})
+  })
+
+  it('saves the names with the step-up trip when adding the Safes needs step-up', async () => {
+    saveStepUpTrip({ endpoint: 'spaceSafesCreateV1', args: {} })
+    mockAddSafesToSpace.mockResolvedValue(ELEVATION_REQUIRED)
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+
+    await submitWithName(result)
+
+    expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled()
+    expect(result.current.error).toBeUndefined()
+    expect(takeStepUpTrip()?.followUps).toEqual([
+      {
+        endpoint: 'addressBooksUpsertAddressBookItemsV1',
+        args: {
+          spaceId: '42',
+          upsertAddressBookItemsDto: { items: [{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }] },
+        },
+      },
+    ])
+  })
+
+  it('saves the add and the names with the step-up trip when removing a Safe needs step-up', async () => {
+    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
+    saveStepUpTrip({ endpoint: 'spaceSafesDeleteV1', args: {} })
+    mockRemoveSafesFromSpace.mockResolvedValue(ELEVATION_REQUIRED)
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
+    await waitFor(() => expect(result.current.selectedSafesLength).toBe(1))
+
+    await submitWithName(result)
+
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
+    expect(takeStepUpTrip()?.followUps).toEqual([
+      {
+        endpoint: 'spaceSafesCreateV1',
+        args: { spaceId: '42', createSpaceSafesDto: { safes: [{ chainId: '1', address: ADDRESS }] } },
+      },
+      {
+        endpoint: 'addressBooksUpsertAddressBookItemsV1',
+        args: {
+          spaceId: '42',
+          upsertAddressBookItemsDto: { items: [{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }] },
+        },
+      },
+    ])
   })
 })

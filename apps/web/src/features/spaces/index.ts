@@ -76,6 +76,7 @@ export {
   ADDRESS_BOOK_UNAVAILABLE,
   useUpsertWorkspaceSafeName,
   useUpsertWorkspaceSafeNames,
+  useWorkspaceSafeNamesFollowUp,
 } from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 

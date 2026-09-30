@@ -47,7 +47,7 @@ export const useStepUpCallback = () => {
         })
       } else {
         await reconcileAuth(dispatch)
-        if (trip.action) await replayStepUpAction(dispatch, trip.action)
+        if (trip.action) await replayStepUpAction(dispatch, trip.action, trip.followUps)
       }
     }
 

@@ -24,6 +24,7 @@ import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
   useUpsertWorkspaceSafeNames,
+  useWorkspaceSafeNamesFollowUp,
   type WorkspaceSafeName,
 } from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
@@ -31,6 +32,7 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { addStepUpFollowUps, type StepUpFollowUp } from '@/features/oidc-auth/utils/stepUpReplay'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
@@ -60,6 +62,16 @@ const parseSafeKey = (key: string) => {
 
 const EMPTY_ALL_SAFES: AllSafeItems = []
 
+/** On `elevation_required`, the rest of the submit is saved with the step-up trip and sent after the rejected request. */
+const withStepUpFollowUps = async (send: () => Promise<void>, followUps: Array<StepUpFollowUp | undefined>) => {
+  try {
+    await send()
+  } catch (error) {
+    if (isElevationRequiredError(error)) addStepUpFollowUps(followUps)
+    throw error
+  }
+}
+
 const useOnboardingSubmit = (
   spaceId: string | undefined,
   onSuccess: () => void,
@@ -74,6 +86,7 @@ const useOnboardingSubmit = (
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const getNamesFollowUp = useWorkspaceSafeNamesFollowUp()
   const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
   const isAddressBookReady = !isLoading && !isError
 
@@ -227,9 +240,18 @@ const useOnboardingSubmit = (
     spaceIdStr: string,
     names: WorkspaceSafeName[],
   ) => {
+    const namesFollowUp = getNamesFollowUp(names)
+    const addFollowUp =
+      safesToAdd.length > 0
+        ? {
+            endpoint: 'spaceSafesCreateV1' as const,
+            args: { spaceId: spaceIdStr, createSpaceSafesDto: { safes: safesToAdd } },
+          }
+        : undefined
+
     // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
-    await removeUnselectedSafes(selectedSafes, spaceIdStr)
-    await addNewSafes(safesToAdd, spaceIdStr)
+    await withStepUpFollowUps(() => removeUnselectedSafes(selectedSafes, spaceIdStr), [addFollowUp, namesFollowUp])
+    await withStepUpFollowUps(() => addNewSafes(safesToAdd, spaceIdStr), [namesFollowUp])
     trustAddedSafes(safesToAdd)
     const namesResult = await upsertWorkspaceNames(names)
     if (namesResult.error) {

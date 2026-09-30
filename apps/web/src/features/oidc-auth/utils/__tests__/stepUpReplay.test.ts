@@ -7,7 +7,13 @@ import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
 import { stepUpReturning } from '../../store'
-import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
+import {
+  addStepUpFollowUps,
+  getReplayableAction,
+  replayStepUpAction,
+  saveStepUpTrip,
+  takeStepUpTrip,
+} from '../stepUpReplay'
 
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
   type: 'cgwClient/executeMutation/rejected',
@@ -126,6 +132,75 @@ describe('step-up trip storage', () => {
     )
 
     expect(takeStepUpTrip()).toEqual({})
+  })
+})
+
+describe('step-up follow-ups', () => {
+  beforeEach(() => {
+    sessionStorage.clear()
+  })
+
+  it('should, when follow-ups are added to a saved trip, return them in order with the trip', () => {
+    const spaceId = faker.string.uuid()
+    const address = faker.finance.ethereumAddress()
+    saveStepUpTrip({ endpoint: 'spaceSafesCreateV1', args: { spaceId } })
+
+    addStepUpFollowUps([
+      {
+        endpoint: 'spaceSafesDeleteV1',
+        args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+      },
+      undefined,
+      {
+        endpoint: 'addressBooksUpsertAddressBookItemsV1',
+        args: { spaceId, upsertAddressBookItemsDto: { items: [{ address, name: 'Treasury', chainIds: ['1'] }] } },
+      },
+    ])
+
+    expect(takeStepUpTrip()).toEqual({
+      action: { endpoint: 'spaceSafesCreateV1', args: { spaceId } },
+      followUps: [
+        {
+          endpoint: 'spaceSafesDeleteV1',
+          args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+        },
+        {
+          endpoint: 'addressBooksUpsertAddressBookItemsV1',
+          args: { spaceId, upsertAddressBookItemsDto: { items: [{ address, name: 'Treasury', chainIds: ['1'] }] } },
+        },
+      ],
+    })
+  })
+
+  it('should, when no trip is saved, not save one for the follow-ups', () => {
+    addStepUpFollowUps([{ endpoint: 'spacesDeleteV1', args: { id: faker.string.uuid() } }])
+
+    expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
+  })
+
+  it('should, when the saved trip has no replayable action, not add the follow-ups', () => {
+    saveStepUpTrip(undefined)
+
+    addStepUpFollowUps([{ endpoint: 'spacesDeleteV1', args: { id: faker.string.uuid() } }])
+
+    expect(takeStepUpTrip()).toEqual({})
+  })
+
+  it('should, when a stored follow-up names an endpoint that is not replayable, drop all follow-ups', () => {
+    sessionStorage.setItem(
+      'oidc_step_up',
+      JSON.stringify({
+        endpoint: 'spacesUpdateV1',
+        args: {},
+        followUps: [
+          { endpoint: 'spacesDeleteV1', args: {} },
+          { endpoint: 'somethingElse', args: {} },
+        ],
+        createdAt: Date.now(),
+      }),
+    )
+
+    expect(takeStepUpTrip()).toEqual({ action: { endpoint: 'spacesUpdateV1', args: {} } })
   })
 })
 
@@ -317,5 +392,77 @@ describe('replayStepUpAction', () => {
 
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
     expect(selectNotifications(store.getState())).toEqual([])
+  })
+
+  it('should, when follow-ups are given, send them in order after the action and show one success message', async () => {
+    const spaceId = faker.string.uuid()
+    const address = faker.finance.ethereumAddress()
+    const requests: string[] = []
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => {
+        requests.push('add')
+        return HttpResponse.json({}, { status: 201 })
+      }),
+      http.put(`${GATEWAY_URL}/v1/spaces/${spaceId}/address-book`, () => {
+        requests.push('names')
+        return HttpResponse.json({ spaceId, data: [] })
+      }),
+    )
+
+    const store = makeStore(undefined, { skipBroadcast: true })
+    await replayStepUpAction(
+      store.dispatch,
+      {
+        endpoint: 'spaceSafesCreateV1',
+        args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+      },
+      [
+        {
+          endpoint: 'addressBooksUpsertAddressBookItemsV1',
+          args: { spaceId, upsertAddressBookItemsDto: { items: [{ address, name: 'Treasury', chainIds: ['1'] }] } },
+        },
+      ],
+    )
+
+    expect(requests).toEqual(['add', 'names'])
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({ message: 'Safe account added', variant: 'success' }),
+    ])
+  })
+
+  it('should, when the action fails, show the error and not send the follow-ups', async () => {
+    const spaceId = faker.string.uuid()
+    const address = faker.finance.ethereumAddress()
+    const requests: string[] = []
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => {
+        requests.push('add')
+        return HttpResponse.json({ message: 'Seat limit reached', statusCode: 402 }, { status: 402 })
+      }),
+      http.put(`${GATEWAY_URL}/v1/spaces/${spaceId}/address-book`, () => {
+        requests.push('names')
+        return HttpResponse.json({ spaceId, data: [] })
+      }),
+    )
+
+    const store = makeStore(undefined, { skipBroadcast: true })
+    await replayStepUpAction(
+      store.dispatch,
+      {
+        endpoint: 'spaceSafesCreateV1',
+        args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
+      },
+      [
+        {
+          endpoint: 'addressBooksUpsertAddressBookItemsV1',
+          args: { spaceId, upsertAddressBookItemsDto: { items: [{ address, name: 'Treasury', chainIds: ['1'] }] } },
+        },
+      ],
+    )
+
+    expect(requests).toEqual(['add'])
+    expect(selectNotifications(store.getState())).toEqual([expect.objectContaining({ variant: 'error' })])
   })
 })

@@ -24,6 +24,7 @@ import {
   useIsAdmin,
   useSpaceSafes,
   useUpsertWorkspaceSafeNames,
+  useWorkspaceSafeNamesFollowUp,
 } from '@/features/spaces'
 import {
   NameAccountsFields,
@@ -73,6 +74,7 @@ import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { addStepUpFollowUps } from '@/features/oidc-auth/utils/stepUpReplay'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../utils/seatLimitError'
 
@@ -140,6 +142,7 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const getNamesFollowUp = useWorkspaceSafeNamesFollowUp()
   const {
     items: spaceAddressBook,
     isLoading: isAddressBookLoading,
@@ -312,7 +315,18 @@ const AddAccounts = ({
             createSpaceSafesDto: { safes: safesToAdd },
           })
 
-          if (isElevationRequiredError(result.error)) return
+          if (isElevationRequiredError(result.error)) {
+            addStepUpFollowUps([
+              safesToRemove.length > 0
+                ? {
+                    endpoint: 'spaceSafesDeleteV1',
+                    args: { spaceId: spaceId ?? '', deleteSpaceSafesDto: { safes: safesToRemove } },
+                  }
+                : undefined,
+              getNamesFollowUp(buildWorkspaceSafeNames(data.names, safesToWrite)),
+            ])
+            return
+          }
           if (result.error) {
             const seatLimit = getSeatLimitMessage(result.error)
             if (seatLimit && spaceId) refreshSpaceEntitlements(dispatch, spaceId)
