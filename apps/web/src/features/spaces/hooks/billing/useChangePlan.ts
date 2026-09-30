@@ -7,7 +7,6 @@ import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/s
 import { useAppDispatch } from '@/store'
 import type { SafeRef } from '../../components/Plans/types'
 import { isPlanChangeable } from './subscription'
-import { syncPlanChange } from './syncPlanChange'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'
 
@@ -45,9 +44,7 @@ export const useChangePlan = (spaceId?: string | null) => {
         },
       })
       if (removedSafes.length > 0) dispatch(spacesApi.util.invalidateTags(['spaces']))
-      if ('error' in result) return false
-      void syncPlanChange(dispatch, gatedSpaceId, priceId)
-      return true
+      return !('error' in result)
     },
     [gatedSpaceId, subscriptionId, update, dispatch],
   )
