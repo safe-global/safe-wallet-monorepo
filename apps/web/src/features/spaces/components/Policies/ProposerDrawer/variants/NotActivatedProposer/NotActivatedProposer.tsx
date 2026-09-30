@@ -21,7 +21,7 @@ export const NotActivatedProposer = ({
   overview,
 }: NotActivatedProposerProps): ReactElement => (
   <div className="flex flex-col gap-4">
-    {/* Figma pairs the error alert with triangle-alert, not the destructive default (circle-alert) */}
+    {/* Figma desired the error alert with triangle-alert, not the destructive default (circle-alert) */}
     <Alert variant="destructive" outlined={false}>
       <TriangleAlert />
       <AlertTitle>The proposer role was not activated</AlertTitle>

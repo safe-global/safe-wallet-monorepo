@@ -12,7 +12,7 @@ import type {
   createSpendingLimitsTx,
   dispatchSpendingLimitTxExecution,
 } from './services/spendingLimitExecution'
-import type { buildSpendingLimitDelta } from './services/spendingLimitDelta'
+import type { buildSpendingLimitEdit } from './services/spendingLimitEdit'
 
 export interface SpendingLimitsContract {
   // Components (PascalCase) - stub renders null
@@ -29,6 +29,6 @@ export interface SpendingLimitsContract {
   createNewSpendingLimitTx: typeof createNewSpendingLimitTx
   createSpendingLimitsTx: typeof createSpendingLimitsTx
   createSpendingLimitEditTx: typeof createSpendingLimitEditTx
-  buildSpendingLimitDelta: typeof buildSpendingLimitDelta
+  buildSpendingLimitEdit: typeof buildSpendingLimitEdit
   dispatchSpendingLimitTxExecution: typeof dispatchSpendingLimitTxExecution
 }

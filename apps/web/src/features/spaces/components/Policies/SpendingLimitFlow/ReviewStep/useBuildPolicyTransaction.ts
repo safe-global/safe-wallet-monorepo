@@ -2,20 +2,20 @@ import { useContext, useEffect, useMemo } from 'react'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxContext'
 import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature, type SpendingLimitPair, type SpendingLimitState } from '@/features/spending-limits'
+import { SpendingLimitsFeature, type DesiredAllowance, type SpendingLimitState } from '@/features/spending-limits'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import type { SpendingLimitPolicyFormValues } from '../types'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR } from '../constants'
-import { buildSpendingLimitPairs, findExistingPair } from './buildSpendingLimitPairs'
+import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR } from '../constants'
+import { buildDesiredAllowances, findExistingAllowance } from './buildDesiredAllowances'
 
 type BlockerInputs = {
   existingLimitsError: Error | undefined
-  pairsError: Error | undefined
-  pairs: readonly SpendingLimitPair[] | undefined
+  desiredError: Error | undefined
+  desired: readonly DesiredAllowance[] | undefined
   existingLimits: readonly SpendingLimitState[] | undefined
   isEditMode: boolean
 }
@@ -23,17 +23,17 @@ type BlockerInputs = {
 /** Why the policy cannot be built at all, as the error the review shows; `undefined` when nothing forbids it. */
 const findBuildBlocker = ({
   existingLimitsError,
-  pairsError,
-  pairs,
+  desiredError,
+  desired,
   existingLimits,
   isEditMode,
 }: BlockerInputs): Error | undefined => {
   // Building blind over unknown limits could re-add a delegate or skip a reset, so a failed load is final.
   if (existingLimitsError) return new Error(EXISTING_LIMITS_LOAD_ERROR, { cause: existingLimitsError })
-  if (pairsError) return pairsError
-  // Only the create flow hides these pairs; an edit describes the Safe's own limits, so they belong in it.
-  if (!isEditMode && pairs && existingLimits && findExistingPair(pairs, existingLimits)) {
-    return new Error(EXISTING_PAIR_IN_POLICY_ERROR)
+  if (desiredError) return desiredError
+  // Only the create flow hides limits the Safe already has; an edit describes them, so they belong in it.
+  if (!isEditMode && desired && existingLimits && findExistingAllowance(desired, existingLimits)) {
+    return new Error(EXISTING_LIMIT_IN_POLICY_ERROR)
   }
   return undefined
 }
@@ -50,25 +50,25 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const chain = useCurrentChain()
   const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions()
   const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
-  const { createSpendingLimitsTx, createSpendingLimitEditTx, buildSpendingLimitDelta, $isReady } =
+  const { createSpendingLimitsTx, createSpendingLimitEditTx, buildSpendingLimitEdit, $isReady } =
     useLoadFeature(SpendingLimitsFeature)
   const isEditMode = useIsEditMode()
 
   const tokensReady = !tokensLoading && !isPopularLoading
-  const pairsResult = useMemo(
-    () => (formValues && tokensReady ? buildSpendingLimitPairs(formValues, tokens) : undefined),
+  const desiredResult = useMemo(
+    () => (formValues && tokensReady ? buildDesiredAllowances(formValues, tokens) : undefined),
     [formValues, tokens, tokensReady],
   )
-  // A balance poll hands back new token objects and with them a new `pairsResult`. The builder reads only
-  // values, so the pairs are keyed by value: otherwise every poll would tear the transaction down and rebuild it.
-  const pairsKey = pairsResult?.pairs ? JSON.stringify(pairsResult.pairs) : undefined
+  // A balance poll hands back new token objects and with them a new `desiredResult`. The builder reads only
+  // values, so they are keyed by value: otherwise every poll would tear the transaction down and rebuild it.
+  const desiredKey = desiredResult?.desired ? JSON.stringify(desiredResult.desired) : undefined
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const pairs = useMemo(() => pairsResult?.pairs, [pairsKey])
-  const pairsError = pairsResult?.error
+  const desired = useMemo(() => desiredResult?.desired, [desiredKey])
+  const desiredError = desiredResult?.error
 
   const blocker = useMemo(
-    () => findBuildBlocker({ existingLimitsError, pairsError, pairs, existingLimits, isEditMode }),
-    [existingLimitsError, pairsError, pairs, existingLimits, isEditMode],
+    () => findBuildBlocker({ existingLimitsError, desiredError, desired, existingLimits, isEditMode }),
+    [existingLimitsError, desiredError, desired, existingLimits, isEditMode],
   )
 
   const sdk = scope?.sdk
@@ -80,20 +80,20 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     // dropped here and only a finished build puts one back. Otherwise a stale one stays signable under a new summary.
     setSafeTx(undefined)
     setSafeTxError(blocker)
-    if (blocker || !pairs || !existingLimits || !sdk || !chainId || !chain || !$isReady || !safeLoaded) return
+    if (blocker || !desired || !existingLimits || !sdk || !chainId || !chain || !$isReady || !safeLoaded) return
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
     const build = isEditMode
       ? createSpendingLimitEditTx(
-          buildSpendingLimitDelta(pairs, existingLimits),
+          buildSpendingLimitEdit(desired, existingLimits),
           existingLimits,
           chainId,
           safe.modules,
           safe.deployed,
           scope,
         )
-      : createSpendingLimitsTx(pairs, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
+      : createSpendingLimitsTx(desired, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
 
     build
       .then((tx) => {
@@ -110,7 +110,7 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     blocker,
-    pairs,
+    desired,
     existingLimits,
     sdk,
     chainId,
@@ -122,7 +122,7 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     isEditMode,
     createSpendingLimitsTx,
     createSpendingLimitEditTx,
-    buildSpendingLimitDelta,
+    buildSpendingLimitEdit,
     setSafeTx,
     setSafeTxError,
   ])

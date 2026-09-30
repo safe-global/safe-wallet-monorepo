@@ -86,7 +86,7 @@ const LimitSummaryRow = ({ limit, chainId }: LimitSummaryRowProps): ReactElement
           >
             <CalendarClock className="size-4" />
           </span>
-          {/* Stacked like the amounts: a period pair does not fit beside them on one line. */}
+          {/* Stacked like the amounts: two periods do not fit beside them on one line. */}
           <span className="flex min-w-0 flex-col" data-testid="spending-limit-summary-frequency">
             {showsPreviousLabel && (
               <Typography variant="paragraph-small" className="truncate text-muted-foreground line-through">

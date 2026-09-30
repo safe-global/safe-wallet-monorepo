@@ -20,10 +20,10 @@ import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
+import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
 import type { SpendingLimitPolicyFormValues } from '../../types'
-import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
-import { buildSpendingLimitDelta } from '@/features/spending-limits/services'
+import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
+import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
 import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
@@ -179,7 +179,7 @@ describe('ReviewSpendingLimitPolicy', () => {
       $isDisabled: false,
       createSpendingLimitsTx: mockCreate,
       createSpendingLimitEditTx: mockCreateEdit,
-      buildSpendingLimitDelta,
+      buildSpendingLimitEdit,
     })
     mockCreateEdit.mockResolvedValue(builtTx)
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc]))
@@ -301,7 +301,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     await waitFor(() => expect(setSafeTxError).toHaveBeenCalledWith(failure))
   })
 
-  it('refuses to build over a spender/token pair the Safe already limits', async () => {
+  it('refuses to build over a spender/token allowance the Safe already limits', async () => {
     mockUseExisting.mockReturnValue({
       limits: [
         spendingLimitStateBuilder()
@@ -314,7 +314,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     renderReview()
 
     await waitFor(() =>
-      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_PAIR_IN_POLICY_ERROR })),
+      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_LIMIT_IN_POLICY_ERROR })),
     )
     expect(mockCreate).not.toHaveBeenCalled()
   })
@@ -380,7 +380,7 @@ describe('ReviewSpendingLimitPolicy', () => {
   })
 
   describe('in edit mode', () => {
-    it('builds the transaction from the delta rather than from the form alone', async () => {
+    it('builds the transaction from the edit rather than from the form alone', async () => {
       renderReview({}, true)
 
       await waitFor(() => expect(mockCreateEdit).toHaveBeenCalled())
@@ -431,7 +431,7 @@ describe('ReviewSpendingLimitPolicy', () => {
 
       await waitFor(() => expect(mockCreateEdit).toHaveBeenCalled())
       expect(setSafeTxError).not.toHaveBeenCalledWith(
-        expect.objectContaining({ message: EXISTING_PAIR_IN_POLICY_ERROR }),
+        expect.objectContaining({ message: EXISTING_LIMIT_IN_POLICY_ERROR }),
       )
     })
   })

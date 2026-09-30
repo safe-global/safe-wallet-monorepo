@@ -1,7 +1,7 @@
 import { getAddress, parseUnits } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { buildSpendingLimitDelta } from '@/features/spending-limits/services'
+import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
 import { toSpendingLimitFormValues } from '../prefill'
 
 const SAFE = `11155111:${getAddress('0x1000000000000000000000000000000000000001')}`
@@ -81,7 +81,7 @@ describe('toSpendingLimitFormValues', () => {
       baseline.find((limit) => limit.token.address === tokenAddress)?.token.decimals ?? 0
 
     const values = toSpendingLimitFormValues(SAFE, baseline)
-    const pairs = values.spenders.flatMap((spender) =>
+    const desired = values.spenders.flatMap((spender) =>
       spender.limits.map((limit) => ({
         beneficiary: spender.address,
         tokenAddress: limit.tokenAddress,
@@ -91,7 +91,7 @@ describe('toSpendingLimitFormValues', () => {
       })),
     )
 
-    expect(buildSpendingLimitDelta(pairs, baseline)).toEqual({
+    expect(buildSpendingLimitEdit(desired, baseline)).toEqual({
       added: [],
       modified: [],
       removed: [],

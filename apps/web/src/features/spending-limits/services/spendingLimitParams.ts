@@ -90,7 +90,7 @@ export const createDeleteAllowanceTx = (
   }
 }
 
-/** The delta clears each allowance explicitly first, so the module is not asked to sweep them again. */
+/** The edit clears each allowance explicitly first, so the module is not asked to sweep them again. */
 export const createRemoveDelegateTx = (delegate: string, spendingLimitAddress: string): MetaTransactionData => {
   const spendingLimitInterface = getSpendingLimitInterface()
 

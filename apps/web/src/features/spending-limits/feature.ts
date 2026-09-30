@@ -12,7 +12,7 @@ import {
   createSpendingLimitsTx,
   dispatchSpendingLimitTxExecution,
 } from './services/spendingLimitExecution'
-import { buildSpendingLimitDelta } from './services/spendingLimitDelta'
+import { buildSpendingLimitEdit } from './services/spendingLimitEdit'
 
 export default {
   // Components
@@ -29,6 +29,6 @@ export default {
   createNewSpendingLimitTx,
   createSpendingLimitsTx,
   createSpendingLimitEditTx,
-  buildSpendingLimitDelta,
+  buildSpendingLimitEdit,
   dispatchSpendingLimitTxExecution,
 }

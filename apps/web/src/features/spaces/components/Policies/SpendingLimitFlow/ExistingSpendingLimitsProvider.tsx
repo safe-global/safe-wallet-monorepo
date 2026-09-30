@@ -40,7 +40,7 @@ const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
 
 /**
  * The selected Safe's current spending limits, loaded once per Safe. Lives above `TxFlow` so the Create
- * step (hide existing pairs) and the Review step (skip known delegates) read the same result.
+ * step (hide the limits it already has) and the Review step (skip known delegates) read the same result.
  */
 export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const scope = useSafeScope()
