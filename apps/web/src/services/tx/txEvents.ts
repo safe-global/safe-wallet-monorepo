@@ -45,6 +45,8 @@ interface TxEvents {
     SafeContext & {
       parentSafeAddress: string
       txHashOrParentSafeTxHash: string
+      executed: boolean
+      method: 'approveHash' | 'execTransaction'
     }
   [TxEvent.EXECUTING]: Id & SafeContext
   [TxEvent.PROCESSING]: Id &

@@ -19,6 +19,7 @@ export type NestedWallet = {
   chainId: string
   provider: Eip1193Provider | null
   isSafe: true
+  threshold: number
 }
 
 export const getNestedWallet = (
@@ -162,5 +163,6 @@ export const getNestedWallet = (
     address: safeInfo.address.value,
     chainId: safeInfo.chainId,
     isSafe: true,
+    threshold: safeInfo.threshold,
   }
 }

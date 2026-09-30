@@ -217,7 +217,7 @@ describe('ExecuteForm', () => {
   })
 
   it('execute the tx when the submit button is clicked', async () => {
-    const mockExecuteTx = jest.fn()
+    const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0x123', isExecuted: true })
 
     const { getByText } = render(
       <ExecuteForm
@@ -245,7 +245,7 @@ describe('ExecuteForm', () => {
   describe('success screen scope', () => {
     const renderWithModal = () => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
@@ -400,7 +400,7 @@ describe('ExecuteForm', () => {
     const mockExecuteTx = jest
       .fn()
       .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
-      .mockResolvedValueOnce('0xnewtx')
+      .mockResolvedValueOnce({ txId: '0xnewtx', isExecuted: true })
 
     const { getByText, getByTestId } = render(
       <ExecuteForm

@@ -24,7 +24,7 @@ import { useNoFeeCampaignEligibility, useGasTooHigh, useIsNoFeeCampaignEnabled }
 import { hasRemainingRelays } from '@/utils/relaying'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
@@ -76,6 +76,7 @@ export const ExecuteForm = ({
 }): ReactElement => {
   // Hooks
   const currentChain = useCurrentChain()
+  const signer = useSigner()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
   const scope = useSafeScope()
@@ -192,8 +193,9 @@ export const ExecuteForm = ({
     onSubmit?.()
 
     let executedTxId: string
+    let isExecuted: boolean
     try {
-      executedTxId = await executeTx(
+      ;({ txId: executedTxId, isExecuted } = await executeTx(
         txOptions,
         safeTx,
         txId,
@@ -201,7 +203,7 @@ export const ExecuteForm = ({
         willRelay || willNoFeeCampaign,
         acceptUnverifiedSimulation,
         willRelay ? sponsoredTxs.spaceId : null,
-      )
+      ))
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -220,10 +222,18 @@ export const ExecuteForm = ({
       return
     }
 
-    // On success
-    onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
+    // A Safe executor that only queued the tx returned a safeTxHash, so it gets the nested screen
+    onSubmitSuccess?.({ txId: executedTxId, isExecuted })
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
-    setTxFlow(<SuccessScreenFlow txId={executedTxId} scope={successScope} />, undefined, false)
+    setTxFlow(
+      isExecuted ? (
+        <SuccessScreenFlow txId={executedTxId} scope={successScope} />
+      ) : (
+        <NestedTxSuccessScreenFlow txId={executedTxId} />
+      ),
+      undefined,
+      false,
+    )
   }
 
   // On modal submit
@@ -242,7 +252,6 @@ export const ExecuteForm = ({
   // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
   // support this nested execution flow at this moment. Block Execute when both conditions hold so
   // the user can't submit a tx that would dead end at sign time.
-  const signer = useSigner()
   const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
 
   const submitDisabled =

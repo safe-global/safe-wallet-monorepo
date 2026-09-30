@@ -299,6 +299,8 @@ const useTxPendingStatuses = (): void => {
           status: PendingStatus.NESTED_SIGNING,
           signerAddress: detail.parentSafeAddress,
           txHashOrParentSafeTxHash: detail.txHashOrParentSafeTxHash,
+          executed: detail.executed,
+          method: detail.method,
         }),
       )
     })
