@@ -7,8 +7,10 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { sanitizeName } from '@safe-global/utils/validation/names'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { addressIsNotSmartContract, signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
+import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -18,10 +20,12 @@ import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
+import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
 import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
+import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 
 export type GrantProposer = {
   grantProposerRole: (values: ProposerRoleFormValues) => Promise<boolean>
@@ -59,6 +63,8 @@ export const useGrantProposer = (): GrantProposer => {
   const provider = useWeb3ReadOnly()
   const dispatch = useAppDispatch()
   const addOrRequestContact = useAddOrRequestWorkspaceContact(SPACE_LABELS.proposer_role_flow)
+  const isAdmin = useIsAdmin()
+  const { get: getContact } = useMergedAddressBooks(chainId)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
   const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -88,6 +94,10 @@ export const useGrantProposer = (): GrantProposer => {
 
   const announceSuccess = useCallback(
     (proposer: string, name: string) => {
+      // A member's request waits for an admin, so a new contact is also kept in their local address book
+      if (!isAdmin && !getContact(proposer, chainId)) {
+        dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
+      }
       void addOrRequestContact({ address: proposer, name, chainIds: [chainId] })
       trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
       dispatch(
@@ -99,7 +109,7 @@ export const useGrantProposer = (): GrantProposer => {
         }),
       )
     },
-    [dispatch, addOrRequestContact, chainId],
+    [dispatch, addOrRequestContact, chainId, isAdmin, getContact],
   )
 
   const grantProposerRole = useCallback(

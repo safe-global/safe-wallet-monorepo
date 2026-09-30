@@ -1,6 +1,8 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { mockPolicies } from '../mocks/policies'
+import * as useChainsHook from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
+import { MOCK_ADDRESSES, MOCK_SAFES, mockPolicies, mockProposerPolicy } from '../mocks/policies'
 import SpacePoliciesPage from '../Page'
 
 const mockUseSpacePolicies = jest.fn()
@@ -84,6 +86,23 @@ describe('SpacePoliciesPage', () => {
 
     expect(screen.getByTestId('policies-list')).toBeInTheDocument()
     expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
+  })
+
+  it('should, when a proposer is only in the local address book, show its local name in the table', () => {
+    const proposers = [
+      { proposer: MOCK_ADDRESSES.bob, delegatedBy: [{ delegator: MOCK_ADDRESSES.alice, label: 'Proposer' }] },
+    ]
+    mockUseSpacePolicies.mockReturnValue({ ...settled, policies: [mockProposerPolicy({ data: { proposers } })] })
+    jest
+      .spyOn(useChainsHook, 'useChain')
+      .mockReturnValue(chainBuilder().with({ chainId: MOCK_SAFES.treasury.chainId }).build())
+
+    render(<SpacePoliciesPage spaceId="space-1" />, {
+      initialReduxState: { addressBook: { [MOCK_SAFES.treasury.chainId]: { [MOCK_ADDRESSES.bob]: 'Local Bob' } } },
+    })
+
+    expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByText('Local Bob')).toBeInTheDocument()
+    jest.restoreAllMocks()
   })
 
   it('should, when the plan includes policies, render no upsell banner and skip reading the plan', () => {

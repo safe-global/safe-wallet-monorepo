@@ -90,7 +90,10 @@ describe('useAddOrRequestWorkspaceContact', () => {
 
     await expect(addOrRequest(CONTACT)).resolves.toBe('requested')
     expect(notifications()).toEqual([
-      expect.objectContaining({ variant: 'info', message: 'Added to Workspace address book on admin approval' }),
+      expect.objectContaining({
+        variant: 'info',
+        message: 'This contact will be added to the Workspace address book on admin approval',
+      }),
     ])
 
     expect(createRequest).toHaveBeenCalledWith({ spaceId: SPACE_ID, createAddressBookRequestDto: CONTACT })
@@ -144,12 +147,17 @@ describe('useAddOrRequestWorkspaceContact', () => {
     )
   })
 
-  it('reports an already pending request without a toast', async () => {
+  it('reports an already pending request with an info toast and no tracking', async () => {
     const { addOrRequest } = setup({ isAdmin: false, requestResult: { error: { status: 409 } } })
 
     await expect(addOrRequest(CONTACT)).resolves.toBe('pending')
 
-    expect(notifications()).toEqual([])
+    expect(notifications()).toEqual([
+      expect.objectContaining({
+        variant: 'info',
+        message: 'A request to add this contact to the Workspace address book is already pending admin approval',
+      }),
+    ])
     expect(trackEvent).not.toHaveBeenCalled()
   })
 })

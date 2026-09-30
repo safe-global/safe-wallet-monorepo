@@ -18,6 +18,12 @@ import { selectNotifications } from '@/store/notificationsSlice'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
 import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
+import { useIsAdmin } from '../../../../../hooks/useSpaceMembers'
+
+jest.mock('../../../../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(() => true),
+}))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -78,8 +84,8 @@ describe('useGrantProposer', () => {
     jest.restoreAllMocks()
   })
 
-  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }) => {
-    const rendered = renderHook(() => useGrantProposer())
+  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}) => {
+    const rendered = renderHook(() => useGrantProposer(), { initialReduxState: { addressBook } })
     let ok = false
     await act(async () => {
       ok = await rendered.result.current.grantProposerRole(values)
@@ -139,7 +145,7 @@ describe('useGrantProposer', () => {
     )
   })
 
-  it('adds or requests the name for the Workspace on the selected chain, not the local address book', async () => {
+  it('adds the name to the Workspace on the selected chain for an admin, not the local address book', async () => {
     await submit({ proposer: PROPOSER, name: 'Nicole' })
 
     const state = getStoreInstance().getState()
@@ -152,6 +158,25 @@ describe('useGrantProposer', () => {
         title: 'Proposer added successfully!',
       }),
     ])
+  })
+
+  describe('for a member', () => {
+    beforeEach(() => jest.mocked(useIsAdmin).mockReturnValue(false))
+    afterEach(() => jest.mocked(useIsAdmin).mockReturnValue(true))
+
+    it('keeps the sanitised name of a new contact in the local address book and requests it', async () => {
+      await submit({ proposer: PROPOSER, name: '  Nicole  ' })
+
+      expect(getStoreInstance().getState().addressBook).toEqual({ [CHAIN_ID]: { [PROPOSER]: 'Nicole' } })
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: '  Nicole  ', chainIds: [CHAIN_ID] })
+    })
+
+    it('leaves the local name of a known contact alone', async () => {
+      await submit({ proposer: PROPOSER, name: 'Bob' }, { [CHAIN_ID]: { [PROPOSER]: 'Alice' } })
+
+      expect(getStoreInstance().getState().addressBook[CHAIN_ID]?.[PROPOSER]).toBe('Alice')
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Bob', chainIds: [CHAIN_ID] })
+    })
   })
 
   it('never sends the entered name to the API', async () => {

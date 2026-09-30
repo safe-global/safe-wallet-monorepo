@@ -18,7 +18,7 @@ export type WorkspaceContactResult = 'added' | 'requested' | 'pending' | 'skippe
 
 type Outcome = { result: WorkspaceContactResult; error?: string }
 
-type Confirmation = { event: AnalyticsEvent; variant: AlertColor; groupKey: string; message: string }
+type Confirmation = { event?: AnalyticsEvent; variant: AlertColor; groupKey: string; message: string }
 
 const CONFIRMATIONS: Partial<Record<WorkspaceContactResult, Confirmation>> = {
   added: {
@@ -31,7 +31,12 @@ const CONFIRMATIONS: Partial<Record<WorkspaceContactResult, Confirmation>> = {
     event: SPACE_EVENTS.ADDRESS_REQUEST_SENT,
     variant: 'info',
     groupKey: 'request-to-add-success',
-    message: 'Added to Workspace address book on admin approval',
+    message: 'This contact will be added to the Workspace address book on admin approval',
+  },
+  pending: {
+    variant: 'info',
+    groupKey: 'request-to-add-pending',
+    message: 'A request to add this contact to the Workspace address book is already pending admin approval',
   },
 }
 
@@ -75,8 +80,8 @@ export const useAddOrRequestWorkspaceContact = (
       const confirmation = CONFIRMATIONS[result]
       if (confirmation) {
         const { event, ...notification } = confirmation
-        if (source) trackEvent(event, { [MixpanelEventParams.SOURCE]: source })
-        else trackEvent(event)
+        if (event && source) trackEvent(event, { [MixpanelEventParams.SOURCE]: source })
+        else if (event) trackEvent(event)
         dispatch(showNotification(notification))
       }
       if (error) dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))

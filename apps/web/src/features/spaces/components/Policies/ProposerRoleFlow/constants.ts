@@ -13,6 +13,3 @@ export const PROPOSER_EXISTS_ERROR = 'This address is already a proposer of this
 export const PROPOSER_RESERVED_ERROR = 'This proposer address is not valid'
 export const PROPOSER_SAFE_LOADING_MESSAGE = 'Loading the Safe account details, please wait'
 export const PROPOSER_SAFE_ERROR_MESSAGE = 'Could not load the Safe account details, please try again'
-export const PENDING_REQUEST_TITLE = 'Request already pending'
-export const PENDING_REQUEST_DESCRIPTION =
-  'There is already a pending request to add this address to the Workspace address book, waiting for an admin to review it. The proposer is still added, but the name you entered is not sent.'

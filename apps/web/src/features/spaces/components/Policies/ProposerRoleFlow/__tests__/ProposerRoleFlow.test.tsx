@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react'
-import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type * as ReactModule from 'react'
 import type * as SafeScopeModule from '@/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
@@ -10,16 +9,9 @@ import { SIGNERS_ONLY_COPY } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
-import useGetAddressBookRequests from '../../../../hooks/useGetAddressBookRequests'
-import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import ProposerRoleFlow from '../index'
 
 jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
-jest.mock('../../../../hooks/useGetAddressBookRequests', () => ({ __esModule: true, default: jest.fn(() => []) }))
-jest.mock('../../../../hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../hooks/useSpaceMembers'),
-  useIsAdmin: jest.fn(() => false),
-}))
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
 jest.mock('@/features/safe-shield', () => ({
@@ -217,67 +209,6 @@ describe('ProposerRoleFlow', () => {
 
       expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' })
       await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
-    })
-
-    describe('with a pending request for the proposer', () => {
-      const pendingRequest: AddressBookRequestItemDto = {
-        id: 1,
-        name: 'Nicole',
-        address: PROPOSER,
-        chainIds: ['137'],
-        requestedBy: '',
-        requestedByUserId: 1,
-        reviewedBy: null,
-        reviewedByUserId: null,
-        status: 'PENDING',
-        createdAt: '',
-        updatedAt: '',
-      }
-
-      beforeEach(() => jest.mocked(useGetAddressBookRequests).mockReturnValue([pendingRequest]))
-      afterEach(() => {
-        jest.mocked(useGetAddressBookRequests).mockReturnValue([])
-        jest.mocked(useIsAdmin).mockReturnValue(false)
-      })
-
-      it('grants right away, then tells a member their request is still pending before closing', async () => {
-        const grantProposerRole = jest.fn().mockResolvedValue(true)
-        mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
-        const { user, setTxFlow } = renderFlow()
-
-        await fillAndSubmit(user)
-
-        expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' })
-        expect(await screen.findByText('Request already pending')).toBeInTheDocument()
-        expect(setTxFlow).not.toHaveBeenCalled()
-
-        await user.click(screen.getByTestId('close-pending-request-btn'))
-
-        expect(setTxFlow).toHaveBeenCalledWith(undefined)
-      })
-
-      it('shows no pending notice when the grant fails', async () => {
-        const grantProposerRole = jest.fn().mockResolvedValue(false)
-        mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
-        const { user } = renderFlow()
-
-        await fillAndSubmit(user)
-
-        await waitFor(() => expect(grantProposerRole).toHaveBeenCalled())
-        expect(screen.queryByText('Request already pending')).not.toBeInTheDocument()
-      })
-
-      it("closes straight away for an admin, whose pending list holds other members' requests", async () => {
-        jest.mocked(useIsAdmin).mockReturnValue(true)
-        const grantProposerRole = jest.fn().mockResolvedValue(true)
-        mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
-        const { user, setTxFlow } = renderFlow()
-
-        await fillAndSubmit(user)
-
-        await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
-        expect(screen.queryByText('Request already pending')).not.toBeInTheDocument()
-      })
     })
 
     it('clears a previous error when another Safe account is picked', async () => {
