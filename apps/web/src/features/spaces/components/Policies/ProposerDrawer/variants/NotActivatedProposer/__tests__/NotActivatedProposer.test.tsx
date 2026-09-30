@@ -32,7 +32,7 @@ describe('NotActivatedProposer', () => {
     expect(screen.getByRole('alert')).toHaveClass('bg-error-subtle')
   })
 
-  it('desired the alert with triangle-alert rather than the destructive default', () => {
+  it('pairs the alert with triangle-alert rather than the destructive default', () => {
     render(<NotActivatedProposer {...PROPS} />)
 
     const alert = screen.getByRole('alert')
