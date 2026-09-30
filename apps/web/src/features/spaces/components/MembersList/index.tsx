@@ -1,5 +1,6 @@
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { formatDate, formatTimeInWords, parseTimestamp } from '@safe-global/utils/utils/date'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Badge } from '@/components/ui/badge'
@@ -63,6 +64,23 @@ const DATE_COLUMNS: Record<MembersListVariant, DataTableColumn<MemberDto>[]> = {
     dateColumn('invitedOn', 'Invited on', (member) => member.createdAt, formatDate),
     dateColumn('expires', 'Expires', (member) => member.inviteExpiresAt, formatTimeInWords),
   ],
+}
+
+const getMemberIdentifier = ({ user }: MemberDto) => {
+  if (user.email) return { label: user.email, full: user.email }
+  if (user.address) return { label: shortenAddress(user.address), full: user.address }
+  return null
+}
+
+const MemberIdentifier = ({ member }: { member: MemberDto }) => {
+  const identifier = getMemberIdentifier(member)
+  if (!identifier) return null
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{identifier.label}</TooltipTrigger>
+      <TooltipContent>{identifier.full}</TooltipContent>
+    </Tooltip>
+  )
 }
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -159,11 +177,10 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     const isDisabled = isAdmin && isLastAdmin && !isInvite
     // The last admin can't be removed, but may still open edit to rename themselves.
     const editDisabled = isDisabled && !isCurrentUser
-    const memberEmail = member.user.email
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
-    const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-    return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
+    const canRenew = isPendingInvite && (Boolean(member.user.email) || isExpired)
+    return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew }
   }
 
   // Widths must sum to 100% per configuration (variant × 2FA flag) — `table-fixed` overflows otherwise.
@@ -191,7 +208,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       cellTestId: 'table-cell-name',
       sortValue: (m) => getMemberDisplayName(m),
       cell: (member, { isCompact }) => {
-        const { isDeclined, isExpired, memberEmail } = memberFlags(member)
+        const { isDeclined, isExpired } = memberFlags(member)
         return (
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
@@ -199,9 +216,9 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
               {isDeclined && <Badge variant="destructive">Declined</Badge>}
               {isExpired && <Badge variant="warning">Expired</Badge>}
             </div>
-            {/* The email column is hidden in the compact layout — surface it under the name instead */}
-            {isCompact && memberEmail && (
-              <span className="text-muted-foreground truncate pl-9 text-xs">{memberEmail}</span>
+            {/* The identifier column is hidden in the compact layout — surface it under the name instead */}
+            {isCompact && (
+              <span className="text-muted-foreground truncate pl-9 text-xs">{getMemberIdentifier(member)?.label}</span>
             )}
           </div>
         )
@@ -209,19 +226,13 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     },
     {
       id: 'email',
-      header: 'Email',
+      header: 'Email or address',
       width: isCondensed ? '15%' : '20%',
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
-      sortValue: (m) => m.user.email,
-      cell: (member) =>
-        member.user.email ? (
-          <Tooltip>
-            <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{member.user.email}</TooltipTrigger>
-            <TooltipContent>{member.user.email}</TooltipContent>
-          </Tooltip>
-        ) : null,
+      sortValue: (m) => getMemberIdentifier(m)?.full ?? null,
+      cell: (member) => <MemberIdentifier member={member} />,
     },
     ...(isTwoFactorEnabled ? [twoFactorColumn] : []),
     {
