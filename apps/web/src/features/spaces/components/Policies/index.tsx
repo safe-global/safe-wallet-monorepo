@@ -15,10 +15,11 @@ import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
+import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy } from './types'
+import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy, type PolicySafe } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -85,6 +86,12 @@ const Policies = ({
   const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
+
+  // The panel is left open: it hides itself while the flow runs, so cancelling lands back on it.
+  const editSpendingLimit = useCallback(
+    (safe: PolicySafe) => setTxFlow(<EditSpendingLimitFlow safe={safe} />),
+    [setTxFlow],
+  )
 
   const startProposerFlow = useCallback(() => {
     setTxFlow(<ProposerRoleFlow />)
@@ -228,7 +235,12 @@ const Policies = ({
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
-        <SpendingLimitDetails policy={openedPolicy} isUnlisted={!listedPolicy} onClose={closeDetails} />
+        <SpendingLimitDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          onClose={closeDetails}
+          onEdit={() => editSpendingLimit(openedPolicy.safe)}
+        />
       )}
     </div>
   )

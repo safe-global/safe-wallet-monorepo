@@ -17,6 +17,10 @@ import {
 } from '../mocks/policies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
+import { mockWallet } from '@/tests/mocks/hooks'
+import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import { safeItemBuilder } from '@/tests/builders/safeItem'
+import EditSpendingLimitFlow from '../SpendingLimitFlow/EditFlow'
 import Policies from '../index'
 import SpendingLimitFlow from '../SpendingLimitFlow'
 
@@ -55,7 +59,28 @@ jest.mock('../SpendingLimitFlow', () => ({
   default: () => <div data-testid="spending-limit-flow" />,
 }))
 
+jest.mock('../SpendingLimitFlow/EditFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="edit-spending-limit-flow" />,
+}))
+
+jest.mock('../../../hooks/useSpaceSafes', () => ({ useSpaceSafes: jest.fn() }))
+
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
+const mockUseSpaceSafes = useSpaceSafes as jest.MockedFunction<typeof useSpaceSafes>
+
+const mockSignerOf = (policy: ReturnType<typeof mockActiveSpendingLimit>) =>
+  mockUseSpaceSafes.mockReturnValue({
+    allSafes: [
+      safeItemBuilder().with({ chainId: policy.safe.chainId, address: policy.safe.address, isReadOnly: false }).build(),
+    ],
+    isLoading: false,
+    isError: false,
+    error: undefined,
+    refetch: jest.fn(),
+    isUninitialized: false,
+  })
+
 const mockUsePendingPolicyTransaction = jest.mocked(usePendingPolicyTransaction)
 
 const renderWithTxModal = () => {
@@ -73,6 +98,14 @@ describe('Policies', () => {
     mockHasSeenSpendingLimitIntro = false
     mockHasSeenProposerIntro = false
     jest.clearAllMocks()
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [],
+      isLoading: false,
+      isError: false,
+      error: undefined,
+      refetch: jest.fn(),
+      isUninitialized: false,
+    })
   })
 
   it('renders the page title', () => {
@@ -658,6 +691,44 @@ describe('Policies', () => {
 
       expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(onUpgrade).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('editing a spending limit', () => {
+    it('opens the edit flow for the Safe whose panel is open, and leaves the panel mounted', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Edit' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(EditSpendingLimitFlow)
+      expect(setTxFlow.mock.calls[0][0].props.safe).toEqual(policy.safe)
+      // Left open rather than closed, so cancelling the flow lands back on the panel.
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('hides the panel while a flow is open, as the pending panel does', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
     })
   })
 })

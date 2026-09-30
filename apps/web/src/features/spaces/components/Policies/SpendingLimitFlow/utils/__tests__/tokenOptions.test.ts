@@ -1,3 +1,4 @@
+import { getAddress } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -31,6 +32,37 @@ describe('buildTokenOptions', () => {
     const options = buildTokenOptions({ balances: [heldNative, heldErc20], popular: [], showNative: false })
 
     expect(options.map((option) => option.address)).toEqual([heldErc20.tokenInfo.address])
+  })
+
+  it('keeps a token the lists never offered, so an existing limit on it still resolves', () => {
+    const held = balanceBuilder().with({ tokenInfo: erc20TokenBuilder().build() }).build()
+    const untrusted = {
+      address: getAddress('0x00000000000000000000000000000000000000e1'),
+      symbol: 'UNTRUSTED',
+      name: 'UNTRUSTED',
+      decimals: 18,
+      group: 'held' as const,
+    }
+
+    const options = buildTokenOptions({ balances: [held], popular: [], extra: [untrusted], showNative: false })
+
+    expect(options.map((option) => option.address)).toEqual([held.tokenInfo.address, untrusted.address])
+  })
+
+  it('does not list an extra token the balances already carry', () => {
+    const held = balanceBuilder().with({ tokenInfo: erc20TokenBuilder().build() }).build()
+    const duplicate = {
+      address: held.tokenInfo.address.toLowerCase(),
+      symbol: 'DUP',
+      name: 'DUP',
+      decimals: 18,
+      group: 'held' as const,
+    }
+
+    const options = buildTokenOptions({ balances: [held], popular: [], extra: [duplicate], showNative: false })
+
+    expect(options).toHaveLength(1)
+    expect(options[0].symbol).toBe(held.tokenInfo.symbol)
   })
 
   it('keeps zero-balance held tokens as held options', () => {

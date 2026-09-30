@@ -1,4 +1,5 @@
 import { useId, useMemo, type ReactNode } from 'react'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { cn } from '@/utils/cn'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -33,6 +34,8 @@ export type SafeAccountSelectorProps = {
   isError?: boolean
   onRetry?: () => void
   disabled?: boolean
+  /** Dimmed, but not the `Select`'s `disabled`, which would swallow the pointer events the copy button needs. */
+  readOnly?: boolean
   label?: string
   /** Must match the rule `accounts` was filtered by. */
   signersOnly?: boolean
@@ -62,6 +65,7 @@ const SafeAccountSelector = ({
   isError = false,
   onRetry,
   disabled = false,
+  readOnly = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
   signersOnly = false,
   helperText = getEligibilityCopy(signersOnly).helperText,
@@ -111,6 +115,41 @@ const SafeAccountSelector = ({
       ) : (
         <SafeAccountRow key={entry.id} account={entry} />
       ),
+    )
+  }
+
+  const helper = shownError ? (
+    <Typography variant="paragraph-mini" role="alert" className="text-destructive">
+      {shownError}
+    </Typography>
+  ) : (
+    <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
+      {helperText}
+    </Typography>
+  )
+
+  if (readOnly && selectedAccount) {
+    return (
+      <div className="flex w-full flex-col gap-1.5">
+        <Label htmlFor={fieldId}>{label}</Label>
+
+        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control — and so
+            carries no `aria-disabled`, which Chrome propagates onto the copy button and would kill it. */}
+        <div
+          id={fieldId}
+          data-testid="safe-account-readonly"
+          className="border-border bg-input flex min-h-9 w-full cursor-not-allowed items-center gap-2 rounded-md border px-3 py-1.5 shadow-xs"
+        >
+          {/* The summary brings its own tooltip with the whole address, which is what gets checked before signing. */}
+          <span className="flex min-w-0 flex-1 opacity-50">
+            <SafeAccountSummary account={selectedAccount} />
+          </span>
+
+          <CopyAddressIconButton address={selectedAccount.address} />
+        </div>
+
+        {helper}
+      </div>
     )
   }
 
@@ -166,15 +205,7 @@ const SafeAccountSelector = ({
         </SelectContent>
       </Select>
 
-      {shownError ? (
-        <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {shownError}
-        </Typography>
-      ) : (
-        <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
-          {helperText}
-        </Typography>
-      )}
+      {helper}
     </div>
   )
 }

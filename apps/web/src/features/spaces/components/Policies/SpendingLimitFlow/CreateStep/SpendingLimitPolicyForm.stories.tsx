@@ -11,6 +11,9 @@ import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
 import { buildSafeAccountId, groupSafeAccounts } from '../../SafeAccountSelector/utils'
 import type { SafeAccountEntry, SafeAccountOption } from '../../SafeAccountSelector/types'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
+import { EditModeProvider } from '../EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
@@ -156,4 +159,56 @@ export const NoEligibleAccounts: Story = {
 export const AccountsLoading: Story = {
   tags: ['skip-visual-test'],
   args: { accounts: [], isAccountsLoading: true },
+}
+
+/** What the chain holds for the edit stories: Nicole already has both limits, Dev has none. */
+const onChain = [
+  spendingLimitStateBuilder()
+    .with({
+      beneficiary: NICOLE,
+      amount: '500000000000000',
+      resetTimeMin: '1440',
+      token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: '' },
+    })
+    .build(),
+  spendingLimitStateBuilder()
+    .with({
+      beneficiary: NICOLE,
+      amount: '250000000',
+      resetTimeMin: '10080',
+      token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+    })
+    .build(),
+]
+
+const EditingForm = (props: StoryProps) => (
+  <EditModeProvider>
+    <ExistingSpendingLimitsContext.Provider value={{ limits: onChain, loading: false }}>
+      <FormInScope {...props} />
+    </ExistingSpendingLimitsContext.Provider>
+  </EditModeProvider>
+)
+
+/** The edit: the Safe is fixed and so is a spender the Safe already limits, while `Dev` is new here. */
+export const Editing: Story = {
+  render: (args) => <EditingForm {...args} />,
+  args: { initialSafe: efSafeTarget, defaultValues: filledValues },
+}
+
+/** Straight off the chain, nothing touched: there is no transaction to build, so `Next` is out of reach. */
+export const EditingUnchanged: Story = {
+  render: (args) => <EditingForm {...args} />,
+  args: {
+    initialSafe: efSafeTarget,
+    defaultValues: { ...filledValues, spenders: [filledValues.spenders[0]] },
+  },
+}
+
+/** Dropping a spender: the removal notice takes the card's place and offers the one way back. */
+export const EditingWithRemovals: Story = {
+  render: (args) => <EditingForm {...args} />,
+  args: {
+    initialSafe: efSafeTarget,
+    defaultValues: { ...filledValues, spenders: [filledValues.spenders[1]] },
+  },
 }

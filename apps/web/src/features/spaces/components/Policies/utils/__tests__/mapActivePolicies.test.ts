@@ -123,6 +123,22 @@ describe('mapActivePolicies', () => {
 
     expect(mapActivePolicies([mismatched], resolveKnownTokens)).toEqual([])
   })
+
+  it('leaves out a spending limit whose allowances have all been removed', () => {
+    const dto = mockSpendingLimitDto()
+    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    dto.data.spenders = []
+
+    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
+  })
+
+  it('leaves out a spending limit whose spender has no allowance left', () => {
+    const dto = mockSpendingLimitDto()
+    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
+
+    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
+  })
 })
 
 describe('getReferencedTokens', () => {

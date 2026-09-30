@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
 import { matchesTokenQuery } from '../utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
@@ -86,8 +87,9 @@ const TokenSelector = ({
   const fieldId = id ?? generatedId
   // Base UI anchors the popup to the <input>; anchoring to the InputGroup makes it match the visible field.
   const fieldAnchor = useComboboxAnchor()
+  const extraTokens = useExistingLimitTokens()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
-    useSpendingLimitTokenOptions()
+    useSpendingLimitTokenOptions(extraTokens)
 
   const visibleOptions = useMemo(
     () =>

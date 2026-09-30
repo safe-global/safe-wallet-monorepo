@@ -191,6 +191,17 @@ describe('SpendingLimitDetails', () => {
     expect(screen.getAllByRole('progressbar')).toHaveLength(policy.data.spenders[0].allowances.length)
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
   })
+
+  it('hands the Edit button to the caller', async () => {
+    mockWallet()
+    mockSpaceSafes(false)
+    const onEdit = jest.fn()
+
+    const { user } = renderWithUserEvent(<SpendingLimitDetails policy={policy} onClose={jest.fn()} onEdit={onEdit} />)
+    await user.click(screen.getByRole('button', { name: 'Edit' }))
+
+    expect(onEdit).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('a pending spending limit', () => {

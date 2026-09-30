@@ -10,6 +10,8 @@ import {
   CALLOUT_NOUN_PLURAL,
   CALLOUT_NOUN_SINGULAR,
   CALLOUT_TITLE_PREFIX,
+  EDIT_CALLOUT_DESCRIPTION,
+  EDIT_CALLOUT_NO_CHANGES,
 } from './constants'
 import { describeFrequency } from './frequency'
 import type { SpendingLimitSummaryModel, SpenderSummary } from './types'
@@ -51,4 +53,36 @@ export const describePolicy = (policy: SpendingLimitSummaryModel): PolicyDescrip
     title: `${subject} ${noun}.`,
     description: count === 1 ? CALLOUT_DESCRIPTION_SINGULAR : CALLOUT_DESCRIPTION_PLURAL,
   }
+}
+
+/** True once any row carries a verdict, which only the edit flow's model does. */
+export const isEditSummary = (policy: SpendingLimitSummaryModel): boolean =>
+  policy.spenders.some((spender) => spender.limits.some((limit) => limit.change !== undefined))
+
+const countChanges = (policy: SpendingLimitSummaryModel) =>
+  policy.spenders
+    .flatMap((spender) => spender.limits)
+    .reduce(
+      (counts, limit) => ({
+        added: counts.added + (limit.change === 'added' ? 1 : 0),
+        changed: counts.changed + (limit.change === 'changed' ? 1 : 0),
+        removed: counts.removed + (limit.change === 'removed' ? 1 : 0),
+      }),
+      { added: 0, changed: 0, removed: 0 },
+    )
+
+/** An edit is described by what it does to the policy, not by the policy it leaves behind. */
+export const describeEdit = (policy: SpendingLimitSummaryModel): PolicyDescription => {
+  const { added, changed, removed } = countChanges(policy)
+  const parts = [
+    added > 0 ? `${added} added` : undefined,
+    changed > 0 ? `${changed} changed` : undefined,
+    removed > 0 ? `${removed} removed` : undefined,
+  ].filter((part): part is string => part !== undefined)
+
+  const total = added + changed + removed
+  const noun = total === 1 ? CALLOUT_NOUN_SINGULAR : CALLOUT_NOUN_PLURAL
+  const title = total === 0 ? EDIT_CALLOUT_NO_CHANGES : `${joinNames(parts)} — ${total} ${noun} in all.`
+
+  return { title, description: EDIT_CALLOUT_DESCRIPTION }
 }

@@ -20,7 +20,8 @@ export type ExistingSpendingLimits = {
 
 const NOTHING_KNOWN: ExistingSpendingLimits = { loading: false }
 
-const ExistingSpendingLimitsContext = createContext<ExistingSpendingLimits>(NOTHING_KNOWN)
+/** Exported so a story or a test can stand in for the chain read without going near an RPC. */
+export const ExistingSpendingLimitsContext = createContext<ExistingSpendingLimits>(NOTHING_KNOWN)
 
 /** Outside the provider (stories, Safe-level) nothing is known, so nothing is excluded. */
 export const useExistingSpendingLimits = (): ExistingSpendingLimits => useContext(ExistingSpendingLimitsContext)
@@ -39,11 +40,13 @@ const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
 
 /**
  * The selected Safe's current spending limits, loaded once per Safe. Lives above `TxFlow` so the Create
- * step (hide existing pairs) and the Review step (skip known delegates) read the same result.
+ * step (hide the limits it already has) and the Review step (skip known delegates) read the same result.
  */
 export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const scope = useSafeScope()
   const { loadSpendingLimits, $isReady } = useLoadFeature(SpendingLimitsFeature)
+  // No `extraTokens` here, deliberately: those are derived from the limits this loads, and `tokenInfos`
+  // is one of its dependencies, so feeding them back would reload every limit a second time.
   const { options } = useSpendingLimitTokenOptions()
 
   // The options are a new array on every balance poll, so key on the fields the loader reads (the logo is cosmetic).
