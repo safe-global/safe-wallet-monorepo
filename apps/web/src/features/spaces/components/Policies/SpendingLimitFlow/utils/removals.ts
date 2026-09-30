@@ -1,7 +1,7 @@
+import uniqWith from 'lodash/uniqWith'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { filledLimits } from './filledLimits'
 
@@ -24,17 +24,22 @@ export const findPendingRemovals = (
   baseline: readonly SpendingLimitState[],
   values: SpendingLimitPolicyFormValues,
 ): PendingRemovals => {
-  const kept = filledLimits(values)
-  const gone = baseline.filter((limit) => !kept.some((row) => isSpendingLimitFor(limit, row.address, row.tokenAddress)))
+  const rows = filledLimits(values)
+  const carded = values.spenders.map((spender) => spender.address).filter(Boolean)
+  const onChainSpenders = uniqWith(
+    baseline.map((limit) => limit.beneficiary),
+    sameAddress,
+  )
 
-  const keptSpenders = values.spenders.map((spender) => spender.address).filter(Boolean)
-  const spenders = gone.reduce<string[]>((unique, limit) => {
-    const isKept = keptSpenders.some((address) => sameAddress(address, limit.beneficiary))
-    const isSeen = unique.some((address) => sameAddress(address, limit.beneficiary))
-    return isKept || isSeen ? unique : [...unique, limit.beneficiary]
-  }, [])
+  // Rows that left the page, counted per spender rather than matched by key: pointing a row at a
+  // different token replaces a limit without removing one, and the row is still there to be read.
+  const limits = onChainSpenders.reduce((total, spender) => {
+    const before = baseline.filter((limit) => sameAddress(limit.beneficiary, spender)).length
+    const after = rows.filter((row) => sameAddress(row.address, spender)).length
+    return total + Math.max(0, before - after)
+  }, 0)
 
-  return { spenders, limits: gone.length }
+  return { spenders: onChainSpenders.filter((spender) => !carded.some((kept) => sameAddress(kept, spender))), limits }
 }
 
 /** The notice's two lines: what goes, and what that means before the transaction executes. */

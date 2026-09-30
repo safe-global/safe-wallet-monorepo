@@ -9,6 +9,7 @@ const ALICE = getAddress('0x00000000000000000000000000000000000000a1')
 const BOB = getAddress('0x00000000000000000000000000000000000000b0')
 const USDC = getAddress('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
 const DAI = getAddress('0x6b175474e89094c44da98b954eedeac495271d0f')
+const WETH = getAddress('0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2')
 
 const onChain = (beneficiary: string, tokenAddress: string): SpendingLimitState =>
   spendingLimitStateBuilder()
@@ -36,6 +37,24 @@ describe('findPendingRemovals', () => {
         ]),
       ),
     ).toEqual({ spenders: [], limits: 0 })
+  })
+
+  it('counts nothing when a row swaps one token for another', () => {
+    const baseline = [onChain(ALICE, USDC)]
+
+    expect(findPendingRemovals(baseline, form([{ address: ALICE, tokens: [DAI] }]))).toEqual({
+      spenders: [],
+      limits: 0,
+    })
+  })
+
+  it('counts the one row that went when another swapped token in the same edit', () => {
+    const baseline = [onChain(ALICE, USDC), onChain(ALICE, DAI)]
+
+    expect(findPendingRemovals(baseline, form([{ address: ALICE, tokens: [WETH] }]))).toEqual({
+      spenders: [],
+      limits: 1,
+    })
   })
 
   it('counts a token dropped from a spender who stays', () => {
