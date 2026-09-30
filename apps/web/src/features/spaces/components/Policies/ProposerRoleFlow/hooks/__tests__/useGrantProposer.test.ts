@@ -162,18 +162,18 @@ describe('useGrantProposer', () => {
     ])
   })
 
-  it('names the Safe the proposer was added to in the success message', async () => {
-    await submit({ proposer: PROPOSER, name: 'Nicole' }, {}, 'Treasury on Polygon')
+  it('names the proposer and the Safe it was added to in the success message', async () => {
+    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury on Polygon')
 
     expect(selectNotifications(getStoreInstance().getState())).toEqual([
       expect.objectContaining({
-        message: `${shortenAddress(PROPOSER)} can now suggest transactions for Treasury on Polygon.`,
+        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury on Polygon.`,
       }),
     ])
   })
 
-  it('falls back to the scoped Safe address in the success message without a label', async () => {
-    await submit()
+  it('falls back to the addresses in the success message without a name or a Safe label', async () => {
+    await submit({ proposer: PROPOSER, name: '   ' })
 
     expect(selectNotifications(getStoreInstance().getState())).toEqual([
       expect.objectContaining({
@@ -190,7 +190,7 @@ describe('useGrantProposer', () => {
       await submit({ proposer: PROPOSER, name: '  Nicole  ' })
 
       expect(getStoreInstance().getState().addressBook).toEqual({ [CHAIN_ID]: { [PROPOSER]: 'Nicole' } })
-      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: '  Nicole  ', chainIds: [CHAIN_ID] })
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
     })
 
     it('leaves the local name of a known contact alone', async () => {

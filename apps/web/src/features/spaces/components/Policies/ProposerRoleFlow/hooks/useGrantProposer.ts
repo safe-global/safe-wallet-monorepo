@@ -94,10 +94,12 @@ export const useGrantProposer = (): GrantProposer => {
   )
 
   const announceSuccess = useCallback(
-    (proposer: string, name: string, safeLabel: string) => {
+    (proposer: string, rawName: string, safeLabel: string) => {
+      const name = sanitizeName(rawName)
+      const proposerLabel = name ? `${name} (${shortenAddress(proposer)})` : shortenAddress(proposer)
       // A member's request waits for an admin, so a new contact is also kept in their local address book
       if (!isAdmin && !getContact(proposer, chainId)) {
-        dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name: sanitizeName(name) }))
+        dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name }))
       }
       void addOrRequestContact({ address: proposer, name, chainIds: [chainId] })
       trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
@@ -107,7 +109,7 @@ export const useGrantProposer = (): GrantProposer => {
           groupKey: 'add-proposer-success',
           autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS,
           title: 'Proposer added successfully!',
-          message: `${shortenAddress(proposer)} can now suggest transactions for ${safeLabel}.`,
+          message: `${proposerLabel} can now suggest transactions for ${safeLabel}.`,
         }),
       )
     },
