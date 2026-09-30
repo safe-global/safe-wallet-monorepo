@@ -99,7 +99,6 @@ const SpendingLimitPolicyForm = ({
   )
 
   // Nothing to sign for an edit that changes nothing, so the step does not offer to move on.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const isUnchangedEdit = useMemo(
     () => isEditMode && baseline !== undefined && !hasEditChanges(baseline, getValues()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
