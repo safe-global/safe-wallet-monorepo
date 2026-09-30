@@ -70,10 +70,13 @@ const notifications = () => selectNotifications(getStoreInstance().getState())
 describe('useAddOrRequestWorkspaceContact', () => {
   beforeEach(() => jest.clearAllMocks())
 
-  it('adds the contact to the Workspace address book for an admin and tracks it', async () => {
+  it('adds the contact to the Workspace address book for an admin, confirms and tracks it', async () => {
     const { addOrRequest, upsert, createRequest } = setup()
 
-    await addOrRequest({ ...CONTACT, name: '  Nicole  ' })
+    await expect(addOrRequest({ ...CONTACT, name: '  Nicole  ' })).resolves.toBe('added')
+    expect(notifications()).toEqual([
+      expect.objectContaining({ variant: 'success', message: 'Contact added to Workspace address book' }),
+    ])
 
     expect(upsert).toHaveBeenCalledWith([CONTACT])
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_BOOK_ENTRY_CREATED, {
@@ -82,10 +85,13 @@ describe('useAddOrRequestWorkspaceContact', () => {
     expect(createRequest).not.toHaveBeenCalled()
   })
 
-  it('requests the contact for a member and tracks the request', async () => {
+  it('requests the contact for a member, confirms and tracks the request', async () => {
     const { addOrRequest, upsert, createRequest } = setup({ isAdmin: false })
 
-    await addOrRequest(CONTACT)
+    await expect(addOrRequest(CONTACT)).resolves.toBe('requested')
+    expect(notifications()).toEqual([
+      expect.objectContaining({ variant: 'info', message: 'Added to Workspace address book on admin approval' }),
+    ])
 
     expect(createRequest).toHaveBeenCalledWith({ spaceId: SPACE_ID, createAddressBookRequestDto: CONTACT })
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT, { [MixpanelEventParams.SOURCE]: SOURCE })
@@ -100,7 +106,7 @@ describe('useAddOrRequestWorkspaceContact', () => {
   ])('sends nothing when %s', async (_, contact, options) => {
     const { addOrRequest, upsert, createRequest } = setup(options)
 
-    await addOrRequest({ ...CONTACT, ...contact })
+    await expect(addOrRequest({ ...CONTACT, ...contact })).resolves.toBe('skipped')
 
     expect(upsert).not.toHaveBeenCalled()
     expect(createRequest).not.toHaveBeenCalled()
@@ -117,7 +123,7 @@ describe('useAddOrRequestWorkspaceContact', () => {
   it('shows the error when the admin write fails', async () => {
     const { addOrRequest } = setup({ upsertResult: { error: 'Forbidden' } })
 
-    await addOrRequest(CONTACT)
+    await expect(addOrRequest(CONTACT)).resolves.toBe('failed')
 
     expect(notifications()).toEqual(
       expect.arrayContaining([expect.objectContaining({ variant: 'error', message: 'Forbidden' })]),
@@ -138,10 +144,10 @@ describe('useAddOrRequestWorkspaceContact', () => {
     )
   })
 
-  it('stays quiet when a request for the address is already pending', async () => {
+  it('reports an already pending request without a toast', async () => {
     const { addOrRequest } = setup({ isAdmin: false, requestResult: { error: { status: 409 } } })
 
-    await addOrRequest(CONTACT)
+    await expect(addOrRequest(CONTACT)).resolves.toBe('pending')
 
     expect(notifications()).toEqual([])
     expect(trackEvent).not.toHaveBeenCalled()
