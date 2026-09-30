@@ -32,6 +32,7 @@ describe('ProposerDetails', () => {
 
   it('should, when opened, name the proposer, the Safe it applies to and the owner who granted it', () => {
     mockUseAddressBookItem.mockImplementation((address: string) => {
+      if (address === MOCK_ADDRESSES.bob) return { name: 'Robert' }
       if (address === MOCK_SAFES.treasury.address) return { name: 'Treasury' }
       if (address === MOCK_ADDRESSES.alice) return { name: 'Alice' }
       return undefined
@@ -40,20 +41,15 @@ describe('ProposerDetails', () => {
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
     expect(screen.getByText('Proposer role')).toBeInTheDocument()
-    expect(screen.getByText('Bob')).toBeInTheDocument()
+    expect(screen.getByText('Robert')).toBeInTheDocument()
     expect(screen.getByText('Treasury')).toBeInTheDocument()
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Safe{Wallet}')).toBeInTheDocument()
   })
 
-  it('should, when the proposer has an address book entry, prefer it over the grant label', () => {
-    mockUseAddressBookItem.mockImplementation((address: string) =>
-      address === MOCK_ADDRESSES.bob ? { name: 'Robert' } : undefined,
-    )
-
+  it('should, when the proposer has no address book entry, not show the grant label', () => {
     render(<ProposerDetails policy={policy} proposer={proposer} onClose={jest.fn()} />)
 
-    expect(screen.getByText('Robert')).toBeInTheDocument()
     expect(screen.queryByText('Bob')).not.toBeInTheDocument()
   })
 

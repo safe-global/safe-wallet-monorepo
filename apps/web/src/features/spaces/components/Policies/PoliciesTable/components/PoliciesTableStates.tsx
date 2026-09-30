@@ -9,7 +9,7 @@ export const PoliciesNoSearchResults = ({ query }: { query: string }) => (
       <Typography variant="paragraph-bold">No policies found</Typography>
       <Typography variant="paragraph-small" className="text-muted-foreground">
         {query ? (
-          <>Nothing matches &ldquo;{query}&rdquo;. Try a different name, address or network.</>
+          <>Nothing matches &ldquo;{query}&rdquo;. Try a different name, address, token or network.</>
         ) : (
           'Nothing matches this filter.'
         )}

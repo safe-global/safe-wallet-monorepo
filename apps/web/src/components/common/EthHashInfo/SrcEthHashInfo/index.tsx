@@ -1,6 +1,7 @@
 import classnames from 'classnames'
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
+import NextLink, { type LinkProps } from 'next/link'
 import { Cloud } from 'lucide-react'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
@@ -33,6 +34,12 @@ export type EthHashInfoProps = {
   addressBookNameSource?: ContactSource
   highlight4bytes?: boolean
   badgeTooltip?: ReactNode
+  /** Links the account's label: its name, or the address when unnamed */
+  href?: LinkProps['href']
+  /** Sets the account's label in bold: its name, or the address when unnamed */
+  boldLabel?: boolean
+  /** Shows the full address, instead of the copy hint, when hovering the address */
+  showAddressTooltip?: boolean
 }
 
 const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
@@ -56,6 +63,9 @@ const SrcEthHashInfo = ({
   addressBookNameSource,
   highlight4bytes = false,
   badgeTooltip,
+  href,
+  boldLabel = false,
+  showAddressTooltip = false,
 }: EthHashInfoProps): ReactElement => {
   const shouldPrefix = isAddress(address)
   const isMobile = useIsBelowSm()
@@ -105,8 +115,18 @@ const SrcEthHashInfo = ({
 
       <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
         {!!name ? (
-          <div title={name} className="ethHashInfo-name flex items-center gap-1" style={accountStylesWithBadge}>
-            <div className="overflow-hidden text-ellipsis">{name}</div>
+          <div
+            title={name}
+            className={classnames('ethHashInfo-name flex items-center gap-1', { 'font-bold': boldLabel })}
+            style={accountStylesWithBadge}
+          >
+            {href ? (
+              <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
+                {name}
+              </NextLink>
+            ) : (
+              <div className="overflow-hidden text-ellipsis">{name}</div>
+            )}
 
             {badgeTooltip
               ? badgeTooltip
@@ -131,9 +151,23 @@ const SrcEthHashInfo = ({
 
         <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
           {(!onlyName || !name) && (
-            <div className="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]">
-              {copyAddress ? (
-                <CopyAddressButton address={address} trusted={trusted}>
+            <div
+              className={classnames(
+                'overflow-hidden text-ellipsis',
+                boldLabel && !name ? 'font-bold' : 'font-[weight:inherit]',
+                'text-[length:inherit]',
+              )}
+            >
+              {href && !name ? (
+                <NextLink href={href} className="text-inherit hover:underline">
+                  {addressElement}
+                </NextLink>
+              ) : copyAddress ? (
+                <CopyAddressButton
+                  address={address}
+                  trusted={trusted}
+                  initialToolTipText={showAddressTooltip ? address : undefined}
+                >
                   {addressElement}
                 </CopyAddressButton>
               ) : (
