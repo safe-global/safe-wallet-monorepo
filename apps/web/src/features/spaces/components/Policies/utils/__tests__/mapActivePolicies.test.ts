@@ -1,16 +1,6 @@
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
-import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import { getReferencedTokens, mapActivePolicies } from '../mapActivePolicies'
-
-const withAllowanceToken = (token: string) =>
-  mockPendingDto({
-    data: {
-      ...mockPendingDto().data,
-      changes: [{ kind: 'set-allowance', delegate: MOCK_ADDRESSES.bob, token, amount: '1', resetPeriodMinutes: 0 }],
-    },
-  })
+import { mapActivePolicies } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
@@ -142,27 +132,5 @@ describe('mapActivePolicies', () => {
     dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
 
     expect(mapActivePolicies([dto])).toEqual([])
-  })
-})
-
-describe('getReferencedTokens', () => {
-  it('should, when queued txs share a token on one chain, list it once', () => {
-    const pending = withAllowanceToken(MOCK_TOKENS.usdt.address)
-
-    expect(getReferencedTokens([pending, pending])).toEqual([
-      { chainId: MOCK_SAFES.treasury.chainId, address: MOCK_TOKENS.usdt.address },
-    ])
-  })
-
-  it('should, when the same token is queued on two chains, list it per chain', () => {
-    const pending = withAllowanceToken(MOCK_TOKENS.usdt.address)
-
-    const tokens = getReferencedTokens([pending, { ...pending, safe: { ...MOCK_SAFES.treasury, chainId: '137' } }])
-
-    expect(tokens.map((token) => token.chainId)).toEqual(['1', '137'])
-  })
-
-  it('should, when a queued allowance is in the native currency, not list it', () => {
-    expect(getReferencedTokens([withAllowanceToken(ZERO_ADDRESS)])).toEqual([])
   })
 })

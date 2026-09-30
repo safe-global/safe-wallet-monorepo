@@ -12723,6 +12723,25 @@
             "type": "string",
             "description": "The token the limit applies to; zero address for native"
           },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          },
           "amount": {
             "type": "string",
             "description": "Per-window ceiling, in base units"
@@ -12736,6 +12755,7 @@
           "kind",
           "delegate",
           "token",
+          "tokenMetadata",
           "amount",
           "resetPeriodMinutes"
         ]
@@ -12754,12 +12774,32 @@
           },
           "token": {
             "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
           }
         },
         "required": [
           "kind",
           "delegate",
-          "token"
+          "token",
+          "tokenMetadata"
         ]
       },
       "DeleteAllowanceChangeDto": {
@@ -12776,12 +12816,32 @@
           },
           "token": {
             "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
           }
         },
         "required": [
           "kind",
           "delegate",
-          "token"
+          "token",
+          "tokenMetadata"
         ]
       },
       "PendingSpendingLimitDataDto": {

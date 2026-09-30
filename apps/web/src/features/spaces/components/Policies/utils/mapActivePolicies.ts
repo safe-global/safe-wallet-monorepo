@@ -1,25 +1,24 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type {
   ActivePolicyDto,
-  PendingPolicyDto,
   ProposerPolicyDataDto,
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Policy, PolicyAllowance, PolicyTokenInfo, ProposerPolicy, SpendingLimitPolicy } from '../types'
 
-export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
-
 /** A token the gateway does not know still has to render its amount, so it shows base units. */
-export const unknownToken = (address: string): PolicyTokenInfo => ({
+const unknownToken = (address: string): PolicyTokenInfo => ({
   address,
   symbol: shortenAddress(address),
   decimals: 0,
   logoUri: null,
 })
 
-const toToken = ({ tokenAddress, tokenMetadata }: SpendingLimitAllowanceDto): PolicyTokenInfo =>
+export const toPolicyToken = (
+  tokenAddress: string,
+  tokenMetadata: SpendingLimitAllowanceDto['tokenMetadata'],
+): PolicyTokenInfo =>
   tokenMetadata
     ? {
         address: tokenAddress,
@@ -33,7 +32,7 @@ const toAllowance = (allowance: SpendingLimitAllowanceDto): PolicyAllowance => {
   const remaining = BigInt(allowance.amount) - BigInt(allowance.spent)
 
   return {
-    token: toToken(allowance),
+    token: toPolicyToken(allowance.tokenAddress, allowance.tokenMetadata),
     amount: allowance.amount,
     spent: allowance.spent,
     remaining: (remaining > 0n ? remaining : 0n).toString(),
@@ -97,24 +96,6 @@ const toPolicies = (dto: ActivePolicyDto): Policy[] => {
     default:
       return []
   }
-}
-
-/** Every distinct ERC-20 the queued policies reference. The native currency needs no lookup. */
-export const getReferencedTokens = (pendingDtos: PendingPolicyDto[]): { chainId: string; address: string }[] => {
-  const refs = pendingDtos.flatMap((dto) =>
-    dto.data.changes.flatMap((change) =>
-      change.kind === 'set-allowance' ? [{ chainId: dto.safe.chainId, address: change.token }] : [],
-    ),
-  )
-
-  const seen = new Set<string>()
-  return refs.filter(({ chainId, address }) => {
-    const lowerCaseAddress = address.toLowerCase()
-    const key = `${chainId}:${lowerCaseAddress}`
-    if (lowerCaseAddress === ZERO_ADDRESS || seen.has(key)) return false
-    seen.add(key)
-    return true
-  })
 }
 
 /**

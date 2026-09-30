@@ -17,7 +17,6 @@ import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
-import { usePolicyTokenResolver } from './usePolicyTokenResolver'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import type { Policy } from '../types'
@@ -82,13 +81,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
-  const pendingTokens = usePolicyTokenResolver(pendingDtos)
-
   const activeRows = useMemo(() => mapActivePolicies(dtos), [dtos])
-  const pendingRows = useMemo(
-    () => (pendingTokens.isLoading ? [] : mapPendingPolicies(pendingDtos, activeRows, pendingTokens.resolveToken)),
-    [pendingDtos, activeRows, pendingTokens.isLoading, pendingTokens.resolveToken],
-  )
+  const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,
