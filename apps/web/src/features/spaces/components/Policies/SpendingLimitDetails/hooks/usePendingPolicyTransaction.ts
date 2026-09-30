@@ -10,7 +10,7 @@ import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { makeTxFromDetails } from '@/utils/transactions'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import { useRefetchOnTxEvents } from '../../hooks/useRefetchOnTxEvents'
-import type { QueuedSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '../../types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 
 const REFETCH_EVENTS = [
@@ -38,7 +38,7 @@ export type PendingPolicyTransaction = {
   outcome?: PendingTxOutcome
 }
 
-export const usePendingPolicyTransaction = (policy: QueuedSpendingLimitPolicy): PendingPolicyTransaction => {
+export const usePendingPolicyTransaction = (policy: PendingSpendingLimitPolicy): PendingPolicyTransaction => {
   const { currentData, error, refetch } = useTransactionsGetTransactionByIdV1Query(
     { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
     // Another signer executing, deleting or replacing it sends no event to this tab.

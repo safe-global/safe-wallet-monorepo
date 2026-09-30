@@ -17,10 +17,11 @@ import {
   asActivePolicy,
   mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
+  mockActivatingPolicy,
   mockPendingPolicy,
   mockPendingRemoval,
 } from '../../mocks/policies'
-import type { QueuedSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '../../types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction, type PendingPolicyTransaction } from '../hooks/usePendingPolicyTransaction'
 import SpendingLimitDetails from '..'
@@ -207,7 +208,7 @@ describe('a pending spending limit', () => {
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
   )
 
-  const renderPending = (policy: QueuedSpendingLimitPolicy = pending) =>
+  const renderPending = (policy: PendingSpendingLimitPolicy = pending) =>
     renderWithUserEvent(withTxModal(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />))
 
   beforeEach(() => {
@@ -321,6 +322,18 @@ describe('a pending spending limit', () => {
 
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
     expect(screen.getByText(/can no longer be executed/)).toBeInTheDocument()
+  })
+
+  it('reports an executed row waiting for the indexer as executed, before its transaction has loaded', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({})
+
+    renderPending(mockActivatingPolicy())
+
+    expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('says the limit stays active while its removal is pending', () => {

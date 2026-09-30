@@ -6,7 +6,7 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import type { ActiveDrawerPolicy } from '../../SpendingLimitDrawer'
-import type { QueuedSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '../../types'
 
 const ENFORCED_BY = 'Safe allowance module'
 
@@ -20,7 +20,7 @@ export type SpendingLimitDetailsContent = {
 
 /** Ownership comes from the Space's own safes, already loaded, so opening a panel costs no request. */
 export const useSpendingLimitDetails = (
-  policy: ActiveDrawerPolicy | QueuedSpendingLimitPolicy,
+  policy: ActiveDrawerPolicy | PendingSpendingLimitPolicy,
 ): SpendingLimitDetailsContent => {
   const { chainId, address: safeAddress } = policy.safe
   const addressBook = useMergedAddressBooks(chainId)

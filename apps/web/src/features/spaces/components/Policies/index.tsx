@@ -18,7 +18,7 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isActiveSpendingLimitPolicy, isProposerPolicy, isQueuedSpendingLimitPolicy, type Policy } from './types'
+import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -71,21 +71,17 @@ const Policies = ({
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isActiveSpendingLimitPolicy(policy) || isQueuedSpendingLimitPolicy(policy)) {
-      setOpenPolicy(policy)
-    }
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
   }, [])
 
   const closeDetails = useCallback(() => setOpenPolicy(null), [])
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
-  // policy that leaves the response takes its panel with it. A queued one stays to report why it left.
+  // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
   const openedPolicy = useMemo(() => {
     if (!openPolicy) return null
     const listed = policies.find((policy) => policy.id === openPolicy.id)
-    const hasLeftQueue = !listed || !isQueuedSpendingLimitPolicy(listed)
-    if (isQueuedSpendingLimitPolicy(openPolicy) && hasLeftQueue) return openPolicy
-    return listed ?? null
+    return listed ?? (isPendingPolicy(openPolicy) ? openPolicy : null)
   }, [policies, openPolicy])
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
@@ -231,7 +227,7 @@ const Policies = ({
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
       )}
 
-      {openedPolicy && (isActiveSpendingLimitPolicy(openedPolicy) || isQueuedSpendingLimitPolicy(openedPolicy)) && (
+      {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
         <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
       )}
     </div>

@@ -510,11 +510,13 @@ describe('Policies', () => {
         expect(screen.getByText('Pending signatures')).toBeInTheDocument()
       })
 
-      it('should not open a panel for a row that is already executed and waiting for the indexer', () => {
+      it('should, for a row already executed and waiting for the indexer, open the panel as executed', () => {
         render(<Policies policies={[mockActivatingPolicy()]} />)
         fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
 
-        expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
       })
 
       it('should keep its panel open after the row leaves the queue, so the panel can say why', () => {

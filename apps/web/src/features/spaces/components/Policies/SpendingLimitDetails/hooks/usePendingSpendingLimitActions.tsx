@@ -8,7 +8,7 @@ import { AppRoutes } from '@/config/routes'
 import useOrigin from '@/hooks/useOrigin'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '../../SpendingLimitDrawer/resolveState'
-import type { QueuedSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy, QueuedSpendingLimitPolicy } from '../../types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction } from './usePendingPolicyTransaction'
 
@@ -21,7 +21,7 @@ export type PendingSpendingLimitActions = {
 }
 
 export const usePendingSpendingLimitActions = (
-  policy: QueuedSpendingLimitPolicy,
+  policy: PendingSpendingLimitPolicy,
   viewer: Viewer,
 ): PendingSpendingLimitActions => {
   const { chainId, address: safeAddress } = policy.safe
@@ -48,10 +48,15 @@ export const usePendingSpendingLimitActions = (
   const hasSigned = confirmedBy.some((signer) => sameAddress(signer, viewer.address))
 
   return {
-    policy: { ...policy, confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted },
+    policy: {
+      ...policy,
+      status: 'pending',
+      confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
+    },
     viewer: { ...viewer, hasSigned },
     transactionLink: `${origin}${AppRoutes.transactions.tx}?safe=${getEip3770ShortName(chainId)}:${safeAddress}&id=${txId}`,
     onReviewTransaction,
-    outcome,
+    // An activating row was already seen executed, before its transaction has loaded.
+    outcome: outcome ?? (policy.status === 'activating' ? 'executed' : undefined),
   }
 }

@@ -1,12 +1,12 @@
 import { useContext, type ReactElement } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { SpendingLimitDrawer, type ActiveDrawerPolicy } from '../SpendingLimitDrawer'
-import type { QueuedSpendingLimitPolicy } from '../types'
+import type { PendingSpendingLimitPolicy } from '../types'
 import { usePendingSpendingLimitActions } from './hooks/usePendingSpendingLimitActions'
 import { useSpendingLimitDetails } from './hooks/useSpendingLimitDetails'
 
 export type SpendingLimitDetailsProps = {
-  policy: ActiveDrawerPolicy | QueuedSpendingLimitPolicy
+  policy: ActiveDrawerPolicy | PendingSpendingLimitPolicy
   onClose: () => void
 }
 
@@ -20,7 +20,7 @@ const PendingSpendingLimitDetails = ({
   policy,
   onClose,
 }: {
-  policy: QueuedSpendingLimitPolicy
+  policy: PendingSpendingLimitPolicy
   onClose: () => void
 }) => {
   const content = useSpendingLimitDetails(policy)
@@ -33,10 +33,10 @@ const PendingSpendingLimitDetails = ({
 
 /** Hooks cannot be conditional, so the queued-transaction reads live in their own component. */
 const SpendingLimitDetails = ({ policy, onClose }: SpendingLimitDetailsProps): ReactElement =>
-  policy.status === 'pending' ? (
-    <PendingSpendingLimitDetails policy={policy} onClose={onClose} />
-  ) : (
+  policy.status === 'active' ? (
     <ActiveSpendingLimitDetails policy={policy} onClose={onClose} />
+  ) : (
+    <PendingSpendingLimitDetails policy={policy} onClose={onClose} />
   )
 
 export default SpendingLimitDetails
