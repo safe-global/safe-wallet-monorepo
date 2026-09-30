@@ -26,10 +26,11 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const dispatch = useAppDispatch()
   const [fetchAddressBook, { isFetching: isDownloading }] = useLazyAddressBooksGetAddressBookItemsV1Query()
-  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(space.uuid)
+  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isMenuOpen ? space.uuid : null)
 
   const handleDownload = async (e: MouseEvent) => {
     e.stopPropagation()
@@ -49,6 +50,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
+    setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -58,7 +60,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger
           render={
             <Button

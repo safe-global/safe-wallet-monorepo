@@ -67,10 +67,16 @@ describe('SpaceContextMenu', () => {
     expect(showNotification).toHaveBeenCalledWith(expect.objectContaining({ variant: 'error' }))
   })
 
-  it('checks whether the space can be deleted', async () => {
-    await openMenu()
+  it('only checks whether the space can be deleted once the menu is open', async () => {
+    render(<SpaceContextMenu space={space} />)
 
-    expect(useSpaceDeletionGuard).toHaveBeenCalledWith('space-1')
+    expect(useSpaceDeletionGuard).toHaveBeenCalledWith(null)
+    expect(useSpaceDeletionGuard).not.toHaveBeenCalledWith('space-1')
+
+    await userEvent.click(screen.getByTestId('space-card-context-menu-button'))
+    await screen.findByTestId('remove-button')
+
+    expect(useSpaceDeletionGuard).toHaveBeenLastCalledWith('space-1')
     expect(screen.getByTestId('remove-button')).not.toHaveAttribute('aria-disabled', 'true')
   })
 
