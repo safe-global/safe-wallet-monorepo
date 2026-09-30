@@ -1,9 +1,10 @@
+import { useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { RotateCcwIcon } from 'lucide-react'
+import { EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import ExternalLink from '@/components/common/ExternalLink'
 import { TENDERLY_SIMULATE_ENDPOINT_URL } from '@safe-global/utils/config/constants'
@@ -23,6 +24,8 @@ const TenderlySection = ({
   showResetTokenButton,
 }: TenderlySectionProps) => {
   const { control } = useFormContext()
+  const [isTokenVisible, setIsTokenVisible] = useState(false)
+  const tokenVisibilityLabel = isTokenVisible ? 'Hide access token' : 'Show access token'
 
   return (
     <>
@@ -89,9 +92,39 @@ const TenderlySection = ({
             control={control}
             render={({ field }) => (
               <InputGroup>
-                <InputGroupInput {...field} id={EnvVariablesField.tenderlyToken} value={field.value || ''} />
-                {showResetTokenButton && (
-                  <InputGroupAddon align="inline-end">
+                <InputGroupInput
+                  {...field}
+                  id={EnvVariablesField.tenderlyToken}
+                  value={field.value || ''}
+                  // A text field masked with CSS, not type="password", so browsers and password managers don't offer to
+                  // save it as a password or autofill a saved one into it.
+                  type="text"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-1p-ignore
+                  data-lpignore="true"
+                  data-form-type="other"
+                  className={isTokenVisible ? undefined : '[-webkit-text-security:disc]'}
+                />
+                <InputGroupAddon align="inline-end">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <InputGroupButton
+                          size="icon-sm"
+                          onClick={() => setIsTokenVisible((visible) => !visible)}
+                          aria-label={tokenVisibilityLabel}
+                          data-testid="tenderly-token-visibility"
+                        >
+                          {isTokenVisible ? <EyeOffIcon /> : <EyeIcon />}
+                        </InputGroupButton>
+                      }
+                    />
+                    <TooltipContent>{tokenVisibilityLabel}</TooltipContent>
+                  </Tooltip>
+                  {showResetTokenButton && (
                     <Tooltip>
                       <TooltipTrigger
                         render={
@@ -102,8 +135,8 @@ const TenderlySection = ({
                       />
                       <TooltipContent>Reset to default value</TooltipContent>
                     </Tooltip>
-                  </InputGroupAddon>
-                )}
+                  )}
+                </InputGroupAddon>
               </InputGroup>
             )}
           />

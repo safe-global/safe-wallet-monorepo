@@ -53,7 +53,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy, hasLimitedActions
     }
   }, [configs, resolveSafeName])
 
-  const matches = usePolicySearch(policies, query)
+  const { policies: matches, matchedSpenderNames } = usePolicySearch(policies, query)
   const rows = useMemo(() => {
     const filtered = typeFilter ? matches.filter((policy) => policy.type === typeFilter) : matches
     return sortPolicies(filtered, sort ?? DEFAULT_POLICY_SORT, sortContext)
@@ -62,7 +62,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy, hasLimitedActions
   const renderTable = () => {
     if (rows.length === 0) return <PoliciesNoSearchResults query={query} />
 
-    return <PoliciesTable policies={rows} onSelect={onSelectPolicy} />
+    return <PoliciesTable policies={rows} matchedSpenderNames={matchedSpenderNames} onSelect={onSelectPolicy} />
   }
 
   return (
@@ -78,7 +78,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy, hasLimitedActions
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onClear={() => setQuery('')}
-          placeholder="by name, address or network"
+          placeholder="Search"
           aria-label="Search policies"
           autoComplete="off"
           className="flex-1"

@@ -2,6 +2,7 @@ import { FETCH_STATUS, type NestedTxStatus } from '@safe-global/utils/components
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 import { getSimulationOutcome, type SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { render, screen } from '@/tests/test-utils'
+import { initialState as initialSettingsState } from '@/store/settingsSlice'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, QueuedTxSimulation } from './index'
 
@@ -119,17 +120,42 @@ describe('queued simulation display', () => {
 describe('QueuedTxSimulation gating', () => {
   const transaction = { txId: 'multisig_0x1_0x2' } as TransactionDetails
 
-  it('hands off to Tenderly public simulator instead of simulating without Safe Pro', async () => {
+  const ownTenderlyState = {
+    settings: {
+      ...initialSettingsState,
+      env: {
+        ...initialSettingsState.env,
+        tenderly: { url: 'https://api.tenderly.co/api/v1/account/me/project/p', accessToken: 'secret' },
+      },
+    },
+  }
+
+  it('leads to Tenderly settings instead of simulating without Safe Pro nor an own Tenderly project', async () => {
     mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
     render(<QueuedTxSimulation transaction={transaction} />)
 
-    const link = await screen.findByTestId('queued-tx-external-simulation')
-    const url = new URL(link.getAttribute('href') ?? '')
-    expect(url.pathname).toBe('/simulator/new')
-    expect(url.searchParams.get('contractAddress')).toBe('0x00000000000000000000000000000000000000aa')
-    expect(url.searchParams.get('from')).toBe('0x1234567890123456789012345678901234567890')
+    const link = await screen.findByTestId('queued-tx-simulation-setup')
+    expect(link.getAttribute('href')).toContain('/settings/environment-variables')
+    expect(link).toHaveTextContent('Set up simulation')
     expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
     expect(mockSimulateTransaction).not.toHaveBeenCalled()
+  })
+
+  it('simulates on the own Tenderly project without Safe Pro', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+    render(<QueuedTxSimulation transaction={transaction} />, { initialReduxState: ownTenderlyState })
+
+    expect(await screen.findByRole('button', { name: /Simulate/ })).toBeInTheDocument()
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing while the plan is still loading', () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true })
+    const { container } = render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
   })
 
   it('keeps the in-app simulation button with Safe Pro', async () => {
@@ -137,6 +163,6 @@ describe('QueuedTxSimulation gating', () => {
     render(<QueuedTxSimulation transaction={transaction} />)
 
     expect(await screen.findByRole('button', { name: /Simulate/ })).toBeInTheDocument()
-    expect(screen.queryByTestId('queued-tx-external-simulation')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
   })
 })
