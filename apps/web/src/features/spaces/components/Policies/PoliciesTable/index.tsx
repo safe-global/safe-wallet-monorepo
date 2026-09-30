@@ -1,6 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
@@ -16,6 +17,8 @@ import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
+  /** Shown in the row because spenders are otherwise only in the detail panel. */
+  matchedSpenderNames?: Map<string, string>
   onSelect?: (policy: Policy) => void
 }
 
@@ -29,7 +32,7 @@ const getOpenPolicyLabel = (policy: Policy): string =>
  *
  * Revoked policies are not in the CGW response, so nothing here has to filter them out.
  */
-const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
+const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTableProps) => {
   const resolveSafeName = useSafeNameResolver()
   const { configs } = useChains()
   const getShortName = (chainId: string) => configs.find((chain) => chain.chainId === chainId)?.shortName
@@ -71,7 +74,24 @@ const PoliciesTable = ({ policies, onSelect }: PoliciesTableProps) => {
       minWidth: 200,
       cellTestId: 'policy-cell-proposer-tokens',
       cell: (policy) => {
-        if (!isProposerPolicy(policy)) return <PolicyTokens policy={policy} />
+        if (!isProposerPolicy(policy)) {
+          const matchedSpender = matchedSpenderNames?.get(policy.id)
+
+          return (
+            <div className="flex min-w-0 flex-col gap-1">
+              <PolicyTokens policy={policy} />
+              {matchedSpender && (
+                <Typography
+                  variant="paragraph-small"
+                  className="truncate text-muted-foreground"
+                  data-testid="policy-matched-spender"
+                >
+                  Spender: {matchedSpender}
+                </Typography>
+              )}
+            </div>
+          )
+        }
 
         const [proposer] = policy.data.proposers
         if (!proposer) return null

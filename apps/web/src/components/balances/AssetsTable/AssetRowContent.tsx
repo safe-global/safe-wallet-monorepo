@@ -15,7 +15,7 @@ import css from './styles.module.css'
 interface AssetRowContentProps {
   item: Balance
   chainId: string
-  isStakingPromoEnabled: boolean
+  isSafenetStakingEnabled: boolean
   isEarnPromoEnabled: boolean
   showMobileValue?: boolean
   showMobileBalance?: boolean
@@ -28,7 +28,7 @@ const isNativeToken = (tokenInfo: Balance['tokenInfo']) => {
 export const AssetRowContent = ({
   item,
   chainId,
-  isStakingPromoEnabled,
+  isSafenetStakingEnabled,
   isEarnPromoEnabled,
   showMobileValue = false,
   showMobileBalance = false,
@@ -64,7 +64,7 @@ export const AssetRowContent = ({
             <PromoButtons
               tokenInfo={item.tokenInfo}
               chainId={chainId}
-              isStakingPromoEnabled={isStakingPromoEnabled}
+              isSafenetStakingEnabled={isSafenetStakingEnabled}
               isEarnPromoEnabled={isEarnPromoEnabled}
             />
           </span>
