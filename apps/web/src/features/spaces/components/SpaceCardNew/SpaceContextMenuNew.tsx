@@ -7,6 +7,8 @@ import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useSpaceDeletionGuard } from '@/features/spaces'
 
 enum ModalType {
   RENAME = 'rename',
@@ -18,6 +20,7 @@ const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isMenuOpen ? space.uuid : null)
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
@@ -52,17 +55,23 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
             <span>Rename</span>
           </DropdownMenuItem>
 
-          <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-            <DropdownMenuItem
-              data-testid="remove-button-spaces-new"
-              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
-              onSelect={(e) => e.stopPropagation()}
-              variant="destructive"
-            >
-              <Trash2 />
-              <span>Remove</span>
-            </DropdownMenuItem>
-          </Track>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
+                <DropdownMenuItem
+                  data-testid="remove-button-spaces-new"
+                  disabled={isDeletionBlocked}
+                  onClick={isDeletionBlocked ? undefined : (e) => handleOpenModal(e, ModalType.REMOVE)}
+                  onSelect={(e) => e.stopPropagation()}
+                  variant="destructive"
+                >
+                  <Trash2 />
+                  <span>Remove</span>
+                </DropdownMenuItem>
+              </Track>
+            </TooltipTrigger>
+            {blockedReason && <TooltipContent side="left">{blockedReason}</TooltipContent>}
+          </Tooltip>
         </DropdownMenuContent>
       </DropdownMenu>
 
