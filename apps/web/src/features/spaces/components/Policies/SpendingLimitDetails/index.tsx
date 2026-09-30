@@ -7,7 +7,6 @@ import { useSpendingLimitDetails } from './hooks/useSpendingLimitDetails'
 
 export type SpendingLimitDetailsProps = {
   policy: ActiveDrawerPolicy | PendingSpendingLimitPolicy
-  /** The pending row is gone from the list, so the panel shows a copy until it learns why. */
   hasLeftQueue?: boolean
   onClose: () => void
 }

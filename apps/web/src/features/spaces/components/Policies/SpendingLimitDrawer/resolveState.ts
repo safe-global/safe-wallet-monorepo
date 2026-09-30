@@ -21,7 +21,7 @@ import {
 export type Viewer = {
   address?: string
   isSigner: boolean
-  /** Undefined while unknown, as before the queued transaction has loaded. */
+  /** Undefined until the queued transaction has loaded. */
   hasSigned?: boolean
 }
 

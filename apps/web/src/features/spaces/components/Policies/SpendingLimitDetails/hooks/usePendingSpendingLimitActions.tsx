@@ -38,7 +38,7 @@ export const usePendingSpendingLimitActions = (
   const txId = getPendingTxId(policy)
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
-  // Until the refetch reports why the row left the queue, the loaded summary may be out of date.
+  // The summary may be stale until the refetch says why the row left.
   const reviewable = hasLeftQueue && !resolvedOutcome ? undefined : txSummary
 
   const onReviewTransaction = useMemo(
@@ -56,7 +56,6 @@ export const usePendingSpendingLimitActions = (
     [reviewable, setTxFlow, chainId, safeAddress],
   )
 
-  // Unknown until the transaction has loaded, so a signer who already signed is not asked to sign.
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
   return {

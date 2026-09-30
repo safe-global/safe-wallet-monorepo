@@ -276,7 +276,7 @@ describe('a pending spending limit', () => {
     mockPendingTx({ txSummary })
 
     renderPending()
-    // user-event replaces the clipboard on setup.
+    // After render: user-event installs its own clipboard stub on setup.
     const writeText = mockClipboard()
     act(() => {
       screen.getByRole('button', { name: 'Copy transaction link' }).click()

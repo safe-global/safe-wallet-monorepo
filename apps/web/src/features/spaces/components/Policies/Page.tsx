@@ -24,7 +24,7 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
 
   return (
     <Policies
-      // An open panel belongs to one Space, so switching Spaces starts afresh.
+      // Closes an open panel on a Space switch.
       key={spaceId}
       policies={policies}
       isLoading={isLoading || planGate.isLoading || (isLocked && isPlanLoading)}

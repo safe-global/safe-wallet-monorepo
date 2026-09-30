@@ -59,7 +59,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
     { skip, ...SPACE_REFRESH_OPTIONS },
   )
-  // Anyone can execute a fully signed change, from any tab, and CGW may still list it right after it is mined.
+  // A fully signed change can be executed elsewhere, and CGW may still list it just after it is mined.
   const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
     { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },

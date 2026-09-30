@@ -36,7 +36,7 @@ export type PendingPolicyTransaction = {
   /** Fresher than the pending DTO, which CGW caches separately. */
   confirmationsSubmitted?: number
   outcome?: PendingTxOutcome
-  /** Set when the transaction could not be loaded for a reason other than it being gone. */
+  /** Set when loading failed with anything but a 404. */
   onRetry?: () => void
 }
 
@@ -44,7 +44,7 @@ export const usePendingPolicyTransaction = (
   policy: PendingSpendingLimitPolicy,
   hasLeftQueue = false,
 ): PendingPolicyTransaction => {
-  // A transaction that has left the queue can no longer change, so it stops being watched.
+  // A transaction that has left the queue can no longer change.
   const [isSettled, setIsSettled] = useState(false)
   const { currentData, error, refetch } = useTransactionsGetTransactionByIdV1Query(
     { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
