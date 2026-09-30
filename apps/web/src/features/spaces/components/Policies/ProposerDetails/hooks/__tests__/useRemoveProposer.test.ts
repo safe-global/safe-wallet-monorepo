@@ -3,6 +3,7 @@ import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '
 import { useRemoveProposer } from '../useRemoveProposer'
 
 const mockDeleteV1 = jest.fn()
+const mockUseAddressBookItem = jest.fn()
 const mockDeleteV2 = jest.fn()
 const mockDispatch = jest.fn()
 const mockShowNotification = jest.fn()
@@ -41,6 +42,10 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
+}))
+
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (...args: unknown[]) => mockShowNotification(...args),
 }))
@@ -59,6 +64,7 @@ describe('useRemoveProposer', () => {
     mockSignData.mockResolvedValue('0xethsign')
     mockDeleteV1.mockReturnValue(unwrapped())
     mockDeleteV2.mockReturnValue(unwrapped())
+    mockUseAddressBookItem.mockReturnValue(undefined)
   })
 
   it('should, when confirmed, switch to the Safe chain, sign the typed data and delete the delegate', async () => {
@@ -78,11 +84,29 @@ describe('useRemoveProposer', () => {
     expect(mockShowNotification).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'Proposer deleted successfully!',
-        message: expect.stringContaining('cannot suggest transactions anymore.'),
+        autoHideDuration: 7000,
+        message: '0x0000...0B0b cannot suggest transactions for 0x8675...a19b anymore.',
       }),
     )
     expect(onRemoved).toHaveBeenCalledTimes(1)
     expect(result.current.error).toBeUndefined()
+  })
+
+  it('should name the proposer and the Safe from the address book in the confirmation', async () => {
+    mockUseAddressBookItem.mockImplementation((address: string) =>
+      address === MOCK_ADDRESSES.bob ? { name: 'Bob' } : { name: 'Treasury' },
+    )
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockUseAddressBookItem).toHaveBeenCalledWith(MOCK_ADDRESSES.bob, MOCK_SAFES.treasury.chainId)
+    expect(mockUseAddressBookItem).toHaveBeenCalledWith(MOCK_SAFES.treasury.address, MOCK_SAFES.treasury.chainId)
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Bob (0x0000...0B0b) cannot suggest transactions for Treasury (0x8675...a19b) anymore.',
+      }),
+    )
   })
 
   it('should, when the wallet only signs with eth_sign, use the v1 endpoint', async () => {

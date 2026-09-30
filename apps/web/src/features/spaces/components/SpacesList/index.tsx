@@ -41,6 +41,7 @@ import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const AddSpaceButton = ({
   onClick,
@@ -285,6 +286,8 @@ const SpacesList = () => {
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
+  const urlSpaceId = useUrlSpaceId()
+  const requestedSpaceId = activeSpaces.some((space) => space.uuid === urlSpaceId) ? urlSpaceId : null
 
   // Treat any indefinite state as loading. On the skip→unskip flip (re-login
   // after logout) RTK Query lags one render — isFetching/isUninitialized are
@@ -299,6 +302,7 @@ const SpacesList = () => {
     isSpacesLoading,
     error: error || undefined,
     singleSpaceId,
+    requestedSpaceId,
   })
 
   const afterSignIn = useCallback(() => {

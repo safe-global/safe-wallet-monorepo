@@ -82,9 +82,9 @@ const renderFlow = () => {
   return { ...rendered, setTxFlow }
 }
 
-const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user']) => {
+const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user'], safeOption: RegExp = /Treasury/) => {
   await user.click(screen.getByTestId('safe-account-selector'))
-  await user.click(await screen.findByRole('option', { name: /Treasury/ }))
+  await user.click(await screen.findByRole('option', { name: safeOption }))
   await user.click(screen.getByRole('combobox', { name: 'Proposer' }))
   await user.paste(PROPOSER)
   await user.click(screen.getByRole('textbox', { name: 'Proposer name' }))
@@ -200,15 +200,33 @@ describe('ProposerRoleFlow', () => {
   })
 
   describe('submitting', () => {
-    it('grants the proposer and closes the flow on success', async () => {
+    it('grants the proposer, labelled with the picked Safe, and closes the flow on success', async () => {
       const grantProposerRole = jest.fn().mockResolvedValue(true)
       mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
       const { user, setTxFlow } = renderFlow()
 
       await fillAndSubmit(user)
 
-      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' })
+      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, 'Treasury (0xAAAA...AAaA)')
       await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
+    })
+
+    it('labels the Safe by address alone when it has no name', async () => {
+      const grantProposerRole = jest.fn().mockResolvedValue(true)
+      mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
+      mockUseEligibleSafeAccounts.mockReturnValue({
+        accounts: [{ ...treasury, name: undefined }],
+        isLoading: false,
+        isError: false,
+        hasWallet: true,
+        signersOnly: true,
+        refetch: jest.fn(),
+      })
+      const { user } = renderFlow()
+
+      await fillAndSubmit(user, /0xAAAA/)
+
+      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, '0xAAAA...AAaA')
     })
 
     it('clears a previous error when another Safe account is picked', async () => {

@@ -61,7 +61,7 @@ describe('create/logic', () => {
 
       // Initialize store for tests that need it (e.g., relaySafeCreation)
       const { makeStore, setStoreInstance } = require('@/store')
-      const testStore = makeStore({}, { skipBroadcast: true })
+      const testStore = makeStore({})
       setStoreInstance(testStore)
     })
 

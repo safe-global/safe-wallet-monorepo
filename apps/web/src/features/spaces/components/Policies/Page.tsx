@@ -1,4 +1,5 @@
 import { useRouter } from 'next/router'
+import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -24,6 +25,8 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
 
   return (
     <Policies
+      // Closes an open panel on a Space switch.
+      key={spaceId}
       policies={policies}
       isLoading={isLoading || planGate.isLoading || (isLocked && isPlanLoading)}
       isError={isError}
@@ -47,9 +50,11 @@ export default function SpacePoliciesPage({ spaceId }: { spaceId: string }) {
 
   return (
     <AuthState spaceId={spaceId}>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <SpacePolicies spaceId={spaceId} />
-      </div>
+      <AddressBookSourceProvider source="merged">
+        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+          <SpacePolicies spaceId={spaceId} />
+        </div>
+      </AddressBookSourceProvider>
     </AuthState>
   )
 }

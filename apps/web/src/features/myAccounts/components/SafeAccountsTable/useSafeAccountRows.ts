@@ -244,16 +244,19 @@ const buildMultiGroup = (item: MultiChainSafeItem, deps: BuildDeps): AccountGrou
  * from the `overviewsByKey` map (populated lazily per row by `useRowOverviews`). Sort keys are
  * computed at the group level so multi-chain children never detach from their parent when the table
  * re-sorts.
+ *
+ * Resolved only when `withWorkspaces` is true to avoid one `/spaces/{id}/safes` request per workspace.
  */
 export function useSafeAccountRows(
   items: AllSafeItems,
   overviewsByKey: Map<string, SafeOverview>,
+  withWorkspaces = true,
 ): { groups: AccountGroup[] } {
   const router = useRouter()
   const getHref = useGetHref(router)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
   const { configs } = useChains()
-  const { safeSpaces } = useSafeSpaces()
+  const { safeSpaces } = useSafeSpaces(!withWorkspaces)
   const { address: walletAddress } = useWallet() ?? {}
 
   const chainMap = useMemo(

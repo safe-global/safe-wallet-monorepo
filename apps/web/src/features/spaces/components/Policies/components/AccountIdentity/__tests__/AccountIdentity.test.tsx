@@ -45,4 +45,22 @@ describe('AccountIdentity', () => {
 
     expect(await screen.findByText(ADDRESS)).toBeInTheDocument()
   })
+
+  it('links the name to the given page', () => {
+    render(<AccountIdentity address={ADDRESS} name="Ops" href="/settings/setup" />)
+
+    expect(screen.getByRole('link', { name: 'Ops' })).toHaveAttribute('href', '/settings/setup')
+  })
+
+  it('links the address when the account has no name', () => {
+    render(<AccountIdentity address={ADDRESS} href="/settings/setup" />)
+
+    expect(screen.getByRole('link', { name: '0x8675...a19b' })).toHaveAttribute('href', '/settings/setup')
+  })
+
+  it('renders no link without an href', () => {
+    render(<AccountIdentity address={ADDRESS} name="Ops" />)
+
+    expect(screen.queryByRole('link')).not.toBeInTheDocument()
+  })
 })

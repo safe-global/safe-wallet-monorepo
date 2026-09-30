@@ -15,6 +15,58 @@ const setup = (state: SpendingLimitDrawerState) =>
   )
 
 describe('SpendingLimitActions', () => {
+  it('none: renders no footer for a transaction that has left the queue', () => {
+    const { container } = setup({
+      kind: 'closed',
+      operation: 'create',
+      action: 'none',
+      bannerTitle: 'The transaction was deleted.',
+      bannerLine2: 'Close this panel to see the current policies.',
+    })
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('review: stays disabled until the transaction has loaded', () => {
+    render(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'review', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{ transactionLink: TRANSACTION_LINK }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+  })
+
+  it('review: offers to try again when the transaction failed to load', async () => {
+    const onRetry = jest.fn()
+    const { user } = renderWithUserEvent(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'review', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{ transactionLink: TRANSACTION_LINK, onRetry }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(onRetry).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it('copy-link: renders no footer until the link can be built', () => {
+    const { container } = render(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'copy-link', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{}}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('connect: asks a disconnected viewer to connect and explains why', async () => {
     const onConnectWallet = jest.fn()
     const { user } = renderWithUserEvent(

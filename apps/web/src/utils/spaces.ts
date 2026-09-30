@@ -1,13 +1,3 @@
-/**
- * Normalize a Space UUID (string | null) for use as a Space identifier.
- * Returns null for missing/whitespace-only inputs so callers can skip
- * space-scoped requests rather than passing an empty id.
- */
-export const normalizeSpaceId = (spaceId: string | null): string | null => {
-  if (spaceId === null || spaceId.trim() === '') return null
-  return spaceId
-}
-
 /** A Workspace's Safe account cap: `null` is unlimited, `undefined` is not known yet (loading or failed). */
 export type SafeLimit = number | null | undefined
 

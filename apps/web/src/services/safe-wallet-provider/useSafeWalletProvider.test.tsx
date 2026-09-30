@@ -191,7 +191,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
+          <Provider store={makeStore()}>
             <TxModalContext.Provider
               value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
             >
@@ -227,17 +227,14 @@ describe('useSafeWalletProvider', () => {
 
       const mockSetTxFlow = jest.fn()
 
-      const testStore = makeStore(
-        {
-          settings: {
-            signing: {
-              onChainSigning: false,
-              blindSigning: false,
-            },
+      const testStore = makeStore({
+        settings: {
+          signing: {
+            onChainSigning: false,
+            blindSigning: false,
           },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+        },
+      } as Partial<RootState>)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
@@ -288,7 +285,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
+          <Provider store={makeStore()}>
             <TxModalContext.Provider
               value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
             >
@@ -364,7 +361,7 @@ describe('useSafeWalletProvider', () => {
       const { result } = renderHook(() => useTxFlowApi('1', '0x1234567890000000000000000000000000000000'), {
         // TODO: Improve render/renderHook to allow custom wrappers within the "defaults"
         wrapper: ({ children }) => (
-          <Provider store={makeStore(undefined, { skipBroadcast: true })}>
+          <Provider store={makeStore()}>
             <TxModalContext.Provider
               value={{ txFlow: undefined, setTxFlow: mockSetTxFlow, setFullWidth: jest.fn() } as TxModalContextType}
             >
@@ -473,7 +470,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+      const store = makeStore({} as Partial<RootState>)
 
       mockWcPopupStore.setStore(true)
 
@@ -536,7 +533,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+      const store = makeStore({} as Partial<RootState>)
 
       const { result } = renderHook(() => useTxFlowApi('1', currentSafeAddress), {
         wrapper: ({ children }) => (
@@ -586,7 +583,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+      const store = makeStore({} as Partial<RootState>)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -646,7 +643,7 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore({} as Partial<RootState>, { skipBroadcast: true })
+      const store = makeStore({} as Partial<RootState>)
 
       const { result } = renderHook(() => useTxFlowApi('1', '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'), {
         wrapper: ({ children }) => (
@@ -718,25 +715,22 @@ describe('useSafeWalletProvider', () => {
         query: {},
       } as unknown as router.NextRouter)
 
-      const store = makeStore(
-        {
-          chains: {
-            data: [
-              {
-                chainId: '5',
-                shortName: 'gor',
-                chainName: 'Goerli',
-                zk: false,
-                beaconChainExplorerUriTemplate: {},
-              } as unknown as Chain,
-            ],
-            loading: false,
-            loaded: true,
-            error: undefined,
-          },
-        } as Partial<RootState>,
-        { skipBroadcast: true },
-      )
+      const store = makeStore({
+        chains: {
+          data: [
+            {
+              chainId: '5',
+              shortName: 'gor',
+              chainName: 'Goerli',
+              zk: false,
+              beaconChainExplorerUriTemplate: {},
+            } as unknown as Chain,
+          ],
+          loading: false,
+          loaded: true,
+          error: undefined,
+        },
+      } as Partial<RootState>)
 
       const { result } = renderHook(() => useTxFlowApi('5', safes[0].address), {
         wrapper: ({ children }) => (

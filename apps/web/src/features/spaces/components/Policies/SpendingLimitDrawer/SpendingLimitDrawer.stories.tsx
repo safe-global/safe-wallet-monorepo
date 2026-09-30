@@ -9,6 +9,7 @@ import {
   mockMissingMetadataPolicy,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
+  mockPendingRemoval,
   mockPendingUpdate,
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
@@ -89,6 +90,26 @@ export const PendingFullySigned: Story = {
 /** A queued edit: the current limits still apply until it executes. */
 export const PendingUpdate: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** A queued removal: the limit is still enforced until it executes. */
+export const PendingRemoval: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingRemoval(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** Executed while the panel was open; the indexer has not caught up yet, so nothing is left to do. */
+export const PendingExecuted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'executed' },
+}
+
+/** Another transaction took its nonce, so this one can never execute. */
+export const PendingReplaced: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'replaced' },
+}
+
+/** Deleted by its proposer while the panel was open. */
+export const PendingDeleted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
 }
 
 /** The module is configured but not enabled, so the limit governs nothing and cannot be managed. */

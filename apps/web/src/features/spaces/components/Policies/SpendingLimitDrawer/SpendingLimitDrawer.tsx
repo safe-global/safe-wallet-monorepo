@@ -4,14 +4,22 @@ import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '../utils/policyIcon'
 import { getPolicyLabel } from '../utils/policyLabel'
+import { AppRoutes } from '@/config/routes'
+import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { PendingBanner } from './components/PendingBanner'
 import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { getPolicyStatus, type PendingSpendingLimitPolicy } from '../types'
-import { resolveSpendingLimitDrawerState, type ActiveDrawerPolicy, type Viewer } from './resolveState'
+import { getPolicyStatus, type QueuedSpendingLimitPolicy } from '../types'
+import {
+  resolveSpendingLimitDrawerState,
+  type ActiveDrawerPolicy,
+  type PendingTxOutcome,
+  type Viewer,
+} from './resolveState'
 
 type SpendingLimitDrawerBaseProps = {
   open: boolean
@@ -31,9 +39,12 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
 }
 
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
-  policy: PendingSpendingLimitPolicy & { status: 'pending' }
-  transactionLink: string
-  onReviewTransaction: () => void
+  policy: QueuedSpendingLimitPolicy
+  transactionLink?: string
+  onReviewTransaction?: () => void
+  onRetry?: () => void
+  /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
+  outcome?: PendingTxOutcome
 }
 
 export type SpendingLimitDrawerProps = ActiveSpendingLimitDrawerProps | PendingSpendingLimitDrawerProps
@@ -44,29 +55,49 @@ const isPendingDrawer = (props: SpendingLimitDrawerProps): props is PendingSpend
 const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
   const { open, onClose, policy, viewer, safe, overview, names, onConnectWallet } = props
   const chain = useChain(policy.safe.chainId)
+  const spaceId = useUrlSpaceId()
   // Derived here rather than asked of the caller: the policy already carries the module and the chain.
   const enforcedByHref =
     chain && policy.enforcement.via === 'module'
       ? getBlockExplorerLink(chain, policy.enforcement.moduleAddress)?.href
       : undefined
 
-  const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account')
+  const outcome = isPendingDrawer(props) ? props.outcome : undefined
+  const state = resolveSpendingLimitDrawerState(policy, viewer, safe.name ?? 'this Safe account', outcome)
   const Icon = getPolicyIcon(policy.type)
-  const isPending = state.kind === 'pending'
+  // A queued transaction that left the queue is no longer pending; only an executed one is on its way.
+  const status = outcome ? (outcome === 'executed' ? 'activating' : null) : getPolicyStatus(policy)
   const actions = isPendingDrawer(props)
-    ? { pending: { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction } }
+    ? {
+        pending: {
+          transactionLink: props.transactionLink,
+          onReviewTransaction: props.onReviewTransaction,
+          onRetry: props.onRetry,
+        },
+      }
     : { onEdit: props.onEdit }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
-      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={getPolicyStatus(policy)} />
+      <PolicyDrawerHeader icon={Icon} title={getPolicyLabel(policy)} status={status} />
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
-          {isPending && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
-          {isPending && <PendingSignatures safe={safe} signed={state.signed} required={state.required} />}
+          {(state.kind === 'pending' || state.kind === 'closed') && (
+            <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
+          )}
+          {state.kind === 'pending' && (
+            <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
+          )}
           <SpendingLimits spenders={policy.data.spenders} names={names} showUsage={state.kind === 'active'} />
-          <PolicyOverview {...overview} appliesTo={safe} enforcedByHref={enforcedByHref} />
+          <PolicyOverview
+            {...overview}
+            appliesTo={{
+              ...safe,
+              href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
+            }}
+            enforcedByHref={enforcedByHref}
+          />
         </div>
       </DrawerBody>
 

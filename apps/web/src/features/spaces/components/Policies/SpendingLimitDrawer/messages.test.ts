@@ -1,4 +1,4 @@
-import { PENDING_BANNER_TITLE, connectHelper, executeLine, signAndExecuteLine, signedAndWaitingLine } from './copy'
+import { PENDING_BANNER_TITLE, connectHelper, executeLine, signAndExecuteLine, signedAndWaitingLine } from './messages'
 
 describe('pending banner copy', () => {
   it('tells a creating user the limit is not active yet', () => {

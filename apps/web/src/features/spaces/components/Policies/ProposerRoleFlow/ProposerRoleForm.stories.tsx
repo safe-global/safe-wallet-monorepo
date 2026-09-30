@@ -155,6 +155,14 @@ export const MultiChainAccount: Story = {
   },
 }
 
+/** A Workspace address book proposer brings its own name, so the name field is hidden. */
+export const WorkspaceContact: Story = {
+  args: {
+    safeAccount: treasury.id,
+    defaultValues: { proposer: SPACE_CONTACT },
+  },
+}
+
 export const AccountsLoading: Story = {
   args: { safeAccounts: { ...eligible, accounts: [], isLoading: true } },
 }

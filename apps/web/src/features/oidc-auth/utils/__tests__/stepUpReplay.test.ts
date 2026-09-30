@@ -159,7 +159,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
@@ -199,7 +199,7 @@ describe('replayStepUpAction', () => {
       http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({}, { status: 201 })),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     await store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
     await replayStepUpAction(store.dispatch, {
@@ -240,7 +240,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
       args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
@@ -279,7 +279,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
 
@@ -307,7 +307,7 @@ describe('replayStepUpAction', () => {
       ),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(stepUpReturning())
 
     await replayStepUpAction(store.dispatch, {

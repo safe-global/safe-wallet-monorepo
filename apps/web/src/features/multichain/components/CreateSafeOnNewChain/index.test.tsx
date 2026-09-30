@@ -45,10 +45,10 @@ const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
 const mockUseSpaceSafeLimit = useSpaceSafeLimit as jest.Mock
 const mockUseSpaceSafes = useSpaceSafesGetV1Query as jest.Mock
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
-const spaceReduxState = {
+const signedInState = {
   auth: {
     sessionExpiresAt: Date.now() + 60000,
-    lastUsedSpace: MOCK_SPACE_UUID,
+    landingSpaceHint: null as string | null,
     isStoreHydrated: true,
     cfSafeSynced: false,
     isOidcLoginPending: false,
@@ -70,7 +70,9 @@ const safeCreationData = {
   safeAccountConfig: { owners: ['0xabc'], threshold: 1 },
 } as unknown as ReplayedSafeProps
 
-const renderDialog = (onClose: () => void, initialReduxState?: typeof spaceReduxState) =>
+type RenderOptions = { initialReduxState?: typeof signedInState; urlSpaceId?: string }
+
+const renderDialog = (onClose: () => void, { initialReduxState, urlSpaceId }: RenderOptions = {}) =>
   render(
     <CreateSafeOnSpecificChain
       safeAddress={SAFE_ADDRESS}
@@ -80,8 +82,10 @@ const renderDialog = (onClose: () => void, initialReduxState?: typeof spaceRedux
       onClose={onClose}
       safeCreationResult={[safeCreationData, undefined, false]}
     />,
-    initialReduxState ? { initialReduxState } : undefined,
+    { initialReduxState, routerProps: urlSpaceId ? { query: { spaceId: urlSpaceId } } : {} },
   )
+
+const renderInSpace = () => renderDialog(jest.fn(), { initialReduxState: signedInState, urlSpaceId: MOCK_SPACE_UUID })
 
 describe('CreateSafeOnSpecificChain', () => {
   beforeEach(() => {
@@ -145,7 +149,7 @@ describe('CreateSafeOnSpecificChain', () => {
         currentData: { safes: { '1': ['0x0000000000000000000000000000000000009999'] } },
       })
 
-      renderDialog(jest.fn(), spaceReduxState)
+      renderInSpace()
 
       expect(screen.getByTestId('space-seat-limit-notice')).toHaveTextContent(
         'This Workspace is at its limit of 20 Safe accounts. The new network will be added in My accounts, outside the Workspace.',
@@ -162,7 +166,7 @@ describe('CreateSafeOnSpecificChain', () => {
     it('adds the new network to the Workspace when the Safe already holds a seat there on another chain', async () => {
       mockUseSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [SAFE_ADDRESS.toLowerCase()] } } })
 
-      renderDialog(jest.fn(), spaceReduxState)
+      renderInSpace()
 
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
 
@@ -175,9 +179,24 @@ describe('CreateSafeOnSpecificChain', () => {
     it('shows no notice to a member, whose Safes are never auto-added', () => {
       mockUseIsAdmin.mockReturnValue(false)
 
-      renderDialog(jest.fn(), spaceReduxState)
+      renderInSpace()
 
       expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
     })
+  })
+
+  it('ignores a Workspace stored by another tab when the URL has none', async () => {
+    // Earlier renders persist `auth`; hydration would otherwise replace the stored Workspace.
+    window.localStorage.clear()
+    mockUseIsAdmin.mockReturnValue(true)
+    mockPersist.mockResolvedValue({ ok: true })
+
+    renderDialog(jest.fn(), {
+      initialReduxState: { auth: { ...signedInState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
+    })
+
+    fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+    await waitFor(() => expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
   })
 })
