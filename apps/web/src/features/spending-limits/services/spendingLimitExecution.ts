@@ -1,10 +1,11 @@
+import uniqWith from 'lodash/uniqWith'
 import type { SpendingLimitState, NewSpendingLimitData, SpendingLimitTxParams } from '../types'
 import {
   getLatestSpendingLimitAddress,
   getDeployedSpendingLimitModuleAddress,
   getSpendingLimitContract,
 } from './spendingLimitContracts'
-import { distinctAddresses, isSpendingLimitFor } from './spendingLimitMatching'
+import { isSpendingLimitFor } from './spendingLimitMatching'
 import type { SpendingLimitEdit } from './spendingLimitEdit'
 import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import {
@@ -166,7 +167,10 @@ export const createSpendingLimitsTx = async (
     txs.push(await createEnableModuleMetaTx(sdk, chain, deployed, allowanceModule.address))
   }
 
-  for (const beneficiary of distinctAddresses(desired.map((allowance) => allowance.beneficiary))) {
+  for (const beneficiary of uniqWith(
+    desired.map((allowance) => allowance.beneficiary),
+    sameAddress,
+  )) {
     const isDelegate = existingSpendingLimits.some((limit) => sameAddress(limit.beneficiary, beneficiary))
     if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
   }
@@ -229,9 +233,10 @@ export const createSpendingLimitEditTx = async (
   // `addDelegate` returns silently for a delegate the module already knows, while `setAllowance`
   // reverts for one it does not. Registering every spender written to therefore costs one call and
   // survives a baseline that a transaction queued in the meantime has already made stale.
-  const txs: MetaTransactionData[] = distinctAddresses(writes.map((allowance) => allowance.beneficiary)).map(
-    (delegate) => createAddDelegateTx(delegate, address),
-  )
+  const txs: MetaTransactionData[] = uniqWith(
+    writes.map((allowance) => allowance.beneficiary),
+    sameAddress,
+  ).map((delegate) => createAddDelegateTx(delegate, address))
 
   for (const allowance of writes) {
     const existing = findExistingLimit(existingSpendingLimits, allowance)

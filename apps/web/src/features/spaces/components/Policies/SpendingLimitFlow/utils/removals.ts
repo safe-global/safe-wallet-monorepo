@@ -1,4 +1,5 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { isSpendingLimitFor } from '@/features/spending-limits/services'
 import type { SpendingLimitPolicyFormValues } from '../types'
@@ -39,8 +40,6 @@ export const findPendingRemovals = (
 /** The notice's two lines: what goes, and what that means before the transaction executes. */
 export type RemovalCopy = { title: string; description: string }
 
-const plural = (count: number, noun: string): string => `${count} ${noun}${count === 1 ? '' : 's'}`
-
 const STAYS_IN_FORCE = 'They can still be spent until this transaction is executed.'
 const POLICY_GOES = 'Executing it removes the spending limit from this Safe account entirely.'
 
@@ -53,11 +52,12 @@ const POLICY_GOES = 'Executing it removes the spending limit from this Safe acco
  * @returns The notice's title and description.
  */
 export const describeRemovals = (removals: PendingRemovals, isEmptyPolicy: boolean): RemovalCopy => {
-  const limits = plural(removals.limits, 'limit')
+  const { spenders, limits } = removals
+  const limitCopy = `${limits} limit${maybePlural(limits)}`
   const title =
-    removals.spenders.length > 0
-      ? `${plural(removals.spenders.length, 'spender')} and ${limits} will be removed`
-      : `${limits} will be removed`
+    spenders.length > 0
+      ? `${spenders.length} spender${maybePlural(spenders)} and ${limitCopy} will be removed`
+      : `${limitCopy} will be removed`
 
   return { title, description: isEmptyPolicy ? `${STAYS_IN_FORCE} ${POLICY_GOES}` : STAYS_IN_FORCE }
 }

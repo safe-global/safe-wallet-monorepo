@@ -43,14 +43,3 @@ export const isSameAllowance = (value: AllowanceValue, onChain: SpendingLimitSta
     Number(value.resetTime) === Number(onChain.resetTimeMin)
   )
 }
-
-/**
- * @param addresses - Addresses, possibly repeated and in mixed casing.
- * @returns One entry per distinct address, keeping the first spelling seen, so `0xAb…` and `0xab…`
- *   count as one delegate and the batch never registers the same spender twice.
- */
-export const distinctAddresses = (addresses: readonly string[]): string[] =>
-  addresses.reduce<string[]>(
-    (unique, address) => (unique.some((known) => sameAddress(known, address)) ? unique : [...unique, address]),
-    [],
-  )

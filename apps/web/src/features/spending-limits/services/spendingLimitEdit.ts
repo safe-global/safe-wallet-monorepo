@@ -1,7 +1,8 @@
+import uniqWith from 'lodash/uniqWith'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SpendingLimitState } from '../types'
 import type { DesiredAllowance } from './spendingLimitExecution'
-import { distinctAddresses, isSameAllowance, isSpendingLimitFor } from './spendingLimitMatching'
+import { isSameAllowance, isSpendingLimitFor } from './spendingLimitMatching'
 
 /**
  * The AllowanceModule stores two separate things per Safe: an allowance filed under
@@ -75,8 +76,14 @@ export const buildSpendingLimitEdit = (
 
   // A spender is registered once however many tokens they hold limits for, so the delegate diff is
   // taken over the distinct addresses on each side rather than over the rows.
-  const desiredDelegates = distinctAddresses(desired.map((allowance) => allowance.beneficiary))
-  const onChainDelegates = distinctAddresses(onChain.map((limit) => limit.beneficiary))
+  const desiredDelegates = uniqWith(
+    desired.map((allowance) => allowance.beneficiary),
+    sameAddress,
+  )
+  const onChainDelegates = uniqWith(
+    onChain.map((limit) => limit.beneficiary),
+    sameAddress,
+  )
 
   return {
     added,
