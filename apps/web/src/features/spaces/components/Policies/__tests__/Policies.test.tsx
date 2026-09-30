@@ -323,7 +323,7 @@ describe('Policies', () => {
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
       expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
-      expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
     })
   })
 

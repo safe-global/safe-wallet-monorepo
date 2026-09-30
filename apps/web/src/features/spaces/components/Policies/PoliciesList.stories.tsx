@@ -74,7 +74,7 @@ export const NoSearchResults: Story = {
   args: { policies: mockPolicies() },
   play: async ({ canvasElement }) => {
     const { userEvent, within } = await import('storybook/test')
-    const search = within(canvasElement).getByPlaceholderText('by name, address or network')
+    const search = within(canvasElement).getByPlaceholderText('Search')
     await userEvent.type(search, 'zzzz')
   },
 }
