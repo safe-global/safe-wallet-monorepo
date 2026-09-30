@@ -1,5 +1,20 @@
-import { render } from '@testing-library/react'
-import { TxCardActions } from './index'
+import { render, screen } from '@testing-library/react'
+import TxCard, { TxCardActions } from './index'
+
+describe('TxCard', () => {
+  it('should, by default, use the standard content padding only', () => {
+    render(<TxCard>content</TxCard>)
+
+    expect(screen.getByTestId('card-content')).toHaveClass('cardContent')
+    expect(screen.getByTestId('card-content')).not.toHaveClass('cardContentCompactBottom')
+  })
+
+  it('should, with compactBottom content padding, add the compact bottom padding class', () => {
+    render(<TxCard contentPadding="compactBottom">content</TxCard>)
+
+    expect(screen.getByTestId('card-content')).toHaveClass('cardContent', 'cardContentCompactBottom')
+  })
+})
 
 describe('TxCardActions', () => {
   it('accepts an explicit spacing override for review flows', () => {

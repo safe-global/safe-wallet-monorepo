@@ -34,6 +34,8 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isSmartContractWallet } from '@/utils/wallets'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -50,6 +52,7 @@ export type TxFlowContextType<T extends unknown = any> = {
     hideNonce?: boolean
     fixedNonce?: boolean
     hideProgress?: boolean
+    hideBack?: boolean
     isReplacement?: boolean
     isMessage?: boolean
   }
@@ -67,6 +70,8 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecute: boolean
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
+  willSignBeforeExecute: boolean
+  continueToExecute: (txId: string) => void
 
   isSubmitLoading: boolean
   setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
@@ -108,6 +113,8 @@ export const initialContext: TxFlowContextType = {
   canExecute: false,
   shouldExecute: false,
   setShouldExecute: () => {},
+  willSignBeforeExecute: false,
+  continueToExecute: () => {},
 
   isSubmitLoading: false,
   setIsSubmitLoading: () => {},
@@ -143,6 +150,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
   isBatchable?: TxFlowContextType['isBatchable']
+  onContinueToExecute?: (txId: string) => void
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -152,7 +160,7 @@ const TxFlowProvider = <T extends unknown>({
   nextStep,
   prevStep,
   progress = 0,
-  txId,
+  txId: initialTxId,
   txNonce,
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
@@ -160,6 +168,7 @@ const TxFlowProvider = <T extends unknown>({
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
   isBatchable = initialContext.isBatchable,
+  onContinueToExecute,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -177,11 +186,13 @@ const TxFlowProvider = <T extends unknown>({
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [signedTxId, setSignedTxId] = useState<string>()
+  const txId = initialTxId ?? signedTxId
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
 
-  const isCreation = !txId
+  const isCreation = !initialTxId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
 
   const isProposing = !!isProposer && !isSafeOwner && isCreation
@@ -200,6 +211,33 @@ const TxFlowProvider = <T extends unknown>({
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
+
+  // Smart-contract signers cannot sign off-chain, so they keep the implicit executor approval path
+  const signerChainId = signer?.chainId
+  const signerAddress = signer?.address
+  const [isSmartContractSigner = false] = useAsync(
+    () =>
+      signerChainId && signerAddress && !signer?.isSafe
+        ? isSmartContractWallet(signerChainId, signerAddress)
+        : undefined,
+    [signerChainId, signerAddress, signer?.isSafe],
+  )
+  const willSignBeforeExecute =
+    safe.threshold === 1 &&
+    canExecute &&
+    !isProposing &&
+    !!safeTx &&
+    safeTx.signatures.size === 0 &&
+    !signer?.isSafe &&
+    !isSmartContractSigner
+
+  const continueToExecute = useCallback(
+    (txId: string) => {
+      setSignedTxId(txId)
+      onContinueToExecute?.(txId)
+    },
+    [onContinueToExecute],
+  )
 
   const updateTxLayoutProps = useCallback((props: TxFlowContextType['txLayoutProps']) => {
     setTxLayoutProps({ ...defaultTxLayoutProps, ...props })
@@ -268,6 +306,8 @@ const TxFlowProvider = <T extends unknown>({
     willExecute,
     shouldExecute,
     setShouldExecute,
+    willSignBeforeExecute,
+    continueToExecute,
 
     isSubmitLoading,
     setIsSubmitLoading,

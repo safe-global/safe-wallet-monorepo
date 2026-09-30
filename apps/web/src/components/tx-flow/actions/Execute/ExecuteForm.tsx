@@ -1,6 +1,6 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
-import { type ReactElement, type SyntheticEvent, useContext, useState, useEffect } from 'react'
+import { type ReactElement, type ReactNode, type SyntheticEvent, useContext, useState, useEffect } from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
@@ -61,6 +61,7 @@ export const ExecuteForm = ({
   txActions,
   tooltip,
   txSecurity,
+  secondaryAction,
 }: SlotComponentProps<SlotName.ComboSubmit> & {
   txId?: string
   disableSubmit?: boolean
@@ -73,6 +74,7 @@ export const ExecuteForm = ({
   isCreation?: boolean
   safeTx?: SafeTransaction
   tooltip?: string
+  secondaryAction?: ReactNode
 }): ReactElement => {
   // Hooks
   const currentChain = useCurrentChain()
@@ -348,44 +350,48 @@ export const ExecuteForm = ({
           </div>
         </ModalDialog>
 
-        <div className="pt-6">
+        <div className="py-6">
           <Separator bleed="6" />
         </div>
 
-        <TxCardActions>
-          {/* Submit button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-            {(isOk) =>
-              tooltip ? (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <div>
-                        <SplitMenuButton
-                          selected={slotId}
-                          onChange={({ id }) => onChange?.(id)}
-                          options={options}
-                          disabled={!isOk || submitDisabled}
-                          loading={isSubmitLoading}
-                          tooltip={tooltip}
-                        />
-                      </div>
-                    }
+        <TxCardActions className={secondaryAction ? '[&>div]:w-full [&>div]:justify-between' : undefined}>
+          {secondaryAction}
+
+          {/* Shrink-wraps the split button so a full-width row keeps it at content width */}
+          <div>
+            <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
+              {(isOk) =>
+                tooltip ? (
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <div>
+                          <SplitMenuButton
+                            selected={slotId}
+                            onChange={({ id }) => onChange?.(id)}
+                            options={options}
+                            disabled={!isOk || submitDisabled}
+                            loading={isSubmitLoading}
+                            tooltip={tooltip}
+                          />
+                        </div>
+                      }
+                    />
+                    <TooltipContent side="top">{tooltip}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <SplitMenuButton
+                    selected={slotId}
+                    onChange={({ id }) => onChange?.(id)}
+                    options={options}
+                    disabled={!isOk || submitDisabled}
+                    loading={isSubmitLoading}
+                    tooltip={tooltip}
                   />
-                  <TooltipContent side="top">{tooltip}</TooltipContent>
-                </Tooltip>
-              ) : (
-                <SplitMenuButton
-                  selected={slotId}
-                  onChange={({ id }) => onChange?.(id)}
-                  options={options}
-                  disabled={!isOk || submitDisabled}
-                  loading={isSubmitLoading}
-                  tooltip={tooltip}
-                />
-              )
-            }
-          </CheckWallet>
+                )
+              }
+            </CheckWallet>
+          </div>
         </TxCardActions>
       </form>
     </>

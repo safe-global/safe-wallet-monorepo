@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useState, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
@@ -6,6 +6,7 @@ import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
+import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
@@ -58,11 +59,12 @@ export const TxFlow = <T extends unknown>({
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
 
   const childrenArray = Array.isArray(children) ? children : [children]
+  const [signedTxId, setSignedTxId] = useState<string>()
+  // A queued tx the wallet can only execute is already fully signed, so it skips the signing receipt
+  const isReadyToExecute = !!txId && !!onlyExecute && !!isExecutable
+  const stepCount = childrenArray.length + (signedTxId ? 3 : 2)
 
-  const progress = useMemo(
-    () => Math.round(((step + 1) / (childrenArray.length + 2)) * 100),
-    [step, childrenArray.length],
-  )
+  const progress = useMemo(() => Math.round(((step + 1) / stepCount) * 100), [step, stepCount])
 
   const trackTimeSpent = useTrackTimeSpent()
 
@@ -72,6 +74,14 @@ export const TxFlow = <T extends unknown>({
       trackTimeSpent()
     },
     [onSubmit, data, trackTimeSpent],
+  )
+
+  const handleContinueToExecute = useCallback(
+    (txId: string) => {
+      setSignedTxId(txId)
+      nextStep()
+    },
+    [nextStep],
   )
 
   return (
@@ -93,6 +103,7 @@ export const TxFlow = <T extends unknown>({
               isRejection={isRejection}
               isBatch={isBatch}
               isBatchable={isBatchable}
+              onContinueToExecute={handleContinueToExecute}
             >
               <TxFlowContent>
                 {...childrenArray}
@@ -106,18 +117,24 @@ export const TxFlow = <T extends unknown>({
                   <RiskConfirmation />
                 </ReviewTransactionComponent>
 
-                <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                  <Counterfactual />
+                {isReadyToExecute ? (
+                  <ExecuteTxStep />
+                ) : (
+                  <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                    <Counterfactual />
 
-                  <ComboSubmit>
-                    <Sign />
-                    <Execute />
-                    <ExecuteThroughRole />
-                    <Batching />
-                  </ComboSubmit>
+                    <ComboSubmit>
+                      <Sign />
+                      <Execute />
+                      <ExecuteThroughRole />
+                      <Batching />
+                    </ComboSubmit>
 
-                  <Propose />
-                </ConfirmTxReceipt>
+                    <Propose />
+                  </ConfirmTxReceipt>
+                )}
+
+                {signedTxId && <ExecuteTxStep afterSigning />}
               </TxFlowContent>
               <LedgerHashComparison />
             </TxFlowProvider>
