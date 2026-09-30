@@ -107,10 +107,7 @@ describe('ApprovalValueField', () => {
     await waitFor(() => expect(input).toHaveValue(PSEUDO_APPROVAL_VALUES.UNLIMITED))
   })
 
-  // Regression: Base UI's default filter treats the typed amount as a search query. It matches no
-  // preset, so the list empties while the popup stays open — `overflow: hidden` collapses it to
-  // height 0 and only its ring paints, as a hairline under the input, while the input keeps
-  // announcing an expanded listbox with nothing in it.
+  // Regression: the typed amount used to filter the preset out, leaving an expanded empty listbox.
   it('keeps the preset listed after typing an amount that matches no preset', async () => {
     const user = userEvent.setup()
     render(<Harness approval={buildApproval()} />)
@@ -144,8 +141,7 @@ describe('ApprovalValueField', () => {
     await waitFor(() => expect(input).toHaveValue(PSEUDO_APPROVAL_VALUES.UNLIMITED))
   })
 
-  // The editor is forced read-only for ERC-721 approvals today, so this label is unreachable in the
-  // app. It is pinned so that relaxing that gate cannot silently ship the ERC-20 wording.
+  // Unreachable today: the editor is forced read-only for ERC-721, so relaxing that gate can't ship silently.
   it('labels an ERC-721 approval as a transfer permission', () => {
     render(
       <Harness

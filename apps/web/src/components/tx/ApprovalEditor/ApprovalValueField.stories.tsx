@@ -56,11 +56,7 @@ const meta: Meta<typeof ApprovalHarness> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-/**
- * Editable allowance. The trigger opens a single preset — "Unlimited amount" — which stays listed
- * even once an amount is typed, because filtering is disabled. Base UI's default filter would treat
- * the amount as a search query and leave the popup open around an empty list.
- */
+/** Editable allowance. The "Unlimited amount" preset stays listed even once an amount is typed. */
 export const Editable: Story = {
   args: { amount: '420.0' },
 }
