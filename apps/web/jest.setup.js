@@ -58,9 +58,6 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
 
 // jest-fixed-jsdom exposes Node's BroadcastChannel, whose open port (from makeStore) keeps Jest from exiting
 globalThis.BroadcastChannel = class BroadcastChannel {
-  constructor(name) {
-    this.name = name
-  }
   postMessage() {}
   addEventListener() {}
   removeEventListener() {}
