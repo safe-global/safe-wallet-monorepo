@@ -67,6 +67,20 @@ describe('PaginatedDataTable', () => {
     })
   })
 
+  it('pins a fit column to its minWidth and leaves unsized columns to share the rest', () => {
+    const sizedColumns: DataTableColumn<string>[] = [
+      { id: 'fit', header: 'Fit', width: 'fit', minWidth: 140, cell: (row) => row },
+      { id: 'fill', header: 'Fill', minWidth: 200, cell: (row) => row },
+    ]
+
+    render(<PaginatedDataTable columns={sizedColumns} rows={['a']} getRowKey={(row) => row} />)
+
+    const fitHeader = screen.getByRole('columnheader', { name: 'Fit' })
+    expect(fitHeader).toHaveClass('md:w-[var(--col-min-w)]')
+    expect(fitHeader.style.getPropertyValue('--col-min-w')).toBe('140px')
+    expect(screen.getByRole('columnheader', { name: 'Fill' }).className).not.toMatch(/md:w-/)
+  })
+
   it('renders every row and no pagination when below the page size', () => {
     render(tableElement(['a', 'b', 'c']))
 

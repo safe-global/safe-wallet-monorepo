@@ -7,6 +7,8 @@ import {
   mockPendingPolicy,
   mockUnenforcedPolicy,
 } from '../../mocks/policies'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import type { DrawerPolicy, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
@@ -48,6 +50,10 @@ const setup = (
 }
 
 describe('SpendingLimitDrawer', () => {
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('titles itself from the policy type rather than a stored name', () => {
     setup()
 
@@ -141,6 +147,25 @@ describe('SpendingLimitDrawer', () => {
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
+  })
+
+  it("links the Safe account to that Safe's settings page", () => {
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chainBuilder().with({ chainId: '1', shortName: 'eth' }).build())
+
+    setup()
+
+    expect(screen.getByRole('link', { name: MOCK_SAFE_NAME })).toHaveAttribute(
+      'href',
+      `/settings/setup?safe=eth%3A${SAFE_ADDRESS}`,
+    )
+  })
+
+  it('leaves the Safe account unlinked when its chain is unknown', () => {
+    jest.spyOn(useChains, 'useChain').mockReturnValue(undefined)
+
+    setup()
+
+    expect(screen.queryByRole('link', { name: MOCK_SAFE_NAME })).not.toBeInTheDocument()
   })
 
   describe('a signer who has already signed', () => {

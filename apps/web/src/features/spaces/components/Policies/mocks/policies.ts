@@ -148,7 +148,9 @@ export const mockProposerPolicy = (overrides: Partial<ProposerPolicy> = {}): Pro
   ...overrides,
 })
 
-export const mockPendingPolicy = (overrides: Partial<PendingSpendingLimitPolicy> = {}): PendingSpendingLimitPolicy => ({
+type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+
+export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> = {}): QueuedSpendingLimitPolicy => ({
   ...mockSpendingLimitPolicy({ id: '0xspending-limit-pending', safe: MOCK_SAFES.payroll }),
   status: 'pending',
   operation: 'create',
@@ -156,10 +158,16 @@ export const mockPendingPolicy = (overrides: Partial<PendingSpendingLimitPolicy>
   nonce: 42,
   confirmationsSubmitted: 1,
   confirmationsRequired: 2,
-  missingSigners: [MOCK_ADDRESSES.bob],
   proposedAt: 1_781_300_000,
-  supersedesId: null,
   ...overrides,
+})
+
+/** Executed onchain, not yet reported by the indexer. */
+export const mockActivatingPolicy = (
+  overrides: Partial<QueuedSpendingLimitPolicy> = {},
+): PendingSpendingLimitPolicy => ({
+  ...mockPendingPolicy(overrides),
+  status: 'activating',
 })
 
 export const asActivePolicy = <T extends ActivePolicy>(policy: T): T & { status: 'active' } => ({
@@ -196,27 +204,24 @@ export const MOCK_SAFE_NAME = 'Treasury'
 export const mockActiveSpendingLimit = (): SpendingLimitPolicy & { status: 'active' } =>
   asActivePolicy(mockSpendingLimitPolicy())
 
-export const mockPendingRemoval = (): PendingSpendingLimitPolicy =>
+export const mockPendingRemoval = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-remove',
     operation: 'remove',
-    supersedesId: '0xspending-limit-treasury',
   })
 
-export const mockPendingUpdate = (): PendingSpendingLimitPolicy =>
+export const mockPendingUpdate = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-update',
     operation: 'update',
-    supersedesId: '0xspending-limit-treasury',
   })
 
 /** Every signature collected; the transaction is waiting only for execution. */
-export const mockFullySignedPending = (): PendingSpendingLimitPolicy =>
+export const mockFullySignedPending = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-full',
     confirmationsSubmitted: 2,
     confirmationsRequired: 2,
-    missingSigners: [],
   })
 
 /** A token CGW has no logo for — the row falls back to the symbol. */

@@ -1,6 +1,8 @@
 import {
+  MOCK_ADDRESSES,
   asActivePolicy,
   mockMultiSpenderPolicy,
+  mockPendingRemoval,
   mockProposerPolicy,
   mockRecoveryPolicy,
   mockSpendingLimitPolicy,
@@ -91,5 +93,16 @@ describe('getPolicySummary', () => {
 
   it('should, when the policy is a proposer grant, summarise it as never expiring', () => {
     expect(getPolicySummary(asActivePolicy(mockProposerPolicy()))).toBe('Never expires')
+  })
+
+  it('should, when a removal is queued, say the limit is being removed rather than gone', () => {
+    expect(getPolicySummary(mockPendingRemoval())).toMatch(/^Removing /)
+  })
+
+  it('should, when a queued removal drops a spender with no limits, name the spender count', () => {
+    const removal = mockPendingRemoval()
+    removal.data = { spenders: [{ spender: MOCK_ADDRESSES.alice, allowances: [] }] }
+
+    expect(getPolicySummary(removal)).toBe('Removing 1 spender')
   })
 })

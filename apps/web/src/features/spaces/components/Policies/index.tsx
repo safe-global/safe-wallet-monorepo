@@ -1,7 +1,5 @@
 import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
-import ExternalLink from '@/components/common/ExternalLink'
 import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
@@ -62,8 +60,6 @@ const Policies = ({
   onSelectPolicy,
   locked,
 }: PoliciesProps): ReactElement => {
-  const isSettled = !isLoading && !isError
-
   const [hasSeenSpendingLimitIntro = false, setHasSeenSpendingLimitIntro] =
     useLocalStorage<boolean>(SPENDING_LIMIT_INTRO_SEEN_KEY)
   const [isSpendingLimitIntroOpen, setIsSpendingLimitIntroOpen] = useState(false)
@@ -178,16 +174,6 @@ const Policies = ({
         <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
           Policies
         </Typography>
-
-        {isSettled && (
-          <Typography variant="paragraph-medium">
-            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-            automatically.{' '}
-            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-              Learn more
-            </ExternalLink>
-          </Typography>
-        )}
       </div>
 
       {isLoading ? (

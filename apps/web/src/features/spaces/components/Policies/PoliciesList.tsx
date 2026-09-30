@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import TableCard from '@/components/common/TableCard'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
+import LimitedActionsHint from './components/LimitedActionsHint'
 import PoliciesTable from './PoliciesTable'
 import { PoliciesNoSearchResults } from './PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
@@ -29,13 +30,14 @@ export type PoliciesListProps = {
   /** Opens the create-policy flow. The caller is responsible for requiring a connected wallet. */
   onAddPolicy?: () => void
   onSelectPolicy?: (policy: Policy) => void
+  hasLimitedActions?: boolean
 }
 
 /**
  * The Policies page once the space has policies: an Add policy button, a search field, a sort
  * control and the table. Search and sort run in the browser over the policies the caller passes.
  */
-const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListProps) => {
+const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy, hasLimitedActions = true }: PoliciesListProps) => {
   const [query, setQuery] = useState('')
   const [sort, setSort] = useState<PolicySortOption | null>(null)
   const [typeFilter, setTypeFilter] = useState<PolicyType | null>(null)
@@ -67,7 +69,7 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
     <div className="flex flex-col gap-4" data-testid="policies-list">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <Button onClick={onAddPolicy} className="shrink-0" data-testid="add-policy-button">
-          <Plus className="size-4" aria-hidden />
+          <Plus className="size-4 text-green-500" aria-hidden />
           Add policy
         </Button>
 
@@ -106,28 +108,36 @@ const PoliciesList = ({ policies, onAddPolicy, onSelectPolicy }: PoliciesListPro
         </Select>
       </div>
 
-      <div className="flex items-center gap-2" role="group" aria-label="Filter by policy type">
-        <span className="text-sm text-muted-foreground">Filter by:</span>
-        {POLICY_TYPE_FILTERS.map(({ type, label }) => {
-          const isSelected = typeFilter === type
-          const count = matches.filter((policy) => policy.type === type).length
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2" role="group" aria-label="Filter by policy type">
+          <span className="text-sm text-muted-foreground">Filter by:</span>
+          {POLICY_TYPE_FILTERS.map(({ type, label }) => {
+            const isSelected = typeFilter === type
+            const count = matches.filter((policy) => policy.type === type).length
 
-          return (
-            <Badge
-              key={type}
-              variant={isSelected ? 'default' : 'card'}
-              size="chip"
-              render={<button type="button" />}
-              aria-pressed={isSelected}
-              onClick={() => setTypeFilter(isSelected ? null : type)}
-              className="cursor-pointer"
-              data-testid={`policies-filter-${type}`}
-            >
-              {label}
-              <span className={isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'}>{count}</span>
-            </Badge>
-          )
-        })}
+            return (
+              <Badge
+                key={type}
+                variant={isSelected ? 'default' : 'card'}
+                size="chip"
+                render={<button type="button" />}
+                aria-pressed={isSelected}
+                onClick={() => setTypeFilter(isSelected ? null : type)}
+                className="cursor-pointer"
+                data-testid={`policies-filter-${type}`}
+              >
+                {label}
+                <span className={isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'}>{count}</span>
+              </Badge>
+            )
+          })}
+        </div>
+
+        {hasLimitedActions && (
+          <div className="ml-auto">
+            <LimitedActionsHint />
+          </div>
+        )}
       </div>
 
       <TableCard>{renderTable()}</TableCard>

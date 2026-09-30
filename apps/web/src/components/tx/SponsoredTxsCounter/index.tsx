@@ -1,10 +1,12 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
 export const _formatResetsAt = (iso: string | null): string | null => {
@@ -30,6 +32,7 @@ const SponsoredTxsCounter = ({
 }: {
   /** Null reads as unlimited. */
   left: number | null
+  /** The plan's allowance per cycle on a Pro Safe, the free daily limit otherwise. */
   quota: number | null
   resetsAt: string | null
   isPro: boolean
@@ -49,7 +52,25 @@ const SponsoredTxsCounter = ({
             <span className="text-muted-foreground"> of {quota} sponsored transactions left</span>
           </span>
         ) : (
-          <span data-testid="sponsored-txs-left">{left} sponsored transactions left</span>
+          <span className="inline-flex items-center gap-1">
+            <span data-testid="sponsored-txs-left">
+              <span className="font-semibold">{left}</span> free transactions left today
+            </span>
+            {quota !== null && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <span className="leading-none" data-testid="sponsored-txs-info">
+                      <Info className="size-4 text-muted-foreground" />
+                    </span>
+                  }
+                />
+                <TooltipContent>
+                  {quota} transaction{maybePlural(quota)} per day for free
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </span>
         )}
         {resets && <span className="text-xs text-muted-foreground">· Resets {resets}</span>}
       </Typography>

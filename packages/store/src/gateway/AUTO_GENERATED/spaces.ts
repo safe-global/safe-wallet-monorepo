@@ -212,6 +212,19 @@ const injectedRtkApi = api
         }),
         providesTags: ['spaces'],
       }),
+      spacePoliciesGetPendingPoliciesV1: build.query<
+        SpacePoliciesGetPendingPoliciesV1ApiResponse,
+        SpacePoliciesGetPendingPoliciesV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/policies/pending`,
+          params: {
+            types: queryArg.types,
+            safes: queryArg.safes,
+          },
+        }),
+        providesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -408,6 +421,15 @@ export type SpacePoliciesGetActivePoliciesV1ApiArg = {
   types: string[]
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string
+}
+export type SpacePoliciesGetPendingPoliciesV1ApiResponse = /** status 200  */ PendingPolicyDto[]
+export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
+  /** Space UUID */
+  spaceId: string
+  /** The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none. */
+  types: string[]
+  /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
+  safes?: string[]
 }
 export type SpaceAddressBookItemDto = {
   name: string
@@ -676,6 +698,10 @@ export type SpendingLimitAllowanceDto = {
   resetBoundaryIsExact: boolean
   /** False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added */
   isDelegateActive: boolean
+  /** Unix seconds this allowance was (re-)established */
+  createdAt: number
+  /** Unix seconds of the last event that changed this allowance */
+  updatedAt: number
 }
 export type SpendingLimitSpenderDto = {
   /** Name resolved by the client, never carried here */
@@ -734,6 +760,81 @@ export type ActivePolicyDto = {
   /** The Safe the policy is in effect on */
   safe: SafeRefDto
 }
+export type EnableModuleChangeDto = {
+  kind: 'enable-module'
+}
+export type AddDelegateChangeDto = {
+  kind: 'add-delegate'
+  /** The address being added as a delegate in AllowanceModule contract */
+  delegate: string
+}
+export type RemoveDelegateChangeDto = {
+  kind: 'remove-delegate'
+  /** The delegate being removed */
+  delegate: string
+  /** Whether the delegate's allowances are deleted along with it */
+  removeAllowances: boolean
+}
+export type SetAllowanceChangeDto = {
+  kind: 'set-allowance'
+  delegate: string
+  /** The token the limit applies to; zero address for native */
+  token: string
+  /** Per-window ceiling, in base units */
+  amount: string
+  /** Window length in minutes; 0 never resets */
+  resetPeriodMinutes: number
+}
+export type ResetAllowanceChangeDto = {
+  kind: 'reset-allowance'
+  delegate: string
+  token: string
+}
+export type DeleteAllowanceChangeDto = {
+  kind: 'delete-allowance'
+  delegate: string
+  token: string
+}
+export type PendingSpendingLimitDataDto = {
+  /** The AllowanceModule deployment holding this state */
+  module: string
+  /** The AllowanceModule calls this transaction decodes to */
+  changes: (
+    | ({
+        kind: 'enable-module'
+      } & EnableModuleChangeDto)
+    | ({
+        kind: 'add-delegate'
+      } & AddDelegateChangeDto)
+    | ({
+        kind: 'remove-delegate'
+      } & RemoveDelegateChangeDto)
+    | ({
+        kind: 'set-allowance'
+      } & SetAllowanceChangeDto)
+    | ({
+        kind: 'reset-allowance'
+      } & ResetAllowanceChangeDto)
+    | ({
+        kind: 'delete-allowance'
+      } & DeleteAllowanceChangeDto)
+  )[]
+}
+export type PendingPolicyDto = {
+  kind: 'queued-transaction'
+  type: 'spending-limit'
+  enforcement: ModuleEnforcementDto
+  /** The queued transaction this change was found in */
+  safeTxHash: string
+  nonce: number
+  confirmations: number
+  confirmationsRequired: number
+  /** Unix seconds the transaction was proposed at */
+  proposedAt: number
+  data: PendingSpendingLimitDataDto
+  /** The Safe the change is queued on */
+  safe: SafeRefDto
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -775,4 +876,6 @@ export const {
   useLazySpaceCounterfactualSafesGetV1Query,
   useSpacePoliciesGetActivePoliciesV1Query,
   useLazySpacePoliciesGetActivePoliciesV1Query,
+  useSpacePoliciesGetPendingPoliciesV1Query,
+  useLazySpacePoliciesGetPendingPoliciesV1Query,
 } = injectedRtkApi
