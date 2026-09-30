@@ -1,13 +1,15 @@
 import type { ReactElement } from 'react'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
-import { EDIT_UNAVAILABLE_HELPER } from '../../copy'
+import { EDIT_UNAVAILABLE_HELPER, TX_LOAD_FAILED_HELPER } from '../../copy'
 import type { SpendingLimitDrawerState } from '../../resolveState'
 import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
-  transactionLink: string
+  transactionLink?: string
   /** Absent until the queued transaction has loaded: the flow needs its summary. */
   onReviewTransaction?: () => void
+  /** Set when the queued transaction failed to load. */
+  onRetry?: () => void
 }
 
 export type SpendingLimitActionsProps = {
@@ -39,6 +41,10 @@ const SpendingLimitActions = ({
       )
 
     case 'review':
+      if (pending?.onRetry) {
+        return <PolicyDrawerActions actionLabel="Try again" onClick={pending.onRetry} hint={TX_LOAD_FAILED_HELPER} />
+      }
+
       return pending ? (
         <PolicyDrawerActions
           actionLabel="Review transaction"
@@ -48,7 +54,7 @@ const SpendingLimitActions = ({
       ) : null
 
     case 'copy-link':
-      return pending ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
+      return pending?.transactionLink ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
 
     case 'none':
       return null

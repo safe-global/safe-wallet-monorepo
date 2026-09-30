@@ -106,13 +106,51 @@ describe('usePendingPolicyTransaction', () => {
     expect(result.current.outcome).toBe('deleted')
   })
 
-  it('does not call a transaction gone when the request merely failed', () => {
-    mockQuery({ error: { status: 500, data: {} } })
+  it('does not call a transaction gone when the request merely failed, and offers a retry', () => {
+    const refetch = jest.fn()
+    mockQuery({ error: { status: 500, data: {} }, refetch })
     const { result } = renderHook(() => usePendingPolicyTransaction(policy))
 
     expect(result.current.outcome).toBeUndefined()
     expect(result.current.txSummary).toBeUndefined()
     expect(result.current.confirmedBy).toEqual([])
+    result.current.onRetry?.()
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('offers no retry while the transaction is still loading', () => {
+    mockQuery({})
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.onRetry).toBeUndefined()
+  })
+
+  it('stops polling and listening for tx events once the transaction has left the queue', () => {
+    const refetch = jest.fn()
+    mockQuery({ currentData: details({ txStatus: 'SUCCESS' }), refetch })
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(mockUseQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0, refetchOnFocus: false }),
+    )
+    act(() => {
+      txDispatch(TxEvent.SIGNATURE_PROPOSED, { txId: getPendingTxId(policy) } as never)
+    })
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
+  it('refetches at once when its row leaves the pending list', () => {
+    const refetch = jest.fn()
+    mockQuery({ currentData: details(), refetch })
+    const { rerender } = renderHook(({ hasLeftQueue }) => usePendingPolicyTransaction(policy, hasLeftQueue), {
+      initialProps: { hasLeftQueue: false },
+    })
+    expect(refetch).not.toHaveBeenCalled()
+
+    rerender({ hasLeftQueue: true })
+
+    expect(refetch).toHaveBeenCalledTimes(1)
   })
 
   it.each([

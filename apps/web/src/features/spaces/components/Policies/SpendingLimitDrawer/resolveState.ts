@@ -1,4 +1,9 @@
-import type { PendingPolicyOperation, PendingSpendingLimitPolicy, SpendingLimitPolicy } from '../types'
+import type {
+  PendingPolicyOperation,
+  PendingSpendingLimitPolicy,
+  QueuedSpendingLimitPolicy,
+  SpendingLimitPolicy,
+} from '../types'
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
@@ -16,6 +21,7 @@ import {
 export type Viewer = {
   address?: string
   isSigner: boolean
+  /** Undefined while unknown, as before the queued transaction has loaded. */
   hasSigned?: boolean
 }
 
@@ -63,7 +69,7 @@ export type SpendingLimitDrawerState =
 
 export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 
-export type DrawerPolicy = ActiveDrawerPolicy | (PendingSpendingLimitPolicy & { status: 'pending' })
+export type DrawerPolicy = ActiveDrawerPolicy | QueuedSpendingLimitPolicy
 
 /** A module that is present but not enabled enforces nothing, so no wallet makes this limit manageable. */
 const resolveUnenforced = (): UnenforcedDrawerState => ({
@@ -99,6 +105,8 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
   }
 
   if (!viewer.isSigner) return { ...base, action: 'copy-link' }
+
+  if (viewer.hasSigned === undefined) return { ...base, action: 'review' }
 
   if (viewer.hasSigned) {
     const missing = policy.confirmationsRequired - policy.confirmationsSubmitted

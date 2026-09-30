@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
 import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
@@ -184,7 +185,29 @@ describe('useSpacePolicies', () => {
 
     expect(mockPendingQuery).toHaveBeenCalledWith(
       { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES },
-      { skip: false, ...SPACE_REFRESH_OPTIONS },
+      { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
+    )
+  })
+
+  it('should, while a queued change has all its signatures, poll for it leaving the queue', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto({ confirmations: 2 })] })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
+    )
+  })
+
+  it('should, while every queued change still needs signatures, not poll', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto({ confirmations: 1 })] })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0 }),
     )
   })
 

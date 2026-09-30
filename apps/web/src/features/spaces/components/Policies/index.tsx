@@ -78,11 +78,11 @@ const Policies = ({
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
   // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
-  const openedPolicy = useMemo(() => {
-    if (!openPolicy) return null
-    const listed = policies.find((policy) => policy.id === openPolicy.id)
-    return listed ?? (isPendingPolicy(openPolicy) ? openPolicy : null)
-  }, [policies, openPolicy])
+  const listedPolicy = useMemo(
+    () => (openPolicy ? policies.find((policy) => policy.id === openPolicy.id) : undefined),
+    [policies, openPolicy],
+  )
+  const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -228,7 +228,7 @@ const Policies = ({
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
-        <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
+        <SpendingLimitDetails policy={openedPolicy} hasLeftQueue={!listedPolicy} onClose={closeDetails} />
       )}
     </div>
   )

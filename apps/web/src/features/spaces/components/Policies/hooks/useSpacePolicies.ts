@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent } from '@/services/tx/txEvents'
 import type {
   ActivePolicyDto,
@@ -58,9 +59,16 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     { spaceId: spaceId ?? '', types: TABLE_POLICY_TYPES },
     { skip, ...SPACE_REFRESH_OPTIONS },
   )
+  // Anyone can execute a fully signed change, from any tab, and CGW may still list it right after it is mined.
+  const [hasExecutable, setHasExecutable] = useState(false)
   const pending = useSpacePoliciesGetPendingPoliciesV1Query(
     { spaceId: spaceId ?? '', types: PENDING_POLICY_TYPES },
-    { skip, ...SPACE_REFRESH_OPTIONS },
+    {
+      skip,
+      ...SPACE_REFRESH_OPTIONS,
+      pollingInterval: hasExecutable ? POLLING_INTERVAL : 0,
+      skipPollingIfUnfocused: true,
+    },
   )
 
   useRefetchOnTxEvents(PENDING_REFETCH_EVENTS, pending.refetch, !skip)
@@ -69,6 +77,10 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
   const dtos = active.currentData ?? NO_POLICIES
   // Queued changes are extra information: without them the table still shows what is enforced.
   const pendingDtos = pending.currentData ?? NO_PENDING
+
+  useEffect(() => {
+    setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
+  }, [pendingDtos])
 
   // Separate lookups, so tokens only a queued change uses don't blank the active rows while they load.
   const activeTokens = usePolicyTokenResolver(dtos)

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   useTransactionsGetTransactionByIdV1Query,
   type Transaction,
@@ -36,20 +36,35 @@ export type PendingPolicyTransaction = {
   /** Fresher than the pending DTO, which CGW caches separately. */
   confirmationsSubmitted?: number
   outcome?: PendingTxOutcome
+  /** Set when the transaction could not be loaded for a reason other than it being gone. */
+  onRetry?: () => void
 }
 
-export const usePendingPolicyTransaction = (policy: PendingSpendingLimitPolicy): PendingPolicyTransaction => {
+export const usePendingPolicyTransaction = (
+  policy: PendingSpendingLimitPolicy,
+  hasLeftQueue = false,
+): PendingPolicyTransaction => {
+  // A transaction that has left the queue can no longer change, so it stops being watched.
+  const [isSettled, setIsSettled] = useState(false)
   const { currentData, error, refetch } = useTransactionsGetTransactionByIdV1Query(
     { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
     // Another signer executing, deleting or replacing it sends no event to this tab.
-    { refetchOnFocus: true, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
+    {
+      refetchOnFocus: !isSettled,
+      pollingInterval: isSettled ? 0 : POLLING_INTERVAL,
+      skipPollingIfUnfocused: true,
+    },
   )
 
-  useRefetchOnTxEvents(REFETCH_EVENTS, refetch, true)
+  useRefetchOnTxEvents(REFETCH_EVENTS, refetch, !isSettled)
 
-  return useMemo<PendingPolicyTransaction>(() => {
+  useEffect(() => {
+    if (hasLeftQueue) refetch()
+  }, [hasLeftQueue, refetch])
+
+  const transaction = useMemo<PendingPolicyTransaction>(() => {
     if (error && 'status' in error && error.status === 404) return { confirmedBy: [], outcome: 'deleted' }
-    if (!currentData) return { confirmedBy: [] }
+    if (!currentData) return error ? { confirmedBy: [], onRetry: refetch } : { confirmedBy: [] }
 
     const execution = isMultisigDetailedExecutionInfo(currentData.detailedExecutionInfo)
       ? currentData.detailedExecutionInfo
@@ -61,5 +76,11 @@ export const usePendingPolicyTransaction = (policy: PendingSpendingLimitPolicy):
       confirmationsSubmitted: execution?.confirmations.length,
       outcome: OUTCOME_BY_STATUS[currentData.txStatus],
     }
-  }, [currentData, error])
+  }, [currentData, error, refetch])
+
+  useEffect(() => {
+    setIsSettled(Boolean(transaction.outcome))
+  }, [transaction.outcome])
+
+  return transaction
 }

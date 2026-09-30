@@ -12,7 +12,7 @@ import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOve
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { getPolicyStatus, type PendingSpendingLimitPolicy } from '../types'
+import { getPolicyStatus, type QueuedSpendingLimitPolicy } from '../types'
 import {
   resolveSpendingLimitDrawerState,
   type ActiveDrawerPolicy,
@@ -38,9 +38,10 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
 }
 
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
-  policy: PendingSpendingLimitPolicy & { status: 'pending' }
-  transactionLink: string
+  policy: QueuedSpendingLimitPolicy
+  transactionLink?: string
   onReviewTransaction?: () => void
+  onRetry?: () => void
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
   outcome?: PendingTxOutcome
 }
@@ -65,7 +66,13 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
   // A queued transaction that left the queue is no longer pending; only an executed one is on its way.
   const status = outcome ? (outcome === 'executed' ? 'activating' : null) : getPolicyStatus(policy)
   const actions = isPendingDrawer(props)
-    ? { pending: { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction } }
+    ? {
+        pending: {
+          transactionLink: props.transactionLink,
+          onReviewTransaction: props.onReviewTransaction,
+          onRetry: props.onRetry,
+        },
+      }
     : { onEdit: props.onEdit }
 
   return (

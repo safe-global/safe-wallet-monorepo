@@ -31,6 +31,8 @@ export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit t
 export const UNENFORCED_HELPER =
   'The allowance module is not enabled on this Safe account, so this limit is not enforced.'
 
+export const TX_LOAD_FAILED_HELPER = "The transaction couldn't be loaded."
+
 /** Dropped once WA-3156 supplies an `onEdit` handler. */
 export const EDIT_UNAVAILABLE_HELPER = 'Editing a spending limit is coming soon.'
 

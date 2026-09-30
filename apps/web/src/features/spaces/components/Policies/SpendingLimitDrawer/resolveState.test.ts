@@ -106,6 +106,19 @@ describe('pending states', () => {
     })
   })
 
+  it('asks a signer to wait, rather than to sign, while it is unknown whether they signed', () => {
+    const state = resolve(mockPendingPolicy(), { ...MOCK_VIEWERS.signer, hasSigned: undefined })
+
+    expect(state).toEqual({
+      kind: 'pending',
+      operation: 'create',
+      bannerTitle: PENDING_CREATE_BANNER_TITLE,
+      action: 'review',
+      signed: 1,
+      required: 2,
+    })
+  })
+
   it('state 7: a non-signer gets the link and no second banner line', () => {
     const state = resolve(mockPendingPolicy(), MOCK_VIEWERS.nonSigner)
 

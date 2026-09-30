@@ -39,6 +39,34 @@ describe('SpendingLimitActions', () => {
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
   })
 
+  it('review: offers to try again when the transaction failed to load', async () => {
+    const onRetry = jest.fn()
+    const { user } = renderWithUserEvent(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'review', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{ transactionLink: TRANSACTION_LINK, onRetry }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(onRetry).toHaveBeenCalledTimes(1)
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  it('copy-link: renders no footer until the link can be built', () => {
+    const { container } = render(
+      <SpendingLimitActions
+        state={{ kind: 'pending', operation: 'create', action: 'copy-link', bannerTitle: 't', signed: 1, required: 2 }}
+        pending={{}}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it('connect: asks a disconnected viewer to connect and explains why', async () => {
     const onConnectWallet = jest.fn()
     const { user } = renderWithUserEvent(

@@ -4,7 +4,6 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { TxModalContext } from '@/components/tx-flow'
-import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
@@ -208,8 +207,10 @@ describe('a pending spending limit', () => {
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
   )
 
-  const renderPending = (policy: PendingSpendingLimitPolicy = pending) =>
-    renderWithUserEvent(withTxModal(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />))
+  const renderPending = (policy: PendingSpendingLimitPolicy = pending, hasLeftQueue?: boolean) =>
+    renderWithUserEvent(
+      withTxModal(<SpendingLimitDetails policy={policy} hasLeftQueue={hasLeftQueue} onClose={jest.fn()} />),
+    )
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -275,7 +276,7 @@ describe('a pending spending limit', () => {
     mockPendingTx({ txSummary })
 
     renderPending()
-    // After render: user-event installs its own clipboard stub on setup.
+    // user-event replaces the clipboard on setup.
     const writeText = mockClipboard()
     act(() => {
       screen.getByRole('button', { name: 'Copy transaction link' }).click()
@@ -283,12 +284,12 @@ describe('a pending spending limit', () => {
 
     await waitFor(() => {
       expect(writeText).toHaveBeenCalledWith(
-        `${window.location.origin}${AppRoutes.transactions.tx}?safe=${getEip3770ShortName(pending.safe.chainId)}:${pending.safe.address}&id=${getPendingTxId(pending)}`,
+        `${window.location.origin}${AppRoutes.transactions.tx}?safe=${chain.shortName}:${pending.safe.address}&id=${getPendingTxId(pending)}`,
       )
     })
   })
 
-  it('keeps Review transaction disabled until the transaction has loaded', () => {
+  it('keeps Review transaction disabled until the transaction has loaded, without asking to sign yet', () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({})
@@ -296,6 +297,31 @@ describe('a pending spending limit', () => {
     renderPending()
 
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+    expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
+  })
+
+  it('offers to try again when the transaction could not be loaded', async () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    const onRetry = jest.fn()
+    mockPendingTx({ onRetry })
+
+    const { user } = renderPending()
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+
+    expect(screen.getByText("The transaction couldn't be loaded.")).toBeInTheDocument()
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('stops offering Review once the row has left the list, until it learns why', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+
+    renderPending(pending, true)
+
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+    expect(mockUsePendingPolicyTransaction).toHaveBeenCalledWith(pending, true)
   })
 
   it('opens the connect dialog, then shows the connected signer their state in the same panel', async () => {
