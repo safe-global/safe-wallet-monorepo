@@ -14,7 +14,7 @@ export type SafeAccountFieldProps = {
   /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
   /** An edit is scoped to one Safe, so the field shows it without offering the others. */
-  disabled?: boolean
+  readOnly?: boolean
 }
 
 const SafeAccountField = ({
@@ -24,7 +24,7 @@ const SafeAccountField = ({
   onRetry,
   hasWallet,
   onSafeChange,
-  disabled = false,
+  readOnly = false,
 }: SafeAccountFieldProps): ReactElement => {
   const { control } = useFormContext<SpendingLimitPolicyFormValues>()
 
@@ -46,7 +46,7 @@ const SafeAccountField = ({
           isError={isError}
           onRetry={onRetry}
           hasWallet={hasWallet}
-          disabled={disabled}
+          readOnly={readOnly}
           name={field.name}
           id="spending-limit-safe-account"
         />

@@ -33,6 +33,12 @@ export type SafeAccountSelectorProps = {
   isError?: boolean
   onRetry?: () => void
   disabled?: boolean
+  /**
+   * Shows the picked account without offering the others. Not `disabled`: a dimmed address is harder
+   * to check than a plain one, and this field exists to be checked — the same reasoning `AddressInput`
+   * applies to a fixed address.
+   */
+  readOnly?: boolean
   label?: string
   /** Must match the rule `accounts` was filtered by. */
   signersOnly?: boolean
@@ -62,6 +68,7 @@ const SafeAccountSelector = ({
   isError = false,
   onRetry,
   disabled = false,
+  readOnly = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
   signersOnly = false,
   helperText = getEligibilityCopy(signersOnly).helperText,
@@ -111,6 +118,35 @@ const SafeAccountSelector = ({
       ) : (
         <SafeAccountRow key={entry.id} account={entry} />
       ),
+    )
+  }
+
+  const helper = shownError ? (
+    <Typography variant="paragraph-mini" role="alert" className="text-destructive">
+      {shownError}
+    </Typography>
+  ) : (
+    <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
+      {helperText}
+    </Typography>
+  )
+
+  if (readOnly && selectedAccount) {
+    return (
+      <div className="flex w-full flex-col gap-1.5">
+        <Label htmlFor={fieldId}>{label}</Label>
+
+        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control. */}
+        <div
+          id={fieldId}
+          data-testid="safe-account-readonly"
+          className="border-border bg-input flex min-h-9 w-full items-center rounded-md border px-3 py-1.5 shadow-xs"
+        >
+          <SafeAccountSummary account={selectedAccount} />
+        </div>
+
+        {helper}
+      </div>
     )
   }
 
@@ -166,15 +202,7 @@ const SafeAccountSelector = ({
         </SelectContent>
       </Select>
 
-      {shownError ? (
-        <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {shownError}
-        </Typography>
-      ) : (
-        <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
-          {helperText}
-        </Typography>
-      )}
+      {helper}
     </div>
   )
 }

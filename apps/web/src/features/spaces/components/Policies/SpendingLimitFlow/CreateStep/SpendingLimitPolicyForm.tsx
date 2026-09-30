@@ -118,7 +118,7 @@ const SpendingLimitPolicyForm = ({
             onRetry={onRetryAccounts}
             hasWallet={hasWallet}
             onSafeChange={onSafeChange}
-            disabled={isEditMode}
+            readOnly={isEditMode}
           />
 
           {removalCopy && (

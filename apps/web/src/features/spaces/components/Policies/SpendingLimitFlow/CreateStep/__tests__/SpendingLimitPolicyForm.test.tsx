@@ -369,10 +369,11 @@ describe('SpendingLimitPolicyForm', () => {
 
     beforeEach(() => mockUseExisting.mockReturnValue({ limits: [onChainLimit], loading: false }))
 
-    it('keeps the Safe selector in place, only not selectable', () => {
+    it('shows the Safe account in full, without offering the others', () => {
       renderEdit()
 
-      expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toBeDisabled()
+      expect(screen.getByTestId('safe-account-readonly')).toHaveTextContent('Treasury')
+      expect(screen.queryByTestId('safe-account-selector')).not.toBeInTheDocument()
     })
 
     it('lets the last spender be removed, which the create flow forbids', () => {

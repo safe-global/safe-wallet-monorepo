@@ -20,7 +20,8 @@ export type ExistingSpendingLimits = {
 
 const NOTHING_KNOWN: ExistingSpendingLimits = { loading: false }
 
-const ExistingSpendingLimitsContext = createContext<ExistingSpendingLimits>(NOTHING_KNOWN)
+/** Exported so a story or a test can stand in for the chain read without going near an RPC. */
+export const ExistingSpendingLimitsContext = createContext<ExistingSpendingLimits>(NOTHING_KNOWN)
 
 /** Outside the provider (stories, Safe-level) nothing is known, so nothing is excluded. */
 export const useExistingSpendingLimits = (): ExistingSpendingLimits => useContext(ExistingSpendingLimitsContext)
