@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useSpacesGetV1Query,
   useLazySpaceSafesGetV1Query,
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { filterSpacesByStatus } from '@/utils/spaces'
 
 /** Maps a chain-qualified Safe key (`${chainId}:${lowercased address}`) to the Spaces (workspaces) it belongs to. */
 export type SafeSpacesMap = Record<string, GetSpaceResponse[]>
@@ -19,7 +17,7 @@ export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${
  * Builds a reverse lookup from a chain-qualified Safe key to the Spaces it belongs to.
  *
  * The gateway only exposes space → safes, so this fetches the signed-in user's spaces and
- * each joined space's safes, then indexes them by `${chainId}:${address}`. Keying by chain (not
+ * each space's safes, then indexes them by `${chainId}:${address}`. Keying by chain (not
  * address alone) keeps a Safe that shares an address across chains from inheriting another
  * chain's workspace membership. Signed-out users belong to no space, so the map is empty and
  * the "Workspaces" column simply renders nothing.
@@ -31,25 +29,12 @@ export const safeSpaceKey = (chainId: string, address: string) => `${chainId}:${
 export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoading: boolean } => {
   const isSignedIn = useAppSelector(isAuthenticated)
   const { data: spaces, isLoading: isLoadingSpaces } = useSpacesGetV1Query(undefined, { skip: !isSignedIn || skip })
-  const {
-    data: currentUser,
-    isLoading: isLoadingUser,
-    isError: isUserError,
-  } = useUsersGetWithWalletsV1Query(undefined, {
-    skip: !isSignedIn || skip,
-  })
   const [triggerSpaceSafes] = useLazySpaceSafesGetV1Query()
   const [safeSpaces, setSafeSpaces] = useState<SafeSpacesMap>({})
   const [isResolving, setIsResolving] = useState(false)
 
-  const joinedSpaces = useMemo(() => {
-    if (!spaces) return undefined
-    if (currentUser) return filterSpacesByStatus(currentUser, spaces, 'ACTIVE')
-    return isUserError ? spaces : undefined
-  }, [spaces, currentUser, isUserError])
-
   useEffect(() => {
-    if (!joinedSpaces || joinedSpaces.length === 0) {
+    if (!spaces || spaces.length === 0) {
       setSafeSpaces({})
       setIsResolving(false)
       return
@@ -59,7 +44,7 @@ export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoad
     setIsResolving(true)
 
     Promise.all(
-      joinedSpaces.map((space) =>
+      spaces.map((space) =>
         triggerSpaceSafes({ spaceId: space.uuid }, true)
           .unwrap()
           .then((response) => ({ space, safes: response.safes }))
@@ -89,7 +74,7 @@ export const useSafeSpaces = (skip = false): { safeSpaces: SafeSpacesMap; isLoad
     return () => {
       cancelled = true
     }
-  }, [joinedSpaces, triggerSpaceSafes])
+  }, [spaces, triggerSpaceSafes])
 
-  return { safeSpaces, isLoading: isLoadingSpaces || isLoadingUser || isResolving }
+  return { safeSpaces, isLoading: isLoadingSpaces || isResolving }
 }

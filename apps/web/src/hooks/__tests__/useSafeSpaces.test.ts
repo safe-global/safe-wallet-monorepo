@@ -4,16 +4,11 @@ import {
   useLazySpaceSafesGetV1Query,
   type GetSpaceResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useSafeSpaces } from '@/hooks/useSafeSpaces'
+import { useSafeSpaces } from '../useSafeSpaces'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetV1Query: jest.fn(),
   useLazySpaceSafesGetV1Query: jest.fn(),
-}))
-
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
-  useUsersGetWithWalletsV1Query: jest.fn(),
 }))
 
 jest.mock('@/store/authSlice', () => ({
@@ -23,29 +18,18 @@ jest.mock('@/store/authSlice', () => ({
 
 const mockUseSpacesGetV1Query = useSpacesGetV1Query as jest.Mock
 const mockUseLazySpaceSafesGetV1Query = useLazySpaceSafesGetV1Query as jest.Mock
-const mockUseUsersGetWithWalletsV1Query = useUsersGetWithWalletsV1Query as jest.Mock
 
-const CURRENT_USER_ID = 1
-const OTHER_USER_ID = 2
+const spaceAlpha = { uuid: 'alpha', name: 'Alpha', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
+const spaceBravo = { uuid: 'bravo', name: 'Bravo', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
 
-type Status = 'ACTIVE' | 'INVITED'
-const member = (status: Status, userId = CURRENT_USER_ID) =>
-  ({ status, user: { id: userId } }) as GetSpaceResponse['members'][number]
-const space = (uuid: string, members = [member('ACTIVE')]) =>
-  ({ uuid, name: uuid, members, memberCount: members.length, safeCount: 1 }) as GetSpaceResponse
-const spaceAlpha = space('alpha')
-const spaceBravo = space('bravo')
-
-const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) => {
-  const trigger = jest.fn((arg: { spaceId: string }) => ({ unwrap: () => Promise.resolve(safesBySpace[arg.spaceId]) }))
-  mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
-  return trigger
-}
+const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) =>
+  mockUseLazySpaceSafesGetV1Query.mockReturnValue([
+    jest.fn((arg: { spaceId: string }) => ({ unwrap: () => Promise.resolve(safesBySpace[arg.spaceId]) })),
+  ])
 
 describe('useSafeSpaces', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: { id: CURRENT_USER_ID }, isLoading: false })
   })
 
   it('indexes each safe by a chain-qualified key to the spaces it belongs to', async () => {
@@ -88,54 +72,15 @@ describe('useSafeSpaces', () => {
     await waitFor(() => expect(result.current.safeSpaces).toEqual({}))
   })
 
-  it('skips Spaces the current user is only invited to, even when other members are active', async () => {
-    const trigger = mockSafesResolver({ alpha: { safes: { '1': ['0xAAA'] } } })
-    const invited = space('invited', [member('ACTIVE', OTHER_USER_ID), member('INVITED')])
-    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, invited], isLoading: false })
-
-    const { result } = renderHook(() => useSafeSpaces())
-
-    await waitFor(() => expect(result.current.safeSpaces['1:0xaaa']).toEqual([spaceAlpha]))
-    expect(trigger).toHaveBeenCalledTimes(1)
-    expect(trigger).toHaveBeenCalledWith({ spaceId: 'alpha' }, true)
-  })
-
-  it('waits for the current user before looking up any Space', async () => {
-    const trigger = mockSafesResolver({ alpha: { safes: { '1': ['0xAAA'] } } })
-    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha], isLoading: false })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: undefined, isLoading: true })
-
-    const { result } = renderHook(() => useSafeSpaces())
-
-    expect(result.current.isLoading).toBe(true)
-    expect(trigger).not.toHaveBeenCalled()
-  })
-
-  it('falls back to every Space when the current user fails to load, dropping the ones it cannot read', async () => {
-    const trigger = jest.fn((arg: { spaceId: string }) => ({
-      unwrap: () =>
-        arg.spaceId === 'alpha' ? Promise.resolve({ safes: { '1': ['0xAAA'] } }) : Promise.reject({ status: 403 }),
-    }))
-    mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
-    const invited = space('invited', [member('INVITED')])
-    mockUseSpacesGetV1Query.mockReturnValue({ data: [spaceAlpha, invited], isLoading: false })
-    mockUseUsersGetWithWalletsV1Query.mockReturnValue({ data: undefined, isLoading: false, isError: true })
-
-    const { result } = renderHook(() => useSafeSpaces())
-
-    await waitFor(() => expect(result.current.safeSpaces['1:0xaaa']).toEqual([spaceAlpha]))
-    expect(result.current.isLoading).toBe(false)
-    expect(trigger).toHaveBeenCalledTimes(2)
-  })
-
   it('does not fetch any Space safes while skipped', async () => {
-    mockSafesResolver({})
+    const trigger = jest.fn()
+    mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
     mockUseSpacesGetV1Query.mockReturnValue({ data: undefined, isLoading: false })
 
     const { result } = renderHook(() => useSafeSpaces(true))
 
     expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
-    expect(mockUseUsersGetWithWalletsV1Query).toHaveBeenCalledWith(undefined, { skip: true })
     await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
+    expect(trigger).not.toHaveBeenCalled()
   })
 })
