@@ -5,14 +5,16 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { WORKSPACE_CONFIRMATION_HIDE_MS } from '@/features/spaces/constants'
 import { signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
+import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
 import type { Proposer } from '../../types'
+import { formatContactLabel } from '../../utils/policyLabel'
 import type { ProposerRef } from './types'
 
 export const REMOVE_PROPOSER_NOT_ALLOWED =
@@ -37,6 +39,8 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
 
   const { chainId, address: safeAddress } = ref.policy.safe
   const delegateAddress = ref.proposer.proposer
+  const proposerName = useAddressBookItem(delegateAddress, chainId)?.name
+  const safeName = useAddressBookItem(safeAddress, chainId)?.name
 
   const removeProposer = useCallback(async () => {
     setError(undefined)
@@ -74,12 +78,15 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
         }).unwrap()
       }
 
+      const proposerLabel = formatContactLabel(delegateAddress, proposerName)
+      const safeLabel = formatContactLabel(safeAddress, safeName)
       dispatch(
         showNotification({
           variant: 'success',
           groupKey: 'delete-proposer-success',
+          autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS,
           title: 'Proposer deleted successfully!',
-          message: `${shortenAddress(delegateAddress)} cannot suggest transactions anymore.`,
+          message: `${proposerLabel} cannot suggest transactions for ${safeLabel} anymore.`,
         }),
       )
       onRemoved()
@@ -88,7 +95,19 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
     } finally {
       setIsRemoving(false)
     }
-  }, [onboard, chainId, safeAddress, delegateAddress, ref, deleteDelegateV1, deleteDelegateV2, dispatch, onRemoved])
+  }, [
+    onboard,
+    chainId,
+    safeAddress,
+    safeName,
+    delegateAddress,
+    proposerName,
+    ref,
+    deleteDelegateV1,
+    deleteDelegateV2,
+    dispatch,
+    onRemoved,
+  ])
 
   const resetError = useCallback(() => setError(undefined), [])
 

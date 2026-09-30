@@ -4,6 +4,7 @@ import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import * as delegatesApi from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
@@ -84,11 +85,11 @@ describe('useGrantProposer', () => {
     jest.restoreAllMocks()
   })
 
-  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}) => {
+  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}, safeLabel?: string) => {
     const rendered = renderHook(() => useGrantProposer(), { initialReduxState: { addressBook } })
     let ok = false
     await act(async () => {
-      ok = await rendered.result.current.grantProposerRole(values)
+      ok = await rendered.result.current.grantProposerRole(values, safeLabel)
     })
     return { ok, result: rendered.result }
   }
@@ -155,7 +156,28 @@ describe('useGrantProposer', () => {
       expect.objectContaining({
         variant: 'success',
         groupKey: 'add-proposer-success',
+        autoHideDuration: 7000,
         title: 'Proposer added successfully!',
+      }),
+    ])
+  })
+
+  it('names the proposer and the Safe it was added to in the success message', async () => {
+    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury (0xAAAA...AAaA)')
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury (0xAAAA...AAaA).`,
+      }),
+    ])
+  })
+
+  it('falls back to the addresses in the success message without a name or a Safe label', async () => {
+    await submit({ proposer: PROPOSER, name: '   ' })
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `${shortenAddress(PROPOSER)} can now suggest transactions for ${shortenAddress(SAFE)}.`,
       }),
     ])
   })
@@ -168,7 +190,7 @@ describe('useGrantProposer', () => {
       await submit({ proposer: PROPOSER, name: '  Nicole  ' })
 
       expect(getStoreInstance().getState().addressBook).toEqual({ [CHAIN_ID]: { [PROPOSER]: 'Nicole' } })
-      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: '  Nicole  ', chainIds: [CHAIN_ID] })
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
     })
 
     it('leaves the local name of a known contact alone', async () => {

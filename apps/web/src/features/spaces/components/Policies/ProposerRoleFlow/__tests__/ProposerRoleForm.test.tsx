@@ -88,12 +88,10 @@ describe('ProposerRoleForm', () => {
     ).toBeInTheDocument()
   })
 
-  it('says the proposer address is public and where a member name goes', () => {
+  it('explains the proposer field and where a member name goes', () => {
     renderForm()
 
-    expect(
-      screen.getByText('The beneficiary that will have the ability to propose transactions, publicly visible'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('The beneficiary that will have the ability to propose transactions.')).toBeInTheDocument()
     expect(screen.getByText('Sent to an admin to add to the Workspace address book.')).toBeInTheDocument()
   })
 

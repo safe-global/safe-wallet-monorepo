@@ -8,6 +8,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAppDispatch } from '@/store'
 import { type AlertColor, showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../constants'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpaceAddressBookState } from './useGetSpaceAddressBook'
 import { useIsAdmin, useIsInvited } from './useSpaceMembers'
@@ -82,7 +83,7 @@ export const useAddOrRequestWorkspaceContact = (
         const { event, ...notification } = confirmation
         if (event && source) trackEvent(event, { [MixpanelEventParams.SOURCE]: source })
         else if (event) trackEvent(event)
-        dispatch(showNotification(notification))
+        dispatch(showNotification({ ...notification, autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS }))
       }
       if (error) dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))
 
