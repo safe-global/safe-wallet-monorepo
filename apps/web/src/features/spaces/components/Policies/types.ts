@@ -29,7 +29,7 @@ export type PolicyTokenInfo = {
 }
 
 export type PolicyAllowance = {
-  /** Active allowances carry it in `tokenMetadata`; queued changes are looked up via the CGW tokens endpoint. */
+  /** From the CGW response's `tokenMetadata`; the address alone when CGW could not resolve it. */
   token: PolicyTokenInfo
   /** Base units. */
   amount: string

@@ -9,7 +9,7 @@ import type {
   PolicySpender,
   SpendingLimitPolicy,
 } from '../types'
-import { unknownToken, type ResolveTokenInfo } from './mapActivePolicies'
+import { toPolicyToken } from './mapActivePolicies'
 
 type PendingChange = PendingPolicyDto['data']['changes'][number]
 type ActiveSpendingLimit = SpendingLimitPolicy & { status: 'active' }
@@ -52,11 +52,7 @@ const getOperation = (changes: PendingChange[], active: ActiveSpendingLimit | un
   return createsSomething ? 'create' : 'update'
 }
 
-const toSpenders = (
-  dto: PendingPolicyDto,
-  active: ActiveSpendingLimit | undefined,
-  resolveToken: ResolveTokenInfo,
-): PolicySpender[] => {
+const toSpenders = (dto: PendingPolicyDto, active: ActiveSpendingLimit | undefined): PolicySpender[] => {
   const byDelegate = new Map<string, PolicySpender>()
   const spenderFor = (delegate: string): PolicySpender => {
     const key = delegate.toLowerCase()
@@ -94,7 +90,7 @@ const toSpenders = (
         const remaining = BigInt(change.amount) - BigInt(spent)
 
         upsertAllowance(change.delegate, {
-          token: resolveToken(dto.safe.chainId, change.token) ?? unknownToken(change.token),
+          token: toPolicyToken(change.token, change.tokenMetadata),
           amount: change.amount,
           spent,
           remaining: (remaining > 0n ? remaining : 0n).toString(),
@@ -126,11 +122,7 @@ export const getPendingTxId = ({ safe, safeTxHash }: Pick<PendingSpendingLimitPo
   `multisig_${safe.address}_${safeTxHash}`
 
 /** One row per queued transaction and module, shown beside the active rows. */
-export const mapPendingPolicies = (
-  dtos: PendingPolicyDto[],
-  active: Policy[],
-  resolveToken: ResolveTokenInfo,
-): PendingSpendingLimitPolicy[] =>
+export const mapPendingPolicies = (dtos: PendingPolicyDto[], active: Policy[]): PendingSpendingLimitPolicy[] =>
   dtos.flatMap((dto) => {
     if (dto.type !== 'spending-limit' || dto.data.changes.length === 0) return []
 
@@ -151,7 +143,7 @@ export const mapPendingPolicies = (
         confirmationsSubmitted: dto.confirmations,
         confirmationsRequired: dto.confirmationsRequired,
         proposedAt: dto.proposedAt,
-        data: { spenders: toSpenders(dto, current, resolveToken) },
+        data: { spenders: toSpenders(dto, current) },
       },
     ]
   })
