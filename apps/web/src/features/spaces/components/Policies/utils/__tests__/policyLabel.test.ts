@@ -10,7 +10,6 @@ import {
 import {
   formatAllowance,
   formatContactLabel,
-  formatSafeLabel,
   getPolicyLabel,
   getPolicySummary,
   getResetPeriodLabel,
@@ -124,18 +123,5 @@ describe('formatContactLabel', () => {
   it('falls back to the shortened address without a name', () => {
     expect(formatContactLabel(address)).toBe('0x8675...a19b')
     expect(formatContactLabel(address, '')).toBe('0x8675...a19b')
-  })
-})
-
-describe('formatSafeLabel', () => {
-  const address = '0x8675B754342754A30A2AeF474D114d8460bca19b'
-
-  it('appends the chain to the contact label', () => {
-    expect(formatSafeLabel(address, 'Treasury', 'Polygon')).toBe('Treasury (0x8675...a19b) on Polygon')
-    expect(formatSafeLabel(address, undefined, 'Polygon')).toBe('0x8675...a19b on Polygon')
-  })
-
-  it('is the plain contact label without a chain', () => {
-    expect(formatSafeLabel(address, 'Treasury')).toBe('Treasury (0x8675...a19b)')
   })
 })

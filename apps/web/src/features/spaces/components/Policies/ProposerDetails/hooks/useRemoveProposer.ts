@@ -7,18 +7,14 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '@/features/spaces/constants'
 import { signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
-import { useSpaceSafes } from '@/features/spaces'
-import { isMultiChainSafeItem } from '@/hooks/safes'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
-import { useChain } from '@/hooks/useChains'
-import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
 import type { Proposer } from '../../types'
-import { formatContactLabel, formatSafeLabel } from '../../utils/policyLabel'
+import { formatContactLabel } from '../../utils/policyLabel'
 import type { ProposerRef } from './types'
 
 export const REMOVE_PROPOSER_NOT_ALLOWED =
@@ -44,11 +40,7 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
   const { chainId, address: safeAddress } = ref.policy.safe
   const delegateAddress = ref.proposer.proposer
   const proposerName = useAddressBookItem(delegateAddress, chainId)?.name
-  const safeName = useSafeDisplayName(safeAddress, chainId)
-  const chain = useChain(chainId)
-  const { allSafes } = useSpaceSafes()
-  const isMultiChain = allSafes.some((safe) => isMultiChainSafeItem(safe) && sameAddress(safe.address, safeAddress))
-  const safeLabel = formatSafeLabel(safeAddress, safeName, isMultiChain ? (chain?.chainName ?? chainId) : undefined)
+  const safeName = useAddressBookItem(safeAddress, chainId)?.name
 
   const removeProposer = useCallback(async () => {
     setError(undefined)
@@ -87,6 +79,7 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
       }
 
       const proposerLabel = formatContactLabel(delegateAddress, proposerName)
+      const safeLabel = formatContactLabel(safeAddress, safeName)
       dispatch(
         showNotification({
           variant: 'success',
@@ -106,7 +99,7 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
     onboard,
     chainId,
     safeAddress,
-    safeLabel,
+    safeName,
     delegateAddress,
     proposerName,
     ref,

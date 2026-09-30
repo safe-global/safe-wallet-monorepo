@@ -163,11 +163,11 @@ describe('useGrantProposer', () => {
   })
 
   it('names the proposer and the Safe it was added to in the success message', async () => {
-    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury on Polygon')
+    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury (0xAAAA...AAaA)')
 
     expect(selectNotifications(getStoreInstance().getState())).toEqual([
       expect.objectContaining({
-        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury on Polygon.`,
+        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury (0xAAAA...AAaA).`,
       }),
     ])
   })
