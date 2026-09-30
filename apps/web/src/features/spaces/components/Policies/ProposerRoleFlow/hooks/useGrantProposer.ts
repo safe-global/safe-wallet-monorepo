@@ -25,6 +25,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { isEthSignWallet } from '@/utils/wallets'
 import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
+import { formatContactLabel } from '../../utils/policyLabel'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 
@@ -96,7 +97,7 @@ export const useGrantProposer = (): GrantProposer => {
   const announceSuccess = useCallback(
     (proposer: string, rawName: string, safeLabel: string) => {
       const name = sanitizeName(rawName)
-      const proposerLabel = name ? `${name} (${shortenAddress(proposer)})` : shortenAddress(proposer)
+      const proposerLabel = formatContactLabel(proposer, name)
       // A member's request waits for an admin, so a new contact is also kept in their local address book
       if (!isAdmin && !getContact(proposer, chainId)) {
         dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name }))

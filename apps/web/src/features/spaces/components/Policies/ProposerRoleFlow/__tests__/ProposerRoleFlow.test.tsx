@@ -207,7 +207,7 @@ describe('ProposerRoleFlow', () => {
 
       await fillAndSubmit(user)
 
-      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, 'Treasury')
+      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, 'Treasury (0xAAAA...AAaA)')
       await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
     })
 

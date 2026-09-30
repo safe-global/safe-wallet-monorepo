@@ -1,5 +1,5 @@
 import groupBy from 'lodash/groupBy'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { formatContactLabel } from '../utils/policyLabel'
 import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountGroup, type SafeAccountOption } from './types'
 
 /** Same format as the topbar selector's row ids. */
@@ -51,12 +51,12 @@ export const flattenSafeAccounts = (entries: SafeAccountEntry[]): SafeAccountOpt
 export const findSafeAccount = (entries: SafeAccountEntry[], id: string | undefined): SafeAccountOption | undefined =>
   id ? flattenSafeAccounts(entries).find((account) => account.id === id) : undefined
 
-/** Human-readable name for messages: the chain is added only when the Safe is offered on several. */
+/** "Name (0x1234...abcd)" for messages; the chain is added only when the Safe is offered on several. */
 export const getSafeAccountLabel = (entries: SafeAccountEntry[], id: string | undefined): string | undefined => {
   const account = findSafeAccount(entries, id)
   if (!account) return undefined
 
-  const label = account.name || shortenAddress(account.address)
+  const label = formatContactLabel(account.address, account.name)
   const isMultiChain = entries.some((entry) => isSafeAccountGroup(entry) && entry.accounts.includes(account))
 
   return isMultiChain ? `${label} on ${chainLabel(account)}` : label

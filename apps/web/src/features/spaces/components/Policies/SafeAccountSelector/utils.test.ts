@@ -150,10 +150,10 @@ describe('groupSafeAccounts', () => {
 })
 
 describe('getSafeAccountLabel', () => {
-  it('uses the Safe name', () => {
+  it('puts the shortened address after the Safe name', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { name: 'Treasury' })])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('1', SAFE_A))).toBe('Treasury')
+    expect(getSafeAccountLabel(entries, buildSafeAccountId('1', SAFE_A))).toBe('Treasury (0xAAAA...AAaA)')
   })
 
   it('falls back to the shortened address for an unnamed Safe', () => {
@@ -165,7 +165,7 @@ describe('getSafeAccountLabel', () => {
   it('adds the chain name when the Safe is offered on several chains', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A, { name: 'Treasury' }), option('137', SAFE_A)])
 
-    expect(getSafeAccountLabel(entries, buildSafeAccountId('137', SAFE_A))).toBe('Treasury on Polygon')
+    expect(getSafeAccountLabel(entries, buildSafeAccountId('137', SAFE_A))).toBe('Treasury (0xAAAA...AAaA) on Polygon')
   })
 
   it('adds the chain id when the Safe is on several chains and the chain config has not loaded', () => {
