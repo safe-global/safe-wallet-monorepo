@@ -1,11 +1,11 @@
 import { useContext, type SyntheticEvent } from 'react'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useTxActions } from '@/components/tx/shared/hooks'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/sdk'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
+import { useUpdateBatch } from '@/features/batching'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
@@ -18,7 +18,7 @@ import { SafeAppsName } from '@/config/constants'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-const Batching = ({
+export const Batching = ({
   onSubmit,
   onSubmitSuccess,
   options = [],
@@ -27,7 +27,7 @@ const Batching = ({
   slotId,
 }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { setTxFlow } = useContext(TxModalContext)
-  const { addToBatch } = useTxActions()
+  const [addToBatch] = useUpdateBatch()
   const { safeTx } = useContext(SafeTxContext)
   const { isSubmitDisabled, setIsSubmitLoading, isSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
@@ -46,7 +46,7 @@ const Batching = ({
     setSubmitError(undefined)
 
     try {
-      await addToBatch(safeTx, origin)
+      await addToBatch(safeTx)
     } catch (_err) {
       const err = asError(_err)
       logError(Errors._819, err)
