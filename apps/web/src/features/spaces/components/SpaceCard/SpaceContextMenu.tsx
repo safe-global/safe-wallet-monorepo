@@ -2,6 +2,7 @@ import { type MouseEvent, useState } from 'react'
 import { Download, EllipsisVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
 import {
@@ -15,6 +16,7 @@ import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { useSpaceDeletionGuard } from '@/features/spaces'
 
 enum ModalType {
   RENAME = 'rename',
@@ -27,6 +29,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const dispatch = useAppDispatch()
   const [fetchAddressBook, { isFetching: isDownloading }] = useLazyAddressBooksGetAddressBookItemsV1Query()
+  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(space.uuid)
 
   const handleDownload = async (e: MouseEvent) => {
     e.stopPropagation()
@@ -77,12 +80,21 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
             <span>Rename</span>
           </DropdownMenuItem>
 
-          <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-            <DropdownMenuItem data-testid="remove-button" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-              <DeleteIcon className="text-[var(--color-error-main)]" />
-              <span>Remove</span>
-            </DropdownMenuItem>
-          </Track>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
+                <DropdownMenuItem
+                  data-testid="remove-button"
+                  disabled={isDeletionBlocked}
+                  onClick={isDeletionBlocked ? undefined : (e) => handleOpenModal(e, ModalType.REMOVE)}
+                >
+                  <DeleteIcon className="text-[var(--color-error-main)]" />
+                  <span>Remove</span>
+                </DropdownMenuItem>
+              </Track>
+            </TooltipTrigger>
+            {blockedReason && <TooltipContent side="left">{blockedReason}</TooltipContent>}
+          </Tooltip>
 
           <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK} label={SPACE_LABELS.space_context_menu}>
             <DropdownMenuItem

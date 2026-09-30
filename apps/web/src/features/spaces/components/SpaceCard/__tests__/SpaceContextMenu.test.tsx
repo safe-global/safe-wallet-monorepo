@@ -4,6 +4,7 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import SpaceContextMenu from '../SpaceContextMenu'
 import { downloadCsv } from '../../../utils/addressBookCsv'
 import { showNotification } from '@/store/notificationsSlice'
+import { useSpaceDeletionGuard } from '../../../hooks/billing/useSpaceDeletionGuard'
 
 const mockFetchAddressBook = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -17,6 +18,10 @@ jest.mock('../../../utils/addressBookCsv', () => ({
 jest.mock('@/store/notificationsSlice', () => ({
   ...jest.requireActual('@/store/notificationsSlice'),
   showNotification: jest.fn(() => ({ type: 'test/notification' })),
+}))
+
+jest.mock('../../../hooks/billing/useSpaceDeletionGuard', () => ({
+  useSpaceDeletionGuard: jest.fn(() => ({ isDeletionBlocked: false })),
 }))
 
 const space = { uuid: 'space-1', name: 'Acme Inc', members: [] } as unknown as GetSpaceResponse
@@ -60,5 +65,23 @@ describe('SpaceContextMenu', () => {
 
     expect(downloadCsv).not.toHaveBeenCalled()
     expect(showNotification).toHaveBeenCalledWith(expect.objectContaining({ variant: 'error' }))
+  })
+
+  it('checks whether the space can be deleted', async () => {
+    await openMenu()
+
+    expect(useSpaceDeletionGuard).toHaveBeenCalledWith('space-1')
+    expect(screen.getByTestId('remove-button')).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('disables removing a space whose subscription is still live', async () => {
+    jest.mocked(useSpaceDeletionGuard).mockReturnValue({
+      isDeletionBlocked: true,
+      blockedReason: 'Cancel the subscription before deleting this Workspace.',
+    })
+
+    await openMenu()
+
+    expect(screen.getByTestId('remove-button')).toHaveAttribute('aria-disabled', 'true')
   })
 })
