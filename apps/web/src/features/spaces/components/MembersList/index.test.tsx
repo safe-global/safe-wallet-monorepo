@@ -1,10 +1,14 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { formatDate as formatDateUtil, formatTimeInWords } from '@safe-global/utils/utils/date'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
 import MembersList from './index'
 
 const formatDate = (iso: string) => formatDateUtil(new Date(iso).getTime())
+const WALLET_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
+const SHORT_WALLET_ADDRESS = shortenAddress(WALLET_ADDRESS)
 
 jest.mock('./MemberName', () => ({
   __esModule: true,
@@ -88,13 +92,91 @@ describe('MembersList', () => {
       />,
     )
 
-    expect(screen.getByText('Email')).toBeInTheDocument()
+    expect(screen.getByText('Email or address')).toBeInTheDocument()
 
     const emailCells = screen.getAllByTestId('table-cell-email')
 
     expect(emailCells).toHaveLength(2)
     expect(within(emailCells[0]!).getByText('alice@example.com')).toBeInTheDocument()
     expect(within(emailCells[1]!).queryByText(/@/)).not.toBeInTheDocument()
+  })
+
+  it('renders a shortened wallet address for members without an email', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Bob', user: memberUserBuilder().with({ address: WALLET_ADDRESS }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const emailCell = screen.getByTestId('table-cell-email')
+    expect(within(emailCell).getByText(SHORT_WALLET_ADDRESS)).toBeInTheDocument()
+    expect(within(emailCell).queryByText(WALLET_ADDRESS)).not.toBeInTheDocument()
+  })
+
+  it('shows the full wallet address in a tooltip on hover', async () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Bob', user: memberUserBuilder().with({ address: WALLET_ADDRESS }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    await userEvent.hover(screen.getByText(SHORT_WALLET_ADDRESS))
+
+    expect(await screen.findByText(WALLET_ADDRESS)).toBeInTheDocument()
+  })
+
+  it('sorts the identifier column across emails and wallet addresses', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ id: 1, name: 'Bob', user: memberUserBuilder().with({ id: 11, address: WALLET_ADDRESS }).build() })
+            .build(),
+          memberBuilder()
+            .with({
+              id: 2,
+              name: 'Alice',
+              user: memberUserBuilder().with({ id: 12, email: 'alice@example.com' }).build(),
+            })
+            .build(),
+          memberBuilder()
+            .with({ id: 3, name: 'Zed', user: memberUserBuilder().with({ id: 13, email: 'zed@example.com' }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Email or address' }))
+
+    const cells = screen.getAllByTestId('table-cell-email').map((cell) => cell.textContent)
+    expect(cells).toEqual([SHORT_WALLET_ADDRESS, 'alice@example.com', 'zed@example.com'])
+  })
+
+  it('prefers the email over the wallet address when both are present', () => {
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({
+              name: 'Alice',
+              user: memberUserBuilder().with({ email: 'alice@example.com', address: WALLET_ADDRESS }).build(),
+            })
+            .build(),
+        ]}
+      />,
+    )
+
+    const emailCell = screen.getByTestId('table-cell-email')
+    expect(within(emailCell).getByText('alice@example.com')).toBeInTheDocument()
+    expect(within(emailCell).queryByText(SHORT_WALLET_ADDRESS)).not.toBeInTheDocument()
   })
 
   it('shows an Expired chip for a pending invite past its expiry', () => {
@@ -208,6 +290,32 @@ describe('MembersList', () => {
     expect(within(nameCell).getByText('alice@example.com')).toBeInTheDocument()
   })
 
+  it('surfaces the shortened wallet address under the member name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Bob', user: memberUserBuilder().with({ address: WALLET_ADDRESS }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const nameCell = screen.getByTestId('table-cell-name')
+    expect(within(nameCell).getByText(SHORT_WALLET_ADDRESS)).toBeInTheDocument()
+  })
+
+  it('renders nothing under the member name on mobile without an email or wallet address', () => {
+    mockUseIsMobile.mockReturnValue(true)
+
+    render(<MembersList members={[memberBuilder().with({ name: 'Bob' }).build()]} />)
+
+    const nameCell = screen.getByTestId('table-cell-name')
+    expect(nameCell.querySelector('.pl-9')).not.toBeInTheDocument()
+  })
+
   describe('2FA column', () => {
     const twoFactorMembers = [
       // Email/Google sign-in — always enrolled
@@ -284,7 +392,7 @@ describe('MembersList', () => {
       expect(screen.queryByText('2FA')).not.toBeInTheDocument()
       expect(screen.queryAllByTestId('table-cell-2fa')).toHaveLength(0)
       // The other columns still render
-      expect(screen.getByText('Email')).toBeInTheDocument()
+      expect(screen.getByText('Email or address')).toBeInTheDocument()
     })
   })
 

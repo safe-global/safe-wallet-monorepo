@@ -209,6 +209,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       sortValue: (m) => getMemberDisplayName(m),
       cell: (member, { isCompact }) => {
         const { isDeclined, isExpired } = memberFlags(member)
+        const identifier = getMemberIdentifier(member)
         return (
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
@@ -217,8 +218,8 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
               {isExpired && <Badge variant="warning">Expired</Badge>}
             </div>
             {/* The identifier column is hidden in the compact layout — surface it under the name instead */}
-            {isCompact && (
-              <span className="text-muted-foreground truncate pl-9 text-xs">{getMemberIdentifier(member)?.label}</span>
+            {isCompact && identifier && (
+              <span className="text-muted-foreground truncate pl-9 text-xs">{identifier.label}</span>
             )}
           </div>
         )
