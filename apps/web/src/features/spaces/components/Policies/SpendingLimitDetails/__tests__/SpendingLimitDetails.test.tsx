@@ -207,9 +207,9 @@ describe('a pending spending limit', () => {
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
   )
 
-  const renderPending = (policy: PendingSpendingLimitPolicy = pending, hasLeftQueue?: boolean) =>
+  const renderPending = (policy: PendingSpendingLimitPolicy = pending, isUnlisted?: boolean) =>
     renderWithUserEvent(
-      withTxModal(<SpendingLimitDetails policy={policy} hasLeftQueue={hasLeftQueue} onClose={jest.fn()} />),
+      withTxModal(<SpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={jest.fn()} />),
     )
 
   beforeEach(() => {

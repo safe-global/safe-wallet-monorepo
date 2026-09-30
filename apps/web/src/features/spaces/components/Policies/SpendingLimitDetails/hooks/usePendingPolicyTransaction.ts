@@ -42,7 +42,7 @@ export type PendingPolicyTransaction = {
 
 export const usePendingPolicyTransaction = (
   policy: PendingSpendingLimitPolicy,
-  hasLeftQueue = false,
+  isUnlisted = false,
 ): PendingPolicyTransaction => {
   // A transaction that has left the queue can no longer change.
   const [isSettled, setIsSettled] = useState(false)
@@ -59,8 +59,8 @@ export const usePendingPolicyTransaction = (
   useRefetchOnTxEvents(REFETCH_EVENTS, refetch, !isSettled)
 
   useEffect(() => {
-    if (hasLeftQueue) refetch()
-  }, [hasLeftQueue, refetch])
+    if (isUnlisted) refetch()
+  }, [isUnlisted, refetch])
 
   const transaction = useMemo<PendingPolicyTransaction>(() => {
     if (error && 'status' in error && error.status === 404) return { confirmedBy: [], outcome: 'deleted' }

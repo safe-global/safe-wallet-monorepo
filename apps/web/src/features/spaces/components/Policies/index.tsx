@@ -228,7 +228,7 @@ const Policies = ({
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
-        <SpendingLimitDetails policy={openedPolicy} hasLeftQueue={!listedPolicy} onClose={closeDetails} />
+        <SpendingLimitDetails policy={openedPolicy} isUnlisted={!listedPolicy} onClose={closeDetails} />
       )}
     </div>
   )

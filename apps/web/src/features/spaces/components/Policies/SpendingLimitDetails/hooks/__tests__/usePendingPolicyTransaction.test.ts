@@ -143,12 +143,12 @@ describe('usePendingPolicyTransaction', () => {
   it('refetches at once when its row leaves the pending list', () => {
     const refetch = jest.fn()
     mockQuery({ currentData: details(), refetch })
-    const { rerender } = renderHook(({ hasLeftQueue }) => usePendingPolicyTransaction(policy, hasLeftQueue), {
-      initialProps: { hasLeftQueue: false },
+    const { rerender } = renderHook(({ isUnlisted }) => usePendingPolicyTransaction(policy, isUnlisted), {
+      initialProps: { isUnlisted: false },
     })
     expect(refetch).not.toHaveBeenCalled()
 
-    rerender({ hasLeftQueue: true })
+    rerender({ isUnlisted: true })
 
     expect(refetch).toHaveBeenCalledTimes(1)
   })

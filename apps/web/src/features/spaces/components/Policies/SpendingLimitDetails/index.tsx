@@ -7,7 +7,7 @@ import { useSpendingLimitDetails } from './hooks/useSpendingLimitDetails'
 
 export type SpendingLimitDetailsProps = {
   policy: ActiveDrawerPolicy | PendingSpendingLimitPolicy
-  hasLeftQueue?: boolean
+  isUnlisted?: boolean
   onClose: () => void
 }
 
@@ -19,15 +19,15 @@ const ActiveSpendingLimitDetails = ({ policy, onClose }: { policy: ActiveDrawerP
 
 const PendingSpendingLimitDetails = ({
   policy,
-  hasLeftQueue,
+  isUnlisted,
   onClose,
 }: {
   policy: PendingSpendingLimitPolicy
-  hasLeftQueue?: boolean
+  isUnlisted?: boolean
   onClose: () => void
 }) => {
   const content = useSpendingLimitDetails(policy)
-  const pending = usePendingSpendingLimitActions(policy, content.viewer, hasLeftQueue)
+  const pending = usePendingSpendingLimitActions(policy, content.viewer, isUnlisted)
   const { txFlow } = useContext(TxModalContext)
 
   // The drawer's overlay sits above the tx modal, so it hides while the flow is open and stays mounted to catch the result.
@@ -35,11 +35,11 @@ const PendingSpendingLimitDetails = ({
 }
 
 /** Hooks cannot be conditional, so the queued-transaction reads live in their own component. */
-const SpendingLimitDetails = ({ policy, hasLeftQueue, onClose }: SpendingLimitDetailsProps): ReactElement =>
+const SpendingLimitDetails = ({ policy, isUnlisted, onClose }: SpendingLimitDetailsProps): ReactElement =>
   policy.status === 'active' ? (
     <ActiveSpendingLimitDetails policy={policy} onClose={onClose} />
   ) : (
-    <PendingSpendingLimitDetails policy={policy} hasLeftQueue={hasLeftQueue} onClose={onClose} />
+    <PendingSpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={onClose} />
   )
 
 export default SpendingLimitDetails

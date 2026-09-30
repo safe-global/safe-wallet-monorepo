@@ -25,7 +25,7 @@ export type PendingSpendingLimitActions = {
 export const usePendingSpendingLimitActions = (
   policy: PendingSpendingLimitPolicy,
   viewer: Viewer,
-  hasLeftQueue = false,
+  isUnlisted = false,
 ): PendingSpendingLimitActions => {
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
@@ -33,13 +33,13 @@ export const usePendingSpendingLimitActions = (
   const { setTxFlow } = useContext(TxModalContext)
   const { txSummary, confirmedBy, confirmationsSubmitted, outcome, onRetry } = usePendingPolicyTransaction(
     policy,
-    hasLeftQueue,
+    isUnlisted,
   )
   const txId = getPendingTxId(policy)
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
   // The summary may be stale until the refetch says why the row left.
-  const reviewable = hasLeftQueue && !resolvedOutcome ? undefined : txSummary
+  const reviewable = isUnlisted && !resolvedOutcome ? undefined : txSummary
 
   const onReviewTransaction = useMemo(
     () =>
