@@ -11,6 +11,7 @@ import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import SpendingLimitSummary from '../Summary'
 import { toEditSummaryModel } from '../Summary/toEditSummaryModel'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
@@ -31,7 +32,8 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const { data: formValues } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { safeTx, safeTxError } = useContext(SafeTxContext)
   const { accounts } = useSpendingLimitSafeAccounts()
-  const { options: tokens } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options: tokens } = useSpendingLimitTokenOptions(extraTokens)
   const names = useAddressBook()
   const chainId = useChainId()
   const isEditMode = useIsEditMode()

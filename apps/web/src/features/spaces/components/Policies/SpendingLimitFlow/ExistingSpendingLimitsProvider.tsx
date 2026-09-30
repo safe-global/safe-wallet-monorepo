@@ -45,6 +45,8 @@ const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
 export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const scope = useSafeScope()
   const { loadSpendingLimits, $isReady } = useLoadFeature(SpendingLimitsFeature)
+  // No `extraTokens` here, deliberately: those are derived from the limits this loads, and `tokenInfos`
+  // is one of its dependencies, so feeding them back would reload every limit a second time.
   const { options } = useSpendingLimitTokenOptions()
 
   // The options are a new array on every balance poll, so key on the fields the loader reads (the logo is cosmetic).

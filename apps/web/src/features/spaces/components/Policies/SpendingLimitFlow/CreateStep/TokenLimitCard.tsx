@@ -16,6 +16,7 @@ import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
@@ -79,7 +80,8 @@ const TokenLimitCard = ({
     trigger,
     formState: { errors },
   } = useFormContext<SpendingLimitPolicyFormValues>()
-  const { options } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options } = useSpendingLimitTokenOptions(extraTokens)
   const { limits: existingLimits } = useExistingSpendingLimits()
   // An edit describes the Safe's whole policy, so its own limits are the rows to change, not conflicts.
   const isEditMode = useIsEditMode()

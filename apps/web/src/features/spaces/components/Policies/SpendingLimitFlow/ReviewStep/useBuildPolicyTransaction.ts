@@ -8,6 +8,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR } from '../constants'
 import { buildDesiredAllowances, findExistingAllowance } from './buildDesiredAllowances'
@@ -48,7 +49,8 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const scope = useSafeScope()
   const { safe, safeLoaded } = useSafeInfo()
   const chain = useCurrentChain()
-  const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions(extraTokens)
   const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
   const { createSpendingLimitsTx, createSpendingLimitEditTx, buildSpendingLimitEdit, $isReady } =
     useLoadFeature(SpendingLimitsFeature)
