@@ -195,6 +195,15 @@ export const Editing: Story = {
   args: { initialSafe: efSafeTarget, defaultValues: filledValues },
 }
 
+/** Straight off the chain, nothing touched: there is no transaction to build, so `Next` is out of reach. */
+export const EditingUnchanged: Story = {
+  render: (args) => <EditingForm {...args} />,
+  args: {
+    initialSafe: efSafeTarget,
+    defaultValues: { ...filledValues, spenders: [filledValues.spenders[0]] },
+  },
+}
+
 /** Dropping a spender: the removal notice takes the card's place and offers the one way back. */
 export const EditingWithRemovals: Story = {
   render: (args) => <EditingForm {...args} />,

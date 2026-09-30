@@ -10,6 +10,7 @@ import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import { describeRemovals, findPendingRemovals } from '../utils/removals'
+import { hasEditChanges } from '../utils/hasEditChanges'
 import { toSpendingLimitFormValues } from '../utils/prefill'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
@@ -79,7 +80,10 @@ const SpendingLimitPolicyForm = ({
 
   const policyKey = spenders
     .map(
-      (spender) => `${spender?.address ?? ''}>${(spender?.limits ?? []).map((l) => l?.tokenAddress ?? '').join('|')}`,
+      (spender) =>
+        `${spender?.address ?? ''}>${(spender?.limits ?? [])
+          .map((limit) => `${limit?.tokenAddress ?? ''}:${limit?.amount ?? ''}:${limit?.resetTime ?? ''}`)
+          .join('|')}`,
     )
     .join(',')
   const removals = useMemo(
@@ -92,6 +96,14 @@ const SpendingLimitPolicyForm = ({
   const discardChanges = useCallback(
     () => reset(toSpendingLimitFormValues(getValues('safe'), baseline ?? [])),
     [reset, getValues, baseline],
+  )
+
+  // Nothing to sign for an edit that changes nothing, so the step does not offer to move on.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const isUnchangedEdit = useMemo(
+    () => isEditMode && baseline !== undefined && !hasEditChanges(baseline, getValues()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [isEditMode, baseline, policyKey],
   )
 
   const isEmptyPolicy = spenders.every((spender) => !spender?.address)
@@ -167,7 +179,12 @@ const SpendingLimitPolicyForm = ({
           </div>
 
           <TxCardActions>
-            <Button type="submit" size="submit" disabled={!formState.isValid || isSafeBlocked} data-testid="next-btn">
+            <Button
+              type="submit"
+              size="submit"
+              disabled={!formState.isValid || isSafeBlocked || isUnchangedEdit}
+              data-testid="next-btn"
+            >
               {NEXT_LABEL}
             </Button>
           </TxCardActions>

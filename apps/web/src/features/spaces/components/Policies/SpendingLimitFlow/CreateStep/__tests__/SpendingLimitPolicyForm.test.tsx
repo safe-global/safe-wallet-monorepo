@@ -340,7 +340,12 @@ describe('SpendingLimitPolicyForm', () => {
   describe('in edit mode', () => {
     const SAFE_ID = buildSafeAccountId('1', SAFE_A)
     const onChainLimit = spendingLimitStateBuilder()
-      .with({ beneficiary: SPENDER, token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' } })
+      .with({
+        beneficiary: SPENDER,
+        amount: '100000000',
+        resetTimeMin: '1440',
+        token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+      })
       .build()
     const prefilled = {
       safe: SAFE_ID,
@@ -380,6 +385,21 @@ describe('SpendingLimitPolicyForm', () => {
       renderEdit()
 
       expect(screen.getByRole('button', { name: REMOVE_SPENDER_LABEL })).toBeInTheDocument()
+    })
+
+    it('withdraws the offer to move on once the change is undone', async () => {
+      const { user } = renderEdit()
+      const amount = screen.getByTestId('limit-amount-input')
+
+      await user.clear(amount)
+      await user.type(amount, '80')
+      // The form is valid by now, so only the edit being empty can take `Next` away again.
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+
+      await user.clear(amount)
+      await user.type(amount, '100')
+
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeDisabled())
     })
 
     it('says nothing about removals while the form still carries every limit', () => {
