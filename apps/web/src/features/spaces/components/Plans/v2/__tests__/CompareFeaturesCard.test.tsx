@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { act, fireEvent, render, screen, within } from '@/tests/test-utils'
-import { COMPARE_SECTIONS_V2, PAY_FEES_FROM_SAFE } from '../../planCatalog'
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import { COMPARE_SECTIONS_V2, PAY_FEES_FROM_SAFE, SAFENET_CHECKS } from '../../planCatalog'
 import CompareFeaturesCard, { VISIBLE_FEATURES } from '../CompareFeaturesCard'
 
 const Harness = ({ currentPlan, initiallyExpanded = false }: { currentPlan?: string; initiallyExpanded?: boolean }) => {
@@ -22,10 +22,10 @@ describe('CompareFeaturesCard', () => {
     window.ResizeObserver = originalResizeObserver
   })
 
-  it('shows only the Operations section while collapsed', () => {
+  it('previews the sections at the top of the table while collapsed', () => {
     render(<Harness />)
 
-    expect(sectionTitles()).toEqual(['Operations'])
+    expect(sectionTitles()).toEqual(['Coming soon', 'Operations'])
     COMPARE_SECTIONS_V2[0].rows.forEach((row) => expect(screen.getByText(row.feature)).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'false')
   })
@@ -59,7 +59,7 @@ describe('CompareFeaturesCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Compare all features/ }))
 
-    expect(sectionTitles()).toEqual(['Operations'])
+    expect(sectionTitles()).toEqual(['Coming soon', 'Operations'])
   })
 
   it.each(['Starter', 'Business', 'Enterprise'])(
@@ -79,12 +79,38 @@ describe('CompareFeaturesCard', () => {
     expect(screen.queryByText('Current')).not.toBeInTheDocument()
   })
 
-  it('lists the fee payment only as a coming-soon row', () => {
+  it.each([
+    [PAY_FEES_FROM_SAFE, ['Included', 'Included', 'Included']],
+    [SAFENET_CHECKS, ['—Not included', 'Included', 'Included']],
+    ['More policies', ['Included', 'Included', 'Included']],
+  ])('groups %s at the top under Coming soon, showing which plans will get it', (feature, cells) => {
     render(<Harness initiallyExpanded />)
 
-    const row = screen.getByRole('rowheader', { name: new RegExp(PAY_FEES_FROM_SAFE) })
-    expect(within(row).getByText('Soon')).toBeInTheDocument()
-    expect(within(row).getByText('Soon')).toHaveAttribute('data-variant', 'subtle')
+    expect(sectionTitles()[0]).toBe('Coming soon')
+    const header = screen.getByRole('rowheader', { name: `${feature} Soon` })
+    expect(within(header).getByText('Soon')).toHaveAttribute('data-variant', 'subtle')
+    const row = header.closest('tr') as HTMLElement
+    expect(
+      within(row)
+        .getAllByRole('cell')
+        .map((cell) => cell.textContent),
+    ).toEqual(cells)
+  })
+
+  it('draws no divider under the last row', () => {
+    render(<Harness initiallyExpanded />)
+
+    const lastSection = screen.getByText('Add-ons', { selector: 'th' }).closest('tbody') as HTMLElement
+    expect(lastSection.className).not.toMatch(/last-child\]:border-b/)
+  })
+
+  it('puts the Hypernative add-on last, in its own section', () => {
+    render(<Harness initiallyExpanded />)
+
+    expect(sectionTitles().at(-1)).toBe('Add-ons')
+    const row = screen.getByRole('rowheader', { name: /Hypernative threat monitoring/ }).closest('tr') as HTMLElement
+    expect(row).toHaveAttribute('data-add-on', 'true')
+    expect(within(row).getByRole('link', { name: 'Discuss add-on' })).toBeInTheDocument()
   })
 
   it('names included and missing features for screen readers', () => {
@@ -176,55 +202,32 @@ describe('CompareFeaturesCard', () => {
   it('keeps the first features readable while collapsed and hides the ones fading out', () => {
     render(<Harness />)
 
-    const rows = COMPARE_SECTIONS_V2[0].rows
+    const rows = COMPARE_SECTIONS_V2.flatMap((section) => section.rows)
     rows
       .slice(0, VISIBLE_FEATURES)
-      .forEach((row) => expect(screen.getByRole('rowheader', { name: row.feature })).toBeInTheDocument())
+      .forEach((row) =>
+        expect(screen.getByRole('rowheader', { name: (name) => name.startsWith(row.feature) })).toBeInTheDocument(),
+      )
     rows
       .slice(VISIBLE_FEATURES)
-      .forEach((row) => expect(screen.queryByRole('rowheader', { name: row.feature })).not.toBeInTheDocument())
+      .forEach((row) =>
+        expect(
+          screen.queryByRole('rowheader', { name: (name) => name.startsWith(row.feature) }),
+        ).not.toBeInTheDocument(),
+      )
   })
 
-  it('pins the header once expanded and adds a glow to the current plan', () => {
+  it('pins a flat header once expanded, marking the current plan with its badge only', () => {
     render(<Harness currentPlan="Business" />)
     const business = screen.getByRole('columnheader', { name: /^Business/ })
     expect(business.closest('thead')).not.toHaveClass('sticky')
-    expect(business).not.toHaveClass('from-mint/15')
 
     fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
 
-    expect(business.closest('thead')).toHaveClass('sticky', 'top-0')
-    expect(screen.getByRole('columnheader', { name: 'Features' })).toBeVisible()
-    expect(business).toHaveClass('from-mint/15')
+    const header = business.closest('thead') as HTMLElement
+    expect(header).toHaveClass('sticky', 'top-0')
+    expect(header.className).not.toMatch(/shadow/)
+    expect(business.className).not.toMatch(/mint/)
     expect(within(business).getByText('Current')).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: /^Enterprise/ })).not.toHaveClass('from-mint/15')
-  })
-
-  it('adds the hairline shadow to the header only while it is pinned', () => {
-    let report: IntersectionObserverCallback = () => {}
-    const original = window.IntersectionObserver
-    window.IntersectionObserver = class {
-      constructor(callback: IntersectionObserverCallback) {
-        report = callback
-      }
-      observe() {}
-      disconnect() {}
-    } as unknown as typeof IntersectionObserver
-    const scrollTo = (isIntersecting: boolean, top: number) =>
-      act(() =>
-        report(
-          [{ isIntersecting, boundingClientRect: { top } } as IntersectionObserverEntry],
-          {} as IntersectionObserver,
-        ),
-      )
-    render(<Harness initiallyExpanded />)
-    const header = screen.getByRole('columnheader', { name: /^Business/ }).closest('thead') as HTMLElement
-
-    scrollTo(false, -20)
-    expect(header).toHaveClass('shadow-hairline-lg')
-
-    scrollTo(true, 40)
-    expect(header).not.toHaveClass('shadow-hairline-lg')
-    window.IntersectionObserver = original
   })
 })

@@ -9,7 +9,13 @@ import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@/utils/cn'
 import { Seats } from '../PlanCards'
-import { getCardFeaturesV2, getPlanContentV2, PLAN_CARD_COPY_V2, RECOMMENDED_PLAN } from '../planCatalog'
+import {
+  getCardFeatureItemsV2,
+  getFeaturesHeadingV2,
+  getPlanContentV2,
+  PLAN_CARD_COPY_V2,
+  RECOMMENDED_PLAN,
+} from '../planCatalog'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from '../types'
 import { CtaArrow } from './CtaArrow'
 import { FeatureCheck } from './FeatureCheck'
@@ -26,7 +32,9 @@ export type PlanCardV2Actions = {
 
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
-const salesLink = <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />
+/** Feature text darkens with its checks while the card is hovered or focused. */
+const FEATURE_TEXT_HOVER_CLASSES =
+  'transition-colors duration-300 ease-soft motion-reduce:transition-none group-hover/plan:text-foreground group-focus-within/plan:text-foreground'
 
 /** Mint underline behind the support level that draws in while the card is hovered or focused. */
 const SUPPORT_HIGHLIGHT_CLASSES = [
@@ -54,7 +62,7 @@ const PlanCtaV2 = ({
           size="lg"
           weight="semibold"
           className="w-full"
-          render={salesLink}
+          render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
           onClick={() => {
             const label =
               cta.kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
@@ -95,17 +103,28 @@ const PlanCtaV2 = ({
   }
 }
 
-export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2Actions) => {
+export const PlanCardV2 = ({
+  tier,
+  seatsLabel,
+  onSeatsChange,
+  ...actions
+}: {
+  tier: PlanTier
+  /** Safe count picked on the other billing cycle, so switching cycles keeps it. */
+  seatsLabel?: string
+  onSeatsChange?: (label: string) => void
+} & PlanCardV2Actions) => {
   const content = getPlanContentV2(tier.name)
   const isPrimary = tier.name === RECOMMENDED_PLAN
   // Tracked by key: tiers are rebuilt every render.
   const [pickedKey, setPickedKey] = useState<string>()
   const option =
     tier.options.find((candidate) => optionKey(candidate) === pickedKey) ??
+    tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options[0]
   const price = option ? getPlanPriceV2(tier, option) : undefined
-  const features = getCardFeaturesV2(tier.name) ?? tier.features
+  const features = getCardFeatureItemsV2(tier.name) ?? tier.features.map((label) => ({ label, isInherited: false }))
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
@@ -129,13 +148,20 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
           )}
         </div>
 
-        <div className="mt-5 flex items-baseline gap-1 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
+        <div className="mt-5 flex flex-col gap-0.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
           {price && (
             <>
-              <Typography variant="h3">{price.headline}</Typography>
-              <Typography variant="paragraph-small" color="muted">
-                {price.suffix}
-              </Typography>
+              <div className="flex items-baseline gap-1">
+                <Typography variant="h3">{price.headline}</Typography>
+                <Typography variant="paragraph-small" color="muted">
+                  {price.suffix}
+                </Typography>
+              </div>
+              {price.perSafe && (
+                <Typography variant="paragraph-small" color="muted" data-testid="plan-per-safe">
+                  {price.perSafe}
+                </Typography>
+              )}
             </>
           )}
         </div>
@@ -146,7 +172,10 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
               <Seats
                 options={tier.options}
                 value={option}
-                onChange={(next) => setPickedKey(optionKey(next))}
+                onChange={(next) => {
+                  setPickedKey(optionKey(next))
+                  onSeatsChange?.(next.label)
+                }}
                 label={`${PLAN_CARD_COPY_V2.seatsLabel} ${tier.name}`}
               />
               {!actions.readOnly && <PlanCtaV2 pick={{ tier, option }} isPrimary={isPrimary} {...actions} />}
@@ -162,12 +191,14 @@ export const PlanCardV2 = ({ tier, ...actions }: { tier: PlanTier } & PlanCardV2
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
-            {content && <Typography variant="paragraph-small-bold">{PLAN_CARD_COPY_V2.featuresHeading}</Typography>}
+            {content && <Typography variant="paragraph-small-bold">{getFeaturesHeadingV2(tier.name)}</Typography>}
             <List className="gap-3">
-              {features.map((feature, index) => (
-                <ListItem key={feature} size="sm" className="items-start py-0">
+              {features.map(({ label, isInherited }, index) => (
+                <ListItem key={label} size="sm" className="items-start py-0" data-inherited={isInherited || undefined}>
                   <FeatureCheck followsPlanHover index={index} />
-                  <Typography variant="paragraph-small">{feature}</Typography>
+                  <Typography variant="paragraph-small" color="muted" className={FEATURE_TEXT_HOVER_CLASSES}>
+                    {label}
+                  </Typography>
                 </ListItem>
               ))}
             </List>

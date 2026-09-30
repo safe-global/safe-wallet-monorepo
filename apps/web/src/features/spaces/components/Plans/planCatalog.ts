@@ -89,13 +89,26 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   { from: 'Enterprise', label: SLAS },
 ]
 
-/** Everything a plan includes, lower plans' features first. */
-export const getCardFeaturesV2 = (name: string): string[] | undefined => {
+export type CardFeatureItemV2 = { label: string; isInherited: boolean }
+
+/** Everything a plan includes: what it adds first, then what it keeps from lower plans. A per-plan quota counts as added. */
+export const getCardFeatureItemsV2 = (name: string): CardFeatureItemV2[] | undefined => {
   if (!isPlanNameV2(name)) return undefined
   const rank = PLAN_ORDER.indexOf(name)
-  return CARD_FEATURES_V2.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ label }) =>
-    typeof label === 'string' ? label : label[name],
-  )
+  const items = CARD_FEATURES_V2.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ from, label }) => ({
+    label: typeof label === 'string' ? label : label[name],
+    isInherited: typeof label === 'string' && from !== name,
+  }))
+  return [...items.filter((item) => !item.isInherited), ...items.filter((item) => item.isInherited)]
+}
+
+export const getCardFeaturesV2 = (name: string): string[] | undefined =>
+  getCardFeatureItemsV2(name)?.map((item) => item.label)
+
+/** "What's included" on the first plan, "Everything in Starter, plus" on the ones after it. */
+export const getFeaturesHeadingV2 = (name: string): string => {
+  const rank = isPlanNameV2(name) ? PLAN_ORDER.indexOf(name) : 0
+  return rank > 0 ? `Everything in ${PLAN_ORDER[rank - 1]}, plus` : PLAN_CARD_COPY_V2.featuresHeading
 }
 
 export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
@@ -116,6 +129,7 @@ export const PLAN_CARD_COPY_V2 = {
   seatsLabel: 'Safe accounts for',
   billedMonthly: 'Billed monthly · excl. VAT',
   billedYearly: 'Billed yearly · excl. VAT',
+  perSafe: (amount: string) => `${amount} per Safe account/mo`,
 } as const
 
 export const SAFENET_CHECKS = 'Safenet checks'
@@ -127,9 +141,11 @@ export type CompareValueV2 = boolean | string
 
 export type CompareRowV2 = {
   feature: string
-  /** Unreleased: shows "Soon" instead of per-plan values. */
+  /** Unreleased: a "Soon" chip next to the feature name. */
   isComingSoon?: boolean
-  values?: Record<PlanNameV2, CompareValueV2>
+  /** Partner add-on, sold separately: the partner's icon and a sales link. */
+  isAddOn?: boolean
+  values: Record<PlanNameV2, CompareValueV2>
 }
 
 export type CompareSectionV2 = { title: string; rows: CompareRowV2[] }
@@ -142,8 +158,16 @@ const every = (value: CompareValueV2): Record<PlanNameV2, CompareValueV2> => ({
 const fromBusiness: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: true, Enterprise: true }
 const enterpriseOnly: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: false, Enterprise: true }
 
-/** The collapsed "Compare all features" card shows only the first section. */
+/** The collapsed "Compare all features" card shows the first few rows. */
 export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
+  {
+    title: 'Coming soon',
+    rows: [
+      { feature: PAY_FEES_FROM_SAFE, values: every(true), isComingSoon: true },
+      { feature: SAFENET_CHECKS, values: fromBusiness, isComingSoon: true },
+      { feature: 'More policies', values: every(true), isComingSoon: true },
+    ],
+  },
   {
     title: 'Operations',
     rows: [
@@ -155,7 +179,6 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Account recovery', values: fromBusiness },
       { feature: MULTIPLE_WORKSPACES, values: enterpriseOnly },
       { feature: 'API access', values: { Starter: 'Builder', Business: 'Growth', Enterprise: 'Scale' } },
-      { feature: PAY_FEES_FROM_SAFE, isComingSoon: true },
     ],
   },
   {
@@ -165,8 +188,6 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Security Hub', values: every(true) },
       { feature: 'Advanced threat analysis', values: every(true) },
       { feature: 'Transaction simulation', values: every(true) },
-      { feature: 'Hypernative threat monitoring', values: every('Add-on') },
-      { feature: SAFENET_CHECKS, isComingSoon: true },
     ],
   },
   {
@@ -199,6 +220,10 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       },
     ],
   },
+  {
+    title: 'Add-ons',
+    rows: [{ feature: 'Hypernative threat monitoring', values: every('Add-on'), isAddOn: true }],
+  },
 ]
 
 export const COMPARE_COPY_V2 = {
@@ -210,22 +235,12 @@ export const COMPARE_COPY_V2 = {
   included: 'Included',
   notIncluded: 'Not included',
   showAll: 'Expand table',
+  discussAddOn: 'Discuss add-on',
 }
 
-export const PLAN_EXTRAS_V2 = {
-  comingSoon: {
-    tag: 'Coming soon',
-    title: 'More ways to execute with confidence',
-    items: [SAFENET_CHECKS, PAY_FEES_FROM_SAFE, 'More policies'],
-    action: 'Request updates',
-  },
-  addOn: {
-    tag: 'Optional add-on',
-    title: 'Hypernative',
-    description:
-      'Real-time threat monitoring and prevention for your Safes, from our security partner. Available on every plan, sold separately.',
-    action: 'Discuss add-on',
-  },
+export const SALES_PROMPT_V2 = {
+  prompt: 'Not sure which plan fits?',
+  action: 'Talk to sales',
 }
 
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.

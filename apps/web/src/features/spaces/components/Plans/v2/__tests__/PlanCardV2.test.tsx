@@ -71,10 +71,31 @@ describe('PlanCardV2', () => {
   it('lists everything the plan includes instead of the Stripe selling points', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 
-    expect(screen.getByText(PLAN_CARD_COPY_V2.featuresHeading)).toBeInTheDocument()
+    expect(screen.getByText('Everything in Starter, plus')).toBeInTheDocument()
     const features = getCardFeaturesV2('Business') ?? []
     features.forEach((feature) => expect(screen.getByText(feature)).toBeInTheDocument())
     expect(screen.queryByText('A Stripe selling point')).not.toBeInTheDocument()
+  })
+
+  it('leads with what the plan adds, then lists what it keeps from the plan below', () => {
+    render(<PlanCardV2 tier={BUSINESS} />)
+
+    const items = screen
+      .getAllByRole('listitem')
+      .filter((item) => item.closest('ul')?.querySelector('[data-inherited]'))
+    const inherited = items.map((item) => item.hasAttribute('data-inherited'))
+    expect(inherited.indexOf(true)).toBeGreaterThan(0)
+    expect(inherited.slice(inherited.indexOf(true)).every(Boolean)).toBe(true)
+    expect(items[0]).toHaveTextContent('50 sponsored transactions per month')
+    const kept = items.find((item) => item.textContent === 'Shared address book') as HTMLElement
+    expect(kept).toHaveAttribute('data-inherited', 'true')
+  })
+
+  it('keeps "What\'s included" on the first plan', () => {
+    render(<PlanCardV2 tier={{ ...BUSINESS, id: 'Starter-month', name: 'Starter' }} />)
+
+    expect(screen.getByText(PLAN_CARD_COPY_V2.featuresHeading)).toBeInTheDocument()
+    expect(screen.queryByText(/Everything in/)).not.toBeInTheDocument()
   })
 
   it('shows the support level and what it includes', () => {

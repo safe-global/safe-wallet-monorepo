@@ -1,10 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
+import { ArrowUpRight, ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Link } from '@/components/ui/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Typography } from '@/components/ui/typography'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@/utils/cn'
 import {
   COMPARE_COPY_V2,
@@ -47,6 +52,31 @@ const CompareValue = ({ value, isCurrent }: { value: CompareValueV2; isCurrent: 
   return <>{value}</>
 }
 
+const trackDiscussAddOn = () =>
+  trackEvent(
+    { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: SAFE_PRO_PLANS_LABELS.discuss_add_on },
+    { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.discuss_add_on },
+  )
+
+const AddOnFeature = ({ feature }: { feature: string }) => (
+  <span className="flex items-start gap-2 whitespace-normal">
+    <HypernativeIcon aria-hidden className="mt-px size-5 shrink-0" />
+    <span className="flex flex-col gap-0.5">
+      {feature}
+      <Link
+        href={CONTACT_SALES_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex w-fit items-center gap-0.5 text-xs font-semibold"
+        onClick={trackDiscussAddOn}
+      >
+        {COMPARE_COPY_V2.discussAddOn}
+        <ArrowUpRight aria-hidden className="size-3" />
+      </Link>
+    </span>
+  </span>
+)
+
 const CompareRow = ({
   row,
   currentPlanName,
@@ -60,24 +90,30 @@ const CompareRow = ({
   isExpanded: boolean
   ref?: Ref<HTMLTableRowElement>
 }) => (
-  <TableRow ref={ref} inert={isFolded} aria-hidden={isFolded || undefined} className="hover:bg-transparent">
+  <TableRow
+    ref={ref}
+    inert={isFolded}
+    aria-hidden={isFolded || undefined}
+    data-add-on={row.isAddOn || undefined}
+    className="hover:bg-transparent"
+  >
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal">
-      <span className="flex items-center gap-2">
-        {row.feature}
-        {row.isComingSoon && (
-          <Badge variant="subtle" size="status" shape="status">
-            {COMPARE_COPY_V2.soon}
-          </Badge>
-        )}
-      </span>
+      {row.isAddOn ? (
+        <AddOnFeature feature={row.feature} />
+      ) : (
+        <span className="flex items-center gap-2">
+          {row.feature}
+          {row.isComingSoon && (
+            <Badge variant="subtle" size="status" shape="status">
+              {COMPARE_COPY_V2.soon}
+            </Badge>
+          )}
+        </span>
+      )}
     </TableHead>
     {PLANS.map((plan) => (
       <TableCell key={plan} className="px-4 py-3">
-        {row.values ? (
-          <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
-        ) : (
-          <span className="sr-only">{COMPARE_COPY_V2.soon}</span>
-        )}
+        <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
       </TableCell>
     ))}
   </TableRow>
@@ -121,54 +157,16 @@ const useTableHeights = (
   return heights
 }
 
-/** Whether the marker at the table's top has scrolled above the viewport, so the sticky header is pinned. */
-const useIsScrolledPast = (markerRef: RefObject<HTMLElement | null>, isActive: boolean): boolean => {
-  const [isPast, setPast] = useState(false)
-
-  useEffect(() => {
-    const marker = markerRef.current
-    if (!isActive || !marker || typeof IntersectionObserver === 'undefined') return
-    const observer = new IntersectionObserver(([entry]) =>
-      setPast(!entry.isIntersecting && entry.boundingClientRect.top < 0),
-    )
-    observer.observe(marker)
-    return () => observer.disconnect()
-  }, [markerRef, isActive])
-
-  return isActive && isPast
-}
-
-const CompareHeaderRow = ({
-  currentPlanName,
-  isExpanded,
-  isStuck,
-}: {
-  currentPlanName?: string
-  isExpanded: boolean
-  isStuck: boolean
-}) => (
-  <TableHeader
-    data-stuck={isStuck || undefined}
-    className={cn(
-      isExpanded && 'sticky top-0 z-10 bg-card transition-shadow duration-200 ease-out',
-      isStuck && 'shadow-hairline-lg',
-    )}
-  >
+const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: string; isExpanded: boolean }) => (
+  <TableHeader className={cn(isExpanded && 'sticky top-0 z-10 bg-card')}>
     <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
-      <TableHead scope="col" className="h-auto w-[28%] px-4 py-2.5 align-top font-semibold">
+      <TableHead scope="col" className="h-11 w-[28%] px-4 py-0 align-middle font-semibold">
         {COMPARE_COPY_V2.featureColumn}
       </TableHead>
       {PLANS.map((plan) => {
         const isCurrent = plan === currentPlanName
         return (
-          <TableHead
-            key={plan}
-            scope="col"
-            className={cn(
-              'h-auto px-4 py-2.5 align-top font-semibold',
-              isExpanded && isCurrent && 'bg-muted-secondary bg-linear-to-t from-mint/15 to-transparent',
-            )}
-          >
+          <TableHead key={plan} scope="col" className="h-11 px-4 py-0 align-middle font-semibold">
             <span className="flex items-center gap-2">
               {plan}
               {isCurrent && (
@@ -184,6 +182,13 @@ const CompareHeaderRow = ({
   </TableHeader>
 )
 
+/** Where each section's rows start in the whole table, so the collapsed preview counts rows across sections. */
+const SECTION_FIRST_ROWS = COMPARE_SECTIONS_V2.map((_, index) =>
+  COMPARE_SECTIONS_V2.slice(0, index).reduce((count, section) => count + section.rows.length, 0),
+)
+const TOTAL_ROWS = COMPARE_SECTIONS_V2.reduce((count, section) => count + section.rows.length, 0)
+const LAST_PEEK_ROW = Math.min(VISIBLE_FEATURES + PEEK_FEATURES, TOTAL_ROWS) - 1
+
 const CompareSection = ({
   section,
   index,
@@ -197,16 +202,16 @@ const CompareSection = ({
   currentPlanName?: string
   lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
-  const isFoldable = index > 0
+  const firstRow = SECTION_FIRST_ROWS[index]
+  const isFoldable = firstRow > LAST_PEEK_ROW
   const isFolded = isFoldable && !isExpanded
-  const lastPeekRow = Math.min(VISIBLE_FEATURES + PEEK_FEATURES, section.rows.length) - 1
   return (
     <TableBody
       inert={isFolded}
       aria-hidden={isFolded || undefined}
       style={{ '--section-delay': `${80 + (index - 1) * SECTION_STAGGER_MS}ms` } as CSSProperties}
       className={cn(
-        '[&_tr:last-child]:border-b',
+        index < COMPARE_SECTIONS_V2.length - 1 && '[&_tr:last-child]:border-b',
         isFoldable && 'transition-opacity motion-reduce:transition-none',
         isFoldable &&
           (isExpanded ? 'opacity-100 duration-300 delay-(--section-delay) ease-out' : 'opacity-0 duration-150 ease-in'),
@@ -224,10 +229,10 @@ const CompareSection = ({
       {section.rows.map((row, rowIndex) => (
         <CompareRow
           key={row.feature}
-          ref={index === 0 && rowIndex === lastPeekRow ? lastPeekRowRef : undefined}
+          ref={firstRow + rowIndex === LAST_PEEK_ROW ? lastPeekRowRef : undefined}
           row={row}
           currentPlanName={currentPlanName}
-          isFolded={!isFoldable && !isExpanded && rowIndex >= VISIBLE_FEATURES}
+          isFolded={!isFoldable && !isExpanded && firstRow + rowIndex >= VISIBLE_FEATURES}
           isExpanded={isExpanded}
         />
       ))}
@@ -249,9 +254,7 @@ export default function CompareFeaturesCard({
 }) {
   const tableRef = useRef<HTMLTableElement>(null)
   const lastPeekRowRef = useRef<HTMLTableRowElement>(null)
-  const topMarkerRef = useRef<HTMLSpanElement>(null)
   const heights = useTableHeights(tableRef, lastPeekRowRef, isExpanded)
-  const isHeaderStuck = useIsScrolledPast(topMarkerRef, isExpanded)
   const tableStyle: CSSProperties | undefined = heights
     ? { height: isExpanded ? heights.full : heights.collapsed }
     : undefined
@@ -294,7 +297,6 @@ export default function CompareFeaturesCard({
           </button>
 
           <div className="@container relative">
-            <span ref={topMarkerRef} aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px" />
             <div
               id={TABLE_ID}
               data-testid="compare-features-table"
@@ -306,11 +308,11 @@ export default function CompareFeaturesCard({
               )}
             >
               <Table ref={tableRef} className="min-w-160 table-fixed">
-                <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} isStuck={isHeaderStuck} />
+                <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} />
                 {COMPARE_SECTIONS_V2.map((section, index) => (
                   <CompareSection
                     key={section.title}
-                    lastPeekRowRef={index === 0 ? lastPeekRowRef : undefined}
+                    lastPeekRowRef={lastPeekRowRef}
                     section={section}
                     index={index}
                     isExpanded={isExpanded}

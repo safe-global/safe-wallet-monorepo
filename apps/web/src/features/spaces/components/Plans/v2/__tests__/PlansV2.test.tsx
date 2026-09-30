@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
-import { SUPPORT_CHAT_URL } from '@/config/constants'
+import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import type { PlanGroup, PlanOffer } from '../../../../hooks/billing/types'
@@ -82,38 +82,59 @@ describe('PlansV2', () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
   })
 
-  it('opens support in a new tab from the coming-soon and add-on cards, tracking each', () => {
+  it('keeps the comparison collapsed by default, with no separate coming-soon or add-on cards', () => {
     renderPlans()
 
-    const requestUpdates = screen.getByRole('link', { name: 'Request updates' })
-    const discussAddOn = screen.getByRole('link', { name: 'Discuss add-on' })
-    ;[requestUpdates, discussAddOn].forEach((link) => {
-      expect(link).toHaveAttribute('href', SUPPORT_CHAT_URL)
-      expect(link).toHaveAttribute('target', '_blank')
-      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
-      expect(link.querySelector('[data-cta-arrow]')).toHaveAttribute('data-cta-arrow', 'reveal')
-    })
+    expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByRole('link', { name: 'Request updates' })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('link', { name: 'Discuss add-on', hidden: true })).toHaveLength(1)
+  })
 
-    fireEvent.click(requestUpdates)
+  it('offers the Hypernative add-on from its row, opening sales in a new tab and tracking it', () => {
+    renderPlans()
+    fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
+
+    const row = screen.getByRole('rowheader', { name: /Hypernative threat monitoring/ }).closest('tr') as HTMLElement
+    expect(row).toHaveAttribute('data-add-on', 'true')
+    const discussAddOn = within(row).getByRole('link', { name: 'Discuss add-on' })
+    expect(discussAddOn).toHaveAttribute('href', CONTACT_SALES_URL)
+    expect(discussAddOn).toHaveAttribute('target', '_blank')
+    expect(discussAddOn).toHaveAttribute('rel', 'noopener noreferrer')
+
     fireEvent.click(discussAddOn)
-    expectPlansClick(SAFE_PRO_PLANS_LABELS.request_updates)
     expectPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
   })
 
   it('tracks Talk to sales on the Enterprise card', () => {
     renderPlans()
 
-    fireEvent.click(screen.getByRole('link', { name: 'Talk to sales' }))
+    const enterprise = screen.getAllByTestId('plan-card').find((card) => within(card).queryByText('Enterprise'))
+    fireEvent.click(within(enterprise as HTMLElement).getByRole('link', { name: 'Talk to sales' }))
 
     expectPlansClick(SAFE_PRO_PLANS_LABELS.talk_to_sales)
   })
 
-  it('keeps the support links for a member who is not an admin, without plan buttons', () => {
-    renderPlans(true)
+  it('ends the page with a sales prompt in its own card, opening sales in a new tab', () => {
+    renderPlans()
 
-    expect(screen.getByRole('link', { name: 'Request updates' })).toBeInTheDocument()
+    const prompt = screen.getByTestId('plans-sales-prompt')
+    expect(prompt).toHaveTextContent('Not sure which plan fits?')
+    const talkToSales = within(prompt).getByRole('link', { name: 'Talk to sales' })
+    expect(talkToSales).toHaveAttribute('href', CONTACT_SALES_URL)
+    expect(talkToSales).toHaveAttribute('target', '_blank')
+    expect(talkToSales).toHaveAttribute('rel', 'noopener noreferrer')
+
+    fireEvent.click(talkToSales)
+    expectPlansClick(SAFE_PRO_PLANS_LABELS.sales_prompt)
+  })
+
+  it('keeps the add-on link for a member who is not an admin, without plan buttons', () => {
+    renderPlans(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
+
     expect(screen.getByRole('link', { name: 'Discuss add-on' })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('plans-sales-prompt')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()
   })
 

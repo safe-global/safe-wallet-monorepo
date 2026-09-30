@@ -26,7 +26,24 @@ export const getTiersV2 = (tiers: PlanTier[]): PlanTier[] => {
   return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
 }
 
-export type PlanPriceV2 = { headline: string; suffix: string; line: string }
+export type PlanPriceV2 = { headline: string; suffix: string; line: string; perSafe?: string }
+
+/** Exact to the cent, in integer cents so it multiplies back to the total: €83.45, or €100 when whole. */
+export const _formatPerSafe = (
+  price: number,
+  billingCycle: PlanTier['billingCycle'],
+  seats: number,
+  currency: string,
+) => {
+  const cents = Math.round((price * 100) / (billingCycle === 'year' ? 12 : 1) / seats)
+  const fractionDigits = cents % 100 === 0 ? 0 : 2
+  return new Intl.NumberFormat('en', {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(cents / 100)
+}
 
 /** Same totals as the launch page: €669/mo, or the full yearly amount per year. */
 export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPriceV2 => {
@@ -41,5 +58,8 @@ export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPric
     headline: formatPlanPrice(option.price, tier.currency),
     suffix: priceSuffix(tier.billingCycle),
     line: tier.billingCycle === 'year' ? PLAN_CARD_COPY_V2.billedYearly : PLAN_CARD_COPY_V2.billedMonthly,
+    perSafe: option.seats
+      ? PLAN_CARD_COPY_V2.perSafe(_formatPerSafe(option.price, tier.billingCycle, option.seats, tier.currency))
+      : undefined,
   }
 }

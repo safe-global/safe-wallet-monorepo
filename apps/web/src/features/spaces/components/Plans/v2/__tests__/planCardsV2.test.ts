@@ -12,7 +12,7 @@ import {
   WORKSPACE_2FA,
 } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { canManageV2, getPlanCtaV2, getPlanPriceV2, getTiersV2 } from '../planCardsV2'
+import { _formatPerSafe, canManageV2, getPlanCtaV2, getPlanPriceV2, getTiersV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -106,17 +106,24 @@ describe('PLAN_CONTENT_V2', () => {
 
     PLAN_ORDER.forEach((plan) => {
       const labels = getCardFeaturesV2(plan) ?? []
-      const value = (feature: string) => rows.find((row) => row.feature === feature)?.values?.[plan]
+      const value = (feature: string) => rows.find((row) => row.feature === feature)?.values[plan]
       rows
         .filter((row) => listed.has(row.feature))
-        .forEach((row) => expect(row.values?.[plan]).toBe(labels.includes(row.feature)))
+        .forEach((row) => expect(row.values[plan]).toBe(labels.includes(row.feature)))
 
       expect(labels).toContainEqual(expect.stringContaining(`${value('Sponsored transactions per month')} sponsored`))
     })
   })
 
-  it('leads the compare table with operations and has no catch-all section', () => {
-    expect(COMPARE_SECTIONS_V2.map((section) => section.title)).toEqual(['Operations', 'Security', 'Support', 'Limits'])
+  it('leads the compare table with what is coming, then operations, and ends with add-ons', () => {
+    expect(COMPARE_SECTIONS_V2.map((section) => section.title)).toEqual([
+      'Coming soon',
+      'Operations',
+      'Security',
+      'Support',
+      'Limits',
+      'Add-ons',
+    ])
   })
 
   it('leaves the coming-soon fee payment out of every plan', () => {
@@ -210,15 +217,21 @@ describe('getPlanPriceV2', () => {
       headline: '€669',
       suffix: '/mo',
       line: 'Billed monthly · excl. VAT',
+      perSafe: '€33.45 per Safe account/mo',
     })
   })
 
-  it('shows the yearly total on a yearly offer', () => {
+  it('shows the yearly total on a yearly offer, with the per-Safe price as a monthly equivalent', () => {
     expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ price: 17_424 }))).toEqual({
       headline: '€17,424',
       suffix: '/yr',
       line: 'Billed yearly · excl. VAT',
+      perSafe: '€72.60 per Safe account/mo',
     })
+  })
+
+  it('leaves out the per-Safe price when the seat count is unknown', () => {
+    expect(getPlanPriceV2(tier(), option({ price: 669, seats: null })).perSafe).toBeUndefined()
   })
 
   it('shows custom pricing without a price', () => {
@@ -227,5 +240,29 @@ describe('getPlanPriceV2', () => {
       suffix: 'Annual term',
       line: 'Pricing by agreement · Billed annually',
     })
+  })
+})
+
+describe('_formatPerSafe', () => {
+  it.each([
+    [189, 'month', 2, '€94.50', 189],
+    [669, 'month', 5, '€133.80', 669],
+    [1099, 'month', 10, '€109.90', 1099],
+    [1669, 'month', 20, '€83.45', 1669],
+    [17_424, 'year', 20, '€72.60', 1452],
+  ] as const)(
+    '%s/%s over %s Safes is %s, which multiplies back to the monthly total',
+    (price, cycle, seats, shown, monthly) => {
+      expect(_formatPerSafe(price, cycle, seats, 'eur')).toBe(shown)
+      expect(Number(shown.slice(1)) * seats).toBeCloseTo(monthly, 2)
+    },
+  )
+
+  it('rounds to the nearest cent when the total does not split evenly', () => {
+    expect(_formatPerSafe(1973, 'year', 2, 'eur')).toBe('€82.21')
+  })
+
+  it('drops the cents when the price per Safe is whole', () => {
+    expect(_formatPerSafe(200, 'month', 2, 'eur')).toBe('€100')
   })
 })

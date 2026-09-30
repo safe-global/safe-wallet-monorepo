@@ -5,7 +5,7 @@ import type Plans from '../index'
 import PlanStatusCard from '../PlanStatusCard'
 import CompareFeaturesCard from './CompareFeaturesCard'
 import PlanCatalogV2 from './PlanCatalogV2'
-import PlanExtrasV2 from './PlanExtrasV2'
+import SalesPromptCard from './SalesPromptCard'
 import { canManageV2 } from './planCardsV2'
 
 const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
@@ -69,7 +69,7 @@ export default function PlansV2({
         isExpanded={isCompareExpanded}
         onExpandedChange={setCompareExpanded}
       />
-      <PlanExtrasV2 />
+      {!readOnly && <SalesPromptCard />}
     </div>
   )
 }
