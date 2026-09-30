@@ -26,6 +26,8 @@ export const mockSpendingLimitDto = (overrides: Partial<ActivePolicyDto> = {}): 
             resetsAtMinute: 29_846_880,
             resetBoundaryIsExact: true,
             isDelegateActive: true,
+            createdAt: 1_790_000_000,
+            updatedAt: 1_790_000_000,
           },
         ],
       },

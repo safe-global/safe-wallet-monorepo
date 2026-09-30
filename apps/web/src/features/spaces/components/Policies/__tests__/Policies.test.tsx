@@ -1,6 +1,5 @@
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
@@ -76,29 +75,11 @@ describe('Policies', () => {
     expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
   })
 
-  it('renders the description as designed', () => {
+  it('should, when rendered, not show a page description or Learn more link', () => {
     render(<Policies />)
 
-    expect(
-      screen.getByText(
-        /Policies are rules that help you manage your Safe accounts\. Set them up once and they will run onchain, automatically\./,
-      ),
-    ).toBeInTheDocument()
-  })
-
-  it('links Learn more to the policies documentation', () => {
-    render(<Policies />)
-
-    expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
-  })
-
-  it('should, when rendered, style Learn more as a bold underlined link without the external icon', () => {
-    render(<Policies />)
-
-    const link = screen.getByRole('link', { name: 'Learn more' })
-
-    expect(link.querySelector('.external-link-icon')).not.toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'underline')
+    expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Learn more' })).not.toBeInTheDocument()
   })
 
   it('renders the policy catalogue', () => {
@@ -342,7 +323,7 @@ describe('Policies', () => {
 
       expect(screen.getByTestId('policies-list')).toBeInTheDocument()
       expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
-      expect(screen.getByPlaceholderText('by name, address or network')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
     })
   })
 
@@ -367,7 +348,6 @@ describe('Policies', () => {
 
       expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
       expect(screen.getByTestId('policies-loading')).toHaveTextContent('Almost there…')
-      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
       expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
       expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
     })
@@ -376,7 +356,6 @@ describe('Policies', () => {
       render(<Policies policies={mockPolicies()} isError />)
 
       expect(screen.getByRole('alert')).toHaveTextContent('The website failed to load data. Please try again.')
-      expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
       expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
       expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
     })

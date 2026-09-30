@@ -2358,10 +2358,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not a member of this space"
+            "description": "Access forbidden - user is not an active member of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space address book",
@@ -2413,10 +2413,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space address book",
@@ -2458,10 +2458,10 @@
             "description": "Invalid space identifier"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, space, or address book entry not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete address book entry",
@@ -3989,6 +3989,79 @@
           }
         },
         "summary": "Get the active policies on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/policies/pending": {
+      "get": {
+        "description": "Returns the spending-limit changes in the transaction queue of every Safe in the Space. Detects only direct AllowanceModule calls and calls found one level inside a MultiSend batch, and only against known AllowanceModule deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial AllowanceModule fork is not detected.",
+        "operationId": "spacePoliciesGetPendingPoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingPolicyDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the pending policy changes on Safes in a Space",
         "tags": [
           "spaces"
         ]
@@ -7157,7 +7230,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-bb4ea72",
+    "version": "main-2204472",
     "contact": {}
   },
   "tags": [],
@@ -12122,6 +12195,14 @@
           "isDelegateActive": {
             "type": "boolean",
             "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix seconds this allowance was (re-)established"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix seconds of the last event that changed this allowance"
           }
         },
         "required": [
@@ -12131,7 +12212,9 @@
           "resetPeriodMinutes",
           "resetsAtMinute",
           "resetBoundaryIsExact",
-          "isDelegateActive"
+          "isDelegateActive",
+          "createdAt",
+          "updatedAt"
         ]
       },
       "SpendingLimitSpenderDto": {
@@ -12307,6 +12390,250 @@
           "type",
           "enforcement",
           "enabled",
+          "data",
+          "safe"
+        ]
+      },
+      "EnableModuleChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "enable-module"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "AddDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "add-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The address being added as a delegate in AllowanceModule contract"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate"
+        ]
+      },
+      "RemoveDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "remove-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The delegate being removed"
+          },
+          "removeAllowances": {
+            "type": "boolean",
+            "description": "Whether the delegate's allowances are deleted along with it"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "removeAllowances"
+        ]
+      },
+      "SetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "amount",
+          "resetPeriodMinutes"
+        ]
+      },
+      "ResetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reset-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token"
+        ]
+      },
+      "DeleteAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delete-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token"
+        ]
+      },
+      "PendingSpendingLimitDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The AllowanceModule deployment holding this state"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EnableModuleChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AddDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "enable-module": "#/components/schemas/EnableModuleChangeDto",
+                  "add-delegate": "#/components/schemas/AddDelegateChangeDto",
+                  "remove-delegate": "#/components/schemas/RemoveDelegateChangeDto",
+                  "set-allowance": "#/components/schemas/SetAllowanceChangeDto",
+                  "reset-allowance": "#/components/schemas/ResetAllowanceChangeDto",
+                  "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              }
+            },
+            "description": "The AllowanceModule calls this transaction decodes to"
+          }
+        },
+        "required": [
+          "module",
+          "changes"
+        ]
+      },
+      "PendingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "queued-transaction"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit"
+            ]
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/ModuleEnforcementDto"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "The queued transaction this change was found in"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
+          },
+          "safe": {
+            "description": "The Safe the change is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "type",
+          "enforcement",
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
           "data",
           "safe"
         ]

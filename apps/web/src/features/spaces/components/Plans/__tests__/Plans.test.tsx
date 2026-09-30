@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
@@ -268,6 +268,35 @@ describe('Plans', () => {
 
     expect(screen.getByText('2 Safe accounts')).toBeInTheDocument()
     expect(screen.queryByText('pl_business_10')).not.toBeInTheDocument()
+  })
+
+  it('keeps the picked seat size when switching between monthly and yearly billing', async () => {
+    const seats = (paymentLinkId: string, price: number, billingCycle: 'month' | 'year', count: number) => ({
+      ...offer('Business', paymentLinkId, price, billingCycle),
+      seats: count,
+    })
+    const business = {
+      name: 'Business',
+      offers: [
+        seats('pl_business_5_m', 669, 'month', 5),
+        seats('pl_business_20_m', 1669, 'month', 20),
+        seats('pl_business_5_y', 6990, 'year', 5),
+        seats('pl_business_20_y', 17430, 'year', 20),
+      ],
+    }
+    const { user } = renderWithUserEvent(<Plans plan={null} {...meters} tiers={buildPlanTiers([business])} />)
+
+    await user.click(screen.getByRole('combobox'))
+    await user.click(await screen.findByRole('option', { name: '20 Safe accounts' }))
+    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+
+    await user.click(screen.getByRole('tab', { name: /Yearly/ }))
+    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+    expect(screen.getByText('€17,430')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: /Monthly/ }))
+    expect(screen.getByRole('combobox')).toHaveTextContent('20 Safe accounts')
+    expect(screen.getByText('€1,669')).toBeInTheDocument()
   })
 
   it('flags an exhausted meter', () => {

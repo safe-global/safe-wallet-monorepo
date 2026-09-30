@@ -117,6 +117,31 @@ describe('EnvironmentVariables', () => {
     })
   })
 
+  it('should mask the Tenderly access token until the user reveals it', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: mockTenderlyUrl, accessToken: mockTenderlyToken } },
+        },
+      },
+    })
+
+    const tenderlyTokenInput = screen.getByLabelText('Tenderly access token') as HTMLInputElement
+    // Never a password field, so password managers leave it alone; the masking is CSS only.
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+    expect(tenderlyTokenInput).toHaveAttribute('data-1p-ignore')
+    expect(tenderlyTokenInput).toHaveAttribute('data-lpignore', 'true')
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show access token' }))
+    expect(tenderlyTokenInput).not.toHaveClass('[-webkit-text-security:disc]')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide access token' }))
+    expect(tenderlyTokenInput).toHaveClass('[-webkit-text-security:disc]')
+    expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
+  })
+
   it('should show reset button when value is entered', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {

@@ -3,7 +3,7 @@ import { ThreatAnalysis } from '../ThreatAnalysis'
 import type { ThreatAnalysisResults, ThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { Severity, ThreatStatus, CommonSharedStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock AnalysisGroupCard — forward expandedGroups to a data attribute for assertions
 jest.mock('../../AnalysisGroupCard', () => ({
@@ -107,18 +107,10 @@ describe('ThreatAnalysis', () => {
     }
   }
 
-  const createAuthenticatedAuth = (overrides?: Partial<HypernativeAuthStatus>): HypernativeAuthStatus => ({
-    isAuthenticated: true,
-    isTokenExpired: false,
-    initiateLogin: jest.fn(),
-    logout: jest.fn(),
-    ...overrides,
-  })
-
   describe('when Hypernative authentication is required', () => {
     it('should render disabled card when hypernativeAuth is defined but not authenticated', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder().build()
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -129,7 +121,9 @@ describe('ThreatAnalysis', () => {
 
     it('should render disabled card when hypernativeAuth is defined and token is expired', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: true })
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: true })
+        .build()
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -144,7 +138,7 @@ describe('ThreatAnalysis', () => {
         undefined,
         false,
       ]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder().build()
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -237,7 +231,9 @@ describe('ThreatAnalysis', () => {
 
     it('should render HnAnalysisGroupCard when THREAT exists and hypernativeAuth is authenticated', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: false })
+        .build()
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -400,7 +396,7 @@ describe('ThreatAnalysis', () => {
         undefined,
         false,
       ]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder().build()
 
       render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -432,7 +428,7 @@ describe('ThreatAnalysis', () => {
     describe('HN path (hypernativeAuth + hn.$isReady)', () => {
       it('renders HnAnalysisGroupCard with expandedGroups=[THREAT] and overflow row when 5 threats', () => {
         const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
-        const hypernativeAuth = createAuthenticatedAuth()
+        const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
         render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -453,7 +449,7 @@ describe('ThreatAnalysis', () => {
 
       it('renders HnAnalysisGroupCard with expandedGroups=[THREAT] and NO overflow row when 2 threats', () => {
         const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(2) }, undefined, false]
-        const hypernativeAuth = createAuthenticatedAuth()
+        const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
         render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -475,7 +471,7 @@ describe('ThreatAnalysis', () => {
         useSafeShieldAssessmentUrl.mockReturnValueOnce(null)
 
         const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
-        const hypernativeAuth = createAuthenticatedAuth()
+        const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
         render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
 

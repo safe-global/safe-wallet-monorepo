@@ -2,8 +2,11 @@ import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import {
   MOCK_SAFES,
   asActivePolicy,
+  mockActivatingPolicy,
+  mockActiveSpendingLimit,
   mockMultiSpenderPolicy,
   mockPendingPolicy,
+  mockPendingUpdate,
   mockPolicies,
   mockPolygonSpendingLimitPolicy,
   mockProposerPolicy,
@@ -18,12 +21,18 @@ jest.mock('@/hooks/useAllAddressBooks', () => ({
   useSafeNameResolver: () => mockResolveSafeName,
 }))
 
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [{ chainId: '1', shortName: 'eth' }] }),
+  useChain: () => undefined,
+}))
+
 describe('PoliciesTable', () => {
   beforeEach(() => {
     mockResolveSafeName.mockReturnValue('')
   })
 
-  it('should, when the Safe has a name in the space, show it in the applies to column', () => {
+  it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
     mockResolveSafeName.mockImplementation((address: string) =>
       address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
     )
@@ -37,10 +46,10 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={mockPolicies()} />)
 
     expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: 'APPLIES TO' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'SAFE ACCOUNT' })).toBeInTheDocument()
     expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
       'RULE',
-      'APPLIES TO',
+      'SAFE ACCOUNT',
       'PROPOSER / TOKENS',
       'NETWORK',
       'STATUS',
@@ -48,12 +57,12 @@ describe('PoliciesTable', () => {
     ])
   })
 
-  it('should, when given a proposer policy, show the proposer with its grant label in the proposer / tokens column', () => {
+  it('should, when given a proposer policy, show the proposer without its grant label in the proposer / tokens column', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
     const cell = screen.getByTestId('policy-cell-proposer-tokens')
 
-    expect(within(cell).getByText('Bob')).toBeInTheDocument()
+    expect(within(cell).queryByText('Bob')).not.toBeInTheDocument()
     expect(within(cell).queryByTestId('policy-tokens')).not.toBeInTheDocument()
   })
 
@@ -61,6 +70,20 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
 
     expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByTestId('policy-tokens')).toBeInTheDocument()
+  })
+
+  it('should, when the search hit a spender name, show that name under the tokens', () => {
+    const policy = asActivePolicy(mockMultiSpenderPolicy())
+
+    render(<PoliciesTable policies={[policy]} matchedSpenderNames={new Map([[policy.id, 'Act1']])} />)
+
+    expect(screen.getByTestId('policy-matched-spender')).toHaveTextContent('Spender: Act1')
+  })
+
+  it('should, when the search did not hit a spender name, show no spender line', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} matchedSpenderNames={new Map()} />)
+
+    expect(screen.queryByTestId('policy-matched-spender')).not.toBeInTheDocument()
   })
 
   it('should, when a spending limit holds three spenders, render one row rather than three', () => {
@@ -106,6 +129,19 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 
     expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an executed change is not yet indexed, show it as activating', () => {
+    render(<PoliciesTable policies={[mockActivatingPolicy()]} />)
+
+    expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
+  })
+
+  it('should, when a change is queued for an active policy, keep the active row beside the pending one', () => {
+    render(<PoliciesTable policies={[mockActiveSpendingLimit(), mockPendingUpdate()]} />)
+
+    expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
   })
 
   it('should, when the policy is a proposer grant, render no token icons', () => {
@@ -164,5 +200,45 @@ describe('PoliciesTable', () => {
     render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
 
     expect(screen.queryByTestId('policy-open-button')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['proposer', asActivePolicy(mockProposerPolicy())],
+    ['spending limit', asActivePolicy(mockMultiSpenderPolicy())],
+  ])("should, for a %s policy, link the Safe name to the Safe's settings page", (_, policy) => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[policy]} />)
+
+    expect(
+      within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }),
+    ).toHaveAttribute('href', `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`)
+  })
+
+  it('should, when the Safe has no name, link its address instead', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: /0x8675/ })).toHaveAttribute(
+      'href',
+      `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`,
+    )
+  })
+
+  it('should, when the Safe link is clicked, not open the policy', () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+    const onSelect = jest.fn()
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} onSelect={onSelect} />)
+    fireEvent.click(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }))
+
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it("should, when the Safe's chain is unknown, not link the Safe", () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[asActivePolicy(mockPolygonSpendingLimitPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).queryByRole('link')).not.toBeInTheDocument()
   })
 })

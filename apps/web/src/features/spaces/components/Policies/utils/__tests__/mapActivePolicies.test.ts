@@ -1,5 +1,6 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
+import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
 import type { PolicyTokenInfo } from '../../types'
 import { getReferencedTokens, mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
@@ -146,5 +147,27 @@ describe('getReferencedTokens', () => {
     dto.data.spenders[0].allowances[0].tokenAddress = ZERO_ADDRESS
 
     expect(getReferencedTokens([dto, mockProposerDto()])).toEqual([])
+  })
+
+  it('should, when a queued tx sets an ERC-20 allowance, include that token once', () => {
+    const pending = mockPendingDto({
+      data: {
+        ...mockPendingDto().data,
+        changes: [
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.bob,
+            token: MOCK_TOKENS.usdt.address,
+            amount: '1',
+            resetPeriodMinutes: 0,
+          },
+        ],
+      },
+    })
+
+    expect(getReferencedTokens([mockSpendingLimitDto()], [pending, pending])).toEqual([
+      { chainId: MOCK_SAFES.treasury.chainId, address: MOCK_TOKENS.usdc.address },
+      { chainId: MOCK_SAFES.treasury.chainId, address: MOCK_TOKENS.usdt.address },
+    ])
   })
 })

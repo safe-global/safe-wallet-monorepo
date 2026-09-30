@@ -11,6 +11,7 @@ import type {
   DeadlockAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
@@ -396,12 +397,7 @@ describe('SafeShieldDisplay', () => {
           contract={emptyContract}
           threat={emptyThreat}
           deadlock={emptyDeadlock}
-          hypernativeAuth={{
-            isAuthenticated: false,
-            isTokenExpired: false,
-            initiateLogin: jest.fn(),
-            logout: jest.fn(),
-          }}
+          hypernativeAuth={hypernativeAuthStatusBuilder().build()}
         />,
       )
 
@@ -415,12 +411,7 @@ describe('SafeShieldDisplay', () => {
           contract={emptyContract}
           threat={emptyThreat}
           deadlock={emptyDeadlock}
-          hypernativeAuth={{
-            isAuthenticated: true,
-            isTokenExpired: true,
-            initiateLogin: jest.fn(),
-            logout: jest.fn(),
-          }}
+          hypernativeAuth={hypernativeAuthStatusBuilder().with({ isAuthenticated: true, isTokenExpired: true }).build()}
         />,
       )
 
@@ -434,12 +425,9 @@ describe('SafeShieldDisplay', () => {
           contract={emptyContract}
           threat={emptyThreat}
           deadlock={emptyDeadlock}
-          hypernativeAuth={{
-            isAuthenticated: true,
-            isTokenExpired: false,
-            initiateLogin: jest.fn(),
-            logout: jest.fn(),
-          }}
+          hypernativeAuth={hypernativeAuthStatusBuilder()
+            .with({ isAuthenticated: true, isTokenExpired: false })
+            .build()}
         />,
       )
 

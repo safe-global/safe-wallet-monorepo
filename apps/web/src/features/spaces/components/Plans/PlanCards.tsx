@@ -26,6 +26,10 @@ export const YEARLY_SAVINGS_LABEL = `Save up to ${YEARLY_SAVINGS_PERCENT}%`
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
+/** The option matching a seat size picked on another cycle of the same plan, so the toggle does not reset it. */
+const findSeatOption = (options: PlanSeatOption[], seatsLabel: string | undefined) =>
+  seatsLabel === undefined ? undefined : options.find((option) => option.label === seatsLabel)
+
 export const Seats = ({
   options,
   value,
@@ -149,6 +153,7 @@ export const PlanCard = ({
   selected,
   onSelect,
   onOptionChange,
+  preferredSeats,
   currentBadge,
   salesHint,
   ...actions
@@ -157,16 +162,19 @@ export const PlanCard = ({
   selected?: boolean
   onSelect?: () => void
   onOptionChange?: (option: PlanSeatOption) => void
+  preferredSeats?: string
 } & PlanCardActions) => {
   const selectable = onSelect !== undefined
   // In the catalog the plan in force is the one white, raised card; a chooser marks its pick with the mint border.
   const isCurrentInCatalog = !selectable && Boolean(tier.isCurrent)
   const currentOption = tier.options.find((candidate) => candidate.priceId === tier.currentPriceId)
-  const [option, setOption] = useState<PlanSeatOption | undefined>(currentOption ?? tier.options[0])
-  // The subscription can land after the card mounted; the selector must then snap to the plan in force.
+  const preferredOption = findSeatOption(tier.options, preferredSeats)
+  const [option, setOption] = useState<PlanSeatOption | undefined>(preferredOption ?? currentOption ?? tier.options[0])
+
   useEffect(() => {
-    if (currentOption) setOption(currentOption)
-  }, [currentOption])
+    if (currentOption && !preferredOption) setOption(currentOption)
+  }, [currentOption, preferredOption])
+
   const price = option?.price ?? null
   const hint = salesHint?.(tier)
   const features = option?.features?.length ? option.features : tier.features
@@ -261,6 +269,7 @@ export function PlanCatalog({
   tiers: PlanTier[]
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
+  const [seatsByPlan, setSeatsByPlan] = useState<Record<string, string>>({})
   const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
   const visible = getVisibleTiers(tiers, cycle)
 
@@ -288,7 +297,13 @@ export function PlanCatalog({
 
       <div className="flex flex-col gap-4 md:flex-row">
         {visible.map((tier) => (
-          <PlanCard key={tier.id} tier={tier} {...actions} />
+          <PlanCard
+            key={tier.id}
+            tier={tier}
+            preferredSeats={seatsByPlan[tier.name]}
+            onOptionChange={(option) => setSeatsByPlan((prev) => ({ ...prev, [tier.name]: option.label }))}
+            {...actions}
+          />
         ))}
       </div>
     </div>

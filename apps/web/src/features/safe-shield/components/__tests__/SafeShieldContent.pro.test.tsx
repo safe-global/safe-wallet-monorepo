@@ -6,6 +6,8 @@ import {
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { SafeShieldContent } from '../SafeShieldContent'
 
 let mockHasOwnTenderly = false
@@ -24,9 +26,6 @@ let mockProSpaceId: string | null = null
 jest.mock('@/features/spaces', () => ({
   useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockProSpaceId }),
 }))
-jest.mock('../HypernativeLoginLine', () => ({
-  HypernativeLoginLine: () => <div data-testid="hypernative-login-line" />,
-}))
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
   default: () => ({ safe: { chainId: '1', owners: [{ value: '0x00000000000000000000000000000000000000f1' }] } }),
@@ -39,7 +38,7 @@ const safeTx = {
 const contractCallTx = {
   data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
 } as unknown as SafeTransaction
-const renderContent = (hasProFeatures: boolean) =>
+const renderContent = (hasProFeatures: boolean, hypernativeAuth?: HypernativeAuthStatus) =>
   render(
     <SafeShieldContent
       recipient={emptyAnalysis}
@@ -48,6 +47,7 @@ const renderContent = (hasProFeatures: boolean) =>
       deadlock={emptyAnalysis}
       safeTx={safeTx}
       hasProFeatures={hasProFeatures}
+      hypernativeAuth={hypernativeAuth}
     />,
   )
 
@@ -72,7 +72,6 @@ describe('SafeShieldContent Safe Pro gating', () => {
 
     expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
     expect(screen.queryByTestId('pro-checks-row')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
     const openChecks = screen.getByTestId('open-checks-list')
     expect(openChecks).toContainElement(screen.getByTestId('recipient-analysis-group-card'))
     expect(openChecks).toContainElement(screen.getByTestId('contract-analysis-group-card'))
@@ -86,10 +85,9 @@ describe('SafeShieldContent Safe Pro gating', () => {
 
     expect(screen.getByTestId('tenderly-simulation-locked')).toBeInTheDocument()
     expect(screen.queryByTestId('tenderly-simulation')).not.toBeInTheDocument()
-    expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
   })
 
-  it('groups the Pro checks after the open ones and leaves the Hypernative line out with Safe Pro', () => {
+  it('groups the Pro checks after the open ones', () => {
     const recipient = RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build()
     render(
       <SafeShieldContent
@@ -112,6 +110,65 @@ describe('SafeShieldContent Safe Pro gating', () => {
     )
     expect(section.previousElementSibling).toBe(screen.getByTestId('open-checks-list'))
     expect(section.nextElementSibling).toBeNull()
+  })
+
+  it.each([true, false])(
+    'places the Hypernative login under the Pro checks for an eligible Safe (hasProFeatures: %s)',
+    (hasProFeatures) => {
+      renderContent(hasProFeatures, hypernativeAuthStatusBuilder().build())
+
+      expect(screen.getByTestId('pro-checks-section').nextElementSibling).toBe(
+        screen.getByTestId('hypernative-login-line'),
+      )
+    },
+  )
+
+  it('offers the Hypernative login after the open checks in the pre-Pro layout', () => {
+    render(
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={safeTx}
+        hypernativeAuth={hypernativeAuthStatusBuilder().build()}
+        hasProFeatures
+        isSafePro={false}
+      />,
+    )
+
+    expect(screen.getByTestId('open-checks-list').nextElementSibling).toBe(screen.getByTestId('hypernative-login-line'))
+  })
+
+  it('offers the Hypernative login when there is no Pro check to show', () => {
+    render(
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        hypernativeAuth={hypernativeAuthStatusBuilder().build()}
+        hasProFeatures
+      />,
+    )
+
+    expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
+    expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
+  })
+
+  it('hides the Hypernative login while the analysis skeleton shows', () => {
+    render(
+      <SafeShieldContent
+        recipient={[undefined, undefined, true]}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        hypernativeAuth={hypernativeAuthStatusBuilder().build()}
+        hasProFeatures
+      />,
+    )
+
+    expect(screen.getByRole('progressbar')).toBeInTheDocument()
     expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
   })
 

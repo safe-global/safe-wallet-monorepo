@@ -105,18 +105,15 @@ export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy
 export type PendingPolicyOperation = 'create' | 'update' | 'remove'
 
 type PendingPolicyBase = PolicyBase & {
-  status: 'pending'
+  /** `activating`: executed onchain, not yet reported by the indexer. */
+  status: 'pending' | 'activating'
   /** A queued removal and a queued creation need different wording, so the two are distinguished. */
   operation: PendingPolicyOperation
   safeTxHash: string
   nonce: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  /** Signers who have not yet confirmed. */
-  missingSigners: string[]
   proposedAt: number
-  /** The active policy this replaces, so a queued edit is not rendered as a second policy. */
-  supersedesId: string | null
 }
 
 /** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
@@ -124,12 +121,13 @@ export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-l
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
 
-export type PolicyStatus = 'active' | 'pending' | 'unenforced' | 'not-activated'
+export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
 
-export const isPendingPolicy = (policy: Policy): policy is PendingPolicy => policy.status === 'pending'
+export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
+  policy.status === 'pending' || policy.status === 'activating'
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
@@ -148,7 +146,7 @@ export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { typ
  * Calling it active would tell the user the Safe is protected when it is not.
  */
 export const getPolicyStatus = (policy: Policy): PolicyStatus => {
-  if (isPendingPolicy(policy)) return 'pending'
+  if (isPendingPolicy(policy)) return policy.status
   if (policy.enabled) return 'active'
 
   // A proposer grant has no module to switch on, so one that is not in force was never activated.
