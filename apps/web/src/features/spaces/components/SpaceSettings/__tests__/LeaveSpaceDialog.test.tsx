@@ -33,7 +33,7 @@ const mockSpace: GetSpaceResponse = {
 const renderDialog = (opts: { space?: GetSpaceResponse | undefined; onClose?: () => void } = {}) => {
   const space = 'space' in opts ? opts.space : mockSpace
   const onClose = opts.onClose ?? jest.fn()
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   return {
     store,
     onClose,

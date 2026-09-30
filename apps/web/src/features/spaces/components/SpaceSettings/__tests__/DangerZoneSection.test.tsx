@@ -18,7 +18,7 @@ jest.mock('../LeaveSpaceDialog', () => () => null)
 
 const renderSection = (space: GetSpaceResponse | undefined) =>
   render(
-    <Provider store={makeStore(undefined, { skipBroadcast: true })}>
+    <Provider store={makeStore()}>
       <DangerZoneSection space={space} />
     </Provider>,
   )

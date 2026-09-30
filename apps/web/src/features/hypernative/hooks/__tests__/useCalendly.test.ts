@@ -18,7 +18,7 @@ describe('useCalendly', () => {
     widgetRef = { current: mockWidgetElement }
 
     // Create a test store
-    mockStore = makeStore({}, { skipBroadcast: true })
+    mockStore = makeStore({})
     setStoreInstance(mockStore)
 
     // Clear any existing Calendly script

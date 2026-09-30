@@ -47,7 +47,7 @@ const mockSpaces = (spaces: GetSpaceResponse[] | undefined) => {
 }
 
 const renderWithStore = () => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
   const utils = renderHook(() => useInviteNotification(), { wrapper })
   return { store, ...utils }

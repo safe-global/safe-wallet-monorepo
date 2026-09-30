@@ -40,7 +40,7 @@ describe('getMultipleSafeOverviews cache key (serializeQueryArgs)', () => {
   })
 
   it('shares ONE entry for the same safe set regardless of field values, order, and isReadOnly flips', () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
 
     // Dashboard-style: full SafeItems, in order [A, B], all writable.
     store.dispatch(
@@ -74,7 +74,7 @@ describe('getMultipleSafeOverviews cache key (serializeQueryArgs)', () => {
   })
 
   it('keeps distinct entries for a different safe set and for wallet-scoped subscriptions', () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const fullSet = [fullSafeItem('1', ADDR_A, false), fullSafeItem('10', ADDR_B, false)]
 
     // No-wallet entry for the full set {A, B}.
