@@ -15,6 +15,7 @@ import {
   selectIsStoreHydrated,
 } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
+import { selectStepUpPhase } from '@/features/oidc-auth/store'
 import useChainId from '@/hooks/useChainId'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { parseSpaceId } from '@/hooks/useUrlSpaceId'
@@ -69,6 +70,8 @@ const useSafeWorkspaceState = (): SafeWorkspaceState => {
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
+  // A step-up return replays the add of a new Safe, which a list read before it would miss
+  const isStepUpInProgress = useAppSelector(selectStepUpPhase) !== 'idle'
   const chainId = useChainId()
   const safeAddress = useSafeAddressFromUrl()
 
@@ -98,7 +101,7 @@ const useSafeWorkspaceState = (): SafeWorkspaceState => {
   return {
     rawSpaceId: isReady ? query.spaceId : undefined,
     isSafeRoute,
-    isSessionPending: !isStoreHydrated || isSessionCheckPending || isOidcLoginPending,
+    isSessionPending: !isStoreHydrated || isSessionCheckPending || isOidcLoginPending || isStepUpInProgress,
     isSignedIn,
     hasNoAccess: Boolean(isUnauthorized(spaceError)),
     membershipStatus,
