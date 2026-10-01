@@ -1,15 +1,17 @@
+import { faker } from '@faker-js/faker'
 import { ExecutionMethod } from '@/components/tx/ExecutionMethodSelector'
 import { getGasPayment, selectSponsoredOffer, type GasPaymentInputs, type SponsoredOffer } from '@/utils/gasPayment'
 
+const spaceId = faker.string.uuid()
 const meter = { used: 10, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
 const buildInputs = (overrides: Partial<GasPaymentInputs> = {}): GasPaymentInputs => ({
   chainOptions: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
   isRefundTx: false,
   walletCanRelay: true,
-  campaign: { isEligible: true, remaining: 3, limit: 5, gasTooHigh: false },
+  campaign: { isEligible: true, remaining: 3, limit: 5, isGasTooHigh: false },
   daily: { remaining: 4, limit: 5 },
-  pro: { isEnabled: true, isPro: true, left: 40, meter, spaceId: 'space-1', canSponsor: true },
+  pro: { isEnabled: true, isPro: true, left: 40, meter, spaceId },
   excluded: new Set(),
   ...overrides,
 })
@@ -23,7 +25,7 @@ const dailyOffer: SponsoredOffer = {
 const subscriptionOffer: SponsoredOffer = {
   option: 'SUBSCRIPTION',
   disabledReason: null,
-  spaceId: 'space-1',
+  spaceId,
   left: 40,
   meter,
 }
@@ -39,7 +41,7 @@ describe('selectSponsoredOffer', () => {
     ['the daily limit when the campaign is excluded', { excluded: new Set(['NO_FEE_CAMPAIGN']) }, dailyOffer],
     [
       'the daily limit when the Safe is not eligible for the campaign',
-      { campaign: { isEligible: false, remaining: 0, limit: 0, gasTooHigh: false } },
+      { campaign: { isEligible: false, remaining: 0, limit: 0, isGasTooHigh: false } },
       dailyOffer,
     ],
     [
@@ -70,7 +72,7 @@ describe('selectSponsoredOffer', () => {
       'no subscription without a plan',
       {
         chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null, canSponsor: false },
+        pro: { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null },
       },
       null,
     ],
@@ -78,7 +80,7 @@ describe('selectSponsoredOffer', () => {
       'no subscription without a Workspace',
       {
         chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: true, left: 4, meter, spaceId: null, canSponsor: true },
+        pro: { isEnabled: true, isPro: true, left: 4, meter, spaceId: null },
       },
       null,
     ],
@@ -89,17 +91,17 @@ describe('selectSponsoredOffer', () => {
   it.each<[string, GasPaymentInputs['campaign'], SponsoredOffer]>([
     [
       'the gas is too high',
-      { isEligible: true, remaining: 3, limit: 5, gasTooHigh: true },
+      { isEligible: true, remaining: 3, limit: 5, isGasTooHigh: true },
       { ...campaignOffer, disabledReason: 'GAS_TOO_HIGH' },
     ],
     [
       'the gas is too high and the limit is reached',
-      { isEligible: true, remaining: 0, limit: 5, gasTooHigh: true },
+      { isEligible: true, remaining: 0, limit: 5, isGasTooHigh: true },
       { ...campaignOffer, remaining: 0, disabledReason: 'GAS_TOO_HIGH' },
     ],
     [
       'the limit is reached',
-      { isEligible: true, remaining: 0, limit: 5, gasTooHigh: false },
+      { isEligible: true, remaining: 0, limit: 5, isGasTooHigh: false },
       { ...campaignOffer, remaining: 0, disabledReason: 'LIMIT_REACHED' },
     ],
   ])('offers the campaign disabled when %s', (_label, campaign, expected) => {
@@ -108,13 +110,13 @@ describe('selectSponsoredOffer', () => {
 
   it('offers an exhausted subscription disabled', () => {
     const { offer } = selectSponsoredOffer(
-      buildInputs({ chainOptions: ['SUBSCRIPTION'], pro: { ...buildInputs().pro, left: 0, canSponsor: false } }),
+      buildInputs({ chainOptions: ['SUBSCRIPTION'], pro: { ...buildInputs().pro, left: 0 } }),
     )
 
     expect(offer).toEqual({ ...subscriptionOffer, left: 0, disabledReason: 'LIMIT_REACHED' })
   })
 
-  const freePro = { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null, canSponsor: false }
+  const freePro = { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null }
   const spentDaily = { remaining: 0, limit: 5 }
 
   it.each<[string, Partial<GasPaymentInputs>, boolean]>([
@@ -180,7 +182,7 @@ describe('getGasPayment', () => {
       'the subscription',
       subscriptionOffer,
       ExecutionMethod.RELAY,
-      { gasPayer: 'SUBSCRIPTION', sponsorSpaceId: 'space-1' },
+      { gasPayer: 'SUBSCRIPTION', sponsorSpaceId: spaceId },
     ],
   ])('pays for %s', (_label, offer, method, expected) => {
     expect(getGasPayment(offer, method)).toEqual(expected)

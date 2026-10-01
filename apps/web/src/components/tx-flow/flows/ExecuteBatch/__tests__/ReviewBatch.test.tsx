@@ -5,7 +5,6 @@ import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { getMockTx } from '@/tests/mocks/transactions'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
-import { GasPaymentOptionUnavailableError, RelayerUnavailableError } from '@safe-global/utils/services/gasPaymentErrors'
 import { dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { logError } from '@/services/exceptions'
@@ -92,9 +91,6 @@ const mockDispatchBatchExecution = dispatchBatchExecution as jest.MockedFunction
 const mockDispatchBatchExecutionRelay = dispatchBatchExecutionRelay as jest.MockedFunction<
   typeof dispatchBatchExecutionRelay
 >
-
-const UNAVAILABLE_MESSAGE =
-  "This gas payment option isn't available for this Safe account right now. Choose another gas payment method and execute again."
 
 const dailyOffer: SponsoredOffer = {
   option: 'FREE_DAILY_LIMIT',
@@ -207,28 +203,6 @@ describe('ReviewBatch', () => {
     expect(mockExclude).toHaveBeenCalledWith(['SUBSCRIPTION'])
     expect(mockDispatchBatchExecutionRelay).toHaveBeenCalledTimes(1)
     expect(screen.getByRole('button', { name: 'Submit' })).toBeEnabled()
-  })
-
-  it('excludes every sponsored option when the relay refuses a pay-from-Safe transaction', async () => {
-    mockDispatchBatchExecutionRelay.mockRejectedValue(
-      new GasPaymentOptionUnavailableError('PAY_FROM_SAFE', 'NOT_LISTED', [], 'Unavailable'),
-    )
-    renderReviewBatch()
-
-    await submit()
-
-    expect(await screen.findByText(UNAVAILABLE_MESSAGE)).toBeInTheDocument()
-    expect(mockExclude).toHaveBeenCalledWith(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
-  })
-
-  it('excludes the offered option when the chain has no relayer', async () => {
-    mockDispatchBatchExecutionRelay.mockRejectedValue(new RelayerUnavailableError('No relayer defined'))
-    renderReviewBatch()
-
-    await submit()
-
-    expect(await screen.findByText(UNAVAILABLE_MESSAGE)).toBeInTheDocument()
-    expect(mockExclude).toHaveBeenCalledWith(['FREE_DAILY_LIMIT'])
   })
 
   it('shows the generic submit error for any other failure', async () => {

@@ -140,19 +140,17 @@ export const ExecuteForm = ({
       )
     } catch (_err) {
       const err = asError(_err)
+      const refusal = getGasPaymentRefusal(err, gasPayer)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
       } else if (err instanceof RelaySimulationError) {
         setRelaySimError(err)
+      } else if (refusal) {
+        exclude(refusal.excluded)
+        setRefusalMessage(refusal.message)
       } else {
-        const refusal = getGasPaymentRefusal(err, gasPayer)
-        if (refusal) {
-          exclude(refusal.excluded)
-          setRefusalMessage(refusal.message)
-        } else {
-          trackError(Errors._804, err)
-          setSubmitError(err)
-        }
+        trackError(Errors._804, err)
+        setSubmitError(err)
       }
 
       setIsSubmitLoading(false)

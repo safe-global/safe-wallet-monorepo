@@ -26,10 +26,10 @@ export const useGasPaymentOptions = ({
 }): GasPaymentOptions => {
   const chain = useCurrentChain()
   const [relays, , isRelaysLoading] = useRelaysBySafe()
-  const { isEnabled, isPro, left, meter, spaceId, canSponsor, isLoading: isProLoading } = useSafeSponsoredTxs()
+  const { isEnabled, isPro, left, meter, spaceId, isLoading: isProLoading } = useSafeSponsoredTxs()
   const campaign = useNoFeeCampaignEligibility()
   const isCampaignEnabled = useIsNoFeeCampaignEnabled()
-  const gasTooHigh = useGasTooHigh(safeTx)
+  const isGasTooHigh = !!useGasTooHigh(safeTx)
   const [walletCanRelay, , isWalletCheckLoading] = useWalletCanRelay(isBatch ? undefined : safeTx)
   const [excluded, setExcluded] = useState<ReadonlySet<SponsoredOption>>(new Set())
 
@@ -48,10 +48,10 @@ export const useGasPaymentOptions = ({
           isEligible: isCampaignEligible,
           remaining: campaign.remaining ?? 0,
           limit: campaign.limit ?? 0,
-          gasTooHigh: !!gasTooHigh,
+          isGasTooHigh,
         },
         daily: relays,
-        pro: { isEnabled, isPro, left, meter, spaceId, canSponsor },
+        pro: { isEnabled, isPro, left, meter, spaceId },
         excluded,
       }),
     [
@@ -61,14 +61,13 @@ export const useGasPaymentOptions = ({
       isCampaignEligible,
       campaign.remaining,
       campaign.limit,
-      gasTooHigh,
+      isGasTooHigh,
       relays,
       isEnabled,
       isPro,
       left,
       meter,
       spaceId,
-      canSponsor,
       excluded,
     ],
   )

@@ -205,8 +205,7 @@ export const _ExecutionMethodSelector = ({
   }
 
   return (
-    /* overflow-hidden so the relay counter's own 6px bottom corners are clipped to this 16px
-       radius instead of poking outside it. */
+    /* overflow-hidden clips the relay counter's 6px bottom corners to this radius */
     <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
       <div className={css.method}>
         <div className="flex flex-col">

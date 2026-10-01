@@ -14,8 +14,7 @@ export const RELAY_SPONSORS = {
 }
 
 const SponsoredBy = ({ option, chainId }: { option: SponsoredOption; chainId: string }) => {
-  const sponsor =
-    option === 'FREE_DAILY_LIMIT' ? RELAY_SPONSORS[chainId] || RELAY_SPONSORS.default : RELAY_SPONSORS.default
+  const sponsor = (option === 'FREE_DAILY_LIMIT' && RELAY_SPONSORS[chainId]) || RELAY_SPONSORS.default
 
   return (
     <>

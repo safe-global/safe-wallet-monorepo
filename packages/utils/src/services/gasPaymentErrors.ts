@@ -26,7 +26,7 @@ export class RelayLimitReachedError extends Error {
   }
 }
 
-/** The chain route's 403 `No relayer defined`: the chain lists no free option (stale config on the client). Chain route only. */
+/** The chain route's 403 `No relayer defined`: the chain lists no free option (stale config on the client). */
 export class RelayerUnavailableError extends Error {
   constructor(message: string) {
     super(message)

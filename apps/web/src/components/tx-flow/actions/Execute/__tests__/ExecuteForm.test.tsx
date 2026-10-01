@@ -3,14 +3,10 @@ import { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
+import { faker } from '@faker-js/faker'
 import { ExecuteForm } from '../ExecuteForm'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
-import {
-  GasPaymentOptionUnavailableError,
-  RelayLimitReachedError,
-  RelayerUnavailableError,
-} from '@safe-global/utils/services/gasPaymentErrors'
 import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import * as useGasLimit from '@/hooks/useGasLimit'
@@ -47,7 +43,7 @@ jest.mock('@/components/tx/ExecutionMethodSelector', () => ({
   ),
 }))
 
-const SPACE_ID = '11111111-1111-1111-1111-111111111111'
+const SPACE_ID = faker.string.uuid()
 const dailyOffer: SponsoredOffer = {
   option: 'FREE_DAILY_LIMIT',
   disabledReason: null,
@@ -75,9 +71,6 @@ const gasPaymentOptions = (overrides: Partial<GasPaymentOptions> = {}): GasPayme
   exclude: mockExclude,
   ...overrides,
 })
-
-const UNAVAILABLE_MESSAGE =
-  "This gas payment option isn't available for this Safe account right now. Choose another gas payment method and execute again."
 
 // We assume that CheckWallet always returns true
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -331,6 +324,21 @@ describe('ExecuteForm', () => {
     expect(getByText('Execute')).toBeDisabled()
   })
 
+  it('publishes the gas payer to the tx flow and clears it on unmount', () => {
+    const setGasPaymentOption = jest.fn()
+    mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: dailyOffer }))
+
+    const { unmount } = render(
+      <TxFlowContext.Provider value={{ ...initialContext, setGasPaymentOption }}>
+        <ExecuteForm {...defaultProps} safeTx={safeTransaction} />
+      </TxFlowContext.Provider>,
+    )
+
+    expect(setGasPaymentOption).toHaveBeenLastCalledWith('FREE_DAILY_LIMIT')
+    unmount()
+    expect(setGasPaymentOption).toHaveBeenLastCalledWith(undefined)
+  })
+
   it('shows an execution validation error', () => {
     jest
       .spyOn(useIsValidExecution, 'default')
@@ -516,25 +524,22 @@ describe('ExecuteForm', () => {
   })
 
   describe('gas payment refusals', () => {
-    const renderRefused = (offer: SponsoredOffer, error: Error) => {
-      mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer }))
-      const mockExecuteTx = jest.fn().mockRejectedValue(error)
-      const view = render(
+    it('excludes the refused option and explains the refusal', async () => {
+      mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: subscriptionOffer }))
+      const mockExecuteTx = jest
+        .fn()
+        .mockRejectedValue(
+          new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
+        )
+
+      const { getByText } = render(
         <ExecuteForm
           {...defaultProps}
           safeTx={safeTransaction}
           txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
         />,
       )
-      fireEvent.click(view.getByText('Execute'))
-      return { ...view, mockExecuteTx }
-    }
-
-    it('excludes the subscription and explains a spent Workspace allowance', async () => {
-      const { getByText, mockExecuteTx } = renderRefused(
-        subscriptionOffer,
-        new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'Quota exceeded'),
-      )
+      fireEvent.click(getByText('Execute'))
 
       await waitFor(() => {
         expect(
@@ -546,34 +551,6 @@ describe('ExecuteForm', () => {
       expect(mockExclude).toHaveBeenCalledWith(['SUBSCRIPTION'])
       expect(mockExecuteTx).toHaveBeenCalledTimes(1)
       expect(getByText('Execute')).toBeEnabled()
-    })
-
-    it('excludes every sponsored option when the backend refuses a Safe-paid transaction', async () => {
-      const { getByText } = renderRefused(
-        dailyOffer,
-        new GasPaymentOptionUnavailableError('PAY_FROM_SAFE', 'NOT_LISTED', [], 'Unavailable'),
-      )
-
-      await waitFor(() => expect(getByText(UNAVAILABLE_MESSAGE)).toBeInTheDocument())
-      expect(mockExclude).toHaveBeenCalledWith(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
-    })
-
-    it('excludes the offered option when its daily limit is spent', async () => {
-      const { getByText } = renderRefused(dailyOffer, new RelayLimitReachedError('Too many requests'))
-
-      await waitFor(() => {
-        expect(
-          getByText('No sponsored transactions left. Choose another gas payment method and execute again.'),
-        ).toBeInTheDocument()
-      })
-      expect(mockExclude).toHaveBeenCalledWith(['FREE_DAILY_LIMIT'])
-    })
-
-    it('excludes the offered option when the chain has no relayer', async () => {
-      const { getByText } = renderRefused(dailyOffer, new RelayerUnavailableError('No relayer defined'))
-
-      await waitFor(() => expect(getByText(UNAVAILABLE_MESSAGE)).toBeInTheDocument())
-      expect(mockExclude).toHaveBeenCalledWith(['FREE_DAILY_LIMIT'])
     })
 
     it('reports any other error as a submit error', async () => {

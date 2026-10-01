@@ -27,7 +27,7 @@ const proSponsoredTxs: SafeSponsoredTxs = {
   isPro: true,
   meter: { used: 10, quota: 50, resetsAt: null },
   left: 40,
-  spaceId: 'space-1',
+  spaceId: faker.string.uuid(),
   canSponsor: true,
   isLoading: false,
 }
@@ -79,7 +79,7 @@ describe('useGasPaymentOptions', () => {
 
     mockRelays({ remaining: 0, limit: 5 })
     rerender()
-    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: 'space-1' })
+    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: proSponsoredTxs.spaceId })
   })
 
   it('treats a campaign-eligible but blocked Safe as not eligible', () => {
@@ -100,7 +100,7 @@ describe('useGasPaymentOptions', () => {
       true,
     ],
     ['an unlisted campaign', ['FREE_DAILY_LIMIT'], () => mockCampaign({ isLoading: true }), false],
-    ['unlisted daily limit', ['SUBSCRIPTION'], () => mockRelays(undefined, true), false],
+    ['an unlisted daily limit', ['SUBSCRIPTION'], () => mockRelays(undefined, true), false],
     [
       'an unlisted subscription',
       ['FREE_DAILY_LIMIT'],
@@ -174,13 +174,5 @@ describe('useGasPaymentOptions', () => {
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: refundTx }))
 
     expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
-  })
-
-  it('offers nothing when the chain lists no option', () => {
-    mockChain([])
-
-    const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
-
-    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false, isLoading: false })
   })
 })

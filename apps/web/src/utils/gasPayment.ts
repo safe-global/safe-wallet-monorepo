@@ -29,9 +29,9 @@ export type GasPaymentInputs = {
   chainOptions: GasPaymentOption[]
   isRefundTx: boolean
   walletCanRelay: boolean
-  campaign: { isEligible: boolean; remaining: number; limit: number; gasTooHigh: boolean }
+  campaign: { isEligible: boolean; remaining: number; limit: number; isGasTooHigh: boolean }
   daily: RelaysRemaining | undefined
-  pro: Pick<SafeSponsoredTxs, 'isEnabled' | 'isPro' | 'left' | 'meter' | 'spaceId' | 'canSponsor'>
+  pro: Pick<SafeSponsoredTxs, 'isEnabled' | 'isPro' | 'left' | 'meter' | 'spaceId'>
   excluded: ReadonlySet<SponsoredOption>
 }
 
@@ -41,7 +41,7 @@ const isOffered = (option: SponsoredOption, { chainOptions, excluded }: GasPayme
 const getCampaignOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
   const { campaign } = inputs
   if (!isOffered('NO_FEE_CAMPAIGN', inputs) || !campaign.isEligible) return null
-  const disabledReason = campaign.gasTooHigh ? 'GAS_TOO_HIGH' : campaign.remaining === 0 ? 'LIMIT_REACHED' : null
+  const disabledReason = campaign.isGasTooHigh ? 'GAS_TOO_HIGH' : campaign.remaining === 0 ? 'LIMIT_REACHED' : null
   return { option: 'NO_FEE_CAMPAIGN', disabledReason, remaining: campaign.remaining, limit: campaign.limit }
 }
 
