@@ -3,8 +3,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import useOrigin from '@/hooks/useOrigin'
-import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { getTxLink } from '@/utils/tx-link'
+import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '../../SpendingLimitDrawer/resolveState'
 import type { PendingSpendingLimitPolicy, QueuedSpendingLimitPolicy } from '../../types'
@@ -38,7 +37,8 @@ export const usePendingSpendingLimitActions = (
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
 
-  const reviewTransactionHref = chain && !isUnlisted ? getTxLink(txId, chain, safeAddress, spaceId).href : undefined
+  const txPath = chain ? `${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}` : undefined
+  const reviewTransactionHref = txPath && !isUnlisted ? withSpaceIdInUrl(txPath, spaceId) : undefined
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
@@ -49,9 +49,7 @@ export const usePendingSpendingLimitActions = (
       confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
     },
     viewer: { ...viewer, hasSigned },
-    transactionLink: chain
-      ? `${origin}${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}`
-      : undefined,
+    transactionLink: txPath ? `${origin}${txPath}` : undefined,
     reviewTransactionHref,
     onRetry,
     outcome: resolvedOutcome,
