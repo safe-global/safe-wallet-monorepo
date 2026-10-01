@@ -1,4 +1,5 @@
 import chains from '@safe-global/utils/config/chains'
+import type { SponsoredOption } from '@/utils/gasPayment'
 import css from './styles.module.css'
 
 export const RELAY_SPONSORS = {
@@ -12,8 +13,9 @@ export const RELAY_SPONSORS = {
   },
 }
 
-const SponsoredBy = ({ chainId }: { chainId: string }) => {
-  const sponsor = RELAY_SPONSORS[chainId] || RELAY_SPONSORS.default
+const SponsoredBy = ({ option, chainId }: { option: SponsoredOption; chainId: string }) => {
+  const sponsor =
+    option === 'FREE_DAILY_LIMIT' ? RELAY_SPONSORS[chainId] || RELAY_SPONSORS.default : RELAY_SPONSORS.default
 
   return (
     <>

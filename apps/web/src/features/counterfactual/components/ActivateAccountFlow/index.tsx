@@ -178,7 +178,7 @@ const ActivateAccountFlow = () => {
                   <ExecutionMethodSelector
                     executionMethod={executionMethod}
                     setExecutionMethod={setExecutionMethod}
-                    relays={minRelays}
+                    offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays }}
                   />
                 }
               />

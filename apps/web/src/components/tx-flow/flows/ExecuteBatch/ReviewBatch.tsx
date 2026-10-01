@@ -14,20 +14,18 @@ import TxCheckError from '@/components/tx/TxCheckError'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
-import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
-import { useSafeSponsoredTxs } from '@/features/spaces'
+import { useGasPaymentOptions } from '@/hooks/useGasPaymentOptions'
+import { getGasPayment } from '@/utils/gasPayment'
+import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
-import { hasRemainingRelays } from '@/utils/relaying'
 import { getMultiSendTxs } from '@/utils/transactions'
 import TxCard, { TxCardActions } from '../../common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 import SendToBlock from '@/components/tx/SendToBlock'
 import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import { TxModalContext } from '@/components/tx-flow'
@@ -66,18 +64,18 @@ const buildGasOverrides = (
 const BatchErrorMessages = ({
   estimationError,
   submitError,
-  quotaError,
+  refusalMessage,
   isRejectedByUser,
 }: {
   estimationError: unknown
   submitError: Error | undefined
-  quotaError?: QuotaExceededError
+  refusalMessage?: string
   isRejectedByUser: Boolean
 }) => (
   <>
     {estimationError && <TxCheckError error={asError(estimationError)} context="estimation" />}
     {submitError && <TxSubmitError error={submitError} context="execution" />}
-    {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
+    {refusalMessage && <ErrorMessage level="warning">{refusalMessage}</ErrorMessage>}
     {isRejectedByUser && <WalletRejectionError />}
   </>
 )
@@ -85,13 +83,12 @@ const BatchErrorMessages = ({
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
   const [submitError, setSubmitError] = useState<Error | undefined>()
-  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>()
+  const [refusalMessage, setRefusalMessage] = useState<string>()
   const [isRejectedByUser, setIsRejectedByUser] = useState<Boolean>(false)
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
-  const [relays] = useRelaysBySafe()
-  const sponsoredTxs = useSafeSponsoredTxs()
+  const { offer, showsProUpsell, isLoading: isGasPaymentLoading, exclude } = useGasPaymentOptions({ isBatch: true })
   const { setTxFlow } = useContext(TxModalContext)
   const [gasPrice] = useGasPrice()
   const userNonce = useUserNonce()
@@ -99,11 +96,8 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const onboard = useOnboard()
   const wallet = useWallet()
 
-  // Chain has relaying feature and available relays, or the Safe's Workspace still sponsors transactions
-  const canRelay = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays)
-  const willRelay = canRelay && executionMethod === ExecutionMethod.RELAY
-  // A spent Pro allowance keeps the selector on screen (sponsoring disabled) so the user sees the count and the reset.
-  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
+  const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
+  const willRelay = gasPayer !== 'WALLET'
 
   // EIP-1559 gas pricing support
   const isEIP1559 = Boolean(chain && hasFeature(chain, FEATURES.EIP1559))
@@ -181,7 +175,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       safe.chainId,
       safe.address.value,
       safe.version ?? latestSafeVersion,
-      sponsoredTxs.spaceId,
+      sponsorSpaceId,
     )
   }
 
@@ -189,7 +183,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     e.preventDefault()
     setIsSubmittable(false)
     setSubmitError(undefined)
-    setQuotaError(undefined)
+    setRefusalMessage(undefined)
     setIsRejectedByUser(false)
 
     try {
@@ -197,11 +191,12 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       setTxFlow(undefined)
     } catch (_err) {
       const err = asError(_err)
+      const refusal = getGasPaymentRefusal(err, gasPayer)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
-      } else if (err instanceof QuotaExceededError) {
-        setQuotaError(err)
-        setExecutionMethod(ExecutionMethod.WALLET)
+      } else if (refusal) {
+        exclude(refusal.excluded)
+        setRefusalMessage(refusal.message)
       } else {
         logError(Errors._804, err)
         setSubmitError(err)
@@ -216,11 +211,12 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
       {
         [MixpanelEventParams.TRANSACTION_TYPE]: TX_TYPES.bulk_execute,
         [MixpanelEventParams.THRESHOLD]: safe.threshold,
+        [MixpanelEventParams.GAS_PAYMENT_OPTION]: gasPayer,
       },
     )
   }
 
-  const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked
+  const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked || isGasPaymentLoading
 
   return (
     <>
@@ -246,16 +242,15 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <NetworkWarning />
 
-        {canRelay || isProExhausted ? (
-          <>
-            <ExecutionMethodSelector
-              executionMethod={executionMethod}
-              setExecutionMethod={setExecutionMethod}
-              relays={relays}
-              tooltip="You can only relay multisend transactions containing executions from the same Safe account."
-            />
-          </>
-        ) : null}
+        {!isGasPaymentLoading && (offer !== null || showsProUpsell) && (
+          <ExecutionMethodSelector
+            executionMethod={executionMethod}
+            setExecutionMethod={setExecutionMethod}
+            offer={offer}
+            showsProUpsell={showsProUpsell}
+            tooltip="You can only relay multisend transactions containing executions from the same Safe account."
+          />
+        )}
 
         <Alert variant="warning" outlined={false}>
           Be aware that if any of the included transactions revert, none of them will be executed. This will result in
@@ -263,7 +258,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
         </Alert>
 
         <BatchErrorMessages
-          quotaError={quotaError}
+          refusalMessage={refusalMessage}
           estimationError={error}
           submitError={submitError}
           isRejectedByUser={isRejectedByUser}
