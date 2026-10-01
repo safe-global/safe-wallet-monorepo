@@ -1,9 +1,6 @@
 import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import { chainBuilder } from '@/tests/builders/chains'
-import * as safeAccountsHooks from '../../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
@@ -191,52 +188,6 @@ describe('SpendingLimitPolicyForm', () => {
     expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toBeInTheDocument()
     expect(screen.getAllByTestId('spender-card')).toHaveLength(1)
     expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
-  })
-
-  describe('networks callout', () => {
-    let chainsSpy: jest.SpyInstance
-
-    afterEach(() => chainsSpy?.mockRestore())
-
-    const mockSupportedChains = (count: number) => {
-      chainsSpy = jest.spyOn(safeAccountsHooks, 'useSpendingLimitChains').mockReturnValue(
-        Array.from({ length: count }, (_, index) =>
-          chainBuilder()
-            .with({ chainId: `${index + 1}`, chainName: `Chain ${index + 1}` })
-            .build(),
-        ) as Chain[],
-      )
-    }
-
-    it('tells the creator which networks support spending limits', () => {
-      mockSupportedChains(3)
-      renderForm()
-
-      expect(screen.getByTestId('networks-callout')).toHaveTextContent('3 networks')
-    })
-
-    it('is not shown while editing an existing policy', () => {
-      mockSupportedChains(3)
-      renderWithUserEvent(
-        <EditModeProvider>
-          <SpendingLimitPolicyForm
-            defaultValues={createDefaultFormValues()}
-            onSubmit={jest.fn()}
-            accounts={[treasury]}
-            isAccountsLoading={false}
-            isAccountsError={false}
-            onRetryAccounts={jest.fn()}
-            isCalloutDismissed
-            onDismissCallout={jest.fn()}
-            hasWallet
-            onSafeChange={jest.fn()}
-            onSpendersChange={jest.fn()}
-          />
-        </EditModeProvider>,
-      )
-
-      expect(screen.queryByTestId('networks-callout')).not.toBeInTheDocument()
-    })
   })
 
   it('enables Next once a Safe, a spender and one complete limit row are valid, and submits the policy', async () => {

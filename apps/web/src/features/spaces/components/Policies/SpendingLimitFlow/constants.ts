@@ -9,9 +9,6 @@ export const CALLOUT_DESCRIPTION =
   "A bot, a teammate, or an external wallet, they don't have to be a signer. Once this transaction executes, withdrawals up to the limit you set go through with no further approvals required."
 export const CALLOUT_DISMISS_LABEL = 'Dismiss'
 
-export const NETWORKS_CALLOUT_TITLE = 'Available on select networks'
-export const getNetworksCountLabel = (count: number) => `${count} ${count === 1 ? 'network' : 'networks'}`
-
 export const SPENDER_LABEL = 'Spender'
 export const SPENDER_PLACEHOLDER = 'by name or address'
 export const SPENDER_HELPER_TEXT = 'The beneficiary that can spend within this limit, no signatures needed'

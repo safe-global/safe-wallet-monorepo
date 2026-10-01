@@ -6,20 +6,19 @@ import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useElig
 import { filterSafeAccountsByChains } from '../utils/safeAccounts'
 
 /** Chains where a spending limit can be created: the SPENDING_LIMIT feature is on and an AllowanceModule is deployed. */
-export const useSpendingLimitChains = () => {
+export const useSpendingLimitChainIds = (): ReadonlySet<string> => {
   const { configs } = useChains()
   return useMemo(
     () =>
-      configs.filter(
-        (chain) => hasFeature(chain, FEATURES.SPENDING_LIMIT) && !!getLatestSpendingLimitAddress(chain.chainId),
+      new Set(
+        configs
+          .filter(
+            (chain) => hasFeature(chain, FEATURES.SPENDING_LIMIT) && !!getLatestSpendingLimitAddress(chain.chainId),
+          )
+          .map((chain) => chain.chainId),
       ),
     [configs],
   )
-}
-
-export const useSpendingLimitChainIds = (): ReadonlySet<string> => {
-  const chains = useSpendingLimitChains()
-  return useMemo(() => new Set(chains.map((chain) => chain.chainId)), [chains])
 }
 
 /** `useEligibleSafeAccounts` narrowed to the chains that support spending limits. */
