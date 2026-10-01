@@ -27,7 +27,7 @@ type SpendingLimitDrawerBaseProps = {
   viewer: Viewer
   /** The Safe the policy applies to. The overview's "applies to" row derives from it. */
   safe: { address: string; name?: string }
-  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'enforcedByHref'>
+  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'chainId' | 'enforcedByHref'>
   names?: Record<string, string>
   onConnectWallet: () => void
 }
@@ -96,6 +96,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
               ...safe,
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
+            chainId={policy.safe.chainId}
             enforcedByHref={enforcedByHref}
           />
         </div>
