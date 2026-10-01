@@ -13,6 +13,7 @@ export type SafeAccountFieldProps = {
   hasWallet: boolean
   /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
+  readOnly?: boolean
 }
 
 const SafeAccountField = ({
@@ -22,6 +23,7 @@ const SafeAccountField = ({
   onRetry,
   hasWallet,
   onSafeChange,
+  readOnly = false,
 }: SafeAccountFieldProps): ReactElement => {
   const { control } = useFormContext<SpendingLimitPolicyFormValues>()
 
@@ -43,6 +45,7 @@ const SafeAccountField = ({
           isError={isError}
           onRetry={onRetry}
           hasWallet={hasWallet}
+          readOnly={readOnly}
           name={field.name}
           id="spending-limit-safe-account"
         />

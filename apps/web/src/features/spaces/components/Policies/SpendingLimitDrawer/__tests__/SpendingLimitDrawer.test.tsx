@@ -9,7 +9,7 @@ import {
 } from '../../mocks/policies'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import type { DrawerPolicy, Viewer } from '../resolveState'
+import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
@@ -24,7 +24,7 @@ const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
 const setup = (
   policy: DrawerPolicy = mockActiveSpendingLimit(),
   viewer: Viewer = MOCK_VIEWERS.signer,
-  { onEdit }: { onEdit?: () => void } = { onEdit: jest.fn() },
+  { onEdit, outcome }: { onEdit?: () => void; outcome?: PendingTxOutcome } = { onEdit: jest.fn() },
 ) => {
   const shared = {
     open: true,
@@ -42,6 +42,7 @@ const setup = (
         policy={policy}
         transactionLink={TRANSACTION_LINK}
         onReviewTransaction={jest.fn()}
+        outcome={outcome}
       />
     ) : (
       <SpendingLimitDrawer {...shared} policy={policy} onEdit={onEdit} />
@@ -52,6 +53,32 @@ const setup = (
 describe('SpendingLimitDrawer', () => {
   afterEach(() => {
     jest.restoreAllMocks()
+  })
+
+  it('calls an executed transaction activating in the header, not pending', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'executed' })
+
+    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+  })
+
+  it('shows no status chip for a transaction that will never execute', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'deleted' })
+
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('policy-status-skeleton')).not.toBeInTheDocument()
+  })
+
+  it('drops the signatures and the footer once the transaction has left the queue', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'replaced' })
+
+    expect(
+      screen.getByText('Another transaction used this nonce, so this one can no longer be executed.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /review transaction|copy transaction link|connect wallet/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('titles itself from the policy type rather than a stored name', () => {
@@ -147,6 +174,20 @@ describe('SpendingLimitDrawer', () => {
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
+  })
+
+  it('offers to copy every spender and the Safe account', () => {
+    const policy = mockActiveSpendingLimit()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 1)
+  })
+
+  it('offers to copy the Safe account in the signatures section of a pending policy too', () => {
+    const policy = mockPendingPolicy()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 2)
   })
 
   it("links the Safe account to that Safe's settings page", () => {

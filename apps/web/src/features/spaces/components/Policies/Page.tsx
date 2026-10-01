@@ -25,6 +25,8 @@ const SpacePolicies = ({ spaceId }: { spaceId: string }) => {
 
   return (
     <Policies
+      // Closes an open panel on a Space switch.
+      key={spaceId}
       policies={policies}
       isLoading={isLoading || planGate.isLoading || (isLocked && isPlanLoading)}
       isError={isError}

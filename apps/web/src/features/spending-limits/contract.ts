@@ -8,9 +8,11 @@ import type SpendingLimitsLoader from './components/SpendingLimitsLoader'
 import type { loadSpendingLimits } from './services/spendingLimitLoader'
 import type {
   createNewSpendingLimitTx,
+  createSpendingLimitEditTx,
   createSpendingLimitsTx,
   dispatchSpendingLimitTxExecution,
 } from './services/spendingLimitExecution'
+import type { buildSpendingLimitEdit } from './services/spendingLimitEdit'
 
 export interface SpendingLimitsContract {
   // Components (PascalCase) - stub renders null
@@ -26,5 +28,7 @@ export interface SpendingLimitsContract {
   loadSpendingLimits: typeof loadSpendingLimits
   createNewSpendingLimitTx: typeof createNewSpendingLimitTx
   createSpendingLimitsTx: typeof createSpendingLimitsTx
+  createSpendingLimitEditTx: typeof createSpendingLimitEditTx
+  buildSpendingLimitEdit: typeof buildSpendingLimitEdit
   dispatchSpendingLimitTxExecution: typeof dispatchSpendingLimitTxExecution
 }

@@ -40,8 +40,13 @@ const isSpendingLimitData = (data: ActivePolicyDto['data']): data is SpendingLim
 
 const isProposerData = (data: ActivePolicyDto['data']): data is ProposerPolicyDataDto => 'proposers' in data
 
+/** Deleting the last allowance leaves the module enabled, so a revoked policy keeps coming back empty. */
+const hasNoAllowances = (data: SpendingLimitPolicyDataDto): boolean =>
+  data.spenders.every((spender) => spender.allowances.length === 0)
+
 const toSpendingLimit = (dto: ActivePolicyDto, resolveToken: ResolveTokenInfo): SpendingLimitPolicy | null => {
   if (dto.enforcement.via !== 'module' || !isSpendingLimitData(dto.data)) return null
+  if (hasNoAllowances(dto.data)) return null
 
   const { chainId } = dto.safe
 
@@ -119,6 +124,14 @@ export const getReferencedTokens = (
   })
 }
 
-/** A policy of a type the page does not render, or with data of another type's shape, is left out. */
+/**
+ * Turns the gateway's active policies into the shapes the Policies table renders.
+ *
+ * @param dtos - Active policies as the gateway returns them.
+ * @param resolveToken - Looks a token up by chain and address; unknown tokens fall back to base units.
+ * @returns One entry per policy the page can render. Left out: a policy of a type the page does not
+ *   render, one whose data has another type's shape, and a spending limit whose allowances are all
+ *   gone — deleting the last allowance leaves the module enabled, so the gateway keeps returning it.
+ */
 export const mapActivePolicies = (dtos: ActivePolicyDto[], resolveToken: ResolveTokenInfo): Policy[] =>
   dtos.flatMap((dto) => toPolicies(dto, resolveToken))

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { PENDING_BANNER_TITLE, signAndExecuteLine } from '../../copy'
+import { PENDING_BANNER_TITLE, signAndExecuteLine } from '../../messages'
 import SpendingLimitActions from './SpendingLimitActions'
 
 const meta = {

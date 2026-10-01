@@ -13,7 +13,7 @@ export type { SpendingLimitState } from './store/spendingLimitsSlice'
 // These types are only used by lazy-loaded feature components (type-only exports are tree-shaken)
 export type { NewSpendingLimitFlowProps, NewSpendingLimitData, SpendingLimitTxParams } from './types'
 // Type-only, so the barrel stays light: the builder itself is reached through the feature contract.
-export type { SpendingLimitPair } from './services/spendingLimitExecution'
+export type { DesiredAllowance } from './services/spendingLimitExecution'
 // NOTE: SpendingLimitFields is NOT exported - it has heavy deps via TokenAmountFields.
 // Components that need it should import directly from './types' (they're lazy-loaded anyway).
 export { getResetTimeOptions } from './constants'

@@ -1,5 +1,6 @@
 import { useCallback, useState, type ReactElement } from 'react'
-import { Info, WalletCards } from 'lucide-react'
+import SpendingLimitIcon from './SpendingLimitIcon'
+import { Info } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'

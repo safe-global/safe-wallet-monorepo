@@ -5,6 +5,9 @@ import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Button } from '@/components/ui/button'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
+import PendingRemovalsCard from '../EditFlow/PendingRemovalsCard'
+import { useEditState } from '../EditFlow/useEditState'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
@@ -49,28 +52,31 @@ const SpendingLimitPolicyForm = ({
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
   const { control, handleSubmit, formState, watch, getValues, reset } = formMethods
   const { fields, append, remove } = useFieldArray({ control, name: 'spenders' })
+  const isEditMode = useIsEditMode()
+  const { removalCopy, discardChanges, isUnchangedEdit } = useEditState(formMethods)
 
   // A limit is entered for one Safe: its token exists on that Safe's chain, and only a test chain offers the short
   // reset periods. Switching Safe therefore starts the policy over rather than leaving fields that describe the
-  // previous one. The first selection is not a switch.
+  // previous one. The first selection is not a switch, and an edit cannot switch Safe at all.
   const previousScopeKey = useRef(scopeKey)
   useEffect(() => {
     const previous = previousScopeKey.current
     previousScopeKey.current = scopeKey
-    if (previous === undefined || previous === scopeKey) return
+    if (isEditMode || previous === undefined || previous === scopeKey) return
 
     reset({ ...createDefaultFormValues(), safe: getValues('safe') })
-  }, [scopeKey, getValues, reset])
+  }, [isEditMode, scopeKey, getValues, reset])
 
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
-  const spenderAddressesKey = (watch('spenders') ?? []).map((spender) => spender?.address ?? '').join(',')
+  const spenders = watch('spenders') ?? []
+  const spenderAddressesKey = spenders.map((spender) => spender?.address ?? '').join(',')
   useEffect(() => {
     onSpendersChange?.(spenderAddressesKey.split(',').filter(Boolean))
   }, [spenderAddressesKey, onSpendersChange])
 
   // The selector shows a placeholder for a Safe the resolved list lacks (prefilled, or a wallet switch after picking).
   const selectedSafe = findSafeAccount(accounts, watch('safe'))
-  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
+  const isSafeBlocked = !isEditMode && (!selectedSafe || Boolean(selectedSafe.ineligibleReason))
 
   return (
     <TxCard>
@@ -80,7 +86,7 @@ const SpendingLimitPolicyForm = ({
           className="flex flex-col gap-5"
           data-testid="spending-limit-policy-form"
         >
-          <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />
+          {!isEditMode && <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />}
 
           <SafeAccountField
             accounts={accounts}
@@ -89,14 +95,17 @@ const SpendingLimitPolicyForm = ({
             onRetry={onRetryAccounts}
             hasWallet={hasWallet}
             onSafeChange={onSafeChange}
+            readOnly={isEditMode}
           />
+
+          {removalCopy && <PendingRemovalsCard copy={removalCopy} onDiscard={discardChanges} />}
 
           {fields.map((field, index) => (
             <SpenderCard
               key={field.id}
               spenderIndex={index}
               spenderCount={fields.length}
-              removable={fields.length > 1}
+              removable={isEditMode || fields.length > 1}
               onRemove={() => remove(index)}
             />
           ))}
@@ -114,7 +123,12 @@ const SpendingLimitPolicyForm = ({
           </div>
 
           <TxCardActions>
-            <Button type="submit" size="submit" disabled={!formState.isValid || isSafeBlocked} data-testid="next-btn">
+            <Button
+              type="submit"
+              size="submit"
+              disabled={!formState.isValid || isSafeBlocked || isUnchangedEdit}
+              data-testid="next-btn"
+            >
               {NEXT_LABEL}
             </Button>
           </TxCardActions>
