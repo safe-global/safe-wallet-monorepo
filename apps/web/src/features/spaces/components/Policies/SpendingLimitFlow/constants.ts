@@ -34,9 +34,4 @@ export const EXISTING_LIMITS_LOAD_ERROR =
 export const EXISTING_LIMIT_IN_POLICY_ERROR =
   'A spender in this policy already has a spending limit for one of these tokens. Go back and remove that token.'
 
-export const PARENT_SAFE_WALLET_COPY = {
-  title: 'Add this spending limit on the Safe account level',
-  action: 'set this spending limit',
-}
-
 export const REVIEW_STEP_TITLE = 'Confirm policy'

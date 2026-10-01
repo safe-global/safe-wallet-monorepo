@@ -3,7 +3,6 @@ import { Plus } from 'lucide-react'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Button } from '@/components/ui/button'
-import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from '../../components/ParentSafeWalletNotice'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
@@ -30,8 +29,6 @@ export type SpendingLimitPolicyFormProps = {
   onSpendersChange?: (addresses: string[]) => void
   isCalloutDismissed: boolean
   onDismissCallout: () => void
-  parentSafeWallet?: ParentSafeWalletNoticeProps
-  isCheckingWallet?: boolean
 }
 
 /**
@@ -51,8 +48,6 @@ const SpendingLimitPolicyForm = ({
   onSpendersChange,
   isCalloutDismissed,
   onDismissCallout,
-  parentSafeWallet,
-  isCheckingWallet = false,
 }: SpendingLimitPolicyFormProps): ReactElement => {
   const formMethods = useForm<SpendingLimitPolicyFormValues>({ defaultValues, mode: 'onChange' })
   const { control, handleSubmit, formState, watch, getValues, reset } = formMethods
@@ -103,8 +98,6 @@ const SpendingLimitPolicyForm = ({
             readOnly={isEditMode}
           />
 
-          {parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
-
           {removalCopy && <PendingRemovalsCard copy={removalCopy} onDiscard={discardChanges} />}
 
           {fields.map((field, index) => (
@@ -133,9 +126,7 @@ const SpendingLimitPolicyForm = ({
             <Button
               type="submit"
               size="submit"
-              disabled={
-                !formState.isValid || isSafeBlocked || isUnchangedEdit || !!parentSafeWallet || isCheckingWallet
-              }
+              disabled={!formState.isValid || isSafeBlocked || isUnchangedEdit}
               data-testid="next-btn"
             >
               {NEXT_LABEL}
