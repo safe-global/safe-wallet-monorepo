@@ -3,7 +3,9 @@ import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafenetShieldRow, SafenetShieldRowView } from '../SafenetShieldRow'
-import { SafenetExecuteStatusView } from '../SafenetExecuteStatus'
+import { SafenetShieldFootView } from '../SafenetShieldFoot'
+import { SafenetCardCaptionView } from '../SafenetCardCaption'
+import { SafenetTxRailView } from '../SafenetTxRail'
 import { SafenetHistoryRowView } from '../SafenetHistoryRow'
 
 jest.mock('@/hooks/useChains', () => ({
@@ -14,6 +16,7 @@ jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShield: je
 
 const mockSetSafenetPhase = jest.fn()
 const START = 1_700_000_000_000
+const EXPLORER = 'https://explorer.safenet-beta.eth.limo/#/safeTx'
 
 describe('Safenet prototype surfaces', () => {
   beforeEach(() => {
@@ -31,8 +34,8 @@ describe('Safenet prototype surfaces', () => {
     expect(mockSetSafenetPhase).not.toHaveBeenCalledWith('risk')
   })
 
-  it('announces status changes politely', () => {
-    render(<SafenetShieldRowView state={{ phase: 'submitted', startedAtMs: START }} nowMs={START} />)
+  it('announces Shield row status changes politely', () => {
+    render(<SafenetShieldRowView state={{ phase: 'submitted', startedAtMs: START }} />)
     expect(screen.getByText('Sent to Safenet for an independent check.').closest('[aria-live]')).toHaveAttribute(
       'aria-live',
       'polite',
@@ -41,40 +44,67 @@ describe('Safenet prototype surfaces', () => {
 
   it('offers a one-tap enable when the check is locked', () => {
     const onEnable = jest.fn()
-    render(<SafenetShieldRowView state={{ phase: 'locked' }} nowMs={START} onEnable={onEnable} />)
+    render(<SafenetShieldRowView state={{ phase: 'locked' }} onEnable={onEnable} />)
     fireEvent.click(screen.getByRole('button', { name: 'Turn on' }))
     expect(onEnable).toHaveBeenCalled()
   })
 
-  it('offers to wait for a running check without forcing it', () => {
-    const onWait = jest.fn()
+  it('links a Shield verdict to the Safenet explorer, but not a running check', () => {
+    const { rerender } = render(<SafenetShieldRowView state={{ phase: 'checking' }} explorerHref={EXPLORER} />)
+    expect(screen.queryByRole('link', { name: /Safenet explorer/ })).not.toBeInTheDocument()
+
+    rerender(<SafenetShieldRowView state={{ phase: 'no-issues' }} explorerHref={EXPLORER} />)
+    expect(screen.getByRole('link', { name: /Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
+  })
+
+  it('shows progress and the ETA at the foot of the Shield while checking', () => {
     render(
-      <SafenetExecuteStatusView
+      <SafenetShieldFootView
         state={{ phase: 'checking', startedAtMs: START, etaMs: START + 60_000 }}
-        nowMs={START + 12_000}
-        onWait={onWait}
+        nowMs={START + 17_000}
       />,
     )
-    expect(screen.getByText(/about 1 min/)).toBeInTheDocument()
-    expect(screen.getByText('Running for 0:12')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '28')
+    expect(screen.getByText('Ready in ~43 seconds')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Why does this take longer/ })).toBeInTheDocument()
+  })
+
+  it('offers to wait for a running check at the execute step without forcing it', () => {
+    const onWait = jest.fn()
+    render(<SafenetCardCaptionView state={{ phase: 'checking', startedAtMs: START }} step="execute" onWait={onWait} />)
+    expect(
+      screen.getByText('Safenet has not reported yet. You can execute now or wait for the result.'),
+    ).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Wait for result' }))
     expect(onWait).toHaveBeenCalled()
   })
 
-  it('moves focus to the verdict once a waited-for check lands', () => {
+  it('moves focus to the caption once a waited-for check lands', () => {
     const { rerender } = render(
-      <SafenetExecuteStatusView state={{ phase: 'checking', startedAtMs: START }} nowMs={START} isWaiting />,
+      <SafenetCardCaptionView state={{ phase: 'checking', startedAtMs: START }} step="sign" isWaiting />,
     )
-    rerender(<SafenetExecuteStatusView state={{ phase: 'no-issues', startedAtMs: START }} nowMs={START} isWaiting />)
-    expect(screen.getByText('Safenet found no issues.').closest('[aria-live]')).toHaveFocus()
+    rerender(<SafenetCardCaptionView state={{ phase: 'no-issues', startedAtMs: START }} step="sign" isWaiting />)
+    expect(screen.getByTestId('safenet-card-caption')).toHaveFocus()
   })
 
-  it('links to the Safenet explorer only once there is a verdict', () => {
-    const href = 'https://explorer.safenet-beta.eth.limo/#/safeTx'
-    const { rerender } = render(<SafenetHistoryRowView state={{ phase: 'checking' }} explorerHref={href} />)
+  it('marks the current rail step and shows Safenet under Sign', () => {
+    render(
+      <SafenetTxRailView
+        current="confirm"
+        safenet={{ state: { phase: 'before-sign' }, nowMs: START }}
+        signatures={{ submitted: 1, required: 2 }}
+      />,
+    )
+    expect(screen.getByText('Confirm').closest('li')).toHaveAttribute('aria-current', 'step')
+    expect(screen.getByText('Offchain · free · 1 of 2 signed')).toBeInTheDocument()
+    expect(screen.getByTestId('safenet-rail-note')).toHaveTextContent('Safenet starts here')
+  })
+
+  it('links to the Safenet explorer in history only once there is a verdict', () => {
+    const { rerender } = render(<SafenetHistoryRowView state={{ phase: 'checking' }} explorerHref={EXPLORER} />)
     expect(screen.queryByRole('link', { name: /View on Safenet explorer/ })).not.toBeInTheDocument()
 
-    rerender(<SafenetHistoryRowView state={{ phase: 'no-issues' }} explorerHref={href} />)
-    expect(screen.getByRole('link', { name: /View on Safenet explorer/ })).toHaveAttribute('href', href)
+    rerender(<SafenetHistoryRowView state={{ phase: 'no-issues' }} explorerHref={EXPLORER} />)
+    expect(screen.getByRole('link', { name: /View on Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
   })
 })

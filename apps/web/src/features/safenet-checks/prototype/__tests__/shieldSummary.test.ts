@@ -6,18 +6,23 @@ const CHECKS = { passed: 3, total: 3 }
 
 describe('withSafenetCheck', () => {
   it.each([undefined, 'before-sign', 'locked'] as const)('leaves the header alone for %s', (phase) => {
-    expect(withSafenetCheck(phase, OK, CHECKS)).toEqual({ overallStatus: OK, checks: CHECKS })
+    expect(withSafenetCheck(phase, OK, CHECKS)).toEqual({ overallStatus: OK, checks: CHECKS, isPending: false })
   })
 
   it('counts a running check and shows it in an info tone', () => {
     expect(withSafenetCheck('checking', OK, CHECKS)).toEqual({
-      overallStatus: { severity: Severity.INFO, title: '3 of 4 checks passed · Safenet checking' },
+      overallStatus: { severity: Severity.INFO, title: '3 of 4 · Safenet checking' },
       checks: { passed: 3, total: 4 },
+      isPending: true,
     })
   })
 
   it('counts no issues found as a passed check', () => {
-    expect(withSafenetCheck('no-issues', OK, CHECKS)).toEqual({ overallStatus: OK, checks: { passed: 4, total: 4 } })
+    expect(withSafenetCheck('no-issues', OK, CHECKS)).toEqual({
+      overallStatus: OK,
+      checks: { passed: 4, total: 4 },
+      isPending: false,
+    })
   })
 
   it('counts an unavailable check without passing it', () => {

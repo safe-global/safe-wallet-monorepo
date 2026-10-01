@@ -18,6 +18,8 @@ import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useLoadFeature } from '@/features/__core__'
+import { SafenetChecksPrototypeFeature } from '@/features/safenet-checks'
 
 export const SignForm = ({
   safeTx,
@@ -49,6 +51,7 @@ export const SignForm = ({
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
     useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
   const hasSigned = useAlreadySigned(safeTx)
   const signer = useSigner()
 
@@ -128,6 +131,8 @@ export const SignForm = ({
             </CheckWallet>
           </form>
         </TxCardActions>
+
+        <safenetPrototype.SafenetCardCaption step="sign" />
       </div>
     </div>
   )

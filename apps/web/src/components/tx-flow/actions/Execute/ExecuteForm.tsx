@@ -351,8 +351,6 @@ export const ExecuteForm = ({
           </div>
         </ModalDialog>
 
-        <safenetPrototype.SafenetExecuteStatus />
-
         <div className="pt-6">
           <Separator bleed="6" />
         </div>
@@ -393,6 +391,7 @@ export const ExecuteForm = ({
           </CheckWallet>
         </TxCardActions>
       </form>
+      <safenetPrototype.SafenetCardCaption step="execute" />
     </>
   )
 }

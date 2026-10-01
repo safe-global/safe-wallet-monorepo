@@ -1,18 +1,21 @@
 import type { SafenetChecksPrototypeContract } from '../types'
-import SafenetExecuteStatus from './components/SafenetExecuteStatus'
+import SafenetCardCaption from './components/SafenetCardCaption'
 import SafenetHistoryRow from './components/SafenetHistoryRow'
 import SafenetQueueChip from './components/SafenetQueueChip'
 import SafenetScenarioDialog from './components/SafenetScenarioDialog'
+import SafenetShieldFoot, { SafenetHeaderEta } from './components/SafenetShieldFoot'
 import SafenetShieldRow from './components/SafenetShieldRow'
-import SafenetStepperNote from './components/SafenetStepperNote'
+import SafenetTxRail from './components/SafenetTxRail'
 
 const feature: SafenetChecksPrototypeContract = {
-  SafenetExecuteStatus,
+  SafenetCardCaption,
+  SafenetHeaderEta,
   SafenetHistoryRow,
   SafenetQueueChip,
   SafenetScenarioDialog,
+  SafenetShieldFoot,
   SafenetShieldRow,
-  SafenetStepperNote,
+  SafenetTxRail,
 }
 
 export default feature

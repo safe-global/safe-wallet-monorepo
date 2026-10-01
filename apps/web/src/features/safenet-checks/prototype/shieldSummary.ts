@@ -15,24 +15,29 @@ export const withSafenetCheck = (
   phase: SafenetCheckPhase | undefined,
   overallStatus: ShieldStatus | undefined,
   checks: ShieldChecks,
-): { overallStatus: ShieldStatus | undefined; checks: ShieldChecks } => {
-  if (!phase || !COUNTED_PHASES.includes(phase)) return { overallStatus, checks }
+): { overallStatus: ShieldStatus | undefined; checks: ShieldChecks; isPending: boolean } => {
+  if (!phase || !COUNTED_PHASES.includes(phase)) return { overallStatus, checks, isPending: false }
 
   const counted = { passed: checks.passed + (phase === 'no-issues' ? 1 : 0), total: checks.total + 1 }
 
   if (phase === 'risk' && overallStatus?.severity !== Severity.CRITICAL) {
-    return { overallStatus: { severity: Severity.CRITICAL, title: 'Safenet found a risk' }, checks: counted }
+    return {
+      overallStatus: { severity: Severity.CRITICAL, title: 'Safenet found a risk' },
+      checks: counted,
+      isPending: false,
+    }
   }
 
   if (isRunningPhase(phase) && overallStatus?.severity === Severity.OK) {
     return {
       overallStatus: {
         severity: Severity.INFO,
-        title: `${counted.passed} of ${counted.total} checks passed · Safenet checking`,
+        title: `${counted.passed} of ${counted.total} · Safenet ${phase}`,
       },
       checks: counted,
+      isPending: true,
     }
   }
 
-  return { overallStatus, checks: counted }
+  return { overallStatus, checks: counted, isPending: isRunningPhase(phase) }
 }

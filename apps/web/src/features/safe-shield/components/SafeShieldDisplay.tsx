@@ -22,7 +22,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
-import { withSafenetCheck } from '@/features/safenet-checks'
+import { SafenetChecksPrototypeFeature, withSafenetCheck } from '@/features/safenet-checks'
+import { useLoadFeature } from '@/features/__core__'
 import type { SafenetCheckPhase } from '@/features/safenet-checks/types'
 
 const shieldLogoOnHover = [
@@ -116,7 +117,8 @@ export const SafeShieldDisplay = ({
     ],
   )
 
-  const { overallStatus, checks } = useMemo(
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
+  const { overallStatus, checks, isPending } = useMemo(
     () => withSafenetCheck(safenetPhase, baseOverallStatus, baseChecks),
     [safenetPhase, baseOverallStatus, baseChecks],
   )
@@ -135,6 +137,8 @@ export const SafeShieldDisplay = ({
           deadlock={deadlock}
           overallStatus={overallStatus}
           checks={checks}
+          isPending={isPending}
+          trailing={isPending ? <safenetPrototype.SafenetHeaderEta /> : undefined}
         />
 
         <SafeShieldContent
@@ -152,6 +156,8 @@ export const SafeShieldDisplay = ({
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
         />
+
+        <safenetPrototype.SafenetShieldFoot />
       </div>
 
       <div className="flex flex-row items-center self-end">

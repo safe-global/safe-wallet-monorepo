@@ -1,4 +1,4 @@
-import { type ReactElement } from 'react'
+import { type ReactElement, type ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
 import type {
   ContractAnalysisResults,
@@ -21,6 +21,8 @@ export const SafeShieldHeader = ({
   deadlock = [{}, undefined, false],
   overallStatus,
   checks,
+  isPending = false,
+  trailing,
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
@@ -29,6 +31,10 @@ export const SafeShieldHeader = ({
   overallStatus?: { severity: Severity; title: string }
   /** "N of M checks passed" replaces the plain title while nothing is amiss. */
   checks?: ChecksCount
+  /** A check is still running: shows a pulsing dot before the label. */
+  isPending?: boolean
+  /** Right-aligned extra, e.g. a countdown. */
+  trailing?: ReactNode
 }): ReactElement => {
   const [_recipientResults, recipientError, recipientLoading = false] = recipient
   const [_contractResults, contractError, contractLoading = false] = contract
@@ -59,12 +65,24 @@ export const SafeShieldHeader = ({
     <div className="px-1 pt-1">
       <div
         data-testid="safe-shield-status"
-        className="flex flex-row rounded-md px-4 py-2"
+        className="flex flex-row items-center gap-2 rounded-md px-4 py-2"
         style={{ backgroundColor: headerBgColor }}
       >
+        {isPending && !isLoadingVisible && (
+          <span
+            className="size-1.5 shrink-0 rounded-full motion-safe:animate-pulse"
+            style={{ backgroundColor: headerTextColor }}
+            aria-hidden
+          />
+        )}
         <Typography variant="paragraph-mini-bold" className="uppercase" style={{ color: headerTextColor }}>
           {label}
         </Typography>
+        {trailing && !isLoadingVisible && (
+          <Typography variant="paragraph-mini" className="ml-auto" style={{ color: headerTextColor }}>
+            {trailing}
+          </Typography>
+        )}
       </div>
     </div>
   )
