@@ -8,6 +8,7 @@ import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useIsEditMode } from '../EditFlow/EditModeContext'
 import PendingRemovalsCard from '../EditFlow/PendingRemovalsCard'
 import { useEditState } from '../EditFlow/useEditState'
+import NetworksCallout from './NetworksCallout'
 import SafeAccountField from './SafeAccountField'
 import SpenderCallout from './SpenderCallout'
 import SpenderCard from './SpenderCard'
@@ -86,7 +87,12 @@ const SpendingLimitPolicyForm = ({
           className="flex flex-col gap-5"
           data-testid="spending-limit-policy-form"
         >
-          {!isEditMode && <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />}
+          {!isEditMode && (
+            <>
+              <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />
+              <NetworksCallout />
+            </>
+          )}
 
           <SafeAccountField
             accounts={accounts}
