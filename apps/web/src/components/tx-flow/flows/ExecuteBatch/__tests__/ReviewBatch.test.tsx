@@ -112,7 +112,6 @@ const mockGasPaymentOptions = (overrides: Partial<GasPaymentOptions> = {}) => {
   mockUseGasPaymentOptions.mockReturnValue({
     offer: dailyOffer,
     showsProUpsell: false,
-    isLoading: false,
     exclude: mockExclude,
     ...overrides,
   })
@@ -166,8 +165,8 @@ describe('ReviewBatch', () => {
     expect(mockDispatchBatchExecutionRelay.mock.calls[0][6]).toBe(subscriptionOffer.spaceId)
   })
 
-  it('executes through the connected wallet without an offer', async () => {
-    mockGasPaymentOptions({ offer: null })
+  it('hides the selector and executes through the connected wallet while no offer is on offer yet', async () => {
+    mockGasPaymentOptions({ offer: null, showsProUpsell: false })
     renderReviewBatch()
 
     expect(screen.queryByTestId('execution-method-selector')).not.toBeInTheDocument()
@@ -176,14 +175,6 @@ describe('ReviewBatch', () => {
 
     await waitFor(() => expect(mockDispatchBatchExecution).toHaveBeenCalledTimes(1))
     expect(mockDispatchBatchExecutionRelay).not.toHaveBeenCalled()
-  })
-
-  it('hides the selector and disables submit while the gas payment options load', () => {
-    mockGasPaymentOptions({ isLoading: true })
-    renderReviewBatch()
-
-    expect(screen.queryByTestId('execution-method-selector')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
   })
 
   it('excludes the subscription and shows the quota message on a quota refusal', async () => {

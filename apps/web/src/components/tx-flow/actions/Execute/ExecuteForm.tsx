@@ -81,11 +81,11 @@ export const ExecuteForm = ({
     setGasPaymentOption,
   } = useContext(TxFlowContext)
 
-  const { offer, showsProUpsell, isLoading: isGasPaymentLoading, exclude } = useGasPaymentOptions({ safeTx })
+  const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ safeTx })
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
   const willRelay = gasPayer !== 'WALLET'
-  const showExecutionSelector = !isGasPaymentLoading && (offer !== null || showsProUpsell)
+  const showExecutionSelector = offer !== null || showsProUpsell
 
   useEffect(() => {
     setGasPaymentOption(gasPayer)
@@ -183,7 +183,6 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    isGasPaymentLoading ||
     relaySimError?.code === 'SIMULATION_FAILED' ||
     (needsRiskConfirmation && !isRiskConfirmed)
 

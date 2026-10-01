@@ -32,6 +32,16 @@ const proSponsoredTxs: SafeSponsoredTxs = {
   isLoading: false,
 }
 
+const proLoading: SafeSponsoredTxs = {
+  isEnabled: true,
+  isPro: false,
+  meter: null,
+  left: null,
+  spaceId: null,
+  canSponsor: false,
+  isLoading: true,
+}
+
 const mockChain = (options: GasPaymentOption[]) =>
   jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
     chainBuilder()
@@ -93,36 +103,51 @@ describe('useGasPaymentOptions', () => {
   it.each<[string, GasPaymentOption[], () => void, boolean]>([
     ['the campaign', ['NO_FEE_CAMPAIGN'], () => mockCampaign({ isLoading: true }), true],
     ['the daily limit', ['FREE_DAILY_LIMIT'], () => mockRelays(undefined, true), true],
-    [
-      'the subscription',
-      ['SUBSCRIPTION'],
-      () => mockUseSafeSponsoredTxs.mockReturnValue({ ...proSponsoredTxs, isLoading: true }),
-      true,
-    ],
+    ['the subscription', ['SUBSCRIPTION'], () => mockUseSafeSponsoredTxs.mockReturnValue(proLoading), true],
     ['an unlisted campaign', ['FREE_DAILY_LIMIT'], () => mockCampaign({ isLoading: true }), false],
     ['an unlisted daily limit', ['SUBSCRIPTION'], () => mockRelays(undefined, true), false],
     [
       'an unlisted subscription',
       ['FREE_DAILY_LIMIT'],
-      () => mockUseSafeSponsoredTxs.mockReturnValue({ ...proSponsoredTxs, isLoading: true }),
+      () => mockUseSafeSponsoredTxs.mockReturnValue(proLoading),
       false,
     ],
-  ])('reports loading while %s loads: %s', (_label, options, mockLoading, expected) => {
+  ])('holds the offer back while %s loads: %s', (_label, options, mockLoading, holdsBack) => {
     mockChain(options)
     mockLoading()
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
 
-    expect(result.current.isLoading).toBe(expected)
+    expect(result.current).not.toHaveProperty('isLoading')
+    expect(result.current.showsProUpsell).toBe(false)
+    expect(result.current.offer === null).toBe(holdsBack)
   })
 
-  it('reports loading while the wallet check loads for a single transaction', () => {
+  it('offers the daily limit at once while the subscription is still loading', () => {
+    mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
+    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+
+    const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
+
+    expect(result.current.offer?.option).toBe('FREE_DAILY_LIMIT')
+  })
+
+  it('waits for the subscription when the daily limit is spent', () => {
+    mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
+    mockRelays({ remaining: 0, limit: 5 })
+    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+
+    const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
+
+    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
+  })
+
+  it('holds the offer back while the wallet check loads for a single transaction', () => {
     walletCanRelaySpy.mockReturnValue([undefined, undefined, true])
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
 
-    expect(result.current.isLoading).toBe(true)
-    expect(result.current.offer).toBeNull()
+    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
   })
 
   it('advances to the next option once one is excluded', () => {
@@ -154,7 +179,6 @@ describe('useGasPaymentOptions', () => {
 
     expect(walletCanRelaySpy).toHaveBeenCalledWith(undefined)
     expect(result.current.offer?.option).toBe('NO_FEE_CAMPAIGN')
-    expect(result.current.isLoading).toBe(false)
   })
 
   it('offers nothing when the wallet cannot relay a single transaction', () => {
@@ -162,7 +186,7 @@ describe('useGasPaymentOptions', () => {
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
 
-    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false, isLoading: false })
+    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
   })
 
   it('offers nothing for a refund transaction', () => {

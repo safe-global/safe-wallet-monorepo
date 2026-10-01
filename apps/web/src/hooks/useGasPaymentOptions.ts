@@ -12,7 +12,6 @@ import { selectSponsoredOffer, type SponsoredOffer, type SponsoredOption } from 
 export type GasPaymentOptions = {
   offer: SponsoredOffer | null
   showsProUpsell: boolean
-  isLoading: boolean
   exclude: (options: SponsoredOption[]) => void
 }
 
@@ -72,15 +71,16 @@ export const useGasPaymentOptions = ({
     ],
   )
 
-  const isLoading =
+  // Only a source that can still change the answer holds the offer back; Pro waits only when nothing free is on offer.
+  const isSettling =
+    (!isBatch && isWalletCheckLoading) ||
     (chainOptions.includes('NO_FEE_CAMPAIGN') && campaign.isLoading) ||
     (chainOptions.includes('FREE_DAILY_LIMIT') && isRelaysLoading) ||
-    (chainOptions.includes('SUBSCRIPTION') && isProLoading) ||
-    (!isBatch && isWalletCheckLoading)
+    (chainOptions.includes('SUBSCRIPTION') && isProLoading && offer === null)
 
   const exclude = useCallback((options: SponsoredOption[]) => {
     setExcluded((current) => new Set([...current, ...options]))
   }, [])
 
-  return { offer, showsProUpsell, isLoading, exclude }
+  return { offer: isSettling ? null : offer, showsProUpsell: isSettling ? false : showsProUpsell, exclude }
 }

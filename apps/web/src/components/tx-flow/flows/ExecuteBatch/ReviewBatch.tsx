@@ -88,7 +88,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
-  const { offer, showsProUpsell, isLoading: isGasPaymentLoading, exclude } = useGasPaymentOptions({ isBatch: true })
+  const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ isBatch: true })
   const { setTxFlow } = useContext(TxModalContext)
   const [gasPrice] = useGasPrice()
   const userNonce = useUserNonce()
@@ -216,7 +216,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
     )
   }
 
-  const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked || isGasPaymentLoading
+  const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked
 
   return (
     <>
@@ -242,7 +242,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <NetworkWarning />
 
-        {!isGasPaymentLoading && (offer !== null || showsProUpsell) && (
+        {(offer !== null || showsProUpsell) && (
           <ExecutionMethodSelector
             executionMethod={executionMethod}
             setExecutionMethod={setExecutionMethod}

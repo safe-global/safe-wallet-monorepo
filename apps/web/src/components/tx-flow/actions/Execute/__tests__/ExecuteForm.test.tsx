@@ -67,7 +67,6 @@ const mockExclude = jest.fn()
 const gasPaymentOptions = (overrides: Partial<GasPaymentOptions> = {}): GasPaymentOptions => ({
   offer: null,
   showsProUpsell: false,
-  isLoading: false,
   exclude: mockExclude,
   ...overrides,
 })
@@ -288,7 +287,8 @@ describe('ExecuteForm', () => {
     expect(getByTestId('execution-method-selector')).toHaveAttribute('data-upsell', 'true')
   })
 
-  it('renders no selector and executes through the wallet when nothing is offered', async () => {
+  it('hides the selector and executes through the wallet while no offer is on offer yet', async () => {
+    mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: null, showsProUpsell: false }))
     const mockExecuteTx = jest.fn()
 
     const { getByText, queryByTestId } = render(
@@ -300,6 +300,7 @@ describe('ExecuteForm', () => {
     )
 
     expect(queryByTestId('execution-method-selector')).not.toBeInTheDocument()
+    expect(getByText('Execute')).toBeEnabled()
     fireEvent.click(getByText('Execute'))
 
     await waitFor(() => {
@@ -313,15 +314,6 @@ describe('ExecuteForm', () => {
         null,
       )
     })
-  })
-
-  it('hides the selector and disables Execute while the gas payment options load', () => {
-    mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: dailyOffer, isLoading: true }))
-
-    const { getByText, queryByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
-
-    expect(queryByTestId('execution-method-selector')).not.toBeInTheDocument()
-    expect(getByText('Execute')).toBeDisabled()
   })
 
   it('publishes the gas payer to the tx flow and clears it on unmount', () => {
