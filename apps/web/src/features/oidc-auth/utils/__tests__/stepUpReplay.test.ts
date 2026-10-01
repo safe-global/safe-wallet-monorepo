@@ -8,13 +8,7 @@ import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
 import { stepUpReturning } from '../../store'
 import { navigateTo } from '@/utils/navigation'
-import {
-  continueAfterStepUp,
-  getReplayableAction,
-  replayStepUpAction,
-  saveStepUpTrip,
-  takeStepUpTrip,
-} from '../stepUpReplay'
+import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
 
 jest.mock('@/utils/navigation', () => ({ navigateTo: jest.fn() }))
 
@@ -107,32 +101,6 @@ describe('step-up trip storage', () => {
     expect(takeStepUpTrip()).toBeUndefined()
   })
 
-  it.each([
-    ['before', true],
-    ['after', false],
-  ])('should, when a continue URL is set %s the trip is saved, return it with the action', (_, isSetFirst) => {
-    const action = { endpoint: 'spaceSafesCreateV1', args: { spaceId: '7' } } as const
-    if (isSetFirst) continueAfterStepUp('/welcome/invite-members?spaceId=7')
-    saveStepUpTrip(action)
-    if (!isSetFirst) continueAfterStepUp('/welcome/invite-members?spaceId=7')
-
-    expect(takeStepUpTrip()).toEqual({ action, continueUrl: '/welcome/invite-members?spaceId=7' })
-  })
-
-  it('should, when the continue URL leaves the app, drop it', () => {
-    saveStepUpTrip({ endpoint: 'spaceSafesCreateV1', args: {} })
-    continueAfterStepUp('https://evil.example')
-
-    expect(takeStepUpTrip()?.continueUrl).toBeUndefined()
-  })
-
-  it('should, when there is no trip, still clear a continue URL so a later trip cannot pick it up', () => {
-    continueAfterStepUp('/welcome/invite-members?spaceId=7')
-
-    expect(takeStepUpTrip()).toBeUndefined()
-    expect(sessionStorage.getItem('oidc_step_up_continue')).toBeNull()
-  })
-
   it('should, when the stored trip is older than the challenge window, return undefined and delete it', () => {
     jest.useFakeTimers()
     saveStepUpTrip({ endpoint: 'membersInviteUserV1', args: {} })
@@ -216,49 +184,6 @@ describe('replayStepUpAction', () => {
     expect(isLeavingPage).toBe(false)
     expect(navigateTo).not.toHaveBeenCalled()
     expect(selectNotifications(store.getState())).toEqual([expect.objectContaining({ variant: 'error' })])
-  })
-
-  it('should, when a continue URL is given and the replay succeeds, go there instead of confirming with a toast', async () => {
-    const spaceId = faker.string.uuid()
-    server.use(http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({}, { status: 201 })))
-
-    const store = makeStore()
-
-    const isLeavingPage = await replayStepUpAction(
-      store.dispatch,
-      {
-        endpoint: 'spaceSafesCreateV1',
-        args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
-      },
-      '/welcome/invite-members?spaceId=7',
-    )
-
-    expect(isLeavingPage).toBe(true)
-    expect(navigateTo).toHaveBeenCalledWith('/welcome/invite-members?spaceId=7')
-    expect(selectNotifications(store.getState())).toEqual([])
-  })
-
-  it('should, when a continue URL is given but the replay fails, stay on the page', async () => {
-    const spaceId = faker.string.uuid()
-    server.use(
-      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
-        HttpResponse.json({ message: 'Boom' }, { status: 500 }),
-      ),
-    )
-
-    const store = makeStore()
-
-    const isLeavingPage = await replayStepUpAction(
-      store.dispatch,
-      {
-        endpoint: 'spaceSafesCreateV1',
-        args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
-      },
-      '/welcome/invite-members?spaceId=7',
-    )
-
-    expect(isLeavingPage).toBe(false)
-    expect(navigateTo).not.toHaveBeenCalled()
   })
 
   it('should, when the list query is still in flight with two subscribers while the replay completes, fetch the list again so it shows the added Safe', async () => {

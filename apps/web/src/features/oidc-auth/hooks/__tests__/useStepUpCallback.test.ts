@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useStepUpCallback } from '../useStepUpCallback'
 import { STEP_UP_CANCELLED, STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning, stepUpSettled } from '../../store'
-import { continueAfterStepUp, saveStepUpTrip } from '../../utils/stepUpReplay'
+import { saveStepUpTrip } from '../../utils/stepUpReplay'
 
 const mockReplace = jest.fn()
 const mockReconcileAuth = jest.fn()
@@ -213,22 +213,7 @@ describe('useStepUpCallback', () => {
     renderHook(() => useStepUpCallback())
 
     await waitFor(() => {
-      expect(mockReplayStepUpAction).toHaveBeenCalledWith(mockDispatch, TRIP_ACTION, undefined)
-    })
-  })
-
-  it('should, when the flow left a continue URL, hand it to the replay', async () => {
-    saveStepUpTrip(TRIP_ACTION)
-    continueAfterStepUp('/welcome/invite-members?spaceId=7')
-
-    renderHook(() => useStepUpCallback())
-
-    await waitFor(() => {
-      expect(mockReplayStepUpAction).toHaveBeenCalledWith(
-        mockDispatch,
-        TRIP_ACTION,
-        '/welcome/invite-members?spaceId=7',
-      )
+      expect(mockReplayStepUpAction).toHaveBeenCalledWith(mockDispatch, TRIP_ACTION)
     })
   })
 

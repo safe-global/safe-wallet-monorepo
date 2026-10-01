@@ -49,7 +49,7 @@ export const useStepUpCallback = () => {
       }
 
       await reconcileAuth(dispatch)
-      return trip.action ? replayStepUpAction(dispatch, trip.action, trip.continueUrl) : false
+      return trip.action ? replayStepUpAction(dispatch, trip.action) : false
     }
 
     void processCallback()
