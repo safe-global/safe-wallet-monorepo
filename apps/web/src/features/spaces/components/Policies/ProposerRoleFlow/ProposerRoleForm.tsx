@@ -41,7 +41,6 @@ export type ProposerRoleFormProps = {
   isSubmitting?: boolean
   errorMessage?: ReactNode
   parentSafeWallet?: ParentSafeWalletNoticeProps
-  isCheckingWallet?: boolean
 }
 
 const ProposerRoleForm = ({
@@ -54,7 +53,6 @@ const ProposerRoleForm = ({
   isSubmitting = false,
   errorMessage,
   parentSafeWallet,
-  isCheckingWallet = false,
 }: ProposerRoleFormProps) => {
   const methods = useForm<ProposerRoleFormValues>({
     defaultValues: { proposer: '', name: '', ...defaultValues },
@@ -84,7 +82,7 @@ const ProposerRoleForm = ({
 
   const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
   const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
-  const canSubmit = !isSafeBlocked && !parentSafeWallet && !isCheckingWallet && formState.isValid
+  const canSubmit = !isSafeBlocked && !parentSafeWallet && formState.isValid
 
   // The picked Safe stays even when typed as its own proposer, so the field keeps it and validation explains why.
   const accountOptions = useMemo(

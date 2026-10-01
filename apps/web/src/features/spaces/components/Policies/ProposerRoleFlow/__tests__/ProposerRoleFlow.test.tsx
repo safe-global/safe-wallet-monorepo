@@ -126,7 +126,7 @@ describe('ProposerRoleFlow', () => {
       refetch: jest.fn(),
     })
     mockUseGrantProposer.mockReturnValue(grantState())
-    mockUseParentSafeWallet.mockReturnValue({ parentSafeAddress: undefined, isChecking: false })
+    mockUseParentSafeWallet.mockReturnValue(undefined)
   })
 
   it('renders the page title and the policy header', () => {
@@ -207,7 +207,7 @@ describe('ProposerRoleFlow', () => {
     const PARENT = '0x2222222222222222222222222222222222222222'
 
     it('checks the wallet against the picked chain and names the parent from the address book', async () => {
-      mockUseParentSafeWallet.mockReturnValue({ parentSafeAddress: PARENT, isChecking: false })
+      mockUseParentSafeWallet.mockReturnValue(PARENT)
       const setTxFlow = jest.fn()
       const push = jest.fn().mockResolvedValue(true)
       const { user } = renderWithUserEvent(

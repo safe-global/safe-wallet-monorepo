@@ -25,7 +25,7 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const { grantProposerRole, isSubmitting, error, blockedReason, reset } = useGrantProposer()
 
   const account = findSafeAccount(safeAccounts.accounts, safeAccount)
-  const { notice: parentSafeWallet, isChecking } = useParentSafeWalletNotice(account, PARENT_SAFE_WALLET_COPY)
+  const parentSafeWallet = useParentSafeWalletNotice(account, PARENT_SAFE_WALLET_COPY)
 
   const onSafeAccountChange = useCallback(
     (value: string) => {
@@ -74,7 +74,6 @@ const ProposerRoleFlowContent = (): ReactElement => {
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
           parentSafeWallet={parentSafeWallet}
-          isCheckingWallet={isChecking}
         />
       </TxLayoutBase>
     </div>

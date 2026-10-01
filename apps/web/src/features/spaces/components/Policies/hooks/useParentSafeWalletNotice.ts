@@ -9,32 +9,24 @@ import type { ParentSafeWalletCopy, ParentSafeWalletNoticeProps } from '../compo
 import type { SafeAccountOption } from '../SafeAccountSelector/types'
 import { useParentSafeWallet } from './useParentSafeWallet'
 
-export type ParentSafeWalletNotice = {
-  notice?: ParentSafeWalletNoticeProps
-  isChecking: boolean
-}
-
 /** Notice props for the picked account when the connected wallet is its parent Safe; the link closes the flow without the discard prompt. */
 export const useParentSafeWalletNotice = (
   account: SafeAccountOption | undefined,
   copy: ParentSafeWalletCopy,
-): ParentSafeWalletNotice => {
+): ParentSafeWalletNoticeProps | undefined => {
   const { setTxFlow } = useContext(TxModalContext)
   const spaceId = useUrlSpaceId()
-  const { parentSafeAddress, isChecking } = useParentSafeWallet(account?.chainId)
+  const parentSafeAddress = useParentSafeWallet(account?.chainId)
   const parentContact = useAddressBookItem(parentSafeAddress ?? '', account?.chainId)
   const closeWithoutPrompt = useCallback(() => setTxFlow(undefined, undefined, false), [setTxFlow])
 
-  if (!account || !parentSafeAddress) return { isChecking }
+  if (!account || !parentSafeAddress) return undefined
 
   return {
-    isChecking,
-    notice: {
-      ...copy,
-      safeName: getSafeDisplayInfo(account.name ?? '', account.address).displayName,
-      parentSafeName: getSafeDisplayInfo(parentContact?.name ?? '', parentSafeAddress).displayName,
-      settingsHref: buildSafeHref(AppRoutes.settings.setup, account.chain?.shortName, account.address, spaceId),
-      onNavigate: closeWithoutPrompt,
-    },
+    ...copy,
+    safeName: getSafeDisplayInfo(account.name ?? '', account.address).displayName,
+    parentSafeName: getSafeDisplayInfo(parentContact?.name ?? '', parentSafeAddress).displayName,
+    settingsHref: buildSafeHref(AppRoutes.settings.setup, account.chain?.shortName, account.address, spaceId),
+    onNavigate: closeWithoutPrompt,
   }
 }

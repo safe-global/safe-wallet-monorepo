@@ -45,13 +45,13 @@ const renderNotice = (account: SafeAccountOption | undefined, addressBook = {}) 
 
 describe('useParentSafeWalletNotice', () => {
   beforeEach(() => {
-    mockUseParentSafeWallet.mockReturnValue({ parentSafeAddress: PARENT, isChecking: false })
+    mockUseParentSafeWallet.mockReturnValue(PARENT)
   })
 
   it('builds the notice from the copy, the address book and the Safe settings link', () => {
     const { result } = renderNotice(treasury, { '137': { [PARENT]: 'Ops' } })
 
-    expect(result.current.notice).toEqual({
+    expect(result.current).toEqual({
       ...COPY,
       safeName: 'Treasury',
       parentSafeName: 'Ops',
@@ -64,13 +64,13 @@ describe('useParentSafeWalletNotice', () => {
   it('falls back to shortened addresses when neither Safe has a name', () => {
     const { result } = renderNotice({ ...treasury, name: undefined })
 
-    expect(result.current.notice).toMatchObject({ safeName: '0xAAAA...AAaA', parentSafeName: '0x2222...2222' })
+    expect(result.current).toMatchObject({ safeName: '0xAAAA...AAaA', parentSafeName: '0x2222...2222' })
   })
 
   it('closes the flow without the discard prompt when the link is used', () => {
     const { result, setTxFlow } = renderNotice(treasury)
 
-    act(() => result.current.notice?.onNavigate?.())
+    act(() => result.current?.onNavigate?.())
 
     expect(setTxFlow).toHaveBeenCalledWith(undefined, undefined, false)
   })
@@ -78,13 +78,13 @@ describe('useParentSafeWalletNotice', () => {
   it('omits the settings link when the chain has no short name', () => {
     const { result } = renderNotice({ ...treasury, chain: undefined })
 
-    expect(result.current.notice?.settingsHref).toBeUndefined()
+    expect(result.current?.settingsHref).toBeUndefined()
   })
 
   it('returns no notice while nothing is picked or the wallet is not a parent Safe', () => {
-    expect(renderNotice(undefined).result.current).toEqual({ isChecking: false })
+    expect(renderNotice(undefined).result.current).toBeUndefined()
 
-    mockUseParentSafeWallet.mockReturnValue({ parentSafeAddress: undefined, isChecking: true })
-    expect(renderNotice(treasury).result.current).toEqual({ isChecking: true })
+    mockUseParentSafeWallet.mockReturnValue(undefined)
+    expect(renderNotice(treasury).result.current).toBeUndefined()
   })
 })

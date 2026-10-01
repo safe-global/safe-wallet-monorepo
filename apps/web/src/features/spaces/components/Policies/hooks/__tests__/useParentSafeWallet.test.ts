@@ -56,7 +56,7 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    expect(result.current).toEqual({ parentSafeAddress: WALLET, isChecking: false })
+    expect(result.current).toBe(WALLET)
     expect(mockIsSmartContractWallet).not.toHaveBeenCalled()
   })
 
@@ -66,7 +66,7 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    await waitFor(() => expect(result.current.parentSafeAddress).toBe(WALLET))
+    await waitFor(() => expect(result.current).toBe(WALLET))
     expect(mockIsSmartContractWallet).toHaveBeenCalledWith(CHAIN_ID, WALLET, mockProvider)
   })
 
@@ -75,16 +75,15 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    expect(result.current.isChecking).toBe(true)
-    await waitFor(() => expect(result.current).toEqual({ parentSafeAddress: WALLET, isChecking: false }))
+    expect(result.current).toBeUndefined()
+    await waitFor(() => expect(result.current).toBe(WALLET))
   })
 
   it('reports nothing for an EOA wallet', async () => {
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    await waitFor(() => expect(result.current.isChecking).toBe(false))
-    expect(mockIsSmartContractWallet).toHaveBeenCalledWith(CHAIN_ID, WALLET, mockProvider)
-    expect(result.current.parentSafeAddress).toBeUndefined()
+    await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalledWith(CHAIN_ID, WALLET, mockProvider))
+    expect(result.current).toBeUndefined()
   })
 
   it('treats a wallet whose code cannot be read as an EOA', async () => {
@@ -92,8 +91,8 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    await waitFor(() => expect(result.current.isChecking).toBe(false))
-    expect(result.current.parentSafeAddress).toBeUndefined()
+    await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
+    expect(result.current).toBeUndefined()
   })
 
   it('does nothing without a wallet', () => {
@@ -101,14 +100,14 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    expect(result.current).toEqual({ parentSafeAddress: undefined, isChecking: false })
+    expect(result.current).toBeUndefined()
     expect(mockIsSmartContractWallet).not.toHaveBeenCalled()
   })
 
   it('does nothing until a Safe account is picked', () => {
     const { result } = renderHook(() => useParentSafeWallet(undefined))
 
-    expect(result.current).toEqual({ parentSafeAddress: undefined, isChecking: false })
+    expect(result.current).toBeUndefined()
     expect(mockIsSmartContractWallet).not.toHaveBeenCalled()
   })
 
@@ -117,7 +116,7 @@ describe('useParentSafeWallet', () => {
 
     const { result } = renderHook(() => useParentSafeWallet(CHAIN_ID))
 
-    expect(result.current).toEqual({ parentSafeAddress: undefined, isChecking: false })
+    expect(result.current).toBeUndefined()
     expect(mockIsSmartContractWallet).not.toHaveBeenCalled()
   })
 })

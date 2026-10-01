@@ -210,14 +210,6 @@ describe('ProposerRoleForm', () => {
       document.removeEventListener('mousedown', guard)
     })
 
-    it('keeps submit disabled while the wallet is still being checked', async () => {
-      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER }, isCheckingWallet: true })
-
-      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
-      expect(screen.queryByTestId('parent-safe-wallet-notice')).not.toBeInTheDocument()
-      expect(submitButton()).toBeDisabled()
-    })
-
     it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {
       renderForm({ safeAccount: buildSafeAccountId('137', SAFE), defaultValues: { proposer: PROPOSER } })
 

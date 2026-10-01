@@ -8,13 +8,8 @@ import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { isSmartContractWallet } from '@/utils/wallets'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 
-export type ParentSafeWallet = {
-  parentSafeAddress?: string
-  isChecking: boolean
-}
-
 /** The flow signs as an EOA, so a wallet that is itself a Safe (e.g. a parent over WalletConnect) cannot grant here. */
-export const useParentSafeWallet = (chainId: string | undefined): ParentSafeWallet => {
+export const useParentSafeWallet = (chainId: string | undefined): string | undefined => {
   const wallet = useWallet()
   const walletAddress = wallet?.address
   const { allSafes } = useSpaceSafes()
@@ -29,13 +24,10 @@ export const useParentSafeWallet = (chainId: string | undefined): ParentSafeWall
     [allSafes, chainId, walletAddress],
   )
 
-  const [isContract, , isChecking] = useAsync(() => {
+  const [isContract] = useAsync(() => {
     if (!chainId || !walletAddress || !provider || isSpaceSafe) return
     return isSmartContractWallet(chainId, walletAddress, provider).catch(() => false)
   }, [chainId, walletAddress, provider, isSpaceSafe])
 
-  return {
-    parentSafeAddress: isSpaceSafe || isContract ? walletAddress : undefined,
-    isChecking,
-  }
+  return isSpaceSafe || isContract ? walletAddress : undefined
 }
