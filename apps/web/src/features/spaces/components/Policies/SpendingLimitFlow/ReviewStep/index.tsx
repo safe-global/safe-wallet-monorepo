@@ -7,11 +7,15 @@ import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import SpendingLimitSummary from '../Summary'
+import { toEditSummaryModel } from '../Summary/toEditSummaryModel'
+import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import { toPolicySummaryModel } from '../Summary/toPolicySummaryModel'
 import type { SpendingLimitPolicyFormValues } from '../types'
 import { resetPeriodEventLabel } from '../utils/resetPeriod'
@@ -28,9 +32,12 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   const { data: formValues } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { safeTx, safeTxError } = useContext(SafeTxContext)
   const { accounts } = useSpendingLimitSafeAccounts()
-  const { options: tokens } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options: tokens } = useSpendingLimitTokenOptions(extraTokens)
   const names = useAddressBook()
   const chainId = useChainId()
+  const isEditMode = useIsEditMode()
+  const { limits: baseline } = useExistingSpendingLimits()
 
   useBuildPolicyTransaction(formValues)
 
@@ -45,15 +52,20 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
           })
         }
       }
+      trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_CONFIRMED, { [MixpanelEventParams.CHAIN_ID]: chainId })
       onSubmit(args)
     },
     [formValues, chainId, onSubmit],
   )
 
-  const summary = useMemo(
-    () => (formValues ? toPolicySummaryModel(formValues, { accounts, tokens, names }) : undefined),
-    [formValues, accounts, tokens, names],
-  )
+  const summary = useMemo(() => {
+    if (!formValues) return undefined
+    const sources = { accounts, tokens, names }
+
+    return isEditMode && baseline
+      ? toEditSummaryModel(formValues, baseline, sources)
+      : toPolicySummaryModel(formValues, sources)
+  }, [formValues, accounts, tokens, names, isEditMode, baseline])
 
   if (!safeTx && !safeTxError) {
     return (

@@ -1,19 +1,27 @@
-import type { PendingPolicyOperation, PendingSpendingLimitPolicy, SpendingLimitPolicy } from '../types'
+import type {
+  PendingPolicyOperation,
+  PendingSpendingLimitPolicy,
+  QueuedSpendingLimitPolicy,
+  SpendingLimitPolicy,
+} from '../types'
 import {
   ACTIVE_CONNECT_HELPER,
   CONNECT_TO_SIGN_LINE,
   NOT_A_SIGNER_HELPER,
   PENDING_BANNER_TITLE,
+  PENDING_OUTCOME_TITLE,
   UNENFORCED_HELPER,
   connectHelper,
   executeLine,
+  outcomeLine,
   signedAndWaitingLine,
   signAndExecuteLine,
-} from './copy'
+} from './messages'
 
 export type Viewer = {
   address?: string
   isSigner: boolean
+  /** Undefined until the queued transaction has loaded. */
   hasSigned?: boolean
 }
 
@@ -42,11 +50,26 @@ export type PendingDrawerState = {
   required: number
 }
 
-export type SpendingLimitDrawerState = ActiveDrawerState | UnenforcedDrawerState | PendingDrawerState
+/** What became of a queued transaction that has left the queue. */
+export type PendingTxOutcome = 'executed' | 'failed' | 'replaced' | 'deleted'
+
+export type ClosedDrawerState = {
+  kind: 'closed'
+  operation: PendingPolicyOperation
+  action: 'none'
+  bannerTitle: string
+  bannerLine2: string
+}
+
+export type SpendingLimitDrawerState =
+  | ActiveDrawerState
+  | UnenforcedDrawerState
+  | PendingDrawerState
+  | ClosedDrawerState
 
 export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 
-export type DrawerPolicy = ActiveDrawerPolicy | (PendingSpendingLimitPolicy & { status: 'pending' })
+export type DrawerPolicy = ActiveDrawerPolicy | QueuedSpendingLimitPolicy
 
 /** A module that is present but not enabled enforces nothing, so no wallet makes this limit manageable. */
 const resolveUnenforced = (): UnenforcedDrawerState => ({
@@ -83,6 +106,8 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
 
   if (!viewer.isSigner) return { ...base, action: 'copy-link' }
 
+  if (viewer.hasSigned === undefined) return { ...base, action: 'review' }
+
   if (viewer.hasSigned) {
     const missing = policy.confirmationsRequired - policy.confirmationsSubmitted
 
@@ -92,12 +117,23 @@ const resolvePending = (policy: PendingSpendingLimitPolicy, viewer: Viewer, safe
   return { ...base, action: 'review', bannerLine2: signAndExecuteLine(policy.operation) }
 }
 
+const resolveClosed = (policy: PendingSpendingLimitPolicy, outcome: PendingTxOutcome): ClosedDrawerState => ({
+  kind: 'closed',
+  operation: policy.operation,
+  action: 'none',
+  bannerTitle: PENDING_OUTCOME_TITLE[outcome],
+  bannerLine2: outcomeLine(outcome, policy.operation),
+})
+
 export const resolveSpendingLimitDrawerState = (
   policy: DrawerPolicy,
   viewer: Viewer,
   safeName: string,
+  outcome?: PendingTxOutcome,
 ): SpendingLimitDrawerState => {
-  if (policy.status === 'pending') return resolvePending(policy, viewer, safeName)
+  if (policy.status === 'pending') {
+    return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
+  }
 
   return policy.enabled ? resolveActive(viewer) : resolveUnenforced()
 }

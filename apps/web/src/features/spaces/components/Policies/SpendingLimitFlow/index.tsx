@@ -1,18 +1,22 @@
 import { useCallback, useState, type ReactElement } from 'react'
-import { Info, WalletCards } from 'lucide-react'
+import SpendingLimitIcon from './SpendingLimitIcon'
+import { Info } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { TxFlow } from '@/components/tx-flow/TxFlow'
+import { TxFlow, type SubmitCallbackWithData } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { TxFlowType } from '@/services/analytics'
+import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { ExistingSpendingLimitsProvider } from './ExistingSpendingLimitsProvider'
 import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
-import { createDefaultFormValues } from './types'
+import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from './types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from './constants'
 
-const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
+const trackTxSigned: SubmitCallbackWithData<SpendingLimitPolicyFormValues> = ({ isExecuted = false }) => {
+  trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, { [MixpanelEventParams.IS_EXECUTED]: isExecuted })
+}
 
 const FlowSubtitle = (): ReactElement => (
   <span className="flex items-center gap-2.5">
@@ -47,6 +51,7 @@ const SpendingLimitFlow = (): ReactElement => {
           ReviewTransactionComponent={ReviewSpendingLimitPolicy}
           eventCategory={TxFlowType.SETUP_SPACE_SPENDING_LIMIT}
           initialData={createDefaultFormValues()}
+          onSubmit={trackTxSigned}
         >
           <TxFlowStep title={CREATE_STEP_TITLE} hideNonce>
             <CreateSpendingLimitPolicy isCalloutDismissed={isCalloutDismissed} onDismissCallout={dismissCallout} />
