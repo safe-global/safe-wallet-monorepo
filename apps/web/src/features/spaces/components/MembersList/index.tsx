@@ -26,6 +26,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
+import CopyButton from '@/components/common/CopyButton'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -67,19 +68,28 @@ const DATE_COLUMNS: Record<MembersListVariant, DataTableColumn<MemberDto>[]> = {
 }
 
 const getMemberIdentifier = ({ user }: MemberDto) => {
-  if (user.email) return { label: user.email, full: user.email }
-  if (user.address) return { label: shortenAddress(user.address), full: user.address }
+  if (user.email) return { label: user.email, full: user.email, copyLabel: 'Copy email' }
+  if (user.address) return { label: shortenAddress(user.address), full: user.address, copyLabel: 'Copy address' }
   return null
 }
+
+type MemberIdentifierValue = NonNullable<ReturnType<typeof getMemberIdentifier>>
+
+const CopyIdentifierButton = ({ identifier }: { identifier: MemberIdentifierValue }) => (
+  <CopyButton text={identifier.full} initialToolTipText={identifier.copyLabel} className="shrink-0" />
+)
 
 const MemberIdentifier = ({ member }: { member: MemberDto }) => {
   const identifier = getMemberIdentifier(member)
   if (!identifier) return null
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{identifier.label}</TooltipTrigger>
-      <TooltipContent>{identifier.full}</TooltipContent>
-    </Tooltip>
+    <span className="flex min-w-0 items-center gap-1">
+      <Tooltip>
+        <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{identifier.label}</TooltipTrigger>
+        <TooltipContent>{identifier.full}</TooltipContent>
+      </Tooltip>
+      <CopyIdentifierButton identifier={identifier} />
+    </span>
   )
 }
 
@@ -219,7 +229,10 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
             </div>
             {/* The identifier column is hidden in the compact layout — surface it under the name instead */}
             {isCompact && identifier && (
-              <span className="text-muted-foreground truncate pl-9 text-xs">{identifier.label}</span>
+              <span className="text-muted-foreground flex min-w-0 items-center gap-1 pl-9 text-xs">
+                <span className="truncate">{identifier.label}</span>
+                <CopyIdentifierButton identifier={identifier} />
+              </span>
             )}
           </div>
         )

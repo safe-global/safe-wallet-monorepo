@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import { fireEvent, mockClipboard, render, screen, within } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { formatDate as formatDateUtil, formatTimeInWords } from '@safe-global/utils/utils/date'
@@ -177,6 +177,61 @@ describe('MembersList', () => {
     const emailCell = screen.getByTestId('table-cell-email')
     expect(within(emailCell).getByText('alice@example.com')).toBeInTheDocument()
     expect(within(emailCell).queryByText(SHORT_WALLET_ADDRESS)).not.toBeInTheDocument()
+  })
+
+  it('copies the full wallet address from the identifier column', () => {
+    const writeText = mockClipboard()
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Bob', user: memberUserBuilder().with({ address: WALLET_ADDRESS }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const emailCell = screen.getByTestId('table-cell-email')
+    fireEvent.click(within(emailCell).getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(WALLET_ADDRESS)
+  })
+
+  it('copies the email from the identifier column', () => {
+    const writeText = mockClipboard()
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Alice', user: memberUserBuilder().with({ email: 'alice@example.com' }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const emailCell = screen.getByTestId('table-cell-email')
+    fireEvent.click(within(emailCell).getByRole('button', { name: 'Copy email' }))
+
+    expect(writeText).toHaveBeenCalledWith('alice@example.com')
+  })
+
+  it('copies the identifier from under the member name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const writeText = mockClipboard()
+    render(
+      <MembersList
+        members={[
+          memberBuilder()
+            .with({ name: 'Bob', user: memberUserBuilder().with({ address: WALLET_ADDRESS }).build() })
+            .build(),
+        ]}
+      />,
+    )
+
+    const nameCell = screen.getByTestId('table-cell-name')
+    fireEvent.click(within(nameCell).getByRole('button', { name: 'Copy address' }))
+
+    expect(writeText).toHaveBeenCalledWith(WALLET_ADDRESS)
   })
 
   it('shows an Expired chip for a pending invite past its expiry', () => {
