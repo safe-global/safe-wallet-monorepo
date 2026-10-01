@@ -89,6 +89,11 @@ export enum MixpanelEvent {
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
   POLICY_UPSELL_UPGRADE_CLICKED = 'Policy Upsell Upgrade Clicked',
+  ADD_POLICY_DIALOG_CLOSED = 'Add Policy Dialog Closed',
+  PROPOSER_SUBMITTED = 'Proposer Submitted',
+  SPENDING_LIMIT_SET = 'Spending Limit Set',
+  SPENDING_LIMIT_TX_CONFIRMED = 'Spending Limit Tx Confirmed',
+  SPENDING_LIMIT_TX_SIGNED = 'Spending Limit Tx Signed',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -161,6 +166,9 @@ export enum MixpanelEventParams {
   MEMBER_ROLE = 'Member Role',
   POLICY_TYPE = 'Policy Type',
   IS_AVAILABLE = 'Is Available',
+  SPENDER_COUNT = 'Spender Count',
+  LIMIT_COUNT = 'Limit Count',
+  IS_EXECUTED = 'Is Executed',
 }
 
 export enum AuthLoginMethod {

@@ -14,7 +14,11 @@ const SpenderCallout = ({ dismissed, onDismiss }: SpenderCalloutProps): ReactEle
   if (dismissed) return null
 
   return (
-    <Alert variant="info" data-testid="spender-callout">
+    <Alert
+      variant="info"
+      className="*:data-[slot=alert-description]:text-muted-foreground"
+      data-testid="spender-callout"
+    >
       <AlertSeverityIcon variant="info" />
       <AlertTitle>{CALLOUT_TITLE}</AlertTitle>
       <AlertDescription>{CALLOUT_DESCRIPTION}</AlertDescription>

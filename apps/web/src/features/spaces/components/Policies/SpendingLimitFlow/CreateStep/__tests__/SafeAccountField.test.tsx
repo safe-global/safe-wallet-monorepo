@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import { SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
+import { getNestedSafesNoticeText, SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../../types'
@@ -55,6 +55,18 @@ describe('SafeAccountField', () => {
     renderWithUserEvent(<Harness onSafeChange={jest.fn()} onRead={jest.fn()} />)
 
     expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toBeInTheDocument()
+  })
+
+  it('points at the spending limit settings in the nested Safes notice', async () => {
+    const { user } = renderWithUserEvent(<Harness onSafeChange={jest.fn()} onRead={jest.fn()} />)
+
+    const trigger = screen.getByRole('combobox')
+    await user.click(trigger)
+    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+
+    expect(await screen.findByTestId('safe-account-selector-notice')).toHaveTextContent(
+      getNestedSafesNoticeText('spending limits'),
+    )
   })
 
   it('stores the picked account in the form and moves the scope to its chain and address', async () => {
