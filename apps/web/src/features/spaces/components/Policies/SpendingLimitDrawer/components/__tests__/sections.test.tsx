@@ -4,6 +4,12 @@ import { PendingBanner } from '../PendingBanner'
 import { PendingSignatures } from '../PendingSignatures'
 import { PolicyOverview } from '../PolicyOverview'
 
+jest.mock('@/components/common/ChainIndicator', () => {
+  const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
+  Mock.displayName = 'ChainIndicator'
+  return { __esModule: true, default: Mock }
+})
+
 const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: 'Ops' }
 
 describe('PendingBanner', () => {
@@ -40,6 +46,7 @@ describe('PolicyOverview', () => {
     render(
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
+        chainId="1"
         lastUpdated="Sep 22, 2026"
         enforcedBy="Safe allowance module"
       />,
@@ -50,6 +57,9 @@ describe('PolicyOverview', () => {
     const appliesToRow = screen.getByText('Safe account').closest('div') as HTMLElement
     expect(within(appliesToRow).getByText('Treasury')).toBeInTheDocument()
 
+    const networkRow = screen.getByText('Network').closest('div') as HTMLElement
+    expect(within(networkRow).getByAltText('chain-1')).toBeInTheDocument()
+
     const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
     expect(within(lastUpdatedRow).getByText('Sep 22, 2026')).toBeInTheDocument()
 
@@ -59,7 +69,11 @@ describe('PolicyOverview', () => {
 
   it('omits the last updated row rather than filling it while the payload carries no timestamp', () => {
     render(
-      <PolicyOverview appliesTo={{ address: SAFE.address, name: 'Treasury' }} enforcedBy="Safe allowance module" />,
+      <PolicyOverview
+        appliesTo={{ address: SAFE.address, name: 'Treasury' }}
+        chainId="1"
+        enforcedBy="Safe allowance module"
+      />,
     )
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
@@ -70,6 +84,7 @@ describe('PolicyOverview', () => {
     render(
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
+        chainId="1"
         initiatedBy={{ address: SAFE.address, name: 'Alice' }}
         lastUpdated="Sep 22, 2026"
         enforcedBy="Safe allowance module"
