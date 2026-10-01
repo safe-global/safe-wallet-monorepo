@@ -32,6 +32,7 @@ export const useProposerOverview = ({ policy, proposer }: ProposerRef): Proposer
       href: buildSafeHref(AppRoutes.settings.setup, shortName, safeAddress, spaceId),
     },
     initiatedBy: { address: grantor ?? '', name: grantorContact?.name },
+    chainId,
     lastUpdated: NO_TIMESTAMP,
     enforcedBy: ENFORCED_BY,
   }

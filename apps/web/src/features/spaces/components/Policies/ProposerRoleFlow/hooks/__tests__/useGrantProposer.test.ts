@@ -12,7 +12,8 @@ import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import * as useOnboardModule from '@/hooks/wallets/useOnboard'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as web3ReadOnlyModule from '@/hooks/wallets/web3ReadOnly'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
@@ -236,18 +237,22 @@ describe('useGrantProposer', () => {
     expect(addOrRequestContact).not.toHaveBeenCalled()
   })
 
-  it('tracks the submit event once the proposer is added', async () => {
+  it('tracks the submit event as soon as the user submits', async () => {
     await submit()
 
-    expect(trackEvent).toHaveBeenCalledWith(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.PROPOSER_SUBMITTED, {
+      [MixpanelEventParams.CHAIN_ID]: CHAIN_ID,
+    })
   })
 
-  it('does not track the submit event when the request fails', async () => {
+  it('tracks the submit event even when the request then fails', async () => {
     addV2.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
 
     await submit()
 
-    expect(trackEvent).not.toHaveBeenCalledWith(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.PROPOSER_SUBMITTED, {
+      [MixpanelEventParams.CHAIN_ID]: CHAIN_ID,
+    })
   })
 
   it('blocks a smart-contract proposer before asking for a signature', async () => {

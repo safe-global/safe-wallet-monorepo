@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
@@ -26,13 +26,7 @@ import {
   validateUniqueToken,
 } from '../utils/validation'
 import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
-import {
-  FREQUENCY_LABEL,
-  LIMIT_AMOUNT_LABEL,
-  LIMIT_AMOUNT_PLACEHOLDER,
-  PRICE_UNAVAILABLE_TEXT,
-  REMOVE_LIMIT_LABEL,
-} from '../constants'
+import { FREQUENCY_LABEL, LIMIT_AMOUNT_LABEL, LIMIT_AMOUNT_PLACEHOLDER, REMOVE_LIMIT_LABEL } from '../constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -46,14 +40,12 @@ export type TokenLimitCardProps = {
   onRemove: () => void
 }
 
-const hasPrice = (token: TokenOption): boolean => !!token.fiatConversion && parseFloat(token.fiatConversion) > 0
+/** Holds one line even when empty, so the Frequency row does not move as the helpers come and go. */
+const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
+  <span className="block min-h-lh">{children}</span>
+)
 
-const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
-  if (!token) return null
-  if (!hasPrice(token)) return <span data-testid="amount-fiat">{PRICE_UNAVAILABLE_TEXT}</span>
-
-  // Nothing typed yet is not worth $0.00 — `computeFiatValue` returns null for that, and for anything
-  // else it cannot price, so say nothing rather than coercing it to a figure.
+const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): ReactElement | null => {
   const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
   if (fiat === null) return null
 
@@ -184,14 +176,16 @@ const TokenLimitCard = ({
                   name={field.name}
                   error={!!tokenError}
                   helperText={
-                    tokenError?.message ? (
-                      <span data-testid="token-error">{String(tokenError.message)}</span>
-                    ) : selectedToken ? (
-                      <span data-testid="token-balance">
-                        {formatVisualAmount(selectedToken.balance ?? '0', selectedToken.decimals)}{' '}
-                        {tokenOptionLabel(selectedToken)}
-                      </span>
-                    ) : undefined
+                    <HelperLine>
+                      {tokenError?.message ? (
+                        <span data-testid="token-error">{String(tokenError.message)}</span>
+                      ) : selectedToken?.balance !== undefined ? (
+                        <span data-testid="token-balance">
+                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
+                          {tokenOptionLabel(selectedToken)}
+                        </span>
+                      ) : null}
+                    </HelperLine>
                   }
                   data-testid="limit-token-selector"
                 />
@@ -206,11 +200,13 @@ const TokenLimitCard = ({
               fullWidth
               error={!!amountError}
               helperText={
-                amountError?.message ? (
-                  String(amountError.message)
-                ) : selectedToken ? (
-                  <FiatLine amount={amount} token={selectedToken} />
-                ) : undefined
+                <HelperLine>
+                  {amountError?.message ? (
+                    String(amountError.message)
+                  ) : selectedToken ? (
+                    <FiatLine amount={amount} token={selectedToken} />
+                  ) : null}
+                </HelperLine>
               }
               data-testid="limit-amount-input"
               {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}

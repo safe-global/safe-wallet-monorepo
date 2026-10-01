@@ -7,6 +7,7 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
@@ -86,6 +87,16 @@ describe('ProposerRoleForm', () => {
     expect(
       screen.getByText('To complete the setup, confirm with a signature from your connected wallet.'),
     ).toBeInTheDocument()
+  })
+
+  it('points at the proposer settings in the nested Safes notice', async () => {
+    const { user } = renderForm()
+
+    await openAccountField(user)
+
+    expect(await screen.findByTestId('safe-account-selector-notice')).toHaveTextContent(
+      getNestedSafesNoticeText('proposers'),
+    )
   })
 
   it('explains the proposer field and where a member name goes', () => {
@@ -387,6 +398,22 @@ describe('ProposerRoleForm', () => {
   describe('proposer field', () => {
     const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
 
+    afterEach(() => jest.restoreAllMocks())
+
+    it('does not suggest the picked Safe account as proposer', async () => {
+      jest.spyOn(useChainIdHook, 'default').mockReturnValue(CHAIN_ID)
+      const { user } = renderForm(
+        { safeAccount: treasury.id },
+        { [CHAIN_ID]: { [SAFE]: 'Treasury', [PROPOSER]: 'Alice' } },
+      )
+
+      await user.click(screen.getByTestId('address-book-toggle'))
+      const options = await screen.findAllByTestId('address-item')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Alice')
+    })
+
     it('does not take focus when the form opens', () => {
       renderForm({ safeAccount: treasury.id })
 
@@ -436,6 +463,31 @@ describe('ProposerRoleForm', () => {
       await user.click(await screen.findByRole('option'))
 
       expect(onSafeAccountChange).toHaveBeenCalledWith(treasury.id)
+    })
+
+    it('does not offer the Safe account entered as proposer', async () => {
+      const ops: SafeAccountOption = {
+        ...treasury,
+        id: buildSafeAccountId(CHAIN_ID, PROPOSER),
+        address: PROPOSER,
+        name: 'Ops',
+      }
+      const { user } = renderForm({
+        safeAccounts: { ...eligible, accounts: [treasury, ops] },
+        defaultValues: { proposer: PROPOSER },
+      })
+
+      await openAccountField(user)
+      const options = await screen.findAllByRole('option')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Treasury')
+    })
+
+    it('keeps the picked Safe account when it is entered as its own proposer', () => {
+      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: SAFE } })
+
+      expect(accountField()).toHaveTextContent('Treasury')
     })
 
     it('passes the loading state through to the account field', () => {

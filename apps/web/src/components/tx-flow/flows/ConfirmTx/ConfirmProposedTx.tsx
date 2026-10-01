@@ -25,6 +25,8 @@ const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): Reac
   }, [setNonce, txNonce])
 
   useEffect(() => {
+    // A Space-level flow mounts before its Safe SDK resolves, and building without it fails.
+    if (scope && !scope.sdk) return
     if (txId) {
       createExistingTx(chainId, txId, undefined, scope).then(setSafeTx).catch(setSafeTxError)
     }

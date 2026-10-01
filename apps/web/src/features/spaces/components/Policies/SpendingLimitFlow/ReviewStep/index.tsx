@@ -7,7 +7,7 @@ import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
@@ -52,6 +52,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
           })
         }
       }
+      trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_CONFIRMED, { [MixpanelEventParams.CHAIN_ID]: chainId })
       onSubmit(args)
     },
     [formValues, chainId, onSubmit],
