@@ -55,7 +55,6 @@ export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBad
 
 export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
 export { startStepUp } from './utils/stepUp'
-export { continueAfterStepUp } from './utils/stepUpReplay'
 export { useStepUpSplash } from './hooks/useStepUpSplash'
 export { useStepUpReturnUrl } from './hooks/useStepUpReturnUrl'
 

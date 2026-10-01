@@ -758,31 +758,6 @@ describe('useOnboardingSubmit — naming step', () => {
     })
   })
 
-  it('leaves the next step for after step-up, so a replayed submit moves on', async () => {
-    sessionStorage.clear()
-    mockAddSafesToSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
-    const { result } = renderHook(() =>
-      useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)], '/welcome/invite-members?spaceId=42'),
-    )
-
-    act(() => {
-      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
-    })
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-    act(() => {
-      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
-    })
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(result.current.error).toBeUndefined()
-    expect(onSuccess).not.toHaveBeenCalled()
-    expect(sessionStorage.getItem('oidc_step_up_continue')).toBe('/welcome/invite-members?spaceId=42')
-  })
-
   it('returns to the selection step on demand', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
 
@@ -795,5 +770,59 @@ describe('useOnboardingSubmit — naming step', () => {
     act(() => result.current.showSelectStep())
 
     expect(result.current.step).toBe('select')
+  })
+})
+
+describe('useOnboardingSubmit — step-up return', () => {
+  const NEXT_STEP_URL = '/welcome/invite-members?spaceId=42'
+  const onSuccess = jest.fn()
+  const setReturnUrl = { type: 'stepUp/stepUpReturnUrlSet', payload: NEXT_STEP_URL }
+  const clearReturnUrl = { type: 'stepUp/stepUpReturnUrlCleared', payload: NEXT_STEP_URL }
+
+  const submitNewSafe = async (selectedSafes: Record<string, boolean>) => {
+    const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [], NEXT_STEP_URL))
+    await waitFor(() => expect(result.current.selectedSafesLength).toBe(mockSpaceSafes.length))
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', selectedSafes)
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockSpaceSafes = []
+    mockSpaceAddressBook = [{ address: '0xnew', name: 'Named', chainIds: ['1'] }]
+    mockAddressBookError = false
+    mockAddSafesToSpace.mockResolvedValue({ data: {} })
+    mockRemoveSafesFromSpace.mockResolvedValue({ data: {} })
+  })
+
+  it('sends a step-up on the add on to the next step', async () => {
+    mockAddSafesToSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
+
+    await submitNewSafe({ '1:0xnew': true })
+
+    expect(mockDispatch).toHaveBeenCalledWith(setReturnUrl)
+    expect(mockDispatch).not.toHaveBeenCalledWith(clearReturnUrl)
+    expect(onSuccess).not.toHaveBeenCalled()
+  })
+
+  it('drops the return URL once the add needs no step-up', async () => {
+    await submitNewSafe({ '1:0xnew': true })
+
+    expect(mockDispatch).toHaveBeenCalledWith(setReturnUrl)
+    expect(mockDispatch).toHaveBeenCalledWith(clearReturnUrl)
+    expect(onSuccess).toHaveBeenCalled()
+  })
+
+  it('keeps a step-up on this step when a Safe is removed first, because only the removal is replayed', async () => {
+    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
+    mockRemoveSafesFromSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
+
+    await submitNewSafe({ '1:0xexisting': false, '1:0xnew': true })
+
+    expect(mockDispatch).not.toHaveBeenCalledWith(setReturnUrl)
   })
 })
