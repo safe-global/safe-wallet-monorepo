@@ -4,8 +4,10 @@ import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
   ELIGIBILITY_HELPER_TEXT,
   ELIGIBILITY_RULE,
+  getNestedSafesNoticeText,
   INELIGIBILITY_TEXT,
   LOAD_ERROR_TEXT,
+  NESTED_SAFES_NOTICE_TITLE,
   NO_ELIGIBLE_ACCOUNTS_TEXT,
   NO_WALLET_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
@@ -547,6 +549,68 @@ describe('SafeAccountSelector', () => {
     expect(screen.getByText('Pick an account to continue')).toBeInTheDocument()
     expect(screen.queryByText(ELIGIBILITY_HELPER_TEXT)).not.toBeInTheDocument()
     expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  describe('notice', () => {
+    const notice = { title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }
+
+    it('renders nothing extra when no notice is given', async () => {
+      const { user } = renderSelector()
+
+      await openSelector(user)
+
+      expect(screen.queryByTestId('safe-account-selector-notice')).not.toBeInTheDocument()
+    })
+
+    it('shows the notice above the options once opened', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      expect(shown).toHaveTextContent(NESTED_SAFES_NOTICE_TITLE)
+      expect(shown).toHaveTextContent(getNestedSafesNoticeText('proposers'))
+    })
+
+    it('precedes every option in the popup', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      const firstOption = (await screen.findAllByRole('option'))[0]
+      expect(shown.compareDocumentPosition(firstOption)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    })
+
+    it('is not selectable', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      expect(shown).not.toHaveAttribute('role', 'option')
+      expect(await screen.findAllByRole('option')).toHaveLength(4)
+    })
+
+    it('names the policy the flow manages', () => {
+      expect(getNestedSafesNoticeText('proposers')).toContain('proposers')
+      expect(getNestedSafesNoticeText('spending limits')).toContain('spending limits')
+    })
+
+    it('stays out of the trigger while the popup is closed', () => {
+      render(<SafeAccountSelector accounts={[singleChainAccount]} onChange={jest.fn()} notice={notice} />)
+
+      expect(screen.getByRole('combobox')).not.toHaveTextContent(NESTED_SAFES_NOTICE_TITLE)
+    })
+
+    it('shows alongside the empty state when no accounts are eligible', async () => {
+      const { user } = renderSelector({ accounts: [], notice, onSwitchWallet: jest.fn() })
+
+      await openSelector(user)
+
+      expect(await screen.findByTestId('safe-account-selector-notice')).toBeInTheDocument()
+      expect(screen.getByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).toBeInTheDocument()
+    })
   })
 
   it('accepts a plain option list with no groups', async () => {

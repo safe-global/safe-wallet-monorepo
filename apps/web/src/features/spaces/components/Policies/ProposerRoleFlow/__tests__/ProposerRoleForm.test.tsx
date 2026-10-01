@@ -7,6 +7,7 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
@@ -86,6 +87,16 @@ describe('ProposerRoleForm', () => {
     expect(
       screen.getByText('To complete the setup, confirm with a signature from your connected wallet.'),
     ).toBeInTheDocument()
+  })
+
+  it('points at the proposer settings in the nested Safes notice', async () => {
+    const { user } = renderForm()
+
+    await openAccountField(user)
+
+    expect(await screen.findByTestId('safe-account-selector-notice')).toHaveTextContent(
+      getNestedSafesNoticeText('proposers'),
+    )
   })
 
   it('explains the proposer field and where a member name goes', () => {
