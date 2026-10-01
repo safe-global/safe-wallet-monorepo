@@ -192,6 +192,24 @@ describe('SafeShieldContext', () => {
     )
   })
 
+  it('requires risk confirmation while the Safenet prototype reports a risk', async () => {
+    mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result } = renderHook(() => useSafeShield(), { wrapper })
+
+    act(() => result.current.setHasSafenetRisk(true))
+    await waitFor(() => expect(result.current.needsRiskConfirmation).toBe(true))
+
+    act(() => result.current.setHasSafenetRisk(false))
+    await waitFor(() => expect(result.current.needsRiskConfirmation).toBe(false))
+  })
+
   it('should reset risk confirmation when transaction changes', async () => {
     mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.CRITICAL))
 

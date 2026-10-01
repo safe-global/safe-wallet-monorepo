@@ -44,6 +44,8 @@ type SafeShieldContextType = {
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
+  /** Set by the Safenet checks prototype while it shows a risk result. */
+  setHasSafenetRisk: Dispatch<SetStateAction<boolean>>
   // Safe-level analysis (untrusted Safe check)
   safeAnalysis: SafeAnalysisResult | null
   addToTrustedList: () => void
@@ -92,6 +94,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
+  const [hasSafenetRisk, setHasSafenetRisk] = useState(false)
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
@@ -107,17 +110,21 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
     // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
     const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
+      hasCriticalThreat ||
+      hasCriticalDeadlock ||
+      hasPoisoning ||
+      hasSafenetRisk ||
+      safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
+  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning, hasSafenetRisk])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning, hasSafenetRisk])
 
   return (
     <SafeShieldContext.Provider
@@ -133,6 +140,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
+        setHasSafenetRisk,
         safeAnalysis,
         addToTrustedList,
         hasProFeatures,

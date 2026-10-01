@@ -26,7 +26,12 @@ import {
   HypernativeFeature,
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import {
+  SafenetChecksFeature,
+  SafenetChecksPrototypeFeature,
+  useIsSafenetChecksEnabled,
+  useIsSafenetPrototypeEnabled,
+} from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
@@ -41,6 +46,8 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
+  const isSafenetPrototype = useIsSafenetPrototypeEnabled()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -58,7 +65,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
   // Bulk-group rows hide the cell via CSS; skipping the mount also skips the chain read.
-  const showSafenetStatus = isSafenetEnabled && isQueue && !isBulkGroup && !!safeTxHash
+  const showSafenetStatus = (isSafenetEnabled || isSafenetPrototype) && isQueue && !isBulkGroup && !!safeTxHash
 
   return (
     <div
@@ -138,7 +145,11 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
 
       {showSafenetStatus && safeTxHash && (
         <div style={{ gridArea: 'safenet' }} className={css.safenet}>
-          <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
+          {isSafenetPrototype ? (
+            <safenetPrototype.SafenetQueueChip />
+          ) : (
+            <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
+          )}
         </div>
       )}
 

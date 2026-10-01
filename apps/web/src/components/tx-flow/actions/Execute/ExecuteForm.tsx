@@ -44,6 +44,8 @@ import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
+import { useLoadFeature } from '@/features/__core__'
+import { SafenetChecksPrototypeFeature } from '@/features/safenet-checks'
 
 export const ExecuteForm = ({
   safeTx,
@@ -78,6 +80,7 @@ export const ExecuteForm = ({
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
   const scope = useSafeScope()
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
@@ -347,6 +350,8 @@ export const ExecuteForm = ({
             </Button>
           </div>
         </ModalDialog>
+
+        <safenetPrototype.SafenetExecuteStatus />
 
         <div className="pt-6">
           <Separator bleed="6" />

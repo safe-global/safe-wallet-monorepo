@@ -2,6 +2,11 @@ import type { FeatureImplementation } from '@/features/__core__'
 import type SafenetAuditRow from './components/SafenetAuditRow'
 import type SafenetChecksSection from './components/SafenetChecksSection'
 import type SafenetQueueStatus from './components/SafenetQueueStatus'
+import type SafenetExecuteStatus from './prototype/components/SafenetExecuteStatus'
+import type SafenetHistoryRow from './prototype/components/SafenetHistoryRow'
+import type SafenetQueueChip from './prototype/components/SafenetQueueChip'
+import type SafenetScenarioDialog from './prototype/components/SafenetScenarioDialog'
+import type SafenetShieldRow from './prototype/components/SafenetShieldRow'
 
 /**
  * Lazy-loaded surface of the Safenet checks feature. All are PascalCase
@@ -15,4 +20,16 @@ export interface SafenetChecksContract extends FeatureImplementation {
   SafenetAuditRow: typeof SafenetAuditRow
   SafenetChecksSection: typeof SafenetChecksSection
   SafenetQueueStatus: typeof SafenetQueueStatus
+}
+
+/**
+ * Lazy-loaded surface of the mocked M1 prototype, gated by `SAFENET_CHECKS_PROTOTYPE`. Each
+ * component replaces the matching real one above while the prototype flag is on.
+ */
+export interface SafenetChecksPrototypeContract extends FeatureImplementation {
+  SafenetExecuteStatus: typeof SafenetExecuteStatus
+  SafenetHistoryRow: typeof SafenetHistoryRow
+  SafenetQueueChip: typeof SafenetQueueChip
+  SafenetScenarioDialog: typeof SafenetScenarioDialog
+  SafenetShieldRow: typeof SafenetShieldRow
 }

@@ -19,6 +19,7 @@ jest.mock('@/hooks/useTxQueue', () => ({
 
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '1' }),
+  useHasFeature: () => false,
 }))
 
 jest.mock('@/utils/chains', () => ({
