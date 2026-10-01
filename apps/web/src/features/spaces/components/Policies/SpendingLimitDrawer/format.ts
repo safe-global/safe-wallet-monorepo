@@ -1,4 +1,4 @@
-import type { PolicyAllowance } from '../types'
+import type { PolicyAllowance, PolicySpender } from '../types'
 import { formatTokenAmount, getResetPeriodLabel } from '../utils/policyLabel'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
@@ -7,6 +7,7 @@ const UTC_PARTS = new Intl.DateTimeFormat('en-US', {
   timeZone: 'UTC',
   month: 'short',
   day: 'numeric',
+  year: 'numeric',
   hour: '2-digit',
   minute: '2-digit',
   hourCycle: 'h23',
@@ -20,6 +21,19 @@ export const formatResetUtc = (resetsAtMinute: number): string => {
   const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
 
   return `${part('month')} ${part('day')}, ${part('hour')}:${part('minute')} UTC`
+}
+
+const MS_PER_SECOND = 1_000
+
+/** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
+export const formatLastUpdated = (spenders: PolicySpender[]): string | undefined => {
+  const createdAts = spenders.flatMap(({ allowances }) => allowances.flatMap(({ createdAt }) => createdAt ?? []))
+  if (createdAts.length === 0) return undefined
+
+  const parts = UTC_PARTS.formatToParts(new Date(Math.max(...createdAts) * MS_PER_SECOND))
+  const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
+
+  return `${part('month')} ${part('day')}, ${part('year')} · ${part('hour')}:${part('minute')} UTC`
 }
 
 const PERCENT_SCALE = 10_000n
