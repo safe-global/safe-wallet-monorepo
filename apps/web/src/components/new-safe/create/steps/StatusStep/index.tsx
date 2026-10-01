@@ -11,27 +11,23 @@ import { SafeCreationEvent, safeCreationSubscribe, isPredictedSafeProps } from '
 import { useCurrentChain } from '@/hooks/useChains'
 import Rocket from '@/public/images/common/rocket.svg'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { useAppDispatch } from '@/store'
+import { useAddNewSafeToUrlSpace } from '@/features/spaces'
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 
 const SPEED_UP_THRESHOLD_IN_SECONDS = 15
 
-export const CreateSafeStatus = ({
-  data,
-  setProgressColor,
-  setStep,
-  setStepData,
-}: StepRenderProps<NewSafeFormData>) => {
+export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: StepRenderProps<NewSafeFormData>) => {
   const [status, setStatus] = useState<SafeCreationEvent>(SafeCreationEvent.PROCESSING)
   const [safeAddress, pendingSafe] = useUndeployedSafe()
   const router = useRouter()
   const chain = useCurrentChain()
-  const dispatch = useAppDispatch()
+  const addNewSafeToUrlSpace = useAddNewSafeToUrlSpace()
+  const hasRedirected = useRef(false)
 
   const counter = useCounter(pendingSafe?.status.submittedAt)
 
@@ -50,15 +46,16 @@ export const CreateSafeStatus = ({
   }, [])
 
   useEffect(() => {
-    if (!chain || !safeAddress) return
+    if (!chain || !safeAddress || status !== SafeCreationEvent.SUCCESS || hasRedirected.current) return
+    hasRedirected.current = true
 
-    if (status === SafeCreationEvent.SUCCESS) {
-      const redirect = getRedirect(chain.shortName, safeAddress, router.query?.safeViewRedirectURL)
+    addNewSafeToUrlSpace(chain.chainId, safeAddress).then((spaceId) => {
+      const redirect = getRedirect(chain.shortName, safeAddress, spaceId, router.query?.safeViewRedirectURL)
       if (typeof redirect !== 'string' || redirect.startsWith('/')) {
         router.push(redirect)
       }
-    }
-  }, [dispatch, chain, data.name, data.owners, data.threshold, router, safeAddress, status])
+    })
+  }, [addNewSafeToUrlSpace, chain, router, safeAddress, status])
 
   useEffect(() => {
     if (!setProgressColor) return

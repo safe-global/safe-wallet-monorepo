@@ -56,6 +56,7 @@ export {
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
 export { useSpaceSafeLimit } from './hooks/useSpaceSafeLimit'
+export { useAddNewSafeToUrlSpace } from './hooks/useAddNewSafeToUrlSpace'
 export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
 export { useSafeProAccess } from './hooks/useSafeProAccess'
 export { usePlanGate } from './hooks/usePlanGate'
