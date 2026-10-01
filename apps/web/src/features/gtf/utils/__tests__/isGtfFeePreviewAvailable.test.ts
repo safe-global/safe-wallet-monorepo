@@ -4,19 +4,12 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { isGtfFeePreviewAvailable } from '../isGtfFeePreviewAvailable'
 
-const GAS_PAYMENT_OPTIONS: Record<NonNullable<Relayer['type']>, Relayer['gasPaymentOptions']> = {
-  GTF: [],
-  RELAY_FEE: ['PAY_FROM_SAFE'],
-  DAILY_LIMIT: ['FREE_DAILY_LIMIT'],
-  NO_FEE_CAMPAIGN: ['NO_FEE_CAMPAIGN'],
-}
-
 const relayer = (type: Relayer['type']): Relayer => ({
   type,
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
-  gasPaymentOptions: type ? GAS_PAYMENT_OPTIONS[type] : [],
+  gasPaymentOptions: ['SUBSCRIPTION'],
 })
 
 const buildChain = (features: FEATURES[], chainRelayer: Relayer | null) =>
