@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { useRouter } from 'next/router'
+import type { LinkProps } from 'next/link'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
@@ -17,7 +16,7 @@ export type PendingSpendingLimitActions = {
   viewer: Viewer
   /** Undefined until the chain configs have loaded. */
   transactionLink?: string
-  onReviewTransaction?: () => void
+  reviewTransactionHref?: LinkProps['href']
   onRetry?: () => void
   outcome?: PendingTxOutcome
 }
@@ -30,7 +29,6 @@ export const usePendingSpendingLimitActions = (
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
-  const router = useRouter()
   const spaceId = useUrlSpaceId()
   const { txSummary, confirmedBy, confirmationsSubmitted, outcome, onRetry } = usePendingPolicyTransaction(
     policy,
@@ -40,15 +38,7 @@ export const usePendingSpendingLimitActions = (
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
 
-  const onReviewTransaction = useMemo(
-    () =>
-      chain && !isUnlisted
-        ? () => {
-            router.push(getTxLink(txId, chain, safeAddress, spaceId).href)
-          }
-        : undefined,
-    [chain, isUnlisted, router, txId, safeAddress, spaceId],
-  )
+  const reviewTransactionHref = chain && !isUnlisted ? getTxLink(txId, chain, safeAddress, spaceId).href : undefined
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
@@ -62,7 +52,7 @@ export const usePendingSpendingLimitActions = (
     transactionLink: chain
       ? `${origin}${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}`
       : undefined,
-    onReviewTransaction,
+    reviewTransactionHref,
     onRetry,
     outcome: resolvedOutcome,
   }

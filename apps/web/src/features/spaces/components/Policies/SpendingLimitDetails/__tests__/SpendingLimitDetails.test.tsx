@@ -206,39 +206,41 @@ describe('a pending spending limit', () => {
 
   const SPACE_ID = '9f3c1a2b-4d5e-4f60-8a7b-1c2d3e4f5a6b'
 
-  const expectedTxHref = {
-    pathname: AppRoutes.transactions.tx,
-    query: { id: getPendingTxId(pending), safe: `${chain.shortName}:${pending.safe.address}`, spaceId: SPACE_ID },
-  }
-
-  const renderInSpace = (policy: PendingSpendingLimitPolicy = pending) => {
-    const push = jest.fn(() => Promise.resolve(true))
-    const result = renderWithUserEvent(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />, {
-      routerProps: { push, query: { spaceId: SPACE_ID } },
+  const renderInSpace = (policy: PendingSpendingLimitPolicy = pending) =>
+    render(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />, {
+      routerProps: { query: { spaceId: SPACE_ID } },
     })
-    return { ...result, push }
+
+  const expectReviewLinkToQueuedTx = () => {
+    const href = screen.getByRole('link', { name: 'Review transaction' }).getAttribute('href')
+    const url = new URL(href ?? '', window.location.origin)
+
+    expect(url.pathname).toBe(AppRoutes.transactions.tx)
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      id: getPendingTxId(pending),
+      safe: `${chain.shortName}:${pending.safe.address}`,
+      spaceId: SPACE_ID,
+    })
   }
 
-  it('sends a signer who has not signed to the transaction in the Safe queue', async () => {
+  it('links a signer who has not signed to the transaction in the Safe queue', () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({ txSummary })
 
-    const { user, push } = renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
-    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+    renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
 
-    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expectReviewLinkToQueuedTx()
   })
 
-  it('sends anyone to the queue to execute a fully signed transaction', async () => {
+  it('links anyone to the queue to execute a fully signed transaction', () => {
     mockWallet()
     mockSpaceSafes(true, pending.safe)
     mockPendingTx({ txSummary, confirmationsSubmitted: 2 })
 
-    const { user, push } = renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 2, confirmationsRequired: 2 }))
-    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+    renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 2, confirmationsRequired: 2 }))
 
-    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expectReviewLinkToQueuedTx()
   })
 
   it('offers a signer who already signed the link to share instead', () => {
@@ -281,15 +283,14 @@ describe('a pending spending limit', () => {
     })
   })
 
-  it('offers Review transaction before the transaction has loaded, without asking to sign yet', async () => {
+  it('offers Review transaction before the transaction has loaded, without asking to sign yet', () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({})
 
-    const { user, push } = renderInSpace()
-    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+    renderInSpace()
 
-    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expectReviewLinkToQueuedTx()
     expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
   })
 
@@ -354,7 +355,7 @@ describe('a pending spending limit', () => {
     mockWallet()
     rerender(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />)
 
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
   })
 
   it('reports a replaced transaction instead of offering a CTA that would fail', () => {
