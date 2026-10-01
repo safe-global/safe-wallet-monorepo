@@ -58,6 +58,7 @@ export {
 export {
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  spaceSafesCacheListener,
   trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,
