@@ -6,7 +6,7 @@ const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 export const startStepUp = (redirectUrl?: string): void => {
   // An `error` left over from an earlier attempt would look like this attempt's
   // failure when the user comes back.
-  const returnUrl = new URL(redirectUrl ?? window.location.href)
+  const returnUrl = new URL(redirectUrl ?? window.location.href, window.location.href)
   returnUrl.searchParams.delete('error')
   returnUrl.searchParams.delete('error_description')
 

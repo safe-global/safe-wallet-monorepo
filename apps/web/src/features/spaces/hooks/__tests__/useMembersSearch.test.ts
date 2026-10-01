@@ -20,6 +20,13 @@ describe('useMembersSearch', () => {
         user: memberUserBuilder().with({ id: 12, status: 'PENDING' }).build(),
       })
       .build(),
+    memberBuilder()
+      .with({
+        id: 3,
+        name: 'Carol',
+        user: memberUserBuilder().with({ id: 13, address: '0x1234567890abcdef1234567890abcdef12345678' }).build(),
+      })
+      .build(),
   ]
 
   it('returns all members when the query is empty', () => {
@@ -56,5 +63,17 @@ describe('useMembersSearch', () => {
     const { result } = renderHook(() => useMembersSearch(members, 'charlie@example.com'))
 
     expect(result.current).toEqual([])
+  })
+
+  it('matches members by wallet address', () => {
+    const { result } = renderHook(() => useMembersSearch(members, '0x1234567890abcdef1234567890abcdef12345678'))
+
+    expect(result.current).toEqual([members[2]])
+  })
+
+  it('matches members by partial wallet address fragments', () => {
+    const { result } = renderHook(() => useMembersSearch(members, '90abcdef12'))
+
+    expect(result.current).toEqual([members[2]])
   })
 })
