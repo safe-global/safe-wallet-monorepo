@@ -7,7 +7,13 @@ import {
   mockRecoveryPolicy,
   mockSpendingLimitPolicy,
 } from '../../mocks/policies'
-import { formatAllowance, getPolicyLabel, getPolicySummary, getResetPeriodLabel } from '../policyLabel'
+import {
+  formatAllowance,
+  formatContactLabel,
+  getPolicyLabel,
+  getPolicySummary,
+  getResetPeriodLabel,
+} from '../policyLabel'
 
 describe('getResetPeriodLabel', () => {
   it('should, when the period is zero, label it as one time', () => {
@@ -104,5 +110,18 @@ describe('getPolicySummary', () => {
     removal.data = { spenders: [{ spender: MOCK_ADDRESSES.alice, allowances: [] }] }
 
     expect(getPolicySummary(removal)).toBe('Removing 1 spender')
+  })
+})
+
+describe('formatContactLabel', () => {
+  const address = '0x8675B754342754A30A2AeF474D114d8460bca19b'
+
+  it('puts the shortened address in parentheses after the name', () => {
+    expect(formatContactLabel(address, 'Nicole')).toBe('Nicole (0x8675...a19b)')
+  })
+
+  it('falls back to the shortened address without a name', () => {
+    expect(formatContactLabel(address)).toBe('0x8675...a19b')
+    expect(formatContactLabel(address, '')).toBe('0x8675...a19b')
   })
 })

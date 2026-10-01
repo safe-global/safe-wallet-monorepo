@@ -19,6 +19,7 @@ import {
   type LimitFormValues,
   type SpendingLimitPolicyFormValues,
 } from '../../types'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -99,16 +100,18 @@ const Harness = ({
   limits,
   spender = '',
   onRemove = jest.fn(),
+  edit = false,
 }: {
   limits: LimitFormValues[]
   spender?: string
   onRemove?: () => void
+  edit?: boolean
 }) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({
     mode: 'onChange',
     defaultValues: { safe: `1:${ZERO_ADDRESS}`, spenders: [{ address: spender, limits }] },
   })
-  return (
+  const rows = (
     <FormProvider {...methods}>
       {limits.map((_, index) => (
         <TokenLimitCard
@@ -128,10 +131,16 @@ const Harness = ({
       </button>
     </FormProvider>
   )
+
+  return edit ? <EditModeProvider>{rows}</EditModeProvider> : rows
 }
 
-const renderRows = (limits: LimitFormValues[] = [createEmptyLimit()], onRemove?: () => void, spender?: string) =>
-  renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} spender={spender} />)
+const renderRows = (
+  limits: LimitFormValues[] = [createEmptyLimit()],
+  onRemove?: () => void,
+  spender?: string,
+  edit?: boolean,
+) => renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} spender={spender} edit={edit} />)
 
 describe('TokenLimitCard', () => {
   beforeEach(() => {
@@ -306,5 +315,31 @@ describe('TokenLimitCard', () => {
     unmount()
     renderRows([createEmptyLimit()])
     expect(screen.queryByRole('button', { name: REMOVE_LIMIT_LABEL })).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    const existingUsdc = spendingLimitStateBuilder()
+      .with({
+        beneficiary: SPENDER,
+        token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+      })
+      .build()
+
+    it('does not flag a token the spender already has a limit for', async () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      const { user } = renderRows([{ ...createEmptyLimit(), tokenAddress: USDC }], undefined, SPENDER, true)
+      await user.click(screen.getByRole('button', { name: 'validate' }))
+
+      await waitFor(() => expect(screen.queryByTestId('token-error')).not.toBeInTheDocument())
+    })
+
+    it('keeps a token the spender already has in the selector so it can be edited', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER, true)
+
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeInTheDocument()
+    })
   })
 })

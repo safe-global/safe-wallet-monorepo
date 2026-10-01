@@ -11,7 +11,7 @@ export type PendingSignaturesProps = {
 
 const PendingSignatures = ({ safe, signed, required }: PendingSignaturesProps): ReactElement => (
   <DrawerSection title="Pending signatures" rightNode={formatSignedCount(signed, required)}>
-    <DrawerList items={[{ label: 'Safe account', content: <AccountIdentity {...safe} /> }]} />
+    <DrawerList items={[{ label: 'Safe account', content: <AccountIdentity {...safe} showCopyButton /> }]} />
   </DrawerSection>
 )
 

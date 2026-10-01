@@ -26,6 +26,7 @@ import {
   addressBookListener,
   elevationListener,
   spaceSafesEntitlementsListener,
+  planChangeSyncListener,
   trialReminderListener,
 } from './slices'
 import * as slices from './slices'
@@ -139,6 +140,7 @@ const listeners = [
   addressBookListener,
   elevationListener,
   spaceSafesEntitlementsListener,
+  planChangeSyncListener,
   trialReminderListener,
   forbiddenSessionListener,
 ]
@@ -196,10 +198,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
-type MakeStoreOptions = {
-  skipBroadcast?: boolean
-}
-export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
+export const makeStore = (initialState?: Partial<RootState>) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -212,9 +211,7 @@ export const makeStore = (initialState?: Partial<RootState>, options?: MakeStore
     preloadedState: initialState,
   })
 
-  if (!options?.skipBroadcast) {
-    listenToBroadcast(store)
-  }
+  listenToBroadcast(store)
 
   setupListeners(store.dispatch)
 

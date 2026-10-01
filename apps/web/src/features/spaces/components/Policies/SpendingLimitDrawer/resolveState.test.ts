@@ -106,6 +106,19 @@ describe('pending states', () => {
     })
   })
 
+  it('asks a signer to wait, rather than to sign, while it is unknown whether they signed', () => {
+    const state = resolve(mockPendingPolicy(), { ...MOCK_VIEWERS.signer, hasSigned: undefined })
+
+    expect(state).toEqual({
+      kind: 'pending',
+      operation: 'create',
+      bannerTitle: PENDING_CREATE_BANNER_TITLE,
+      action: 'review',
+      signed: 1,
+      required: 2,
+    })
+  })
+
   it('state 7: a non-signer gets the link and no second banner line', () => {
     const state = resolve(mockPendingPolicy(), MOCK_VIEWERS.nonSigner)
 
@@ -171,5 +184,51 @@ describe('activating rows', () => {
   it('are not drawer policies, so they never resolve to the manage action', () => {
     // @ts-expect-error an executed change waiting for the indexer has nothing to manage or sign
     resolve({ ...mockPendingPolicy(), status: 'activating' }, MOCK_VIEWERS.signer)
+  })
+})
+
+describe('a transaction that is no longer pending', () => {
+  it.each([
+    ['executed', 'The transaction was executed.'],
+    ['failed', 'The transaction failed and can no longer be executed.'],
+    ['replaced', 'Another transaction used this nonce, so this one can no longer be executed.'],
+    ['deleted', 'The transaction was deleted.'],
+  ] as const)('reports a %s transaction with nothing left to do', (outcome, title) => {
+    const state = resolveSpendingLimitDrawerState(mockPendingPolicy(), MOCK_VIEWERS.signer, MOCK_SAFE_NAME, outcome)
+
+    expect(state).toEqual(expect.objectContaining({ kind: 'closed', action: 'none', bannerTitle: title }))
+  })
+
+  it('outranks a disconnected wallet: there is nothing to connect for', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingPolicy(),
+      MOCK_VIEWERS.disconnected,
+      MOCK_SAFE_NAME,
+      'deleted',
+    )
+
+    expect(state.action).toBe('none')
+  })
+
+  it('tells an executed creation that the limit is being activated', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingPolicy(),
+      MOCK_VIEWERS.nonSigner,
+      MOCK_SAFE_NAME,
+      'executed',
+    )
+
+    expect(state).toEqual(expect.objectContaining({ bannerLine2: 'The spending limit will show as active shortly.' }))
+  })
+
+  it('tells an executed removal that the limit is about to go', () => {
+    const state = resolveSpendingLimitDrawerState(
+      mockPendingRemoval(),
+      MOCK_VIEWERS.nonSigner,
+      MOCK_SAFE_NAME,
+      'executed',
+    )
+
+    expect(state).toEqual(expect.objectContaining({ bannerLine2: 'The spending limit will disappear shortly.' }))
   })
 })

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { PendingSpendingLimitPolicy, Policy } from '../types'
-import { isPendingChangeIndexed } from '../utils/mapPendingPolicies'
+import { getPendingTxId, isPendingChangeIndexed } from '../utils/mapPendingPolicies'
 
 const HOLD_MS = 5 * 60_000
 const POLL_MS = 15_000
@@ -51,7 +51,7 @@ export const useActivatingPolicies = (
       const key = latestKey.current
       const { data, error } = await getTransaction({
         chainId: row.safe.chainId,
-        id: `multisig_${row.safe.address}_${row.safeTxHash}`,
+        id: getPendingTxId(row),
       })
       // Only a 404 means the tx was deleted; any other error can't rule out execution, so the row is held.
       if (error && 'status' in error && error.status === 404) return

@@ -1,4 +1,4 @@
-import { formatVisualAmount, maybePlural } from '@safe-global/utils/utils/formatters'
+import { formatVisualAmount, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   hasRecoveryData,
   isPendingPolicy,
@@ -94,3 +94,7 @@ export const getPolicySummary = (policy: Policy): string => {
 
 /** The name shown in the RULE column and as the detail panel title. */
 export const getPolicyLabel = (policy: Policy): string => POLICY_TYPE_LABELS[policy.type]
+
+/** "Name (0x1234...abcd)" when the contact has a name, otherwise the shortened address alone. */
+export const formatContactLabel = (address: string, name?: string): string =>
+  name ? `${name} (${shortenAddress(address)})` : shortenAddress(address)

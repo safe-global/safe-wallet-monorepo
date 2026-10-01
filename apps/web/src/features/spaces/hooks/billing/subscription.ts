@@ -32,6 +32,8 @@ export const isLivePlanStatus = (status: PlanStatus): boolean => status === 'act
 /** Mirrors the CGW's UPDATABLE_SUBSCRIPTION_STATUSES, which are the live ones too. */
 export const isPlanChangeable = isLivePlanStatus
 
+export const isSpaceDeletionBlocked = (status: PlanStatus): boolean => status !== 'none' && status !== 'canceled'
+
 export const getPlanStatus = (subscription: Subscription | undefined): PlanStatus => {
   if (!subscription) return 'none'
   if (subscription.status === 'trialing') return 'trialing'

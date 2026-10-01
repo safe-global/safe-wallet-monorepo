@@ -8,6 +8,10 @@ import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
 import { ADD_SPENDER_LABEL, CALLOUT_DISMISS_LABEL, CALLOUT_TITLE, NEXT_LABEL } from '../../constants'
 import { createDefaultFormValues, createEmptySpender } from '../../types'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
+import { DISCARD_CHANGES_LABEL, REMOVE_SPENDER_LABEL } from '../../constants'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
@@ -98,6 +102,11 @@ jest.mock('../../TokenSelector', () => ({
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('../../ExistingSpendingLimitsProvider', () => ({
+  useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
+}))
+
+const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
 
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 
@@ -326,5 +335,109 @@ describe('SpendingLimitPolicyForm', () => {
     renderForm({ isCalloutDismissed: true })
 
     expect(screen.queryByText(CALLOUT_TITLE)).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    const SAFE_ID = buildSafeAccountId('1', SAFE_A)
+    const onChainLimit = spendingLimitStateBuilder()
+      .with({
+        beneficiary: SPENDER,
+        amount: '100000000',
+        resetTimeMin: '1440',
+        token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+      })
+      .build()
+    const prefilled = {
+      safe: SAFE_ID,
+      spenders: [{ address: SPENDER, limits: [{ tokenAddress: USDC, amount: '100', resetTime: '1440' }] }],
+    }
+
+    const renderEdit = (props: Partial<SpendingLimitPolicyFormProps> = {}) =>
+      renderWithUserEvent(
+        <EditModeProvider>
+          <SpendingLimitPolicyForm
+            defaultValues={prefilled}
+            onSubmit={jest.fn()}
+            accounts={[treasury]}
+            isAccountsLoading={false}
+            isAccountsError={false}
+            onRetryAccounts={jest.fn()}
+            isCalloutDismissed
+            onDismissCallout={jest.fn()}
+            hasWallet
+            onSafeChange={jest.fn()}
+            onSpendersChange={jest.fn()}
+            {...props}
+          />
+        </EditModeProvider>,
+      )
+
+    beforeEach(() => mockUseExisting.mockReturnValue({ limits: [onChainLimit], loading: false }))
+
+    it('shows the Safe account in full, without offering the others', () => {
+      renderEdit()
+
+      expect(screen.getByTestId('safe-account-readonly')).toHaveTextContent('Treasury')
+      expect(screen.queryByTestId('safe-account-selector')).not.toBeInTheDocument()
+    })
+
+    it('lets the last spender be removed, which the create flow forbids', () => {
+      renderEdit()
+
+      expect(screen.getByRole('button', { name: REMOVE_SPENDER_LABEL })).toBeInTheDocument()
+    })
+
+    it('withdraws the offer to move on once the change is undone', async () => {
+      const { user } = renderEdit()
+      const amount = screen.getByTestId('limit-amount-input')
+
+      await user.clear(amount)
+      await user.type(amount, '80')
+      // The form is valid by now, so only the edit being empty can take `Next` away again.
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+
+      await user.clear(amount)
+      await user.type(amount, '100')
+
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeDisabled())
+    })
+
+    it('says nothing about removals while the form still carries every limit', () => {
+      renderEdit()
+
+      expect(screen.queryByTestId('pending-removals')).not.toBeInTheDocument()
+    })
+
+    it('reports what will be removed once a spender is dropped', async () => {
+      const { user } = renderEdit()
+
+      await user.click(screen.getByRole('button', { name: REMOVE_SPENDER_LABEL }))
+
+      await waitFor(() =>
+        expect(screen.getByTestId('pending-removals')).toHaveTextContent('1 spender and 1 limit will be removed'),
+      )
+    })
+
+    it('still restores the chain state after a trip to the review step', async () => {
+      // Coming back re-seeds the form with what was submitted, so `defaultValues` no longer holds the policy.
+      const { user } = renderEdit({ defaultValues: { safe: SAFE_ID, spenders: [] } })
+      expect(screen.getByTestId('pending-removals')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: DISCARD_CHANGES_LABEL }))
+
+      await waitFor(() => expect(screen.queryByTestId('pending-removals')).not.toBeInTheDocument())
+      expect(screen.getByTestId('spender-card')).toBeInTheDocument()
+    })
+
+    it('puts the dropped spender back when the changes are discarded', async () => {
+      const { user } = renderEdit()
+      await user.click(screen.getByRole('button', { name: REMOVE_SPENDER_LABEL }))
+      await waitFor(() => expect(screen.getByTestId('pending-removals')).toBeInTheDocument())
+
+      await user.click(screen.getByRole('button', { name: DISCARD_CHANGES_LABEL }))
+
+      await waitFor(() => expect(screen.queryByTestId('pending-removals')).not.toBeInTheDocument())
+      expect(screen.getByTestId('spender-card')).toBeInTheDocument()
+    })
   })
 })

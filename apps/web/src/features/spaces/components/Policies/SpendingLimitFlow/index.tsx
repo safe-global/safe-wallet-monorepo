@@ -1,5 +1,6 @@
 import { useCallback, useState, type ReactElement } from 'react'
-import { Info, WalletCards } from 'lucide-react'
+import SpendingLimitIcon from './SpendingLimitIcon'
+import { Info } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
@@ -11,8 +12,6 @@ import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
 import { createDefaultFormValues } from './types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from './constants'
-
-const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
 
 const FlowSubtitle = (): ReactElement => (
   <span className="flex items-center gap-2.5">

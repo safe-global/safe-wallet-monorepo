@@ -24,3 +24,6 @@ export const TRIAL_DISCLAIMER =
 
 /** Zoho Bookings page the "Talk to sales" CTAs open in a new tab, to schedule a call with sales. */
 export const CONTACT_SALES_URL = 'https://zbooking.eu/3H4cf'
+
+/** Proposer and contact confirmations carry more than a status, so they stay a little longer than the 5s default. */
+export const WORKSPACE_CONFIRMATION_HIDE_MS = 7000

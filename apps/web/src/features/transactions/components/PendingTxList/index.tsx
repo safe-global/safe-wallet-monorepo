@@ -16,6 +16,8 @@ import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import TxInfo from '@/components/transactions/TxInfo'
 import PendingRecoveryListItem from '@/components/dashboard/PendingTxs/PendingRecoveryListItem'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 
 const MAX_TXS = 3
 
@@ -32,6 +34,7 @@ export const TxIcon = ({ tx }: TxIconProps): ReactElement => (
 const PendingTxList = (): ReactElement => {
   const { page, loading } = useTxQueue()
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const wallet = useWallet()
   const queuedTxns = useMemo(() => getLatestTransactions(page?.results), [page?.results])
@@ -51,11 +54,11 @@ const PendingTxList = (): ReactElement => {
   const isLoading = loading || safeLoading || isInitialState
 
   const handleViewAll = () => {
-    router.push({ pathname: AppRoutes.transactions.queue, query: { safe: router.query.safe } })
+    router.push({ pathname: AppRoutes.transactions.queue, query: safeLinkQuery })
   }
 
   const handleNavigate = () => {
-    router.push({ pathname: AppRoutes.transactions.queue, query: { safe: router.query.safe } })
+    router.push({ pathname: AppRoutes.transactions.queue, query: safeLinkQuery })
   }
 
   return (
@@ -81,7 +84,10 @@ const PendingTxList = (): ReactElement => {
             return (
               <SafeWidget.Item
                 key={tx.transaction.id}
-                href={`${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`}
+                href={withSpaceIdInUrl(
+                  `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`,
+                  safeLinkQuery.spaceId,
+                )}
                 label={
                   <div className="flex gap-1 items-center">
                     <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />

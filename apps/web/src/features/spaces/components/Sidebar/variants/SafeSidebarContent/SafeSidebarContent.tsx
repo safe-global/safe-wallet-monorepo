@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import { useCallback, useContext, useMemo } from 'react'
-import { useRouter } from 'next/router'
 import { safeMainNavigation, safeDefiGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import { SafeSidebarVariant } from '../SafeSidebarVariant'
@@ -11,8 +10,8 @@ import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
-import { getQuerySpaceId } from '../../utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -33,27 +32,23 @@ export const SafeSidebarContent = ({
   onSpaceAdded,
   isLoading = false,
 }: SidebarVariantContentProps): ReactElement => {
-  const router = useRouter()
   const chain = useCurrentChain()
   const queueSize = useQueuedTxsLength()
   const isBlockedCountry = useContext(GeoblockingContext)
   const { safe } = useSafeInfo()
   const safeAddress = useSafeQueryParam() || undefined
+  const spaceId = useUrlSpaceId()
 
   const getLink = useCallback(
     (item: SidebarItemConfig) => {
-      const spaceId = getQuerySpaceId(router.query)
-      const query: { spaceId?: string | null; safe?: string } = {
-        ...(safeAddress && { safe: safeAddress }),
-        ...(spaceId && { spaceId }),
-      }
+      const query = withSpaceId(safeAddress ? { safe: safeAddress } : {}, spaceId)
 
       const pathname =
         item.href === AppRoutes.transactions.history && queueSize ? AppRoutes.transactions.queue : item.href
 
       return { pathname, query }
     },
-    [router.query, safeAddress, queueSize],
+    [spaceId, safeAddress, queueSize],
   )
 
   const isItemDisabled = useCallback(

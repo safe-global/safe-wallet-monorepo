@@ -15,10 +15,11 @@ import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
+import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isActiveSpendingLimitPolicy, isProposerPolicy, type Policy } from './types'
+import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy, type PolicySafe } from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -68,23 +69,29 @@ const Policies = ({
   const [hasSeenProposerIntro = false, setHasSeenProposerIntro] = useLocalStorage<boolean>(PROPOSER_INTRO_SEEN_KEY)
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
-  const [openPolicyId, setOpenPolicyId] = useState<string | null>(null)
+  const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
-  const openPolicy = useCallback((policy: Policy) => {
-    // TODO(WA-3646): widen to isSpendingLimitPolicy once the panel can take a queued policy.
-    if (isProposerPolicy(policy) || isActiveSpendingLimitPolicy(policy)) setOpenPolicyId(policy.id)
+  const selectPolicy = useCallback((policy: Policy) => {
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
   }, [])
 
-  const closeDetails = useCallback(() => setOpenPolicyId(null), [])
+  const closeDetails = useCallback(() => setOpenPolicy(null), [])
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
-  // policy that leaves the response takes its panel with it.
-  const openedPolicy = useMemo(
-    () => policies.find((policy) => policy.id === openPolicyId) ?? null,
-    [policies, openPolicyId],
+  // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
+  const listedPolicy = useMemo(
+    () => (openPolicy ? policies.find((policy) => policy.id === openPolicy.id) : undefined),
+    [policies, openPolicy],
   )
+  const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
+
+  // The panel is left open: it hides itself while the flow runs, so cancelling lands back on it.
+  const editSpendingLimit = useCallback(
+    (safe: PolicySafe) => setTxFlow(<EditSpendingLimitFlow safe={safe} />),
+    [setTxFlow],
+  )
 
   const startProposerFlow = useCallback(() => {
     setTxFlow(<ProposerRoleFlow />)
@@ -192,7 +199,7 @@ const Policies = ({
             <PoliciesList
               policies={policies}
               onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
-              onSelectPolicy={onSelectPolicy ?? openPolicy}
+              onSelectPolicy={onSelectPolicy ?? selectPolicy}
             />
           ) : (
             <PolicyCatalogue onSelect={handleSelect} locked={locked} />
@@ -227,8 +234,13 @@ const Policies = ({
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
       )}
 
-      {openedPolicy && isActiveSpendingLimitPolicy(openedPolicy) && (
-        <SpendingLimitDetails policy={openedPolicy} onClose={closeDetails} />
+      {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
+        <SpendingLimitDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          onClose={closeDetails}
+          onEdit={() => editSpendingLimit(openedPolicy.safe)}
+        />
       )}
     </div>
   )

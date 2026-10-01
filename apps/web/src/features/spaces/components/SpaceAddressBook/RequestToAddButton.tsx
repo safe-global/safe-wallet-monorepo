@@ -10,15 +10,9 @@ import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
-import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { showNotification } from '@/store/notificationsSlice'
-import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
+import { useAddOrRequestWorkspaceContact } from '../../hooks/useAddOrRequestWorkspaceContact'
 import { validateContactName } from './utils'
-import { sanitizeName } from '@safe-global/utils/validation/names'
 
 type RequestToAddButtonProps = {
   address: string
@@ -28,19 +22,9 @@ type RequestToAddButtonProps = {
   isCompact?: boolean
 }
 
-const getRequestErrorMessage = (error: unknown): string => {
-  const err = error as { status?: number | string; data?: { message?: string } }
-  if (err?.status === 409) return 'A request for this address is already pending.'
-  if (err?.status === 429) return 'Too many requests. Please try again later.'
-  if (typeof err?.data?.message === 'string') return err.data.message
-  return 'Failed to create request. Please try again.'
-}
-
 const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompact }: RequestToAddButtonProps) => {
-  const spaceId = useCurrentSpaceId()
   const chains = useChains()
-  const dispatch = useAppDispatch()
-  const [createRequest] = useAddressBookRequestsCreateRequestV1Mutation()
+  const addOrRequestContact = useAddOrRequestWorkspaceContact()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [open, setOpen] = useState(false)
@@ -49,51 +33,15 @@ const RequestToAddButton = ({ address, name, chainIds, alreadyRequested, isCompa
   const nameError = validateContactName(name)
 
   const handleConfirm = async () => {
-    if (!spaceId || isDone) return
+    if (isDone) return
 
+    setIsSubmitting(true)
     try {
-      setIsSubmitting(true)
-
-      const result = await createRequest({
-        spaceId,
-        createAddressBookRequestDto: { address, name: sanitizeName(name), chainIds },
-      })
-
-      if (result.error) {
-        const err = result.error as { status?: number | string }
-        // A pending request already exists, reflect that instead of erroring
-        if (err.status === 409) {
-          setRequested(true)
-          setOpen(false)
-        }
-        dispatch(
-          showNotification({
-            message: getRequestErrorMessage(result.error),
-            variant: 'error',
-            groupKey: 'request-to-add-error',
-          }),
-        )
-        return
+      const result = await addOrRequestContact({ address, name, chainIds })
+      if (result === 'requested' || result === 'pending') {
+        setRequested(true)
+        setOpen(false)
       }
-
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_SENT)
-      setRequested(true)
-      setOpen(false)
-      dispatch(
-        showNotification({
-          message: 'Request submitted for admin approval',
-          variant: 'success',
-          groupKey: 'request-to-add-success',
-        }),
-      )
-    } catch {
-      dispatch(
-        showNotification({
-          message: 'Something went wrong. Please try again.',
-          variant: 'error',
-          groupKey: 'request-to-add-error',
-        }),
-      )
     } finally {
       setIsSubmitting(false)
     }

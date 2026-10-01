@@ -7,6 +7,7 @@ describe('broadcast middleware', () => {
     BroadcastChannel.prototype = {
       addEventListener: jest.fn(),
       postMessage: jest.fn(),
+      close: jest.fn(),
     }
     global.BroadcastChannel = BroadcastChannel as any
   })
@@ -72,6 +73,17 @@ describe('broadcast middleware', () => {
       ;(global.BroadcastChannel as any).prototype.addEventListener.mock.calls[0][1](event)
 
       expect(store.getState().addressBook).toEqual({})
+    })
+
+    it('should close the previous channel when called again', () => {
+      const store = makeStore()
+      const { addEventListener, close } = global.BroadcastChannel.prototype as unknown as Record<string, jest.Mock>
+
+      listenToBroadcast(store)
+
+      expect(close).toHaveBeenCalledTimes(1)
+      expect(close.mock.contexts[0]).toBe(addEventListener.mock.contexts[0])
+      expect(close.mock.contexts[0]).not.toBe(addEventListener.mock.contexts[1])
     })
   })
 })

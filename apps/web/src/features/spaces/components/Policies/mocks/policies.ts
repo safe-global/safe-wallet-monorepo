@@ -5,6 +5,7 @@ import type {
   PolicySafe,
   PolicyTokenInfo,
   ProposerPolicy,
+  QueuedSpendingLimitPolicy,
   RecoveryPolicy,
   SpendingLimitPolicy,
 } from '../types'
@@ -147,8 +148,6 @@ export const mockProposerPolicy = (overrides: Partial<ProposerPolicy> = {}): Pro
   },
   ...overrides,
 })
-
-type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
 
 export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> = {}): QueuedSpendingLimitPolicy => ({
   ...mockSpendingLimitPolicy({ id: '0xspending-limit-pending', safe: MOCK_SAFES.payroll }),

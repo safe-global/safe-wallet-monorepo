@@ -4,6 +4,7 @@ import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import * as delegatesApi from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
@@ -17,6 +18,13 @@ import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
+import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
+import { useIsAdmin } from '../../../../../hooks/useSpaceMembers'
+
+jest.mock('../../../../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(() => true),
+}))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -51,12 +59,15 @@ const connect = (label: string) => {
 describe('useGrantProposer', () => {
   let addV1: ReturnType<typeof mutation>
   let addV2: ReturnType<typeof mutation>
+  let addOrRequestContact: jest.Mock
 
   beforeEach(() => {
     localStorage.clear()
     jest.mocked(trackEvent).mockClear()
     addV1 = mutation()
     addV2 = mutation()
+    addOrRequestContact = jest.fn().mockResolvedValue(undefined)
+    jest.spyOn(addOrRequestContactModule, 'useAddOrRequestWorkspaceContact').mockReturnValue(addOrRequestContact)
     jest.spyOn(delegatesApi, 'useDelegatesPostDelegateV1Mutation').mockReturnValue(addV1.tuple)
     jest.spyOn(delegatesApi, 'useDelegatesPostDelegateV2Mutation').mockReturnValue(addV2.tuple)
     jest.spyOn(useChainIdModule, 'default').mockReturnValue(CHAIN_ID)
@@ -74,11 +85,11 @@ describe('useGrantProposer', () => {
     jest.restoreAllMocks()
   })
 
-  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }) => {
-    const rendered = renderHook(() => useGrantProposer())
+  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}, safeLabel?: string) => {
+    const rendered = renderHook(() => useGrantProposer(), { initialReduxState: { addressBook } })
     let ok = false
     await act(async () => {
-      ok = await rendered.result.current.grantProposerRole(values)
+      ok = await rendered.result.current.grantProposerRole(values, safeLabel)
     })
     return { ok, result: rendered.result }
   }
@@ -135,19 +146,59 @@ describe('useGrantProposer', () => {
     )
   })
 
-  it('stores the sanitised name for the selected chain only and shows the success toast', async () => {
-    await submit({ proposer: PROPOSER, name: '  Nicole  ' })
+  it('adds the name to the Workspace on the selected chain for an admin, not the local address book', async () => {
+    await submit({ proposer: PROPOSER, name: 'Nicole' })
 
     const state = getStoreInstance().getState()
-    expect(state.addressBook[CHAIN_ID]?.[PROPOSER]).toBe('Nicole')
-    expect(Object.keys(state.addressBook)).toEqual([CHAIN_ID])
+    expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
+    expect(state.addressBook).toEqual({})
     expect(selectNotifications(state)).toEqual([
       expect.objectContaining({
         variant: 'success',
         groupKey: 'add-proposer-success',
+        autoHideDuration: 7000,
         title: 'Proposer added successfully!',
       }),
     ])
+  })
+
+  it('names the proposer and the Safe it was added to in the success message', async () => {
+    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury (0xAAAA...AAaA)')
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury (0xAAAA...AAaA).`,
+      }),
+    ])
+  })
+
+  it('falls back to the addresses in the success message without a name or a Safe label', async () => {
+    await submit({ proposer: PROPOSER, name: '   ' })
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `${shortenAddress(PROPOSER)} can now suggest transactions for ${shortenAddress(SAFE)}.`,
+      }),
+    ])
+  })
+
+  describe('for a member', () => {
+    beforeEach(() => jest.mocked(useIsAdmin).mockReturnValue(false))
+    afterEach(() => jest.mocked(useIsAdmin).mockReturnValue(true))
+
+    it('keeps the sanitised name of a new contact in the local address book and requests it', async () => {
+      await submit({ proposer: PROPOSER, name: '  Nicole  ' })
+
+      expect(getStoreInstance().getState().addressBook).toEqual({ [CHAIN_ID]: { [PROPOSER]: 'Nicole' } })
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
+    })
+
+    it('leaves the local name of a known contact alone', async () => {
+      await submit({ proposer: PROPOSER, name: 'Bob' }, { [CHAIN_ID]: { [PROPOSER]: 'Alice' } })
+
+      expect(getStoreInstance().getState().addressBook[CHAIN_ID]?.[PROPOSER]).toBe('Alice')
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Bob', chainIds: [CHAIN_ID] })
+    })
   })
 
   it('never sends the entered name to the API', async () => {
@@ -182,7 +233,7 @@ describe('useGrantProposer', () => {
     expect(result.current.error?.message).toBe('Wallet connected to wrong chain.')
     expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
     expect(addV2.trigger).not.toHaveBeenCalled()
-    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toBeUndefined()
+    expect(addOrRequestContact).not.toHaveBeenCalled()
   })
 
   it('tracks the submit event once the proposer is added', async () => {
@@ -219,7 +270,7 @@ describe('useGrantProposer', () => {
     expect(ok).toBe(false)
     expect(result.current.error?.message).toBe('User rejected')
     expect(addV2.trigger).not.toHaveBeenCalled()
-    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toBeUndefined()
+    expect(addOrRequestContact).not.toHaveBeenCalled()
     expect(selectNotifications(getStoreInstance().getState())).toEqual([])
   })
 
@@ -230,7 +281,7 @@ describe('useGrantProposer', () => {
 
     expect(ok).toBe(false)
     expect(result.current.error?.message).toBe('422')
-    expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toBeUndefined()
+    expect(addOrRequestContact).not.toHaveBeenCalled()
   })
 
   it('does nothing without a connected wallet', async () => {

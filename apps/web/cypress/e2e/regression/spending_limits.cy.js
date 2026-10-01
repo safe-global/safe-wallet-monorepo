@@ -1,7 +1,6 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
-import { plans } from '../../support/spaces-login.js'
 import * as navigation from '../pages/navigation.page'
 import * as tx from '../pages/create_tx.pages'
 import * as ls from '../../support/localstorage_data.js'
@@ -25,11 +24,9 @@ describe('Spending limits tests', () => {
 
   describe('Connected on the default safe', () => {
     beforeEach(() => {
-      spendinglimit.signInOnPlan(signer, plans.business)
-      wallet.connectSignerViaStorage(
-        signer,
-        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
-      )
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: spendinglimit.safeProOffStorage,
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     })
 
@@ -139,15 +136,10 @@ describe('Spending limits tests', () => {
   })
 
   describe('Other safes and pre-seeded data', () => {
-    beforeEach(() => {
-      spendinglimit.signInOnPlan(signer, plans.business)
-    })
-
     it('Verify only setAllowance action is shown if allowance was not used', () => {
-      wallet.connectSignerViaStorage(
-        signer,
-        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23 + spendinglimit.workspaceParam,
-      )
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23, {
+        extraStorage: spendinglimit.safeProOffStorage,
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       spendinglimit.clickOnNewSpendingLimitBtn()
       spendinglimit.enterBeneficiaryAddress(signerAddress)
@@ -158,13 +150,12 @@ describe('Spending limits tests', () => {
     })
 
     it('Verify that when multiple assets are available, they are displayed in token dropdown', () => {
-      wallet.connectSignerViaStorage(
-        signer,
-        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
-        {
-          extraStorage: { [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings },
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: {
+          ...spendinglimit.safeProOffStorage,
+          [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings,
         },
-      )
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       navigation.clickOnNewTxBtn()
       tx.clickOnSendTokensBtn()
@@ -173,13 +164,12 @@ describe('Spending limits tests', () => {
     })
 
     it('Verify that beneficiary can be retried from address book', () => {
-      wallet.connectSignerViaStorage(
-        signer,
-        constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8 + spendinglimit.workspaceParam,
-        {
-          extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2 },
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: {
+          ...spendinglimit.safeProOffStorage,
+          [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2,
         },
-      )
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       spendinglimit.clickOnNewSpendingLimitBtn()
       spendinglimit.enterBeneficiaryAddress(constants.DEFAULT_OWNER_ADDRESS.substring(30))
@@ -187,7 +177,7 @@ describe('Spending limits tests', () => {
     })
 
     it('Verify that the enableModule action shows the correct AllowanceModule address for Sepolia', () => {
-      spendinglimit.visitSpendingLimitsPage(staticSafes.SEP_STATIC_SAFE_47 + spendinglimit.workspaceParam)
+      spendinglimit.visitSpendingLimitsPage(staticSafes.SEP_STATIC_SAFE_47)
       wallet.connectSignerViaStorage(signer)
       spendinglimit.clickOnNewSpendingLimitBtn()
       spendinglimit.enterBeneficiaryAddress(signerAddress)
@@ -201,9 +191,9 @@ describe('Spending limits tests', () => {
     it('Verify that the enableModule action shows the correct AllowanceModule address for Polygon', () => {
       // setupSafeSettingsWithAllTokens is required: the Polygon safe has near-zero MATIC balance
       // which triggers the "hide small tokens" filter, leaving the token selector empty
-      spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34 + spendinglimit.workspaceParam)
+      spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
       main.setupSafeSettingsWithAllTokens().then(() => {
-        spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34 + spendinglimit.workspaceParam)
+        spendinglimit.visitSpendingLimitsPage(staticSafes.MATIC_STATIC_SAFE_34)
         wallet.connectSignerViaStorage(signer)
         spendinglimit.clickOnNewSpendingLimitBtn()
         spendinglimit.enterBeneficiaryAddress(signerAddress)

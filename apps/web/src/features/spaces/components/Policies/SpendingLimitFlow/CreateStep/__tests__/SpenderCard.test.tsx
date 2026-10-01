@@ -1,7 +1,10 @@
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { ADD_TOKEN_LABEL, DUPLICATE_SPENDER_ERROR, REMOVE_SPENDER_LABEL, SPENDER_HELPER_TEXT } from '../../constants'
 import { createEmptySpender, type SpenderFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import SpenderCard from '../SpenderCard'
 
 // The address book field has its own suite; a registered input keeps the card's validity about its own rules.
@@ -11,12 +14,14 @@ jest.mock('@/components/common/AddressBookInput', () => {
     validate,
     deps,
     excludeAddresses = [],
+    disabled,
     'data-testid': testId,
   }: {
     name: string
     validate?: (value: string) => string | undefined | Promise<string | undefined>
     deps?: string[]
     excludeAddresses?: readonly string[]
+    disabled?: boolean
     'data-testid'?: string
   }) => {
     const {
@@ -33,6 +38,7 @@ jest.mock('@/components/common/AddressBookInput', () => {
         <input
           data-testid={testId}
           data-excluded={excludeAddresses.join(',')}
+          disabled={disabled}
           {...register(name, { required: true, validate, deps })}
         />
         {error?.message && <span>{error.message}</span>}
@@ -56,12 +62,26 @@ jest.mock('../TokenLimitCard', () => ({
   ),
 }))
 
+jest.mock('../../ExistingSpendingLimitsProvider', () => ({
+  useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
+}))
+
+const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
+
 const SPENDER = '0x1234567890123456789012345678901234567890'
 const OTHER_SPENDER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 
-const Harness = ({ spenders, onRemove = jest.fn() }: { spenders: SpenderFormValues[]; onRemove?: () => void }) => {
+const Harness = ({
+  spenders,
+  onRemove = jest.fn(),
+  edit = false,
+}: {
+  spenders: SpenderFormValues[]
+  onRemove?: () => void
+  edit?: boolean
+}) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({ mode: 'onChange', defaultValues: { safe: '', spenders } })
-  return (
+  const cards = (
     <FormProvider {...methods}>
       {spenders.map((_, index) => (
         <SpenderCard
@@ -77,6 +97,8 @@ const Harness = ({ spenders, onRemove = jest.fn() }: { spenders: SpenderFormValu
       </button>
     </FormProvider>
   )
+
+  return edit ? <EditModeProvider>{cards}</EditModeProvider> : cards
 }
 
 describe('SpenderCard', () => {
@@ -150,5 +172,26 @@ describe('SpenderCard', () => {
     unmount()
     renderWithUserEvent(<Harness spenders={[createEmptySpender()]} />)
     expect(screen.queryByRole('button', { name: REMOVE_SPENDER_LABEL })).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    const onChainSpender = spendingLimitStateBuilder().with({ beneficiary: SPENDER }).build()
+
+    it('keeps the same field for a spender the Safe already limits, only not editable', () => {
+      mockUseExisting.mockReturnValue({ limits: [onChainSpender], loading: false })
+
+      renderWithUserEvent(<Harness spenders={[{ ...createEmptySpender(), address: SPENDER }]} edit />)
+
+      expect(screen.getByTestId('spender-address-input')).toBeDisabled()
+      expect(screen.getByText(SPENDER_HELPER_TEXT)).toBeInTheDocument()
+    })
+
+    it('still lets a spender added during this edit be typed', () => {
+      mockUseExisting.mockReturnValue({ limits: [onChainSpender], loading: false })
+
+      renderWithUserEvent(<Harness spenders={[createEmptySpender()]} edit />)
+
+      expect(screen.getByTestId('spender-address-input')).toBeEnabled()
+    })
   })
 })

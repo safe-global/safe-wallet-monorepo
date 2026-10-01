@@ -9,7 +9,7 @@ import { CGW_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/gatew
 
 describe('fetchSafeMessage', () => {
   beforeEach(() => {
-    setStoreInstance(makeStore(undefined, { skipBroadcast: true }))
+    setStoreInstance(makeStore())
   })
 
   const mockResponse = (status: number) =>

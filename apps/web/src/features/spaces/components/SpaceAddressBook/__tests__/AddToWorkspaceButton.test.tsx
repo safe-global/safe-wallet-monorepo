@@ -8,11 +8,23 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const IS_ADMIN = true
 const mockUpsert = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [mockUpsert],
+  useAddressBookRequestsCreateRequestV1Mutation: () => [jest.fn()],
 }))
+
+jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
+
+jest.mock('../../../hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => [],
+  useSpaceAddressBookState: () => ({ items: [], isLoading: false, isError: false }),
+}))
+
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

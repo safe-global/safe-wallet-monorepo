@@ -666,6 +666,7 @@
     },
     "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
       "patch": {
+        "description": "Safes in `removedSafes` are removed from the workspace first, then the plan changes. If the plan change fails after that, the answer is 502 and sending the same request again finishes it.",
         "operationId": "billingUpdateSubscriptionV1",
         "parameters": [
           {
@@ -722,7 +723,7 @@
             "description": "The named payment link does not offer this plan"
           },
           "502": {
-            "description": "The billing service reported the plan change as unsuccessful"
+            "description": "The billing service reported the plan change as unsuccessful, or failed after `removedSafes` were removed"
           }
         },
         "summary": "Move a subscription onto another plan",
@@ -7230,7 +7231,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-2204472",
+    "version": "main-abe9655",
     "contact": {}
   },
   "tags": [],
@@ -7875,6 +7876,21 @@
           "lineItems"
         ]
       },
+      "RemovedSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
       "UpdateSubscriptionDto": {
         "type": "object",
         "properties": {
@@ -7885,6 +7901,13 @@
           "paymentLinkId": {
             "type": "string",
             "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          },
+          "removedSafes": {
+            "description": "Safes to remove from the workspace before the plan changes, so it fits the new plan. Safes the workspace does not hold are ignored",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RemovedSafeDto"
+            }
           }
         },
         "required": [

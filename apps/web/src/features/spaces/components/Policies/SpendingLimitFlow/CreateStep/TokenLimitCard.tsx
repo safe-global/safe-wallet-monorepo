@@ -14,7 +14,9 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
@@ -78,12 +80,15 @@ const TokenLimitCard = ({
     trigger,
     formState: { errors },
   } = useFormContext<SpendingLimitPolicyFormValues>()
-  const { options } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options } = useSpendingLimitTokenOptions(extraTokens)
   const { limits: existingLimits } = useExistingSpendingLimits()
+  // An edit describes the Safe's whole policy, so its own limits are the rows to change, not conflicts.
+  const isEditMode = useIsEditMode()
   const spenderAddress = watch(spenderAddressPath(spenderIndex)) ?? ''
   const existingTokens = useMemo(
-    () => existingTokensForSpender(spenderAddress, existingLimits),
-    [spenderAddress, existingLimits],
+    () => (isEditMode ? [] : existingTokensForSpender(spenderAddress, existingLimits)),
+    [isEditMode, spenderAddress, existingLimits],
   )
 
   const tokenPath = limitPath(spenderIndex, limitIndex, 'tokenAddress')
@@ -134,6 +139,8 @@ const TokenLimitCard = ({
       .map((limit) => limit.tokenAddress)
       .filter((_, index) => index !== limitIndex)
     const spender = getValues(spenderAddressPath(spenderIndex)) ?? ''
+
+    if (isEditMode) return validateUniqueToken(tokenAddress, siblingTokens)
 
     return (
       validateUniqueToken(tokenAddress, siblingTokens) ?? validateNoExistingLimit(tokenAddress, spender, existingLimits)

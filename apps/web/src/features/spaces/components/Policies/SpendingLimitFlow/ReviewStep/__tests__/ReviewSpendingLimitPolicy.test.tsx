@@ -20,9 +20,11 @@ import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_PAIR_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
+import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
 import type { SpendingLimitPolicyFormValues } from '../../types'
-import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildSpendingLimitPairs'
+import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
+import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))
@@ -115,6 +117,7 @@ const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeo
 const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
 const mockReviewTransaction = ReviewTransaction as jest.Mock
 const mockCreate = jest.fn()
+const mockCreateEdit = jest.fn()
 const setSafeTx = jest.fn()
 const setSafeTxError = jest.fn()
 const onSubmit = jest.fn()
@@ -135,16 +138,19 @@ const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxCont
   ...overrides,
 })
 
-const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}) =>
-  render(
+const renderReview = (safeTxOverrides: Partial<SafeTxContextParams> = {}, edit = false) => {
+  const tree = (
     <TxFlowContext.Provider value={{ ...initialContext, data } as TxFlowContextType}>
       <SafeTxContext.Provider value={safeTxContext(safeTxOverrides)}>
         <ReviewSpendingLimitPolicy onSubmit={onSubmit}>
           <div data-testid="flow-children" />
         </ReviewSpendingLimitPolicy>
       </SafeTxContext.Provider>
-    </TxFlowContext.Provider>,
+    </TxFlowContext.Provider>
   )
+
+  return render(edit ? <EditModeProvider>{tree}</EditModeProvider> : tree)
+}
 
 const optionsResult = (options: (typeof eth)[], isLoading = false, isPopularLoading = false) => ({
   options,
@@ -168,7 +174,14 @@ describe('ReviewSpendingLimitPolicy', () => {
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     mockUseSafeScope.mockReturnValue(scope)
     mockUseSafeInfo.mockReturnValue({ safe, safeAddress: SAFE_A, safeLoaded: true, safeLoading: false })
-    mockUseLoadFeature.mockReturnValue({ $isReady: true, $isDisabled: false, createSpendingLimitsTx: mockCreate })
+    mockUseLoadFeature.mockReturnValue({
+      $isReady: true,
+      $isDisabled: false,
+      createSpendingLimitsTx: mockCreate,
+      createSpendingLimitEditTx: mockCreateEdit,
+      buildSpendingLimitEdit,
+    })
+    mockCreateEdit.mockResolvedValue(builtTx)
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc]))
     mockUseExisting.mockReturnValue({ limits: [], loading: false })
     mockCreate.mockResolvedValue(builtTx)
@@ -288,7 +301,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     await waitFor(() => expect(setSafeTxError).toHaveBeenCalledWith(failure))
   })
 
-  it('refuses to build over a spender/token pair the Safe already limits', async () => {
+  it('refuses to build over a spender/token allowance the Safe already limits', async () => {
     mockUseExisting.mockReturnValue({
       limits: [
         spendingLimitStateBuilder()
@@ -301,7 +314,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     renderReview()
 
     await waitFor(() =>
-      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_PAIR_IN_POLICY_ERROR })),
+      expect(setSafeTxError).toHaveBeenCalledWith(expect.objectContaining({ message: EXISTING_LIMIT_IN_POLICY_ERROR })),
     )
     expect(mockCreate).not.toHaveBeenCalled()
   })
@@ -364,5 +377,62 @@ describe('ReviewSpendingLimitPolicy', () => {
 
     expect(screen.getByTestId('review-transaction')).toBeInTheDocument()
     expect(screen.queryByTestId('review-skeleton')).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    it('builds the transaction from the edit rather than from the form alone', async () => {
+      renderReview({}, true)
+
+      await waitFor(() => expect(mockCreateEdit).toHaveBeenCalled())
+      expect(mockCreate).not.toHaveBeenCalled()
+      expect(setSafeTx).toHaveBeenCalledWith(builtTx)
+    })
+
+    it('marks every row against what the chain holds, and shows the rows the form dropped', async () => {
+      const usdcOnChain = spendingLimitStateBuilder()
+        .with({
+          beneficiary: SPENDER_A,
+          amount: '100000000',
+          resetTimeMin: '10080',
+          spent: '0',
+          token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+        })
+        .build()
+      const droppedDai = spendingLimitStateBuilder()
+        .with({
+          beneficiary: SPENDER_A,
+          amount: '5000000000000000000',
+          resetTimeMin: '0',
+          spent: '0',
+          token: { address: '0x6B175474E89094C44Da98b954EedeAC495271d0F', symbol: 'DAI', decimals: 18, logoUri: '' },
+        })
+        .build()
+      mockUseExisting.mockReturnValue({ limits: [usdcOnChain, droppedDai], loading: false })
+
+      renderReview({ safeTx: builtTx }, true)
+
+      await waitFor(() => expect(screen.getByTestId('review-transaction')).toBeInTheDocument())
+      // USDC went 100 -> 250, ETH is new to the policy, DAI is no longer in the form.
+      expect(screen.getByTestId('limit-change-changed')).toBeInTheDocument()
+      expect(screen.getByTestId('limit-change-added')).toBeInTheDocument()
+      expect(screen.getByTestId('limit-change-removed')).toBeInTheDocument()
+    })
+
+    it('does not treat a limit already on chain as a conflict', async () => {
+      const existing = spendingLimitStateBuilder()
+        .with({
+          beneficiary: SPENDER_A,
+          token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+        })
+        .build()
+      mockUseExisting.mockReturnValue({ limits: [existing], loading: false })
+
+      renderReview({}, true)
+
+      await waitFor(() => expect(mockCreateEdit).toHaveBeenCalled())
+      expect(setSafeTxError).not.toHaveBeenCalledWith(
+        expect.objectContaining({ message: EXISTING_LIMIT_IN_POLICY_ERROR }),
+      )
+    })
   })
 })

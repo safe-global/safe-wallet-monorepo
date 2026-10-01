@@ -11,14 +11,18 @@ import { addressExBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { NewSpendingLimitData, SpendingLimitState } from '../types'
 import { getLatestSpendingLimitAddress } from './spendingLimitDeployments'
+import type { SpendingLimitEdit } from './spendingLimitEdit'
 import {
   createNewSpendingLimitTx,
+  createSpendingLimitEditTx,
   createSpendingLimitsTx,
   DUPLICATE_SPENDING_LIMIT_ERROR,
+  EMPTY_SPENDING_LIMIT_EDIT_ERROR,
+  MODULE_NOT_ENABLED_ERROR,
   EMPTY_SPENDING_LIMITS_ERROR,
   NO_ALLOWANCE_MODULE_ERROR,
   UNKNOWN_TOKEN_DECIMALS_ERROR,
-  type SpendingLimitPair,
+  type DesiredAllowance,
 } from './spendingLimitExecution'
 
 // Sepolia — the AllowanceModule is registered for it in @safe-global/safe-modules-deployments
@@ -30,6 +34,7 @@ const UNREGISTERED_CHAIN_ID = '999999999999'
 const SAFE_ADDRESS = getAddress('0x1000000000000000000000000000000000000001')
 const ALICE = getAddress('0x00000000000000000000000000000000000000a1')
 const BOB = getAddress('0x00000000000000000000000000000000000000b0')
+const CAROL = getAddress('0x00000000000000000000000000000000000000c0')
 const USDC = getAddress('0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48')
 /** `enableModule(address)` selector: the mocked SDK returns it so the decoder can name the call. */
 const ENABLE_MODULE_DATA = '0x610b5925'
@@ -60,7 +65,7 @@ const decodeBatch = (): DecodedCall[] => {
 
 const names = (): string[] => decodeBatch().map((call) => call.name)
 
-const pair = (overrides: Partial<SpendingLimitPair> = {}): SpendingLimitPair => ({
+const allowance = (overrides: Partial<DesiredAllowance> = {}): DesiredAllowance => ({
   beneficiary: ALICE,
   tokenAddress: ZERO_ADDRESS,
   amount: '1',
@@ -94,16 +99,16 @@ afterAll(() => {
 
 describe('createSpendingLimitsTx', () => {
   const build = (
-    pairs: SpendingLimitPair[],
+    desired: DesiredAllowance[],
     existing: SpendingLimitState[] = [],
     safeModules: SafeState['modules'] = [],
-  ) => createSpendingLimitsTx(pairs, existing, REGISTERED_CHAIN_ID, mockChain, safeModules, true)
+  ) => createSpendingLimitsTx(desired, existing, REGISTERED_CHAIN_ID, mockChain, safeModules, true)
 
-  it('enables the module once, adds each spender once and sets every pair, in that order', async () => {
+  it('enables the module once, adds each spender once and sets every allowance, in that order', async () => {
     await build([
-      pair(),
-      pair({ tokenAddress: USDC, decimals: 6, amount: '2.5', resetTime: '10080' }),
-      pair({ beneficiary: BOB, resetTime: '1440' }),
+      allowance(),
+      allowance({ tokenAddress: USDC, decimals: 6, amount: '2.5', resetTime: '10080' }),
+      allowance({ beneficiary: BOB, resetTime: '1440' }),
     ])
 
     expect(names()).toEqual([
@@ -123,7 +128,7 @@ describe('createSpendingLimitsTx', () => {
   it('does not enable a module the Safe already has, and sends every call to it', async () => {
     const moduleAddress = requireModuleAddress()
 
-    await build([pair()], [], [addressExBuilder().with({ value: moduleAddress }).build()])
+    await build([allowance()], [], [addressExBuilder().with({ value: moduleAddress }).build()])
 
     expect(names()).toEqual(['addDelegate', 'setAllowance'])
     expect(decodeBatch().every((call) => call.to === moduleAddress)).toBe(true)
@@ -131,7 +136,7 @@ describe('createSpendingLimitsTx', () => {
   })
 
   it('adds only the spenders that are not delegates yet', async () => {
-    await build([pair(), pair({ beneficiary: BOB })], [limitFor(ALICE, USDC)])
+    await build([allowance(), allowance({ beneficiary: BOB })], [limitFor(ALICE, USDC)])
 
     const adds = decodeBatch().filter((call) => call.name === 'addDelegate')
     expect(adds).toHaveLength(1)
@@ -140,7 +145,7 @@ describe('createSpendingLimitsTx', () => {
 
   it('resets an existing allowance with spend before setting it, and leaves an unspent one alone', async () => {
     await build(
-      [pair(), pair({ tokenAddress: USDC, decimals: 6 })],
+      [allowance(), allowance({ tokenAddress: USDC, decimals: 6 })],
       [limitFor(ALICE, ZERO_ADDRESS, '5'), limitFor(ALICE, USDC, '0')],
     )
 
@@ -151,8 +156,8 @@ describe('createSpendingLimitsTx', () => {
 
   it('encodes each row with its own amount, decimals and reset period', async () => {
     await build([
-      pair({ amount: '1.5', resetTime: '0' }),
-      pair({ tokenAddress: USDC, decimals: 6, amount: '250', resetTime: '10080' }),
+      allowance({ amount: '1.5', resetTime: '0' }),
+      allowance({ tokenAddress: USDC, decimals: 6, amount: '250', resetTime: '10080' }),
     ])
 
     const [eth, usdc] = decodeBatch().filter((call) => call.name === 'setAllowance')
@@ -166,17 +171,17 @@ describe('createSpendingLimitsTx', () => {
   })
 
   it('rejects the same spender and token twice, whatever the address casing', async () => {
-    await expect(build([pair(), pair({ beneficiary: ALICE.toLowerCase() })])).rejects.toThrow(
+    await expect(build([allowance(), allowance({ beneficiary: ALICE.toLowerCase() })])).rejects.toThrow(
       DUPLICATE_SPENDING_LIMIT_ERROR,
     )
   })
 
   it('rejects a token whose decimals are unknown instead of guessing', async () => {
-    await expect(build([pair({ decimals: Number.NaN })])).rejects.toThrow(UNKNOWN_TOKEN_DECIMALS_ERROR)
+    await expect(build([allowance({ decimals: Number.NaN })])).rejects.toThrow(UNKNOWN_TOKEN_DECIMALS_ERROR)
   })
 
   it('rejects when no module address resolves for the chain', async () => {
-    await expect(createSpendingLimitsTx([pair()], [], UNREGISTERED_CHAIN_ID, mockChain, [], true)).rejects.toThrow(
+    await expect(createSpendingLimitsTx([allowance()], [], UNREGISTERED_CHAIN_ID, mockChain, [], true)).rejects.toThrow(
       NO_ALLOWANCE_MODULE_ERROR,
     )
   })
@@ -187,7 +192,7 @@ describe('createSpendingLimitsTx', () => {
     } as unknown as Safe
     const scope = { chainId: REGISTERED_CHAIN_ID, safeAddress: SAFE_ADDRESS, sdk: scopedSdk }
 
-    await createSpendingLimitsTx([pair()], [], REGISTERED_CHAIN_ID, mockChain, [], true, scope)
+    await createSpendingLimitsTx([allowance()], [], REGISTERED_CHAIN_ID, mockChain, [], true, scope)
 
     expect(scopedSdk.createEnableModuleTx).toHaveBeenCalled()
     expect(mockSDK.createEnableModuleTx).not.toHaveBeenCalled()
@@ -225,7 +230,7 @@ describe('createNewSpendingLimitTx', () => {
     ).rejects.toThrow(UNKNOWN_TOKEN_DECIMALS_ERROR)
   })
 
-  it('produces the same batch as the multi-pair builder for one pair', async () => {
+  it('produces the same batch as the multi-allowance builder for one allowance', async () => {
     await createNewSpendingLimitTx(data, [limitFor(ALICE, USDC, '3')], REGISTERED_CHAIN_ID, mockChain, [], true, 6)
 
     expect(names()).toEqual(['enableModule', 'resetAllowance', 'setAllowance'])
@@ -243,5 +248,114 @@ describe('createNewSpendingLimitTx', () => {
 
     expect(scopedSdk.createEnableModuleTx).toHaveBeenCalled()
     expect(txSender.createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
+  })
+})
+
+describe('createSpendingLimitEditTx', () => {
+  const NO_CHANGES: SpendingLimitEdit = {
+    added: [],
+    modified: [],
+    removed: [],
+    addedDelegates: [],
+    removedDelegates: [],
+  }
+
+  const enabledModule = (): SafeState['modules'] => [addressExBuilder().with({ value: requireModuleAddress() }).build()]
+
+  const build = (
+    edit: Partial<SpendingLimitEdit>,
+    existing: SpendingLimitState[] = [],
+    safeModules: SafeState['modules'] = enabledModule(),
+  ) => createSpendingLimitEditTx({ ...NO_CHANGES, ...edit }, existing, REGISTERED_CHAIN_ID, safeModules, true)
+
+  it('deletes the allowance of a limit the edit dropped', async () => {
+    await build({ removed: [{ beneficiary: ALICE, tokenAddress: USDC }] })
+
+    expect(decodeBatch()).toEqual([{ to: requireModuleAddress(), name: 'deleteAllowance', args: [ALICE, USDC] }])
+  })
+
+  it('clears every allowance before unregistering the spender', async () => {
+    await build({ removed: [{ beneficiary: BOB, tokenAddress: USDC }], removedDelegates: [BOB] })
+
+    expect(names()).toEqual(['deleteAllowance', 'removeDelegate'])
+  })
+
+  it('unregisters a spender without asking the module to sweep allowances again', async () => {
+    await build({ removed: [{ beneficiary: BOB, tokenAddress: USDC }], removedDelegates: [BOB] })
+
+    expect(decodeBatch().find((call) => call.name === 'removeDelegate')?.args).toEqual([BOB, false])
+  })
+
+  it('rejects two writes naming the same spender and token', async () => {
+    await expect(build({ added: [allowance()], modified: [allowance({ amount: '2' })] })).rejects.toThrow(
+      DUPLICATE_SPENDING_LIMIT_ERROR,
+    )
+  })
+
+  it('rejects a write whose token decimals the chain never resolved', async () => {
+    await expect(build({ added: [allowance({ decimals: NaN })] })).rejects.toThrow(UNKNOWN_TOKEN_DECIMALS_ERROR)
+  })
+
+  it('registers a new spender before setting their first allowance', async () => {
+    await build({ added: [allowance({ beneficiary: BOB })], addedDelegates: [BOB] })
+
+    expect(names()).toEqual(['addDelegate', 'setAllowance'])
+  })
+
+  it('zeroes a spent allowance before writing the new one', async () => {
+    await build({ modified: [allowance()] }, [limitFor(ALICE, ZERO_ADDRESS, '5')])
+
+    expect(names()).toEqual(['addDelegate', 'resetAllowance', 'setAllowance'])
+  })
+
+  it('leaves an unspent allowance alone before writing the new one', async () => {
+    await build({ modified: [allowance()] }, [limitFor(ALICE, ZERO_ADDRESS, '0')])
+
+    expect(names()).toEqual(['addDelegate', 'setAllowance'])
+  })
+
+  it('registers, writes, deletes and unregisters, in that order', async () => {
+    await build(
+      {
+        addedDelegates: [CAROL],
+        added: [allowance({ beneficiary: CAROL })],
+        modified: [allowance()],
+        removed: [{ beneficiary: BOB, tokenAddress: USDC }],
+        removedDelegates: [BOB],
+      },
+      [limitFor(ALICE, ZERO_ADDRESS, '0')],
+    )
+
+    expect(names()).toEqual([
+      'addDelegate',
+      'addDelegate',
+      'setAllowance',
+      'setAllowance',
+      'deleteAllowance',
+      'removeDelegate',
+    ])
+  })
+
+  it('registers every spender it writes a limit for, so a stale baseline cannot make setAllowance revert', async () => {
+    await build({ modified: [allowance()] }, [limitFor(ALICE, ZERO_ADDRESS, '0')])
+
+    expect(names()).toEqual(['addDelegate', 'setAllowance'])
+    expect(decodeBatch()[0].args).toEqual([ALICE])
+  })
+
+  it('does not register a spender it is removing', async () => {
+    await build({ removed: [{ beneficiary: BOB, tokenAddress: USDC }], removedDelegates: [BOB] })
+
+    expect(names()).toEqual(['deleteAllowance', 'removeDelegate'])
+  })
+
+  it('rejects an edit that changes nothing', async () => {
+    await expect(build({})).rejects.toThrow(EMPTY_SPENDING_LIMIT_EDIT_ERROR)
+  })
+
+  it('rejects an edit for a Safe that does not run the module', async () => {
+    await expect(build({ removed: [{ beneficiary: ALICE, tokenAddress: USDC }] }, [], [])).rejects.toThrow(
+      MODULE_NOT_ENABLED_ERROR,
+    )
   })
 })
