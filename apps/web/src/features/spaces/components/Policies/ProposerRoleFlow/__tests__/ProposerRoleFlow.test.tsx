@@ -209,11 +209,12 @@ describe('ProposerRoleFlow', () => {
     it('checks the wallet against the picked chain and names the parent from the address book', async () => {
       mockUseParentSafeWallet.mockReturnValue({ parentSafeAddress: PARENT, isChecking: false })
       const setTxFlow = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
       const { user } = renderWithUserEvent(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ProposerRoleFlow />
         </TxModalContext.Provider>,
-        { initialReduxState: { addressBook: { '137': { [PARENT]: 'Ops' } } } },
+        { initialReduxState: { addressBook: { '137': { [PARENT]: 'Ops' } } }, routerProps: { push } },
       )
 
       expect(screen.queryByTestId('parent-safe-wallet-notice')).not.toBeInTheDocument()
@@ -234,6 +235,10 @@ describe('ProposerRoleFlow', () => {
       await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
 
       expect(setTxFlow).toHaveBeenCalledWith(undefined, undefined, false)
+      expect(push).toHaveBeenCalledWith({
+        pathname: '/settings/setup',
+        query: { safe: `matic:${SAFE}` },
+      })
     })
   })
 

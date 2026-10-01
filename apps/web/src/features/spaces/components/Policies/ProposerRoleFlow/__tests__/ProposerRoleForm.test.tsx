@@ -167,6 +167,49 @@ describe('ProposerRoleForm', () => {
       expect(submitButton()).toBeDisabled()
     })
 
+    it('closes the flow and pushes the settings route itself when the link is clicked', async () => {
+      const onNavigate = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
+      const settingsHref = { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } }
+      const { user } = renderWithUserEvent(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          safeAccounts={eligible}
+          onSafeAccountChange={jest.fn()}
+          safeAccount={treasury.id}
+          parentSafeWallet={{
+            ...PARENT_SAFE_WALLET_COPY,
+            safeName: 'Treasury',
+            parentSafeName: 'Ops',
+            settingsHref,
+            onNavigate,
+          }}
+        />,
+        { routerProps: { push } },
+      )
+
+      await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
+
+      expect(onNavigate).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledWith(settingsHref)
+    })
+
+    it('keeps the settings link mousedown from the document-level navigation guard', () => {
+      const guard = jest.fn()
+      document.addEventListener('mousedown', guard)
+      renderForm({
+        safeAccount: treasury.id,
+        parentSafeWallet: { ...PARENT_SAFE_WALLET_COPY, safeName: 'Treasury', parentSafeName: 'Ops', settingsHref: {} },
+      })
+
+      fireEvent.mouseDown(screen.getByRole('link', { name: 'Go to Safe settings' }))
+      fireEvent.mouseDown(screen.getByTestId('parent-safe-wallet-notice'))
+
+      expect(guard).toHaveBeenCalledTimes(1)
+      document.removeEventListener('mousedown', guard)
+    })
+
     it('keeps submit disabled while the wallet is still being checked', async () => {
       renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER }, isCheckingWallet: true })
 
