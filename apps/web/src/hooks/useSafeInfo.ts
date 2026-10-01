@@ -21,7 +21,7 @@ const useSafeInfo = (): {
   return useMemo(() => {
     if (scopeContext) {
       if (!scope) {
-        return { safe: defaultSafeInfo, safeAddress: '', safeLoaded: false, safeLoading: false }
+        return { safe: defaultSafeInfo, safeAddress: '', safeLoaded: false, safeLoading: false, safeError: undefined }
       }
       return {
         safe: scope.safe || defaultSafeInfo,

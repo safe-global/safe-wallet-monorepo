@@ -21,7 +21,7 @@ const useUntrustedSafeAnalysis = (): UntrustedSafeAnalysisResult => {
   const { trustSafe } = useTrustSafe()
 
   const safeAnalysis: SafeAnalysisResult | null = useMemo(() => {
-    // A Space flow picks its Safe in step 1, so until one is loaded there is nothing to vouch for.
+    // No Safe picked yet, so there is nothing to vouch for.
     if (!safeLoaded || isTrusted) return null
     return {
       severity: Severity.CRITICAL,
