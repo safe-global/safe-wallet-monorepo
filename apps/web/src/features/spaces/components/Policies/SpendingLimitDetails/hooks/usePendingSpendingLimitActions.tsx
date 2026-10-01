@@ -38,7 +38,8 @@ export const usePendingSpendingLimitActions = (
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
 
   const txPath = chain ? `${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}` : undefined
-  const reviewTransactionHref = txPath && !isUnlisted ? withSpaceIdInUrl(txPath, spaceId) : undefined
+  // Held until the transaction loads, so a signer who already signed is never offered Review.
+  const reviewTransactionHref = txPath && txSummary && !isUnlisted ? withSpaceIdInUrl(txPath, spaceId) : undefined
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 

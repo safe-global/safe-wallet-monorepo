@@ -282,14 +282,14 @@ describe('a pending spending limit', () => {
     })
   })
 
-  it('offers Review transaction before the transaction has loaded, without asking to sign yet', () => {
+  it('keeps Review transaction disabled until the transaction has loaded, without asking to sign yet', () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({})
 
-    renderInSpace()
+    renderPending()
 
-    expectReviewLinkToQueuedTx()
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
     expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
   })
 

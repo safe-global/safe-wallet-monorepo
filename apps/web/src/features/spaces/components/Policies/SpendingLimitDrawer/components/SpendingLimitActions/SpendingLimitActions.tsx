@@ -7,7 +7,7 @@ import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
   transactionLink?: string
-  /** Absent until the chain configs have loaded, or once the row has left the list. */
+  /** Absent until the transaction and chain configs have loaded, or once the row has left the list. */
   reviewTransactionHref?: LinkProps['href']
   /** Set when the queued transaction failed to load. */
   onRetry?: () => void
