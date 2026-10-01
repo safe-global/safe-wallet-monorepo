@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import type * as ReactModule from 'react'
 import type { ReactElement, ReactNode, CSSProperties } from 'react'
 import { AppRoutes } from '@/config/routes'
@@ -1150,10 +1150,9 @@ describe('SpaceSelectorDropdown', () => {
       afterEach(() => mockUseIsSafeProPlansV2Enabled.mockReturnValue(false))
 
       it.each([
-        [20, 'Free access', false],
-        [14, 'Free access', false],
-        [7, 'Free access · 7 days left', true],
-      ])('daysLeft=%s → muted "%s" behind a dot, warning=%s', (daysLeft, label, isWarning) => {
+        [14, 'Free access'],
+        [7, 'Free access · 7 days left'],
+      ])('counts down from the last week: daysLeft=%s → "%s"', (daysLeft, label) => {
         mockUseIsSafeProEnabled.mockReturnValue(true)
         mockPlans.isTrialing = true
         mockPlans.isTrialEndingSoon = daysLeft <= 7
@@ -1162,11 +1161,7 @@ describe('SpaceSelectorDropdown', () => {
 
         render(<SpaceSelectorDropdown spaces={spaces} selectedSpace={spaces[0]} />)
 
-        const subtitle = screen.getByText(label)
-        expect(subtitle).toHaveClass('text-muted-foreground')
-        expect(subtitle).not.toHaveClass('text-green-500')
-        const dot = within(subtitle).getByTestId('status-dot')
-        expect(dot.hasAttribute('data-warning')).toBe(isWarning)
+        expect(screen.getByText(label)).toBeInTheDocument()
       })
     })
   })

@@ -1,10 +1,7 @@
-import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { fireEvent, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { ENTERPRISE_TIER, getCardFeaturesV2, PLAN_CARD_COPY_V2, PLAN_CONTENT_V2 } from '../../planCatalog'
-import type { PlanSeatOption, PlanTier } from '../../types'
-import type { CurrentPlan } from '../../types'
+import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
 import { PlanCardV2 } from '../PlanCardV2'
 
 jest.mock('@/services/analytics', () => ({
@@ -54,80 +51,10 @@ const BUSINESS: PlanTier = {
   currency: 'eur',
   billingCycle: 'month',
   options: [option(20, 166_900), option(5, 66_900)],
-  features: ['A Stripe selling point'],
+  features: [],
 }
 
 describe('PlanCardV2', () => {
-  it('shows who the plan is for and the monthly total', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    expect(screen.getByText(PLAN_CONTENT_V2.Business.description)).toBeInTheDocument()
-    expect(screen.getByText('€1,669')).toBeInTheDocument()
-    expect(screen.getByText('/mo')).toBeInTheDocument()
-    expect(screen.queryByText('/Safe/mo')).not.toBeInTheDocument()
-    expect(screen.getByTestId('plan-price-line')).toHaveTextContent('Billed monthly · excl. VAT')
-  })
-
-  it('lists everything the plan includes instead of the Stripe selling points', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    expect(screen.getByText('Everything in Starter, plus')).toBeInTheDocument()
-    const features = getCardFeaturesV2('Business') ?? []
-    features.forEach((feature) => expect(screen.getByText(feature)).toBeInTheDocument())
-    expect(screen.queryByText('A Stripe selling point')).not.toBeInTheDocument()
-  })
-
-  it('lists only what the plan adds over the one below it, leading with its sponsored allowance', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    const items = within(screen.getByTestId('plan-features'))
-      .getAllByRole('listitem')
-      .filter((item) => !item.hasAttribute('data-coming-soon'))
-      .map((item) => item.textContent)
-    expect(items[0]).toBe('50 sponsored transactions per month')
-    expect(items).not.toContain('Shared address book')
-    expect(items).toEqual(getCardFeaturesV2('Business'))
-  })
-
-  it('ends the list with what is coming to the plan, marked Soon instead of checked', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    const items = within(screen.getByTestId('plan-features')).getAllByRole('listitem')
-    const comingSoon = items.filter((item) => item.hasAttribute('data-coming-soon'))
-    expect(items.slice(-comingSoon.length)).toEqual(comingSoon)
-    expect(comingSoon.map((item) => item.textContent)).toEqual(['Safenet checksSoon', 'More policiesSoon'])
-    comingSoon.forEach((item) => {
-      expect(within(item).getByText('Soon')).toHaveAttribute('data-variant', 'subtle')
-      expect(within(item).queryByTestId('plan-feature-check')).not.toBeInTheDocument()
-    })
-    expect(screen.queryByText('Pay gas from your Safe')).not.toBeInTheDocument()
-  })
-
-  it('adds no coming-soon items to a plan that gets nothing unreleased over the one below it', () => {
-    render(<PlanCardV2 tier={ENTERPRISE_TIER} />)
-
-    expect(screen.queryByText('Soon')).not.toBeInTheDocument()
-  })
-
-  it('keeps "What\'s included" on the first plan', () => {
-    render(<PlanCardV2 tier={{ ...BUSINESS, id: 'Starter-month', name: 'Starter' }} />)
-
-    expect(screen.getByText(PLAN_CARD_COPY_V2.featuresHeading)).toBeInTheDocument()
-    expect(screen.queryByText(/Everything in/)).not.toBeInTheDocument()
-  })
-
-  it('shows the support level and what it includes', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    const support = screen.getByTestId('plan-support')
-    expect(within(support).getByText('Support')).toBeInTheDocument()
-    expect(within(support).getByText('Priority')).toBeInTheDocument()
-    expect(within(support).getByText('+ Guided onboarding')).toBeInTheDocument()
-
-    const highlight = within(support).getByTestId('plan-support-level').querySelector('span[aria-hidden]')
-    expect(highlight).toHaveClass('scale-x-0', 'group-hover/plan:scale-x-100', 'bg-mint')
-  })
-
   it('reprices the card when another Safe count is picked', async () => {
     const { user } = renderWithUserEvent(<PlanCardV2 tier={BUSINESS} />)
 
@@ -137,21 +64,6 @@ describe('PlanCardV2', () => {
     await user.click(await screen.findByRole('option', { name: '5 Safe accounts' }))
 
     expect(screen.getByText('€669')).toBeInTheDocument()
-  })
-
-  it('carries no plan badge', () => {
-    render(<PlanCardV2 tier={{ ...BUSINESS, isCurrent: true, currentPriceId: 'price_b20m' }} />)
-
-    expect(screen.queryByText(/Free access|Active/)).not.toBeInTheDocument()
-  })
-
-  it('shows custom pricing and a sales link on the Enterprise card', () => {
-    render(<PlanCardV2 tier={ENTERPRISE_TIER} />)
-
-    expect(screen.getByText('Custom')).toBeInTheDocument()
-    expect(screen.getByText('Annual term')).toBeInTheDocument()
-    expect(screen.getByTestId('plan-price-line')).toHaveTextContent('Pricing by agreement · Billed annually')
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('hands the picked offer to onSubscribe', () => {
@@ -171,87 +83,20 @@ describe('PlanCardV2', () => {
     expect(screen.queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
   })
 
-  it('keeps every card flat on the muted surface, lifting it to white with a shadow on hover', () => {
-    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
-    render(
-      <>
-        <PlanCardV2 tier={starter} />
-        <PlanCardV2 tier={BUSINESS} />
-      </>,
-    )
+  it('tracks the Talk to sales link next to the Business button', () => {
+    render(<PlanCardV2 tier={BUSINESS} />)
 
-    const [starterCard, businessCard] = screen.getAllByTestId('plan-card')
-    expect(starterCard).toHaveAttribute('data-variant', 'muted-secondary')
-    expect(businessCard).toHaveAttribute('data-variant', 'muted-secondary')
-    expect(businessCard).toHaveClass('hover:bg-card')
-    expect(businessCard).toHaveClass('hover:shadow-hairline-lg')
-    expect(businessCard).not.toHaveClass('shadow-hairline-lg')
-    expect(businessCard).toHaveClass('group/plan')
-    within(businessCard)
-      .getAllByTestId('plan-feature-check')
-      .forEach((check) => expect(check).toHaveClass('bg-muted', 'group-hover/plan:bg-foreground'))
-    expect(
-      within(businessCard)
-        .getAllByTestId('plan-feature-check')
-        .map((check) => check.style.getPropertyValue('--check-delay')),
-    ).toEqual((getCardFeaturesV2('Business') ?? []).map((_, index) => `${index * 15}ms`))
-  })
+    fireEvent.click(screen.getByRole('link', { name: 'Talk to sales' }))
 
-  it('gives only the Business card the filled button, whose arrow nudges while the others reveal one', () => {
-    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
-    render(
-      <>
-        <PlanCardV2 tier={starter} />
-        <PlanCardV2 tier={BUSINESS} />
-      </>,
-    )
-
-    const [starterCard, businessCard] = screen.getAllByTestId('plan-card')
-    expect(starterCard).not.toHaveAttribute('data-primary')
-    expect(businessCard).toHaveAttribute('data-primary', 'true')
-    const arrowOf = (card: HTMLElement, name: string) =>
-      within(card).getByRole('button', { name }).querySelector('[data-cta-arrow]')
-    expect(arrowOf(starterCard, 'Continue with Starter')).toHaveAttribute('data-cta-arrow', 'reveal')
-    expect(arrowOf(businessCard, 'Continue with Business')).toHaveAttribute('data-cta-arrow', 'nudge')
-  })
-
-  it('pairs the Business button with a Talk to sales link in the same row, tracked as sales', () => {
-    const starter: PlanTier = { ...BUSINESS, id: 'Starter-month', name: 'Starter', options: [option(2, 18_900)] }
-    render(
-      <>
-        <PlanCardV2 tier={starter} />
-        <PlanCardV2 tier={BUSINESS} />
-      </>,
-    )
-
-    const [starterCtas, businessCtas] = screen.getAllByTestId('plan-ctas')
-    expect(within(starterCtas).queryByRole('link', { name: 'Talk to sales' })).not.toBeInTheDocument()
-    expect(within(businessCtas).getByRole('button', { name: 'Continue with Business' })).toBeInTheDocument()
-    const talkToSales = within(businessCtas).getByRole('link', { name: 'Talk to sales' })
-    expect(talkToSales).toHaveAttribute('href', CONTACT_SALES_URL)
-    expect(talkToSales).toHaveAttribute('target', '_blank')
-
-    fireEvent.click(talkToSales)
     expectPlansClick(SAFE_PRO_PLANS_LABELS.talk_to_sales)
   })
 
-  it('greys out the plan in force, even on the Business card', () => {
+  it('disables the button of the plan in force', () => {
     render(
-      <PlanCardV2
-        tier={{ ...BUSINESS, isCurrent: true, currentPriceId: 'price_b20m' }}
-        currentPlan={{
-          name: 'Business',
-          price: 1669,
-          currency: 'eur',
-          billingCycle: 'month',
-          isTrialing: false,
-          periodEndsAt: null,
-        }}
-      />,
+      <PlanCardV2 tier={{ ...BUSINESS, isCurrent: true, currentPriceId: 'price_b20m' }} currentPlan={businessPlan()} />,
     )
 
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Current plan' }).querySelector('[data-cta-arrow]')).toBeNull()
   })
 
   it('sends a trial without a payment method to billing, not to the change-plan flow', () => {

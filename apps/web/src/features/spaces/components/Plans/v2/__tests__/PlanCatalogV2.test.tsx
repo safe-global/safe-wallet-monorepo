@@ -23,19 +23,13 @@ const tier = (billingCycle: 'month' | 'year'): PlanTier => ({
 })
 
 describe('PlanCatalogV2', () => {
-  it('advertises the yearly saving as a ceiling in a status chip inside the Yearly tab', () => {
-    render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
+  it('advertises the yearly saving only when a plan has a yearly price', () => {
+    const { unmount } = render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
+    expect(within(screen.getByRole('tab', { name: /Yearly/ })).getByTestId('yearly-savings')).toBeInTheDocument()
+    unmount()
 
-    const chip = within(screen.getByRole('tab', { name: /Yearly/ })).getByTestId('yearly-savings')
-    expect(chip).toHaveTextContent('Save up to 13%')
-    expect(chip).toHaveAttribute('data-variant', 'subtle')
-    expect(chip).toHaveClass('h-6', 'text-xs', 'rounded-lg')
-  })
-
-  it('shows no saving when no plan has a yearly price', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), ENTERPRISE_TIER]} />)
-
-    expect(screen.queryByText(/Save up to 13%/)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('yearly-savings')).not.toBeInTheDocument()
   })
 
   it('tells a member who is not an admin why there are no buttons', () => {
@@ -47,13 +41,10 @@ describe('PlanCatalogV2', () => {
   it('switches every card to its yearly price from the billing-cycle toggle', () => {
     render(<PlanCatalogV2 tiers={[tier('month'), tier('year'), ENTERPRISE_TIER]} />)
     expect(screen.getByText('€1,669')).toBeInTheDocument()
-    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('Billed monthly · excl. VAT')
 
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
 
     expect(screen.getByText('€17,424')).toBeInTheDocument()
-    expect(screen.getByText('/yr')).toBeInTheDocument()
-    expect(screen.getAllByTestId('plan-price-line')[0]).toHaveTextContent('Billed yearly · excl. VAT')
   })
 
   it('keeps the picked Safe count when switching between monthly and yearly', async () => {

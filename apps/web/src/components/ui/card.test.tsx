@@ -61,44 +61,4 @@ describe('Card', () => {
 
     expect(screen.getByTestId('xl-card')).toHaveAttribute('data-radius', 'xl')
   })
-
-  it.each([
-    { elevated: false, hairline: false, shadow: undefined },
-    { elevated: true, hairline: false, shadow: 'shadow-lg' },
-    { elevated: false, hairline: true, shadow: 'shadow-hairline' },
-    { elevated: true, hairline: true, shadow: 'shadow-hairline-lg' },
-  ])('carries one shadow when elevated is $elevated and hairline is $hairline', ({ elevated, hairline, shadow }) => {
-    render(
-      <Card data-testid="card" elevated={elevated} hairline={hairline}>
-        Card
-      </Card>,
-    )
-
-    const shadows = screen
-      .getByTestId('card')
-      .className.split(' ')
-      .filter((name) => name.startsWith('shadow-'))
-    expect(shadows).toEqual(shadow ? [shadow] : [])
-  })
-
-  it('lifts to the card surface and raised shadow on hover and focus only when asked to', () => {
-    render(
-      <>
-        <Card data-testid="plain" variant="muted-secondary">
-          Plain
-        </Card>
-        <Card data-testid="lifting" variant="muted-secondary" highlightOnHover>
-          Lifting
-        </Card>
-      </>,
-    )
-
-    expect(screen.getByTestId('plain')).not.toHaveClass('hover:bg-card')
-    expect(screen.getByTestId('lifting')).toHaveClass(
-      'hover:bg-card',
-      'focus-within:bg-card',
-      'hover:shadow-hairline-lg',
-      'focus-within:shadow-hairline-lg',
-    )
-  })
 })

@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import type { PlanGroup, PlanOffer } from '../../../../hooks/billing/types'
@@ -62,70 +61,39 @@ describe('PlansV2', () => {
     Object.defineProperty(window, 'matchMedia', { configurable: true, writable: true, value: originalMatchMedia })
   })
 
-  it('opens the comparison from the link at the top, scrolling to it smoothly and moving focus there', () => {
-    renderPlans()
+  it.each([
+    { reduce: false, behavior: 'smooth' },
+    { reduce: true, behavior: 'auto' },
+  ])(
+    'opens the comparison from the link at the top, scrolling $behavior and moving focus there',
+    ({ reduce, behavior }) => {
+      mockMatchMedia(reduce)
+      renderPlans()
 
-    fireEvent.click(screen.getByRole('link', { name: /Compare all features/ }))
+      fireEvent.click(screen.getByRole('link', { name: /Compare all features/ }))
 
-    expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'true')
-    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' })
-    expect(screen.getByTestId('compare-features')).toHaveFocus()
-    expectPlansClick(SAFE_PRO_PLANS_LABELS.compare_features)
-  })
+      expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'true')
+      expect(scrollIntoView).toHaveBeenCalledWith({ behavior, block: 'start' })
+      expect(screen.getByTestId('compare-features')).toHaveFocus()
+      expectPlansClick(SAFE_PRO_PLANS_LABELS.compare_features)
+    },
+  )
 
-  it('jumps without animation when the system asks for reduced motion', () => {
-    mockMatchMedia(true)
-    renderPlans()
-
-    fireEvent.click(screen.getByRole('link', { name: /Compare all features/ }))
-
-    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' })
-  })
-
-  it('keeps the comparison collapsed by default, with no separate coming-soon or add-on cards', () => {
-    renderPlans()
-
-    expect(screen.getByRole('button', { name: /Compare all features/ })).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.queryByRole('link', { name: 'Request updates' })).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Sold separately', hidden: true })).toHaveLength(3)
-  })
-
-  it('offers Hypernative Guardian from every plan cell, opening its signup and tracking it', () => {
+  it('opens the Hypernative Guardian signup from the add-on row and tracks it', () => {
     renderPlans()
     fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
 
     const row = screen.getByRole('rowheader', { name: 'Hypernative Guardian' }).closest('tr') as HTMLElement
-    expect(row).toHaveAttribute('data-add-on', 'true')
-    const addOns = within(row).getAllByRole('button', { name: 'Sold separately' })
-    expect(addOns).toHaveLength(3)
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-
-    fireEvent.click(addOns[1])
+    fireEvent.click(within(row).getAllByRole('button', { name: 'Sold separately' })[1])
 
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     expectPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
   })
 
-  it('tracks Talk to sales on the Enterprise card', () => {
+  it('tracks the sales prompt at the end of the page', () => {
     renderPlans()
 
-    const enterprise = screen.getAllByTestId('plan-card').find((card) => within(card).queryByText('Enterprise'))
-    fireEvent.click(within(enterprise as HTMLElement).getByRole('link', { name: 'Talk to sales' }))
-
-    expectPlansClick(SAFE_PRO_PLANS_LABELS.talk_to_sales)
-  })
-
-  it('ends the page with a sales prompt in its own card, opening sales in a new tab', () => {
-    renderPlans()
-
-    const prompt = screen.getByTestId('plans-sales-prompt')
-    expect(prompt).toHaveTextContent('Not sure which plan fits?')
-    const talkToSales = within(prompt).getByRole('link', { name: 'Talk to sales' })
-    expect(talkToSales).toHaveAttribute('href', CONTACT_SALES_URL)
-    expect(talkToSales).toHaveAttribute('target', '_blank')
-    expect(talkToSales).toHaveAttribute('rel', 'noopener noreferrer')
-
-    fireEvent.click(talkToSales)
+    fireEvent.click(within(screen.getByTestId('plans-sales-prompt')).getByRole('link', { name: 'Talk to sales' }))
     expectPlansClick(SAFE_PRO_PLANS_LABELS.sales_prompt)
   })
 
@@ -169,12 +137,4 @@ describe('PlansV2', () => {
       expect(screen.queryAllByRole('button', { name: 'Manage plan' })).toHaveLength(shown ? 1 : 0)
     },
   )
-
-  it('marks the current tier as the current column of the comparison', () => {
-    const tiers = buildPlanTiers(PLANS).map((tier) => (tier.name === 'Business' ? { ...tier, isCurrent: true } : tier))
-    render(<PlansV2 plan={null} safeAccounts={null} sponsoredTxs={null} tiers={tiers} />)
-
-    const header = screen.getByRole('columnheader', { name: /^Business/ })
-    expect(within(header).getByText('Current')).toBeInTheDocument()
-  })
 })

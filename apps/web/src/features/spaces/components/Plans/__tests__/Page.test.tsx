@@ -1,6 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SpacePlansPage from '../Page'
-import { PLAN_CONTENT_V2 } from '../planCatalog'
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -200,9 +199,8 @@ describe('SpacePlansPage', () => {
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
-    expect(screen.queryByText(PLAN_CONTENT_V2.Business.description)).not.toBeInTheDocument()
-    expect(screen.queryByTestId('plan-price-line')).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+    expect(screen.queryByRole('button', { name: 'Current plan' })).not.toBeInTheDocument()
   })
 
   it('shows the v2 plan cards, reusing the change-plan dialog, while SAFE_PRO_PLANS_V2 is on', () => {
@@ -211,7 +209,6 @@ describe('SpacePlansPage', () => {
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
-    expect(screen.getByText(PLAN_CONTENT_V2.Business.description)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
     expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(1)
 

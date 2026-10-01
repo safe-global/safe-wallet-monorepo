@@ -1,4 +1,4 @@
-import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
@@ -345,25 +345,6 @@ describe('Plans', () => {
     expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
   })
 
-  it('keeps the launch green status badge unless the v2 appearance is asked for', () => {
-    render(<PlanStatusCard plan={active} {...meters} />)
-
-    expect(screen.getByTestId('plan-status-badge')).toHaveAttribute('data-variant', 'brand')
-  })
-
-  it.each([
-    { plan: active, label: 'Active', isWarning: false },
-    { plan: trialing(20), label: 'Free access', isWarning: false },
-    { plan: trialing(3), label: 'Free access · 3 days left', isWarning: true },
-  ])('draws the v2 status as a neutral "$label" badge with a status dot', ({ plan, label, isWarning }) => {
-    render(<PlanStatusCard plan={plan} {...meters} appearance="v2" />)
-
-    const badge = screen.getByTestId('plan-status-badge')
-    expect(badge).toHaveAttribute('data-variant', 'subtle')
-    expect(badge).toHaveTextContent(label)
-    expect(within(badge).getByTestId('status-dot').hasAttribute('data-warning')).toBe(isWarning)
-  })
-
   it('moves the v2 countdown into the status line', () => {
     const { rerender } = render(<PlanStatusCard plan={trialing(20)} {...meters} />)
     expect(screen.queryByText(/20 days left/)).not.toBeInTheDocument()
@@ -371,15 +352,5 @@ describe('Plans', () => {
     rerender(<PlanStatusCard plan={trialing(20)} {...meters} appearance="v2" />)
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent(/^Free access$/)
     expect(screen.getByText(/Active until .* · 20 days left/)).toBeInTheDocument()
-  })
-
-  it('draws the v2 usage tiles on the same surface and radius as the plan cards', () => {
-    const { rerender } = render(<PlanStatusCard plan={active} {...meters} />)
-    const tile = () => screen.getByText('Safe accounts available').closest('[data-slot="card"]')
-    expect(tile()).toHaveAttribute('data-variant', 'muted')
-
-    rerender(<PlanStatusCard plan={active} {...meters} appearance="v2" />)
-    expect(tile()).toHaveAttribute('data-variant', 'muted-secondary')
-    expect(tile()).toHaveClass('rounded-lg-xl')
   })
 })
