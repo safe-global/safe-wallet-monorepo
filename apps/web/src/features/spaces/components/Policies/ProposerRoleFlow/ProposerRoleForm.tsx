@@ -13,6 +13,7 @@ import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
 import SafeAccountSelector from '../SafeAccountSelector'
+import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
@@ -109,6 +110,7 @@ const ProposerRoleForm = ({
               isError={safeAccounts.isError}
               onRetry={safeAccounts.refetch}
               hasWallet={safeAccounts.hasWallet}
+              notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
             />
 
             <div className="flex flex-col gap-1">
