@@ -7231,7 +7231,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-abe9655",
+    "version": "main-5d1ff92",
     "contact": {}
   },
   "tags": [],
@@ -11217,12 +11217,17 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
           "status",
-          "email"
+          "email",
+          "address"
         ]
       },
       "MemberDto": {
