@@ -4,6 +4,9 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
+import { useParentSafeWalletNotice } from '../../hooks/useParentSafeWalletNotice'
+import { findSafeAccount } from '../../SafeAccountSelector/utils'
+import { PARENT_SAFE_WALLET_COPY } from '../constants'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
@@ -22,6 +25,10 @@ const CreateSpendingLimitPolicy = ({
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
+  const { notice: parentSafeWallet, isChecking } = useParentSafeWalletNotice(
+    findSafeAccount(accounts, scopeKey),
+    PARENT_SAFE_WALLET_COPY,
+  )
 
   // Address-poisoning check for every spender, as the Safe-level form does for its beneficiary.
   const [spenderAddresses, setSpenderAddresses] = useState<string[]>([])
@@ -50,6 +57,8 @@ const CreateSpendingLimitPolicy = ({
       onSpendersChange={setSpenderAddresses}
       isCalloutDismissed={isCalloutDismissed}
       onDismissCallout={onDismissCallout}
+      parentSafeWallet={parentSafeWallet}
+      isCheckingWallet={isChecking}
     />
   )
 }

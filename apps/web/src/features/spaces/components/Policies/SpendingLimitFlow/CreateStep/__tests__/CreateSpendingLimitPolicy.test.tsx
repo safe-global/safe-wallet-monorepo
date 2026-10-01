@@ -4,6 +4,10 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
+import { useParentSafeWalletNotice } from '../../../hooks/useParentSafeWalletNotice'
+import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
+import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '../../constants'
 import { useSpendingLimitSafeAccounts } from '../../hooks/useSpendingLimitSafeAccounts'
 import { createDefaultFormValues, createEmptyLimit, type SpendingLimitPolicyFormValues } from '../../types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
@@ -13,6 +17,7 @@ const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
 const SPENDER = '0x1234567890123456789012345678901234567890'
 
 jest.mock('../../hooks/useSpendingLimitSafeAccounts', () => ({ useSpendingLimitSafeAccounts: jest.fn() }))
+jest.mock('../../../hooks/useParentSafeWalletNotice', () => ({ useParentSafeWalletNotice: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -29,6 +34,8 @@ jest.mock('../SpendingLimitPolicyForm', () => ({
       data-accounts={props.accounts.length}
       data-default-safe={props.defaultValues.safe}
       data-default-spenders={props.defaultValues.spenders.length}
+      data-parent-safe={props.parentSafeWallet?.parentSafeName ?? ''}
+      data-checking-wallet={String(props.isCheckingWallet)}
     >
       <button type="button" onClick={() => props.onSafeChange('1', SAFE_A)}>
         pick safe
@@ -59,6 +66,15 @@ jest.mock('../SpendingLimitPolicyForm', () => ({
 
 const mockUseAccounts = useSpendingLimitSafeAccounts as jest.MockedFunction<typeof useSpendingLimitSafeAccounts>
 const mockPoisoning = useSafeShieldForAddressPoisoning as jest.MockedFunction<typeof useSafeShieldForAddressPoisoning>
+const mockUseParentSafeWalletNotice = jest.mocked(useParentSafeWalletNotice)
+
+const treasury: SafeAccountOption = {
+  id: buildSafeAccountId('1', SAFE_A),
+  chainId: '1',
+  address: SAFE_A,
+  name: 'Treasury',
+  eligibility: 'signer',
+}
 
 const renderStep = ({ data, scopeKey }: { data?: SpendingLimitPolicyFormValues; scopeKey?: string } = {}) => {
   const onNext = jest.fn()
@@ -99,6 +115,28 @@ describe('CreateSpendingLimitPolicy', () => {
       signersOnly: false,
       refetch: jest.fn(),
     })
+    mockUseParentSafeWalletNotice.mockReturnValue({ isChecking: false })
+  })
+
+  it('hands the parent Safe notice for the scoped Safe to the form', () => {
+    mockUseAccounts.mockReturnValue({
+      accounts: [treasury],
+      isLoading: false,
+      isError: false,
+      hasWallet: true,
+      signersOnly: false,
+      refetch: jest.fn(),
+    })
+    mockUseParentSafeWalletNotice.mockReturnValue({
+      isChecking: true,
+      notice: { ...PARENT_SAFE_WALLET_COPY, safeName: 'Treasury', parentSafeName: 'Ops' },
+    })
+
+    renderStep({ scopeKey: `1:${SAFE_A}` })
+
+    expect(mockUseParentSafeWalletNotice).toHaveBeenCalledWith(treasury, PARENT_SAFE_WALLET_COPY)
+    expect(screen.getByTestId('form')).toHaveAttribute('data-parent-safe', 'Ops')
+    expect(screen.getByTestId('form')).toHaveAttribute('data-checking-wallet', 'true')
   })
 
   it('moves the SafeScope when the form picks a Safe', () => {

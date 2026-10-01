@@ -9,6 +9,7 @@ import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '../constants'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -136,6 +137,7 @@ describe('ProposerRoleForm', () => {
         safeAccount: treasury.id,
         defaultValues: { proposer: PROPOSER },
         parentSafeWallet: {
+          ...PARENT_SAFE_WALLET_COPY,
           safeName: 'Treasury',
           parentSafeName: 'Ops',
           settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } },

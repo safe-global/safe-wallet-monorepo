@@ -12,10 +12,10 @@ import { Typography } from '@/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
+import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from '../components/ParentSafeWalletNotice'
 import SafeAccountSelector from '../SafeAccountSelector'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
-import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from './components/ParentSafeWalletNotice'
 import {
   GRANT_INFO_DESCRIPTION,
   GRANT_INFO_TITLE,

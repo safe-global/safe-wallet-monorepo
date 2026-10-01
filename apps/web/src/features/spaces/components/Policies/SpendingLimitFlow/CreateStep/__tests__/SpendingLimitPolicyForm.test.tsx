@@ -6,7 +6,13 @@ import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
-import { ADD_SPENDER_LABEL, CALLOUT_DISMISS_LABEL, CALLOUT_TITLE, NEXT_LABEL } from '../../constants'
+import {
+  ADD_SPENDER_LABEL,
+  CALLOUT_DISMISS_LABEL,
+  CALLOUT_TITLE,
+  NEXT_LABEL,
+  PARENT_SAFE_WALLET_COPY,
+} from '../../constants'
 import { createDefaultFormValues, createEmptySpender } from '../../types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
@@ -188,6 +194,40 @@ describe('SpendingLimitPolicyForm', () => {
     expect(screen.getByLabelText(SAFE_ACCOUNT_SELECTOR_LABEL)).toBeInTheDocument()
     expect(screen.getAllByTestId('spender-card')).toHaveLength(1)
     expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('shows the parent Safe notice under the Safe selector and keeps Next disabled', async () => {
+    const { user } = renderForm({
+      parentSafeWallet: {
+        ...PARENT_SAFE_WALLET_COPY,
+        safeName: 'Treasury',
+        parentSafeName: 'Ops',
+        settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE_A}` } },
+      },
+    })
+
+    await pickSafe(user)
+    await fillFirstSpender(user)
+
+    expect(screen.getByText('Add this spending limit on the Safe account level')).toBeInTheDocument()
+    expect(screen.getByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+      'To set this spending limit on its behalf, open the settings of Treasury with a signer of Ops.',
+    )
+    expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/settings/setup?safe='),
+    )
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled())
+  })
+
+  it('keeps Next disabled while the wallet is still being checked', async () => {
+    const { user } = renderForm({ isCheckingWallet: true })
+
+    await pickSafe(user)
+    await fillFirstSpender(user)
+
+    expect(screen.queryByTestId('parent-safe-wallet-notice')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled())
   })
 
   it('enables Next once a Safe, a spender and one complete limit row are valid, and submits the policy', async () => {

@@ -9,13 +9,13 @@ import { SIGNERS_ONLY_COPY } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
-import { useParentSafeWallet } from '../hooks/useParentSafeWallet'
+import { useParentSafeWallet } from '../../hooks/useParentSafeWallet'
 import ProposerRoleFlow from '../index'
 
 jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
-jest.mock('../hooks/useParentSafeWallet', () => ({ useParentSafeWallet: jest.fn() }))
+jest.mock('../../hooks/useParentSafeWallet', () => ({ useParentSafeWallet: jest.fn() }))
 jest.mock('@/features/safe-shield', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,

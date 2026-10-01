@@ -6,7 +6,7 @@ import { useChain } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { isSmartContractWallet } from '@/utils/wallets'
-import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 
 export type ParentSafeWallet = {
   parentSafeAddress?: string
