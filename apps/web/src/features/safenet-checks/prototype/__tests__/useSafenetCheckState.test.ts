@@ -35,7 +35,7 @@ describe('useSafenetCheckState', () => {
     expect(result.current).toBeNull()
   })
 
-  it.each(['1', '100'])('runs on chain %s', (chainId) => {
+  it.each(['1', '100', '11155111'])('runs on chain %s', (chainId) => {
     mockChainId(chainId)
     const { result } = renderHook(() => useSafenetCheckState('co-signer'))
     expect(result.current).not.toBeNull()
