@@ -1,9 +1,10 @@
 import { renderHook, act } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import useSpaceSubmit from './useSpaceSubmit'
+import useSpaceSubmit, { CREATED_SPACE_QUERY_PARAM } from './useSpaceSubmit'
 
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 const mockUpdateSpace = jest.fn()
 
@@ -22,7 +23,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace, pathname: '/welcome/spaces', query: mockRouterQuery }),
 }))
 
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
@@ -138,6 +139,41 @@ describe('useSpaceSubmit under Safe Pro', () => {
     })
 
     expect(mockCreateSpaceWithUser).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the created Workspace in the URL so a page load shows its trial offer again', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      {
+        pathname: '/welcome/spaces',
+        query: { next: '/balances', [CREATED_SPACE_QUERY_PARAM]: '11111111-1111-1111-1111-111111111111' },
+      },
+      undefined,
+      { shallow: true },
+    )
+  })
+
+  it('picks up the created Workspace from the URL after a page load and never creates another one', async () => {
+    mockRouterQuery = { [CREATED_SPACE_QUERY_PARAM]: '11111111-1111-1111-1111-111111111111' }
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    expect(result.current.createdSpaceId).toBe('11111111-1111-1111-1111-111111111111')
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockCreateSpaceWithUser).not.toHaveBeenCalled()
   })
 
   it('still moves straight on after editing an existing Workspace', async () => {

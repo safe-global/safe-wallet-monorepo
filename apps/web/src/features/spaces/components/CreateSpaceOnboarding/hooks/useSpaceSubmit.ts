@@ -12,6 +12,8 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
+export const CREATED_SPACE_QUERY_PARAM = 'createdSpaceId'
+
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,
   spaceId: string | undefined,
@@ -20,8 +22,10 @@ const useSpaceSubmit = (
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
   // Under Safe Pro a freshly created Workspace is offered its trial before the wizard moves on.
-  const [createdSpaceId, setCreatedSpaceId] = useState<string>()
+  const [newSpaceId, setNewSpaceId] = useState<string>()
   const router = useRouter()
+  const createdSpaceParam = router.query[CREATED_SPACE_QUERY_PARAM]
+  const createdSpaceId = newSpaceId ?? (typeof createdSpaceParam === 'string' ? createdSpaceParam : undefined)
   const safe = useSafeQueryParam() || undefined
   const isSafePro = useIsSafeProEnabled()
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
@@ -53,15 +57,20 @@ const useSpaceSubmit = (
     const response = await createSpaceWithUser({ createSpaceDto: { name: sanitizeName(name) } })
 
     if (response.data) {
-      const newSpaceId = response.data.uuid
-      trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
+      const createdId = response.data.uuid
+      trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: createdId }, { workspace_id: createdId })
 
       if (isSafePro) {
-        setCreatedSpaceId(newSpaceId)
+        setNewSpaceId(createdId)
         setIsSubmitting(false)
+        router.replace(
+          { pathname: router.pathname, query: { ...router.query, [CREATED_SPACE_QUERY_PARAM]: createdId } },
+          undefined,
+          { shallow: true },
+        )
         return
       }
-      goToSelectSafes(newSpaceId)
+      goToSelectSafes(createdId)
     }
 
     if (response.error) {
