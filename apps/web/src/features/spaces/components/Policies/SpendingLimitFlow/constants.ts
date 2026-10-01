@@ -17,7 +17,6 @@ export const LIMIT_AMOUNT_LABEL = 'Limit amount'
 export const LIMIT_AMOUNT_PLACEHOLDER = '0.0'
 export const FREQUENCY_LABEL = 'Frequency'
 export const ONE_TIME_HELPER_TEXT = 'One-time limit, it does not reset'
-export const PRICE_UNAVAILABLE_TEXT = 'Price unavailable'
 
 export const ADD_TOKEN_LABEL = 'Add token'
 export const ADD_SPENDER_LABEL = 'Add spender'
