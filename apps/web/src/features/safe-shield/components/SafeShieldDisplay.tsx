@@ -22,6 +22,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import { withSafenetCheck } from '@/features/safenet-checks'
+import type { SafenetCheckPhase } from '@/features/safenet-checks/types'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -45,6 +47,7 @@ export const SafeShieldDisplay = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
+  safenetPhase,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -59,6 +62,8 @@ export const SafeShieldDisplay = ({
   hasProFeatures?: boolean
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
+  /** Set while the Safenet checks prototype shows a check; folds it into the header. */
+  safenetPhase?: SafenetCheckPhase
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -74,7 +79,7 @@ export const SafeShieldDisplay = ({
     [hypernativeAuth],
   )
 
-  const overallStatus = useMemo(
+  const baseOverallStatus = useMemo(
     () =>
       getOverallStatus(
         recipientResults,
@@ -87,7 +92,7 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
-  const checks = useMemo(
+  const baseChecks = useMemo(
     () =>
       countChecks({
         threat: threatResults,
@@ -109,6 +114,11 @@ export const SafeShieldDisplay = ({
       isSimulationSuccess,
       safeTx,
     ],
+  )
+
+  const { overallStatus, checks } = useMemo(
+    () => withSafenetCheck(safenetPhase, baseOverallStatus, baseChecks),
+    [safenetPhase, baseOverallStatus, baseChecks],
   )
 
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull

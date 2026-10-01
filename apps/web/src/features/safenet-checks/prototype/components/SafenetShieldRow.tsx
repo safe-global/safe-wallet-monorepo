@@ -78,14 +78,14 @@ export const SafenetShieldRowView = ({
 export const SafenetShieldRow = (): ReactElement | null => {
   const { isCreation, willExecute, onlyExecute } = useContext(TxFlowContext)
   const { scenario, updateScenario } = useSafenetScenario()
-  const { setHasSafenetRisk } = useSafeShield()
+  const { setSafenetPhase } = useSafeShield()
   const check = useSafenetCheckState(resolveRole(scenario.role, { isCreation, willExecute, onlyExecute }))
-  const isRisk = check?.state.phase === 'risk'
+  const phase = check?.state.phase
 
   useEffect(() => {
-    setHasSafenetRisk(isRisk)
-    return () => setHasSafenetRisk(false)
-  }, [isRisk, setHasSafenetRisk])
+    setSafenetPhase(phase)
+    return () => setSafenetPhase(undefined)
+  }, [phase, setSafenetPhase])
 
   if (!check) return null
 

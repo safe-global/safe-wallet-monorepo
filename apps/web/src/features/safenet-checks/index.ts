@@ -27,3 +27,4 @@ export const SafenetChecksPrototypeFeature: FeatureHandle<SafenetChecksPrototype
 export { useIsSafenetPrototypeEnabled }
 export { useSafenetScenario } from './prototype/useSafenetScenario'
 export type { SafenetChecksContract, SafenetChecksPrototypeContract } from './types'
+export { withSafenetCheck } from './prototype/shieldSummary'

@@ -12,7 +12,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShield: jest.fn() }))
 
-const mockSetHasSafenetRisk = jest.fn()
+const mockSetSafenetPhase = jest.fn()
 const START = 1_700_000_000_000
 
 describe('Safenet prototype surfaces', () => {
@@ -21,14 +21,14 @@ describe('Safenet prototype surfaces', () => {
     window.localStorage.clear()
     ;(useHasFeature as jest.Mock).mockReturnValue(true)
     ;(useCurrentChain as jest.Mock).mockReturnValue(chainBuilder().with({ chainId: '100' }).build())
-    ;(useSafeShield as jest.Mock).mockReturnValue({ setHasSafenetRisk: mockSetHasSafenetRisk })
+    ;(useSafeShield as jest.Mock).mockReturnValue({ setSafenetPhase: mockSetSafenetPhase })
   })
 
   it('renders nothing in the Shield while the prototype flag is off', () => {
     ;(useHasFeature as jest.Mock).mockReturnValue(false)
     const { container } = render(<SafenetShieldRow />)
     expect(container).toBeEmptyDOMElement()
-    expect(mockSetHasSafenetRisk).not.toHaveBeenCalledWith(true)
+    expect(mockSetSafenetPhase).not.toHaveBeenCalledWith('risk')
   })
 
   it('announces status changes politely', () => {

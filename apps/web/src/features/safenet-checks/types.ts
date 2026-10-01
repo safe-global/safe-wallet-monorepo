@@ -7,6 +7,7 @@ import type SafenetHistoryRow from './prototype/components/SafenetHistoryRow'
 import type SafenetQueueChip from './prototype/components/SafenetQueueChip'
 import type SafenetScenarioDialog from './prototype/components/SafenetScenarioDialog'
 import type SafenetShieldRow from './prototype/components/SafenetShieldRow'
+import type SafenetStepperNote from './prototype/components/SafenetStepperNote'
 
 /**
  * Lazy-loaded surface of the Safenet checks feature. All are PascalCase
@@ -32,4 +33,6 @@ export interface SafenetChecksPrototypeContract extends FeatureImplementation {
   SafenetQueueChip: typeof SafenetQueueChip
   SafenetScenarioDialog: typeof SafenetScenarioDialog
   SafenetShieldRow: typeof SafenetShieldRow
+  SafenetStepperNote: typeof SafenetStepperNote
 }
+export type { SafenetCheckPhase } from './prototype/types'

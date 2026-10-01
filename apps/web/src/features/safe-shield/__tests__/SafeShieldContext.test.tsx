@@ -203,10 +203,10 @@ describe('SafeShieldContext', () => {
 
     const { result } = renderHook(() => useSafeShield(), { wrapper })
 
-    act(() => result.current.setHasSafenetRisk(true))
+    act(() => result.current.setSafenetPhase('risk'))
     await waitFor(() => expect(result.current.needsRiskConfirmation).toBe(true))
 
-    act(() => result.current.setHasSafenetRisk(false))
+    act(() => result.current.setSafenetPhase('no-issues'))
     await waitFor(() => expect(result.current.needsRiskConfirmation).toBe(false))
   })
 

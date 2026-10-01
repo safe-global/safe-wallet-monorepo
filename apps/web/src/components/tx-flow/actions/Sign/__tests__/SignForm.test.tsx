@@ -60,7 +60,7 @@ describe('SignForm', () => {
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
-      setHasSafenetRisk: jest.fn(),
+      setSafenetPhase: jest.fn(),
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
       hasProFeatures: true,

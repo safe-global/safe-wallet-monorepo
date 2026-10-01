@@ -12,6 +12,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
+import { useLoadFeature } from '@/features/__core__'
+import { SafenetChecksPrototypeFeature, useIsSafenetPrototypeEnabled } from '@/features/safenet-checks'
 
 /* Between 900px and 1200px the rail collapses to icons only so the transaction card — the point of
    the screen — keeps its width instead of the header wrapping mid-word. `sr-only` rather than
@@ -43,6 +45,8 @@ const TxStatusWidget = ({
   const isSafeOwner = useIsSafeOwner()
   const isProposer = useIsWalletProposer()
   const isProposing = isProposer && !isSafeOwner
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
+  const isSafenetPrototype = useIsSafenetPrototypeEnabled() && !isBatch && !isMessage
   const isAwaitingExecution = txSummary?.txStatus === TransactionStatus.AWAITING_EXECUTION
 
   const { executionInfo = undefined } = txSummary || {}
@@ -53,6 +57,22 @@ const TxStatusWidget = ({
     : safe.threshold === 1 && !isProposing
 
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
+
+  const confirmedLabel = (
+    <StatusLabel>
+      {isBatch ? (
+        'Create batch'
+      ) : !nonceNeeded ? (
+        'Confirmed'
+      ) : isMessage ? (
+        'Collect signatures'
+      ) : (
+        <>
+          Confirmed ({confirmationsSubmitted} of {threshold}){canSign && <span className={css.badge}>+1</span>}
+        </>
+      )}
+    </StatusLabel>
+  )
 
   return (
     <div className="bg-transparent">
@@ -70,19 +90,14 @@ const TxStatusWidget = ({
             <SignedIcon />
           </span>
 
-          <StatusLabel>
-            {isBatch ? (
-              'Create batch'
-            ) : !nonceNeeded ? (
-              'Confirmed'
-            ) : isMessage ? (
-              'Collect signatures'
-            ) : (
-              <>
-                Confirmed ({confirmationsSubmitted} of {threshold}){canSign && <span className={css.badge}>+1</span>}
-              </>
-            )}
-          </StatusLabel>
+          {isSafenetPrototype ? (
+            <span className="flex min-w-0 flex-col">
+              {confirmedLabel}
+              <safenetPrototype.SafenetStepperNote className="sr-only min-[1200px]:not-sr-only" />
+            </span>
+          ) : (
+            confirmedLabel
+          )}
         </li>
 
         <li className={classnames(css.item, { [css.incomplete]: !(isAwaitingExecution && isLastStep) })}>

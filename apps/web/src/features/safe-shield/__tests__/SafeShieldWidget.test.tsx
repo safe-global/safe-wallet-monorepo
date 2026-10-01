@@ -70,7 +70,7 @@ describe('SafeShieldWidget', () => {
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
-      setHasSafenetRisk: jest.fn(),
+      setSafenetPhase: jest.fn(),
       setRecipientAddresses: jest.fn(),
       setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
