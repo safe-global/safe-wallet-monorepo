@@ -1,6 +1,7 @@
 import { useContext, useEffect, type ReactElement } from 'react'
-import { ArrowUpRight, LockKeyhole } from 'lucide-react'
+import { ArrowUpRight, Info, LockKeyhole } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
@@ -10,11 +11,19 @@ import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SAFENET_EXPLORER_URL } from '@safe-global/utils/features/safenet-checks/constants'
 import { cn } from '@/utils/cn'
-import { PHASE_PRESENTATION, SHIELD_ROW_COPY, isRunningPhase, isVerdictPhase } from '../copy'
+import {
+  PHASE_PRESENTATION,
+  SAFENET_EXPLAINER_COPY,
+  SAFENET_EXPLAINER_TITLE,
+  SHIELD_ROW_COPY,
+  isRunningPhase,
+  isVerdictPhase,
+} from '../copy'
 import type { SafenetCheckState } from '../types'
 import { resolveRole, useSafenetCheckState } from '../useSafenetCheckState'
 import { useSafenetScenario } from '../useSafenetScenario'
 import { SafenetPulse } from './SafenetPulse'
+import { SafenetShieldFootView } from './SafenetShieldFoot'
 
 export type SafenetShieldRowViewProps = {
   state: SafenetCheckState
@@ -36,17 +45,41 @@ export const SafenetShieldRowView = ({ state, explorerHref, onEnable }: SafenetS
 
   return (
     <div data-testid="safenet-shield-row" data-phase={state.phase}>
-      <div className="flex items-start gap-2.5 px-4 py-3">
+      <div className="flex items-start gap-2.5 px-3 py-3">
         <span className="mt-0.5">
           <RowMark state={state} />
         </span>
         <div className="flex min-w-0 flex-1 flex-col" aria-live="polite">
-          <Typography
-            variant="paragraph-small"
-            className={cn('leading-5', isRisk ? 'text-[var(--color-error-dark)]' : 'text-[var(--color-primary-light)]')}
-          >
-            {title}
-          </Typography>
+          <span className="flex items-center gap-1">
+            <Typography
+              variant="paragraph-small"
+              className={cn(
+                'leading-5',
+                isRisk ? 'text-[var(--color-error-dark)]' : 'text-[var(--color-primary-light)]',
+              )}
+            >
+              {title}
+            </Typography>
+            {(isRunningPhase(state.phase) || state.phase === 'before-sign') && (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      aria-label={SAFENET_EXPLAINER_TITLE}
+                      className="inline-flex rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50"
+                    />
+                  }
+                >
+                  <Info className="size-3.5" aria-hidden />
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-60">
+                  <strong className="block">{SAFENET_EXPLAINER_TITLE}</strong>
+                  {SAFENET_EXPLAINER_COPY}
+                </TooltipContent>
+              </Tooltip>
+            )}
+          </span>
           <Typography variant="paragraph-mini" color="muted">
             {sub}
           </Typography>
@@ -70,7 +103,7 @@ export const SafenetShieldRowView = ({ state, explorerHref, onEnable }: SafenetS
           rel="noreferrer noopener"
           data-testid="safenet-explorer-link"
           className={cn(
-            'group flex items-center gap-2.5 border-t border-border px-4 py-3 text-sm font-medium outline-none transition-colors hover:underline focus-visible:underline',
+            'group flex items-center gap-2.5 border-t border-border px-3 py-3 text-sm font-medium outline-none transition-colors hover:underline focus-visible:underline',
             isRisk
               ? 'hover:bg-[var(--color-error-background)] hover:text-[var(--color-error-dark)]'
               : 'hover:bg-[var(--color-success-background)] hover:text-[var(--color-success-dark)]',
@@ -110,11 +143,14 @@ export const SafenetShieldRow = (): ReactElement | null => {
     : SAFENET_EXPLORER_URL
 
   return (
-    <SafenetShieldRowView
-      state={check.state}
-      explorerHref={explorerHref}
-      onEnable={() => updateScenario({ enhancedExecution: true })}
-    />
+    <div>
+      <SafenetShieldRowView
+        state={check.state}
+        explorerHref={explorerHref}
+        onEnable={() => updateScenario({ enhancedExecution: true })}
+      />
+      {isRunningPhase(check.state.phase) && <SafenetShieldFootView state={check.state} nowMs={check.nowMs} />}
+    </div>
   )
 }
 

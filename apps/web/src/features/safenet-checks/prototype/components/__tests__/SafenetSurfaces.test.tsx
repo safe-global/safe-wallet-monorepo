@@ -42,6 +42,11 @@ describe('Safenet prototype surfaces', () => {
     )
   })
 
+  it('explains the wait from the Shield row while checking', () => {
+    render(<SafenetShieldRowView state={{ phase: 'checking' }} />)
+    expect(screen.getByRole('button', { name: 'Why does this take longer?' })).toBeInTheDocument()
+  })
+
   it('offers a one-tap enable when the check is locked', () => {
     const onEnable = jest.fn()
     render(<SafenetShieldRowView state={{ phase: 'locked' }} onEnable={onEnable} />)
@@ -66,7 +71,6 @@ describe('Safenet prototype surfaces', () => {
     )
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '28')
     expect(screen.getByText('Ready in ~43 seconds')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Why does this take longer/ })).toBeInTheDocument()
   })
 
   it('offers to wait for a running check at the execute step without forcing it', () => {

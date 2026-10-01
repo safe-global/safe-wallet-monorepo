@@ -22,7 +22,11 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
-import { SafenetChecksPrototypeFeature, withSafenetCheck } from '@/features/safenet-checks'
+import {
+  SafenetChecksPrototypeFeature,
+  useIsSafenetPrototypeEnabled,
+  withSafenetCheck,
+} from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import type { SafenetCheckPhase } from '@/features/safenet-checks/types'
 
@@ -118,6 +122,7 @@ export const SafeShieldDisplay = ({
   )
 
   const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
+  const isSafenetPrototype = useIsSafenetPrototypeEnabled()
   const { overallStatus, checks, isPending } = useMemo(
     () => withSafenetCheck(safenetPhase, baseOverallStatus, baseChecks),
     [safenetPhase, baseOverallStatus, baseChecks],
@@ -156,13 +161,15 @@ export const SafeShieldDisplay = ({
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
         />
-
-        <safenetPrototype.SafenetShieldFoot />
       </div>
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
+          {isSafenetPrototype ? (
+            <safenetPrototype.SafenetShieldPill phase={safenetPhase} />
+          ) : (
+            <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
+          )}
         </ExternalLink>
       </div>
     </div>

@@ -3,12 +3,12 @@ import type SafenetAuditRow from './components/SafenetAuditRow'
 import type SafenetChecksSection from './components/SafenetChecksSection'
 import type SafenetQueueStatus from './components/SafenetQueueStatus'
 import type SafenetCardCaption from './prototype/components/SafenetCardCaption'
-import type SafenetShieldFoot from './prototype/components/SafenetShieldFoot'
 import type { SafenetHeaderEta } from './prototype/components/SafenetShieldFoot'
 import type SafenetTxRail from './prototype/components/SafenetTxRail'
 import type SafenetHistoryRow from './prototype/components/SafenetHistoryRow'
 import type SafenetQueueChip from './prototype/components/SafenetQueueChip'
 import type SafenetScenarioDialog from './prototype/components/SafenetScenarioDialog'
+import type SafenetShieldPill from './prototype/components/SafenetShieldPill'
 import type SafenetShieldRow from './prototype/components/SafenetShieldRow'
 
 /**
@@ -35,8 +35,8 @@ export interface SafenetChecksPrototypeContract extends FeatureImplementation {
   SafenetHistoryRow: typeof SafenetHistoryRow
   SafenetQueueChip: typeof SafenetQueueChip
   SafenetScenarioDialog: typeof SafenetScenarioDialog
+  SafenetShieldPill: typeof SafenetShieldPill
   SafenetShieldRow: typeof SafenetShieldRow
-  SafenetShieldFoot: typeof SafenetShieldFoot
   SafenetTxRail: typeof SafenetTxRail
 }
 

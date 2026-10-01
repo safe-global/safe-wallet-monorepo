@@ -160,8 +160,9 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          {shouldShowContent &&
-            (isSafenetPrototype ? <safenetPrototype.SafenetShieldRow /> : <safenet.SafenetChecksSection />)}
+          {shouldShowContent && !isSafenetPrototype && <safenet.SafenetChecksSection />}
+
+          {shouldShowContent && isSafenetPrototype && !isSafePro && <safenetPrototype.SafenetShieldRow />}
 
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
@@ -172,7 +173,7 @@ export const SafeShieldContent = ({
           )}
         </div>
 
-        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent) && (
+        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent || isSafenetPrototype) && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
@@ -204,6 +205,8 @@ export const SafeShieldContent = ({
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+
+              {isSafenetPrototype && <safenetPrototype.SafenetShieldRow />}
             </div>
           </div>
         )}

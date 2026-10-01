@@ -1,0 +1,42 @@
+/* Mirrors the "Checked before signing" artifact: a pop for a clean verdict, a quieter settle otherwise,
+   with the glyph drawn in either way. */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  38% {
+    transform: scale(1.14);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes draw-in {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.icon {
+  transform-origin: center;
+  transition: color 0.25s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fire .icon {
+    animation: pop 0.46s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  .fire .glyph,
+  .settle .glyph {
+    stroke-dasharray: 22;
+    stroke-dashoffset: 22;
+    animation: draw-in 0.5s 0.14s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+
+  .settle .glyph {
+    animation-duration: 0.34s;
+    animation-delay: 0.04s;
+  }
+}
