@@ -17,6 +17,8 @@ import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
   GRANT_INFO_DESCRIPTION,
   GRANT_INFO_TITLE,
+  NESTED_SAFES_INFO_DESCRIPTION,
+  NESTED_SAFES_INFO_TITLE,
   PROPOSER_FIELD_HELPER,
   PROPOSER_NAME_HELPER,
   PROPOSER_NAME_WORKSPACE_HELPER,
@@ -90,16 +92,28 @@ const ProposerRoleForm = ({
               <AlertDescription>{GRANT_INFO_DESCRIPTION}</AlertDescription>
             </Alert>
 
-            <SafeAccountSelector
-              accounts={safeAccounts.accounts}
-              signersOnly={safeAccounts.signersOnly}
-              value={safeAccount}
-              onChange={onSafeAccountChange}
-              isLoading={safeAccounts.isLoading}
-              isError={safeAccounts.isError}
-              onRetry={safeAccounts.refetch}
-              hasWallet={safeAccounts.hasWallet}
-            />
+            <div className="flex flex-col gap-2">
+              <SafeAccountSelector
+                accounts={safeAccounts.accounts}
+                signersOnly={safeAccounts.signersOnly}
+                value={safeAccount}
+                onChange={onSafeAccountChange}
+                isLoading={safeAccounts.isLoading}
+                isError={safeAccounts.isError}
+                onRetry={safeAccounts.refetch}
+                hasWallet={safeAccounts.hasWallet}
+              />
+
+              <Alert
+                variant="info"
+                className="px-3 py-3 *:data-[slot=alert-description]:text-muted-foreground"
+                data-testid="nested-safes-info"
+              >
+                <AlertSeverityIcon variant="info" />
+                <AlertTitle className="text-sm font-normal">{NESTED_SAFES_INFO_TITLE}</AlertTitle>
+                <AlertDescription>{NESTED_SAFES_INFO_DESCRIPTION}</AlertDescription>
+              </Alert>
+            </div>
 
             <div className="flex flex-col gap-1">
               <AddressBookInput name="proposer" label="Proposer" required focused={false} validate={validateProposer} />
