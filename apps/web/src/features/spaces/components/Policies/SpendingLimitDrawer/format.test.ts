@@ -47,6 +47,10 @@ describe('formatLastUpdated', () => {
   it('returns nothing when no allowance carries a timestamp', () => {
     expect(formatLastUpdated([{ spender: '0x1', allowances: [at()] }])).toBeUndefined()
   })
+
+  it('treats a zero timestamp as missing rather than rendering 1970', () => {
+    expect(formatLastUpdated([{ spender: '0x1', allowances: [at(0)] }])).toBeUndefined()
+  })
 })
 
 describe('remainingPercent', () => {

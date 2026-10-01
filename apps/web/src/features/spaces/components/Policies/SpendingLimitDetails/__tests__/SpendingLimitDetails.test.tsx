@@ -7,7 +7,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
-import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
@@ -19,6 +19,7 @@ import {
   mockActivatingPolicy,
   mockPendingPolicy,
   mockPendingRemoval,
+  mockPendingUpdate,
 } from '../../mocks/policies'
 import type { PendingSpendingLimitPolicy } from '../../types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
@@ -197,8 +198,9 @@ describe('SpendingLimitDetails', () => {
 
     setup()
 
-    const lastUpdatedRow = screen.getByText('Last updated').closest('div') as HTMLElement
-    expect(within(lastUpdatedRow).getByText('Jun 24, 2026 · 03:35 UTC')).toBeInTheDocument()
+    expect(screen.getByText('Last updated').closest('dt')?.nextElementSibling).toHaveTextContent(
+      'Jun 24, 2026 · 03:35 UTC',
+    )
   })
 
   it('hands the Edit button to the caller', async () => {
@@ -382,12 +384,18 @@ describe('a pending spending limit', () => {
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
-  it('shows no last updated time, since a queued change has not been set yet', () => {
+  // Pending edits carry the active allowance's createdAt, so only the status keeps it off the panel.
+  it.each([
+    ['a queued creation', mockPendingPolicy()],
+    ['a queued update', mockPendingUpdate()],
+    ['a queued removal', mockPendingRemoval()],
+    ['an executed change awaiting the indexer', mockActivatingPolicy()],
+  ])('shows no last updated time for %s', (_, policy) => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({ txSummary })
 
-    renderPending()
+    renderPending(policy)
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
   })

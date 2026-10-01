@@ -13,12 +13,17 @@ const UTC_PARTS = new Intl.DateTimeFormat('en-US', {
   hourCycle: 'h23',
 })
 
+const utcParts = (ms: number) => {
+  const parts = UTC_PARTS.formatToParts(new Date(ms))
+
+  return (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
+}
+
 const MS_PER_MINUTE = 60_000
 
 /** Takes unix MINUTES, as CGW returns. The reset instant is chain time; the viewer's zone would misstate it. */
 export const formatResetUtc = (resetsAtMinute: number): string => {
-  const parts = UTC_PARTS.formatToParts(new Date(resetsAtMinute * MS_PER_MINUTE))
-  const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
+  const part = utcParts(resetsAtMinute * MS_PER_MINUTE)
 
   return `${part('month')} ${part('day')}, ${part('hour')}:${part('minute')} UTC`
 }
@@ -27,11 +32,12 @@ const MS_PER_SECOND = 1_000
 
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
 export const formatLastUpdated = (spenders: PolicySpender[]): string | undefined => {
-  const createdAts = spenders.flatMap(({ allowances }) => allowances.flatMap(({ createdAt }) => createdAt ?? []))
+  const createdAts = spenders.flatMap(({ allowances }) =>
+    allowances.flatMap(({ createdAt }) => (createdAt ? [createdAt] : [])),
+  )
   if (createdAts.length === 0) return undefined
 
-  const parts = UTC_PARTS.formatToParts(new Date(Math.max(...createdAts) * MS_PER_SECOND))
-  const part = (type: Intl.DateTimeFormatPartTypes): string => parts.find((p) => p.type === type)?.value ?? ''
+  const part = utcParts(Math.max(...createdAts) * MS_PER_SECOND)
 
   return `${part('month')} ${part('day')}, ${part('year')} · ${part('hour')}:${part('minute')} UTC`
 }

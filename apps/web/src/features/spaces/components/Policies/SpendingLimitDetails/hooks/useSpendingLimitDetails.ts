@@ -50,13 +50,15 @@ export const useSpendingLimitDetails = (
     return Object.fromEntries(named)
   }, [policy.data.spenders, addressBook, chainId])
 
+  const lastUpdated = useMemo(
+    () => (policy.status === 'active' ? formatLastUpdated(policy.data.spenders) : undefined),
+    [policy.status, policy.data.spenders],
+  )
+
   return {
     viewer: { address: wallet?.address, isSigner },
     safe: { address: safeAddress, name: addressBook.get(safeAddress, chainId)?.name },
-    overview: {
-      enforcedBy: ENFORCED_BY,
-      lastUpdated: policy.status === 'active' ? formatLastUpdated(policy.data.spenders) : undefined,
-    },
+    overview: { enforcedBy: ENFORCED_BY, lastUpdated },
     names,
     onConnectWallet,
   }
