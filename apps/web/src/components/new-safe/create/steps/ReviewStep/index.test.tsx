@@ -1,6 +1,7 @@
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import * as useChains from '@/hooks/useChains'
 import * as relay from '@/utils/relaying'
+import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { render } from '@/tests/test-utils'
@@ -194,6 +195,32 @@ describe('ReviewStep', () => {
     })
 
     expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+  })
+
+  it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    jest
+      .spyOn(remainingRelays, 'useLeastRemainingRelays')
+      .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    act(() => {
+      fireEvent.click(screen.getByText('Pay now'))
+    })
+
+    expect(screen.getByText(/free transactions left today/)).toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })
 
   const authReduxState = {

@@ -512,7 +512,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: false }}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />
@@ -564,7 +564,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: false }}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />

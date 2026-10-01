@@ -38,7 +38,7 @@ const SponsoredTxsCounter = ({
   resetsAt: string | null
   /** Counts a plan's allowance per cycle instead of the free daily limit. */
   isSubscription: boolean
-  /** Shows the Pro chip instead of the upgrade button; null (plan loading) shows neither. */
+  /** Shows the Pro chip instead of the upgrade button; null (plan unknown, or Pro does not apply as in Safe creation) shows neither. */
   isPro: boolean | null
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)

@@ -20,7 +20,7 @@ export type SponsoredOffer =
       option: 'FREE_DAILY_LIMIT'
       disabledReason: null
       relays: RelaysRemaining | undefined
-      /** The Safe is on a Pro plan but this chain sponsors it through the free daily limit; null while the plan loads. */
+      /** The Safe is on a Pro plan but this chain sponsors it through the free daily limit; null while the plan is unknown or where Pro does not apply (Safe creation). */
       isPro: boolean | null
     }
   | {
