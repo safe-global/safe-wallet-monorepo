@@ -1,4 +1,4 @@
-import { useEffect, useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
@@ -39,6 +39,11 @@ export type TokenLimitCardProps = {
   removable: boolean
   onRemove: () => void
 }
+
+/** Holds one line even when empty, so the Frequency row does not move as the helpers come and go. */
+const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
+  <span className="block min-h-lh">{children}</span>
+)
 
 const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
   if (!token) return null
@@ -173,14 +178,16 @@ const TokenLimitCard = ({
                   name={field.name}
                   error={!!tokenError}
                   helperText={
-                    tokenError?.message ? (
-                      <span data-testid="token-error">{String(tokenError.message)}</span>
-                    ) : selectedToken?.balance !== undefined ? (
-                      <span data-testid="token-balance">
-                        {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
-                        {tokenOptionLabel(selectedToken)}
-                      </span>
-                    ) : undefined
+                    <HelperLine>
+                      {tokenError?.message ? (
+                        <span data-testid="token-error">{String(tokenError.message)}</span>
+                      ) : selectedToken?.balance !== undefined ? (
+                        <span data-testid="token-balance">
+                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
+                          {tokenOptionLabel(selectedToken)}
+                        </span>
+                      ) : null}
+                    </HelperLine>
                   }
                   data-testid="limit-token-selector"
                 />
@@ -195,11 +202,13 @@ const TokenLimitCard = ({
               fullWidth
               error={!!amountError}
               helperText={
-                amountError?.message ? (
-                  String(amountError.message)
-                ) : selectedToken ? (
-                  <FiatLine amount={amount} token={selectedToken} />
-                ) : undefined
+                <HelperLine>
+                  {amountError?.message ? (
+                    String(amountError.message)
+                  ) : selectedToken ? (
+                    <FiatLine amount={amount} token={selectedToken} />
+                  ) : null}
+                </HelperLine>
               }
               data-testid="limit-amount-input"
               {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
