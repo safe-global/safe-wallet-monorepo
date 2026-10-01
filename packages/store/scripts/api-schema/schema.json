@@ -7251,7 +7251,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-bf242e3",
+    "version": "main-615683f",
     "contact": {}
   },
   "tags": [],
@@ -11058,7 +11058,7 @@
             }
           },
           "addressBookItems": {
-            "description": "Address book entries to upsert for the added Safes. They are written after the Safes are added; if that write fails, the Safes stay added and the request fails with 502.",
+            "description": "Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AddressBookItem"
