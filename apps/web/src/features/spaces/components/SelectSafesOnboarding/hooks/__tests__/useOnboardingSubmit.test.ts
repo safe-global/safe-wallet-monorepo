@@ -65,7 +65,6 @@ jest.mock('@/hooks/safes', () => ({
 
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
 let mockAddressBookError = false
-const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 const mockPrepareNames = jest.fn<{ items?: unknown[]; error?: string }, [unknown[]]>((items) => ({ items }))
 
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
@@ -81,7 +80,6 @@ jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
 jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
   ...jest.requireActual('@/features/spaces/hooks/useUpsertWorkspaceSafeName'),
   usePrepareWorkspaceSafeNames: () => mockPrepareNames,
-  useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
 }))
 
 const mockDispatch = jest.fn()
@@ -758,40 +756,6 @@ describe('useOnboardingSubmit — naming step', () => {
       spaceId: '42',
       createSpaceSafesDto: { safes: [{ chainId: '1', address: NAMED }], addressBookItems: [] },
     })
-  })
-
-  it('writes the names on their own when a retry finds the Safes already added', async () => {
-    mockAddSafesToSpace.mockResolvedValueOnce({ error: { status: 502, data: { message: 'Names not saved' } } })
-    // An existing Safe keeps the one-time selection reset from wiping the entered names on rerender.
-    mockSpaceSafes = [buildSafeItem('1', '0xexisting')]
-    const { result, rerender } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
-    await waitFor(() => expect(result.current.selectedSafesLength).toBe(1))
-
-    act(() => {
-      result.current.formMethods.setValue('selectedSafes', { '1:0xexisting': true, [`1:${ADDRESS}`]: true })
-    })
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-    act(() => {
-      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
-    })
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-    expect(onSuccess).not.toHaveBeenCalled()
-
-    // The add went through, so the retry has nothing left to add.
-    mockSpaceSafes = [buildSafeItem('1', '0xexisting'), buildSafeItem('1', ADDRESS)]
-    rerender()
-    await act(async () => {
-      await result.current.onSubmit()
-    })
-
-    expect(mockAddSafesToSpace).toHaveBeenCalledTimes(1)
-    expect(mockUpsertWorkspaceNames).toHaveBeenCalledTimes(1)
-    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])
-    expect(onSuccess).toHaveBeenCalled()
   })
 
   it('leaves the next step for after step-up, so a replayed submit moves on', async () => {

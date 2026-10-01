@@ -24,7 +24,6 @@ import {
   useIsAdmin,
   useSpaceSafes,
   usePrepareWorkspaceSafeNames,
-  useUpsertWorkspaceSafeNames,
 } from '@/features/spaces'
 import {
   NameAccountsFields,
@@ -141,7 +140,6 @@ const AddAccounts = ({
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const prepareNames = usePrepareWorkspaceSafeNames()
-  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
   const {
     items: spaceAddressBook,
     isLoading: isAddressBookLoading,
@@ -360,15 +358,6 @@ const AddAccounts = ({
               { workspace_id: spaceId, safe_address: address, chain_id: chainId },
             )
           })
-        }
-
-        // A retry after the names failed has no Safes left to add, so the names go on their own.
-        if (safesToAdd.length === 0) {
-          const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-          if (namesResult.error) {
-            setError(namesResult.error)
-            return
-          }
         }
 
         // Show success notification

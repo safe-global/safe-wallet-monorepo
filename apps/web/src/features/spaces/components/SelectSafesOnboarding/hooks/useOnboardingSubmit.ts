@@ -25,7 +25,6 @@ import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
   usePrepareWorkspaceSafeNames,
-  useUpsertWorkspaceSafeNames,
   type WorkspaceSafeName,
 } from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
@@ -78,7 +77,6 @@ const useOnboardingSubmit = (
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
   const prepareNames = usePrepareWorkspaceSafeNames()
-  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
   const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
   const isAddressBookReady = !isLoading && !isError
 
@@ -242,12 +240,6 @@ const useOnboardingSubmit = (
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
     await addNewSafes(safesToAdd, spaceIdStr, prepared.items)
     trustAddedSafes(safesToAdd)
-    // A retry after the names failed has no Safes left to add, so the names go on their own.
-    if (safesToAdd.length > 0) return
-    const namesResult = await upsertWorkspaceNames(names)
-    if (namesResult.error) {
-      throw new Error(namesResult.error)
-    }
   }
 
   const onSubmit = handleSubmit(
