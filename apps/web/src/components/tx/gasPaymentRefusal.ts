@@ -11,6 +11,8 @@ import { sponsoredQuotaMessage } from './sponsoredQuotaMessage'
 const LIMIT_REACHED_MESSAGE = 'No sponsored transactions left. Choose another gas payment method and execute again.'
 const UNAVAILABLE_MESSAGE =
   "This gas payment option isn't available for this Safe account right now. Choose another gas payment method and execute again."
+const WALLET_ONLY_MESSAGE =
+  'This transaction can only be executed with your connected wallet. Execute again to continue.'
 
 /** Which sponsored options a backend refusal rules out, and what to tell the user. */
 export const getGasPaymentRefusal = (
@@ -23,7 +25,8 @@ export const getGasPaymentRefusal = (
   if (err instanceof RelayLimitReachedError) return { excluded: [gasPayer], message: LIMIT_REACHED_MESSAGE }
   if (err instanceof GasPaymentOptionUnavailableError) {
     const isRefundTx = err.requested === 'PAY_FROM_SAFE' || err.reason === REFUNDING_TRANSACTION_REASON
-    return { excluded: isRefundTx ? SPONSORED_OPTIONS : [gasPayer], message: UNAVAILABLE_MESSAGE }
+    if (isRefundTx) return { excluded: SPONSORED_OPTIONS, message: WALLET_ONLY_MESSAGE }
+    return { excluded: [gasPayer], message: UNAVAILABLE_MESSAGE }
   }
   if (err instanceof RelayerUnavailableError) return { excluded: [gasPayer], message: UNAVAILABLE_MESSAGE }
 

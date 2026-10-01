@@ -28,6 +28,7 @@ const SponsoredTxsCounter = ({
   left,
   quota,
   resetsAt,
+  isSubscription,
   isPro,
 }: {
   /** Null reads as unlimited. */
@@ -35,6 +36,9 @@ const SponsoredTxsCounter = ({
   /** The plan's allowance per cycle on a Pro Safe, the free daily limit otherwise. */
   quota: number | null
   resetsAt: string | null
+  /** Counts a plan's allowance per cycle instead of the free daily limit. */
+  isSubscription: boolean
+  /** Shows the Pro chip instead of the upgrade button. */
   isPro: boolean
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
@@ -44,7 +48,7 @@ const SponsoredTxsCounter = ({
       <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
         {left === null ? (
           <span>Unlimited sponsored transactions</span>
-        ) : isPro && quota !== null ? (
+        ) : isSubscription && quota !== null ? (
           <span>
             <span className="font-semibold" data-testid="sponsored-txs-left">
               {left}

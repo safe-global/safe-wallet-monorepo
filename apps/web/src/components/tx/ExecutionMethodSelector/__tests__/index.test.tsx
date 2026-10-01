@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import { ExecutionMethod, ExecutionMethodSelector } from '../index'
@@ -27,14 +28,24 @@ jest.mock('../../RemainingRelays', () => ({
     <div data-testid="remaining-relays" data-props={JSON.stringify(props)} />
   ),
 }))
-jest.mock('../../SponsoredTxsCounter', () => ({
-  __esModule: true,
-  default: (props: { left: number | null; quota: number | null; resetsAt: string | null; isPro: boolean }) => (
-    <div data-testid="sponsored-txs-counter" data-props={JSON.stringify(props)} />
-  ),
-}))
+jest.mock('../../SponsoredTxsCounter', () => {
+  const { default: SponsoredTxsCounter } = jest.requireActual('../../SponsoredTxsCounter')
+  return {
+    __esModule: true,
+    default: (props: ComponentProps<typeof SponsoredTxsCounter>) => (
+      <div data-testid="sponsored-txs-counter-props" data-props={JSON.stringify(props)}>
+        <SponsoredTxsCounter {...props} />
+      </div>
+    ),
+  }
+})
 
-const daily: SponsoredOffer = { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: { remaining: 5, limit: 5 } }
+const daily = (isPro = false): SponsoredOffer => ({
+  option: 'FREE_DAILY_LIMIT',
+  disabledReason: null,
+  relays: { remaining: 5, limit: 5 },
+  isPro,
+})
 const campaign = (overrides: Partial<Extract<SponsoredOffer, { option: 'NO_FEE_CAMPAIGN' }>> = {}): SponsoredOffer => ({
   option: 'NO_FEE_CAMPAIGN',
   disabledReason: null,
@@ -116,20 +127,20 @@ describe('ExecutionMethodSelector', () => {
 
   describe('daily relays', () => {
     it('names the chain sponsor', () => {
-      renderSelector(daily)
+      renderSelector(daily())
 
       expect(getProps('sponsored-by')).toEqual({ option: 'FREE_DAILY_LIMIT', chainId: '1' })
     })
 
     it('keeps the daily relay counter while SAFE_PRO is off', () => {
-      renderSelector(daily, { tooltip: 'Free creation' })
+      renderSelector(daily(), { tooltip: 'Free creation' })
 
       expect(getProps('remaining-relays')).toEqual({ relays: { remaining: 5, limit: 5 }, tooltip: 'Free creation' })
       expect(screen.queryByTestId('sponsored-txs-counter')).not.toBeInTheDocument()
     })
 
     it('shows the wallet balance when the connected wallet is selected while SAFE_PRO is off', () => {
-      renderSelector(daily, { executionMethod: ExecutionMethod.WALLET })
+      renderSelector(daily(), { executionMethod: ExecutionMethod.WALLET })
 
       expect(screen.getByTestId('balance-info')).toBeInTheDocument()
       expect(screen.queryByTestId('remaining-relays')).not.toBeInTheDocument()
@@ -137,11 +148,36 @@ describe('ExecutionMethodSelector', () => {
 
     it('shows the free allowance with the upgrade nudge under SAFE_PRO, whichever method is picked', () => {
       mockUseIsSafeProEnabled.mockReturnValue(true)
-      renderSelector(daily, { executionMethod: ExecutionMethod.WALLET })
+      renderSelector(daily(), { executionMethod: ExecutionMethod.WALLET })
 
-      expect(getProps('sponsored-txs-counter')).toEqual({ left: 5, quota: 5, resetsAt: null, isPro: false })
+      expect(getProps('sponsored-txs-counter-props')).toEqual({
+        left: 5,
+        quota: 5,
+        resetsAt: null,
+        isSubscription: false,
+        isPro: false,
+      })
+      expect(screen.getByTestId('sponsored-txs-upgrade')).toBeInTheDocument()
       expect(screen.queryByTestId('balance-info')).not.toBeInTheDocument()
       expect(getRadio('relay-execution-method')).not.toHaveAttribute('data-disabled')
+    })
+
+    it('keeps the daily counter with the Pro chip on a Safe Pro Safe under SAFE_PRO', () => {
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      renderSelector(daily(true))
+
+      expect(getProps('sponsored-by')).toEqual({ option: 'FREE_DAILY_LIMIT', chainId: '1' })
+      expect(getProps('sponsored-txs-counter-props')).toEqual({
+        left: 5,
+        quota: 5,
+        resetsAt: null,
+        isSubscription: false,
+        isPro: true,
+      })
+      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 free transactions left today')
+      expect(screen.queryByText(/sponsored transactions left/)).not.toBeInTheDocument()
+      expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+      expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
     })
   })
 
@@ -150,10 +186,11 @@ describe('ExecutionMethodSelector', () => {
       renderSelector(subscription(30))
 
       expect(getProps('sponsored-by')).toEqual({ option: 'SUBSCRIPTION', chainId: '1' })
-      expect(getProps('sponsored-txs-counter')).toEqual({
+      expect(getProps('sponsored-txs-counter-props')).toEqual({
         left: 30,
         quota: 50,
         resetsAt: '2026-11-01T00:00:00.000Z',
+        isSubscription: true,
         isPro: true,
       })
       expect(getRadio('relay-execution-method')).toHaveAttribute('data-checked')
@@ -164,10 +201,11 @@ describe('ExecutionMethodSelector', () => {
 
       expect(getRadio('relay-execution-method')).toHaveAttribute('data-disabled')
       expect(getRadio('connected-wallet-execution-method')).toHaveAttribute('data-checked')
-      expect(getProps('sponsored-txs-counter')).toEqual({
+      expect(getProps('sponsored-txs-counter-props')).toEqual({
         left: 0,
         quota: 50,
         resetsAt: '2026-11-01T00:00:00.000Z',
+        isSubscription: true,
         isPro: true,
       })
     })
@@ -178,7 +216,13 @@ describe('ExecutionMethodSelector', () => {
 
     expect(screen.queryByTestId('relay-execution-method')).not.toBeInTheDocument()
     expect(screen.queryByTestId('connected-wallet-execution-method')).not.toBeInTheDocument()
-    expect(getProps('sponsored-txs-counter')).toEqual({ left: 0, quota: null, resetsAt: null, isPro: false })
+    expect(getProps('sponsored-txs-counter-props')).toEqual({
+      left: 0,
+      quota: null,
+      resetsAt: null,
+      isSubscription: false,
+      isPro: false,
+    })
   })
 
   it('renders nothing without an offer or an upgrade nudge', () => {

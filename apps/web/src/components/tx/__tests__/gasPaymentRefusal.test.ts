@@ -10,6 +10,7 @@ import { sponsoredQuotaMessage } from '../sponsoredQuotaMessage'
 
 const UNAVAILABLE =
   "This gas payment option isn't available for this Safe account right now. Choose another gas payment method and execute again."
+const WALLET_ONLY = 'This transaction can only be executed with your connected wallet. Execute again to continue.'
 const LIMIT_REACHED = 'No sponsored transactions left. Choose another gas payment method and execute again.'
 
 const quotaError = new QuotaExceededError('sponsored_transactions', 50, 50, '2026-11-01T00:00:00.000Z', 'x')
@@ -44,13 +45,13 @@ describe('getGasPaymentRefusal', () => {
       'a 409 for a refund transaction on the chain route',
       new GasPaymentOptionUnavailableError('PAY_FROM_SAFE', 'NOT_LISTED', [], 'x'),
       'FREE_DAILY_LIMIT',
-      { excluded: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'], message: UNAVAILABLE },
+      { excluded: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'], message: WALLET_ONLY },
     ],
     [
       'a 409 for a refund transaction on the space route',
       new GasPaymentOptionUnavailableError('SUBSCRIPTION', 'REFUNDING_TRANSACTION', [], 'x'),
       'SUBSCRIPTION',
-      { excluded: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'], message: UNAVAILABLE },
+      { excluded: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'], message: WALLET_ONLY },
     ],
     [
       'a chain-route 403',

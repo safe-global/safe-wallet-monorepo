@@ -47,7 +47,12 @@ const campaign = (
   remaining: number,
 ): SponsoredOffer => ({ option: 'NO_FEE_CAMPAIGN', disabledReason, remaining, limit: 10 })
 
-const daily: SponsoredOffer = { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: { remaining: 4, limit: 5 } }
+const daily = (isPro = false): SponsoredOffer => ({
+  option: 'FREE_DAILY_LIMIT',
+  disabledReason: null,
+  relays: { remaining: 4, limit: 5 },
+  isPro,
+})
 
 const subscription = (left: number): SponsoredOffer => ({
   option: 'SUBSCRIPTION',
@@ -64,9 +69,11 @@ export const CampaignGasTooHigh: Story = { args: { offer: campaign('GAS_TOO_HIGH
 
 export const CampaignLimitReached: Story = { args: { offer: campaign('LIMIT_REACHED', 0) } }
 
-export const DailyRelays: Story = { args: { offer: daily } }
+export const DailyRelays: Story = { args: { offer: daily() } }
 
-export const DailyRelaysWithSafePro: Story = { args: { offer: daily, isSafeProEnabled: true } }
+export const DailyRelaysWithSafePro: Story = { args: { offer: daily(), isSafeProEnabled: true } }
+
+export const DailyRelaysProSafe: Story = { args: { offer: daily(true), isSafeProEnabled: true } }
 
 export const SubscriptionAvailable: Story = { args: { offer: subscription(30), isSafeProEnabled: true } }
 

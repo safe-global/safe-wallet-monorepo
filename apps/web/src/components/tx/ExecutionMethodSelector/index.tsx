@@ -151,7 +151,13 @@ const SponsoredStrip = ({
       if (!offer.relays) return balance
       if (isSafeProEnabled) {
         return (
-          <SponsoredTxsCounter left={offer.relays.remaining} quota={offer.relays.limit} resetsAt={null} isPro={false} />
+          <SponsoredTxsCounter
+            left={offer.relays.remaining}
+            quota={offer.relays.limit}
+            resetsAt={null}
+            isSubscription={false}
+            isPro={offer.isPro}
+          />
         )
       }
       return isRelay ? <RemainingRelays relays={offer.relays} tooltip={tooltip} /> : balance
@@ -161,6 +167,7 @@ const SponsoredStrip = ({
           left={offer.left}
           quota={offer.meter?.quota ?? null}
           resetsAt={offer.meter?.resetsAt ?? null}
+          isSubscription
           isPro
         />
       )
@@ -199,7 +206,7 @@ export const _ExecutionMethodSelector = ({
     if (!showsProUpsell) return null
     return (
       <div className={`${css.container} overflow-hidden rounded-[var(--radius)]`}>
-        <SponsoredTxsCounter left={0} quota={null} resetsAt={null} isPro={false} />
+        <SponsoredTxsCounter left={0} quota={null} resetsAt={null} isSubscription={false} isPro={false} />
       </div>
     )
   }

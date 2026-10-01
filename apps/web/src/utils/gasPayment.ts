@@ -16,7 +16,13 @@ export type SponsoredOffer =
       remaining: number
       limit: number
     }
-  | { option: 'FREE_DAILY_LIMIT'; disabledReason: null; relays: RelaysRemaining | undefined }
+  | {
+      option: 'FREE_DAILY_LIMIT'
+      disabledReason: null
+      relays: RelaysRemaining | undefined
+      /** The Safe is on a Pro plan but this chain sponsors it through the free daily limit. */
+      isPro: boolean
+    }
   | {
       option: 'SUBSCRIPTION'
       disabledReason: 'LIMIT_REACHED' | null
@@ -47,7 +53,7 @@ const getCampaignOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
 
 const getDailyOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
   if (!isOffered('FREE_DAILY_LIMIT', inputs) || !(inputs.daily && inputs.daily.remaining > 0)) return null
-  return { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: inputs.daily }
+  return { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: inputs.daily, isPro: inputs.pro.isPro }
 }
 
 const getSubscriptionOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {

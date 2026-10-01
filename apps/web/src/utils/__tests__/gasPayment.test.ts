@@ -21,6 +21,7 @@ const dailyOffer: SponsoredOffer = {
   option: 'FREE_DAILY_LIMIT',
   disabledReason: null,
   relays: { remaining: 4, limit: 5 },
+  isPro: true,
 }
 const subscriptionOffer: SponsoredOffer = {
   option: 'SUBSCRIPTION',
@@ -43,6 +44,14 @@ describe('selectSponsoredOffer', () => {
       'the daily limit when the Safe is not eligible for the campaign',
       { campaign: { isEligible: false, remaining: 0, limit: 0, isGasTooHigh: false } },
       dailyOffer,
+    ],
+    [
+      'the daily limit to a Safe without a plan',
+      {
+        pro: { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null },
+        excluded: new Set(['NO_FEE_CAMPAIGN']),
+      },
+      { ...dailyOffer, isPro: false },
     ],
     [
       'the subscription when no daily relay is left',

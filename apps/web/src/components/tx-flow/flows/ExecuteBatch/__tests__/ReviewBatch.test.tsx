@@ -96,6 +96,7 @@ const dailyOffer: SponsoredOffer = {
   option: 'FREE_DAILY_LIMIT',
   disabledReason: null,
   relays: { remaining: 3, limit: 5 },
+  isPro: false,
 }
 
 const subscriptionOffer: SponsoredOffer = {
