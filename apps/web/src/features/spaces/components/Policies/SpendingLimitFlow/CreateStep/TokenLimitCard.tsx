@@ -45,9 +45,7 @@ const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
   <span className="block min-h-lh">{children}</span>
 )
 
-const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
-  if (!token) return null
-
+const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): ReactElement | null => {
   const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
   if (fiat === null) return null
 
