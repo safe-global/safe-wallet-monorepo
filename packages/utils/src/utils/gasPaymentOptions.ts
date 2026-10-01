@@ -1,8 +1,13 @@
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { Chain, Relayer } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
-export const GAS_PAYMENT_OPTIONS = ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION', 'PAY_FROM_SAFE'] as const
+export type GasPaymentOption = Relayer['gasPaymentOptions'][number]
 
-export type GasPaymentOption = (typeof GAS_PAYMENT_OPTIONS)[number]
+export const GAS_PAYMENT_OPTIONS = [
+  'NO_FEE_CAMPAIGN',
+  'FREE_DAILY_LIMIT',
+  'SUBSCRIPTION',
+  'PAY_FROM_SAFE',
+] as const satisfies readonly GasPaymentOption[]
 
 /** Known entries in canonical order; anything else is dropped. */
 export const parseGasPaymentOptions = (value: unknown): GasPaymentOption[] => {
@@ -10,8 +15,5 @@ export const parseGasPaymentOptions = (value: unknown): GasPaymentOption[] => {
   return GAS_PAYMENT_OPTIONS.filter((option) => value.includes(option))
 }
 
-export const getGasPaymentOptions = (chain: Pick<Chain, 'relayer'> | undefined): GasPaymentOption[] => {
-  // The generated Relayer type lacks gasPaymentOptions until schema.json is regenerated
-  const relayer = chain?.relayer as { gasPaymentOptions?: unknown } | null | undefined
-  return parseGasPaymentOptions(relayer?.gasPaymentOptions)
-}
+export const getGasPaymentOptions = (chain: Pick<Chain, 'relayer'> | undefined): GasPaymentOption[] =>
+  parseGasPaymentOptions(chain?.relayer?.gasPaymentOptions)

@@ -1,15 +1,27 @@
+import type { GasPaymentOptionUnavailableResponse } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { parseGasPaymentOptions, type GasPaymentOption } from '@safe-global/utils/utils/gasPaymentOptions'
 
 export const GAS_PAYMENT_OPTION_UNAVAILABLE_CODE = 'GAS_PAYMENT_OPTION_UNAVAILABLE'
 
-// CGW reasons: NOT_LISTED | NO_RELAYER | NOT_A_WORKSPACE_SAFE | REFUNDING_TRANSACTION
-export const REFUNDING_TRANSACTION_REASON = 'REFUNDING_TRANSACTION'
+export type GasPaymentOptionUnavailableReason = GasPaymentOptionUnavailableResponse['reason']
+
+export const REFUNDING_TRANSACTION_REASON: GasPaymentOptionUnavailableReason = 'REFUNDING_TRANSACTION'
+
+const UNAVAILABLE_REASONS: ReadonlyArray<GasPaymentOptionUnavailableReason> = [
+  'NOT_LISTED',
+  'NO_RELAYER',
+  'NOT_A_WORKSPACE_SAFE',
+  REFUNDING_TRANSACTION_REASON,
+]
+
+const isUnavailableReason = (reason: unknown): reason is GasPaymentOptionUnavailableReason =>
+  UNAVAILABLE_REASONS.includes(reason as GasPaymentOptionUnavailableReason)
 
 /** The CGW's HTTP 409: the requested gas payment option cannot pay for this transaction. */
 export class GasPaymentOptionUnavailableError extends Error {
   constructor(
     readonly requested: GasPaymentOption | null,
-    readonly reason: string,
+    readonly reason: GasPaymentOptionUnavailableReason | 'UNKNOWN',
     readonly available: GasPaymentOption[],
     message: string,
   ) {
@@ -51,7 +63,7 @@ export const getGasPaymentOptionUnavailableError = (thrown: unknown): GasPayment
 
   return new GasPaymentOptionUnavailableError(
     parseGasPaymentOptions([requested])[0] ?? null,
-    typeof reason === 'string' ? reason : 'unknown',
+    isUnavailableReason(reason) ? reason : 'UNKNOWN',
     parseGasPaymentOptions(available),
     getMessage(body.data, 'Gas payment option unavailable'),
   )

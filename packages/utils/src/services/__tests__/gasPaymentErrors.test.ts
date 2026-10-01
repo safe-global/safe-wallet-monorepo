@@ -42,7 +42,7 @@ describe('getGasPaymentOptionUnavailableError', () => {
   it('keys on the code only, whatever the status', () => {
     expect(
       getGasPaymentOptionUnavailableError({ status: 400, data: { code: 'GAS_PAYMENT_OPTION_UNAVAILABLE' } }),
-    ).toMatchObject({ requested: null, reason: 'unknown', available: [] })
+    ).toMatchObject({ requested: null, reason: 'UNKNOWN', available: [] })
   })
 
   it('maps an unknown requested option to null', () => {

@@ -101,13 +101,11 @@ export const chainBuilder = (): IBuilder<Chain> => {
   })
 }
 
-export const gasPaymentRelayer = (options: GasPaymentOption[], overrides?: Partial<Relayer>): Relayer =>
-  // The generated Relayer type lacks gasPaymentOptions until schema.json is regenerated
-  ({
-    type: null,
-    safeCreationSponsored: false,
-    safeTransactionSponsored: false,
-    enableTenderlySimulationBeforeRelay: false,
-    ...overrides,
-    gasPaymentOptions: options,
-  }) as Relayer
+export const gasPaymentRelayer = (options: GasPaymentOption[], overrides?: Partial<Relayer>): Relayer => ({
+  type: null,
+  safeCreationSponsored: false,
+  safeTransactionSponsored: false,
+  enableTenderlySimulationBeforeRelay: false,
+  ...overrides,
+  gasPaymentOptions: options,
+})
