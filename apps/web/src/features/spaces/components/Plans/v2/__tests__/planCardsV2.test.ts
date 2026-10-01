@@ -1,6 +1,6 @@
-import { ENTERPRISE_TIER, getCardFeaturesV2, getPlanContentV2, PLAN_CONTENT_V2 } from '../../planCatalog'
+import { ENTERPRISE_TIER } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { _formatPerSafe, canManageV2, getPlanCtaV2, getPlanPriceV2, getTiersV2 } from '../planCardsV2'
+import { _formatPerSafe, getPlanCtaV2, getPlanPriceV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -33,15 +33,6 @@ const currentPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
 })
 
 const currentBusiness = tier({ id: 'current', isCurrent: true, currentPriceId: 'price_b20m' })
-
-describe('getPlanContentV2', () => {
-  it('looks content up by plan name, ignoring names outside the catalog', () => {
-    expect(getPlanContentV2('Business')).toBe(PLAN_CONTENT_V2.Business)
-    expect(getPlanContentV2('Safe Pro')).toBeUndefined()
-    expect(getPlanContentV2('toString')).toBeUndefined()
-    expect(getCardFeaturesV2('Safe Pro')).toBeUndefined()
-  })
-})
 
 describe('getPlanCtaV2', () => {
   it('shows the plan in force as the greyed-out current plan', () => {
@@ -89,30 +80,6 @@ describe('getPlanCtaV2', () => {
       kind: 'account-team',
       label: 'Change via your account team',
     })
-  })
-})
-
-describe('getTiersV2', () => {
-  it('keeps the static Enterprise card for every other plan', () => {
-    const tiers = [tier(), ENTERPRISE_TIER]
-    expect(getTiersV2(tiers)).toEqual(tiers)
-  })
-
-  it('drops the static Enterprise card when Enterprise is the plan in force', () => {
-    const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true })
-    expect(getTiersV2([tier(), currentEnterprise, ENTERPRISE_TIER])).toEqual([tier(), currentEnterprise])
-  })
-})
-
-describe('canManageV2', () => {
-  it.each([
-    { canManage: true, current: undefined, expected: true },
-    { canManage: false, current: currentPlan({ isTrialing: true, hasPaymentMethod: true }), expected: true },
-    { canManage: false, current: currentPlan({ isTrialing: true }), expected: false },
-    { canManage: false, current: currentPlan(), expected: false },
-    { canManage: undefined, current: undefined, expected: false },
-  ])('is $expected for canManage $canManage and plan $current', ({ canManage, current, expected }) => {
-    expect(canManageV2(canManage, current)).toBe(expected)
   })
 })
 

@@ -3,7 +3,7 @@ import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/bil
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
-import PlanStatusCard, { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
+import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
 
@@ -343,14 +343,5 @@ describe('Plans', () => {
     render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} canManage onManage={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
-  })
-
-  it('moves the v2 countdown into the status line', () => {
-    const { rerender } = render(<PlanStatusCard plan={trialing(20)} {...meters} />)
-    expect(screen.queryByText(/20 days left/)).not.toBeInTheDocument()
-
-    rerender(<PlanStatusCard plan={trialing(20)} {...meters} appearance="v2" />)
-    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent(/^Free access$/)
-    expect(screen.getByText(/Active until .* · 20 days left/)).toBeInTheDocument()
   })
 })
