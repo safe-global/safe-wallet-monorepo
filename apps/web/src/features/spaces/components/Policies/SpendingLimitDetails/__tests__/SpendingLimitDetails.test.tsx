@@ -264,13 +264,12 @@ describe('a pending spending limit', () => {
     expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
   })
 
-  it('copies a link that opens the transaction on its Safe', async () => {
+  it('copies a link that opens the transaction on its Safe, without the Space', async () => {
     mockWallet()
     mockSpaceSafes(true, pending.safe)
     mockPendingTx({ txSummary })
 
-    renderPending()
-    // After render: user-event installs its own clipboard stub on setup.
+    renderInSpace()
     const writeText = mockClipboard()
     act(() => {
       screen.getByRole('button', { name: 'Copy transaction link' }).click()

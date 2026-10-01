@@ -49,6 +49,7 @@ export const usePendingSpendingLimitActions = (
       confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
     },
     viewer: { ...viewer, hasSigned },
+    // Shared links leave the Space out on purpose: their recipient may not be a member of it.
     transactionLink: txPath ? `${origin}${txPath}` : undefined,
     reviewTransactionHref,
     onRetry,
