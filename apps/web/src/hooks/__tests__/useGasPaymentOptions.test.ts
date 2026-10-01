@@ -178,7 +178,24 @@ describe('useGasPaymentOptions', () => {
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx(), isBatch: true }))
 
     expect(walletCanRelaySpy).toHaveBeenCalledWith(undefined)
-    expect(result.current.offer?.option).toBe('NO_FEE_CAMPAIGN')
+    expect(result.current.offer?.option).toBe('FREE_DAILY_LIMIT')
+  })
+
+  it('never offers the campaign to a batch', () => {
+    mockChain(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT'])
+
+    const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx(), isBatch: true }))
+
+    expect(result.current.offer?.option).toBe('FREE_DAILY_LIMIT')
+  })
+
+  it('does not wait on the campaign for a batch', () => {
+    mockChain(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT'])
+    mockCampaign({ isLoading: true })
+
+    const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx(), isBatch: true }))
+
+    expect(result.current.offer?.option).toBe('FREE_DAILY_LIMIT')
   })
 
   it('offers nothing when the wallet cannot relay a single transaction', () => {

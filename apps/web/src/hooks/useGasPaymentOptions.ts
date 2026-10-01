@@ -32,7 +32,11 @@ export const useGasPaymentOptions = ({
   const [walletCanRelay, , isWalletCheckLoading] = useWalletCanRelay(isBatch ? undefined : safeTx)
   const [excluded, setExcluded] = useState<ReadonlySet<SponsoredOption>>(new Set())
 
-  const chainOptions = useMemo(() => getGasPaymentOptions(chain), [chain])
+  // A batch sends no gas estimate, so the campaign's gas cap cannot be enforced on it.
+  const chainOptions = useMemo(
+    () => getGasPaymentOptions(chain).filter((option) => !isBatch || option !== 'NO_FEE_CAMPAIGN'),
+    [chain, isBatch],
+  )
   const isRefundTx = !!safeTx && isGtfSafePaid(safeTx.data)
   const canWalletRelay = isBatch || walletCanRelay === true
   const isCampaignEligible = !!isCampaignEnabled && !!campaign.isEligible && !campaign.blockedAddress
