@@ -41,6 +41,21 @@ describe('useIsHypernativeGuard', () => {
     expect(result.current.isHypernativeGuard).toBe(false)
   })
 
+  it('should not report loading when there is no Safe to check', () => {
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder().build(),
+      safeAddress: '',
+      safeLoaded: false,
+      safeLoading: false,
+      safeError: undefined,
+    })
+
+    const { result } = renderHook(() => useIsHypernativeGuard())
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.isHypernativeGuard).toBe(false)
+  })
+
   it('should return false and not loading when safe has no guard', async () => {
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safe: extendedSafeInfoBuilder().with({ guard: null }).build(),
