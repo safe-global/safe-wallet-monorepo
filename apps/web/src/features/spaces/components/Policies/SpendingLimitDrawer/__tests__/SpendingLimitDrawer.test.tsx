@@ -12,6 +12,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
+jest.mock('@/components/common/ChainIndicator', () => {
+  const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
+  Mock.displayName = 'ChainIndicator'
+  return { __esModule: true, default: Mock }
+})
+
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
 const OVERVIEW = {
@@ -199,6 +205,14 @@ describe('SpendingLimitDrawer', () => {
       'href',
       `/settings/setup?safe=eth%3A${SAFE_ADDRESS}`,
     )
+  })
+
+  it("shows the policy Safe's network in the overview", () => {
+    const policy = mockActiveSpendingLimit()
+
+    setup(policy)
+
+    expect(screen.getByAltText(`chain-${policy.safe.chainId}`)).toBeInTheDocument()
   })
 
   it('leaves the Safe account unlinked when its chain is unknown', () => {
