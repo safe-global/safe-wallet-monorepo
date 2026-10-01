@@ -17,18 +17,19 @@ type UntrustedSafeAnalysisResult = {
  */
 const useUntrustedSafeAnalysis = (): UntrustedSafeAnalysisResult => {
   const isTrusted = useIsTrustedSafe()
-  const { safe, safeAddress } = useSafeInfo()
+  const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { trustSafe } = useTrustSafe()
 
   const safeAnalysis: SafeAnalysisResult | null = useMemo(() => {
-    if (isTrusted) return null
+    // A Space flow picks its Safe in step 1, so until one is loaded there is nothing to vouch for.
+    if (!safeLoaded || isTrusted) return null
     return {
       severity: Severity.CRITICAL,
       type: SafeStatus.UNTRUSTED,
       title: 'Not in your accounts',
       description: "You're creating a transaction from a Safe that isn't in your accounts. Add it if you recognize it.",
     }
-  }, [isTrusted])
+  }, [safeLoaded, isTrusted])
 
   const addToTrustedList = useCallback(() => {
     const chainId = safe?.chainId
