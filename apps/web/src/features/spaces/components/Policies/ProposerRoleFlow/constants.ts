@@ -12,6 +12,3 @@ export const PROPOSER_EXISTS_ERROR = 'This address is already a proposer of this
 export const PROPOSER_RESERVED_ERROR = 'This proposer address is not valid'
 export const PROPOSER_SAFE_LOADING_MESSAGE = 'Loading the Safe account details, please wait'
 export const PROPOSER_SAFE_ERROR_MESSAGE = 'Could not load the Safe account details, please try again'
-export const NESTED_SAFES_INFO_TITLE = 'Nested Safe accounts'
-export const NESTED_SAFES_INFO_DESCRIPTION =
-  'To manage proposers for the Nested Safe accounts, go to the Safe account settings.'

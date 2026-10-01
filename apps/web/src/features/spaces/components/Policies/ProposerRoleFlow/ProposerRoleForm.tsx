@@ -12,13 +12,12 @@ import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
 import SafeAccountSelector from '../SafeAccountSelector'
+import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
   GRANT_INFO_DESCRIPTION,
   GRANT_INFO_TITLE,
-  NESTED_SAFES_INFO_DESCRIPTION,
-  NESTED_SAFES_INFO_TITLE,
   PROPOSER_FIELD_HELPER,
   PROPOSER_NAME_HELPER,
   PROPOSER_NAME_WORKSPACE_HELPER,
@@ -92,28 +91,17 @@ const ProposerRoleForm = ({
               <AlertDescription>{GRANT_INFO_DESCRIPTION}</AlertDescription>
             </Alert>
 
-            <div className="flex flex-col gap-2">
-              <SafeAccountSelector
-                accounts={safeAccounts.accounts}
-                signersOnly={safeAccounts.signersOnly}
-                value={safeAccount}
-                onChange={onSafeAccountChange}
-                isLoading={safeAccounts.isLoading}
-                isError={safeAccounts.isError}
-                onRetry={safeAccounts.refetch}
-                hasWallet={safeAccounts.hasWallet}
-              />
-
-              <Alert
-                variant="info"
-                className="px-3 py-3 *:data-[slot=alert-description]:text-muted-foreground"
-                data-testid="nested-safes-info"
-              >
-                <AlertSeverityIcon variant="info" />
-                <AlertTitle className="text-sm font-normal">{NESTED_SAFES_INFO_TITLE}</AlertTitle>
-                <AlertDescription>{NESTED_SAFES_INFO_DESCRIPTION}</AlertDescription>
-              </Alert>
-            </div>
+            <SafeAccountSelector
+              accounts={safeAccounts.accounts}
+              signersOnly={safeAccounts.signersOnly}
+              value={safeAccount}
+              onChange={onSafeAccountChange}
+              isLoading={safeAccounts.isLoading}
+              isError={safeAccounts.isError}
+              onRetry={safeAccounts.refetch}
+              hasWallet={safeAccounts.hasWallet}
+              notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
+            />
 
             <div className="flex flex-col gap-1">
               <AddressBookInput name="proposer" label="Proposer" required focused={false} validate={validateProposer} />
