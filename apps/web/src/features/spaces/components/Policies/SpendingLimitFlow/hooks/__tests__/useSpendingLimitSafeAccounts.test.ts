@@ -2,7 +2,11 @@ import { renderHook } from '@/tests/test-utils'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { useEligibleSafeAccounts } from '../../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { useSpendingLimitSafeAccounts } from '../useSpendingLimitSafeAccounts'
+import {
+  useSpendingLimitChainIds,
+  useSpendingLimitChains,
+  useSpendingLimitSafeAccounts,
+} from '../useSpendingLimitSafeAccounts'
 
 jest.mock('../../../SafeAccountSelector/hooks/useEligibleSafeAccounts', () => ({
   useEligibleSafeAccounts: jest.fn(),
@@ -63,5 +67,39 @@ describe('useSpendingLimitSafeAccounts', () => {
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
     expect(result.current).toMatchObject({ isLoading: true, isError: false, hasWallet: false, refetch })
+  })
+})
+
+describe('useSpendingLimitChains', () => {
+  it('keeps only chains with both the spending-limit feature and a module deployment', () => {
+    const { result } = renderHook(() => useSpendingLimitChains())
+
+    expect(result.current.map((chain) => chain.chainId)).toEqual(['11155111'])
+  })
+
+  it('drops a chain whose module is deployed but whose feature is off', () => {
+    const { result } = renderHook(() => useSpendingLimitChains())
+
+    expect(result.current.map((chain) => chain.chainId)).not.toContain('137')
+  })
+
+  it('drops a chain with the feature on but no module deployment', () => {
+    const { result } = renderHook(() => useSpendingLimitChains())
+
+    expect(result.current.map((chain) => chain.chainId)).not.toContain('999999')
+  })
+
+  it('carries the chain name through for display', () => {
+    const { result } = renderHook(() => useSpendingLimitChains())
+
+    expect(result.current.map((chain) => chain.chainName)).toEqual(['Sepolia'])
+  })
+})
+
+describe('useSpendingLimitChainIds', () => {
+  it('reduces the supported chains to their ids', () => {
+    const { result } = renderHook(() => useSpendingLimitChainIds())
+
+    expect([...result.current]).toEqual(['11155111'])
   })
 })
