@@ -1,12 +1,12 @@
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { formatDate, formatTimeInWords, parseTimestamp } from '@safe-global/utils/utils/date'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import EditIcon from '@/public/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import MemberName from './MemberName'
+import MemberIdentifier, { getMemberIdentifier } from './MemberIdentifier'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
 import MemberRowActionsMenu from './MemberRowActionsMenu'
@@ -26,7 +26,6 @@ import { isAuthenticated } from '@/store/authSlice'
 import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import CopyButton from '@/components/common/CopyButton'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -65,32 +64,6 @@ const DATE_COLUMNS: Record<MembersListVariant, DataTableColumn<MemberDto>[]> = {
     dateColumn('invitedOn', 'Invited on', (member) => member.createdAt, formatDate),
     dateColumn('expires', 'Expires', (member) => member.inviteExpiresAt, formatTimeInWords),
   ],
-}
-
-const getMemberIdentifier = ({ user }: MemberDto) => {
-  if (user.email) return { label: user.email, full: user.email, copyLabel: 'Copy email' }
-  if (user.address) return { label: shortenAddress(user.address), full: user.address, copyLabel: 'Copy address' }
-  return null
-}
-
-type MemberIdentifierValue = NonNullable<ReturnType<typeof getMemberIdentifier>>
-
-const CopyIdentifierButton = ({ identifier }: { identifier: MemberIdentifierValue }) => (
-  <CopyButton text={identifier.full} initialToolTipText={identifier.copyLabel} className="shrink-0" />
-)
-
-const MemberIdentifier = ({ member }: { member: MemberDto }) => {
-  const identifier = getMemberIdentifier(member)
-  if (!identifier) return null
-  return (
-    <span className="flex min-w-0 items-center gap-1">
-      <Tooltip>
-        <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{identifier.label}</TooltipTrigger>
-        <TooltipContent>{identifier.full}</TooltipContent>
-      </Tooltip>
-      <CopyIdentifierButton identifier={identifier} />
-    </span>
-  )
 }
 
 const EditButton = ({ member, disabled }: { member: MemberDto; disabled: boolean }) => {
@@ -219,7 +192,6 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       sortValue: (m) => getMemberDisplayName(m),
       cell: (member, { isCompact }) => {
         const { isDeclined, isExpired } = memberFlags(member)
-        const identifier = getMemberIdentifier(member)
         return (
           <div className="flex flex-col gap-0.5">
             <div className="flex items-center gap-2">
@@ -228,12 +200,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
               {isExpired && <Badge variant="warning">Expired</Badge>}
             </div>
             {/* The identifier column is hidden in the compact layout — surface it under the name instead */}
-            {isCompact && identifier && (
-              <span className="text-muted-foreground flex min-w-0 items-center gap-1 pl-9 text-xs">
-                <span className="truncate">{identifier.label}</span>
-                <CopyIdentifierButton identifier={identifier} />
-              </span>
-            )}
+            {isCompact && <MemberIdentifier member={member} className="text-muted-foreground pl-9 text-xs" />}
           </div>
         )
       },
@@ -245,7 +212,7 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
-      sortValue: (m) => getMemberIdentifier(m)?.full ?? null,
+      sortValue: (m) => getMemberIdentifier(m)?.value ?? null,
       cell: (member) => <MemberIdentifier member={member} />,
     },
     ...(isTwoFactorEnabled ? [twoFactorColumn] : []),
