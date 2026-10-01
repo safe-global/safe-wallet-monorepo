@@ -56,7 +56,7 @@ const withPWA = withPWAInit({
         },
       },
       {
-        urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === 'navigate',
+        urlPattern: ({ request }) => request.mode === 'navigate',
         handler: 'NetworkFirst',
         options: {
           cacheName: 'pages',
