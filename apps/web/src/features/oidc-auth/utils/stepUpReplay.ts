@@ -6,9 +6,12 @@ import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { navigateTo } from '@/utils/navigation'
+import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { isElevationRequiredError } from './elevation'
 
 const STEP_UP_KEY = 'oidc_step_up'
+
+const STEP_UP_CONTINUE_KEY = 'oidc_step_up_continue'
 
 const STEP_UP_MAX_AGE_MS = 5 * 60 * 1_000
 
@@ -65,6 +68,8 @@ export const getReplayableAction = (action: UnknownAction): PendingStepUpAction 
 export type StepUpTrip = {
   /** Missing when the endpoint that was rejected is not in the list above. */
   action?: PendingStepUpAction
+  /** Where to go once the replay succeeds. */
+  continueUrl?: string
 }
 
 export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
@@ -75,8 +80,28 @@ export const saveStepUpTrip = (action?: PendingStepUpAction): void => {
   }
 }
 
+/**
+ * For a flow whose next step is a page: the replay sends only the rejected request, so without
+ * this the user lands back on the step they already finished. Kept apart from the trip, which the
+ * listener may write after the flow calls this.
+ */
+export const continueAfterStepUp = (url: string): void => {
+  try {
+    sessionStorage.setItem(STEP_UP_CONTINUE_KEY, url)
+  } catch {
+    // Without it the user stays on the finished step, which is still correct.
+  }
+}
+
+const takeContinueUrl = (): string | undefined => {
+  const url = sessionStorage.getItem(STEP_UP_CONTINUE_KEY)
+  sessionStorage.removeItem(STEP_UP_CONTINUE_KEY)
+  return sanitizeNextUrl(url) ?? undefined
+}
+
 /** Reads and removes in one step, so a saved request cannot run twice, or on a later return. */
 export const takeStepUpTrip = (): StepUpTrip | undefined => {
+  const continueUrl = takeContinueUrl()
   const raw = sessionStorage.getItem(STEP_UP_KEY)
   if (!raw) return undefined
 
@@ -88,7 +113,7 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
     if (Date.now() - parsed.createdAt > STEP_UP_MAX_AGE_MS) return undefined
     if (typeof parsed.endpoint !== 'string' || !isReplayableEndpoint(parsed.endpoint)) return {}
 
-    return { action: { endpoint: parsed.endpoint, args: parsed.args } }
+    return { action: { endpoint: parsed.endpoint, args: parsed.args }, continueUrl }
   } catch {
     return undefined
   }
@@ -112,7 +137,11 @@ const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
   replayableEndpoints()[endpoint].initiate as unknown as ReplayInitiator
 
 /** Resolves to `true` when the replay sends the browser to another page, so the caller keeps the splash up. */
-export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<boolean> => {
+export const replayStepUpAction = async (
+  dispatch: AppDispatch,
+  pending: PendingStepUpAction,
+  continueUrl?: string,
+): Promise<boolean> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
@@ -138,6 +167,11 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
     }
     dispatch(showNotification({ message: REPLAY_FAILED_MESSAGE, variant: 'error', groupKey: 'step-up-replay-failed' }))
     return false
+  }
+
+  if (continueUrl) {
+    navigateTo(continueUrl)
+    return true
   }
 
   // The success message must not appear while the lists still show the old data.

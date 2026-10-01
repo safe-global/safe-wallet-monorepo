@@ -804,6 +804,31 @@ describe('useOnboardingSubmit — naming step', () => {
     })
   })
 
+  it('leaves the next step for after step-up, so a replayed submit moves on', async () => {
+    sessionStorage.clear()
+    mockAddSafesToSpace.mockResolvedValueOnce({ error: { status: 403, data: { message: 'elevation_required' } } })
+    const { result } = renderHook(() =>
+      useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)], '/welcome/invite-members?spaceId=42'),
+    )
+
+    act(() => {
+      result.current.formMethods.setValue('selectedSafes', { [`1:${ADDRESS}`]: true })
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    act(() => {
+      result.current.formMethods.setValue(`names.${ADDRESS.toLowerCase()}`, 'Treasury')
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.error).toBeUndefined()
+    expect(onSuccess).not.toHaveBeenCalled()
+    expect(sessionStorage.getItem('oidc_step_up_continue')).toBe('/welcome/invite-members?spaceId=42')
+  })
+
   it('returns to the selection step on demand', async () => {
     const { result } = renderHook(() => useOnboardingSubmit('42', onSuccess, [buildSafeItem('1', ADDRESS)]))
 
