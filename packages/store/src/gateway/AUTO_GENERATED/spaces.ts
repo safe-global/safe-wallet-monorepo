@@ -615,6 +615,7 @@ export type MemberUser = {
   id: number
   status: 'PENDING' | 'ACTIVE'
   email: string | null
+  address: string | null
 }
 export type MemberDto = {
   id: number
