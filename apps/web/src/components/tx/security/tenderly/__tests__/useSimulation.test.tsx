@@ -262,6 +262,7 @@ describe('useSimulation()', () => {
     )
 
     await waitFor(() => expect(getSimulationPayloadSpy).toHaveBeenCalledWith(expect.anything(), scope))
+    expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.ERROR)
   })
 
   it('builds the payload without a scope outside a Space-level flow', async () => {
@@ -280,5 +281,6 @@ describe('useSimulation()', () => {
     )
 
     await waitFor(() => expect(getSimulationPayloadSpy).toHaveBeenCalledWith(expect.anything(), undefined))
+    expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.ERROR)
   })
 })

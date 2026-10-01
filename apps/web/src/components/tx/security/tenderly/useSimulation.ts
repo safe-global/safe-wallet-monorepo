@@ -19,7 +19,6 @@ export const useSimulation = (): UseSimulationReturn => {
   const [simulationRequestStatus, setSimulationRequestStatus] = useState<FETCH_STATUS>(FETCH_STATUS.NOT_ASKED)
   const [requestError, setRequestError] = useState<string | undefined>(undefined)
   const tenderly = useAppSelector(selectTenderly)
-  // A Space-level flow simulates its scoped Safe; without a scope this is the URL Safe, as before.
   const scope = useSafeScope()
 
   const simulationLink = useMemo(

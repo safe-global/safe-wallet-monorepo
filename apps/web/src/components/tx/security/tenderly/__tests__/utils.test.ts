@@ -395,6 +395,34 @@ describe('simulation utils', () => {
       )
     })
 
+    it('throws instead of falling back to the app-wide provider when the scope has none yet', async () => {
+      const scopeWithoutProvider: TxSenderScope = { ...scope, web3ReadOnly: undefined }
+
+      await expect(
+        getSimulationPayload(
+          {
+            executionOwner: zeroPadValue('0x01', 20),
+            safe: mockSafeInfo as SafeState,
+            transactions: mockTx,
+          },
+          scopeWithoutProvider,
+        ),
+      ).rejects.toThrow('The provider for the selected Safe account is not initialized yet.')
+
+      expect(Web3.getWeb3ReadOnly).not.toHaveBeenCalled()
+    })
+
+    it('reads the block gas limit from the app-wide provider without a scope', async () => {
+      const tenderlyPayload = await getSimulationPayload({
+        executionOwner: zeroPadValue('0x01', 20),
+        safe: mockSafeInfo as SafeState,
+        transactions: mockTx,
+      })
+
+      expect(tenderlyPayload.gas).toEqual(30_000_000)
+      expect(Web3.getWeb3ReadOnly).toHaveBeenCalled()
+    })
+
     it('reads the block gas limit from the scoped provider', async () => {
       const tenderlyPayload = await getSimulationPayload(
         {

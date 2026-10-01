@@ -80,6 +80,11 @@ export const _getMultiSendCallOnlyPayload = async (
 }
 
 const getLatestBlockGasLimit = async (scope?: TxSenderScope): Promise<number> => {
+  // Falling back to the app-wide provider here would read the URL chain's block, not the scoped Safe's.
+  if (scope && !scope.web3ReadOnly) {
+    throw Error('The provider for the selected Safe account is not initialized yet.')
+  }
+
   const web3ReadOnly = scope?.web3ReadOnly ?? getWeb3ReadOnly()
   const latestBlock = await web3ReadOnly?.getBlock('latest')
   if (!latestBlock) {
