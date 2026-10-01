@@ -18,6 +18,8 @@ const DAY = 86_400
 const DAY_MINUTES = 1_440
 /** 2026-10-01T00:00:00Z, in unix minutes. */
 const RESETS_AT_MINUTE = 29_846_880
+/** 2026-06-24T03:35:00Z, in unix seconds. */
+export const ALLOWANCE_CREATED_AT = 1_782_272_100
 
 export const MOCK_SAFES = {
   treasury: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', chainId: '1' },
@@ -71,6 +73,7 @@ const allowance = (
   remaining: (BigInt(amount) - BigInt(spent)).toString(),
   resetPeriodMinutes,
   resetsAtMinute: resetPeriodMinutes === 0 ? null : resetsAtMinute,
+  createdAt: ALLOWANCE_CREATED_AT,
 })
 
 export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> = {}): SpendingLimitPolicy => ({
