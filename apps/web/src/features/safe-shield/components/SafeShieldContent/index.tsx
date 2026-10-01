@@ -31,6 +31,7 @@ import {
 } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import { cn } from '@/utils/cn'
 
 export const SafeShieldContent = ({
   recipient,
@@ -126,7 +127,10 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <div data-testid="open-checks-list">
+        <div
+          data-testid="open-checks-list"
+          className={cn(isSafenetPrototype && 'flex flex-col gap-1 pt-1 [&>*]:rounded-md [&>*]:bg-muted-secondary')}
+        >
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
@@ -174,9 +178,17 @@ export const SafeShieldContent = ({
         </div>
 
         {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent || isSafenetPrototype) && (
-          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
-            <ProChecksRow hasProFeatures={hasProFeatures} />
-            <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
+          <div
+            className={cn('mt-1 flex flex-col', !isSafenetPrototype && 'rounded-md bg-muted')}
+            data-testid="pro-checks-section"
+          >
+            <ProChecksRow hasProFeatures={hasProFeatures} variant={isSafenetPrototype ? 'divider' : 'chip'} />
+            <div
+              className={cn(
+                'flex flex-col gap-1 [&>*]:rounded-md [&>*]:bg-muted-secondary',
+                !isSafenetPrototype && 'px-1 pb-1',
+              )}
+            >
               {hasProFeatures ? (
                 <AnalysisGroupCard
                   data-testid="recipient-analysis-group-card"

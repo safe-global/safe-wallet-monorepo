@@ -1,4 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
+import { cn } from '@/utils/cn'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -134,7 +135,7 @@ export const SafeShieldDisplay = ({
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
       {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
           two curves stay concentric instead of the inner corner cutting inside the outer one. */}
-      <div className="overflow-hidden rounded-lg bg-card">
+      <div className={cn('overflow-hidden rounded-lg', isSafenetPrototype ? 'bg-muted' : 'bg-card')}>
         <SafeShieldHeader
           recipient={recipient}
           contract={contract}
