@@ -1,3 +1,4 @@
+import type Safe from '@safe-global/protocol-kit'
 import { render, waitFor } from '@/tests/test-utils'
 import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
 import { TxFlowContext, initialContext as txFlowInitialContext } from '@/components/tx-flow/TxFlowProvider'
@@ -13,34 +14,40 @@ jest.mock('@/services/tx/tx-sender', () => ({
 const scopeChainId = '137'
 const urlSafe = 'sep:0x0000000000000000000000000000000000000123'
 const txId = 'multisig_0x0000000000000000000000000000000000000456_0xabc'
+const sdk = {} as Safe
+
+const renderInScope = (scopeSdk?: Safe) => (
+  <SafeScopeContext.Provider
+    value={{
+      scope: {
+        chainId: scopeChainId,
+        safeAddress: '0x0000000000000000000000000000000000000456',
+        scopeKey: `${scopeChainId}:0x0000000000000000000000000000000000000456`,
+        safeLoaded: Boolean(scopeSdk),
+        safeLoading: !scopeSdk,
+        sdk: scopeSdk,
+      },
+      setScope: jest.fn(),
+      clearScope: jest.fn(),
+    }}
+  >
+    <TxFlowContext.Provider value={{ ...txFlowInitialContext, txId }}>
+      <SafeTxContext.Provider value={{ setSafeTx: jest.fn(), setSafeTxError: jest.fn(), setNonce: jest.fn() } as never}>
+        <ConfirmProposedTx onSubmit={jest.fn()} />
+      </SafeTxContext.Provider>
+    </TxFlowContext.Provider>
+  </SafeScopeContext.Provider>
+)
 
 describe('ConfirmProposedTx under a SafeScope', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('loads the existing transaction on the scope chain, not the URL chain', async () => {
     window.history.replaceState(null, '', `/spaces/policies?safe=${urlSafe}`)
 
-    render(
-      <SafeScopeContext.Provider
-        value={{
-          scope: {
-            chainId: scopeChainId,
-            safeAddress: '0x0000000000000000000000000000000000000456',
-            scopeKey: `${scopeChainId}:0x0000000000000000000000000000000000000456`,
-            safeLoaded: false,
-            safeLoading: true,
-          },
-          setScope: jest.fn(),
-          clearScope: jest.fn(),
-        }}
-      >
-        <TxFlowContext.Provider value={{ ...txFlowInitialContext, txId }}>
-          <SafeTxContext.Provider
-            value={{ setSafeTx: jest.fn(), setSafeTxError: jest.fn(), setNonce: jest.fn() } as never}
-          >
-            <ConfirmProposedTx onSubmit={jest.fn()} />
-          </SafeTxContext.Provider>
-        </TxFlowContext.Provider>
-      </SafeScopeContext.Provider>,
-    )
+    render(renderInScope(sdk))
 
     await waitFor(() =>
       expect(txSender.createExistingTx).toHaveBeenCalledWith(
@@ -50,5 +57,23 @@ describe('ConfirmProposedTx under a SafeScope', () => {
         expect.objectContaining({ chainId: scopeChainId }),
       ),
     )
+  })
+
+  it('waits for the scope SDK before loading the existing transaction', async () => {
+    const { rerender } = render(renderInScope())
+
+    expect(txSender.createExistingTx).not.toHaveBeenCalled()
+
+    rerender(renderInScope(sdk))
+
+    await waitFor(() =>
+      expect(txSender.createExistingTx).toHaveBeenCalledWith(
+        scopeChainId,
+        txId,
+        undefined,
+        expect.objectContaining({ sdk }),
+      ),
+    )
+    expect(txSender.createExistingTx).toHaveBeenCalledTimes(1)
   })
 })
