@@ -6,13 +6,7 @@ import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
-import {
-  DUPLICATE_TOKEN_ERROR,
-  EXISTING_LIMIT_ERROR,
-  ONE_TIME_HELPER_TEXT,
-  PRICE_UNAVAILABLE_TEXT,
-  REMOVE_LIMIT_LABEL,
-} from '../../constants'
+import { DUPLICATE_TOKEN_ERROR, EXISTING_LIMIT_ERROR, ONE_TIME_HELPER_TEXT, REMOVE_LIMIT_LABEL } from '../../constants'
 import {
   createEmptyLimit,
   spenderAddressPath,
@@ -50,7 +44,6 @@ const mockTokens = [
       fiatConversion: '1',
     })
     .build(),
-  // Popular-only: no balance and no price, so the row falls back to "Price unavailable".
   tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
 ]
 
@@ -189,12 +182,21 @@ describe('TokenLimitCard', () => {
     expect(screen.queryByTestId('amount-fiat')).not.toBeInTheDocument()
   })
 
-  it('says so when the selected token has no price', async () => {
+  it('stays quiet about fiat for a token with no price', async () => {
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), DAI)
+    await user.type(screen.getByTestId('limit-amount-input'), '1')
+
+    expect(screen.queryByTestId('amount-fiat')).not.toBeInTheDocument()
+  })
+
+  it('shows no balance for a popular token rather than claiming the Safe holds none', async () => {
     const { user } = renderRows()
 
     await user.selectOptions(screen.getByTestId('limit-token-selector'), DAI)
 
-    expect(screen.getByTestId('amount-fiat')).toHaveTextContent(PRICE_UNAVAILABLE_TEXT)
+    expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
   })
 
   it('asks for a token before it judges the amount', async () => {
@@ -332,6 +334,16 @@ describe('TokenLimitCard', () => {
       await user.click(screen.getByRole('button', { name: 'validate' }))
 
       await waitFor(() => expect(screen.queryByTestId('token-error')).not.toBeInTheDocument())
+    })
+
+    it('shows no balance for a limited token the balances endpoint did not return', () => {
+      const unlisted = tokenOptionBuilder().with({ group: 'held' }).build()
+      mockUseOptions.mockReturnValue({ ...mockUseOptions(), options: [...mockTokens, unlisted] })
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([{ ...createEmptyLimit(), tokenAddress: unlisted.address }], undefined, SPENDER, true)
+
+      expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
     })
 
     it('keeps a token the spender already has in the selector so it can be edited', () => {

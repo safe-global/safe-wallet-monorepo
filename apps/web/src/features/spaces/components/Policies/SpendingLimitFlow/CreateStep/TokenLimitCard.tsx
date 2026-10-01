@@ -26,13 +26,7 @@ import {
   validateUniqueToken,
 } from '../utils/validation'
 import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
-import {
-  FREQUENCY_LABEL,
-  LIMIT_AMOUNT_LABEL,
-  LIMIT_AMOUNT_PLACEHOLDER,
-  PRICE_UNAVAILABLE_TEXT,
-  REMOVE_LIMIT_LABEL,
-} from '../constants'
+import { FREQUENCY_LABEL, LIMIT_AMOUNT_LABEL, LIMIT_AMOUNT_PLACEHOLDER, REMOVE_LIMIT_LABEL } from '../constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -46,14 +40,9 @@ export type TokenLimitCardProps = {
   onRemove: () => void
 }
 
-const hasPrice = (token: TokenOption): boolean => !!token.fiatConversion && parseFloat(token.fiatConversion) > 0
-
 const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
   if (!token) return null
-  if (!hasPrice(token)) return <span data-testid="amount-fiat">{PRICE_UNAVAILABLE_TEXT}</span>
 
-  // Nothing typed yet is not worth $0.00 — `computeFiatValue` returns null for that, and for anything
-  // else it cannot price, so say nothing rather than coercing it to a figure.
   const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
   if (fiat === null) return null
 
@@ -186,9 +175,9 @@ const TokenLimitCard = ({
                   helperText={
                     tokenError?.message ? (
                       <span data-testid="token-error">{String(tokenError.message)}</span>
-                    ) : selectedToken ? (
+                    ) : selectedToken?.balance !== undefined ? (
                       <span data-testid="token-balance">
-                        {formatVisualAmount(selectedToken.balance ?? '0', selectedToken.decimals)}{' '}
+                        {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
                         {tokenOptionLabel(selectedToken)}
                       </span>
                     ) : undefined
