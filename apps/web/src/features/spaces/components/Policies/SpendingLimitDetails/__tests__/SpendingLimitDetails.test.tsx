@@ -1,6 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
+import { TxModalContext } from '@/components/tx-flow'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
@@ -314,6 +315,20 @@ describe('a pending spending limit', () => {
 
     expect(screen.getByText("The transaction couldn't be loaded.")).toBeInTheDocument()
     expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the panel while a transaction flow is open, so its overlay does not cover the flow', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+
+    render(
+      <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+        <SpendingLimitDetails policy={pending} onClose={jest.fn()} />
+      </TxModalContext.Provider>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('stops offering Review once the row has left the list, until it learns why', () => {
