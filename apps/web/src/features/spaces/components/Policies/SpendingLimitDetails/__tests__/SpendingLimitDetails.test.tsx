@@ -1,9 +1,7 @@
-import type { ReactElement } from 'react'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { TxModalContext } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
@@ -190,22 +188,13 @@ describe('a pending spending limit', () => {
   const pending = mockPendingPolicy()
   const txSummary = { id: getPendingTxId(pending) } as Transaction
   const chain = chainBuilder().with({ chainId: pending.safe.chainId }).build()
-  const setTxFlow = jest.fn()
   const connectWallet = jest.fn()
 
   const mockPendingTx = (tx: Partial<PendingPolicyTransaction>) =>
     mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], ...tx })
 
-  const withTxModal = (ui: ReactElement) => (
-    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
-      {ui}
-    </TxModalContext.Provider>
-  )
-
   const renderPending = (policy: PendingSpendingLimitPolicy = pending, isUnlisted?: boolean) =>
-    renderWithUserEvent(
-      withTxModal(<SpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={jest.fn()} />),
-    )
+    renderWithUserEvent(<SpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={jest.fn()} />)
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -223,7 +212,7 @@ describe('a pending spending limit', () => {
 
   const renderInSpace = (policy: PendingSpendingLimitPolicy = pending) => {
     const push = jest.fn(() => Promise.resolve(true))
-    const result = renderWithUserEvent(withTxModal(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />), {
+    const result = renderWithUserEvent(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />, {
       routerProps: { push, query: { spaceId: SPACE_ID } },
     })
     return { ...result, push }
@@ -238,7 +227,6 @@ describe('a pending spending limit', () => {
     await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
     expect(push).toHaveBeenCalledWith(expectedTxHref)
-    expect(setTxFlow).not.toHaveBeenCalled()
   })
 
   it('sends anyone to the queue to execute a fully signed transaction', async () => {
@@ -250,7 +238,6 @@ describe('a pending spending limit', () => {
     await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
     expect(push).toHaveBeenCalledWith(expectedTxHref)
-    expect(setTxFlow).not.toHaveBeenCalled()
   })
 
   it('offers a signer who already signed the link to share instead', () => {
@@ -350,7 +337,7 @@ describe('a pending spending limit', () => {
     expect(connectWallet).toHaveBeenCalledTimes(1)
 
     mockWallet()
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />))
+    rerender(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
   })

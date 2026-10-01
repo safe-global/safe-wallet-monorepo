@@ -39,17 +39,15 @@ export const usePendingSpendingLimitActions = (
   const txId = getPendingTxId(policy)
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
-  // The queue may no longer hold the transaction until the refetch says why the row left.
-  const reviewable = !isUnlisted || Boolean(resolvedOutcome)
 
   const onReviewTransaction = useMemo(
     () =>
-      chain && reviewable
+      chain && !isUnlisted
         ? () => {
             router.push(getTxLink(txId, chain, safeAddress, spaceId).href)
           }
         : undefined,
-    [chain, reviewable, router, txId, safeAddress, spaceId],
+    [chain, isUnlisted, router, txId, safeAddress, spaceId],
   )
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
