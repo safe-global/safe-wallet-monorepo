@@ -1,11 +1,11 @@
-import { useContext, useMemo } from 'react'
+import { useMemo } from 'react'
+import { useRouter } from 'next/router'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { TxModalContext } from '@/components/tx-flow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
-import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import useOrigin from '@/hooks/useOrigin'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { getTxLink } from '@/utils/tx-link'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '../../SpendingLimitDrawer/resolveState'
 import type { PendingSpendingLimitPolicy, QueuedSpendingLimitPolicy } from '../../types'
@@ -30,7 +30,8 @@ export const usePendingSpendingLimitActions = (
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
-  const { setTxFlow } = useContext(TxModalContext)
+  const router = useRouter()
+  const spaceId = useUrlSpaceId()
   const { txSummary, confirmedBy, confirmationsSubmitted, outcome, onRetry } = usePendingPolicyTransaction(
     policy,
     isUnlisted,
@@ -38,22 +39,17 @@ export const usePendingSpendingLimitActions = (
   const txId = getPendingTxId(policy)
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
-  // The summary may be stale until the refetch says why the row left.
-  const reviewable = isUnlisted && !resolvedOutcome ? undefined : txSummary
+  // The queue may no longer hold the transaction until the refetch says why the row left.
+  const reviewable = !isUnlisted || Boolean(resolvedOutcome)
 
   const onReviewTransaction = useMemo(
     () =>
-      reviewable
-        ? () =>
-            setTxFlow(
-              <SafeScopeProvider initial={{ chainId, safeAddress }}>
-                <ConfirmTxFlow txSummary={reviewable} />
-              </SafeScopeProvider>,
-              undefined,
-              false,
-            )
+      chain && reviewable
+        ? () => {
+            router.push(getTxLink(txId, chain, safeAddress, spaceId).href)
+          }
         : undefined,
-    [reviewable, setTxFlow, chainId, safeAddress],
+    [chain, reviewable, router, txId, safeAddress, spaceId],
   )
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined

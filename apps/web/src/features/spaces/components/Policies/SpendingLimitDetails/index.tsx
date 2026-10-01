@@ -40,10 +40,8 @@ const PendingSpendingLimitDetails = ({
 }) => {
   const content = useSpendingLimitDetails(policy)
   const pendingActions = usePendingSpendingLimitActions(policy, content.viewer, isUnlisted)
-  const { txFlow } = useContext(TxModalContext)
 
-  // The drawer's overlay sits above the tx modal, so it hides while the flow is open and stays mounted to catch the result.
-  return <SpendingLimitDrawer open={!txFlow} onClose={onClose} {...content} {...pendingActions} />
+  return <SpendingLimitDrawer open onClose={onClose} {...content} {...pendingActions} />
 }
 
 /** Hooks cannot be conditional, so the queued-transaction reads live in their own component. */

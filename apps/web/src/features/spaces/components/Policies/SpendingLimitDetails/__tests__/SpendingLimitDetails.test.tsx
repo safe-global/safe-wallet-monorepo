@@ -36,24 +36,6 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(),
   useHasFeature: jest.fn(() => false),
 }))
-jest.mock('@/components/tx-flow/flows', () => ({
-  ConfirmTxFlow: ({ txSummary }: { txSummary: Transaction }) => (
-    <div data-testid="confirm-tx-flow" data-tx-id={txSummary.id} />
-  ),
-}))
-jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
-  SafeScopeProvider: ({
-    initial,
-    children,
-  }: {
-    initial?: { chainId: string; safeAddress: string }
-    children: ReactElement
-  }) => (
-    <div data-testid="safe-scope" data-scope={initial ? `${initial.chainId}:${initial.safeAddress}` : ''}>
-      {children}
-    </div>
-  ),
-}))
 // Stubbed wholesale rather than with `requireActual`: this module sits in the spaces barrel import
 // cycle, and pulling the real one in from a mock factory dies on its own TDZ.
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -214,8 +196,10 @@ describe('a pending spending limit', () => {
   const mockPendingTx = (tx: Partial<PendingPolicyTransaction>) =>
     mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], ...tx })
 
-  const withTxModal = (ui: ReactElement, txFlow?: ReactElement) => (
-    <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
+  const withTxModal = (ui: ReactElement) => (
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+      {ui}
+    </TxModalContext.Provider>
   )
 
   const renderPending = (policy: PendingSpendingLimitPolicy = pending, isUnlisted?: boolean) =>
@@ -230,34 +214,43 @@ describe('a pending spending limit', () => {
     mockUseConnectWallet.mockReturnValue(connectWallet)
   })
 
-  it('offers a signer who has not signed to review, and hands the transaction to the tx flow for its Safe', async () => {
+  const SPACE_ID = '9f3c1a2b-4d5e-4f60-8a7b-1c2d3e4f5a6b'
+
+  const expectedTxHref = {
+    pathname: AppRoutes.transactions.tx,
+    query: { id: getPendingTxId(pending), safe: `${chain.shortName}:${pending.safe.address}`, spaceId: SPACE_ID },
+  }
+
+  const renderInSpace = (policy: PendingSpendingLimitPolicy = pending) => {
+    const push = jest.fn(() => Promise.resolve(true))
+    const result = renderWithUserEvent(withTxModal(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />), {
+      routerProps: { push, query: { spaceId: SPACE_ID } },
+    })
+    return { ...result, push }
+  }
+
+  it('sends a signer who has not signed to the transaction in the Safe queue', async () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({ txSummary })
 
-    const { user } = renderPending()
+    const { user, push } = renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
     await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
-    expect(setTxFlow).toHaveBeenCalledTimes(1)
-    render(setTxFlow.mock.calls[0][0])
-    expect(screen.getByTestId('safe-scope')).toHaveAttribute(
-      'data-scope',
-      `${pending.safe.chainId}:${pending.safe.address}`,
-    )
-    expect(screen.getByTestId('confirm-tx-flow')).toHaveAttribute('data-tx-id', txSummary.id)
+    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expect(setTxFlow).not.toHaveBeenCalled()
   })
 
-  it('steps aside while the tx flow is open, and comes back once it closes', async () => {
+  it('sends anyone to the queue to execute a fully signed transaction', async () => {
     mockWallet()
-    mockSpaceSafes(false, pending.safe)
-    mockPendingTx({ txSummary })
+    mockSpaceSafes(true, pending.safe)
+    mockPendingTx({ txSummary, confirmationsSubmitted: 2 })
 
-    const { rerender } = renderPending()
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />, <div />))
-    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument())
+    const { user, push } = renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 2, confirmationsRequired: 2 }))
+    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
 
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />))
-    expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expect(setTxFlow).not.toHaveBeenCalled()
   })
 
   it('offers a signer who already signed the link to share instead', () => {
@@ -300,15 +293,27 @@ describe('a pending spending limit', () => {
     })
   })
 
-  it('keeps Review transaction disabled until the transaction has loaded, without asking to sign yet', () => {
+  it('offers Review transaction before the transaction has loaded, without asking to sign yet', async () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({})
 
+    const { user, push } = renderInSpace()
+    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+
+    expect(push).toHaveBeenCalledWith(expectedTxHref)
+    expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
+  })
+
+  it('keeps Review transaction disabled until the chain configs have loaded', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+    mockUseChain.mockReturnValue(undefined)
+
     renderPending()
 
     expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
-    expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
   })
 
   it('offers to try again when the transaction could not be loaded', async () => {

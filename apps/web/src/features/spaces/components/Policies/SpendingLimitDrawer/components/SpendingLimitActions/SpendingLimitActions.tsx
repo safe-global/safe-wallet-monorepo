@@ -6,7 +6,7 @@ import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
   transactionLink?: string
-  /** Absent until the queued transaction has loaded: the flow needs its summary. */
+  /** Absent until the chain configs have loaded, or while an unlisted row awaits its outcome. */
   onReviewTransaction?: () => void
   /** Set when the queued transaction failed to load. */
   onRetry?: () => void
