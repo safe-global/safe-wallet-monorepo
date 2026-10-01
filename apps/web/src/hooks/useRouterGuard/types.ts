@@ -24,6 +24,7 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
+  isCreatedSpaceOwned: boolean
 }
 
 // ---------------------------------------------------------------------------

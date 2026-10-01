@@ -1,7 +1,8 @@
 import { renderHook, act } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import useSpaceSubmit, { CREATED_SPACE_QUERY_PARAM } from './useSpaceSubmit'
+import { CREATED_SPACE_QUERY_PARAM } from '@/features/spaces/constants'
+import useSpaceSubmit from './useSpaceSubmit'
 
 const mockPush = jest.fn()
 const mockReplace = jest.fn()

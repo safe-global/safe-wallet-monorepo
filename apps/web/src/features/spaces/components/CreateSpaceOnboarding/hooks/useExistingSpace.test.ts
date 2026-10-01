@@ -40,6 +40,17 @@ describe('useExistingSpace', () => {
     expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: '' }, { skip: true })
   })
 
+  it('loads the name of a Workspace waiting on its trial offer without entering edit mode', () => {
+    mockRouterQuery = { createdSpaceId: '11111111-1111-1111-1111-111111111111' }
+    setQueryResult({ data: { id: 7, name: 'Treasury' } })
+
+    const { result } = renderHook(() => useExistingSpace(mockSetValue))
+
+    expect(result.current.isEditMode).toBe(false)
+    expect(useSpacesGetOneV1Query).toHaveBeenCalledWith({ id: '11111111-1111-1111-1111-111111111111' }, { skip: false })
+    expect(mockSetValue).toHaveBeenCalledWith('name', 'Treasury', { shouldValidate: true })
+  })
+
   it('is in edit mode and runs the query when the URL carries a spaceId', () => {
     mockRouterQuery = { spaceId: '11111111-1111-1111-1111-111111111111' }
 

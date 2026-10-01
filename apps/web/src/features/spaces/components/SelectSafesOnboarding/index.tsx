@@ -19,6 +19,7 @@ import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import ConnectWalletHint from '../ConnectWalletHint'
 import { NameAccountsFields } from '../NameAccounts'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
+import useTrialOfferReturn from './hooks/useTrialOfferReturn'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
 import useOnboardingSelection from './hooks/useOnboardingSelection'
@@ -35,6 +36,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
+  useTrialOfferReturn(spaceId)
   const {
     trustedSafes,
     ownedSafes,

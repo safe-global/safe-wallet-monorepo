@@ -10,6 +10,7 @@ import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
+import { CREATED_SPACE_QUERY_PARAM } from '@/features/spaces'
 
 // ---------------------------------------------------------------------------
 // Route classifications
@@ -66,10 +67,11 @@ const guardRules: GuardRule[] = [
     },
   },
 
-  // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
+  // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page.
+  // A Workspace just created and still waiting on its trial offer stays on the onboarding step.
   {
-    match: ({ hasSpaces, isOnboardingRoute, query }) => {
-      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
+    match: ({ hasSpaces, isOnboardingRoute, query, isCreatedSpaceOwned }) => {
+      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId && !isCreatedSpaceOwned
       return shouldRedirect
     },
     action: ({ query }) => {
@@ -110,6 +112,7 @@ export const useFlowActivationGuard: UseGuard = () => {
 
     let hasSpaces = false
     let isPartOfSpaceUrl = true
+    let isCreatedSpaceOwned = false
 
     if (isSiweAuthenticated) {
       const { data: spaces, error } = await fetchSpaces(undefined)
@@ -130,6 +133,11 @@ export const useFlowActivationGuard: UseGuard = () => {
       if (query.spaceId) {
         isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
       }
+
+      const createdSpaceId = query[CREATED_SPACE_QUERY_PARAM]
+      if (createdSpaceId) {
+        isCreatedSpaceOwned = !!spaces && spaces.some((s) => s.uuid === createdSpaceId)
+      }
     }
 
     const isSpacesPath = pathname.startsWith('/spaces')
@@ -147,6 +155,7 @@ export const useFlowActivationGuard: UseGuard = () => {
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
+        isCreatedSpaceOwned,
       },
       guardRules,
     )

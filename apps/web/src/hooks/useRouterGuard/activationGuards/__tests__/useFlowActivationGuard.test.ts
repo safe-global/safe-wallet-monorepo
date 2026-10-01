@@ -469,6 +469,32 @@ describe('useFlowActivationGuard', () => {
       })
     })
 
+    it("should allow the create step when it names one of the user's Workspaces waiting on its trial offer", async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        query: { createdSpaceId: MOCK_SPACE_UUID },
+        spaces: defaultSpaces,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it("should still redirect when the created Workspace is not one of the user's", async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        query: { createdSpaceId: 'someone-elses-workspace' },
+        spaces: defaultSpaces,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.spaces.createSpace })
+    })
+
     it('should allow onboarding route when spaceId is present', async () => {
       setupMocks({
         pathname: AppRoutes.welcome.createSpace,
