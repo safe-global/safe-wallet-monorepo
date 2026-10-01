@@ -36,6 +36,7 @@ const mockChain = chainBuilder()
       safeCreationSponsored: false,
       safeTransactionSponsored: false,
       enableTenderlySimulationBeforeRelay: false,
+      gasPaymentOptions: ['SUBSCRIPTION'],
     },
   })
   .build()
