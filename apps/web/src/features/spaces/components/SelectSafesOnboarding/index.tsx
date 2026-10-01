@@ -1,4 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
+import { useRouter } from 'next/router'
 import { FormProvider, useWatch } from 'react-hook-form'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
@@ -9,6 +10,8 @@ import SimilarityConfirmDialog from '@/components/common/TrustedSafesModal/Simil
 import { OnboardingLayout, StepCounter, SafeAppMockup, deriveSidePanelAccountsFromSpace } from '../OnboardingLayout'
 import useWallet from '@/hooks/wallets/useWallet'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import ClaimTrialModal from '../Plans/ClaimTrialModal'
+import { AppRoutes } from '@/config/routes'
 import { type AllSafeItems } from '@/hooks/safes'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
@@ -19,6 +22,7 @@ import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import ConnectWalletHint from '../ConnectWalletHint'
 import { NameAccountsFields } from '../NameAccounts'
 import useOnboardingNavigation from './hooks/useOnboardingNavigation'
+import useOffersTrial from './hooks/useOffersTrial'
 import useOnboardingSafes from './hooks/useOnboardingSafes'
 import useOnboardingSubmit from './hooks/useOnboardingSubmit'
 import useOnboardingSelection from './hooks/useOnboardingSelection'
@@ -35,6 +39,8 @@ const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
   const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
+  const router = useRouter()
+  const offersTrial = useOffersTrial(spaceId)
   const {
     trustedSafes,
     ownedSafes,
@@ -226,6 +232,15 @@ const SelectSafesOnboarding = (): ReactElement => {
       )}
 
       {spaceId && <CheckoutReturnModals spaceId={spaceId} trialCtaLabel="Get started" />}
+
+      {offersTrial && spaceId && (
+        <ClaimTrialModal
+          spaceId={spaceId}
+          variant="new"
+          returnPathname={AppRoutes.welcome.selectSafes}
+          onBack={() => router.push(AppRoutes.welcome.accounts)}
+        />
+      )}
     </>
   )
 }
