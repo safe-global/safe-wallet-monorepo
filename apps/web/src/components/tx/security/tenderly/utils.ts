@@ -7,6 +7,7 @@ import {
 } from '@/services/contracts/safeContracts'
 import type { TenderlySimulatePayload } from '@safe-global/utils/components/tx/security/tenderly/types'
 import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 
 import type {
   MultiSendTransactionSimulationParams,
@@ -21,6 +22,7 @@ import {
 
 export const _getSingleTransactionPayload = async (
   params: SingleTransactionSimulationParams,
+  scope?: TxSenderScope,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
   // If a transaction is executable we simulate with the proposed/selected gasLimit and the actual signatures
   let transaction = params.transactions
@@ -38,7 +40,7 @@ export const _getSingleTransactionPayload = async (
     transaction = simulatedTransaction
   }
 
-  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(params.safe)
+  const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(params.safe, scope)
 
   const input = readOnlySafeContract.encode('execTransaction', [
     transaction.data.to,
@@ -61,12 +63,14 @@ export const _getSingleTransactionPayload = async (
 
 export const _getMultiSendCallOnlyPayload = async (
   params: MultiSendTransactionSimulationParams,
+  scope?: TxSenderScope,
 ): Promise<Pick<TenderlySimulatePayload, 'to' | 'input'>> => {
   const data = encodeMultiSendData(params.transactions) as `0x${string}`
   const readOnlyMultiSendContract = await getReadOnlyMultiSendCallOnlyContract(
     params.safe.version,
     params.safe.chainId,
     params.safe.implementation?.value,
+    scope,
   )
 
   return {
@@ -75,8 +79,8 @@ export const _getMultiSendCallOnlyPayload = async (
   }
 }
 
-const getLatestBlockGasLimit = async (): Promise<number> => {
-  const web3ReadOnly = getWeb3ReadOnly()
+const getLatestBlockGasLimit = async (scope?: TxSenderScope): Promise<number> => {
+  const web3ReadOnly = scope?.web3ReadOnly ?? getWeb3ReadOnly()
   const latestBlock = await web3ReadOnly?.getBlock('latest')
   if (!latestBlock) {
     throw Error('Could not determine block gas limit')
@@ -84,12 +88,15 @@ const getLatestBlockGasLimit = async (): Promise<number> => {
   return Number(latestBlock.gasLimit)
 }
 
-export const getSimulationPayload = async (params: SimulationTxParams): Promise<TenderlySimulatePayload> => {
-  const gasLimit = params.gasLimit ?? (await getLatestBlockGasLimit())
+export const getSimulationPayload = async (
+  params: SimulationTxParams,
+  scope?: TxSenderScope,
+): Promise<TenderlySimulatePayload> => {
+  const gasLimit = params.gasLimit ?? (await getLatestBlockGasLimit(scope))
 
   const payload = isSingleTransactionSimulation(params)
-    ? await _getSingleTransactionPayload(params)
-    : await _getMultiSendCallOnlyPayload(params)
+    ? await _getSingleTransactionPayload(params, scope)
+    : await _getMultiSendCallOnlyPayload(params, scope)
 
   const stateOverwrites = getStateOverwrites(params)
   const stateOverwritesLength = Object.keys(stateOverwrites).length
