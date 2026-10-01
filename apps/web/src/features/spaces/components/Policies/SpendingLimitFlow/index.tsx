@@ -14,8 +14,6 @@ import ReviewSpendingLimitPolicy from './ReviewStep'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from './types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from './constants'
 
-const SpendingLimitIcon = (): ReactElement => <WalletCards aria-hidden />
-
 const trackTxSigned: SubmitCallbackWithData<SpendingLimitPolicyFormValues> = ({ isExecuted = false }) => {
   trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, { [MixpanelEventParams.IS_EXECUTED]: isExecuted })
 }
