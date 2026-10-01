@@ -161,7 +161,7 @@ describe('ExecuteForm', () => {
 
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
-    expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+    expect(getByText('Who will pay gas fees')).toBeInTheDocument()
   })
 
   it('keeps the gas-fee selector on screen, sponsoring disabled, when the Workspace allowance is spent', () => {
@@ -178,7 +178,7 @@ describe('ExecuteForm', () => {
 
     const { getByText, getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
 
-    expect(getByText('Who will pay gas fees:')).toBeInTheDocument()
+    expect(getByText('Who will pay gas fees')).toBeInTheDocument()
     expect(getByTestId('relay-execution-method').querySelector('[data-slot=radio-group-item]')).toHaveAttribute(
       'data-disabled',
     )

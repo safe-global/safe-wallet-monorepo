@@ -109,7 +109,7 @@ const SelectSafesOnboarding = (): ReactElement => {
           <Typography variant="h2">{isNameStep ? 'Name your Safe accounts' : 'Select Safe accounts'}</Typography>
           {!isNameStep && (
             <Typography variant="paragraph" color="muted">
-              Choose which Safe account to add to this Workspace. You can add more later.
+              Select which Safe accounts to add to this Workspace. You can add more later.
             </Typography>
           )}
         </div>
@@ -195,7 +195,7 @@ const SelectSafesOnboarding = (): ReactElement => {
           disabled={isSubmitting}
           className="cursor-pointer text-sm font-semibold text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
         >
-          Skip, add Safes later
+          Skip, add Safe accounts later
         </button>
       )}
     </div>

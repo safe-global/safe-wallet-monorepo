@@ -133,7 +133,7 @@ describe('SpaceSafeAccounts', () => {
     mockUseSeatUpsell.mockReturnValue({ isSafePro: true, tierName: 'Business', limit: 2, plansHref: '/spaces/plans' })
     rerender(<SpaceSafeAccounts />)
     expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2')
-    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 2 Safe accounts')
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('The Business plan includes 2 Safe accounts')
   })
 
   it('counts a Safe on several chains as one seat', () => {

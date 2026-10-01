@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
+import { formatDate } from '@safe-global/utils/utils/date'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { SafeProNoticeModal } from '../SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
@@ -19,12 +20,17 @@ export const _memberCopy = (
   if (reason === 'trial-offered') {
     return {
       title: claimCopy(trialPeriodDays).title,
-      body: `${spaceName} is locked until an admin starts the free access. Your Safe accounts remain available outside the Workspace.`,
+      body: `${spaceName} is locked until an admin claims free access. Your Safe accounts remain available in My accounts.`,
     }
   }
   return {
-    title: reason === 'payment-failed' ? 'Your Workspace’s last payment failed' : chooserCopy(reason, endedAt).title,
-    body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
+    title:
+      reason === 'payment-failed'
+        ? 'Your Workspace’s last payment failed'
+        : reason === 'lapsed' && endedAt !== null
+          ? `Your free access ended on ${formatDate(endedAt)}`
+          : chooserCopy(reason, endedAt).title,
+    body: 'An admin needs to choose a plan to unlock your Workspace.\nYour Safe accounts remain available in My accounts.',
   }
 }
 

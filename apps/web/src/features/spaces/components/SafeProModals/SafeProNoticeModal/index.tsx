@@ -39,7 +39,7 @@ const SafeProNoticeModal = ({
         <Typography variant="h4" as={DialogTitle}>
           {title}
         </Typography>
-        <Typography variant="paragraph-small" color="muted">
+        <Typography variant="paragraph-small" color="muted" className="whitespace-pre-line">
           {body}
         </Typography>
       </div>

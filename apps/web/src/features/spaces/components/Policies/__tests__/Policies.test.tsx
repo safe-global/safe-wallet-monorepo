@@ -125,7 +125,7 @@ describe('Policies', () => {
     render(<Policies />)
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
-    expect(screen.getByText('Proposer')).toBeInTheDocument()
+    expect(screen.getByText('Proposer role')).toBeInTheDocument()
     expect(screen.getByText('Something missing?')).toBeInTheDocument()
   })
 
@@ -197,7 +197,7 @@ describe('Policies', () => {
     it('explains the proposer role before the flow starts', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -205,7 +205,7 @@ describe('Policies', () => {
     it('returns to the catalogue with nothing started when dismissed', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
@@ -215,7 +215,7 @@ describe('Policies', () => {
     it('records that it has been shown', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       expect(mockSetHasSeenProposerIntro).toHaveBeenCalledWith(true)
@@ -226,7 +226,7 @@ describe('Policies', () => {
       mockHasSeenProposerIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
@@ -235,7 +235,7 @@ describe('Policies', () => {
       mockHasSeenSpendingLimitIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -243,7 +243,7 @@ describe('Policies', () => {
     it('opens the proposer intro and no other policy dialog', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
@@ -252,7 +252,7 @@ describe('Policies', () => {
     it('opens the proposer flow from the intro', async () => {
       const { user, setTxFlow } = renderWithTxModal()
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
       await user.click(await screen.findByRole('button', { name: 'Set up proposer' }))
 
       expect(setTxFlow).toHaveBeenCalledTimes(1)
@@ -264,7 +264,7 @@ describe('Policies', () => {
       mockHasSeenProposerIntro = true
       const { user, setTxFlow } = renderWithTxModal()
 
-      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
       expect(setTxFlow).toHaveBeenCalledTimes(1)
       expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)

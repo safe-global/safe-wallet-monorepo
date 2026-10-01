@@ -49,7 +49,7 @@ const SponsoredTxsCounter = ({
             <span className="font-semibold" data-testid="sponsored-txs-left">
               {left}
             </span>
-            <span className="text-muted-foreground"> of {quota} sponsored transactions left</span>
+            <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
           </span>
         ) : (
           <span className="inline-flex items-center gap-1">

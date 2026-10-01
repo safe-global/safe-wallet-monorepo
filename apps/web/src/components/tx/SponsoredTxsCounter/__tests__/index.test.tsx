@@ -13,7 +13,7 @@ describe('SponsoredTxsCounter', () => {
     render(<SponsoredTxsCounter left={30} quota={50} resetsAt="2026-11-01T00:00:00.000Z" isPro />)
 
     expect(screen.getByTestId('sponsored-txs-counter')).toHaveTextContent(
-      '30 of 50 sponsored transactions left· Resets Nov 1, 00:00 UTC',
+      '30/50 sponsored transactions left· Resets Nov 1, 00:00 UTC',
     )
     expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
     expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()

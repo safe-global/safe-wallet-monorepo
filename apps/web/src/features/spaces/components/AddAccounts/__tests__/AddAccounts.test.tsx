@@ -212,7 +212,7 @@ describe('AddAccounts — Safe account limit', () => {
     fireEvent.click(screen.getByTestId('safe-accounts-table'))
 
     expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 40 selected')
-    expect(screen.getByTestId('add-accounts-button')).toHaveTextContent('Add accounts (1)')
+    expect(screen.getByTestId('add-accounts-button')).toHaveTextContent('Save')
   })
 
   it('counts against a known limit and leaves picking open below it', () => {
