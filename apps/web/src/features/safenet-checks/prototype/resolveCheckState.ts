@@ -1,4 +1,5 @@
 import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types'
+import { isRunningPhase } from './copy'
 import type { SafenetCheckOutcome, SafenetCheckState, SafenetScenario, SafenetSignerRole } from './types'
 
 export const SUBMITTED_DURATION_MS = 3_000
@@ -34,7 +35,7 @@ export const resolveCheckState = (
   if (role === 'first-signer' && !options.isExecuted) return { phase: 'before-sign' }
 
   const outcome = outcomeState(scenario.outcome, startedAtMs)
-  if (options.isExecuted || scenario.timing === 'instant') return outcome
+  if (options.isExecuted || scenario.timing === 'instant' || isRunningPhase(outcome.phase)) return outcome
 
   const elapsedMs = nowMs - startedAtMs
   if (elapsedMs < SUBMITTED_DURATION_MS) return { phase: 'submitted', startedAtMs }

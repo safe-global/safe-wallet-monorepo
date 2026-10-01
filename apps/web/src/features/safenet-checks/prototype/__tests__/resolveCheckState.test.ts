@@ -44,6 +44,11 @@ describe('resolveCheckState', () => {
     expect(resolveCheckState(s, 'co-signer', START, START + 10 * CHECK_ETA_MS).phase).toBe('checking')
   })
 
+  it('holds a running outcome instead of cycling back to it', () => {
+    const s = scenario({ timing: 'about-60s', outcome: 'submitted' })
+    expect(resolveCheckState(s, 'co-signer', START, START + 10 * CHECK_ETA_MS).phase).toBe('submitted')
+  })
+
   it('returns the outcome straight away when timing is instant', () => {
     expect(resolveCheckState(scenario({ timing: 'instant', outcome: 'risk' }), 'co-signer', START, START)).toEqual({
       phase: 'risk',
