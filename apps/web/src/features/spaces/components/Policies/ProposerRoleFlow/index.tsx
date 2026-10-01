@@ -29,6 +29,8 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const { grantProposerRole, isSubmitting, error, blockedReason, reset } = useGrantProposer()
   const spaceId = useUrlSpaceId()
 
+  const closeWithoutPrompt = useCallback(() => setTxFlow(undefined, undefined, false), [setTxFlow])
+
   const account = findSafeAccount(safeAccounts.accounts, safeAccount)
   const { parentSafeAddress, isChecking } = useParentSafeWallet(account?.chainId)
   const parentContact = useAddressBookItem(parentSafeAddress ?? '', account?.chainId)
@@ -43,6 +45,7 @@ const ProposerRoleFlowContent = (): ReactElement => {
                 query: withSpaceId({ safe: `${account.chain.shortName}:${account.address}` }, spaceId),
               }
             : undefined,
+          onNavigate: closeWithoutPrompt,
         }
       : undefined
 

@@ -8,12 +8,14 @@ export type ParentSafeWalletNoticeProps = {
   safeName: string
   parentSafeName: string
   settingsHref?: UrlObject
+  onNavigate?: () => void
 }
 
 const ParentSafeWalletNotice = ({
   safeName,
   parentSafeName,
   settingsHref,
+  onNavigate,
 }: ParentSafeWalletNoticeProps): ReactElement => (
   <Alert variant="warning" outlined={false} data-testid="parent-safe-wallet-notice">
     <AlertSeverityIcon variant="warning" />
@@ -23,7 +25,11 @@ const ParentSafeWalletNotice = ({
         Your connected wallet, {parentSafeName}, is a parent Safe account of {safeName}. To grant this role on its
         behalf, open the settings of {safeName} with a signer of {parentSafeName}.
       </p>
-      {settingsHref && <Link render={<NextLink href={settingsHref} />}>Go to Safe settings</Link>}
+      {settingsHref && (
+        <Link render={<NextLink href={settingsHref} />} onMouseDown={onNavigate} onClick={onNavigate}>
+          Go to Safe settings
+        </Link>
+      )}
     </AlertDescription>
   </Alert>
 )
