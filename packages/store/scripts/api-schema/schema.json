@@ -11056,6 +11056,13 @@
             "items": {
               "$ref": "#/components/schemas/SpaceSafeDto"
             }
+          },
+          "addressBookItems": {
+            "description": "Address book entries to upsert for the added Safes. They are written after the Safes are added; if that write fails, the Safes stay added and the request fails with 502.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
           }
         },
         "required": [

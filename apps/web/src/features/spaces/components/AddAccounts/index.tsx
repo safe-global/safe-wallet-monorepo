@@ -23,6 +23,7 @@ import {
   useSpaceAddressBookState,
   useIsAdmin,
   useSpaceSafes,
+  usePrepareWorkspaceSafeNames,
   useUpsertWorkspaceSafeNames,
 } from '@/features/spaces'
 import {
@@ -139,6 +140,7 @@ const AddAccounts = ({
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const prepareNames = usePrepareWorkspaceSafeNames()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
   const {
     items: spaceAddressBook,
@@ -304,12 +306,18 @@ const AddAccounts = ({
         })
       }
 
+      const preparedNames = prepareNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+      if (preparedNames.error !== undefined) {
+        setError(preparedNames.error)
+        return
+      }
+
       try {
-        // Add new safes
+        // Add new Safes and their names
         if (safesToAdd.length > 0) {
           const result = await addSafesToSpace({
             spaceId: spaceId ?? '',
-            createSpaceSafesDto: { safes: safesToAdd },
+            createSpaceSafesDto: { safes: safesToAdd, addressBookItems: preparedNames.items },
           })
 
           if (isElevationRequiredError(result.error)) return
@@ -354,10 +362,13 @@ const AddAccounts = ({
           })
         }
 
-        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-        if (namesResult.error) {
-          setError(namesResult.error)
-          return
+        // A retry after the names failed has no Safes left to add, so the names go on their own.
+        if (safesToAdd.length === 0) {
+          const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+          if (namesResult.error) {
+            setError(namesResult.error)
+            return
+          }
         }
 
         // Show success notification

@@ -78,6 +78,7 @@ export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLab
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
 export {
   ADDRESS_BOOK_UNAVAILABLE,
+  usePrepareWorkspaceSafeNames,
   useUpsertWorkspaceSafeName,
   useUpsertWorkspaceSafeNames,
 } from './hooks/useUpsertWorkspaceSafeName'

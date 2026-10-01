@@ -575,6 +575,8 @@ export type SpaceSafeDto = {
 }
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
+  /** Address book entries to upsert for the added Safes. They are written after the Safes are added; if that write fails, the Safes stay added and the request fails with 502. */
+  addressBookItems?: AddressBookItem[]
 }
 export type GetSpaceSafeResponse = {
   safes: {

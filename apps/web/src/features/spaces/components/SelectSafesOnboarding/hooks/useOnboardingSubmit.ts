@@ -7,6 +7,7 @@ import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
+  type AddressBookItem,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -23,6 +24,7 @@ import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
+  usePrepareWorkspaceSafeNames,
   useUpsertWorkspaceSafeNames,
   type WorkspaceSafeName,
 } from '../../../hooks/useUpsertWorkspaceSafeName'
@@ -75,6 +77,7 @@ const useOnboardingSubmit = (
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const prepareNames = usePrepareWorkspaceSafeNames()
   const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
   const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
   const isAddressBookReady = !isLoading && !isError
@@ -168,12 +171,16 @@ const useOnboardingSubmit = (
       .map(([key]) => parseSafeKey(key))
   }
 
-  const addNewSafes = async (safesToAdd: Array<{ chainId: string; address: string }>, spaceIdStr: string) => {
+  const addNewSafes = async (
+    safesToAdd: Array<{ chainId: string; address: string }>,
+    spaceIdStr: string,
+    addressBookItems: AddressBookItem[],
+  ) => {
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
       spaceId: spaceIdStr,
-      createSpaceSafesDto: { safes: safesToAdd },
+      createSpaceSafesDto: { safes: safesToAdd, addressBookItems },
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
@@ -229,10 +236,14 @@ const useOnboardingSubmit = (
     spaceIdStr: string,
     names: WorkspaceSafeName[],
   ) => {
+    const prepared = prepareNames(names)
+    if (prepared.error !== undefined) throw new Error(prepared.error)
     // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
-    await addNewSafes(safesToAdd, spaceIdStr)
+    await addNewSafes(safesToAdd, spaceIdStr, prepared.items)
     trustAddedSafes(safesToAdd)
+    // A retry after the names failed has no Safes left to add, so the names go on their own.
+    if (safesToAdd.length > 0) return
     const namesResult = await upsertWorkspaceNames(names)
     if (namesResult.error) {
       throw new Error(namesResult.error)
