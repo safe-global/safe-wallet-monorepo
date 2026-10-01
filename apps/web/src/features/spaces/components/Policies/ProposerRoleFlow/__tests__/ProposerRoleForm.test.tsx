@@ -131,6 +131,37 @@ describe('ProposerRoleForm', () => {
       expect(submitButton()).toBeDisabled()
     })
 
+    it('shows the parent Safe notice with a settings link and blocks submit when the wallet is a parent Safe', async () => {
+      renderForm({
+        safeAccount: treasury.id,
+        defaultValues: { proposer: PROPOSER },
+        parentSafeWallet: {
+          safeName: 'Treasury',
+          parentSafeName: 'Ops',
+          settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } },
+        },
+      })
+
+      expect(screen.getByText('Add this proposer on the Safe account level')).toBeInTheDocument()
+      expect(screen.getByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+        'Your connected wallet, Ops, is a parent Safe account of Treasury. To grant this role on its behalf, open the settings of Treasury with a signer of Ops.',
+      )
+      expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('/settings/setup?safe='),
+      )
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('keeps submit disabled while the wallet is still being checked', async () => {
+      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER }, isCheckingWallet: true })
+
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(screen.queryByTestId('parent-safe-wallet-notice')).not.toBeInTheDocument()
+      expect(submitButton()).toBeDisabled()
+    })
+
     it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {
       renderForm({ safeAccount: buildSafeAccountId('137', SAFE), defaultValues: { proposer: PROPOSER } })
 

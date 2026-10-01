@@ -15,6 +15,7 @@ import { useIsAdmin } from '../../../hooks/useSpaceMembers'
 import SafeAccountSelector from '../SafeAccountSelector'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
+import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from './components/ParentSafeWalletNotice'
 import {
   GRANT_INFO_DESCRIPTION,
   GRANT_INFO_TITLE,
@@ -38,6 +39,8 @@ export type ProposerRoleFormProps = {
   defaultValues?: Partial<ProposerRoleFormValues>
   isSubmitting?: boolean
   errorMessage?: ReactNode
+  parentSafeWallet?: ParentSafeWalletNoticeProps
+  isCheckingWallet?: boolean
 }
 
 const ProposerRoleForm = ({
@@ -49,6 +52,8 @@ const ProposerRoleForm = ({
   defaultValues,
   isSubmitting = false,
   errorMessage,
+  parentSafeWallet,
+  isCheckingWallet = false,
 }: ProposerRoleFormProps) => {
   const methods = useForm<ProposerRoleFormValues>({
     defaultValues: { proposer: '', name: '', ...defaultValues },
@@ -78,7 +83,7 @@ const ProposerRoleForm = ({
 
   const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
   const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
-  const canSubmit = !isSafeBlocked && formState.isValid
+  const canSubmit = !isSafeBlocked && !parentSafeWallet && !isCheckingWallet && formState.isValid
 
   // The picked Safe stays even when typed as its own proposer, so the field keeps it and validation explains why.
   const accountOptions = useMemo(
@@ -110,6 +115,8 @@ const ProposerRoleForm = ({
               onRetry={safeAccounts.refetch}
               hasWallet={safeAccounts.hasWallet}
             />
+
+            {parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
 
             <div className="flex flex-col gap-1">
               <AddressBookInput
