@@ -54,7 +54,7 @@ export const useGasPaymentOptions = ({
           isGasTooHigh,
         },
         daily: relays,
-        pro: { isEnabled, isPro, left, meter, spaceId },
+        pro: { isEnabled, isPro, isLoading: isProLoading, left, meter, spaceId },
         excluded,
       }),
     [
@@ -68,6 +68,7 @@ export const useGasPaymentOptions = ({
       relays,
       isEnabled,
       isPro,
+      isProLoading,
       left,
       meter,
       spaceId,

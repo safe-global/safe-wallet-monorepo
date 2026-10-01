@@ -38,8 +38,8 @@ const SponsoredTxsCounter = ({
   resetsAt: string | null
   /** Counts a plan's allowance per cycle instead of the free daily limit. */
   isSubscription: boolean
-  /** Shows the Pro chip instead of the upgrade button. */
-  isPro: boolean
+  /** Shows the Pro chip instead of the upgrade button; null (plan loading) shows neither. */
+  isPro: boolean | null
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
 
@@ -79,7 +79,9 @@ const SponsoredTxsCounter = ({
         {resets && <span className="text-xs text-muted-foreground">· Resets {resets}</span>}
       </Typography>
 
-      {isPro ? (
+      {isPro === null ? (
+        <span className="block h-5 w-8 shrink-0" aria-hidden />
+      ) : isPro ? (
         <span className="block h-5 w-8 shrink-0" role="img" aria-label="Safe Pro">
           <ProChip className="size-full" />
         </span>

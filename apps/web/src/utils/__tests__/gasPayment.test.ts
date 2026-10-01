@@ -11,7 +11,7 @@ const buildInputs = (overrides: Partial<GasPaymentInputs> = {}): GasPaymentInput
   walletCanRelay: true,
   campaign: { isEligible: true, remaining: 3, limit: 5, isGasTooHigh: false },
   daily: { remaining: 4, limit: 5 },
-  pro: { isEnabled: true, isPro: true, left: 40, meter, spaceId },
+  pro: { isEnabled: true, isPro: true, isLoading: false, left: 40, meter, spaceId },
   excluded: new Set(),
   ...overrides,
 })
@@ -48,10 +48,18 @@ describe('selectSponsoredOffer', () => {
     [
       'the daily limit to a Safe without a plan',
       {
-        pro: { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null },
+        pro: { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null },
         excluded: new Set(['NO_FEE_CAMPAIGN']),
       },
       { ...dailyOffer, isPro: false },
+    ],
+    [
+      'the daily limit with the plan unknown while it loads',
+      {
+        chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
+        pro: { isEnabled: true, isPro: false, isLoading: true, left: null, meter: null, spaceId: null },
+      },
+      { ...dailyOffer, isPro: null },
     ],
     [
       'the subscription when no daily relay is left',
@@ -81,7 +89,7 @@ describe('selectSponsoredOffer', () => {
       'no subscription without a plan',
       {
         chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null },
+        pro: { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null },
       },
       null,
     ],
@@ -89,7 +97,7 @@ describe('selectSponsoredOffer', () => {
       'no subscription without a Workspace',
       {
         chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: true, left: 4, meter, spaceId: null },
+        pro: { isEnabled: true, isPro: true, isLoading: false, left: 4, meter, spaceId: null },
       },
       null,
     ],
@@ -125,7 +133,7 @@ describe('selectSponsoredOffer', () => {
     expect(offer).toEqual({ ...subscriptionOffer, left: 0, disabledReason: 'LIMIT_REACHED' })
   })
 
-  const freePro = { isEnabled: true, isPro: false, left: null, meter: null, spaceId: null }
+  const freePro = { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null }
   const spentDaily = { remaining: 0, limit: 5 }
 
   it.each<[string, Partial<GasPaymentInputs>, boolean]>([

@@ -132,6 +132,18 @@ describe('useGasPaymentOptions', () => {
     expect(result.current.offer?.option).toBe('FREE_DAILY_LIMIT')
   })
 
+  it('offers the daily limit with the plan unknown until it loads', () => {
+    mockChain(['FREE_DAILY_LIMIT'])
+    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+
+    const { result, rerender } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
+    expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: null })
+
+    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    rerender()
+    expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: true })
+  })
+
   it('waits for the subscription when the daily limit is spent', () => {
     mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
     mockRelays({ remaining: 0, limit: 5 })

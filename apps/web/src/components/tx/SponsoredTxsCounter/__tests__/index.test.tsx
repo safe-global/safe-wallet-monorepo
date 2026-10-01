@@ -51,6 +51,14 @@ describe('SponsoredTxsCounter', () => {
     expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveTextContent('Upgrade to')
   })
 
+  it('shows neither the PRO chip nor the upgrade nudge while the plan is unknown', () => {
+    render(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isSubscription={false} isPro={null} />)
+
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('3 free transactions left today')
+    expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+  })
+
   it('reads an uncapped plan as unlimited', () => {
     render(<SponsoredTxsCounter left={null} quota={null} resetsAt={null} isSubscription isPro />)
 

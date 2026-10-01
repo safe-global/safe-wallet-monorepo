@@ -40,7 +40,7 @@ jest.mock('../../SponsoredTxsCounter', () => {
   }
 })
 
-const daily = (isPro = false): SponsoredOffer => ({
+const daily = (isPro: boolean | null = false): SponsoredOffer => ({
   option: 'FREE_DAILY_LIMIT',
   disabledReason: null,
   relays: { remaining: 5, limit: 5 },
@@ -178,6 +178,16 @@ describe('ExecutionMethodSelector', () => {
       expect(screen.queryByText(/sponsored transactions left/)).not.toBeInTheDocument()
       expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
       expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    })
+
+    it('keeps the daily counter without the upgrade nudge while the plan loads under SAFE_PRO', () => {
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      renderSelector(daily(null))
+
+      expect(getProps('sponsored-txs-counter-props')).toMatchObject({ isSubscription: false, isPro: null })
+      expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('5 free transactions left today')
+      expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+      expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
     })
   })
 
