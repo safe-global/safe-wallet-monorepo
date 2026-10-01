@@ -50,10 +50,7 @@ export const useSpendingLimitDetails = (
     return Object.fromEntries(named)
   }, [policy.data.spenders, addressBook, chainId])
 
-  const lastUpdated = useMemo(
-    () => (policy.status === 'active' ? formatLastUpdated(policy.data.spenders) : undefined),
-    [policy.status, policy.data.spenders],
-  )
+  const lastUpdated = policy.status === 'active' ? formatLastUpdated(policy.data.spenders) : undefined
 
   return {
     viewer: { address: wallet?.address, isSigner },

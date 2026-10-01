@@ -33,7 +33,7 @@ const MS_PER_SECOND = 1_000
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
 export const formatLastUpdated = (spenders: PolicySpender[]): string | undefined => {
   const createdAts = spenders.flatMap(({ allowances }) =>
-    allowances.flatMap(({ createdAt }) => (createdAt ? [createdAt] : [])),
+    allowances.flatMap(({ createdAt }) => (createdAt != null && createdAt > 0 ? [createdAt] : [])),
   )
   if (createdAts.length === 0) return undefined
 
