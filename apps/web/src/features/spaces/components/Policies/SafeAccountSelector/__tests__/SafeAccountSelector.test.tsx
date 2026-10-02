@@ -611,6 +611,21 @@ describe('SafeAccountSelector', () => {
       expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
       expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['unsupported-chain'])
     })
+
+    it('does not flag a read-only unsupported-network value', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+          readOnly
+        />,
+      )
+
+      expect(screen.getByTestId('safe-account-readonly')).toBeInTheDocument()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-account-helper-text')).toBeInTheDocument()
+    })
   })
 
   it('replaces the helper text with the form validation message', () => {
