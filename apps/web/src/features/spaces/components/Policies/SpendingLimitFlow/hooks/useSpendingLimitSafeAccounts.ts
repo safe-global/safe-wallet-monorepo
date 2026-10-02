@@ -3,7 +3,7 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChains from '@/hooks/useChains'
 import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { filterSafeAccountsByChains, markSafeAccountsOffChains } from '../utils/safeAccounts'
+import { markSafeAccountsOffChains } from '../utils/safeAccounts'
 
 export type SpendingLimitChainSets = {
   /** A spending limit can be created: the SPENDING_LIMIT feature is on and an AllowanceModule is deployed. */
@@ -30,15 +30,16 @@ export const useSpendingLimitChainSets = (): SpendingLimitChainSets => {
 }
 
 /**
- * `useEligibleSafeAccounts` narrowed to chains where a limit can be created, with the chains the Policy
- * Indexer does not cover left in place but disabled, so the row can say where to set the limit up instead.
+ * `useEligibleSafeAccounts` with every row kept: a chain the Policy Indexer does not cover is disabled with a
+ * pointer to the Safe settings, one where no limit can be created at all is disabled with that reason instead.
  */
 export const useSpendingLimitSafeAccounts = () => {
   const eligible = useEligibleSafeAccounts()
   const { creatable, indexed } = useSpendingLimitChainSets()
-  const accounts = useMemo(
-    () => markSafeAccountsOffChains(filterSafeAccountsByChains(eligible.accounts, creatable), indexed),
-    [eligible.accounts, creatable, indexed],
-  )
+  const accounts = useMemo(() => {
+    if (creatable.size === 0) return []
+    const marked = markSafeAccountsOffChains(eligible.accounts, indexed, 'unsupported-chain')
+    return markSafeAccountsOffChains(marked, creatable, 'no-spending-limits')
+  }, [eligible.accounts, creatable, indexed])
   return { ...eligible, accounts }
 }

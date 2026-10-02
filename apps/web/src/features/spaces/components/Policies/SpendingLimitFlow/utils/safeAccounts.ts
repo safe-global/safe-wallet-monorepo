@@ -1,23 +1,14 @@
 import { flattenSafeAccounts, groupSafeAccounts } from '../../SafeAccountSelector/utils'
-import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
+import type { SafeAccountEntry, SafeAccountIneligibility } from '../../SafeAccountSelector/types'
 
-/**
- * Keeps only the per-chain entries on `chainIds`; an ineligible chain is absent, not disabled.
- * Groups are re-formed afterwards so a Safe left with one chain becomes a plain row again.
- */
-export const filterSafeAccountsByChains = (
-  entries: readonly SafeAccountEntry[],
-  chainIds: ReadonlySet<string>,
-): SafeAccountEntry[] =>
-  groupSafeAccounts(flattenSafeAccounts([...entries]).filter((option) => chainIds.has(option.chainId)))
-
-/** Disables, rather than drops, every per-chain entry off `chainIds`; the network reason wins over any other. */
+/** Disables, rather than drops, every per-chain entry off `chainIds`; `reason` wins over any the entry already has. */
 export const markSafeAccountsOffChains = (
   entries: readonly SafeAccountEntry[],
   chainIds: ReadonlySet<string>,
+  reason: SafeAccountIneligibility = 'unsupported-chain',
 ): SafeAccountEntry[] =>
   groupSafeAccounts(
     flattenSafeAccounts([...entries]).map((option) =>
-      chainIds.has(option.chainId) ? option : { ...option, ineligibleReason: 'unsupported-chain' as const },
+      chainIds.has(option.chainId) ? option : { ...option, ineligibleReason: reason },
     ),
   )

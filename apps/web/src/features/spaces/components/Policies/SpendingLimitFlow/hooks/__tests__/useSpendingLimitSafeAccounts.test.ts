@@ -71,12 +71,16 @@ describe('useSpendingLimitSafeAccounts', () => {
     mockConfigs.mockReturnValue(CHAINS)
   })
 
-  it('hides Safes on chains without the spending-limit feature or a module deployment', () => {
+  it('disables Safes on chains without the spending-limit feature or a module deployment', () => {
     eligible([option(SEPOLIA), option('1', SAFE_B), option(NOWHERE, SAFE_B)])
 
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
-    expect(reasons(result.current.accounts)).toEqual([[SEPOLIA, undefined]])
+    expect(reasons(result.current.accounts)).toEqual([
+      [SEPOLIA, undefined],
+      ['1', 'no-spending-limits'],
+      [NOWHERE, 'no-spending-limits'],
+    ])
   })
 
   it('keeps but disables Safes on chains the Policy Indexer does not index', () => {
@@ -90,7 +94,7 @@ describe('useSpendingLimitSafeAccounts', () => {
     ])
   })
 
-  it('keeps a multichain Safe grouped with only its unindexed chains disabled', () => {
+  it('keeps a multichain Safe grouped, each chain carrying its own reason', () => {
     eligible([option(SEPOLIA), option(POLYGON), option('1')])
 
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
@@ -98,6 +102,7 @@ describe('useSpendingLimitSafeAccounts', () => {
     const [group] = result.current.accounts
     expect(isSafeAccountGroup(group)).toBe(true)
     expect(reasons([group])).toEqual([
+      ['1', 'no-spending-limits'],
       [SEPOLIA, undefined],
       [POLYGON, 'unsupported-chain'],
     ])
@@ -129,6 +134,14 @@ describe('useSpendingLimitSafeAccounts', () => {
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
     expect(result.current.accounts).toEqual([])
+  })
+
+  it('never empties a non-empty eligible list once the chain configs are loaded', () => {
+    eligible([option('1'), option(NOWHERE, SAFE_B)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(result.current.accounts).toHaveLength(2)
   })
 
   it('passes the loading, error and wallet state through', () => {

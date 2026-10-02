@@ -95,6 +95,14 @@ const unsupportedNetwork = account(POLYGON, PAYROLL, {
   ineligibleReason: 'unsupported-chain',
 })
 
+const noSpendingLimits = account(HOODI, UNNAMED, {
+  name: 'Testnet ops',
+  threshold: 1,
+  owners: 2,
+  fiatTotal: '0',
+  ineligibleReason: 'no-spending-limits',
+})
+
 const [partlySupportedGroup] = groupSafeAccounts([
   account(ETHEREUM, UNNAMED_MULTI, { name: 'Ops', threshold: 2, owners: 4, fiatTotal: '910.5' }),
   account(POLYGON, UNNAMED_MULTI, {
@@ -198,9 +206,12 @@ export const NotActivatedAccounts: Story = {
   args: { accounts: [treasury, notActivated, partlyActivatedGroup] },
 }
 
-/** A Safe on a network the Policy Indexer does not cover: disabled, balance kept, tooltip on hover. */
+/**
+ * Safes on networks the Policy Indexer does not cover, and one with no spending limits at all: disabled,
+ * balance kept, each with its own tooltip on hover.
+ */
 export const UnsupportedNetworkAccounts: Story = {
-  args: { accounts: [treasury, unsupportedNetwork, partlySupportedGroup] },
+  args: { accounts: [treasury, unsupportedNetwork, noSpendingLimits, partlySupportedGroup] },
 }
 
 export const Disabled: Story = {

@@ -537,6 +537,24 @@ describe('SafeAccountSelector', () => {
     })
   })
 
+  describe('accounts on networks without spending limits', () => {
+    const unavailable = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'no-spending-limits' })
+
+    it('lists the account as a disabled row and explains the network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unavailable]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['no-spending-limits'])).toBeInTheDocument()
+    })
+  })
+
   describe('unsupported-network accounts', () => {
     const unsupported = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-chain' })
 

@@ -37,6 +37,8 @@ export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
   'not-activated': 'You need to activate this Safe before transacting',
   'unsupported-chain':
     "Spending limits on this network aren't supported in the Workspace view. Set them up in the Safe account settings.",
+  'no-spending-limits':
+    "The spending limit module isn't deployed on this chain yet, so new spending limits can't be created here.",
 }
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'
