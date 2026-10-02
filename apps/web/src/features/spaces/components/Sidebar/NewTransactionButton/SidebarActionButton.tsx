@@ -26,7 +26,7 @@ export const SidebarActionButton = (): ReactElement => {
   }
 
   return (
-    <CheckWallet allowSpendingLimit>
+    <CheckWallet allowSpendingLimit allowGnosisPaySafe>
       {(isOk) => (
         <Button
           data-testid="new-tx-btn"
