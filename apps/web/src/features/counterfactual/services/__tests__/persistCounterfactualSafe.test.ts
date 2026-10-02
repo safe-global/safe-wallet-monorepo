@@ -150,6 +150,30 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
+  it('adds the Safe on every given chain to the space in one POST', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      spaceChainIds: ['1', '100'],
+      dispatch,
+    })
+
+    expect(spaceInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).toHaveBeenCalledWith({
+      spaceId: MOCK_SPACE_UUID,
+      createSpaceSafesDto: {
+        safes: [
+          { chainId: '1', address: '0xSafe' },
+          { chainId: '100', address: '0xSafe' },
+        ],
+      },
+    })
+    expect(result.ok).toBe(true)
+  })
+
   it('returns ok=false and skips Redux add when user-endpoint POST fails', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'user-create-thunk') return { error: { status: 500 } }

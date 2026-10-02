@@ -45,6 +45,8 @@ type PersistArgs = {
    *  entry) instead of swallowing it as success. Single-create flows keep the
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
+  /** Chains whose Safe this call adds to the Workspace in one request; defaults to `chainId`. */
+  spaceChainIds?: string[]
   /** Read-only provider for `chainId`, used to check the Safe isn't already
    *  deployed. Must target `chainId`; when absent the check is skipped. */
   provider?: JsonRpcProvider
@@ -80,6 +82,7 @@ export const persistCounterfactualSafe = async ({
   spaceSafeLimit,
   holdsSeatInSpace,
   isMultiChainCreation,
+  spaceChainIds = [chainId],
   provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
@@ -142,7 +145,7 @@ export const persistCounterfactualSafe = async ({
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
             spaceId,
-            createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
+            createSpaceSafesDto: { safes: spaceChainIds.map((id) => ({ chainId: id, address: safeAddress })) },
           }),
         )
         if ('error' in spaceResult) {

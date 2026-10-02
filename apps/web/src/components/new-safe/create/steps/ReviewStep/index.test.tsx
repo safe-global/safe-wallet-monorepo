@@ -637,6 +637,69 @@ describe('ReviewStep', () => {
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 
+    it('adds the Safe to the Workspace on every network in one request, from the last network', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      const data = buildMultiChainData()
+      const [first, last] = data.networks
+
+      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenCalledTimes(2)
+      expect(persistSpy).toHaveBeenNthCalledWith(1, expect.objectContaining({ chainId: first.chainId, spaceId: null }))
+      expect(persistSpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          chainId: last.chainId,
+          spaceId: MOCK_SPACE_UUID,
+          spaceChainIds: [first.chainId, last.chainId],
+        }),
+      )
+    })
+
+    it('leaves a network where the Safe was already deployed out of the Workspace request', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      persistSpy.mockResolvedValueOnce({ ok: true, skipped: 'already-deployed' })
+      const data = buildMultiChainData()
+
+      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ spaceChainIds: [data.networks[1].chainId] }),
+      )
+    })
+
+    it('waits for the step-up instead of opening the Safe when the multi-network Workspace add needs one', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      persistSpy
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(push).not.toHaveBeenCalled()
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBe(newSafeHomeUrl)
+      expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+    })
+
     it('ignores a Workspace stored by another tab when the URL has none', async () => {
       mockUseIsAdmin.mockReturnValue(true)
       const persistSpy = mockCreation()
