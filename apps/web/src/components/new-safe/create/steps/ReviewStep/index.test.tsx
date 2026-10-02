@@ -730,6 +730,28 @@ describe('ReviewStep', () => {
       expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
     })
 
+    it('keeps the Safe name when the single-network Workspace add needs a step-up', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(
+        getStoreInstance().getState().addressBook[chainWithFeatures.chainId]?.[
+          '0x0000000000000000000000000000000000000001'
+        ],
+      ).toBe('Test')
+      expect(push).not.toHaveBeenCalled()
+    })
+
     it('ignores a Workspace stored by another tab when the URL has none', async () => {
       mockUseIsAdmin.mockReturnValue(true)
       const persistSpy = mockCreation()
