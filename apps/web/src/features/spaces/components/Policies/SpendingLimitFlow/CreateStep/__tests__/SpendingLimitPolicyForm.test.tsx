@@ -401,6 +401,19 @@ describe('SpendingLimitPolicyForm', () => {
       expect(screen.queryByTestId('safe-account-selector')).not.toBeInTheDocument()
     })
 
+    it('neither flags the Safe nor blocks the edit when its network is no longer supported', async () => {
+      const { user } = renderEdit({ accounts: [{ ...treasury, ineligibleReason: 'unsupported-chain' }] })
+
+      expect(screen.getByTestId('safe-account-readonly')).toHaveTextContent('Treasury')
+      expect(screen.queryByText(INELIGIBILITY_TEXT['unsupported-chain'])).not.toBeInTheDocument()
+
+      const amount = screen.getByTestId('limit-amount-input')
+      await user.clear(amount)
+      await user.type(amount, '80')
+
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+    })
+
     it('lets the last spender be removed, which the create flow forbids', () => {
       renderEdit()
 

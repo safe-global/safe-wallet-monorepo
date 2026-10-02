@@ -584,6 +584,24 @@ describe('SafeAccountSelector', () => {
       expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
     })
 
+    it('disables only the unsupported chain inside a multichain group', async () => {
+      const group: SafeAccountGroup = {
+        ...multiChainGroup,
+        accounts: [option('1', SAFE_B), option('137', SAFE_B, { ineligibleReason: 'unsupported-chain' })],
+      }
+      const { user } = renderWithUserEvent(<SafeAccountSelector accounts={[group]} onChange={jest.fn()} />)
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByTestId('safe-account-chain-option')
+      expect(rows).toHaveLength(2)
+      expect(rows[0]).not.toHaveAttribute('aria-disabled', 'true')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
     it('keeps the balance column on an unsupported-network row', async () => {
       const { user } = renderWithUserEvent(
         <SafeAccountSelector

@@ -140,6 +140,14 @@ describe('useSpendingLimitSafeAccounts', () => {
     expect(result.current.isLoading).toBe(true)
   })
 
+  it('is not loading once both the chain configs and the eligible accounts have resolved', () => {
+    eligible([option(SEPOLIA)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(result.current.isLoading).toBe(false)
+  })
+
   it('disables every Safe when no loaded chain can create a spending limit', () => {
     mockConfigs.mockReturnValue(CHAINS.map((chain) => ({ ...chain, features: [] })))
     eligible([option(SEPOLIA), option(POLYGON, SAFE_B)])
