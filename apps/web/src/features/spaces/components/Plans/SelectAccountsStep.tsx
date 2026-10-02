@@ -10,6 +10,7 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { countSeats } from '@/utils/spaces'
 import type { SafeRef } from './types'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
@@ -78,6 +79,8 @@ export default function SelectAccountsStep({
     [allSafes, selectedKeys],
   )
 
+  const removedCount = countSeats(removed.map(({ address }) => address))
+
   return (
     <>
       <Typography variant="h3" as={DialogTitle}>
@@ -143,7 +146,7 @@ export default function SelectAccountsStep({
           <Alert variant="warning">
             <AlertSeverityIcon variant="warning" />
             <AlertDescription>
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
+              {removedCount === 1 ? '1 Safe account' : `${removedCount} Safe accounts`} will be removed from the
               Workspace. They remain available in My accounts.
             </AlertDescription>
           </Alert>

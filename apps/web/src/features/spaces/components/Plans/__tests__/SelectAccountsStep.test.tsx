@@ -23,7 +23,10 @@ const multi = {
 }
 const allSafes = [treasury, payroll, grants]
 
-jest.mock('../../../hooks/useSpaceSafes', () => ({ useSpaceSafes: () => ({ allSafes, isLoading: false }) }))
+let mockAllSafes: unknown[] = allSafes
+jest.mock('../../../hooks/useSpaceSafes', () => ({
+  useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
+}))
 jest.mock('@/hooks/safes/useSafesSearch', () => ({
   useSafesSearch: (items: unknown[], query: string) =>
     query ? items.filter((item) => (item as { name: string }).name.toLowerCase().includes(query.toLowerCase())) : items,
@@ -34,21 +37,32 @@ jest.mock('@/features/myAccounts', () => ({
     items,
     selection,
   }: {
-    items: Array<{ chainId: string; address: string; name: string }>
+    items: Array<{ chainId?: string; address: string; name: string; safes?: Array<{ chainId: string }> }>
     selection: { selectedKeys: Set<string>; onToggle: (line: AccountLine, checked: boolean) => void }
   }) => (
     <>
       {items.map((item) => {
-        const key = `${item.chainId}:${item.address}`
+        // A multi-chain group is one row: checked while every chain of it is, toggled as a whole.
+        const isGroup = Boolean(item.safes)
+        const key = isGroup ? `multichain_${item.address}` : `${item.chainId}:${item.address}`
+        const checked = isGroup
+          ? item.safes!.every((safe) => selection.selectedKeys.has(`${safe.chainId}:${item.address}`))
+          : selection.selectedKeys.has(key)
         return (
           <input
             key={key}
             type="checkbox"
             aria-label={item.name}
-            checked={selection.selectedKeys.has(key)}
+            checked={checked}
             onChange={(e) =>
               selection.onToggle(
-                { key, variant: 'single', address: item.address, displayName: item.name, source: item } as AccountLine,
+                {
+                  key,
+                  variant: isGroup ? 'group' : 'single',
+                  address: item.address,
+                  displayName: item.name,
+                  source: item,
+                } as AccountLine,
                 e.target.checked,
               )
             }
@@ -69,6 +83,10 @@ const renderStep = (props: Partial<React.ComponentProps<typeof SelectAccountsSte
   )
 
 describe('SelectAccountsStep', () => {
+  beforeEach(() => {
+    mockAllSafes = allSafes
+  })
+
   it('preselects every Safe, multi-chain groups included', () => {
     expect(_initialSelection([multi, treasury])).toEqual({
       '1:0xD': true,
@@ -97,6 +115,26 @@ describe('SelectAccountsStep', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
     expect(onContinue).toHaveBeenCalledWith([{ chainId: '1', address: '0xB' }])
+  })
+
+  it('counts a deselected multi-chain Safe as one account in the removal note', () => {
+    mockAllSafes = [treasury, payroll, multi]
+    const onContinue = jest.fn()
+    renderStep({ onContinue })
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Ops' }))
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
+    expect(screen.getByText(/1 Safe account will be removed from the Workspace/)).toBeInTheDocument()
+
+    // Every chain of it still leaves the Workspace.
+    fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
+    expect(onContinue).toHaveBeenCalledWith([
+      { chainId: '1', address: '0xD' },
+      { chainId: '10', address: '0xD' },
+    ])
   })
 
   it('names where the step leads when it is not a checkout', () => {

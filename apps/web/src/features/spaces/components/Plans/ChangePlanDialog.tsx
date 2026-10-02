@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Spinner } from '@/components/ui/spinner'
 import { Typography } from '@/components/ui/typography'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { countSeats } from '@/utils/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
@@ -87,6 +88,7 @@ export default function ChangePlanDialog({
   const errorMessage = error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined
   const isBusy = isChanging || isVerifying
   const canConfirm = Boolean(priceId && paymentLinkId) && (isTrialSwitch || (Boolean(preview) && !previewError))
+  const removedCount = countSeats(removed.map(({ address }) => address))
 
   return (
     <Dialog open onOpenChange={(open) => !open && !isBusy && onClose()}>
@@ -165,7 +167,7 @@ export default function ChangePlanDialog({
 
           {removed.length > 0 && (
             <Typography color="muted" data-testid="change-plan-removed-note">
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
+              {removedCount === 1 ? '1 Safe account' : `${removedCount} Safe accounts`} will be removed from the
               Workspace. They remain available in My accounts.
             </Typography>
           )}

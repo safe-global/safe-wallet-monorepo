@@ -135,6 +135,28 @@ describe('ChangePlanDialog', () => {
     expect(mockChangePlan).toHaveBeenCalledTimes(1)
   })
 
+  it('counts a Safe left out on several chains as one account in the summary', () => {
+    mockState = { preview }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        removed={[
+          { chainId: '1', address: '0xB' },
+          { chainId: '10', address: '0xB' },
+          { chainId: '1', address: '0xC' },
+        ]}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '2 Safe accounts will be removed from the Workspace. They remain available in My accounts.',
+    )
+  })
+
   it('keeps the dialog open with the server message when the change fails after the Safes were removed', async () => {
     const message = 'Your Safes were removed, but the plan change failed. Please try again.'
     mockState = { preview, changeError: { status: 502, data: { message } } }
