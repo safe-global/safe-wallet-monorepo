@@ -24,9 +24,9 @@ const FORM_ID = 'invite-members-form'
 
 const InviteMembersOnboarding = (): ReactElement => {
   const totalSteps = useOnboardingStepCount()
-  const { spaceId, goBack, redirectToNextStep, nextStepUrl } = useInviteNavigation()
+  const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
-    useInviteForm(spaceId, redirectToNextStep, nextStepUrl)
+    useInviteForm(spaceId, redirectToNextStep)
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()

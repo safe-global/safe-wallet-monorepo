@@ -98,13 +98,6 @@ describe('useSafeWorkspaceAttach', () => {
     expect(replace).not.toHaveBeenCalled()
   })
 
-  // makeStore marks the session settled on load, so a step-up stands for a pending session
-  it.each(['leaving', 'returning'] as const)('waits while a step-up is %s', (phase) => {
-    const { replace } = renderAttach({ initialReduxState: { ...auth(), stepUp: { phase } } as Partial<RootState> })
-
-    expect(replace).not.toHaveBeenCalled()
-  })
-
   it('waits while the Safes of the Workspaces load', () => {
     mockAllSpaceSafes.mockReturnValue({ currentData: undefined, isLoading: true, isFetching: true })
 

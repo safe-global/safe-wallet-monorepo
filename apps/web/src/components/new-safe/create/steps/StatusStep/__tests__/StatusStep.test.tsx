@@ -58,30 +58,19 @@ describe('CreateSafeStatus', () => {
     listeners.clear()
   })
 
-  it('should, once deployed, add the Safe to the Workspace with a step-up return to its home in that Workspace', async () => {
-    mockAddNewSafeToUrlSpace.mockResolvedValue({ spaceId, isStepUpPending: false })
+  it('should, once deployed, add the Safe to the Workspace and go to its home in that Workspace', async () => {
+    mockAddNewSafeToUrlSpace.mockResolvedValue(spaceId)
 
     await deploy()
 
-    const [chainId, address, getStepUpReturnUrl] = mockAddNewSafeToUrlSpace.mock.calls[0]
-    expect([chainId, address]).toEqual(['137', safeAddress])
-    expect(getStepUpReturnUrl(spaceId)).toBe(`/home?safe=matic%3A${safeAddress}&spaceId=${spaceId}`)
+    expect(mockAddNewSafeToUrlSpace).toHaveBeenCalledWith('137', safeAddress)
     await waitFor(() =>
       expect(mockPush).toHaveBeenCalledWith({ pathname: '/home', query: { safe: `matic:${safeAddress}`, spaceId } }),
     )
   })
 
-  it('should, when the add waits on a step-up, leave the navigation to the step-up', async () => {
-    mockAddNewSafeToUrlSpace.mockResolvedValue({ spaceId: null, isStepUpPending: true })
-
-    await deploy()
-    await Promise.resolve()
-
-    expect(mockPush).not.toHaveBeenCalled()
-  })
-
   it('should, when the Safe stays outside the Workspace, go to its home without a Workspace', async () => {
-    mockAddNewSafeToUrlSpace.mockResolvedValue({ spaceId: null, isStepUpPending: false })
+    mockAddNewSafeToUrlSpace.mockResolvedValue(null)
 
     await deploy()
 

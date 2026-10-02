@@ -24,7 +24,6 @@ import {
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,
@@ -78,8 +77,7 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Deliberately absent from `persistedSlices`: a phase restored from a previous
-  // page load would leave the user on a splash screen with nothing in flight.
+  // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
@@ -141,7 +139,6 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,
