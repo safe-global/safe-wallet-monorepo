@@ -157,7 +157,7 @@ export default function PlanStatusCard({
             <UsageMeter
               icon={<Fuel className="size-5" strokeWidth={1.5} />}
               label="Sponsored transactions remaining"
-              tooltip="Once the limit is reached, gas is paid from the connected wallet until the cycle resets."
+              tooltip="Transactions above the limit bill at pay-as-you-go rates."
               meter={sponsoredTxs}
             />
           </div>
