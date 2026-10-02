@@ -73,6 +73,7 @@ const entitlements = (sub: Subscription | undefined): EntitlementsResponse => ({
         id: sub.plan.id,
         name: sub.plan.name ?? null,
         cycleEndsAt: new Date((sub.currentPeriodEnd ?? now()) * 1000).toISOString(),
+        status: sub.status === 'trialing' ? 'trialing' : 'active',
       }
     : null,
   entitlements: sub

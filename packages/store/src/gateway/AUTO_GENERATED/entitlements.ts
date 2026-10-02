@@ -33,12 +33,15 @@ export type EntitlementsGetEntitlementsV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type EntitlementsPlanStatus = 'active' | 'trialing'
 export type EntitlementsPlan = {
   /** Plan identifier in the billing service */
   id: string
   name: string | null
   /** End of the current billing cycle */
   cycleEndsAt: string | null
+  /** Status of the subscription the plan comes from */
+  status: EntitlementsPlanStatus
 }
 export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies'
 export type BinaryEntitlement = {

@@ -7315,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-ecb600a",
+    "version": "main-002f9cb",
     "contact": {}
   },
   "tags": [],
@@ -13146,6 +13146,14 @@
           "resetsAt"
         ]
       },
+      "EntitlementsPlanStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "trialing"
+        ],
+        "description": "Status of the subscription the plan comes from"
+      },
       "EntitlementsPlan": {
         "type": "object",
         "properties": {
@@ -13162,12 +13170,21 @@
             "type": "string",
             "nullable": true,
             "description": "End of the current billing cycle"
+          },
+          "status": {
+            "description": "Status of the subscription the plan comes from",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlanStatus"
+              }
+            ]
           }
         },
         "required": [
           "id",
           "name",
-          "cycleEndsAt"
+          "cycleEndsAt",
+          "status"
         ]
       },
       "EntitlementsResponse": {
