@@ -170,7 +170,7 @@ export default function ClaimTrialModal({
   }
 
   const continueToCheckout = (removed: SafeRef[]) => {
-    if (option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
+    if (option?.paymentLinkId) void checkout(option.paymentLinkId, removed, seats ?? undefined)
   }
 
   return (

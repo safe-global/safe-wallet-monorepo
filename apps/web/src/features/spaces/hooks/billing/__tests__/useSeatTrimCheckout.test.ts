@@ -1,4 +1,7 @@
-import { act, renderHook } from '@testing-library/react'
+import { act } from '@testing-library/react'
+import { renderHook } from '@/tests/test-utils'
+import { getStoreInstance } from '@/store'
+import { stepUpLeaving } from '@/features/oidc-auth/store'
 import { useSeatTrimCheckout } from '../useSeatTrimCheckout'
 
 const mockStartCheckout = jest.fn()
@@ -79,6 +82,57 @@ describe('useSeatTrimCheckout', () => {
     })
     expect(ok).toBe(false)
     expect(mockStartCheckout).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps a return URL that resumes the checkout when the removal needs a step-up', async () => {
+    mockRemoveSafes.mockImplementation(async () => {
+      getStoreInstance().dispatch(stepUpLeaving())
+      return { error: { status: 403, data: { message: 'elevation_required' } } }
+    })
+    const { result } = renderHook(() => useSeatTrimCheckout(SPACE_ID))
+
+    let ok = true
+    await act(async () => {
+      ok = await result.current.checkout('pl_starter', [{ chainId: '10', address: '0xC' }], 2)
+    })
+
+    expect(ok).toBe(false)
+    expect(mockStartCheckout).not.toHaveBeenCalled()
+    expect(getStoreInstance().getState().stepUp.returnUrl).toMatch(
+      /[?&]resumeCheckout=pl_starter&resumeCheckoutSeats=2$/,
+    )
+  })
+
+  it('drops the return URL once the removal is done without a step-up', async () => {
+    const { result } = renderHook(() => useSeatTrimCheckout(SPACE_ID))
+
+    await act(async () => {
+      await result.current.checkout('pl_starter', [{ chainId: '10', address: '0xC' }], 2)
+    })
+
+    expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_starter')
+  })
+
+  it('starts the checkout on the return from a step-up once the replayed removal has freed the seats', async () => {
+    const replace = jest.fn(() => Promise.resolve(true))
+    const routerProps = {
+      pathname: '/spaces',
+      query: { spaceId: SPACE_ID, resumeCheckout: 'pl_starter', resumeCheckoutSeats: '2' },
+      replace,
+    }
+    const { rerender } = renderHook(() => useSeatTrimCheckout(SPACE_ID), { routerProps })
+
+    expect(mockStartCheckout).not.toHaveBeenCalled()
+
+    mockSafes = { safes: { '1': ['0xA', '0xB'] } }
+    rerender()
+
+    expect(mockStartCheckout).toHaveBeenCalledTimes(1)
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_starter')
+    expect(replace).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: SPACE_ID } }, undefined, {
+      shallow: true,
+    })
   })
 
   it('words the removal and checkout errors', () => {

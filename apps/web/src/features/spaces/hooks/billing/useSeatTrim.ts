@@ -31,5 +31,5 @@ export const useSeatTrim = (spaceId: string) => {
     ? getRtkQueryErrorMessage(removeError) || 'We couldn’t update the Workspace. Please try again.'
     : undefined
 
-  return { seatCount, needsTrim, trim, isTrimming, error }
+  return { seatCount, isLoaded: spaceSafes !== undefined, needsTrim, trim, isTrimming, error }
 }
