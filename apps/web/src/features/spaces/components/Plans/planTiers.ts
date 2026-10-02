@@ -1,5 +1,7 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
+import type { PlanStatus } from '../../hooks/billing/subscription'
 import {
   getSubscriptionFeatures,
   getSubscriptionPlanName,
@@ -26,6 +28,22 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
+/** The tracking plan's plan states: a trial is free access, anything not live is locked. */
+export const toPlanStatus = (status: PlanStatus): string =>
+  status === 'trialing' ? 'free_access' : status === 'active' || status === 'none' ? status : 'locked'
+
+/** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
+export const pickProps = (pick: PlanPick) => ({
+  [MixpanelEventParams.TARGET_PLAN]: pick.tier.name.toLowerCase(),
+  [MixpanelEventParams.SEATS]: pick.option.seats ?? undefined,
+  [MixpanelEventParams.BILLING_PERIOD]:
+    pick.tier.billingCycle === 'year'
+      ? BillingPeriod.YEARLY
+      : pick.tier.billingCycle === 'month'
+        ? BillingPeriod.MONTHLY
+        : undefined,
+})
+
 /** The subscription's own seats tag wins: the entitlements quota lags until the billing webhook lands. */
 const currentSeats = (
   subscription: Subscription,
@@ -51,6 +69,7 @@ export const toCurrentPlan = (
     hasPaymentMethod: subscription.hasPaymentMethod === true,
     periodEndsAt: plan.periodEndsAt,
     daysLeft: plan.daysLeft,
+    seats: typeof seats === 'number' ? seats : undefined,
     seatsLabel: seats === undefined ? undefined : seatsLabel(seats),
   }
 }

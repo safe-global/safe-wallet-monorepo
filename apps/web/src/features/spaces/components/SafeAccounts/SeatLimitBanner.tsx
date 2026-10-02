@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Lock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -6,6 +7,20 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import {
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { trackPlanSelectionStarted } from '../Plans/planSelection'
+
+const PROMPT = {
+  [MixpanelEventParams.FEATURE]: UpgradeFeature.SAFE_ACCOUNTS_LIMIT,
+  [MixpanelEventParams.LOCATION]: UpgradeLocation.SAFE_ACCOUNTS_PAGE,
+}
 
 /** Shown once the Workspace holds as many Safes as its plan covers: upgrade when a bigger plan is offered, else sales. */
 export default function SeatLimitBanner({
@@ -17,6 +32,12 @@ export default function SeatLimitBanner({
   className?: string
 }) {
   const { tierName, limit, upgradePlanName, plansHref } = useSeatUpsell()
+  const isPromptTracked = useRef(false)
+  useEffect(() => {
+    if (limit === null || !upgradePlanName || isPromptTracked.current) return
+    isPromptTracked.current = true
+    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
+  }, [limit, upgradePlanName])
   if (limit === null) return null
 
   const title = `${tierName ?? 'Your plan'} includes ${limit} Safe accounts`
@@ -37,6 +58,13 @@ export default function SeatLimitBanner({
         ) : (
           <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />
         )
+      }
+      onClick={() =>
+        upgradePlanName &&
+        trackPlanSelectionStarted({
+          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+          ...PROMPT,
+        })
       }
     >
       {upgradePlanName ? `Upgrade to ${upgradePlanName}` : 'Talk to sales'}

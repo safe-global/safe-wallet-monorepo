@@ -1,7 +1,25 @@
-import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SponsoredTxsCounter, { _formatResetsAt } from '../index'
 
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+
 describe('SponsoredTxsCounter', () => {
+  it('tracks the upgrade prompt and its click only without Pro', () => {
+    render(<SponsoredTxsCounter left={30} quota={50} resetsAt={null} isPro />)
+    expect(trackEvent).not.toHaveBeenCalled()
+
+    render(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isPro={false} />)
+    fireEvent.click(screen.getByTestId('sponsored-txs-upgrade'))
+    const prompt = { Feature: 'sponsored_tx', Location: 'tx_flow_gas' }
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, {
+      'Entry Point': 'upgrade_prompt',
+      ...prompt,
+    })
+  })
+
   it('formats the reset moment in UTC and tolerates missing or broken dates', () => {
     expect(_formatResetsAt('2026-11-01T00:00:00.000Z')).toBe('Nov 1, 00:00 UTC')
     expect(_formatResetsAt('2026-10-17T15:52:37.000Z')).toBe('Oct 17, 15:52 UTC')

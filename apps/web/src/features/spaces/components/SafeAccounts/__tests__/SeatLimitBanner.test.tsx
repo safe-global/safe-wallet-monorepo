@@ -1,11 +1,33 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SeatLimitBanner from '../SeatLimitBanner'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+const mockTrackPlanSelectionStarted = jest.fn()
+jest.mock('../../Plans/planSelection', () => ({
+  trackPlanSelectionStarted: (p: unknown) => mockTrackPlanSelectionStarted(p),
+}))
 
 const mockUseSeatUpsell = jest.fn()
 jest.mock('../../../hooks/useSeatUpsell', () => ({ useSeatUpsell: () => mockUseSeatUpsell() }))
 
 describe('SeatLimitBanner', () => {
+  it('tracks the upgrade prompt when a bigger plan is offered', () => {
+    mockUseSeatUpsell.mockReturnValue({
+      tierName: 'Starter',
+      limit: 2,
+      upgradePlanName: 'Business',
+      plansHref: '/plans',
+    })
+    render(<SeatLimitBanner />)
+    fireEvent.click(screen.getByRole('link', { name: 'Upgrade to Business' }))
+    const prompt = { Feature: 'safe_accounts_limit', Location: 'safe_accounts_page' }
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
+    expect(mockTrackPlanSelectionStarted).toHaveBeenCalledWith({ 'Entry Point': 'upgrade_prompt', ...prompt })
+  })
+
   it('sends a Business Workspace to sales', () => {
     mockUseSeatUpsell.mockReturnValue({ tierName: 'Business', limit: 20, plansHref: '/spaces/plans?spaceId=1' })
     render(<SeatLimitBanner />)

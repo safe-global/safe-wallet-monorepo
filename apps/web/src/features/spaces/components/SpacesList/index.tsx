@@ -249,7 +249,7 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
                 link
                 onClick={() =>
                   trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                    entry_point: WorkspaceCreateEntryPoint.WELCOME,
+                    entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
                   })
                 }
               />

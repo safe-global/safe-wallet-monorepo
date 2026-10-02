@@ -11,6 +11,9 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
@@ -45,6 +48,7 @@ export default function ChangePlanDialog({
   spaceId,
   pick,
   currentPlan,
+  entry,
   removed = [],
   onClose,
   onChanged,
@@ -52,6 +56,8 @@ export default function ChangePlanDialog({
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
+  /** Analytics: where plan selection started. */
+  entry: Record<string, unknown>
   /** Safes the accounts step left out; the plan change removes them from the Workspace first. */
   removed?: SafeRef[]
   /** Dismissed without changing anything. */
@@ -78,9 +84,19 @@ export default function ChangePlanDialog({
     if (isElevationRequiredError(changeError)) setIsVerifying(true)
   }, [changeError])
 
+  const changeProps = {
+    [MixpanelEventParams.FROM_PLAN]: currentPlan.name.toLowerCase(),
+    [MixpanelEventParams.TO_PLAN]: pick.tier.name.toLowerCase(),
+    [MixpanelEventParams.FROM_SEATS]: currentPlan.seats,
+    [MixpanelEventParams.TO_SEATS]: pick.option.seats ?? undefined,
+    [MixpanelEventParams.AMOUNT_DUE]: preview ? preview.amountDue / 100 : undefined,
+  }
   const onConfirm = async () => {
     if (!priceId || !paymentLinkId) return
-    if (await changePlan(priceId, paymentLinkId, removed)) onChanged()
+    if (await changePlan(priceId, paymentLinkId, removed)) {
+      trackEvent(SAFE_PRO_EVENTS.PLAN_CHANGE_CONFIRMED, { ...changeProps, ...entry })
+      onChanged()
+    }
   }
 
   const error = previewError ?? (isVerifying ? undefined : changeError)

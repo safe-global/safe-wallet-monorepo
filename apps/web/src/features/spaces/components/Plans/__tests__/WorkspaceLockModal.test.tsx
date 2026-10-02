@@ -1,5 +1,9 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceLockModal'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -161,6 +165,15 @@ describe('WorkspaceLockModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('counts a member seeing a Workspace whose plan ended', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { 'User Role': 'member' })
   })
 
   it('words the member explanation by lock reason', () => {

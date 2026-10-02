@@ -34,12 +34,26 @@ jest.mock('../SelectAccountsStep', () => ({
 
 jest.mock('../ChangePlanDialog', () => ({
   __esModule: true,
-  default: ({ removed, onChanged }: { removed?: { chainId: string; address: string }[]; onChanged: () => void }) => (
-    <div data-testid="change-plan-dialog" data-removed={JSON.stringify(removed ?? null)}>
+  default: ({
+    removed,
+    entry,
+    onChanged,
+  }: {
+    removed?: { chainId: string; address: string }[]
+    entry: Record<string, unknown>
+    onChanged: () => void
+  }) => (
+    <div
+      data-testid="change-plan-dialog"
+      data-removed={JSON.stringify(removed ?? null)}
+      data-entry={JSON.stringify(entry)}
+    >
       <button onClick={onChanged}>confirm-change</button>
     </div>
   ),
 }))
+
+const ENTRY = { 'Entry Point': 'sidebar' }
 
 jest.mock('../../SafeProModals', () => ({
   SafeProPlanSwitchedModal: ({
@@ -104,7 +118,15 @@ describe('ChangePlanFlow', () => {
   })
 
   it('asks which Safes stay when the Workspace holds more than the new plan covers, then confirms with them removed', () => {
-    render(<ChangePlanFlow spaceId="space-1" pick={pick(2, 189)} currentPlan={currentPlan} onClose={jest.fn()} />)
+    render(
+      <ChangePlanFlow
+        spaceId="space-1"
+        entry={ENTRY}
+        pick={pick(2, 189)}
+        currentPlan={currentPlan}
+        onClose={jest.fn()}
+      />,
+    )
 
     expect(screen.getByTestId('accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('accounts-step')).toHaveAttribute('data-plan', 'Starter')
@@ -121,7 +143,15 @@ describe('ChangePlanFlow', () => {
 
   it('goes back to the chooser from the accounts step', () => {
     const onClose = jest.fn()
-    render(<ChangePlanFlow spaceId="space-1" pick={pick(2, 189)} currentPlan={currentPlan} onClose={onClose} />)
+    render(
+      <ChangePlanFlow
+        spaceId="space-1"
+        entry={ENTRY}
+        pick={pick(2, 189)}
+        currentPlan={currentPlan}
+        onClose={onClose}
+      />,
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Back' }))
 
@@ -129,10 +159,19 @@ describe('ChangePlanFlow', () => {
   })
 
   it('opens the change summary straight away when the plan covers every Safe', () => {
-    render(<ChangePlanFlow spaceId="space-1" pick={pick(20, 1669)} currentPlan={currentPlan} onClose={jest.fn()} />)
+    render(
+      <ChangePlanFlow
+        spaceId="space-1"
+        entry={ENTRY}
+        pick={pick(20, 1669)}
+        currentPlan={currentPlan}
+        onClose={jest.fn()}
+      />,
+    )
 
     expect(screen.queryByTestId('accounts-step')).not.toBeInTheDocument()
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-removed', 'null')
+    expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-entry', JSON.stringify(ENTRY))
   })
 
   it('confirms a switch made during the trial with when billing starts, then closes', () => {
@@ -141,6 +180,7 @@ describe('ChangePlanFlow', () => {
     render(
       <ChangePlanFlow
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick(20, 1669)}
         currentPlan={currentPlan}
         onClose={onClose}
@@ -167,6 +207,7 @@ describe('ChangePlanFlow', () => {
     render(
       <ChangePlanFlow
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick(20, 1669)}
         currentPlan={{ ...currentPlan, isTrialing: false }}
         onClose={onClose}

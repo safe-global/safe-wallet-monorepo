@@ -2,6 +2,10 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import type { AccountLine } from '@/features/myAccounts'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import SelectAccountsStep, { _initialSelection } from '../SelectAccountsStep'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const safe = (address: string, name: string, chainId = '1') => ({
   chainId,
@@ -97,6 +101,15 @@ describe('SelectAccountsStep', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
     expect(onContinue).toHaveBeenCalledWith([{ chainId: '1', address: '0xB' }])
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED, {
+      'Accounts Available': 3,
+      'Plan Limit': 2,
+    })
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_SUBMITTED, {
+      'Selected Count': 2,
+      'Deselected Count': 1,
+      'Plan Limit': 2,
+    })
   })
 
   it('names where the step leads when it is not a checkout', () => {
