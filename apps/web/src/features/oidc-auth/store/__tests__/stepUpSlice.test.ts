@@ -1,41 +1,31 @@
-import { faker } from '@faker-js/faker'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet, stepUpSettled, stepUpSlice } from '../stepUpSlice'
+import {
+  stepUpFailed,
+  stepUpPopupBlocked,
+  stepUpPopupOpened,
+  stepUpRequested,
+  stepUpSettled,
+  stepUpSlice,
+} from '../stepUpSlice'
 
 const { reducer } = stepUpSlice
 
-describe('stepUpSlice return URL', () => {
-  it('should, when a return URL is set, store it', () => {
-    const returnUrl = faker.internet.url()
-
-    const state = reducer(undefined, stepUpReturnUrlSet(returnUrl))
-
-    expect(state.returnUrl).toBe(returnUrl)
+describe('stepUpSlice', () => {
+  it('starts idle', () => {
+    expect(reducer(undefined, { type: 'init' })).toEqual({ status: 'idle' })
   })
 
-  it('should, when the stored return URL is cleared, remove it', () => {
-    const returnUrl = faker.internet.url()
-
-    const state = reducer(reducer(undefined, stepUpReturnUrlSet(returnUrl)), stepUpReturnUrlCleared(returnUrl))
-
-    expect(state.returnUrl).toBeUndefined()
+  it.each([
+    [stepUpRequested(), 'prompt'],
+    [stepUpPopupOpened(), 'waiting'],
+    [stepUpPopupBlocked(), 'blocked'],
+    [stepUpFailed(), 'failed'],
+  ])('moves to the status of %p', (action, status) => {
+    expect(reducer(undefined, action)).toEqual({ status })
   })
 
-  it('should, when another return URL is cleared, keep the stored one', () => {
-    const returnUrl = faker.internet.url()
+  it('returns to idle when the step-up settles', () => {
+    const waiting = reducer(reducer(undefined, stepUpRequested()), stepUpPopupOpened())
 
-    const state = reducer(
-      reducer(undefined, stepUpReturnUrlSet(returnUrl)),
-      stepUpReturnUrlCleared(`${returnUrl}/other`),
-    )
-
-    expect(state.returnUrl).toBe(returnUrl)
-  })
-
-  it('should, when the step-up settles, keep the return URL for the next one', () => {
-    const returnUrl = faker.internet.url()
-
-    const state = reducer(reducer(undefined, stepUpReturnUrlSet(returnUrl)), stepUpSettled())
-
-    expect(state.returnUrl).toBe(returnUrl)
+    expect(reducer(waiting, stepUpSettled())).toEqual({ status: 'idle' })
   })
 })

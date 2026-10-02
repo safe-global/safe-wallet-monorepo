@@ -129,17 +129,6 @@ describe('useSafeWorkspaceCheck', () => {
     expect(mockShowNotification).not.toHaveBeenCalled()
   })
 
-  it.each(['leaving', 'returning'] as const)(
-    'waits while a step-up is %s, so the add it replays can land before the check',
-    (phase) => {
-      mockSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [] } } })
-
-      const replace = renderCheck(undefined, '/home', { ...signedInAuth, stepUp: { phase } })
-
-      expect(replace).not.toHaveBeenCalled()
-    },
-  )
-
   it('removes the Workspace once, even when the page renders again before the removal lands', () => {
     mockSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [] } } })
     const replace = jest.fn(() => Promise.resolve(true))

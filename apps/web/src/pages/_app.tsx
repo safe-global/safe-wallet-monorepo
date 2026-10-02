@@ -92,7 +92,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -142,7 +142,7 @@ const InitApp = (): ReactElement | null => {
   useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
@@ -176,13 +176,6 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
 }
 
-// Must render inside the Redux provider to read the step-up phase.
-const AppLaunchScreen = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return <LaunchScreen stepUpCaption={stepUpCaption} />
-}
-
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
@@ -199,7 +192,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <LazyWeb3Init />
 
-          <AppLaunchScreen />
+          <LaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
@@ -210,6 +203,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <TargetedOutreachPopupLoader />
 
           <Notifications />
+
+          <StepUpDialog />
 
           <RecoveryLoader />
 

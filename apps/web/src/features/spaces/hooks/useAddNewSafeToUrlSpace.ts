@@ -5,25 +5,15 @@ import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../utils/seatLimitError'
 import { useIsAdmin } from './useSpaceMembers'
 
-export type AddNewSafeToSpaceResult = {
-  /** Null when the Safe stays outside the Workspace: none in the URL, signed out, not an admin, or refused. */
-  spaceId: string | null
-  /** The browser is leaving for the step-up, and its replay adds the Safe. */
-  isStepUpPending: boolean
-}
-
-/** Adds a newly deployed Safe to the Workspace of the URL; a step-up returns to `getStepUpReturnUrl(spaceId)`. */
-export const useAddNewSafeToUrlSpace = (): ((
-  chainId: string,
-  safeAddress: string,
-  getStepUpReturnUrl: (spaceId: string) => string,
-) => Promise<AddNewSafeToSpaceResult>) => {
+/**
+ * Adds a newly deployed Safe to the Workspace of the URL. Resolves to that Workspace, or to null
+ * when the Safe stays outside it: none in the URL, signed out, not an admin, or refused.
+ */
+export const useAddNewSafeToUrlSpace = (): ((chainId: string, safeAddress: string) => Promise<string | null>) => {
   const dispatch = useAppDispatch()
   const isSignedIn = useAppSelector(isAuthenticated)
   const spaceId = useUrlSpaceId()
@@ -31,9 +21,8 @@ export const useAddNewSafeToUrlSpace = (): ((
   const [addSafeToSpace] = useSpaceSafesCreateV1Mutation()
 
   return useCallback(
-    async (chainId: string, safeAddress: string, getStepUpReturnUrl: (spaceId: string) => string) => {
-      const outside: AddNewSafeToSpaceResult = { spaceId: null, isStepUpPending: false }
-      if (spaceId === null || !isSignedIn) return outside
+    async (chainId: string, safeAddress: string) => {
+      if (spaceId === null || !isSignedIn) return null
 
       if (!isAdmin) {
         dispatch(
@@ -43,19 +32,14 @@ export const useAddNewSafeToUrlSpace = (): ((
             groupKey: 'new-safe-space-skipped',
           }),
         )
-        return outside
+        return null
       }
 
-      const stepUpReturnUrl = getStepUpReturnUrl(spaceId)
-      dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
       const result = await addSafeToSpace({
         spaceId,
         createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
       })
-      if (isElevationRequiredError(result.error)) return { spaceId: null, isStepUpPending: true }
-
-      dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
-      if (!result.error) return { spaceId, isStepUpPending: false }
+      if (!result.error) return spaceId
 
       const seatLimit = getSeatLimitMessage(result.error)
       if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
@@ -66,7 +50,7 @@ export const useAddNewSafeToUrlSpace = (): ((
           groupKey: 'new-safe-space-error',
         }),
       )
-      return outside
+      return null
     },
     [spaceId, isSignedIn, isAdmin, addSafeToSpace, dispatch],
   )

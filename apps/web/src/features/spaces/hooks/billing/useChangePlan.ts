@@ -10,10 +10,7 @@ import { isPlanChangeable } from './subscription'
 import { useBillingSpaceId } from './useBillingSpaceId'
 import { useSpaceSubscription } from './useSpaceSubscription'
 
-/**
- * The elevation listener steps up the PATCH's second factor and replays it; callers tolerate `elevation_required`.
- * `removedSafes` leave the Workspace in the same request, before the plan changes.
- */
+/** `removedSafes` leave the Workspace in the same request, before the plan changes. */
 export const useChangePlan = (spaceId?: string | null) => {
   const gatedSpaceId = useBillingSpaceId(spaceId)
   const dispatch = useAppDispatch()

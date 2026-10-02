@@ -38,7 +38,6 @@ export type { OidcAuthContract } from './contract'
 export { useOidcLogin } from './hooks/useOidcLogin'
 export { useOidcLoginCallback } from './hooks/useOidcLoginCallback'
 export { useAuthenticators } from './hooks/useAuthenticators'
-export { useStepUpCallback } from './hooks/useStepUpCallback'
 export { useTwoFactorAwarenessDismissed } from './hooks/useTwoFactorAwarenessDismissed'
 
 // Direct (non-lazy) component export: the spaces account settings page is
@@ -54,9 +53,8 @@ export { default as MemberTwoFactorBadge } from './components/MemberTwoFactorBad
 // ─────────────────────────────────────────────────────────────────
 
 export { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from './utils/elevation'
-export { startStepUp } from './utils/stepUp'
-export { useStepUpSplash } from './hooks/useStepUpSplash'
-export { useStepUpReturnUrl } from './hooks/useStepUpReturnUrl'
+export { useStepUpRecovery } from './hooks/useStepUpRecovery'
+export { default as StepUpDialog } from './components/StepUpDialog'
 
 // ─────────────────────────────────────────────────────────────────
 // 2FA STATUS DERIVATION (shared with the spaces Team page)

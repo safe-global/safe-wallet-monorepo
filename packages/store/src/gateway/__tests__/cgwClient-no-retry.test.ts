@@ -3,7 +3,8 @@ import * as cgwClient from '../cgwClient'
 
 /**
  * Pins that `dynamicBaseQuery` itself issues each request exactly once: it does
- * not retry internally. A 422 means we sent a malformed request, so re-sending
+ * not retry internally unless a platform `setRecoverErrorHook` asks for it
+ * (see cgwClient-recover-error.test.ts). A 422 means we sent a malformed request, so re-sending
  * it cannot change the outcome (WA-3252).
  *
  * Scope — what this does NOT cover. It calls `dynamicBaseQuery` directly, so it
