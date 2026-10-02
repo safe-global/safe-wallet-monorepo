@@ -37,8 +37,7 @@ import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import LaunchScreen from '@/components/common/LaunchScreen'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -83,12 +82,6 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
-const StepUpSplash = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
-}
-
 const InitApp = (): null => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -110,7 +103,7 @@ const InitApp = (): null => {
   useVisitedSafes()
   usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
   return null
@@ -128,6 +121,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <CookieAndTermBanner />
       <TargetedOutreachPopupLoader />
       <Notifications />
+      <StepUpDialog />
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
@@ -155,7 +149,6 @@ function RootShell() {
         <AppProviders>
           <CaptchaProvider>
             <InitApp />
-            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

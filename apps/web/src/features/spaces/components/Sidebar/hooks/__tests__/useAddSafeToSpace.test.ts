@@ -1,5 +1,4 @@
 import { renderHook, act } from '@testing-library/react'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { Errors } from '@/services/exceptions'
 import { useAddSafeToSpace } from '../useAddSafeToSpace'
@@ -323,79 +322,17 @@ describe('useAddSafeToSpace', () => {
     })
   })
 
-  describe('step-up return URL', () => {
-    const alphaUuid = '0b7a1c2e-4f3d-4e5a-9b6c-7d8e9f0a1b2c'
-    const alphaReturnUrl = `/home?safe=sep%3A0xSafe&spaceId=${alphaUuid}`
+  it('returns false without an error notification when the user cancels the verification', async () => {
+    mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
+    const { result } = renderHook(() => useAddSafeToSpace())
 
-    it('returns to the current Safe page in the chosen Workspace and keeps it when a step-up is required', async () => {
-      mockRouter.pathname = '/transactions/history'
-      mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      const expectedUrl = `/transactions/history?safe=sep%3A0xSafe&spaceId=${alphaUuid}`
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(expectedUrl))
-      expect(mockDispatch).not.toHaveBeenCalledWith(stepUpReturnUrlCleared(expectedUrl))
-      expect(mockDispatch.mock.invocationCallOrder[0]).toBeLessThan(mockAddSafeToSpace.mock.invocationCallOrder[0])
+    let added: boolean | undefined
+    await act(async () => {
+      added = await result.current.addToSpace('space-1')
     })
 
-    it('replaces a spaceId already in the URL', async () => {
-      mockRouter.query = { safe: 'sep:0xSafe', spaceId: '42' }
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the Safe is added', async () => {
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the API returns an error', async () => {
-      mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the mutation throws', async () => {
-      mockAddSafeToSpace.mockRejectedValue(new Error('Network error'))
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('does not set a return URL when the Safe cannot be added', async () => {
-      mockUseCurrentChain.mockReturnValue(null)
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).not.toHaveBeenCalled()
-    })
+    expect(added).toBe(false)
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 
   describe('Workspace in the URL', () => {
@@ -436,7 +373,7 @@ describe('useAddSafeToSpace', () => {
       ['the API returns an error', () => mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })],
       ['the mutation throws', () => mockAddSafeToSpace.mockRejectedValue(new Error('Network error'))],
       [
-        'a step-up is required',
+        'the user cancels the verification',
         () =>
           mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } }),
       ],

@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import type { SerializedError } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import { stringify } from 'querystring'
 import { useSpaceSafesCreateV1Mutation, type SpaceSafeDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -14,11 +13,10 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
-type AddOutcome = 'added' | 'stepUp' | 'failed'
+type AddOutcome = 'added' | 'cancelled' | 'failed'
 
 interface UseAddSafeToSpaceResult {
   addToSpace: (spaceId: string) => Promise<boolean>
@@ -71,7 +69,7 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
     spaceQuery: typeof router.query,
   ): Promise<AddOutcome> => {
     const result = await addSafeToSpace({ spaceId, createSpaceSafesDto: { safes: [toAdd] } })
-    if (isElevationRequiredError(result.error)) return 'stepUp'
+    if (isElevationRequiredError(result.error)) return 'cancelled'
     if (result.error) {
       handleAddError(result.error)
       return 'failed'
@@ -85,17 +83,13 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
     const toAdd = { chainId: chain.chainId, address: safe.address.value }
     const { spaceId: _replaced, ...query } = router.query
     const spaceQuery = withSpaceId(query, spaceId)
-    // A step-up reloads the page, so it returns to this URL instead
-    const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`
 
     setLoadingSpaceId(spaceId)
-    dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
     const outcome = await requestAdd(spaceId, toAdd, spaceQuery).catch((error: unknown): AddOutcome => {
       logError(Errors._651, error)
       showError(error instanceof Error ? error.message : '')
       return 'failed'
     })
-    if (outcome !== 'stepUp') dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
     setLoadingSpaceId(null)
     return outcome === 'added'
   }

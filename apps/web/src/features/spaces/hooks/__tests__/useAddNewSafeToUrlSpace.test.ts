@@ -2,11 +2,10 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { useAppSelector } from '@/store'
-import { selectStepUpReturnUrl } from '@/features/oidc-auth/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
 import { act, renderHook } from '@/tests/test-utils'
-import { useAddNewSafeToUrlSpace, type AddNewSafeToSpaceResult } from '../useAddNewSafeToUrlSpace'
+import { useAddNewSafeToUrlSpace } from '../useAddNewSafeToUrlSpace'
 
 const mockIsAdmin = jest.fn()
 
@@ -37,7 +36,6 @@ const renderAddHook = ({ query = { spaceId }, auth = signedInAuth }: RenderOptio
     () => ({
       addToSpace: useAddNewSafeToUrlSpace(),
       notifications: useAppSelector(selectNotifications),
-      stepUpReturnUrl: useAppSelector(selectStepUpReturnUrl),
     }),
     {
       routerProps: { query },
@@ -45,17 +43,13 @@ const renderAddHook = ({ query = { spaceId }, auth = signedInAuth }: RenderOptio
     },
   )
 
-const getStepUpReturnUrl = (id: string) => `/home?safe=${safeAddress}&spaceId=${id}`
-
 const addSafe = async (result: ReturnType<typeof renderAddHook>['result']) => {
-  let outcome: AddNewSafeToSpaceResult | undefined
+  let outcome: string | null | undefined
   await act(async () => {
-    outcome = await result.current.addToSpace(chainId, safeAddress, getStepUpReturnUrl)
+    outcome = await result.current.addToSpace(chainId, safeAddress)
   })
   return outcome
 }
-
-const outside = { spaceId: null, isStepUpPending: false }
 
 const respondToAdd = (status: number, body: Record<string, unknown> = {}) => {
   const requests: unknown[] = []
@@ -77,17 +71,16 @@ describe('useAddNewSafeToUrlSpace', () => {
     const requests = respondToAdd(201)
     const { result } = renderAddHook()
 
-    expect(await addSafe(result)).toEqual({ spaceId, isStepUpPending: false })
+    expect(await addSafe(result)).toBe(spaceId)
     expect(requests).toEqual([{ safes: [{ chainId, address: safeAddress }] }])
     expect(result.current.notifications).toEqual([])
-    expect(result.current.stepUpReturnUrl).toBeUndefined()
   })
 
   it('should return null without a request when the URL has no Workspace', async () => {
     const requests = respondToAdd(201)
     const { result } = renderAddHook({ query: {} })
 
-    expect(await addSafe(result)).toEqual(outside)
+    expect(await addSafe(result)).toBeNull()
     expect(requests).toEqual([])
   })
 
@@ -95,7 +88,7 @@ describe('useAddNewSafeToUrlSpace', () => {
     const requests = respondToAdd(201)
     const { result } = renderAddHook({ auth: { ...signedInAuth, sessionExpiresAt: null } })
 
-    expect(await addSafe(result)).toEqual(outside)
+    expect(await addSafe(result)).toBeNull()
     expect(requests).toEqual([])
   })
 
@@ -104,7 +97,7 @@ describe('useAddNewSafeToUrlSpace', () => {
     const requests = respondToAdd(201)
     const { result } = renderAddHook()
 
-    expect(await addSafe(result)).toEqual(outside)
+    expect(await addSafe(result)).toBeNull()
     expect(requests).toEqual([])
     expect(result.current.notifications).toEqual([
       expect.objectContaining({
@@ -118,7 +111,7 @@ describe('useAddNewSafeToUrlSpace', () => {
     respondToAdd(402, { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 5, used: 5 })
     const { result } = renderAddHook()
 
-    expect(await addSafe(result)).toEqual(outside)
+    expect(await addSafe(result)).toBeNull()
     expect(result.current.notifications).toEqual([
       expect.objectContaining({
         message: expect.stringContaining('Your plan covers 5 Safe accounts'),
@@ -127,21 +120,24 @@ describe('useAddNewSafeToUrlSpace', () => {
     ])
   })
 
-  it('should, when the backend asks for a step-up, keep the return URL to the Safe in the Workspace', async () => {
+  it('should keep the Safe outside the Workspace when the user cancels the verification', async () => {
     respondToAdd(403, { message: 'elevation_required' })
     const { result } = renderAddHook()
 
-    expect(await addSafe(result)).toEqual({ spaceId: null, isStepUpPending: true })
-    expect(result.current.notifications).toEqual([])
-    expect(result.current.stepUpReturnUrl).toBe(getStepUpReturnUrl(spaceId))
+    expect(await addSafe(result)).toBeNull()
+    expect(result.current.notifications).toEqual([
+      expect.objectContaining({
+        message: expect.stringContaining('Verify your identity to continue with this action.'),
+        variant: 'error',
+      }),
+    ])
   })
 
   it('should show an error when the backend refuses the add', async () => {
     respondToAdd(500, { message: 'Internal error' })
     const { result } = renderAddHook()
 
-    expect(await addSafe(result)).toEqual(outside)
-    expect(result.current.stepUpReturnUrl).toBeUndefined()
+    expect(await addSafe(result)).toBeNull()
     expect(result.current.notifications).toEqual([
       expect.objectContaining({
         message: expect.stringContaining('Safe created in My accounts, but not added to the Workspace.'),

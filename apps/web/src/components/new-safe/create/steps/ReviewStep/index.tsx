@@ -72,7 +72,6 @@ import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -267,9 +266,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   }
 
   const handleCreateSafeClick = async () => {
-    let stepUpReturnUrl: string | undefined
-    let isStepUpPending = false
-
     try {
       if (!wallet || !chain || !newSafeProps) return
 
@@ -289,15 +285,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
-      // Pay later adds the Safe to the Workspace now, so a step-up there must return to the Safe, not this form.
-      if (spaceId && isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        stepUpReturnUrl = getNewSafeHomeUrl(data.networks[0].shortName, safeAddress, spaceId)
-        dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
-      }
-
       const createSafeResults: CreateSafeResult[] = []
       for (const [index, network] of data.networks.entries()) {
-        // The step-up replays one request, so the last network adds the Safe to the space for every created network at once.
+        // The last network adds the Safe to the space for every created network in one request.
         const isLastNetwork = index === data.networks.length - 1
         const chainIdsToAddToSpace = isLastNetwork
           ? [
@@ -305,13 +295,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               network.chainId,
             ]
           : []
-        const { stepUpPending, ...result } = await createSafe(
-          network,
-          replayedSafeWithNonce,
-          safeAddress,
-          chainIdsToAddToSpace,
-        )
-        if (stepUpPending) isStepUpPending = true
+        const result = await createSafe(network, replayedSafeWithNonce, safeAddress, chainIdsToAddToSpace)
         createSafeResults.push(result)
       }
 
@@ -332,7 +316,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       gtmSetChainId(chain.chainId)
 
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        if (successfulChains.length === 0 || isStepUpPending) return
+        if (successfulChains.length === 0) return
 
         await router?.push(getNewSafeHomeUrl(successfulChains[0].chain.shortName, safeAddress, spaceId))
 
@@ -363,7 +347,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       console.error(err)
       setSubmitError('Error creating the Safe account. Please try again later.')
     } finally {
-      if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       setIsCreating(false)
     }
   }
@@ -373,7 +356,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     props: ReplayedSafeProps,
     safeAddress: string,
     chainIdsToAddToSpace: string[],
-  ): Promise<CreateSafeResult & { stepUpPending?: true }> => {
+  ): Promise<CreateSafeResult> => {
     if (!wallet) return { chain, safeAddress, success: false }
 
     gtmSetChainId(chain.chainId)
@@ -419,7 +402,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
-          if (result.stepUpPending) return { chain, safeAddress, success: false, stepUpPending: true }
           setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }

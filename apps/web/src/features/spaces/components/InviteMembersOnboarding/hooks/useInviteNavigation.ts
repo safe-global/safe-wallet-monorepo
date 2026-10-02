@@ -30,14 +30,10 @@ const useInviteNavigation = () => {
     router.push({ pathname: AppRoutes.welcome.survey, query: { spaceId } })
   }, [router, spaceId, nextUrl])
 
-  const nextStepUrl =
-    nextString ?? `${AppRoutes.welcome.survey}?${new URLSearchParams({ spaceId: spaceId ?? '' }).toString()}`
-
   return {
     spaceId,
     goBack,
     redirectToNextStep,
-    nextStepUrl,
   }
 }
 

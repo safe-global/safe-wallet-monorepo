@@ -16,7 +16,6 @@ import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PersistArgs = {
   chainId: string
@@ -53,10 +52,7 @@ type PersistArgs = {
   dispatch: AppDispatch
 }
 
-export type PersistResult =
-  | { ok: true; skipped?: 'already-deployed' }
-  /** `stepUpPending`: the step-up is taking over, so the caller shows nothing. */
-  | { ok: false; error: Error; stepUpPending?: true }
+export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -149,10 +145,6 @@ export const persistCounterfactualSafe = async ({
           }),
         )
         if ('error' in spaceResult) {
-          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
-          if (isElevationRequiredError(spaceResult.error)) {
-            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
-          }
           // Stale cached count (another admin filled the seats); seats are per address, so a 402 never splits a batch.
           const quotaExceeded = getQuotaExceeded(spaceResult.error)
           if (quotaExceeded) {
