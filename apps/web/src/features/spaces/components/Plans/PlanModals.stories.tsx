@@ -20,22 +20,28 @@ import {
   subscription,
 } from './plans.fixtures'
 
-const setup = createMockStory({
+const options = {
   scenario: 'efSafe',
   wallet: 'owner',
   features: { spaces: true, safePro: true },
   pathname: '/spaces',
   query: { spaceId: SPACE_ID },
   shadcn: true,
-})
+} as const
+const setup = createMockStory(options)
+const setupV2 = createMockStory({ ...options, features: { ...options.features, safeProPlansV2: true } })
 
-const withBilling = (subscriptions: Subscription[], links: PaymentLink[] = PAID_LINKS) => ({
-  ...setup.parameters,
+const withBilling = (
+  subscriptions: Subscription[],
+  links: PaymentLink[] = PAID_LINKS,
+  { parameters, handlers } = setup,
+) => ({
+  ...parameters,
   msw: {
     handlers: [
       ...billingHandlers(subscriptions, links),
       http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: SPACE_SAFES })),
-      ...setup.handlers,
+      ...handlers,
     ],
   },
 })
@@ -77,6 +83,24 @@ export const LockedTrialEnded: Story = {
   render: () => (
     <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={(now() - 2 * DAY) * 1000} onBack={() => {}} />
   ),
+}
+
+/** Trial Ending with the redesigned plan cards behind SAFE_PRO_PLANS_V2. */
+export const RedesignedTrialEnding: Story = {
+  parameters: withBilling([trial], PAID_LINKS, setupV2),
+  decorators: [setupV2.decorator],
+  render: TrialEnding.render,
+}
+
+/** Locked Trial Ended with the redesigned plan cards behind SAFE_PRO_PLANS_V2. */
+export const RedesignedLockedTrialEnded: Story = {
+  parameters: withBilling(
+    [subscription({ status: 'canceled', currentPeriodEnd: now() - 2 * DAY, cancelledAt: now() - 2 * DAY })],
+    PAID_LINKS,
+    setupV2,
+  ),
+  decorators: [setupV2.decorator],
+  render: LockedTrialEnded.render,
 }
 
 /** The last payment failed: the Workspace is locked until billing is fixed or another plan is picked. */

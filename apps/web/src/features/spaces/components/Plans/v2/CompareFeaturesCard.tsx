@@ -111,8 +111,8 @@ const CompareRow = ({
     data-add-on={row.isAddOn || undefined}
     className="hover:bg-transparent"
   >
-    <TableHead scope="row" className="h-auto px-4 py-3 font-normal">
-      <span className="flex items-center gap-2">
+    <TableHead scope="row" className="h-auto px-4 py-3 font-normal whitespace-normal">
+      <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {row.feature}
         {row.isComingSoon && (
           <Badge variant="subtle" size="status" shape="status">
