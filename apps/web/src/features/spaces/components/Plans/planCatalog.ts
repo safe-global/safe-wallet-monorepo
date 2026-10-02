@@ -40,6 +40,7 @@ export type PlanNameV2 = (typeof PLAN_ORDER)[number]
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
 export const NAMED_SUPPORT_CONTACT = 'Named support contact'
+export const POLICIES = 'Policies (spending limits, proposers)'
 
 export type PlanContentV2 = {
   /** Who the plan is for, one line under its name. */
@@ -80,9 +81,7 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   },
   { from: 'Starter', label: 'Shared address book' },
   { from: 'Starter', label: 'Workspace activity log' },
-  { from: 'Business', label: 'Spending limits' },
-  { from: 'Business', label: 'Transaction proposers' },
-  { from: 'Business', label: 'Self-custodial account recovery' },
+  { from: 'Business', label: POLICIES },
   { from: 'Starter', label: 'Advanced threat analysis' },
   { from: 'Starter', label: 'Transaction simulation' },
   { from: 'Enterprise', label: NAMED_SUPPORT_CONTACT },
@@ -165,7 +164,7 @@ export const COMPARE_COPY_V2 = {
   soldSeparately: 'Sold separately',
 }
 
-/** Unreleased: listed on the cards with a "Soon" chip, never in the compare table. */
+/** Unreleased: listed on the cards with a "Soon" chip; a compare table row marks it with `isComingSoon`. */
 export const COMING_SOON_V2: Pick<CompareRowV2, 'feature' | 'values'>[] = [
   { feature: PAY_GAS_FROM_SAFE, values: fromBusiness },
   { feature: SAFENET_CHECKS, values: fromBusiness },
@@ -193,9 +192,8 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Shared address book', values: every(true) },
       { feature: 'Workspace activity log', values: every(true) },
       { feature: 'Nested Safe support', values: every(true) },
-      { feature: 'Spending limits', values: fromBusiness },
-      { feature: 'Transaction proposers', values: fromBusiness },
-      { feature: 'Self-custodial account recovery', values: fromBusiness },
+      { feature: POLICIES, values: fromBusiness },
+      { feature: PAY_GAS_FROM_SAFE, values: fromBusiness, isComingSoon: true },
     ],
   },
   {
