@@ -20,7 +20,7 @@ import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '../../constants'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '../../types'
-import { getAddToSpaceBlock, truncateSpaceName, type AddToSpaceBlock } from '../../utils'
+import { getAddToSpaceStatus, truncateSpaceName, type AddToSpaceStatus } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
 import { useSafeAddressFromUrl, useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
@@ -30,13 +30,19 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { AdminOnlyWorkspaceTooltip } from '../../../AdminOnlyWorkspaceTooltip'
 import { getDeterministicColor } from '@/utils/colors'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 import { useSpacesSafeEligibility } from '../../../../hooks/useSpacesSafeEligibility'
-import type { SafeLimit } from '@/utils/spaces'
 import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
+export const NO_PLAN_TOOLTIP = 'Choose a plan for this Workspace to add Safe accounts'
+
+const safeLimitMessage = (limit: number, isSafePro: boolean): string =>
+  isSafePro
+    ? `Your plan covers ${limit} Safe account${maybePlural(limit)}, and all are in use. Upgrade to add more.`
+    : `You can have up to ${limit} Safes per Workspace`
 
 const MENU_ITEM_CLASS = 'cursor-pointer gap-3 min-h-9 px-2 py-2'
 
@@ -80,26 +86,25 @@ export const SpaceSelectorDropdown = ({
     [spaces],
   )
 
-  const handleSelectSpace = async (targetSpaceId: string) => {
-    if (isAddToWorkspace) {
-      const success = await addToSpace(targetSpaceId)
-      if (success) setIsOpen(false)
-    } else {
-      const targetSpace = spaces.find((s) => s.uuid === targetSpaceId)
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: targetSpaceId },
-        {
-          from_workspace_id: selectedSpace?.uuid,
-          to_workspace_id: targetSpaceId,
-          source: 'sidebar',
-          safe_count: targetSpace?.safeCount ?? 0,
-        },
-      )
-      router.push({
-        pathname: router.pathname,
-        query: { ...router.query, spaceId: targetSpaceId },
-      })
-    }
+  const switchToSpace = (targetSpace: SpaceItem) => {
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: targetSpace.uuid },
+      {
+        from_workspace_id: selectedSpace?.uuid,
+        to_workspace_id: targetSpace.uuid,
+        source: 'sidebar',
+        safe_count: targetSpace.safeCount,
+      },
+    )
+    router.push({
+      pathname: router.pathname,
+      query: { ...router.query, spaceId: targetSpace.uuid },
+    })
+  }
+
+  const addSafeToSpace = async (targetSpace: SpaceItem) => {
+    const success = await addToSpace(targetSpace.uuid)
+    if (success) setIsOpen(false)
   }
 
   const handleCreateSpace = () => {
@@ -117,17 +122,21 @@ export const SpaceSelectorDropdown = ({
 
   const renderSpaceMenuItem = (space: SpaceItem) => {
     const limit = eligibility.getLimit(space.uuid)
-    const block = isAddToWorkspace
-      ? getAddToSpaceBlock({
+    const status: AddToSpaceStatus = isAddToWorkspace
+      ? getAddToSpaceStatus({
           spaceSafes: eligibility.getSafes(space.uuid),
           safeCount: space.safeCount,
           limit,
+          hasPlan: eligibility.hasPlan(space.uuid),
           isAdmin: isAdminOfSpace(space),
           chainId,
           safeAddress,
         })
-      : null
-    const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (eligibility.isLoading || block !== null))
+      : 'available'
+    const isSelectable = status === 'available' || status === 'alreadyAdded'
+    const isDisabled = loadingSpaceId !== null || (isAddToWorkspace && (eligibility.isLoading || !isSelectable))
+    // A Workspace that holds the Safe already only opens it there
+    const takesSafe = isAddToWorkspace && status !== 'alreadyAdded'
 
     return (
       <SpaceMenuRow
@@ -137,9 +146,9 @@ export const SpaceSelectorDropdown = ({
         isSelected={selectedSpace?.uuid === space.uuid}
         isAdding={loadingSpaceId === space.uuid}
         isDisabled={isDisabled}
-        block={block}
-        limit={limit}
-        onSelect={() => void handleSelectSpace(space.uuid)}
+        status={status}
+        limitMessage={typeof limit === 'number' ? safeLimitMessage(limit, isSafePro) : undefined}
+        onSelect={() => (takesSafe ? void addSafeToSpace(space) : switchToSpace(space))}
       />
     )
   }
@@ -265,8 +274,9 @@ interface SpaceMenuRowProps {
   isSelected: boolean
   isAdding: boolean
   isDisabled: boolean
-  block: AddToSpaceBlock
-  limit: SafeLimit
+  status: AddToSpaceStatus
+  /** Set whenever the status is `safeLimit`. */
+  limitMessage: string | undefined
   onSelect: () => void
 }
 
@@ -276,8 +286,8 @@ const SpaceMenuRow = ({
   isSelected,
   isAdding,
   isDisabled,
-  block,
-  limit,
+  status,
+  limitMessage,
   onSelect,
 }: SpaceMenuRowProps): ReactElement => {
   const menuItem = (
@@ -300,24 +310,23 @@ const SpaceMenuRow = ({
     </DropdownMenuItem>
   )
 
-  switch (block) {
+  switch (status) {
     case 'alreadyAdded':
-      return (
-        <Tooltip>
-          <TooltipTrigger render={<div className="block w-full" />}>{menuItem}</TooltipTrigger>
-          <TooltipContent side="right">{SAFE_ALREADY_IN_WORKSPACE_TOOLTIP}</TooltipContent>
-        </Tooltip>
-      )
+      return <RowTooltip message={SAFE_ALREADY_IN_WORKSPACE_TOOLTIP}>{menuItem}</RowTooltip>
     case 'notAdmin':
       return <AdminOnlyWorkspaceTooltip isAdmin={false}>{menuItem}</AdminOnlyWorkspaceTooltip>
+    case 'noPlan':
+      return <RowTooltip message={NO_PLAN_TOOLTIP}>{menuItem}</RowTooltip>
     case 'safeLimit':
-      return (
-        <Tooltip>
-          <TooltipTrigger render={<span className="block w-full" />}>{menuItem}</TooltipTrigger>
-          <TooltipContent side="right">{`You can have up to ${limit} Safes per Workspace`}</TooltipContent>
-        </Tooltip>
-      )
-    case null:
+      return <RowTooltip message={limitMessage ?? ''}>{menuItem}</RowTooltip>
+    case 'available':
       return menuItem
   }
 }
+
+const RowTooltip = ({ message, children }: { message: string; children: ReactElement }): ReactElement => (
+  <Tooltip>
+    <TooltipTrigger render={<span className="block w-full" />}>{children}</TooltipTrigger>
+    <TooltipContent side="right">{message}</TooltipContent>
+  </Tooltip>
+)
