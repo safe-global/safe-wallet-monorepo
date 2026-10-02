@@ -113,10 +113,6 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/audit-log/actors` }),
         providesTags: ['spaces'],
       }),
-      spaceSafesGetAllV1: build.query<SpaceSafesGetAllV1ApiResponse, SpaceSafesGetAllV1ApiArg>({
-        query: () => ({ url: `/v1/spaces/safes` }),
-        providesTags: ['spaces'],
-      }),
       spaceSafesCreateV1: build.mutation<SpaceSafesCreateV1ApiResponse, SpaceSafesCreateV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/safes`,
@@ -136,6 +132,10 @@ const injectedRtkApi = api
           body: queryArg.deleteSpaceSafesDto,
         }),
         invalidatesTags: ['spaces'],
+      }),
+      spaceSafesGetAllV1: build.query<SpaceSafesGetAllV1ApiResponse, SpaceSafesGetAllV1ApiArg>({
+        query: () => ({ url: `/v1/spaces/safes` }),
+        providesTags: ['spaces'],
       }),
       membersInviteUserV1: build.mutation<MembersInviteUserV1ApiResponse, MembersInviteUserV1ApiArg>({
         query: (queryArg) => ({
@@ -329,12 +329,6 @@ export type SpaceAuditGetAuditLogActorsV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
-export type SpaceSafesGetAllV1ApiResponse = /** status 200 Safes of all spaces retrieved successfully */ {
-  [key: string]: {
-    [key: string]: string[]
-  }
-}
-export type SpaceSafesGetAllV1ApiArg = void
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
   /** Space UUID to add Safes to */
@@ -354,6 +348,9 @@ export type SpaceSafesDeleteV1ApiArg = {
   /** List of Safe addresses and their chain information to remove from the space */
   deleteSpaceSafesDto: DeleteSpaceSafesDto
 }
+export type SpaceSafesGetAllV1ApiResponse =
+  /** status 200 Safes of all spaces retrieved successfully */ GetSpacesSafesResponse[]
+export type SpaceSafesGetAllV1ApiArg = void
 export type MembersInviteUserV1ApiResponse = /** status 200 Users invited successfully */ Invitation[]
 export type MembersInviteUserV1ApiArg = {
   /** Space UUID to invite users to */
@@ -595,6 +592,13 @@ export type GetSpaceSafeResponse = {
 }
 export type DeleteSpaceSafesDto = {
   safes: SpaceSafeDto[]
+}
+export type GetSpacesSafesResponse = {
+  safes: {
+    [key: string]: string[]
+  }
+  /** Space UUID */
+  spaceUuid: string
 }
 export type Invitation = {
   userId: number
@@ -869,12 +873,12 @@ export const {
   useLazySpaceAuditGetAuditLogV1Query,
   useSpaceAuditGetAuditLogActorsV1Query,
   useLazySpaceAuditGetAuditLogActorsV1Query,
-  useSpaceSafesGetAllV1Query,
-  useLazySpaceSafesGetAllV1Query,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesGetV1Query,
   useLazySpaceSafesGetV1Query,
   useSpaceSafesDeleteV1Mutation,
+  useSpaceSafesGetAllV1Query,
+  useLazySpaceSafesGetAllV1Query,
   useMembersInviteUserV1Mutation,
   useMembersAcceptInviteV1Mutation,
   useMembersDeclineInviteV1Mutation,

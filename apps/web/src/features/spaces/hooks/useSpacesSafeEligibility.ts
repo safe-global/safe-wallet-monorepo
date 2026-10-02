@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import { useSpaceSafesGetAllV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -39,6 +40,11 @@ export const useSpacesSafeEligibility = (enabled: boolean): SpacesSafeEligibilit
     refetch: entitlementsQuery.refetch,
   })
 
+  const safesBySpace = useMemo(
+    () => new Map(safesQuery.currentData?.map(({ spaceUuid, safes }) => [spaceUuid, safes])),
+    [safesQuery.currentData],
+  )
+
   const getLimit = (spaceId: string): SafeLimit => {
     if (!isSafePro) return SAFE_ACCOUNTS_LIMIT
     const seats = getSeatsMeter(entitlementsQuery.currentData?.[spaceId])
@@ -46,7 +52,7 @@ export const useSpacesSafeEligibility = (enabled: boolean): SpacesSafeEligibilit
   }
 
   return {
-    getSafes: (spaceId) => safesQuery.currentData?.[spaceId],
+    getSafes: (spaceId) => safesBySpace.get(spaceId),
     getLimit,
     isLoading:
       isQueryLoading(safesQuery) || isQueryLoading(entitlementsQuery) || isRetryingSafes || isRetryingEntitlements,

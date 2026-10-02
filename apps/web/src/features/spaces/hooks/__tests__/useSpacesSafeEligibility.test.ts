@@ -38,7 +38,9 @@ describe('useSpacesSafeEligibility', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseIsSafeProEnabled.mockReturnValue(true)
-    mockUseSpaceSafesGetAllV1Query.mockReturnValue(queryResult({ currentData: { [spaceId]: { '1': [safeAddress] } } }))
+    mockUseSpaceSafesGetAllV1Query.mockReturnValue(
+      queryResult({ currentData: [{ spaceUuid: spaceId, safes: { '1': [safeAddress] } }] }),
+    )
     mockUseEntitlementsGetAllEntitlementsV1Query.mockReturnValue(
       queryResult({ currentData: { [spaceId]: seatsEntitlements(5), [otherSpaceId]: seatsEntitlements(null) } }),
     )

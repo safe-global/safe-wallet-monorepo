@@ -3014,51 +3014,6 @@
         ]
       }
     },
-    "/v1/spaces/safes": {
-      "get": {
-        "description": "Retrieves the Safes of every space the user is an active member of, keyed by space UUID and grouped by chain like the per-space endpoint. A space without Safes maps to an empty object.",
-        "operationId": "spaceSafesGetAllV1",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Safes of all spaces retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "example": {
-                    "{spaceUuid}": {
-                      "{chainId}": [
-                        "0x..."
-                      ]
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authentication required"
-          },
-          "403": {
-            "description": "Access forbidden - missing or invalid authentication"
-          }
-        },
-        "summary": "Get Safes of all spaces",
-        "tags": [
-          "spaces"
-        ]
-      }
-    },
     "/v1/spaces/{spaceId}/safes": {
       "post": {
         "description": "Adds one or more Safe addresses to a space. This allows the space members to collectively manage these Safes.",
@@ -3199,6 +3154,38 @@
           }
         },
         "summary": "Remove Safes from space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, one entry per space with its Safes grouped by chain like the per-space endpoint. A space without Safes has an empty `safes` object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpacesSafesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
         "tags": [
           "spaces"
         ]
@@ -7328,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-615683f",
+    "version": "main-ecb600a",
     "contact": {}
   },
   "tags": [],
@@ -11144,6 +11131,33 @@
         },
         "required": [
           "safes"
+        ]
+      },
+      "GetSpacesSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          }
+        },
+        "required": [
+          "safes",
+          "spaceUuid"
         ]
       },
       "GetSpaceSafeResponse": {
