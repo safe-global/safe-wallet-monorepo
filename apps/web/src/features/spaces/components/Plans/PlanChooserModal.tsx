@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -14,7 +17,7 @@ import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
-import { buildPlanTiers } from './planTiers'
+import { buildPlanTiers, pickProps } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { PlanPick, PlanTier } from './types'
 
@@ -72,11 +75,17 @@ export default function PlanChooserModal({
   const [pick, setPick] = useState<PlanPick>()
   const { title, subtitle } = chooserCopy(reason, endedAt)
   const trimming = pick && needsTrim(pick.option.seats) ? pick : undefined
+  const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.LOCKED_MODAL }
+  useEffect(() => {
+    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'admin' })
+  }, [])
+
+  const start = () => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)
 
   const subscribe = (picked: PlanPick) => {
     if (!picked.option.paymentLinkId) return
     if (needsTrim(picked.option.seats)) setPick(picked)
-    else void checkout(picked.option.paymentLinkId)
+    else void checkout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
   }
 
   return (
@@ -90,7 +99,9 @@ export default function PlanChooserModal({
               planName={trimming.tier.name}
               onBack={() => setPick(undefined)}
               onContinue={(removed) => {
-                if (trimming.option.paymentLinkId) void checkout(trimming.option.paymentLinkId, removed)
+                if (trimming.option.paymentLinkId) {
+                  void checkout(trimming.option.paymentLinkId, { ...pickProps(trimming), ...entry }, removed)
+                }
               }}
               isSubmitting={isBusy}
               error={error}
@@ -113,7 +124,10 @@ export default function PlanChooserModal({
                   accentIcon
                   className="self-start"
                   disabled={isOpeningPortal}
-                  onClick={() => void openPortal()}
+                  onClick={() => {
+                    start()
+                    void openPortal()
+                  }}
                 >
                   Update billing details
                   <ArrowRight />
@@ -135,6 +149,8 @@ export default function PlanChooserModal({
                   salesHint={salesHintFor(tiers)}
                   onSubscribe={subscribe}
                   isBusy={isBusy}
+                  location={PlanLocation.LOCKED_MODAL}
+                  onCta={start}
                 />
               )}
 

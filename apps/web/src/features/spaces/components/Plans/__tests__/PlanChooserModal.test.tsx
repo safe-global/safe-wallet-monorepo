@@ -1,5 +1,7 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import PlanChooserModal, { chooserCopy, _LAPSED_DATA_NOTE } from '../PlanChooserModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -8,6 +10,7 @@ const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
 let mockTrimState: Record<string, unknown> = {}
 
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -15,7 +18,8 @@ jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
   useSeatTrimCheckout: (spaceId: string) => ({
     seatCount: 3,
     needsTrim: (seats: number | null | undefined) => mockNeedsTrim(seats),
-    checkout: (paymentLinkId: string, removed?: unknown[]) => mockCheckout(spaceId, paymentLinkId, removed),
+    checkout: (paymentLinkId: string, props: unknown, removed?: unknown[]) =>
+      mockCheckout(spaceId, paymentLinkId, props, removed),
     isBusy: false,
     error: undefined,
     ...mockTrimState,
@@ -63,6 +67,7 @@ const PLANS = [
 ]
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const ENDED_AT = Date.UTC(2026, 11, 5, 12)
+const LOCKED_ENTRY = { 'Entry Point': 'locked_modal' }
 
 describe('PlanChooserModal', () => {
   beforeEach(() => {
@@ -107,13 +112,24 @@ describe('PlanChooserModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(onBack).toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { 'User Role': 'admin' })
   })
 
   it('goes straight to Stripe when the picked plan covers the Workspace', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
-    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, LOCKED_ENTRY)
+    expect(trackEvent).toHaveBeenCalledWith(
+      SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
+      expect.objectContaining({ Location: 'locked_modal' }),
+    )
+    expect(mockCheckout).toHaveBeenCalledWith(
+      SPACE_ID,
+      'pl_business',
+      { 'Target Plan': 'business', Seats: 20, 'Billing Period': 'monthly', ...LOCKED_ENTRY },
+      undefined,
+    )
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
 
@@ -132,7 +148,12 @@ describe('PlanChooserModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('step-continue'))
-    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])
+    expect(mockCheckout).toHaveBeenCalledWith(
+      SPACE_ID,
+      'pl_starter',
+      { 'Target Plan': 'starter', Seats: 2, 'Billing Period': 'monthly', ...LOCKED_ENTRY },
+      [{ chainId: '1', address: '0xC' }],
+    )
   })
 
   it('sends a failed payment to the billing portal instead of the catalog', () => {
@@ -141,6 +162,7 @@ describe('PlanChooserModal', () => {
     expect(screen.queryByRole('button', { name: 'Continue with Business' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /Update billing details/ }))
     expect(mockOpenPortal).toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, LOCKED_ENTRY)
   })
 
   it('shows a skeleton while loading, an empty state without plans and a checkout error', () => {

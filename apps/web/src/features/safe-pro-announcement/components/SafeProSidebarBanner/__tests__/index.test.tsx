@@ -1,8 +1,17 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import SafeProSidebarBanner from '../index'
 
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+
 describe('SafeProSidebarBanner', () => {
+  it('tracks viewed on mount', () => {
+    render(<SafeProSidebarBanner />)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { Location: 'sidebar' })
+  })
+
   it('renders the headline and the supporting line', () => {
     render(<SafeProSidebarBanner />)
 

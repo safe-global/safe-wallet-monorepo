@@ -1,5 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import ChangePlanDialog from '../ChangePlanDialog'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 import type { PlanPick } from '../types'
 
 const mockPreviewChange = jest.fn()
@@ -31,6 +35,7 @@ const pick: PlanPick = {
     paymentLinkId: 'pl_starter',
     priceId: 'price_starter',
     label: '2 Safe accounts',
+    seats: 2,
     price: 189,
     originalPrice: null,
   },
@@ -42,8 +47,11 @@ const currentPlan = {
   billingCycle: 'month' as const,
   isTrialing: false,
   periodEndsAt: '2026-12-06T00:00:00Z',
+  seats: 20,
   seatsLabel: '20 Safe accounts',
 }
+const ENTRY = { 'Entry Point': 'sidebar' }
+const CHANGE = { 'From Plan': 'business', 'To Plan': 'starter', 'From Seats': 20, 'To Seats': 2 }
 const preview = {
   amountDue: -31000,
   currency: 'eur',
@@ -64,6 +72,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}
@@ -84,6 +93,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={onClose}
@@ -108,6 +118,11 @@ describe('ChangePlanDialog', () => {
     await waitFor(() => expect(onChanged).toHaveBeenCalled())
     expect(onClose).not.toHaveBeenCalled()
     expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', [])
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_CHANGE_CONFIRMED, {
+      ...CHANGE,
+      'Amount Due': -310,
+      ...ENTRY,
+    })
   })
 
   it('sends the Safes left out with the change and says so in the summary', async () => {
@@ -117,6 +132,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         removed={removed}
@@ -143,6 +159,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         removed={[{ chainId: '1', address: '0xB' }]}
@@ -166,6 +183,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={onClose}
@@ -185,6 +203,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={{ ...currentPlan, price: 49 }}
         onClose={jest.fn()}
@@ -202,6 +221,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={{ ...currentPlan, isTrialing: true }}
         onClose={jest.fn()}
@@ -225,6 +245,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}
@@ -242,6 +263,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}

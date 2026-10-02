@@ -37,6 +37,7 @@ jest.mock('@/services/analytics', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/spaces').SPACE_EVENTS,
     ADD_ACCOUNTS_MODAL: { action: 'add_accounts_modal', category: 'spaces' },
     ACCOUNTS_WIDGET_CLICKED: { action: 'accounts_widget_clicked', category: 'spaces' },
     PENDING_TX_WIDGET_CLICKED: { action: 'pending_tx_widget_clicked', category: 'spaces' },
@@ -46,6 +47,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {
     SAFE_ADDRESS: 'Safe Address',
     TX_ID: 'TX ID',

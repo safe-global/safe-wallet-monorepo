@@ -1,6 +1,10 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -59,15 +63,22 @@ jest.mock('../ChangePlanFlow', () => ({
   default: ({
     pick,
     currentPlan,
+    entry,
     onClose,
     onChanged,
   }: {
     pick: { tier: { name: string } }
     currentPlan: { isTrialing: boolean }
+    entry: Record<string, unknown>
     onClose: () => void
     onChanged?: () => void
   }) => (
-    <div data-testid="change-plan-dialog" data-to={pick.tier.name} data-trial={String(currentPlan.isTrialing)}>
+    <div
+      data-testid="change-plan-dialog"
+      data-to={pick.tier.name}
+      data-trial={String(currentPlan.isTrialing)}
+      data-entry={JSON.stringify(entry)}
+    >
       <button onClick={onChanged}>plan-changed</button>
       <button onClick={onClose}>flow-closed</button>
     </div>
@@ -161,12 +172,23 @@ describe('TrialEndingModal', () => {
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {
+      Location: 'reminder_modal',
+      'Free Access Days Left': 7,
+      'User Role': 'admin',
+    })
+
     fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))
     expect(mockOpenPortal).toHaveBeenCalled()
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, { 'Entry Point': 'reminder_modal' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-to', 'Starter')
     expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-trial', 'true')
+    expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute(
+      'data-entry',
+      JSON.stringify({ 'Entry Point': 'reminder_modal' }),
+    )
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Safe Pro' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()

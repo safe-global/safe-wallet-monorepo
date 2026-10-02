@@ -1,7 +1,11 @@
+import { useEffect, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { highlightSafePro } from '@/components/common/ProHighlight'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { SafeProNoticeModal } from '../SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -34,6 +38,35 @@ const CHECKOUT_RELEASED_STATUSES: CheckoutReturnStatus[] = ['error', 'timeout', 
 export const _PLAN_ERROR_COPY = {
   title: 'Your plan could not be checked',
   body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available outside the Workspace.',
+}
+
+/** A member cannot act on a lapsed or failed plan; the notice is the whole of the locked flow for them. */
+const MemberLockedNotice = ({
+  reason,
+  title,
+  body,
+  onBack,
+}: {
+  reason: WorkspaceLockReason
+  title: ReactNode
+  body: string
+  onBack: () => void
+}) => {
+  const isPlanLock = reason !== 'trial-offered'
+  useEffect(() => {
+    if (isPlanLock) trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'member' })
+  }, [isPlanLock])
+
+  return (
+    <SafeProNoticeModal
+      open
+      title={title}
+      body={body}
+      onAction={onBack}
+      secondaryActionLabel={reason === 'lapsed' ? 'Create new Workspace' : undefined}
+      secondaryActionHref={reason === 'lapsed' ? AppRoutes.welcome.spaces : undefined}
+    />
+  )
 }
 
 /** Mounted on every Workspace page; none of the modals it shows can be dismissed. */
@@ -71,16 +104,7 @@ export default function WorkspaceLockModal({ spaceId }: { spaceId: string }) {
 
   if (!isAdmin) {
     const { title, body } = _memberCopy(reason, trialPeriodDays, endedAt, space?.name ?? 'This Workspace')
-    return (
-      <SafeProNoticeModal
-        open
-        title={highlightSafePro(title)}
-        body={body}
-        onAction={goBack}
-        secondaryActionLabel={reason === 'lapsed' ? 'Create new Workspace' : undefined}
-        secondaryActionHref={reason === 'lapsed' ? AppRoutes.welcome.spaces : undefined}
-      />
-    )
+    return <MemberLockedNotice reason={reason} title={highlightSafePro(title)} body={body} onBack={goBack} />
   }
 
   if (reason === 'trial-offered') return <ClaimTrialModal spaceId={spaceId} onBack={goBack} />

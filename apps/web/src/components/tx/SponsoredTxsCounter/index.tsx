@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import { useEffect, type ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,19 @@ import { Typography } from '@/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import {
+  trackEvent,
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+const PROMPT = {
+  [MixpanelEventParams.FEATURE]: UpgradeFeature.SPONSORED_TX,
+  [MixpanelEventParams.LOCATION]: UpgradeLocation.TX_FLOW_GAS,
+}
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
 export const _formatResetsAt = (iso: string | null): string | null => {
@@ -38,6 +51,9 @@ const SponsoredTxsCounter = ({
   isPro: boolean
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
+  useEffect(() => {
+    if (!isPro) trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
+  }, [isPro])
 
   return (
     <div className="flex items-center justify-between gap-3 bg-muted px-4 py-2" data-testid="sponsored-txs-counter">
@@ -86,6 +102,12 @@ const SponsoredTxsCounter = ({
           className="shrink-0"
           render={<NextLink href={AppRoutes.welcome.spaces} />}
           data-testid="sponsored-txs-upgrade"
+          onClick={() =>
+            trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, {
+              [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+              ...PROMPT,
+            })
+          }
         >
           Upgrade to
           <span className="block h-4 w-6" aria-label="Safe Pro">
