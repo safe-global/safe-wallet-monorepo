@@ -41,7 +41,7 @@ export default function PlanCatalogV2({
             <TabsTrigger value="year">
               {PLAN_CARD_COPY_V2.yearly}
               {hasYearly && (
-                <Badge variant="subtle" size="status" shape="status" data-testid="yearly-savings">
+                <Badge variant="positive" size="status" shape="status" data-testid="yearly-savings">
                   {PLAN_CARD_COPY_V2.yearlySavings}
                 </Badge>
               )}

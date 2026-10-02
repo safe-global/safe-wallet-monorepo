@@ -91,18 +91,15 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   { from: 'Enterprise', label: 'Tailored contract & billing terms' },
 ]
 
-/** What a plan adds over the plan below it; a per-plan quota counts as added. The compare table lists everything. */
+/** Everything a plan includes, its own features first. */
 export const getCardFeaturesV2 = (name: string): string[] | undefined => {
   if (!isPlanNameV2(name)) return undefined
-  return CARD_FEATURES_V2.filter(({ from, label }) => from === name || typeof label !== 'string').map(({ label }) =>
+  const rank = PLAN_ORDER.indexOf(name)
+  const included = CARD_FEATURES_V2.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank)
+  const isOwn = ({ from, label }: CardFeatureV2) => from === name || typeof label !== 'string'
+  return [...included.filter(isOwn), ...included.filter((feature) => !isOwn(feature))].map(({ label }) =>
     typeof label === 'string' ? label : label[name],
   )
-}
-
-/** "What's included" on the first plan, "Everything in Starter, plus" on the ones after it. */
-export const getFeaturesHeadingV2 = (name: string): string => {
-  const rank = isPlanNameV2(name) ? PLAN_ORDER.indexOf(name) : 0
-  return rank > 0 ? `Everything in ${PLAN_ORDER[rank - 1]}, plus` : PLAN_CARD_COPY_V2.featuresHeading
 }
 
 export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
@@ -124,7 +121,6 @@ export const PLAN_CARD_COPY_V2 = {
   seatsLabel: 'Safe accounts for',
   billedMonthly: 'Billed monthly · excl. VAT',
   billedYearly: 'Billed yearly · excl. VAT',
-  perSafe: (amount: string) => `${amount} per Safe account/mo`,
 } as const
 
 export const SAFENET_CHECKS = 'Safenet checks'
@@ -162,7 +158,7 @@ export const COMPARE_COPY_V2 = {
   included: 'Included',
   notIncluded: 'Not included',
   showAll: 'Expand table',
-  soldSeparately: 'Sold separately',
+  addOn: 'Add on',
 }
 
 /** Unreleased: listed on the cards with a "Soon" chip, never in the compare table. */
@@ -207,7 +203,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Transaction simulation', values: every(true) },
       {
         feature: SAFENET_CHECKS,
-        values: { Starter: 'Pay per transaction', Business: true, Enterprise: true },
+        values: fromBusiness,
         isComingSoon: true,
       },
     ],
@@ -231,21 +227,19 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   },
   {
     title: 'Add-ons',
-    rows: [{ feature: 'Hypernative Guardian', values: every(COMPARE_COPY_V2.soldSeparately), isAddOn: true }],
+    rows: [{ feature: 'Hypernative Guardian', values: every(COMPARE_COPY_V2.addOn), isAddOn: true }],
   },
 ]
 
-/** Unreleased features a plan will get that the plan below it will not; the card lists them after what is included. */
+/** Unreleased features a plan will get; the card lists them after what is included. */
 export const getCardComingSoonV2 = (name: string): string[] | undefined => {
   if (!isPlanNameV2(name)) return undefined
-  const below = PLAN_ORDER[PLAN_ORDER.indexOf(name) - 1]
-  return COMING_SOON_V2.filter((row) => row.values[name] === true && (!below || row.values[below] !== true)).map(
-    (row) => row.feature,
-  )
+  return COMING_SOON_V2.filter((row) => row.values[name] === true).map((row) => row.feature)
 }
 
 export const SALES_PROMPT_V2 = {
   prompt: 'Not sure which plan fits?',
+  detail: "Tell us how your team works and we'll help you pick.",
   action: 'Talk to sales',
 }
 
