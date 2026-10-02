@@ -45,6 +45,8 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
+  /** SAFE_PRO_PLANS_V2 - redesigned Plans page (default: false) */
+  safeProPlansV2?: boolean
 }
 
 /**

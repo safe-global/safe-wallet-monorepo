@@ -20,6 +20,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   twoFactorAwarenessBanner: false,
   safeStaking: false,
   safePro: false,
+  safeProPlansV2: false,
 }
 
 /**
@@ -38,6 +39,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   twoFactorAwarenessBanner: 'TWO_FACTOR_AWARENESS_BANNER',
   safeStaking: 'SAFE_STAKING',
   safePro: 'SAFE_PRO',
+  safeProPlansV2: 'SAFE_PRO_PLANS_V2',
 }
 
 /**

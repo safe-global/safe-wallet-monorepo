@@ -14,8 +14,8 @@ export const TRIAL_ENDING_SOON_DAYS = 7
 /** From here on the trial label counts down; further out it just says "Free access". */
 export const TRIAL_COUNTDOWN_DAYS = 14
 
-export const trialLabel = (daysLeft: number | null | undefined): string => {
-  if (daysLeft == null || daysLeft > TRIAL_COUNTDOWN_DAYS) return 'Free access'
+export const trialLabel = (daysLeft: number | null | undefined, countdownDays = TRIAL_COUNTDOWN_DAYS): string => {
+  if (daysLeft == null || daysLeft > countdownDays) return 'Free access'
   return `Free access · ${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
 }
 

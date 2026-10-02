@@ -9,8 +9,10 @@ import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import AuthState from '../AuthState'
 import Plans from './index'
+import PlansV2 from './v2/PlansV2'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
+import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -29,6 +31,7 @@ const PlansSkeleton = () => (
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useIsSafeProEnabled()
+  const isPlansV2 = useIsSafeProPlansV2Enabled()
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const { plan, seats, sponsoredTxs, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
@@ -37,6 +40,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { canChange } = useChangePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
+  const PlansView = isPlansV2 ? PlansV2 : Plans
 
   const currentPlan = useMemo(
     () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
@@ -66,7 +70,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         ) : isPlanLoading || isOffersLoading ? (
           <PlansSkeleton />
         ) : (
-          <Plans
+          <PlansView
             plan={plan}
             safeAccounts={seats}
             sponsoredTxs={sponsoredTxs}

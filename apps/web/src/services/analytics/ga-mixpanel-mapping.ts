@@ -16,6 +16,7 @@ import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
 import { POLICY_EVENTS } from './events/policies'
+import { SAFE_PRO_EVENTS } from './events/safe-pro'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -91,6 +92,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED.action]: MixpanelEvent.WORKSPACE_SAFE_UNLINKED,
   [SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED.action]: MixpanelEvent.ACCOUNTS_WIDGET_CLICKED,
   [SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action]: MixpanelEvent.PENDING_TX_WIDGET_CLICKED,
+  [SAFE_PRO_EVENTS.PLANS_CLICKED.action]: MixpanelEvent.SAFE_PRO_PLANS_CLICKED,
   [SPACE_EVENTS.WALLET_SWITCHED.action]: MixpanelEvent.WALLET_SWITCHED,
   [SPACE_EVENTS.WALLET_DISCONNECTED.action]: MixpanelEvent.WALLET_DISCONNECTED,
   [SPACE_EVENTS.WORKSPACE_CREATE_STARTED.action]: MixpanelEvent.WORKSPACE_CREATE_STARTED,
