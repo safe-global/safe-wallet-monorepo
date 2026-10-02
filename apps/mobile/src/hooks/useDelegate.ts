@@ -6,7 +6,8 @@ import { selectAllChains } from '@/src/store/chains'
 import { addDelegate } from '@/src/store/delegatesSlice'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
-import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
@@ -33,7 +34,8 @@ export const useDelegate = (): UseDelegateProps => {
   const allChains = useAppSelector(selectAllChains)
 
   // Access API endpoints
-  const [registerDelegate] = cgwApi.useDelegatesPostDelegateV2Mutation()
+  const [registerDelegateV2] = cgwApi.useDelegatesPostDelegateV2Mutation()
+  const [registerDelegateV3] = cgwApi.useDelegatesPostDelegateV3Mutation()
 
   const createDelegate = useCallback(
     async (ownerPrivateKey: string, safe: string | null = null) => {
@@ -75,11 +77,12 @@ export const useDelegate = (): UseDelegateProps => {
               await new Promise((resolve) => setTimeout(resolve, 300 * index))
             }
 
-            // Generate typed data for this chain
-            const typedData = getDelegateTypedData(chain.chainId, delegateWallet.address)
+            const typedData = getDelegateTypedData(chain, delegateWallet.address, safe)
 
-            // Sign the message with the owner's wallet
-            const signature = await ownerWallet.signTypedData(typedData.domain, typedData.types, typedData.message)
+            // Sign the raw EIP-712 digest — ethers rejects the queue service's non-standard `safe` domain key
+            const signature = ownerWallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
+
+            const registerDelegate = hasFeature(chain, FEATURES.QUEUE_SERVICE) ? registerDelegateV3 : registerDelegateV2
 
             // Register delegate on the backend
             await registerDelegate({
@@ -127,7 +130,7 @@ export const useDelegate = (): UseDelegateProps => {
         return { success: false, error: errorMsg }
       }
     },
-    [allChains, dispatch, storePrivateKey, registerDelegate],
+    [allChains, dispatch, storePrivateKey, registerDelegateV2, registerDelegateV3],
   )
 
   return {

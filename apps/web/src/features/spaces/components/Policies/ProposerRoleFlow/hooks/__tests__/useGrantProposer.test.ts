@@ -2,12 +2,13 @@ import { act, renderHook } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
-import * as delegatesApi from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
+import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import * as useOnboardModule from '@/hooks/wallets/useOnboard'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
@@ -17,6 +18,7 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
+import { chainBuilder } from '@/tests/builders/chains'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
 import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
@@ -27,22 +29,37 @@ jest.mock('../../../../../hooks/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(() => true),
 }))
 
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/delegates'),
+  useDelegatesPostDelegateV1Mutation: jest.fn(),
+  useDelegatesPostDelegateV2Mutation: jest.fn(),
+  useDelegatesPostDelegateV3Mutation: jest.fn(),
+}))
+
+const { useDelegatesPostDelegateV1Mutation, useDelegatesPostDelegateV2Mutation, useDelegatesPostDelegateV3Mutation } =
+  jest.requireMock<
+    Record<
+      | 'useDelegatesPostDelegateV1Mutation'
+      | 'useDelegatesPostDelegateV2Mutation'
+      | 'useDelegatesPostDelegateV3Mutation',
+      jest.Mock
+    >
+  >('@safe-global/store/gateway/AUTO_GENERATED/delegates')
+
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
 
-const CHAIN_ID = '137'
+const CHAIN_ID = faker.string.numeric()
 const SAFE = checksumAddress(faker.finance.ethereumAddress())
 const PROPOSER = checksumAddress(faker.finance.ethereumAddress())
 const signer = {} as JsonRpcSigner
 const provider = {} as JsonRpcProvider
 
-type PostV2 = ReturnType<typeof delegatesApi.useDelegatesPostDelegateV2Mutation>
-
 const mutation = () => {
   const trigger = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve({}) })
-  return { trigger, tuple: [trigger, { isLoading: false, reset: jest.fn() }] as unknown as PostV2 }
+  return { trigger, tuple: [trigger, { isLoading: false, reset: jest.fn() }] }
 }
 
 const wallet = (label: string) => connectedWalletBuilder().with({ label, chainId: CHAIN_ID }).build()
@@ -57,21 +74,34 @@ const connect = (label: string) => {
   return connected
 }
 
-describe('useGrantProposer', () => {
+describe.each([
+  { service: 'queue service', isQueueService: true },
+  { service: 'transaction service', isQueueService: false },
+])('useGrantProposer on a $service chain', ({ service, isQueueService }) => {
+  const chain = chainBuilder()
+    .with({ chainId: CHAIN_ID, features: isQueueService ? [FEATURES.QUEUE_SERVICE] : [] })
+    .build()
+
   let addV1: ReturnType<typeof mutation>
-  let addV2: ReturnType<typeof mutation>
+  let addDelegate: ReturnType<typeof mutation>
+  let otherAddDelegate: ReturnType<typeof mutation>
   let addOrRequestContact: jest.Mock
 
   beforeEach(() => {
     localStorage.clear()
     jest.mocked(trackEvent).mockClear()
     addV1 = mutation()
-    addV2 = mutation()
+    const addV2 = mutation()
+    const addV3 = mutation()
+    addDelegate = isQueueService ? addV3 : addV2
+    otherAddDelegate = isQueueService ? addV2 : addV3
     addOrRequestContact = jest.fn().mockResolvedValue(undefined)
     jest.spyOn(addOrRequestContactModule, 'useAddOrRequestWorkspaceContact').mockReturnValue(addOrRequestContact)
-    jest.spyOn(delegatesApi, 'useDelegatesPostDelegateV1Mutation').mockReturnValue(addV1.tuple)
-    jest.spyOn(delegatesApi, 'useDelegatesPostDelegateV2Mutation').mockReturnValue(addV2.tuple)
+    useDelegatesPostDelegateV1Mutation.mockReturnValue(addV1.tuple)
+    useDelegatesPostDelegateV2Mutation.mockReturnValue(addV2.tuple)
+    useDelegatesPostDelegateV3Mutation.mockReturnValue(addV3.tuple)
     jest.spyOn(useChainIdModule, 'default').mockReturnValue(CHAIN_ID)
+    jest.spyOn(useChainsModule, 'useChain').mockReturnValue(chain)
     jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(SAFE)
     jest.spyOn(useOnboardModule, 'default').mockReturnValue(onboard)
     connect('MetaMask')
@@ -95,12 +125,13 @@ describe('useGrantProposer', () => {
     return { ok, result: rendered.result }
   }
 
-  it('signs typed data and posts to the v2 endpoint scoped to the selected Safe', async () => {
+  it(`signs typed data for the selected Safe and posts it to the ${service} endpoint`, async () => {
     const { ok } = await submit()
 
     expect(ok).toBe(true)
-    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(CHAIN_ID, PROPOSER, signer)
-    expect(addV2.trigger).toHaveBeenCalledWith({
+    expect(jest.mocked(useChainsModule.useChain)).toHaveBeenCalledWith(CHAIN_ID)
+    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(chain, PROPOSER, SAFE, 'add', signer)
+    expect(addDelegate.trigger).toHaveBeenCalledWith({
       chainId: CHAIN_ID,
       createDelegateDto: {
         delegate: PROPOSER,
@@ -110,6 +141,7 @@ describe('useGrantProposer', () => {
         safe: SAFE,
       },
     })
+    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
     expect(addV1.trigger).not.toHaveBeenCalled()
     expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
   })
@@ -119,7 +151,7 @@ describe('useGrantProposer', () => {
 
     await submit()
 
-    expect(addV2.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(connected.address)
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(connected.address)
   })
 
   it('uses eth_sign and the v1 endpoint for Trezor', async () => {
@@ -133,7 +165,8 @@ describe('useGrantProposer', () => {
       chainId: CHAIN_ID,
       createDelegateDto: expect.objectContaining({ signature: '0xethsign', safe: SAFE }),
     })
-    expect(addV2.trigger).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
     expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
   })
 
@@ -205,7 +238,7 @@ describe('useGrantProposer', () => {
   it('never sends the entered name to the API', async () => {
     await submit({ proposer: PROPOSER, name: 'Nicole' })
 
-    expect(addV2.trigger.mock.calls[0][0].createDelegateDto.label).toBe(PROPOSER_LABEL_PLACEHOLDER)
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.label).toBe(PROPOSER_LABEL_PLACEHOLDER)
   })
 
   it('switches the wallet to the selected Safe chain before signing', async () => {
@@ -222,7 +255,7 @@ describe('useGrantProposer', () => {
 
     await submit()
 
-    expect(addV2.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(switched.address)
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(switched.address)
   })
 
   it('surfaces a refused chain switch without signing or posting', async () => {
@@ -233,7 +266,7 @@ describe('useGrantProposer', () => {
     expect(ok).toBe(false)
     expect(result.current.error?.message).toBe('Wallet connected to wrong chain.')
     expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
-    expect(addV2.trigger).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
     expect(addOrRequestContact).not.toHaveBeenCalled()
   })
 
@@ -246,7 +279,7 @@ describe('useGrantProposer', () => {
   })
 
   it('tracks the submit event even when the request then fails', async () => {
-    addV2.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
+    addDelegate.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
 
     await submit()
 
@@ -264,7 +297,7 @@ describe('useGrantProposer', () => {
     expect(result.current.blockedReason).toBe(SMART_CONTRACT_PROPOSER_ERROR)
     expect(result.current.error).toBeUndefined()
     expect(sdk.getAssertedChainSigner).not.toHaveBeenCalled()
-    expect(addV2.trigger).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
   })
 
   it('surfaces a rejected signature as an error without posting or saving the name', async () => {
@@ -274,13 +307,13 @@ describe('useGrantProposer', () => {
 
     expect(ok).toBe(false)
     expect(result.current.error?.message).toBe('User rejected')
-    expect(addV2.trigger).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
     expect(addOrRequestContact).not.toHaveBeenCalled()
     expect(selectNotifications(getStoreInstance().getState())).toEqual([])
   })
 
   it('surfaces a failed request as an error without saving the name', async () => {
-    addV2.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
+    addDelegate.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
 
     const { ok, result } = await submit()
 
@@ -299,8 +332,19 @@ describe('useGrantProposer', () => {
     expect(sdk.getAssertedChainSigner).not.toHaveBeenCalled()
   })
 
+  it('does nothing while the chain config is not loaded', async () => {
+    jest.spyOn(useChainsModule, 'useChain').mockReturnValue(undefined)
+
+    const { ok } = await submit()
+
+    expect(ok).toBe(false)
+    expect(sdk.assertWalletChain).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(addV1.trigger).not.toHaveBeenCalled()
+  })
+
   it('clears the previous error and blocked reason on the next attempt', async () => {
-    addV2.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
+    addDelegate.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
     const { result } = renderHook(() => useGrantProposer())
 
     await act(async () => {
@@ -316,7 +360,7 @@ describe('useGrantProposer', () => {
   })
 
   it('clears the error and blocked reason on reset', async () => {
-    addV2.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
+    addDelegate.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
     const { result } = renderHook(() => useGrantProposer())
 
     await act(async () => {

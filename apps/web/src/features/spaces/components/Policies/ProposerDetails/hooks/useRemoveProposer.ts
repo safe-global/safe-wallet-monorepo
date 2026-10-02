@@ -1,13 +1,12 @@
 import { useCallback, useState } from 'react'
-import {
-  useDelegatesDeleteDelegateV1Mutation,
-  useDelegatesDeleteDelegateV2Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import { useDelegatesDeleteDelegateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '@/features/spaces/constants'
 import { signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
+import { useDelegateMutations } from '@/features/proposers'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
+import { useChain } from '@/hooks/useChains'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
@@ -33,11 +32,12 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
   const onboard = useOnboard()
   const dispatch = useAppDispatch()
   const [deleteDelegateV1] = useDelegatesDeleteDelegateV1Mutation()
-  const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
+  const { deleteDelegate } = useDelegateMutations()
   const [isRemoving, setIsRemoving] = useState(false)
   const [error, setError] = useState<Error>()
 
   const { chainId, address: safeAddress } = ref.policy.safe
+  const chain = useChain(chainId)
   const delegateAddress = ref.proposer.proposer
   const proposerName = useAddressBookItem(delegateAddress, chainId)?.name
   const safeName = useAddressBookItem(safeAddress, chainId)?.name
@@ -45,7 +45,7 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
   const removeProposer = useCallback(async () => {
     setError(undefined)
 
-    if (!onboard) {
+    if (!onboard || !chain) {
       setError(new Error('Please connect your wallet first'))
       return
     }
@@ -69,13 +69,13 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
           deleteDelegateDto: { delegate: delegateAddress, delegator, signature },
         }).unwrap()
       } else {
-        const signature = await signProposerTypedData(chainId, delegateAddress, signer)
+        const signature = await signProposerTypedData(chain, delegateAddress, safeAddress, 'delete', signer)
 
-        await deleteDelegateV2({
-          chainId,
+        await deleteDelegate({
+          chain,
           delegateAddress,
-          deleteDelegateV2Dto: { delegator, safe: safeAddress, signature },
-        }).unwrap()
+          deleteDelegateDto: { delegator, safe: safeAddress, signature },
+        })
       }
 
       const proposerLabel = formatContactLabel(delegateAddress, proposerName)
@@ -98,13 +98,14 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
   }, [
     onboard,
     chainId,
+    chain,
     safeAddress,
     safeName,
     delegateAddress,
     proposerName,
     ref,
     deleteDelegateV1,
-    deleteDelegateV2,
+    deleteDelegate,
     dispatch,
     onRemoved,
   ])

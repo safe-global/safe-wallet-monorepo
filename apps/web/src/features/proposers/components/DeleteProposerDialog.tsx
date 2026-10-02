@@ -19,7 +19,6 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { isEthSignWallet } from '@/utils/wallets'
 import {
   useDelegatesDeleteDelegateV1Mutation,
-  useDelegatesDeleteDelegateV2Mutation,
   type Delegate,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
@@ -34,28 +33,30 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { XIcon } from 'lucide-react'
 import madProps from '@/utils/mad-props'
 import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useDelegateMutations } from '../hooks/useDelegateMutations'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 
 type DeleteProposerProps = {
   wallet: ReturnType<typeof useWallet>
   safeAddress: ReturnType<typeof useSafeAddress>
   chainId: ReturnType<typeof useChainId>
+  chain: ReturnType<typeof useCurrentChain>
   proposer: Delegate
 }
 
-const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: DeleteProposerProps) => {
+const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer }: DeleteProposerProps) => {
   const [open, setOpen] = useState<boolean>(false)
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [deleteDelegateV1] = useDelegatesDeleteDelegateV1Mutation()
-  const [deleteDelegateV2] = useDelegatesDeleteDelegateV2Mutation()
+  const { deleteDelegate } = useDelegateMutations()
   const dispatch = useAppDispatch()
   const nestedSafeOwners = useNestedSafeOwners()
 
@@ -74,7 +75,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
   const onConfirm = async () => {
     setError(undefined)
 
-    if (!wallet?.provider || !safeAddress || !chainId) {
+    if (!wallet?.provider || !safeAddress || !chain) {
       setError(new Error('Please connect your wallet first'))
       return
     }
@@ -87,8 +88,15 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
       if (parentSafeAddress && isMultiSigRequired) {
         // Multi-sig flow: create off-chain message on parent Safe for signature collection
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, proposer.delegate, parentSafeAddress, signer)
-        const delegateTypedData = getDelegateTypedData(chainId, proposer.delegate) as TypedData
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chain,
+          proposer.delegate,
+          parentSafeAddress,
+          safeAddress,
+          'delete',
+          signer,
+        )
+        const delegateTypedData = getDelegateTypedData(chain, proposer.delegate, safeAddress, 'delete')
         const origin = buildDelegationOrigin('remove', proposer.delegate, safeAddress)
 
         await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
@@ -103,22 +111,29 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 
       if (parentSafeAddress) {
         // Single-sig nested Safe owner
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, proposer.delegate, parentSafeAddress, signer)
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chain,
+          proposer.delegate,
+          parentSafeAddress,
+          safeAddress,
+          'delete',
+          signer,
+        )
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
 
-        await deleteDelegateV2({
-          chainId,
+        await deleteDelegate({
+          chain,
           delegateAddress: proposer.delegate,
-          deleteDelegateV2Dto: {
+          deleteDelegateDto: {
             delegator: parentSafeAddress,
             safe: safeAddress,
             signature,
           },
-        }).unwrap()
+        })
       } else {
         signature = shouldEthSign
           ? await signProposerData(proposer.delegate, signer)
-          : await signProposerTypedData(chainId, proposer.delegate, signer)
+          : await signProposerTypedData(chain, proposer.delegate, safeAddress, 'delete', signer)
 
         if (shouldEthSign) {
           await deleteDelegateV1({
@@ -131,15 +146,15 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
             },
           }).unwrap()
         } else {
-          await deleteDelegateV2({
-            chainId,
+          await deleteDelegate({
+            chain,
             delegateAddress: proposer.delegate,
-            deleteDelegateV2Dto: {
+            deleteDelegateDto: {
               delegator: proposer.delegator,
               safe: safeAddress,
               signature,
             },
-          }).unwrap()
+          })
         }
       }
 
@@ -308,6 +323,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, proposer }: Dele
 const DeleteProposerDialog = madProps(InternalDeleteProposer, {
   wallet: useWallet,
   chainId: useChainId,
+  chain: useCurrentChain,
   safeAddress: useSafeAddress,
 })
 

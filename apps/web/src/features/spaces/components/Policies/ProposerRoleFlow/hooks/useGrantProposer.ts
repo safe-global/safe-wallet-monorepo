@@ -2,16 +2,18 @@ import { useCallback, useState } from 'react'
 import type { OnboardAPI } from '@web3-onboard/core'
 import {
   useDelegatesPostDelegateV1Mutation,
-  useDelegatesPostDelegateV2Mutation,
   type CreateDelegateDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { addressIsNotSmartContract, signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
+import { useDelegateMutations } from '@/features/proposers'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
+import { useChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -45,15 +47,20 @@ type SignedDelegation = {
   delegator: string
 }
 
-const signDelegation = async (onboard: OnboardAPI, chainId: string, proposer: string): Promise<SignedDelegation> => {
+const signDelegation = async (
+  onboard: OnboardAPI,
+  chain: Chain,
+  safeAddress: string,
+  proposer: string,
+): Promise<SignedDelegation> => {
   // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
-  const activeWallet = await assertWalletChain(onboard, chainId)
+  const activeWallet = await assertWalletChain(onboard, chain.chainId)
 
   const useV1Endpoint = isEthSignWallet(activeWallet)
   const signer = await getAssertedChainSigner(activeWallet.provider)
   const signature = useV1Endpoint
     ? await signProposerData(proposer, signer)
-    : await signProposerTypedData(chainId, proposer, signer)
+    : await signProposerTypedData(chain, proposer, safeAddress, 'add', signer)
 
   return { signature, useV1Endpoint, delegator: activeWallet.address }
 }
@@ -62,6 +69,7 @@ export const useGrantProposer = (): GrantProposer => {
   const wallet = useWallet()
   const onboard = useOnboard()
   const chainId = useChainId()
+  const chain = useChain(chainId)
   const safeAddress = useSafeAddress()
   const provider = useWeb3ReadOnly()
   const dispatch = useAppDispatch()
@@ -69,7 +77,7 @@ export const useGrantProposer = (): GrantProposer => {
   const isAdmin = useIsAdmin()
   const { get: getContact } = useMergedAddressBooks(chainId)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
-  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
+  const { addDelegate } = useDelegateMutations()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<Error>()
   const [blockedReason, setBlockedReason] = useState<string>()
@@ -80,7 +88,7 @@ export const useGrantProposer = (): GrantProposer => {
   }, [])
 
   const submitDelegation = useCallback(
-    async (proposer: string, { signature, useV1Endpoint, delegator }: SignedDelegation) => {
+    async (chain: Chain, proposer: string, { signature, useV1Endpoint, delegator }: SignedDelegation) => {
       const createDelegateDto: CreateDelegateDto = {
         delegate: proposer,
         delegator,
@@ -89,10 +97,13 @@ export const useGrantProposer = (): GrantProposer => {
         safe: safeAddress,
       }
 
-      const addDelegate = useV1Endpoint ? addDelegateV1 : addDelegateV2
-      await addDelegate({ chainId, createDelegateDto }).unwrap()
+      if (useV1Endpoint) {
+        await addDelegateV1({ chainId: chain.chainId, createDelegateDto }).unwrap()
+      } else {
+        await addDelegate({ chain, createDelegateDto })
+      }
     },
-    [safeAddress, chainId, addDelegateV1, addDelegateV2],
+    [safeAddress, addDelegateV1, addDelegate],
   )
 
   const announceSuccess = useCallback(
@@ -121,7 +132,7 @@ export const useGrantProposer = (): GrantProposer => {
     async ({ proposer, name }: ProposerRoleFormValues, safeLabel?: string): Promise<boolean> => {
       trackEvent(POLICY_EVENTS.PROPOSER_SUBMITTED, { [MixpanelEventParams.CHAIN_ID]: chainId })
 
-      if (!wallet || !onboard || !safeAddress) return false
+      if (!wallet || !onboard || !safeAddress || !chain) return false
 
       reset()
       setIsSubmitting(true)
@@ -137,8 +148,8 @@ export const useGrantProposer = (): GrantProposer => {
           return false
         }
 
-        const signed = await signDelegation(onboard, chainId, proposer)
-        await submitDelegation(proposer, signed)
+        const signed = await signDelegation(onboard, chain, safeAddress, proposer)
+        await submitDelegation(chain, proposer, signed)
         announceSuccess(proposer, name, safeLabel ?? shortenAddress(safeAddress))
 
         return true
@@ -149,7 +160,7 @@ export const useGrantProposer = (): GrantProposer => {
         setIsSubmitting(false)
       }
     },
-    [wallet, onboard, safeAddress, chainId, provider, reset, submitDelegation, announceSuccess],
+    [wallet, onboard, safeAddress, chainId, chain, provider, reset, submitDelegation, announceSuccess],
   )
 
   return { grantProposerRole, isSubmitting, error, blockedReason, reset }
