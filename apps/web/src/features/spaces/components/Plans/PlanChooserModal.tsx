@@ -90,7 +90,8 @@ export default function PlanChooserModal({
               planName={trimming.tier.name}
               onBack={() => setPick(undefined)}
               onContinue={(removed) => {
-                if (trimming.option.paymentLinkId) void checkout(trimming.option.paymentLinkId, removed)
+                if (trimming.option.paymentLinkId)
+                  void checkout(trimming.option.paymentLinkId, removed, trimming.option.seats ?? undefined)
               }}
               isSubmitting={isBusy}
               error={error}
