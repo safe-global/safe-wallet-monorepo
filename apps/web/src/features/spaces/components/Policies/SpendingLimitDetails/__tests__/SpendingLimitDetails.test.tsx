@@ -18,6 +18,7 @@ import {
   mockActivatingPolicy,
   mockPendingPolicy,
   mockPendingRemoval,
+  mockPendingUpdate,
 } from '../../mocks/policies'
 import type { PendingSpendingLimitPolicy } from '../../types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
@@ -170,7 +171,17 @@ describe('SpendingLimitDetails', () => {
     setup()
 
     expect(screen.getAllByRole('progressbar')).toHaveLength(policy.data.spenders[0].allowances.length)
-    expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
+  })
+
+  it('shows when the policy was last set, in UTC', () => {
+    mockWallet()
+    mockSpaceSafes(false)
+
+    setup()
+
+    expect(screen.getByText('Last updated').closest('dt')?.nextElementSibling).toHaveTextContent(
+      'Jun 24, 2026 · 03:35 UTC',
+    )
   })
 
   it('hands the Edit button to the caller', async () => {
@@ -378,6 +389,22 @@ describe('a pending spending limit', () => {
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
     expect(screen.getByText('Activating')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+  })
+
+  // Only a queued removal carries the active allowance's createdAt, so it is the case that tests the status check.
+  it.each([
+    ['a queued creation', mockPendingPolicy()],
+    ['a queued update', mockPendingUpdate()],
+    ['a queued removal', mockPendingRemoval()],
+    ['an executed change awaiting the indexer', mockActivatingPolicy()],
+  ])('shows no last updated time for %s', (_, policy) => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+
+    renderPending(policy)
+
+    expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
   })
 
   it('says the limit stays active while its removal is pending', () => {
