@@ -220,6 +220,15 @@ describe('ReviewStep', () => {
     }
   }
 
+  const createdOn = (
+    networks: Chain[],
+    status: 'saved' | 'already-deployed' = 'saved',
+    isStepUpPending = false,
+  ): cfServices.CreateCounterfactualSafeResult => ({
+    chains: networks.map(({ chainId }) => ({ chainId, status })),
+    isStepUpPending,
+  })
+
   it('shows the selector with Pay now disabled for multichain creation', () => {
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
 
@@ -258,7 +267,7 @@ describe('ReviewStep', () => {
     expect(getByTestId('review-step-next-btn')).not.toBeDisabled()
   })
 
-  it('creates counterfactual safes on each network for multichain when authenticated', async () => {
+  it('creates a multi-network Safe with one coordinator call listing every network', async () => {
     const mockData = buildMultiChainData()
 
     jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
@@ -271,7 +280,7 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    const persistSpy = jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    const createSpy = jest.spyOn(cfServices, 'createCounterfactualSafe').mockResolvedValue(createdOn(mockData.networks))
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -281,9 +290,13 @@ describe('ReviewStep', () => {
       fireEvent.click(screen.getByTestId('review-step-next-btn'))
     })
 
-    expect(persistSpy).toHaveBeenCalledTimes(mockData.networks.length)
-    expect(persistSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ payMethod: PayMethod.PayLater, isUserAuthenticated: true }),
+    expect(createSpy).toHaveBeenCalledTimes(1)
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        networks: [expect.objectContaining({ chainId: '100' }), expect.objectContaining({ chainId: '1' })],
+        payMethod: PayMethod.PayLater,
+        isUserAuthenticated: true,
+      }),
     )
   })
 
@@ -300,7 +313,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest
+      .spyOn(cfServices, 'createCounterfactualSafe')
+      .mockResolvedValue(createdOn(mockData.networks, 'already-deployed'))
     const eventSpy = jest.spyOn(cfServices, 'safeCreationDispatch')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -327,7 +342,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest
+      .spyOn(cfServices, 'createCounterfactualSafe')
+      .mockResolvedValue(createdOn(mockData.networks, 'already-deployed'))
     const trackSpy = jest.spyOn(analytics, 'trackEvent')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -355,7 +372,9 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true, skipped: 'already-deployed' })
+    jest
+      .spyOn(cfServices, 'createCounterfactualSafe')
+      .mockResolvedValue(createdOn(mockData.networks, 'already-deployed'))
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -389,7 +408,7 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+    jest.spyOn(cfServices, 'createCounterfactualSafe').mockResolvedValue(createdOn(mockData.networks))
     const showNotificationSpy = jest.spyOn(notificationsSlice, 'showNotification')
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -405,7 +424,7 @@ describe('ReviewStep', () => {
     )
   })
 
-  it('surfaces the persist error message when counterfactual creation fails', async () => {
+  it('surfaces the backend error message when counterfactual creation fails', async () => {
     const mockData = buildMultiChainData()
     const backendMessage = 'Safe account name is too long'
 
@@ -419,9 +438,10 @@ describe('ReviewStep', () => {
     jest
       .spyOn(multichain, 'predictAddressBasedOnReplayData')
       .mockResolvedValue('0x0000000000000000000000000000000000000001')
-    jest
-      .spyOn(cfServices, 'persistCounterfactualSafe')
-      .mockResolvedValue({ ok: false, error: new Error(backendMessage) })
+    jest.spyOn(cfServices, 'createCounterfactualSafe').mockResolvedValue({
+      chains: mockData.networks.map(({ chainId }) => ({ chainId, status: 'failed', error: new Error(backendMessage) })),
+      isStepUpPending: false,
+    })
 
     render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
       initialReduxState: authReduxState,
@@ -453,7 +473,7 @@ describe('ReviewStep', () => {
       jest
         .spyOn(multichain, 'predictAddressBasedOnReplayData')
         .mockResolvedValue('0x0000000000000000000000000000000000000001')
-      return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
+      return jest.spyOn(cfServices, 'createCounterfactualSafe').mockResolvedValue(createdOn([chainWithFeatures]))
     }
 
     const newSafeHomeUrl = `/home?safe=${chainWithFeatures.shortName}%3A0x0000000000000000000000000000000000000001&spaceId=${MOCK_SPACE_UUID}`
@@ -471,7 +491,7 @@ describe('ReviewStep', () => {
       mockUseIsAdmin.mockReturnValue(true)
       mockUseSpaceSafeCount.mockReturnValue(20)
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
-      const persistSpy = mockCreation()
+      const createSpy = mockCreation()
 
       render(
         <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
@@ -486,7 +506,7 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(persistSpy).toHaveBeenCalledWith(
+      expect(createSpy).toHaveBeenCalledWith(
         expect.objectContaining({ spaceId: MOCK_SPACE_UUID, spaceSafeCount: 20, spaceSafeLimit: 20 }),
       )
     })
@@ -556,7 +576,7 @@ describe('ReviewStep', () => {
 
     it('returns from a step-up to the new Safe in the Workspace when Pay later needs one', async () => {
       mockUseIsAdmin.mockReturnValue(true)
-      mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      mockCreation().mockResolvedValue(createdOn([chainWithFeatures], 'saved', true))
       const push = jest.fn(() => Promise.resolve(true))
 
       render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -573,12 +593,43 @@ describe('ReviewStep', () => {
       expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
     })
 
+    it('adds a multi-network Safe to the Workspace in one call and waits on the step-up without navigating', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const networks = [chainWithFeatures, { ...chainWithFeatures, chainId: '1', chainName: 'Ethereum' } as Chain]
+      const createSpy = mockCreation().mockResolvedValue(createdOn(networks, 'saved', true))
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(
+        <ReviewStep
+          data={{ ...singleChainData(), networks }}
+          onSubmit={jest.fn()}
+          onBack={jest.fn()}
+          setStep={jest.fn()}
+        />,
+        { ...inSpace, routerProps: { ...inSpace.routerProps, push } },
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(createSpy).toHaveBeenCalledTimes(1)
+      expect(createSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          spaceId: MOCK_SPACE_UUID,
+          networks: [expect.objectContaining({ chainId: '100' }), expect.objectContaining({ chainId: '1' })],
+        }),
+      )
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBe(newSafeHomeUrl)
+      expect(push).not.toHaveBeenCalled()
+    })
+
     it('drops the step-up return URL once Pay later finishes without a step-up', async () => {
       mockUseIsAdmin.mockReturnValue(true)
-      const returnUrlsDuringPersist: Array<string | undefined> = []
+      const returnUrlsDuringCreation: Array<string | undefined> = []
       mockCreation().mockImplementation(async () => {
-        returnUrlsDuringPersist.push(getStoreInstance().getState().stepUp.returnUrl)
-        return { ok: true }
+        returnUrlsDuringCreation.push(getStoreInstance().getState().stepUp.returnUrl)
+        return createdOn([chainWithFeatures])
       })
 
       render(
@@ -590,14 +641,14 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(returnUrlsDuringPersist).toEqual([newSafeHomeUrl])
+      expect(returnUrlsDuringCreation).toEqual([newSafeHomeUrl])
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 
     it('sets no step-up return URL for Pay later outside a Workspace', async () => {
       mockCreation().mockImplementation(async () => {
         expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
-        return { ok: true }
+        return createdOn([chainWithFeatures])
       })
 
       render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
@@ -608,13 +659,13 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(cfServices.persistCounterfactualSafe).toHaveBeenCalledTimes(1)
+      expect(cfServices.createCounterfactualSafe).toHaveBeenCalledTimes(1)
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 
     it('sets no step-up return URL for Pay now, which adds the Safe to the Workspace only after deployment', async () => {
       mockUseIsAdmin.mockReturnValue(true)
-      const persistSpy = mockCreation()
+      const createSpy = mockCreation()
       const returnUrlsDuringDeployment: Array<string | undefined> = []
       jest.spyOn(createLogic, 'createNewSafe').mockImplementation(async () => {
         returnUrlsDuringDeployment.push(getStoreInstance().getState().stepUp.returnUrl)
@@ -632,14 +683,14 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(persistSpy).not.toHaveBeenCalled()
+      expect(createSpy).not.toHaveBeenCalled()
       expect(returnUrlsDuringDeployment).toEqual([undefined])
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 
     it('ignores a Workspace stored by another tab when the URL has none', async () => {
       mockUseIsAdmin.mockReturnValue(true)
-      const persistSpy = mockCreation()
+      const createSpy = mockCreation()
 
       render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
         initialReduxState: { auth: { ...authReduxState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
@@ -649,7 +700,7 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(persistSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null }))
+      expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null }))
     })
   })
 })

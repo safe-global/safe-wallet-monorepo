@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import { CreateSafeOnSpecificChain } from './index'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
+import { createCounterfactualSafe, type ChainCreationResult } from '@/features/counterfactual/services'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { predictAddressBasedOnReplayData } from '../../utils'
@@ -9,7 +9,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 
 jest.mock('@/features/counterfactual/services', () => ({
-  persistCounterfactualSafe: jest.fn(),
+  createCounterfactualSafe: jest.fn(),
 }))
 
 jest.mock('../../utils', () => ({
@@ -39,7 +39,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpaceSafesGetV1Query: jest.fn(),
 }))
 
-const mockPersist = persistCounterfactualSafe as jest.MockedFunction<typeof persistCounterfactualSafe>
+const mockCreate = createCounterfactualSafe as jest.MockedFunction<typeof createCounterfactualSafe>
+const resolveWith = (result: ChainCreationResult, isStepUpPending = false) =>
+  mockCreate.mockResolvedValue({ chains: [result], isStepUpPending })
 const mockUseIsAdmin = useIsAdmin as jest.Mock
 const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
 const mockUseSpaceSafeLimit = useSpaceSafeLimit as jest.Mock
@@ -98,29 +100,42 @@ describe('CreateSafeOnSpecificChain', () => {
     mockUseSpaceSafes.mockReturnValue({ currentData: undefined })
   })
 
-  it('keeps the dialog open and shows the inline backend error when persisting fails', async () => {
+  it('keeps the dialog open and shows the inline backend error when creation fails', async () => {
     const onClose = jest.fn()
-    mockPersist.mockResolvedValue({ ok: false, error: new Error('Network already added by another member') })
+    resolveWith({ chainId: '100', status: 'failed', error: new Error('Network already added by another member') })
 
     renderDialog(onClose)
 
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
-    await waitFor(() => expect(mockPersist).toHaveBeenCalled())
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled())
 
     expect(await screen.findByText('Network already added by another member')).toBeInTheDocument()
     expect(onClose).not.toHaveBeenCalled()
   })
 
-  it('closes the dialog when persisting succeeds', async () => {
+  it('closes the dialog when creation succeeds', async () => {
     const onClose = jest.fn()
-    mockPersist.mockResolvedValue({ ok: true })
+    resolveWith({ chainId: '100', status: 'saved' })
 
     renderDialog(onClose)
 
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
     await waitFor(() => expect(onClose).toHaveBeenCalled())
+  })
+
+  it('keeps the dialog open without an error while a step-up is pending', async () => {
+    const onClose = jest.fn()
+    resolveWith({ chainId: '100', status: 'saved' }, true)
+
+    renderDialog(onClose)
+
+    fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled())
+    expect(onClose).not.toHaveBeenCalled()
+    expect(screen.queryByText(/Successfully added/)).not.toBeInTheDocument()
   })
 
   it('keeps the dialog open and shows an inline error when the predicted address mismatches', async () => {
@@ -133,7 +148,7 @@ describe('CreateSafeOnSpecificChain', () => {
 
     expect(await screen.findByText('The replayed Safe leads to an unexpected address')).toBeInTheDocument()
     expect(onClose).not.toHaveBeenCalled()
-    expect(mockPersist).not.toHaveBeenCalled()
+    expect(mockCreate).not.toHaveBeenCalled()
   })
 
   describe('at the Workspace seat limit', () => {
@@ -141,7 +156,7 @@ describe('CreateSafeOnSpecificChain', () => {
       mockUseIsAdmin.mockReturnValue(true)
       mockUseSpaceSafeCount.mockReturnValue(20)
       mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
-      mockPersist.mockResolvedValue({ ok: true })
+      resolveWith({ chainId: '100', status: 'saved' })
     })
 
     it('warns upfront and skips the seat when the Safe is not in the Workspace yet', async () => {
@@ -157,9 +172,14 @@ describe('CreateSafeOnSpecificChain', () => {
 
       fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
-      await waitFor(() => expect(mockPersist).toHaveBeenCalled())
-      expect(mockPersist).toHaveBeenCalledWith(
-        expect.objectContaining({ spaceSafeCount: 20, spaceSafeLimit: 20, holdsSeatInSpace: false }),
+      await waitFor(() => expect(mockCreate).toHaveBeenCalled())
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          networks: [{ chainId: '100', provider: expect.anything() }],
+          spaceSafeCount: 20,
+          spaceSafeLimit: 20,
+          holdsSeatInSpace: false,
+        }),
       )
     })
 
@@ -172,8 +192,8 @@ describe('CreateSafeOnSpecificChain', () => {
 
       fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
-      await waitFor(() => expect(mockPersist).toHaveBeenCalled())
-      expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ holdsSeatInSpace: true }))
+      await waitFor(() => expect(mockCreate).toHaveBeenCalled())
+      expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ holdsSeatInSpace: true }))
     })
 
     it('shows no notice to a member, whose Safes are never auto-added', () => {
@@ -189,7 +209,7 @@ describe('CreateSafeOnSpecificChain', () => {
     // Earlier renders persist `auth`; hydration would otherwise replace the stored Workspace.
     window.localStorage.clear()
     mockUseIsAdmin.mockReturnValue(true)
-    mockPersist.mockResolvedValue({ ok: true })
+    resolveWith({ chainId: '100', status: 'saved' })
 
     renderDialog(jest.fn(), {
       initialReduxState: { auth: { ...signedInState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
@@ -197,6 +217,6 @@ describe('CreateSafeOnSpecificChain', () => {
 
     fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
 
-    await waitFor(() => expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
   })
 })

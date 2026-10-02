@@ -27,7 +27,7 @@ import { MULTICHAIN_HELP_ARTICLE } from '@/config/constants'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
+import { createCounterfactualSafe } from '@/features/counterfactual/services'
 import { isAuthenticated } from '@/store/authSlice'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
@@ -123,11 +123,11 @@ const ReplaySafeDialog = ({
 
       trackEvent({ ...OVERVIEW_EVENTS.SUBMIT_ADD_NEW_NETWORK, label: selectedChain.chainId })
 
-      // 2. Persist to backend (if authenticated) + add to Redux. Shared code
-      //    path with the initial create-safe flow so any future backend write
-      //    added to one path is automatically covered for the other.
-      const persistResult = await persistCounterfactualSafe({
-        chainId: selectedChain.chainId,
+      const {
+        chains: [result],
+        isStepUpPending,
+      } = await createCounterfactualSafe({
+        networks: [{ chainId: selectedChain.chainId, provider }],
         safeAddress,
         props: safeCreationData,
         name: currentName || '',
@@ -138,29 +138,28 @@ const ReplaySafeDialog = ({
         spaceSafeCount,
         spaceSafeLimit,
         holdsSeatInSpace,
-        provider,
         dispatch,
       })
-      if (!persistResult.ok) {
-        if (persistResult.stepUpPending) {
-          // Nothing to show, but the dialog must not close as if the network had been added.
-          hasError = true
-          return
-        }
-        setCreationError(persistResult.error)
+      if (isStepUpPending) {
+        // Nothing to show, but the dialog must not close as if the network had been added.
+        hasError = true
+        return
+      }
+      if (result.status === 'failed') {
+        setCreationError(result.error)
         hasError = true
         dispatch(
           showNotification({
             variant: 'error',
             groupKey: 'replay-safe-error',
-            message: persistResult.error.message,
+            message: result.error.message,
           }),
         )
         return
       }
 
       // Don't report a creation for Safes that were already deployed.
-      if (persistResult.skipped !== 'already-deployed') {
+      if (result.status === 'saved') {
         trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
         trackEvent({ ...CREATE_SAFE_EVENTS.CREATED_SAFE, label: 'counterfactual' })
       }
@@ -193,7 +192,7 @@ const ReplaySafeDialog = ({
           variant: 'success',
           groupKey: 'replay-safe-success',
           message:
-            persistResult.skipped === 'already-deployed'
+            result.status === 'already-deployed'
               ? `This account is already deployed on ${selectedChain.chainName}`
               : `Successfully added your account on ${selectedChain.chainName}`,
         }),

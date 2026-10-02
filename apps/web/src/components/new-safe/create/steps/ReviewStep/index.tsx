@@ -5,7 +5,7 @@ import {
   SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  persistCounterfactualSafe,
+  createCounterfactualSafe,
 } from '@/features/counterfactual/services'
 import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
@@ -266,10 +266,29 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     onBack(data)
   }
 
-  const handleCreateSafeClick = async () => {
-    let stepUpReturnUrl: string | undefined
-    let isStepUpPending = false
+  const isPayLater = isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater
 
+  const trackCreatedSafe = (chain: Chain, props: ReplayedSafeProps, safeAddress: string) =>
+    trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
+      [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
+      [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
+      [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
+      [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
+      [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
+      [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
+      [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
+        isCounterfactualEnabled,
+        effectivePayMethod,
+        willRelay,
+      ),
+    })
+
+  const addToAddressBook = (chainIds: string[], safeAddress: string) => {
+    if (chainIds.length === 0) return
+    dispatch(updateAddressBook(chainIds, safeAddress, data.name, data.owners, data.threshold))
+  }
+
+  const handleCreateSafeClick = async () => {
     try {
       if (!wallet || !chain || !newSafeProps) return
 
@@ -289,137 +308,108 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
-      // Pay later adds the Safe to the Workspace now, so a step-up there must return to the Safe, not this form.
-      if (spaceId && isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        stepUpReturnUrl = getNewSafeHomeUrl(data.networks[0].shortName, safeAddress, spaceId)
-        dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+      if (isPayLater) {
+        await createPayLaterSafe(replayedSafeWithNonce, safeAddress, chain.chainId)
+        return
       }
 
       const createSafeResults: CreateSafeResult[] = []
       for (const network of data.networks) {
-        const { stepUpPending, ...result } = await createSafe(network, replayedSafeWithNonce, safeAddress)
-        if (stepUpPending) isStepUpPending = true
-        createSafeResults.push(result)
+        createSafeResults.push(await createSafe(network, replayedSafeWithNonce, safeAddress))
       }
 
-      // Update the addressbook with owners and Safe on all successfully created networks
       const successfulChains = createSafeResults.filter((result) => result.success)
-      if (successfulChains.length > 0) {
-        dispatch(
-          updateAddressBook(
-            successfulChains.map((res) => res.chain.chainId),
-            safeAddress,
-            data.name,
-            data.owners,
-            data.threshold,
-          ),
-        )
-      }
-
+      addToAddressBook(
+        successfulChains.map((res) => res.chain.chainId),
+        safeAddress,
+      )
       gtmSetChainId(chain.chainId)
-
-      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        if (successfulChains.length === 0) return
-
-        await router?.push(getNewSafeHomeUrl(successfulChains[0].chain.shortName, safeAddress, spaceId))
-
-        // Only counterfactual chains are awaiting activation.
-        const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
-        if (awaitingChains.length > 0) {
-          safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
-            groupKey: CF_TX_GROUP_KEY,
-            safeAddress,
-            networks: awaitingChains.map((r) => r.chain),
-          })
-        }
-
-        // Acknowledge chains where the Safe was already deployed — otherwise the
-        // user lands on the account with no explanation of why nothing activated.
-        const deployedChains = successfulChains.filter((r) => r.alreadyDeployed)
-        if (deployedChains.length > 0) {
-          dispatch(
-            showNotification({
-              variant: 'info',
-              groupKey: 'cf-safe-already-deployed',
-              message: `This account is already deployed on ${deployedChains.map((r) => r.chain.chainName).join(', ')}`,
-            }),
-          )
-        }
-      }
     } catch (err) {
       console.error(err)
       setSubmitError('Error creating the Safe account. Please try again later.')
     } finally {
-      if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       setIsCreating(false)
     }
   }
 
-  const createSafe = async (
-    chain: Chain,
-    props: ReplayedSafeProps,
-    safeAddress: string,
-  ): Promise<CreateSafeResult & { stepUpPending?: true }> => {
+  const createPayLaterSafe = async (props: ReplayedSafeProps, safeAddress: string, currentChainId: string) => {
+    // Pay later adds the Safe to the Workspace now, so a step-up there must return to the Safe, not this form.
+    const stepUpReturnUrl = spaceId ? getNewSafeHomeUrl(data.networks[0].shortName, safeAddress, spaceId) : undefined
+    if (stepUpReturnUrl) dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+    const clearStepUpReturnUrl = () => {
+      if (stepUpReturnUrl) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
+    }
+
+    gtmSetSafeAddress(safeAddress)
+    const { chains, isStepUpPending } = await createCounterfactualSafe({
+      networks: data.networks.map((network) => ({
+        chainId: network.chainId,
+        provider: createWeb3ReadOnly(network, customRpc[network.chainId]),
+      })),
+      safeAddress,
+      props,
+      name: data.name,
+      payMethod: effectivePayMethod,
+      spaceId,
+      isUserAuthenticated,
+      isAdminOfActiveSpace,
+      spaceSafeCount,
+      spaceSafeLimit,
+      dispatch,
+    }).catch((error) => {
+      clearStepUpReturnUrl()
+      throw error
+    })
+    if (!isStepUpPending) clearStepUpReturnUrl()
+
+    const statusOf = (network: Chain) => chains.find((result) => result.chainId === network.chainId)?.status
+    const savedNetworks = data.networks.filter((network) => statusOf(network) === 'saved')
+    const deployedNetworks = data.networks.filter((network) => statusOf(network) === 'already-deployed')
+    const createdNetworks = data.networks.filter((network) => statusOf(network) !== 'failed')
+    const failure = chains.find((result) => result.status === 'failed')
+    if (failure) setSubmitError(failure.error.message)
+
+    savedNetworks.forEach((network) => {
+      trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
+      trackCreatedSafe(network, props, safeAddress)
+    })
+    addToAddressBook(
+      createdNetworks.map((network) => network.chainId),
+      safeAddress,
+    )
+    gtmSetChainId(currentChainId)
+
+    if (isStepUpPending || createdNetworks.length === 0) return
+
+    await router?.push(getNewSafeHomeUrl(createdNetworks[0].shortName, safeAddress, spaceId))
+
+    if (savedNetworks.length > 0) {
+      safeCreationDispatch(SafeCreationEvent.AWAITING_EXECUTION, {
+        groupKey: CF_TX_GROUP_KEY,
+        safeAddress,
+        networks: savedNetworks,
+      })
+    }
+
+    // Without this the user lands on the account with no explanation of why nothing activated.
+    if (deployedNetworks.length > 0) {
+      dispatch(
+        showNotification({
+          variant: 'info',
+          groupKey: 'cf-safe-already-deployed',
+          message: `This account is already deployed on ${deployedNetworks.map((network) => network.chainName).join(', ')}`,
+        }),
+      )
+    }
+  }
+
+  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string): Promise<CreateSafeResult> => {
     if (!wallet) return { chain, safeAddress, success: false }
 
     gtmSetChainId(chain.chainId)
 
-    const trackCreatedSafe = () =>
-      trackEvent(CREATE_SAFE_EVENTS.CREATED_SAFE, {
-        [MixpanelEventParams.SAFE_ADDRESS]: safeAddress,
-        [MixpanelEventParams.BLOCKCHAIN_NETWORK]: chain.chainName,
-        [MixpanelEventParams.NUMBER_OF_OWNERS]: props.safeAccountConfig.owners.length,
-        [MixpanelEventParams.THRESHOLD]: props.safeAccountConfig.threshold,
-        [MixpanelEventParams.ENTRY_POINT]: document.referrer || 'Direct',
-        [MixpanelEventParams.DEPLOYMENT_TYPE]: getDeploymentType(isCounterfactualEnabled, effectivePayMethod),
-        [MixpanelEventParams.PAYMENT_METHOD]: getPaymentMethodLabel(
-          isCounterfactualEnabled,
-          effectivePayMethod,
-          willRelay,
-        ),
-      })
-
     try {
-      if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        gtmSetSafeAddress(safeAddress)
-
-        // Single code path for backend persist + Redux add — shared with the
-        // "Add another network" flow to keep the write path consistent.
-        const provider = createWeb3ReadOnly(chain, customRpc[chain.chainId])
-        const result = await persistCounterfactualSafe({
-          chainId: chain.chainId,
-          safeAddress,
-          props,
-          name: data.name,
-          payMethod: effectivePayMethod,
-          spaceId,
-          isUserAuthenticated,
-          isAdminOfActiveSpace,
-          spaceSafeCount,
-          spaceSafeLimit,
-          isMultiChainCreation: isMultiChainDeployment,
-          provider,
-          dispatch,
-        })
-        if (!result.ok) {
-          // Surface the backend's message (e.g. conflict guidance) instead of the
-          // generic wallet-error fallback in the catch below.
-          if (result.stepUpPending) return { chain, safeAddress, success: false, stepUpPending: true }
-          setSubmitError(result.error.message)
-          return { chain, safeAddress, success: false }
-        }
-
-        const alreadyDeployed = result.skipped === 'already-deployed'
-        // Don't report a creation for Safes that were already deployed.
-        if (!alreadyDeployed) {
-          trackEvent({ ...OVERVIEW_EVENTS.PROCEED_WITH_TX, label: 'counterfactual', category: CREATE_SAFE_CATEGORY })
-          trackCreatedSafe()
-        }
-
-        return { chain, safeAddress, success: true, alreadyDeployed }
-      }
-
-      trackCreatedSafe()
+      trackCreatedSafe(chain, props, safeAddress)
 
       const options: TransactionOptions = buildTransactionOptions(
         !!isEIP1559,
