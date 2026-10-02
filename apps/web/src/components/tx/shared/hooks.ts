@@ -70,7 +70,7 @@ export const useTxActions = (): TxActions => {
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
   const gtfFeature = useLoadFeature(GTFFeature)
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const { gtfPaymentMode, gtfSelectedGasToken, safenetCheckEnabled } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
 
   return useMemo<TxActions>(() => {
@@ -89,6 +89,7 @@ export const useTxActions = (): TxActions => {
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
+        safenetCheck: safenetCheckEnabled,
         currency,
         dispatch,
       })
@@ -256,6 +257,7 @@ export const useTxActions = (): TxActions => {
     gtfFeature,
     gtfPaymentMode,
     gtfSelectedGasToken,
+    safenetCheckEnabled,
     currency,
   ])
 }

@@ -43,6 +43,10 @@ export type SafeTxContextParams = {
   setGtfPaymentMode: (source: GtfPaymentMode) => void
   gtfSelectedGasToken?: string
   setGtfSelectedGasToken: Dispatch<SetStateAction<string | undefined>>
+
+  /** Per-transaction opt-in, gated by chain availability. Off by default. */
+  safenetCheckEnabled: boolean
+  setSafenetCheckEnabled: Dispatch<SetStateAction<boolean>>
 }
 
 export const SafeTxContext = createContext<SafeTxContextParams>({
@@ -58,4 +62,6 @@ export const SafeTxContext = createContext<SafeTxContextParams>({
   gtfPaymentMode: 'safe',
   setGtfPaymentMode: () => {},
   setGtfSelectedGasToken: () => {},
+  safenetCheckEnabled: false,
+  setSafenetCheckEnabled: () => {},
 })
