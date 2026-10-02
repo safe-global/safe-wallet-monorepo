@@ -13,20 +13,25 @@ import useSafeInfo from './useSafeInfo'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useRecoveryQueue } from '../features/recovery/hooks/useRecoveryQueue'
 import { getTransactionQueue } from '@/services/transactions'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 // The Redux queue belongs to the route's Safe, so a Space-level flow fetches its scoped Safe's first page instead.
 const useScopedTxQueue = () => {
   const scopeContext = useSafeScopeContext()
   const scope = scopeContext?.scope
+  // Picking fields keeps every nonce option from re-rendering on each poll's isFetching flip
   const { currentData, error, isLoading } = useTransactionsGetTransactionQueueV1Query(
     scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : skipToken,
-    { pollingInterval: POLLING_INTERVAL },
+    {
+      pollingInterval: POLLING_INTERVAL,
+      selectFromResult: ({ currentData, error, isLoading }) => ({ currentData, error, isLoading }),
+    },
   )
 
   return {
     isScoped: scopeContext !== undefined,
     page: currentData,
-    error: error ? ('message' in error ? String(error.message) : 'Failed to load transaction queue') : undefined,
+    error: error ? getRtkQueryErrorMessage(error) : undefined,
     loading: isLoading,
   }
 }

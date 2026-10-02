@@ -77,6 +77,28 @@ describe('useTxQueue inside a Safe scope', () => {
     expect(requests).toHaveLength(1)
   })
 
+  it("drops the previous Safe's nonces when the flow switches Safe", async () => {
+    const other = { chainId: target.chainId, safeAddress: fakerChecksummedAddress() }
+    server.use(
+      http.get<{ chainId: string; safeAddress: string }>(QUEUE_URL, ({ params }) => {
+        requests.push({ chainId: params.chainId, safeAddress: params.safeAddress })
+        const nonce = params.safeAddress === other.safeAddress ? 40 : 227
+        return HttpResponse.json({ results: [getMockTx({ nonce })] })
+      }),
+    )
+    let currentTarget = target
+    const Wrapper = ({ children }: { children: ReactNode }) => scopeWrapper(currentTarget)({ children })
+
+    const { result, rerender } = renderHook(() => usePreviousNonces(), { wrapper: Wrapper })
+    await waitFor(() => expect(result.current).toEqual([227]))
+
+    currentTarget = other
+    rerender()
+
+    expect(result.current).not.toContain(227)
+    await waitFor(() => expect(result.current).toEqual([40]))
+  })
+
   it("never falls back to the route Safe's stored queue before a Safe is picked", () => {
     const { result } = renderHook(() => ({ nonces: usePreviousNonces(), byNonce: useQueuedTxByNonce(5) }), {
       wrapper: scopeWrapper(),
