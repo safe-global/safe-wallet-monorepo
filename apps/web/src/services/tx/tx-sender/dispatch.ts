@@ -36,7 +36,13 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
-import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import { getQuotaExceededError, QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import {
+  GasPaymentOptionUnavailableError,
+  getGasPaymentOptionUnavailableError,
+  getRelayerUnavailableError,
+  getRelayLimitReachedError,
+} from '@safe-global/utils/services/gasPaymentErrors'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
@@ -515,6 +521,18 @@ export async function dispatchSafeAppsTx(
   return safeTxHash
 }
 
+// Typed CGW refusals (422 simulation, 402 quota, 409 option, 429 limit, chain-route 403) let the UI block, retry or fall back.
+const getRelayError = (error: unknown, sponsorSpaceId?: string | null): Error =>
+  getRelaySimulationError(error) ??
+  (sponsorSpaceId ? getQuotaExceededError(error) : undefined) ??
+  getGasPaymentOptionUnavailableError(error) ??
+  getRelayLimitReachedError(error) ??
+  (sponsorSpaceId ? undefined : getRelayerUnavailableError(error)) ??
+  asError(error)
+
+const isStaleEntitlementsError = (error: Error): boolean =>
+  error instanceof QuotaExceededError || error instanceof GasPaymentOptionUnavailableError
+
 export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
   safe: SafeState,
@@ -594,11 +612,9 @@ export const dispatchTxRelay = async (
     // Monitor relay tx
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
-    // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
-    // error so the UI can block or offer an explicit retry; a spent allowance (402) also refreshes the stale meter.
-    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
-    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
-    const finalError = getRelaySimulationError(error) ?? quotaError ?? asError(error)
+    const finalError = getRelayError(error, sponsorSpaceId)
+    // A space-route refusal means the meter on screen is stale.
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
     txDispatch(TxEvent.FAILED, {
       txId,
       error: finalError,
@@ -645,9 +661,8 @@ export const dispatchBatchExecutionRelay = async (
           .dispatch(relayApi.endpoints.relayRelayV1.initiate({ chainId, relayDto: { to, data, version: safeVersion } }))
           .unwrap()
   } catch (error) {
-    const quotaError = sponsorSpaceId ? getQuotaExceededError(error) : undefined
-    if (quotaError && sponsorSpaceId) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
-    const finalError = quotaError ?? asError(error)
+    const finalError = getRelayError(error, sponsorSpaceId)
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {
         txId,
