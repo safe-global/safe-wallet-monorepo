@@ -537,6 +537,115 @@ describe('SafeAccountSelector', () => {
     })
   })
 
+  describe('accounts on networks without spending limits', () => {
+    const unavailable = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'no-spending-limits' })
+
+    it('lists the account as a disabled row and explains the network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unavailable]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['no-spending-limits'])).toBeInTheDocument()
+    })
+  })
+
+  describe('unsupported-network accounts', () => {
+    const unsupported = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-chain' })
+
+    it('lists an unsupported-network account as a disabled row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows).toHaveLength(2)
+      expect(rows[1]).toHaveTextContent('Grants')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('explains the unsupported network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
+    it('disables only the unsupported chain inside a multichain group', async () => {
+      const group: SafeAccountGroup = {
+        ...multiChainGroup,
+        accounts: [option('1', SAFE_B), option('137', SAFE_B, { ineligibleReason: 'unsupported-chain' })],
+      }
+      const { user } = renderWithUserEvent(<SafeAccountSelector accounts={[group]} onChange={jest.fn()} />)
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByTestId('safe-account-chain-option')
+      expect(rows).toHaveLength(2)
+      expect(rows[0]).not.toHaveAttribute('aria-disabled', 'true')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
+    it('keeps the balance column on an unsupported-network row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector
+          accounts={[option('137', SAFE_B, { ineligibleReason: 'unsupported-chain', fiatTotal: '12' })]}
+          onChange={jest.fn()}
+        />,
+      )
+
+      await openSelector(user)
+
+      const [row] = await screen.findAllByRole('option')
+      expect(within(row).queryByTestId('safe-account-not-activated-icon')).not.toBeInTheDocument()
+      expect(row.querySelector('[data-testid="row-end-column"]')).toHaveTextContent('$')
+    })
+
+    it('flags a preselected unsupported-network value as invalid and explains why', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['unsupported-chain'])
+    })
+
+    it('does not flag a read-only unsupported-network value', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+          readOnly
+        />,
+      )
+
+      expect(screen.getByTestId('safe-account-readonly')).toBeInTheDocument()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-account-helper-text')).toBeInTheDocument()
+    })
+  })
+
   it('replaces the helper text with the form validation message', () => {
     render(
       <SafeAccountSelector
