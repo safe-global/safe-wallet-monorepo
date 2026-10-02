@@ -7,6 +7,7 @@ const mockCheckout = jest.fn()
 const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
 let mockTrimState: Record<string, unknown> = {}
+let mockIsPlansV2 = false
 
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
@@ -24,6 +25,7 @@ jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
+jest.mock('../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => mockIsPlansV2 }))
 jest.mock('../SelectAccountsStep', () => ({
   __esModule: true,
   default: ({
@@ -67,6 +69,7 @@ const ENDED_AT = Date.UTC(2026, 11, 5, 12)
 describe('PlanChooserModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockIsPlansV2 = false
     mockTrimState = {}
     mockUseSpaceOffers.mockReturnValue({ paidPlans: PLANS, isLoading: false })
     mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null && 3 > seats)
@@ -155,5 +158,24 @@ describe('PlanChooserModal', () => {
     rerender(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={jest.fn()} />)
     expect(screen.getByText('There is no plan available for this Workspace right now.')).toBeInTheDocument()
     expect(screen.getByText('We couldn’t start the checkout. Please try again.')).toBeInTheDocument()
+  })
+
+  it('keeps the current plan cards while SAFE_PRO_PLANS_V2 is off', () => {
+    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
+
+    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
+    expect(screen.queryByTestId('plan-card')).not.toBeInTheDocument()
+  })
+
+  it('shows the v2 plan cards without the compare link while SAFE_PRO_PLANS_V2 is on', () => {
+    mockIsPlansV2 = true
+    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
+
+    expect(screen.getAllByTestId('plan-card').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Need more than 20?')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Compare all features/ })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
+    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
   })
 })

@@ -10,12 +10,14 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
+import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
 import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
+import PlanCatalogV2 from './v2/PlanCatalogV2'
 import type { PlanPick, PlanTier } from './types'
 
 export const _LAPSED_DATA_NOTE =
@@ -70,6 +72,7 @@ export default function PlanChooserModal({
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
+  const isPlansV2 = useIsSafeProPlansV2Enabled()
   const { title, subtitle } = chooserCopy(reason, endedAt)
   const trimming = pick && needsTrim(pick.option.seats) ? pick : undefined
 
@@ -81,7 +84,12 @@ export default function PlanChooserModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
-      <DialogContent size="md" surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
+      <DialogContent
+        size={isPlansV2 && !trimming ? 'lg' : 'md'}
+        surface="card"
+        padding="sm"
+        showCloseButton={Boolean(trimming)}
+      >
         <div className="flex flex-col gap-6 pt-5">
           {trimming ? (
             <SelectAccountsStep
@@ -128,6 +136,8 @@ export default function PlanChooserModal({
                   <AlertSeverityIcon variant="info" />
                   <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
                 </Alert>
+              ) : isPlansV2 ? (
+                <PlanCatalogV2 embedded tiers={tiers} onSubscribe={subscribe} isBusy={isBusy} />
               ) : (
                 <PlanCatalog
                   tiers={tiers}
