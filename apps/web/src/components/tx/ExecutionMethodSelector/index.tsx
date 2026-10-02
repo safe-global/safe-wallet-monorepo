@@ -218,7 +218,7 @@ export const _ExecutionMethodSelector = ({
         <div className="flex flex-col">
           {!noLabel ? (
             <Typography variant="paragraph-small" className={css.label}>
-              Who will pay gas fees:
+              Who will pay gas fees
             </Typography>
           ) : null}
 

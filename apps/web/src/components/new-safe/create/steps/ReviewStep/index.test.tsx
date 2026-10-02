@@ -146,7 +146,7 @@ describe('ReviewStep', () => {
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
-    expect(queryByText('Who will pay gas fees:')).not.toBeInTheDocument()
+    expect(queryByText('Who will pay gas fees')).not.toBeInTheDocument()
   })
 
   it('should display the network fee for counterfactual safes if the user selects pay now', async () => {
@@ -195,7 +195,7 @@ describe('ReviewStep', () => {
       fireEvent.click(payNow)
     })
 
-    expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+    expect(getByText(/Who will pay gas fees/)).toBeInTheDocument()
   })
 
   it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', () => {

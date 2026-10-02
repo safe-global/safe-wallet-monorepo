@@ -30,7 +30,7 @@ export type ClaimTrialCopy = { title: string; subtitle: string; note: string; ba
 
 /** What happens when the trial runs out, behind the info icon next to the note. */
 export const TRIAL_END_TOOLTIP =
-  "Your paid subscription only starts after you add a payment method. If you don't add one or choose another plan before your free access ends, your Workspace will be locked. Nothing is deleted for 90 days and your Safe accounts remain available in My accounts."
+  "Your paid subscription only starts once you add a payment method. If you don't add one or choose another plan before your free access ends, your Workspace will be locked. Its data is kept for 90 days and your Safe accounts remain available in My accounts."
 
 /** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
 export const _freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
@@ -54,8 +54,9 @@ export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVar
   return trialPeriodDays === MIGRATED_TRIAL_DAYS
     ? {
         ...existing,
-        title: 'Your Workspace moved to Safe Pro on Oct 6, 2026',
-        subtitle: 'You’ve used Safe before, so your free access is 60 days instead of 30.',
+        title: 'Your Workspace moved to Safe Pro',
+        subtitle:
+          'You’ve used Safe before, so your free access is 60 days instead of 30.\nYour Safe accounts remain available in My accounts.',
       }
     : {
         ...existing,
@@ -83,6 +84,7 @@ const TrialOfferCard = ({
   onSelect: () => void
 }) => {
   const option = tier.options[0]
+  const features = tier.features.filter((feature) => feature !== 'Unlimited Workspace members')
 
   return (
     <Card
@@ -112,7 +114,7 @@ const TrialOfferCard = ({
             </div>
             {availableUntil && (
               <Typography variant="paragraph-small" color="muted">
-                Available until {availableUntil}.
+                Available until {availableUntil}. You can subscribe any time after that.
               </Typography>
             )}
           </div>
@@ -120,9 +122,9 @@ const TrialOfferCard = ({
           {/* Column-major like the design: the first half of the list on the left, the rest on the right. */}
           <ul
             className="grid gap-x-6 gap-y-2 sm:grid-flow-col sm:grid-rows-[repeat(var(--rows),auto)]"
-            style={{ '--rows': Math.ceil(tier.features.length / 2) } as CSSProperties}
+            style={{ '--rows': Math.ceil(features.length / 2) } as CSSProperties}
           >
-            {tier.features.map((feature) => (
+            {features.map((feature) => (
               <li key={feature} className="flex items-center gap-2">
                 <Check className="size-4 shrink-0 text-muted-foreground" strokeWidth={1.5} />
                 <Typography variant="paragraph-small">{feature}</Typography>
@@ -192,7 +194,9 @@ export default function ClaimTrialModal({
                 <Typography variant="h3" as={DialogTitle}>
                   {highlightSafePro(copy.title)}
                 </Typography>
-                <Typography color="muted">{copy.subtitle}</Typography>
+                <Typography color="muted" className="whitespace-pre-line">
+                  {copy.subtitle}
+                </Typography>
               </div>
 
               <Link

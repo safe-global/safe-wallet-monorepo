@@ -32,7 +32,7 @@ const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsell
               className="font-normal text-muted-foreground underline"
               href={HelpCenterArticle.POLICIES}
             >
-              Read more
+              Learn more
             </ExternalLink>
           </Typography>
         </div>

@@ -1,4 +1,4 @@
-import { Wallet } from 'lucide-react'
+import { ExternalLink, Wallet } from 'lucide-react'
 import NextLink from 'next/link'
 import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
@@ -6,7 +6,9 @@ import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { Button } from '@/components/ui/button'
+import { Link } from '@/components/ui/link'
 import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@/utils/cn'
@@ -35,7 +37,26 @@ const GetStartedCard = () => {
         </Typography>
 
         <p className="mx-auto mt-6 max-w-[300px] text-center text-[13px] leading-[18px] text-muted-foreground">
-          Connect your wallet to create a Safe account or watch an existing one
+          By continuing you accept the{' '}
+          <Link
+            variant="muted"
+            href={TERMS_URL}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="underline underline-offset-2"
+          >
+            Safe{'{'}Wallet{'}'} Terms
+          </Link>{' '}
+          and{' '}
+          <Link
+            variant="muted"
+            href={PRIVACY_URL}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="whitespace-nowrap underline underline-offset-2"
+          >
+            Privacy Policy. <ExternalLink className="ml-0.5 inline size-4 align-text-bottom" />
+          </Link>
         </p>
 
         <div className="mt-5 flex flex-col gap-2.5">
