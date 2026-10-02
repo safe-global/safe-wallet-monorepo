@@ -537,6 +537,64 @@ describe('SafeAccountSelector', () => {
     })
   })
 
+  describe('unsupported-network accounts', () => {
+    const unsupported = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-chain' })
+
+    it('lists an unsupported-network account as a disabled row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows).toHaveLength(2)
+      expect(rows[1]).toHaveTextContent('Grants')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('explains the unsupported network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
+    it('keeps the balance column on an unsupported-network row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector
+          accounts={[option('137', SAFE_B, { ineligibleReason: 'unsupported-chain', fiatTotal: '12' })]}
+          onChange={jest.fn()}
+        />,
+      )
+
+      await openSelector(user)
+
+      const [row] = await screen.findAllByRole('option')
+      expect(within(row).queryByTestId('safe-account-not-activated-icon')).not.toBeInTheDocument()
+      expect(row.querySelector('[data-testid="row-end-column"]')).toHaveTextContent('$')
+    })
+
+    it('flags a preselected unsupported-network value as invalid and explains why', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['unsupported-chain'])
+    })
+  })
+
   it('replaces the helper text with the form validation message', () => {
     render(
       <SafeAccountSelector

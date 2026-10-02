@@ -35,6 +35,8 @@ export const LOAD_ERROR_TEXT = 'Failed to load Safe Accounts'
 
 export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
   'not-activated': 'You need to activate this Safe before transacting',
+  'unsupported-chain':
+    "Spending limits on this network aren't supported in the Workspace view. Set them up in the Safe account settings.",
 }
 
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'

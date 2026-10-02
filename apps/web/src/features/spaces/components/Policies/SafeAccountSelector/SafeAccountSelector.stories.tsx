@@ -87,6 +87,25 @@ const [partlyActivatedGroup] = groupSafeAccounts([
   account(POLYGON, UNNAMED_MULTI, { name: 'Grants', threshold: 2, owners: 4, ineligibleReason: 'not-activated' }),
 ])
 
+const unsupportedNetwork = account(POLYGON, PAYROLL, {
+  name: 'Grants',
+  threshold: 2,
+  owners: 3,
+  fiatTotal: '75.4',
+  ineligibleReason: 'unsupported-chain',
+})
+
+const [partlySupportedGroup] = groupSafeAccounts([
+  account(ETHEREUM, UNNAMED_MULTI, { name: 'Ops', threshold: 2, owners: 4, fiatTotal: '910.5' }),
+  account(POLYGON, UNNAMED_MULTI, {
+    name: 'Ops',
+    threshold: 2,
+    owners: 4,
+    fiatTotal: '12.25',
+    ineligibleReason: 'unsupported-chain',
+  }),
+])
+
 const defaultAccounts: SafeAccountEntry[] = [treasury, opsGroup, payroll, unnamedSafe]
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'connected', layout: 'none', shadcn: true })
@@ -177,6 +196,11 @@ export const LongSafeName: Story = {
 
 export const NotActivatedAccounts: Story = {
   args: { accounts: [treasury, notActivated, partlyActivatedGroup] },
+}
+
+/** A Safe on a network the Policy Indexer does not cover: disabled, balance kept, tooltip on hover. */
+export const UnsupportedNetworkAccounts: Story = {
+  args: { accounts: [treasury, unsupportedNetwork, partlySupportedGroup] },
 }
 
 export const Disabled: Story = {

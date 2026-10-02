@@ -3,7 +3,7 @@ import type { ChainInfo } from '@/features/spaces/types'
 /** Why the wallet may set a policy on a Safe. Drives no UI yet; read by the flow gate. */
 export type SafeAccountEligibility = 'signer' | 'proposer' | 'signer-and-proposer'
 
-export type SafeAccountIneligibility = 'not-activated'
+export type SafeAccountIneligibility = 'not-activated' | 'unsupported-chain'
 
 /** One selectable entry: a Safe on exactly one chain. */
 export type SafeAccountOption = {
