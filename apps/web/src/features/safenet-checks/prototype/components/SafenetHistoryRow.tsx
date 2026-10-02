@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
 import ExternalLink from '@/components/common/ExternalLink'
-import { PHASE_PRESENTATION, isVerdictPhase } from '../copy'
+import { PHASE_PRESENTATION, SAFENET_DETAILS_LINK, SAFENET_DETAILS_LINK_LABEL, isVerdictPhase } from '../copy'
 import { getSafenetExplorerHref } from '../explorer'
 import type { SafenetCheckPhase, SafenetCheckState } from '../types'
 import { useSafenetCheckState } from '../useSafenetCheckState'
@@ -30,8 +30,12 @@ export const SafenetHistoryRowView = ({ state, explorerHref, isLast }: SafenetHi
         isVerdictPhase(state.phase) ? (
           <>
             Safenet ·{' '}
-            <ExternalLink href={explorerHref} data-testid="safenet-explorer-link">
-              View on Safenet explorer
+            <ExternalLink
+              href={explorerHref}
+              aria-label={SAFENET_DETAILS_LINK_LABEL}
+              data-testid="safenet-explorer-link"
+            >
+              {SAFENET_DETAILS_LINK}
             </ExternalLink>
           </>
         ) : (

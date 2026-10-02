@@ -14,6 +14,10 @@ export type SafenetPhasePresentation = {
 /** Stands in for the Safenet logo until we have the asset. */
 export const SAFENET_NAME = 'Safenet'
 
+export const SAFENET_DETAILS_LINK = 'View details'
+
+export const SAFENET_DETAILS_LINK_LABEL = 'View details on Safenet explorer'
+
 export const SAFENET_LEARN_MORE_URL = 'https://safefoundation.org/safenet'
 
 /** Kept general until the API returns individual sub-checks. */

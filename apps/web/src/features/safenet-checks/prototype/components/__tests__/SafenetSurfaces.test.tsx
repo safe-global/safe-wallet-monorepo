@@ -81,10 +81,10 @@ describe('Safenet prototype surfaces', () => {
     const { rerender } = render(
       <SafenetShieldRowView state={{ phase: 'checking' }} nowMs={START} explorerHref={EXPLORER} />,
     )
-    expect(screen.queryByRole('link', { name: /Safenet explorer/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /View details on Safenet explorer/ })).not.toBeInTheDocument()
 
     rerender(<SafenetShieldRowView state={{ phase: 'no-issues' }} nowMs={START} explorerHref={EXPLORER} />)
-    expect(screen.getByRole('link', { name: /Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
+    expect(screen.getByRole('link', { name: /View details on Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
   })
 
   it('shows a risk above the action as an alert', () => {
@@ -105,14 +105,17 @@ describe('Safenet prototype surfaces', () => {
   it('shows the result and explorer link in the expanded transaction', () => {
     render(<SafenetTxStatusView state={{ phase: 'risk' }} nowMs={START} explorerHref={EXPLORER} />)
     expect(screen.getByTestId('safenet-tx-status')).toHaveTextContent('Safenet: Risk detected')
-    expect(screen.getByRole('link', { name: /Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
+    expect(screen.getByRole('link', { name: /View details on Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
   })
 
   it('links to the Safenet explorer in history only once there is a verdict', () => {
     const { rerender } = render(<SafenetHistoryRowView state={{ phase: 'checking' }} explorerHref={EXPLORER} />)
-    expect(screen.queryByRole('link', { name: /View on Safenet explorer/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /View details on Safenet explorer/ })).not.toBeInTheDocument()
 
     rerender(<SafenetHistoryRowView state={{ phase: 'no-issues' }} explorerHref={EXPLORER} />)
-    expect(screen.getByRole('link', { name: /View on Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
+    const link = screen.getByRole('link', { name: /View details on Safenet explorer/ })
+    expect(link).toHaveAttribute('href', EXPLORER)
+    expect(link).toHaveTextContent('View details')
+    expect(screen.getByTestId('safenet-history-row')).toHaveTextContent('By Safenet · View details')
   })
 })

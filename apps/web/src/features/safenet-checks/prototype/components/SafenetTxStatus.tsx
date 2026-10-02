@@ -4,7 +4,15 @@ import { Typography } from '@/components/ui/typography'
 import ExternalLink from '@/components/common/ExternalLink'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { PHASE_PRESENTATION, SAFENET_NAME, getEtaCopy, isRunningPhase, isVerdictPhase } from '../copy'
+import {
+  PHASE_PRESENTATION,
+  SAFENET_DETAILS_LINK,
+  SAFENET_DETAILS_LINK_LABEL,
+  SAFENET_NAME,
+  getEtaCopy,
+  isRunningPhase,
+  isVerdictPhase,
+} from '../copy'
 import { getSafenetExplorerHref } from '../explorer'
 import type { SafenetCheckState } from '../types'
 import { useSafenetCheckState } from '../useSafenetCheckState'
@@ -31,8 +39,13 @@ export const SafenetTxStatusView = ({ state, nowMs, explorerHref }: SafenetTxSta
           </Typography>
           {state.riskDetails && <Typography variant="paragraph-small">{state.riskDetails}</Typography>}
           {isVerdictPhase(state.phase) && (
-            <ExternalLink href={explorerHref} className="inline-flex self-start" data-testid="safenet-explorer-link">
-              <Typography variant="paragraph-small-bold">View on Safenet explorer</Typography>
+            <ExternalLink
+              href={explorerHref}
+              aria-label={SAFENET_DETAILS_LINK_LABEL}
+              className="inline-flex self-start"
+              data-testid="safenet-explorer-link"
+            >
+              <Typography variant="paragraph-small-bold">{SAFENET_DETAILS_LINK}</Typography>
             </ExternalLink>
           )}
         </div>

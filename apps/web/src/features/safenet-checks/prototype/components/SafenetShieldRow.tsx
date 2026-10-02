@@ -9,6 +9,8 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
   PHASE_PRESENTATION,
+  SAFENET_DETAILS_LINK,
+  SAFENET_DETAILS_LINK_LABEL,
   SAFENET_LEARN_MORE_URL,
   SAFENET_NAME,
   getEtaCopy,
@@ -68,8 +70,12 @@ export const SafenetShieldRowView = ({
           )}
           {isVerdictPhase(state.phase) && explorerHref && (
             <Typography variant="paragraph-small">
-              <ExternalLink href={explorerHref} data-testid="safenet-explorer-link">
-                View on Safenet explorer
+              <ExternalLink
+                href={explorerHref}
+                aria-label={SAFENET_DETAILS_LINK_LABEL}
+                data-testid="safenet-explorer-link"
+              >
+                {SAFENET_DETAILS_LINK}
               </ExternalLink>
             </Typography>
           )}
