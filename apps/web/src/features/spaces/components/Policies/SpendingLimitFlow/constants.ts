@@ -30,6 +30,8 @@ export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this sp
 export const EXISTING_LIMIT_ERROR = 'This spender already has a spending limit for this token'
 export const EXISTING_LIMIT_TOOLTIP =
   'This spender already has a spending limit for this token. Edit the policy to change it.'
+export const SPENDER_RESERVED_ERROR = 'This spender address is not valid'
+export const SPENDER_IS_SAFE_ERROR = 'Cannot add the Safe account itself as spender'
 export const EXISTING_LIMITS_LOAD_ERROR =
   "The Safe's current spending limits could not be loaded. Close this window and try again."
 export const EXISTING_LIMIT_IN_POLICY_ERROR =
