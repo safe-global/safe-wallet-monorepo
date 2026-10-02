@@ -7251,7 +7251,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-bf242e3",
+    "version": "main-615683f",
     "contact": {}
   },
   "tags": [],
@@ -11055,6 +11055,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SpaceSafeDto"
+            }
+          },
+          "addressBookItems": {
+            "description": "Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
             }
           }
         },
