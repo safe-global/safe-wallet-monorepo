@@ -8,7 +8,7 @@ import { Link } from '@/components/ui/link'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { DAY_MS } from '../../hooks/billing/subscription'
@@ -200,7 +200,7 @@ export default function ClaimTrialModal({
               </div>
 
               <Link
-                href={SAFE_PRO_ANNOUNCEMENT_URL}
+                href={SAFE_PRO_PRICING_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 variant="muted"

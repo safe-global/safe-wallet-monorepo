@@ -1,3 +1,4 @@
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
@@ -114,11 +115,23 @@ describe('Policies', () => {
     expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
   })
 
-  it('should, when rendered, not show a page description or Learn more link', () => {
+  it('should, under the title, describe policies and link to the help centre', () => {
     render(<Policies />)
 
+    expect(screen.getByText(/Policies are rules that help you/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
+  })
+
+  it('should hide the description while the policies are loading', () => {
+    render(<Policies isLoading />)
+
     expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Learn more' })).not.toBeInTheDocument()
+  })
+
+  it('should hide the description when the policies failed to load', () => {
+    render(<Policies isError />)
+
+    expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
   })
 
   it('renders the policy catalogue', () => {

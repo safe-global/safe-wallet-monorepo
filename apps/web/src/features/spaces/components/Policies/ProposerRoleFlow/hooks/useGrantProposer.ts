@@ -16,7 +16,8 @@ import useSafeAddress from '@/hooks/useSafeAddress'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
@@ -103,7 +104,6 @@ export const useGrantProposer = (): GrantProposer => {
         dispatch(upsertAddressBookEntries({ chainIds: [chainId], address: proposer, name }))
       }
       void addOrRequestContact({ address: proposer, name, chainIds: [chainId] })
-      trackEvent(SETTINGS_EVENTS.PROPOSERS.SUBMIT_ADD_PROPOSER)
       dispatch(
         showNotification({
           variant: 'success',
@@ -119,6 +119,8 @@ export const useGrantProposer = (): GrantProposer => {
 
   const grantProposerRole = useCallback(
     async ({ proposer, name }: ProposerRoleFormValues, safeLabel?: string): Promise<boolean> => {
+      trackEvent(POLICY_EVENTS.PROPOSER_SUBMITTED, { [MixpanelEventParams.CHAIN_ID]: chainId })
+
       if (!wallet || !onboard || !safeAddress) return false
 
       reset()

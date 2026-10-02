@@ -27,6 +27,7 @@ describe('mapActivePolicies', () => {
     expect(allowance.remaining).toBe('500000000')
     expect(allowance.resetPeriodMinutes).toBe(43_200)
     expect(allowance.resetsAtMinute).toBe(29_846_880)
+    expect(allowance.createdAt).toBe(1_790_000_000)
   })
 
   it('should, when the allowance never resets, leave the reset time empty', () => {

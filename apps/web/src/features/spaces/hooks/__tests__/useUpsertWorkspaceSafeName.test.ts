@@ -1,6 +1,11 @@
 import { renderHook } from '@/tests/test-utils'
 import { useAddressBooksUpsertAddressBookItemsV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useUpsertWorkspaceSafeName, useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
+import {
+  ADDRESS_BOOK_UNAVAILABLE,
+  usePrepareWorkspaceSafeNames,
+  useUpsertWorkspaceSafeName,
+  useUpsertWorkspaceSafeNames,
+} from '../useUpsertWorkspaceSafeName'
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
 
@@ -127,5 +132,28 @@ describe('useUpsertWorkspaceSafeNames — address book not read', () => {
       error: 'The Workspace address book is unavailable. Try again in a moment.',
     })
     expect(upsert).not.toHaveBeenCalled()
+  })
+})
+
+describe('usePrepareWorkspaceSafeNames', () => {
+  beforeEach(() => jest.clearAllMocks())
+
+  it('returns sanitized names merged with the existing entry chainIds, without a request', () => {
+    const upsert = setup({ addressBook: [{ address: ADDRESS, name: 'Old', chainIds: ['137'] }] })
+    const { result } = renderHook(() => usePrepareWorkspaceSafeNames())
+
+    expect(result.current([{ address: ADDRESS, name: '  Treasury  ', chainIds: ['1'] }])).toEqual({
+      items: [{ address: ADDRESS, name: 'Treasury', chainIds: ['137', '1'] }],
+    })
+    expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('returns an error while the address book is unavailable', () => {
+    setup({ isError: true })
+    const { result } = renderHook(() => usePrepareWorkspaceSafeNames())
+
+    expect(result.current([{ address: ADDRESS, name: 'Treasury', chainIds: ['1'] }])).toEqual({
+      error: ADDRESS_BOOK_UNAVAILABLE,
+    })
   })
 })

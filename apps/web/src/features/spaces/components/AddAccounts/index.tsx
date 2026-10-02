@@ -23,7 +23,7 @@ import {
   useSpaceAddressBookState,
   useIsAdmin,
   useSpaceSafes,
-  useUpsertWorkspaceSafeNames,
+  usePrepareWorkspaceSafeNames,
 } from '@/features/spaces'
 import {
   NameAccountsFields,
@@ -138,7 +138,7 @@ const AddAccounts = ({
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
-  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const prepareNames = usePrepareWorkspaceSafeNames()
   const {
     items: spaceAddressBook,
     isLoading: isAddressBookLoading,
@@ -306,12 +306,18 @@ const AddAccounts = ({
         })
       }
 
+      const preparedNames = prepareNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+      if (preparedNames.error !== undefined) {
+        setError(preparedNames.error)
+        return
+      }
+
       try {
-        // Add new safes
+        // Add new Safes and their names
         if (safesToAdd.length > 0) {
           const result = await addSafesToSpace({
             spaceId: spaceId ?? '',
-            createSpaceSafesDto: { safes: safesToAdd },
+            createSpaceSafesDto: { safes: safesToAdd, addressBookItems: preparedNames.items },
           })
 
           if (isElevationRequiredError(result.error)) return
@@ -354,12 +360,6 @@ const AddAccounts = ({
               { workspace_id: spaceId, safe_address: address, chain_id: chainId },
             )
           })
-        }
-
-        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-        if (namesResult.error) {
-          setError(namesResult.error)
-          return
         }
 
         // Show success notification

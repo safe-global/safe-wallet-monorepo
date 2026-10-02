@@ -88,12 +88,9 @@ export const getReadOnlyMultiSendCallOnlyContract = async (
   safeVersion: SafeState['version'],
   chainId?: string,
   implementationAddress?: string,
+  scope?: TxSenderScope,
 ) => {
-  const safeSDK = getSafeSDK()
-  if (!safeSDK) {
-    throw new Error('Safe SDK not found.')
-  }
-
+  const safeSDK = getAndValidateSafeSDK(scope)
   const safeProvider = safeSDK.getSafeProvider()
 
   // For unsupported mastercopies, use the SDK version if available

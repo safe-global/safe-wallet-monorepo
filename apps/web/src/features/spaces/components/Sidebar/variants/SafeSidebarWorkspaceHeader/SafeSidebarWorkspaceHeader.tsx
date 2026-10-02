@@ -40,7 +40,6 @@ export const SafeSidebarWorkspaceHeader = ({
             triggerVariant="addToWorkspace"
             selectedSpace={workspaceHeader.selectedSpace}
             spaces={workspaceHeader.spaces}
-            onSpaceAdded={workspaceHeader.onSpaceAdded}
           />
         )
       }

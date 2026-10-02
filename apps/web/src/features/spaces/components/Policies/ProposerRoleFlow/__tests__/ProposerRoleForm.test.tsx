@@ -7,8 +7,10 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '../constants'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -88,6 +90,16 @@ describe('ProposerRoleForm', () => {
     ).toBeInTheDocument()
   })
 
+  it('points at the proposer settings in the nested Safes notice', async () => {
+    const { user } = renderForm()
+
+    await openAccountField(user)
+
+    expect(await screen.findByTestId('safe-account-selector-notice')).toHaveTextContent(
+      getNestedSafesNoticeText('proposers'),
+    )
+  })
+
   it('explains the proposer field and where a member name goes', () => {
     renderForm()
 
@@ -129,6 +141,73 @@ describe('ProposerRoleForm', () => {
 
       await screen.findByText('You need to activate this Safe before transacting')
       expect(submitButton()).toBeDisabled()
+    })
+
+    it('shows the parent Safe notice with a settings link and blocks submit when the wallet is a parent Safe', async () => {
+      renderForm({
+        safeAccount: treasury.id,
+        defaultValues: { proposer: PROPOSER },
+        parentSafeWallet: {
+          ...PARENT_SAFE_WALLET_COPY,
+          safeName: 'Treasury',
+          parentSafeName: 'Ops',
+          settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } },
+        },
+      })
+
+      expect(screen.getByText('Add this proposer on the Safe account level')).toBeInTheDocument()
+      expect(screen.getByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+        'Your connected wallet, Ops, is a parent Safe account of Treasury. To grant this role on its behalf, open the settings of Treasury with a signer of Ops.',
+      )
+      expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('/settings/setup?safe='),
+      )
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('closes the flow and pushes the settings route itself when the link is clicked', async () => {
+      const onNavigate = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
+      const settingsHref = { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } }
+      const { user } = renderWithUserEvent(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          safeAccounts={eligible}
+          onSafeAccountChange={jest.fn()}
+          safeAccount={treasury.id}
+          parentSafeWallet={{
+            ...PARENT_SAFE_WALLET_COPY,
+            safeName: 'Treasury',
+            parentSafeName: 'Ops',
+            settingsHref,
+            onNavigate,
+          }}
+        />,
+        { routerProps: { push } },
+      )
+
+      await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
+
+      expect(onNavigate).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledWith(settingsHref)
+    })
+
+    it('keeps the settings link mousedown from the document-level navigation guard', () => {
+      const guard = jest.fn()
+      document.addEventListener('mousedown', guard)
+      renderForm({
+        safeAccount: treasury.id,
+        parentSafeWallet: { ...PARENT_SAFE_WALLET_COPY, safeName: 'Treasury', parentSafeName: 'Ops', settingsHref: {} },
+      })
+
+      fireEvent.mouseDown(screen.getByRole('link', { name: 'Go to Safe settings' }))
+      fireEvent.mouseDown(screen.getByTestId('parent-safe-wallet-notice'))
+
+      expect(guard).toHaveBeenCalledTimes(1)
+      document.removeEventListener('mousedown', guard)
     })
 
     it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {
@@ -387,6 +466,22 @@ describe('ProposerRoleForm', () => {
   describe('proposer field', () => {
     const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
 
+    afterEach(() => jest.restoreAllMocks())
+
+    it('does not suggest the picked Safe account as proposer', async () => {
+      jest.spyOn(useChainIdHook, 'default').mockReturnValue(CHAIN_ID)
+      const { user } = renderForm(
+        { safeAccount: treasury.id },
+        { [CHAIN_ID]: { [SAFE]: 'Treasury', [PROPOSER]: 'Alice' } },
+      )
+
+      await user.click(screen.getByTestId('address-book-toggle'))
+      const options = await screen.findAllByTestId('address-item')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Alice')
+    })
+
     it('does not take focus when the form opens', () => {
       renderForm({ safeAccount: treasury.id })
 
@@ -436,6 +531,31 @@ describe('ProposerRoleForm', () => {
       await user.click(await screen.findByRole('option'))
 
       expect(onSafeAccountChange).toHaveBeenCalledWith(treasury.id)
+    })
+
+    it('does not offer the Safe account entered as proposer', async () => {
+      const ops: SafeAccountOption = {
+        ...treasury,
+        id: buildSafeAccountId(CHAIN_ID, PROPOSER),
+        address: PROPOSER,
+        name: 'Ops',
+      }
+      const { user } = renderForm({
+        safeAccounts: { ...eligible, accounts: [treasury, ops] },
+        defaultValues: { proposer: PROPOSER },
+      })
+
+      await openAccountField(user)
+      const options = await screen.findAllByRole('option')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Treasury')
+    })
+
+    it('keeps the picked Safe account when it is entered as its own proposer', () => {
+      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: SAFE } })
+
+      expect(accountField()).toHaveTextContent('Treasury')
     })
 
     it('passes the loading state through to the account field', () => {
