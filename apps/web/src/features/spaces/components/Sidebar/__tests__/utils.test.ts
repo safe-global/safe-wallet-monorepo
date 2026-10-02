@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { truncateSpaceName, getSidebarItemTestId, getSidebarActionItemTestId, getAddToSpaceBlock } from '../utils'
+import { truncateSpaceName, getSidebarItemTestId, getSidebarActionItemTestId, getAddToSpaceStatus } from '../utils'
 
 describe('truncateSpaceName', () => {
   it('returns original value when within max length', () => {
@@ -52,14 +52,15 @@ describe('getSidebarActionItemTestId', () => {
   })
 })
 
-describe('getAddToSpaceBlock', () => {
+describe('getAddToSpaceStatus', () => {
   const safeAddress = faker.finance.ethereumAddress()
   const otherAddress = () => faker.finance.ethereumAddress()
-  const check = (overrides: Partial<Parameters<typeof getAddToSpaceBlock>[0]> = {}) =>
-    getAddToSpaceBlock({
+  const check = (overrides: Partial<Parameters<typeof getAddToSpaceStatus>[0]> = {}) =>
+    getAddToSpaceStatus({
       spaceSafes: {},
       safeCount: 0,
       limit: 2,
+      hasPlan: true,
       isAdmin: true,
       chainId: '1',
       safeAddress,
@@ -67,7 +68,7 @@ describe('getAddToSpaceBlock', () => {
     })
 
   it('allows an admin to add a new Safe below the limit', () => {
-    expect(check({ spaceSafes: { '1': [otherAddress()] } })).toBeNull()
+    expect(check({ spaceSafes: { '1': [otherAddress()] } })).toBe('available')
   })
 
   it('blocks a Safe that the Workspace has on the current chain, in any case of the address', () => {
@@ -82,21 +83,37 @@ describe('getAddToSpaceBlock', () => {
     expect(check({ isAdmin: false })).toBe('notAdmin')
   })
 
+  it('blocks a Workspace without a plan, not as a full one', () => {
+    expect(check({ hasPlan: false, limit: 0 })).toBe('noPlan')
+  })
+
+  it('reports a missing admin role before a missing plan', () => {
+    expect(check({ hasPlan: false, isAdmin: false })).toBe('notAdmin')
+  })
+
+  it('reports an added Safe before a missing plan', () => {
+    expect(check({ spaceSafes: { '1': [safeAddress] }, hasPlan: false })).toBe('alreadyAdded')
+  })
+
+  it('does not block while it is unknown whether the Workspace has a plan', () => {
+    expect(check({ hasPlan: undefined, limit: undefined })).toBe('available')
+  })
+
   it('blocks a Workspace whose seats are all taken', () => {
     expect(check({ spaceSafes: { '1': [otherAddress()], '137': [otherAddress()] } })).toBe('safeLimit')
   })
 
   it('counts one seat for a Safe on several chains', () => {
     const multichain = otherAddress()
-    expect(check({ spaceSafes: { '1': [multichain], '137': [multichain] } })).toBeNull()
+    expect(check({ spaceSafes: { '1': [multichain], '137': [multichain] } })).toBe('available')
   })
 
   it('allows a full Workspace that has this Safe on another chain, because it takes no new seat', () => {
-    expect(check({ spaceSafes: { '137': [safeAddress, otherAddress()] } })).toBeNull()
+    expect(check({ spaceSafes: { '137': [safeAddress, otherAddress()] } })).toBe('available')
   })
 
   it('counts the seats from the Safes of the Workspace, not from the cached Safe count', () => {
-    expect(check({ spaceSafes: {}, safeCount: 5 })).toBeNull()
+    expect(check({ spaceSafes: {}, safeCount: 5 })).toBe('available')
   })
 
   it('uses the cached Safe count while the Safes are unknown', () => {
@@ -107,6 +124,6 @@ describe('getAddToSpaceBlock', () => {
     ['unknown', undefined],
     ['unlimited', null],
   ])('never blocks on the limit while it is %s', (_, limit) => {
-    expect(check({ spaceSafes: { '1': [otherAddress()], '137': [otherAddress()] }, limit })).toBeNull()
+    expect(check({ spaceSafes: { '1': [otherAddress()], '137': [otherAddress()] }, limit })).toBe('available')
   })
 })

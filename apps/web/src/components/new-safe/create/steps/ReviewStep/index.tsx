@@ -419,7 +419,8 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
-          if (result.stepUpPending) return { chain, safeAddress, success: false, stepUpPending: true }
+          // Saved for the user; the replay adds it to the space, so it still gets its name.
+          if (result.stepUpPending) return { chain, safeAddress, success: true, stepUpPending: true }
           setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }
@@ -538,7 +539,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      relays={minRelays}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />
@@ -590,7 +591,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      relays={minRelays}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />

@@ -1,6 +1,7 @@
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import * as useChains from '@/hooks/useChains'
 import * as relay from '@/utils/relaying'
+import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { render } from '@/tests/test-utils'
@@ -145,7 +146,7 @@ describe('ReviewStep', () => {
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
-    expect(queryByText('Who will pay gas fees:')).not.toBeInTheDocument()
+    expect(queryByText('Who will pay gas fees')).not.toBeInTheDocument()
   })
 
   it('should display the network fee for counterfactual safes if the user selects pay now', async () => {
@@ -194,7 +195,33 @@ describe('ReviewStep', () => {
       fireEvent.click(payNow)
     })
 
-    expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+    expect(getByText(/Who will pay gas fees/)).toBeInTheDocument()
+  })
+
+  it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    jest
+      .spyOn(remainingRelays, 'useLeastRemainingRelays')
+      .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    act(() => {
+      fireEvent.click(screen.getByText('Pay now'))
+    })
+
+    expect(screen.getByText(/free transactions left today/)).toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })
 
   const authReduxState = {
@@ -701,6 +728,28 @@ describe('ReviewStep', () => {
       expect(push).not.toHaveBeenCalled()
       expect(getStoreInstance().getState().stepUp.returnUrl).toBe(newSafeHomeUrl)
       expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+    })
+
+    it('keeps the Safe name when the single-network Workspace add needs a step-up', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(
+        getStoreInstance().getState().addressBook[chainWithFeatures.chainId]?.[
+          '0x0000000000000000000000000000000000000001'
+        ],
+      ).toBe('Test')
+      expect(push).not.toHaveBeenCalled()
     })
 
     it('ignores a Workspace stored by another tab when the URL has none', async () => {

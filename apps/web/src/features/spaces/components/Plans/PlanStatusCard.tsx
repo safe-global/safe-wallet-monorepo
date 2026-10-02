@@ -17,7 +17,7 @@ import { StatusDot } from './v2/StatusDot'
 export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
-  `${tierName ?? 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
+  `${tierName ? `Your ${tierName} plan` : 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
 /** `countdownDays`: days left when the trial label starts counting down. */
 export const getCurrentBadge = (plan: PlanSummary | null, countdownDays?: number): CurrentBadge | undefined => {
@@ -48,7 +48,7 @@ const UsageMeter = ({
 }: {
   icon: ReactNode
   label: string
-  tooltip: string
+  tooltip?: string
   meter: Meter | null
   isV2?: boolean
 }) => {
@@ -69,7 +69,7 @@ const UsageMeter = ({
             <AvatarFallback surface="card">{icon}</AvatarFallback>
           </Avatar>
           <Typography variant="paragraph-medium">{label}</Typography>
-          <InfoTip text={tooltip} />
+          {tooltip && <InfoTip text={tooltip} />}
         </div>
         <Typography
           variant="paragraph-bold"
@@ -100,15 +100,17 @@ const daysLeftText = (daysLeft: number) => `${daysLeft} ${daysLeft === 1 ? 'day'
 const statusText = (
   plan: PlanSummary | null,
   endDate: string | null,
-  isEndingSoon: boolean,
+  isSeatsFull: boolean,
   withDaysLeft = false,
-): string => {
+): string | null => {
   if (plan === null) {
-    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
+    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available in My accounts.'
   }
-  if (plan.status === 'active') return 'Safe accounts above the limit remain available outside the Workspace.'
+  if (plan.status === 'active') {
+    return isSeatsFull ? 'Safe accounts above the limit remain available in My accounts.' : null
+  }
   const until = endDate ?? 'the end of the period'
-  return isEndingSoon && !plan.hasPaymentMethod
+  return !plan.hasPaymentMethod
     ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
     : withDaysLeft && plan.daysLeft != null
       ? `Active until ${until} · ${daysLeftText(plan.daysLeft)}`
@@ -142,6 +144,7 @@ export default function PlanStatusCard({
   const badge = getCurrentBadge(plan, isV2 ? TRIAL_ENDING_SOON_DAYS : undefined)
   const isEndingSoon = badge?.variant === 'warning'
   const badgeVariant = isV2 ? 'subtle' : badge?.variant
+  const text = statusText(plan, endDate, safeAccounts !== null && _remaining(safeAccounts) === 0, isV2)
 
   return (
     <Card radius="xl">
@@ -164,12 +167,14 @@ export default function PlanStatusCard({
                   </Badge>
                 )}
               </div>
-              <Typography className="flex items-center gap-1">
-                {statusText(plan, endDate, isEndingSoon, isV2)}
-                {isTrial && !plan?.hasPaymentMethod && (
-                  <InfoTip text={TRIAL_DISCLAIMER} data-testid="trial-disclaimer" />
-                )}
-              </Typography>
+              {text && (
+                <Typography className="flex items-center gap-1">
+                  {text}
+                  {isTrial && !plan?.hasPaymentMethod && (
+                    <InfoTip text={TRIAL_DISCLAIMER} data-testid="trial-disclaimer" />
+                  )}
+                </Typography>
+              )}
             </div>
             {canManage && (
               <Button variant="outline" size="lg" onClick={onManage} disabled={isManaging}>
@@ -188,8 +193,7 @@ export default function PlanStatusCard({
             />
             <UsageMeter
               icon={<Fuel className="size-5" strokeWidth={1.5} />}
-              label="Sponsored transactions remaining"
-              tooltip="Transactions above the limit bill at pay-as-you-go rates."
+              label="Sponsored transactions available"
               meter={sponsoredTxs}
               isV2={isV2}
             />

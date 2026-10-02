@@ -9,24 +9,29 @@ export const YEARLY_SAVINGS_PERCENT = 13
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
 
-const SECURITY_FEATURES = ['Unlimited Workspace members', 'Advanced threat analysis', 'Transaction simulation']
-const COLLABORATION_FEATURES = ['Shared address book', 'MFA authentication']
+const SHARED_FEATURES = [
+  'Unlimited Workspace members',
+  'Advanced threat analysis',
+  'Transaction simulation',
+  'Shared address book',
+  'MFA Authentication',
+]
 
 export const PLAN_FEATURES: Record<string, string[]> = {
-  Starter: ['10 sponsored transactions / month', ...SECURITY_FEATURES, ...COLLABORATION_FEATURES, 'Builder API access'],
+  Starter: ['10 sponsored transactions per month', ...SHARED_FEATURES, 'Builder API access'],
   Business: [
-    '50 sponsored transactions / month',
-    ...SECURITY_FEATURES,
-    'Policy engine',
-    ...COLLABORATION_FEATURES,
+    '50 sponsored transactions per month',
+    ...SHARED_FEATURES,
     'Growth API access',
+    'Pay fees from Safe accounts',
+    'Policy engine',
   ],
   Enterprise: [
     'Unlimited sponsored transactions',
-    ...SECURITY_FEATURES,
-    'Policy engine',
-    ...COLLABORATION_FEATURES,
+    ...SHARED_FEATURES,
     'Scale API access',
+    'Pay fees from Safe accounts',
+    'Policy engine',
   ],
 }
 

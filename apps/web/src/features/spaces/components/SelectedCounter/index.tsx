@@ -34,7 +34,7 @@ const SelectedCounter = ({
       <TooltipTrigger render={<span className="inline-flex cursor-help" />}>
         <Info className="size-4" />
       </TooltipTrigger>
-      <TooltipContent>{tooltip}</TooltipContent>
+      <TooltipContent className="whitespace-pre-line">{tooltip}</TooltipContent>
     </Tooltip>
   </Typography>
 )

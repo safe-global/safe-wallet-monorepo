@@ -8,7 +8,7 @@ describe('SafeProTrialActivatedModal', () => {
 
     expect(screen.getByRole('heading')).toHaveTextContent('Your free access is active until Dec 6, 2026')
     expect(
-      screen.getByText(/add a payment method before your free access ends — nothing is charged until you do/),
+      screen.getByText(/add a payment method before the free access period ends — nothing is charged until you do/),
     ).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Get started' }))
