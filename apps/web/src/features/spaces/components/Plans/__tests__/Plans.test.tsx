@@ -72,7 +72,7 @@ describe('Plans', () => {
 
   it('advertises the yearly saving as a fixed ceiling, only when a yearly offer exists', () => {
     const { unmount } = render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} />)
-    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent('-10%')
+    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent('Save up to 13%')
     unmount()
 
     render(

@@ -20,8 +20,8 @@ type Cycle = 'month' | 'year'
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
-/** Fixed marketing copy, not derived from the plan prices. */
-export const YEARLY_SAVINGS_LABEL = '-10%'
+/** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
+export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
