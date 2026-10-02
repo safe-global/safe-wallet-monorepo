@@ -1,10 +1,8 @@
 import { renderHook } from '@testing-library/react'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
-import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
+import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
@@ -14,7 +12,6 @@ const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const mockUseCurrentSpaceId = jest.fn()
 const mockPoliciesQuery = jest.fn()
 const mockPendingQuery = jest.fn()
-const mockTokenInfosQuery = jest.fn()
 const mockUseActivatingPolicies = jest.fn()
 let mockIsAuthenticated = true
 
@@ -35,19 +32,8 @@ jest.mock('@/store/api/gateway/spacePolicies', () => ({
   useSpacePoliciesGetPendingPoliciesV1Query: (...args: unknown[]) => mockPendingQuery(...args),
 }))
 
-jest.mock('@/store/api/gateway', () => ({
-  useGetPolicyTokenInfosQuery: (...args: unknown[]) => mockTokenInfosQuery(...args),
-}))
-
 jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
-}))
-
-jest.mock('@/hooks/useChains', () => ({
-  __esModule: true,
-  default: () => ({
-    configs: [{ chainId: '1', nativeCurrency: { symbol: 'ETH', decimals: 18, logoUri: 'https://logo/eth.png' } }],
-  }),
 }))
 
 const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
@@ -59,7 +45,6 @@ describe('useSpacePolicies', () => {
     mockUseCurrentSpaceId.mockReturnValue(SPACE_ID)
     mockPoliciesQuery.mockReturnValue(idle)
     mockPendingQuery.mockReturnValue(idle)
-    mockTokenInfosQuery.mockReturnValue(idle)
     mockUseActivatingPolicies.mockReturnValue([])
   })
 
@@ -126,22 +111,8 @@ describe('useSpacePolicies', () => {
     expect(result.current.policies).toHaveLength(1)
   })
 
-  it('should, when policies reference tokens, look their metadata up and stay loading until it is in', () => {
+  it('should, when active policies carry their token metadata, render the token with it', () => {
     mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
-    mockTokenInfosQuery.mockReturnValue({ ...idle, isLoading: true })
-
-    const { result } = renderHook(() => useSpacePolicies())
-
-    expect(mockTokenInfosQuery).toHaveBeenCalledWith({ tokens: [{ chainId: '1', address: MOCK_TOKENS.usdc.address }] })
-    expect(result.current.isLoading).toBe(true)
-  })
-
-  it('should, when the metadata is in, render the token with its symbol and decimals', () => {
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
-    mockTokenInfosQuery.mockReturnValue({
-      ...idle,
-      currentData: { [`1:${MOCK_TOKENS.usdc.address.toLowerCase()}`]: mockUsdcMetadata() },
-    })
 
     const { result } = renderHook(() => useSpacePolicies())
     const [policy] = result.current.policies
@@ -149,35 +120,6 @@ describe('useSpacePolicies', () => {
 
     expect(result.current.isLoading).toBe(false)
     expect(policy.data.spenders[0].allowances[0].token).toEqual(MOCK_TOKENS.usdc)
-  })
-
-  it('should, when an allowance is in the native currency, take it from the chain config without a lookup', () => {
-    const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
-    dto.data.spenders[0].allowances[0].tokenAddress = ZERO_ADDRESS
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [dto] })
-
-    const { result } = renderHook(() => useSpacePolicies())
-    const [policy] = result.current.policies
-    if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
-
-    expect(mockTokenInfosQuery).toHaveBeenCalledWith(skipToken)
-    expect(policy.data.spenders[0].allowances[0].token).toEqual({
-      address: ZERO_ADDRESS,
-      symbol: 'ETH',
-      decimals: 18,
-      logoUri: 'https://logo/eth.png',
-    })
-  })
-
-  it('should, when the space has only proposer grants, not look any token up', () => {
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockProposerDto()] })
-
-    const { result } = renderHook(() => useSpacePolicies())
-
-    expect(mockTokenInfosQuery).toHaveBeenCalledWith(skipToken)
-    expect(result.current.policies).toHaveLength(1)
-    expect(result.current.policies[0].type).toBe('proposer')
   })
 
   it('should ask for the pending spending limits of the space', () => {
@@ -252,25 +194,6 @@ describe('useSpacePolicies', () => {
   it('should, while pending rows load for the first time, show the active rows', () => {
     mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
     mockPendingQuery.mockReturnValue({ ...idle, isLoading: true, isFetching: true })
-
-    const { result } = renderHook(() => useSpacePolicies())
-
-    expect(result.current.isLoading).toBe(false)
-    expect(result.current.policies.map((policy) => policy.status)).toEqual(['active'])
-  })
-
-  it('should, while the tokens only a queued change uses load, show the active rows alone', () => {
-    const pendingDto = mockPendingDto()
-    const [addDelegate, setAllowance] = pendingDto.data.changes
-    if (setAllowance.kind !== 'set-allowance') throw new Error('expected a set-allowance')
-    pendingDto.data.changes = [addDelegate, { ...setAllowance, token: MOCK_TOKENS.usdt.address }]
-    mockPoliciesQuery.mockReturnValue({ ...idle, currentData: [mockSpendingLimitDto()] })
-    mockPendingQuery.mockReturnValue({ ...idle, currentData: [pendingDto] })
-    mockTokenInfosQuery.mockImplementation((arg: typeof skipToken | { tokens: { address: string }[] }) =>
-      arg !== skipToken && arg.tokens.some((token) => token.address === MOCK_TOKENS.usdt.address)
-        ? { ...idle, isLoading: true }
-        : idle,
-    )
 
     const { result } = renderHook(() => useSpacePolicies())
 

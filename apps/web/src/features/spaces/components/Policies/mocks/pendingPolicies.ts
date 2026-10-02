@@ -1,4 +1,4 @@
-import type { PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { NativeTokenMetadataDto, PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MOCK_SAFES } from './policies'
 
 /** Shaped like the CGW `policies/pending` response. */
@@ -24,6 +24,7 @@ export const mockPendingDto = (overrides: Partial<PendingPolicyDto> = {}): Pendi
         kind: 'set-allowance',
         delegate: PENDING_MOCK_DELEGATE,
         token: '0x0000000000000000000000000000000000000000',
+        tokenMetadata: mockEthMetadata(),
         amount: '100000000000000000',
         resetPeriodMinutes: 0,
       },
@@ -31,4 +32,14 @@ export const mockPendingDto = (overrides: Partial<PendingPolicyDto> = {}): Pendi
   },
   safe: MOCK_SAFES.treasury,
   ...overrides,
+})
+
+export const mockEthMetadata = (): NativeTokenMetadataDto => ({
+  type: 'NATIVE_TOKEN',
+  address: '0x0000000000000000000000000000000000000000',
+  symbol: 'ETH',
+  decimals: 18,
+  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  name: 'Ether',
+  trusted: true,
 })

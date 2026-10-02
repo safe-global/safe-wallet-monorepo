@@ -1,7 +1,6 @@
-import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { mockSpendingLimitDto } from '../../mocks/activePolicies'
-import { mockPendingDto, PENDING_MOCK_DELEGATE } from '../../mocks/pendingPolicies'
+import { mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
+import { mockEthMetadata, mockPendingDto, PENDING_MOCK_DELEGATE } from '../../mocks/pendingPolicies'
 import {
   MOCK_ADDRESSES,
   MOCK_TOKENS,
@@ -9,26 +8,17 @@ import {
   mockPendingPolicy,
   mockSpendingLimitPolicy,
 } from '../../mocks/policies'
-import type { PolicyTokenInfo } from '../../types'
-import { mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
+import { mapActivePolicies } from '../mapActivePolicies'
 import { getPendingTxId, isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 
-const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
-
-const resolveKnownTokens: ResolveTokenInfo = (_chainId, address) => {
-  if (sameAddress(address, ZERO_ADDRESS)) return ETH
-  if (sameAddress(address, MOCK_TOKENS.usdc.address)) return MOCK_TOKENS.usdc
-  return undefined
-}
-
-const activeRows = () => mapActivePolicies([mockSpendingLimitDto()], resolveKnownTokens)
+const activeRows = () => mapActivePolicies([mockSpendingLimitDto()])
 
 const withChanges = (changes: ReturnType<typeof mockPendingDto>['data']['changes']) =>
   mockPendingDto({ data: { ...mockPendingDto().data, changes } })
 
 describe('mapPendingPolicies', () => {
   it('should, when a queued tx adds a delegate with an allowance, render a pending creation', () => {
-    const [row] = mapPendingPolicies([mockPendingDto()], [], resolveKnownTokens)
+    const [row] = mapPendingPolicies([mockPendingDto()], [])
 
     expect(row).toMatchObject({
       status: 'pending',
@@ -43,7 +33,12 @@ describe('mapPendingPolicies', () => {
         spender: PENDING_MOCK_DELEGATE,
         allowances: [
           {
-            token: ETH,
+            token: {
+              address: ZERO_ADDRESS,
+              symbol: mockEthMetadata().symbol,
+              decimals: mockEthMetadata().decimals,
+              logoUri: mockEthMetadata().logoUri,
+            },
             amount: '100000000000000000',
             spent: '0',
             remaining: '100000000000000000',
@@ -59,7 +54,6 @@ describe('mapPendingPolicies', () => {
     const rows = mapPendingPolicies(
       [mockPendingDto(), mockPendingDto({ safeTxHash: '0xother', nonce: 3 })],
       activeRows(),
-      resolveKnownTokens,
     )
 
     expect(rows.map((row) => row.id)).toEqual([
@@ -77,13 +71,13 @@ describe('mapPendingPolicies', () => {
             kind: 'set-allowance',
             delegate: MOCK_ADDRESSES.alice.toLowerCase(),
             token: MOCK_TOKENS.usdc.address.toLowerCase(),
+            tokenMetadata: mockUsdcMetadata(),
             amount: '2000000000',
             resetPeriodMinutes: 43_200,
           },
         ]),
       ],
       active,
-      resolveKnownTokens,
     )
 
     expect(row.operation).toBe('update')
@@ -103,18 +97,19 @@ describe('mapPendingPolicies', () => {
             kind: 'reset-allowance',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
+            tokenMetadata: mockUsdcMetadata(),
           },
           {
             kind: 'set-allowance',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
+            tokenMetadata: mockUsdcMetadata(),
             amount: '2000000000',
             resetPeriodMinutes: 43_200,
           },
         ]),
       ],
       activeRows(),
-      resolveKnownTokens,
     )
 
     expect(row.operation).toBe('update')
@@ -131,12 +126,16 @@ describe('mapPendingPolicies', () => {
   it('should match the active policy on the enforcing module', () => {
     const active = activeRows()
     const dto = withChanges([
-      { kind: 'reset-allowance', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+      {
+        kind: 'reset-allowance',
+        delegate: MOCK_ADDRESSES.alice,
+        token: MOCK_TOKENS.usdc.address,
+        tokenMetadata: mockUsdcMetadata(),
+      },
     ])
     const [row] = mapPendingPolicies(
       [{ ...dto, data: { ...dto.data, module: '0x0000000000000000000000000000000000000001' } }],
       active,
-      resolveKnownTokens,
     )
 
     expect(row.data.spenders[0].allowances).toHaveLength(1)
@@ -151,11 +150,11 @@ describe('mapPendingPolicies', () => {
             kind: 'delete-allowance',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
+            tokenMetadata: mockUsdcMetadata(),
           },
         ]),
       ],
       active,
-      resolveKnownTokens,
     )
 
     expect(row.operation).toBe('remove')
@@ -166,7 +165,6 @@ describe('mapPendingPolicies', () => {
     const [row] = mapPendingPolicies(
       [withChanges([{ kind: 'remove-delegate', delegate: MOCK_ADDRESSES.alice, removeAllowances: true }])],
       activeRows(),
-      resolveKnownTokens,
     )
 
     expect(row.operation).toBe('remove')
@@ -181,18 +179,18 @@ describe('mapPendingPolicies', () => {
             kind: 'reset-allowance',
             delegate: MOCK_ADDRESSES.alice,
             token: MOCK_TOKENS.usdc.address,
+            tokenMetadata: mockUsdcMetadata(),
           },
         ]),
       ],
       activeRows(),
-      resolveKnownTokens,
     )
 
     expect(row.operation).toBe('update')
     expect(row.data.spenders[0].allowances[0]).toMatchObject({ spent: '0', remaining: '1500000000' })
   })
 
-  it('should, when a token is unknown, fall back to base units and a short address', () => {
+  it('should, when CGW could not resolve the token, fall back to base units and a short address', () => {
     const unknown = '0x1111111111111111111111111111111111111111'
     const [row] = mapPendingPolicies(
       [
@@ -201,20 +199,20 @@ describe('mapPendingPolicies', () => {
             kind: 'set-allowance',
             delegate: PENDING_MOCK_DELEGATE,
             token: unknown,
+            tokenMetadata: null,
             amount: '5',
             resetPeriodMinutes: 60,
           },
         ]),
       ],
       [],
-      resolveKnownTokens,
     )
 
     expect(row.data.spenders[0].allowances[0].token).toMatchObject({ address: unknown, decimals: 0 })
   })
 
   it('should, when a queued tx carries no changes, render no row', () => {
-    expect(mapPendingPolicies([withChanges([])], [], resolveKnownTokens)).toEqual([])
+    expect(mapPendingPolicies([withChanges([])], [])).toEqual([])
   })
 })
 
