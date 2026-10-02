@@ -15,13 +15,13 @@ import {
   ComboboxList,
   useComboboxAnchor,
 } from '@/components/ui/combobox'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
 import { matchesTokenQuery } from '../utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
+import DisabledTokenOption from './DisabledTokenOption'
 import { TokenGroupError, TokenGroupLoading } from './TokenGroupState'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -197,22 +197,7 @@ const TokenSelector = ({
                 <ComboboxCollection>
                   {(option: TokenOption) =>
                     disabledAddresses?.some((address) => sameAddress(address, option.address)) ? (
-                      <Tooltip key={option.address}>
-                        <TooltipTrigger
-                          render={
-                            <ComboboxItem
-                              value={option}
-                              disabled
-                              // The primitive drops pointer events on disabled items, which would keep the tooltip shut.
-                              className="data-[disabled]:pointer-events-auto"
-                              data-testid="token-option"
-                            />
-                          }
-                        >
-                          <TokenOptionRow option={option} />
-                        </TooltipTrigger>
-                        <TooltipContent>{disabledReason}</TooltipContent>
-                      </Tooltip>
+                      <DisabledTokenOption key={option.address} option={option} reason={disabledReason} />
                     ) : (
                       <ComboboxItem key={option.address} value={option} data-testid="token-option">
                         <TokenOptionRow option={option} />
