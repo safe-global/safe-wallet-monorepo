@@ -82,7 +82,8 @@ export const getTokensForDelegates = async (
     (result) => contract.interface.decodeFunctionResult('getTokens', result.returnData)[0] as string[],
   )
 
-  const spendingLimitRequests = delegates.flatMap((delegate, idx) => {
+  // `delegates` is an ethers Result, whose inherited flatMap turns an empty list into `[0]`.
+  const spendingLimitRequests = Array.from(delegates).flatMap((delegate, idx) => {
     const tokensForDelegate = tokens[idx]
     return tokensForDelegate.map((token) => ({
       delegate,
