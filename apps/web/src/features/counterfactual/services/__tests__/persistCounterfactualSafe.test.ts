@@ -1,4 +1,4 @@
-import { persistCounterfactualSafe } from '../persistCounterfactualSafe'
+import { addCounterfactualSafeToSpace, persistCounterfactualSafe } from '../persistCounterfactualSafe'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
@@ -399,31 +399,6 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
-  it('rolls back and fails the chain on a 400 limit rejection during multi-chain creation', async () => {
-    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
-    const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: { status: 400, data: { message: backendMessage } } }
-      return action
-    }) as unknown as AppDispatch
-
-    const result = await persistCounterfactualSafe({
-      ...baseArgs,
-      spaceId: MOCK_SPACE_UUID,
-      isUserAuthenticated: true,
-      isMultiChainCreation: true,
-      dispatch,
-    })
-
-    expect(userDeleteInitiate).toHaveBeenCalledWith({
-      deleteCounterfactualSafesDto: { safes: [{ chainId: '100', address: '0xSafe' }] },
-    })
-    expect(replayImpl).not.toHaveBeenCalled()
-    expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
-    )
-    expect(result).toEqual({ ok: false, error: expect.any(Error) })
-  })
-
   it('rolls back and fails when the space POST returns a non-limit 400 (e.g. validation error)', async () => {
     const backendMessage = 'Validation failed (uuid is expected)'
     const dispatch = jest.fn((action) => {
@@ -689,26 +664,6 @@ describe('persistCounterfactualSafe', () => {
     expect(result).toEqual({ ok: true })
   })
 
-  it('does not roll back a 402 during multi-chain creation (seats are per address, so no chain was left behind)', async () => {
-    const dispatch = jest.fn((action) => {
-      if (action.type === 'space-create-thunk') return { error: quotaExceeded(20) }
-      return action
-    }) as unknown as AppDispatch
-
-    const result = await persistCounterfactualSafe({
-      ...baseArgs,
-      spaceId: MOCK_SPACE_UUID,
-      isUserAuthenticated: true,
-      isMultiChainCreation: true,
-      spaceSafeLimit: 20,
-      dispatch,
-    })
-
-    expect(userDeleteInitiate).not.toHaveBeenCalled()
-    expect(replayImpl).toHaveBeenCalled()
-    expect(result).toEqual({ ok: true })
-  })
-
   it('falls back to the plan limit in the toast when the 402 body carries no quota', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'space-create-thunk') return { error: quotaExceeded() }
@@ -757,5 +712,133 @@ describe('persistCounterfactualSafe', () => {
     })
 
     expect(showNotificationImpl).not.toHaveBeenCalled()
+  })
+})
+
+describe('persistCounterfactualSafe with skipSpaceAdd', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    isSmartContractImpl.mockResolvedValue(false)
+  })
+
+  it('persists at the user level and leaves the Workspace add to the caller', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      skipSpaceAdd: true,
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
+    expect(result).toEqual({ ok: true })
+  })
+})
+
+describe('addCounterfactualSafeToSpace', () => {
+  const spaceArgs = {
+    spaceId: MOCK_SPACE_UUID,
+    safeAddress: '0xSafe',
+    chainIds: ['11155111', '137'],
+    isAdminOfActiveSpace: true,
+    spaceSafeLimit: 40,
+    isMultiChainCreation: true,
+  }
+  const batch = [
+    { chainId: '11155111', address: '0xSafe' },
+    { chainId: '137', address: '0xSafe' },
+  ]
+
+  const dispatchWith = (spaceError?: unknown, deleteError?: unknown) =>
+    jest.fn((action) => {
+      if (action.type === 'space-create-thunk' && spaceError) return { error: spaceError }
+      if (action.type === 'user-delete-thunk' && deleteError) return { error: deleteError }
+      return action
+    }) as unknown as AppDispatch
+
+  beforeEach(() => jest.clearAllMocks())
+
+  it('adds every chain to the Workspace in one request', async () => {
+    const result = await addCounterfactualSafeToSpace({ ...spaceArgs, dispatch: dispatchWith() })
+
+    expect(spaceInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID, createSpaceSafesDto: { safes: batch } })
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('reports a pending step-up without rolling back, so the one replay adds every chain', async () => {
+    const result = await addCounterfactualSafeToSpace({
+      ...spaceArgs,
+      dispatch: dispatchWith({ status: 403, data: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } }),
+    })
+
+    expect(spaceInitiate).toHaveBeenCalledTimes(1)
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(result).toEqual({ ok: false, error: expect.any(Error), stepUpPending: true })
+  })
+
+  it('skips the request with a toast when the user is not an admin', async () => {
+    const result = await addCounterfactualSafeToSpace({
+      ...spaceArgs,
+      isAdminOfActiveSpace: false,
+      dispatch: dispatchWith(),
+    })
+
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledTimes(1)
+    expect(showNotificationImpl).toHaveBeenCalledWith(expect.objectContaining({ groupKey: 'cf-safe-space-skipped' }))
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('skips the request with a toast at the seat limit', async () => {
+    const result = await addCounterfactualSafeToSpace({
+      ...spaceArgs,
+      spaceSafeCount: 40,
+      dispatch: dispatchWith(),
+    })
+
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledTimes(1)
+    expect(showNotificationImpl).toHaveBeenCalledWith(expect.objectContaining({ groupKey: 'cf-safe-space-limit' }))
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('keeps every chain in My accounts on a 402, since seats are per address', async () => {
+    const result = await addCounterfactualSafeToSpace({ ...spaceArgs, dispatch: dispatchWith(quotaExceeded(20)) })
+
+    expect(userDeleteInitiate).not.toHaveBeenCalled()
+    expect(showNotificationImpl).toHaveBeenCalledWith(expect.objectContaining({ groupKey: 'cf-safe-space-limit' }))
+    expect(result).toEqual({ ok: true })
+  })
+
+  it('rolls back every chain on a legacy 400 limit rejection', async () => {
+    const backendMessage = 'This space only allows a maximum of 40 safe accounts'
+    const result = await addCounterfactualSafeToSpace({
+      ...spaceArgs,
+      dispatch: dispatchWith({ status: 400, data: { message: backendMessage } }),
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalledWith({ deleteCounterfactualSafesDto: { safes: batch } })
+    expect(showNotificationImpl).toHaveBeenCalledWith(expect.objectContaining({ message: backendMessage }))
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+  })
+
+  it('rolls back every chain in one request and queues each when the rollback fails', async () => {
+    const result = await addCounterfactualSafeToSpace({
+      ...spaceArgs,
+      dispatch: dispatchWith({ status: 500 }, { status: 500 }),
+    })
+
+    expect(userDeleteInitiate).toHaveBeenCalledTimes(1)
+    expect(userDeleteInitiate).toHaveBeenCalledWith({ deleteCounterfactualSafesDto: { safes: batch } })
+    expect(enqueueImpl).toHaveBeenCalledWith(batch[0])
+    expect(enqueueImpl).toHaveBeenCalledWith(batch[1])
+    expect(result).toEqual({ ok: false, error: expect.any(Error) })
+    if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
   })
 })

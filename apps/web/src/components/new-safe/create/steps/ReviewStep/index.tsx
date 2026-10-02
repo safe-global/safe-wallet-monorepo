@@ -6,7 +6,9 @@ import {
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
   persistCounterfactualSafe,
+  addCounterfactualSafeToSpace,
 } from '@/features/counterfactual/services'
+import { removeUndeployedSafe } from '@/features/counterfactual/store'
 import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
 import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
 
@@ -295,11 +297,42 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
       }
 
-      const createSafeResults: CreateSafeResult[] = []
+      // One Workspace add for all networks: the step-up keeps one replay, so per-network adds would lose all but one.
+      const isBatchingSpaceAdd =
+        isMultiChainDeployment && isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater
+
+      let createSafeResults: CreateSafeResult[] = []
       for (const network of data.networks) {
         const { stepUpPending, ...result } = await createSafe(network, replayedSafeWithNonce, safeAddress)
         if (stepUpPending) isStepUpPending = true
         createSafeResults.push(result)
+      }
+
+      if (isBatchingSpaceAdd && spaceId) {
+        const spaceChains = createSafeResults.filter((r) => r.success && !r.alreadyDeployed)
+        if (spaceChains.length > 0) {
+          const spaceResult = await addCounterfactualSafeToSpace({
+            spaceId,
+            safeAddress,
+            chainIds: spaceChains.map((r) => r.chain.chainId),
+            isAdminOfActiveSpace,
+            spaceSafeCount,
+            spaceSafeLimit,
+            isMultiChainCreation: true,
+            dispatch,
+          })
+          if (!spaceResult.ok) {
+            if (spaceResult.stepUpPending) {
+              isStepUpPending = true
+            } else {
+              spaceChains.forEach((r) =>
+                dispatch(removeUndeployedSafe({ chainId: r.chain.chainId, address: safeAddress })),
+              )
+              setSubmitError(spaceResult.error.message)
+            }
+            createSafeResults = createSafeResults.map((r) => (spaceChains.includes(r) ? { ...r, success: false } : r))
+          }
+        }
       }
 
       // Update the addressbook with owners and Safe on all successfully created networks
@@ -397,7 +430,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isAdminOfActiveSpace,
           spaceSafeCount,
           spaceSafeLimit,
-          isMultiChainCreation: isMultiChainDeployment,
+          skipSpaceAdd: isMultiChainDeployment,
           provider,
           dispatch,
         })

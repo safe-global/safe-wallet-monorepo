@@ -39,12 +39,8 @@ type PersistArgs = {
   spaceSafeLimit: SafeLimit
   /** The Safe address is already in the space on another chain, so this add takes no new seat. */
   holdsSeatInSpace?: boolean
-  /** True when this call is one chain of a multi-chain creation batch. A legacy
-   *  limit rejection (400) then means the safe genuinely wasn't attached on this
-   *  chain, so we surface it as a failure (after rolling back the user-level
-   *  entry) instead of swallowing it as success. Single-create flows keep the
-   *  soft toast-and-succeed behavior. */
-  isMultiChainCreation?: boolean
+  /** The caller adds all its chains to the Workspace in one request via `addCounterfactualSafeToSpace`. */
+  skipSpaceAdd?: boolean
   /** Read-only provider for `chainId`, used to check the Safe isn't already
    *  deployed. Must target `chainId`; when absent the check is skipped. */
   provider?: JsonRpcProvider
@@ -79,7 +75,7 @@ export const persistCounterfactualSafe = async ({
   spaceSafeCount,
   spaceSafeLimit,
   holdsSeatInSpace,
-  isMultiChainCreation,
+  skipSpaceAdd,
   provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
@@ -118,90 +114,18 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    if (spaceId !== null) {
-      if (!isAdminOfActiveSpace) {
-        // Backend gates this endpoint on admin role and would 403. Inform the
-        // user — the safe is still persisted at the user level above.
-        dispatch(
-          showNotification({
-            variant: 'info',
-            groupKey: 'cf-safe-space-skipped',
-            message: 'Safe added to your accounts — ask an admin to add it to the Workspace',
-          }),
-        )
-      } else if (!holdsSeatInSpace && isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)) {
-        // The plan has no seat left, so the Safe stays in My accounts (the chooser said so upfront).
-        dispatch(
-          showNotification({
-            variant: 'info',
-            groupKey: 'cf-safe-space-limit',
-            message: seatLimitMessage(spaceSafeLimit),
-          }),
-        )
-      } else {
-        const spaceResult = await dispatch(
-          spacesApi.endpoints.spaceSafesCreateV1.initiate({
-            spaceId,
-            createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
-          }),
-        )
-        if ('error' in spaceResult) {
-          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
-          if (isElevationRequiredError(spaceResult.error)) {
-            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
-          }
-          // Stale cached count (another admin filled the seats); seats are per address, so a 402 never splits a batch.
-          const quotaExceeded = getQuotaExceeded(spaceResult.error)
-          if (quotaExceeded) {
-            dispatch(
-              showNotification({
-                variant: 'info',
-                groupKey: 'cf-safe-space-limit',
-                message: seatLimitMessage(quotaExceeded.quota ?? spaceSafeLimit),
-              }),
-            )
-          } else if (isLimitRejection(spaceResult.error)) {
-            // Legacy 400 from a space without a plan: the static cap counts rows, not seats.
-            dispatch(
-              showNotification({
-                variant: 'info',
-                groupKey: 'cf-safe-space-limit',
-                message: toSpaceError(spaceResult.error).message,
-              }),
-            )
-            // In a multi-chain batch the safe genuinely wasn't attached on this
-            // chain. Roll back the user-level entry and report failure so the
-            // caller doesn't record this chain as successfully created.
-            if (isMultiChainCreation) {
-              const rollbackResult = await dispatch(
-                counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-                  deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-                }),
-              )
-              if ('error' in rollbackResult) {
-                dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
-              }
-              return { ok: false, error: toSpaceError(spaceResult.error) }
-            }
-          } else {
-            // Roll back the user-level entry so the backend doesn't end up with
-            // a safe that the user "created" but failed to associate with their
-            // active space.
-            const rollbackResult = await dispatch(
-              counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
-                deleteCounterfactualSafesDto: { safes: [{ chainId, address: safeAddress }] },
-              }),
-            )
-            if ('error' in rollbackResult) {
-              // Rollback also failed — orphan now exists server-side. Queue the
-              // cleanup so the next sign-in's sync flushes it, otherwise the GET
-              // would re-surface the orphan locally as "Not activated".
-              dispatch(enqueuePendingCfDelete({ chainId, address: safeAddress }))
-            }
-            return { ok: false, error: toSpaceError(spaceResult.error) }
-          }
-        }
-      }
+    if (spaceId !== null && !skipSpaceAdd) {
+      const spaceResult = await addCounterfactualSafeToSpace({
+        spaceId,
+        safeAddress,
+        chainIds: [chainId],
+        isAdminOfActiveSpace,
+        spaceSafeCount,
+        spaceSafeLimit,
+        holdsSeatInSpace,
+        dispatch,
+      })
+      if (!spaceResult.ok) return spaceResult
     }
   }
 
@@ -212,6 +136,110 @@ export const persistCounterfactualSafe = async ({
   return { ok: true }
 }
 
+type SpaceAddArgs = Pick<
+  PersistArgs,
+  'safeAddress' | 'isAdminOfActiveSpace' | 'spaceSafeCount' | 'spaceSafeLimit' | 'holdsSeatInSpace' | 'dispatch'
+> & {
+  spaceId: string
+  /** Chains whose user-level counterfactual entry already exists; on failure they are rolled back together. */
+  chainIds: string[]
+  /** A legacy limit rejection (400) then fails and rolls back instead of toast-and-succeed. */
+  isMultiChainCreation?: boolean
+}
+
+/** One request for all chains, so a step-up rejection saves one replay that covers every chain. */
+export const addCounterfactualSafeToSpace = async ({
+  spaceId,
+  safeAddress,
+  chainIds,
+  isAdminOfActiveSpace,
+  spaceSafeCount,
+  spaceSafeLimit,
+  holdsSeatInSpace,
+  isMultiChainCreation,
+  dispatch,
+}: SpaceAddArgs): Promise<PersistResult> => {
+  const safes = chainIds.map((chainId) => ({ chainId, address: safeAddress }))
+
+  const rollback = async () => {
+    const rollbackResult = await dispatch(
+      counterfactualSafesApi.endpoints.counterfactualSafesDeleteV1.initiate({
+        deleteCounterfactualSafesDto: { safes },
+      }),
+    )
+    if ('error' in rollbackResult) {
+      // Rollback also failed — orphan now exists server-side. Queue the
+      // cleanup so the next sign-in's sync flushes it, otherwise the GET
+      // would re-surface the orphan locally as "Not activated".
+      safes.forEach((safe) => dispatch(enqueuePendingCfDelete(safe)))
+    }
+  }
+
+  if (!isAdminOfActiveSpace) {
+    // Backend gates this endpoint on admin role and would 403. Inform the
+    // user — the safe is still persisted at the user level above.
+    dispatch(
+      showNotification({
+        variant: 'info',
+        groupKey: 'cf-safe-space-skipped',
+        message: 'Safe added to your accounts — ask an admin to add it to the Workspace',
+      }),
+    )
+    return { ok: true }
+  }
+
+  if (!holdsSeatInSpace && isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)) {
+    // The plan has no seat left, so the Safe stays in My accounts (the chooser said so upfront).
+    dispatch(
+      showNotification({
+        variant: 'info',
+        groupKey: 'cf-safe-space-limit',
+        message: seatLimitMessage(spaceSafeLimit),
+      }),
+    )
+    return { ok: true }
+  }
+
+  const spaceResult = await dispatch(
+    spacesApi.endpoints.spaceSafesCreateV1.initiate({ spaceId, createSpaceSafesDto: { safes } }),
+  )
+  if (!('error' in spaceResult)) return { ok: true }
+
+  // The user-level entry stays, so the replay after verification attaches a Safe that exists.
+  if (isElevationRequiredError(spaceResult.error)) {
+    return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
+  }
+
+  // Stale cached count (another admin filled the seats); seats are per address, so a 402 never splits a batch.
+  const quotaExceeded = getQuotaExceeded(spaceResult.error)
+  if (quotaExceeded) {
+    dispatch(
+      showNotification({
+        variant: 'info',
+        groupKey: 'cf-safe-space-limit',
+        message: seatLimitMessage(quotaExceeded.quota ?? spaceSafeLimit),
+      }),
+    )
+    return { ok: true }
+  }
+
+  if (isLimitRejection(spaceResult.error)) {
+    // Legacy 400 from a space without a plan: the static cap counts rows, not seats.
+    dispatch(
+      showNotification({
+        variant: 'info',
+        groupKey: 'cf-safe-space-limit',
+        message: toSpaceError(spaceResult.error).message,
+      }),
+    )
+    // Single-create keeps the soft toast-and-succeed behaviour; a multi-chain batch genuinely wasn't attached.
+    if (!isMultiChainCreation) return { ok: true }
+  }
+
+  // Roll back so the backend doesn't keep a Safe the user "created" but couldn't add to their Workspace.
+  await rollback()
+  return { ok: false, error: toSpaceError(spaceResult.error) }
+}
 /**
  * The Safe is already deployed, so store it as a regular deployed Safe in My
  * accounts (not counterfactual, which shows "Not activated") and drop any stale

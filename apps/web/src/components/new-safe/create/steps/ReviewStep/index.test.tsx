@@ -11,6 +11,7 @@ import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
 import * as cfServices from '@/features/counterfactual/services'
+import * as cfStore from '@/features/counterfactual/store'
 import * as multichain from '@/features/multichain'
 import * as createLogic from '@/components/new-safe/create/logic'
 import * as web3 from '@/hooks/wallets/web3'
@@ -650,6 +651,112 @@ describe('ReviewStep', () => {
       })
 
       expect(persistSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null }))
+    })
+  })
+
+  describe('multi-network Pay later in a Workspace', () => {
+    const inSpace = { initialReduxState: authReduxState, routerProps: { query: { spaceId: MOCK_SPACE_UUID } } }
+    const safeAddress = '0x0000000000000000000000000000000000000001'
+
+    beforeEach(() => window.localStorage.clear())
+
+    const mockCreation = (networks: Chain[]) => {
+      mockUseIsAdmin.mockReturnValue(true)
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(networks[0])
+      jest.spyOn(useWallet, 'default').mockReturnValue({ provider: {} } as unknown as ConnectedWallet)
+      jest
+        .spyOn(createLogic, 'createNewUndeployedSafeWithoutSalt')
+        .mockReturnValue({ safeAccountConfig: { owners: ['0x1'], threshold: 1 } } as unknown as ReplayedSafeProps)
+      jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue({} as ReturnType<typeof web3.createWeb3ReadOnly>)
+      jest.spyOn(multichain, 'predictAddressBasedOnReplayData').mockResolvedValue(safeAddress)
+      return {
+        persistSpy: jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true }),
+        spaceAddSpy: jest.spyOn(cfServices, 'addCounterfactualSafeToSpace').mockResolvedValue({ ok: true }),
+      }
+    }
+
+    const clickCreate = async (data: NewSafeFormData, push = jest.fn(() => Promise.resolve(true))) => {
+      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+      return push
+    }
+
+    it('adds the Safe to the Workspace on every network in one request', async () => {
+      const data = buildMultiChainData()
+      const { persistSpy, spaceAddSpy } = mockCreation(data.networks)
+
+      const push = await clickCreate(data)
+
+      expect(persistSpy).toHaveBeenCalledTimes(2)
+      expect(persistSpy).toHaveBeenCalledWith(expect.objectContaining({ spaceId: MOCK_SPACE_UUID, skipSpaceAdd: true }))
+      expect(spaceAddSpy).toHaveBeenCalledTimes(1)
+      expect(spaceAddSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          spaceId: MOCK_SPACE_UUID,
+          safeAddress,
+          chainIds: ['100', '1'],
+          isMultiChainCreation: true,
+        }),
+      )
+      expect(push).toHaveBeenCalledTimes(1)
+    })
+
+    it('leaves already-deployed networks out of the Workspace add', async () => {
+      const data = buildMultiChainData()
+      const { persistSpy, spaceAddSpy } = mockCreation(data.networks)
+      persistSpy.mockResolvedValueOnce({ ok: true, skipped: 'already-deployed' })
+
+      await clickCreate(data)
+
+      expect(spaceAddSpy).toHaveBeenCalledWith(expect.objectContaining({ chainIds: ['1'] }))
+    })
+
+    it('hands over to the step-up once, keeping the Safes and the return URL', async () => {
+      const data = buildMultiChainData()
+      const { spaceAddSpy } = mockCreation(data.networks)
+      spaceAddSpy.mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const removeSpy = jest.spyOn(cfStore, 'removeUndeployedSafe')
+
+      const push = await clickCreate(data)
+
+      expect(spaceAddSpy).toHaveBeenCalledTimes(1)
+      expect(push).not.toHaveBeenCalled()
+      expect(getStoreInstance().getState().stepUp.returnUrl).toContain(`spaceId=${MOCK_SPACE_UUID}`)
+      expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+      expect(removeSpy).not.toHaveBeenCalled()
+    })
+
+    it('shows the error and drops the local Safes when the Workspace add fails', async () => {
+      const data = buildMultiChainData()
+      const { spaceAddSpy } = mockCreation(data.networks)
+      spaceAddSpy.mockResolvedValue({ ok: false, error: new Error('Failed to add Safe account to Workspace') })
+      const removeSpy = jest.spyOn(cfStore, 'removeUndeployedSafe')
+
+      const push = await clickCreate(data)
+
+      expect(push).not.toHaveBeenCalled()
+      expect(screen.getByText('Failed to add Safe account to Workspace')).toBeInTheDocument()
+      expect(removeSpy).toHaveBeenCalledWith({ chainId: '100', address: safeAddress })
+      expect(removeSpy).toHaveBeenCalledWith({ chainId: '1', address: safeAddress })
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+    })
+
+    it('keeps the per-network Workspace add for a single network', async () => {
+      const data = { ...buildMultiChainData(), networks: buildMultiChainData().networks.slice(0, 1) }
+      const { persistSpy, spaceAddSpy } = mockCreation(data.networks)
+
+      await clickCreate(data)
+
+      expect(persistSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: MOCK_SPACE_UUID, skipSpaceAdd: false }),
+      )
+      expect(spaceAddSpy).not.toHaveBeenCalled()
     })
   })
 })
