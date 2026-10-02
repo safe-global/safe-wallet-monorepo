@@ -1,9 +1,8 @@
-import type { ReactElement } from 'react'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeDisplayInfo } from '@/components/common/AccountRow'
-import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { TxModalContext } from '@/components/tx-flow'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import { ContactSource, useMergedAddressBooks, type ExtendedContact } from '@/hooks/useAllAddressBooks'
@@ -35,24 +34,6 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: jest.fn(),
   useCurrentChain: jest.fn(),
   useHasFeature: jest.fn(() => false),
-}))
-jest.mock('@/components/tx-flow/flows', () => ({
-  ConfirmTxFlow: ({ txSummary }: { txSummary: Transaction }) => (
-    <div data-testid="confirm-tx-flow" data-tx-id={txSummary.id} />
-  ),
-}))
-jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
-  SafeScopeProvider: ({
-    initial,
-    children,
-  }: {
-    initial?: { chainId: string; safeAddress: string }
-    children: ReactElement
-  }) => (
-    <div data-testid="safe-scope" data-scope={initial ? `${initial.chainId}:${initial.safeAddress}` : ''}>
-      {children}
-    </div>
-  ),
 }))
 // Stubbed wholesale rather than with `requireActual`: this module sits in the spaces barrel import
 // cycle, and pulling the real one in from a mock factory dies on its own TDZ.
@@ -208,20 +189,13 @@ describe('a pending spending limit', () => {
   const pending = mockPendingPolicy()
   const txSummary = { id: getPendingTxId(pending) } as Transaction
   const chain = chainBuilder().with({ chainId: pending.safe.chainId }).build()
-  const setTxFlow = jest.fn()
   const connectWallet = jest.fn()
 
   const mockPendingTx = (tx: Partial<PendingPolicyTransaction>) =>
     mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], ...tx })
 
-  const withTxModal = (ui: ReactElement, txFlow?: ReactElement) => (
-    <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth: jest.fn() }}>{ui}</TxModalContext.Provider>
-  )
-
   const renderPending = (policy: PendingSpendingLimitPolicy = pending, isUnlisted?: boolean) =>
-    renderWithUserEvent(
-      withTxModal(<SpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={jest.fn()} />),
-    )
+    renderWithUserEvent(<SpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={jest.fn()} />)
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -230,34 +204,43 @@ describe('a pending spending limit', () => {
     mockUseConnectWallet.mockReturnValue(connectWallet)
   })
 
-  it('offers a signer who has not signed to review, and hands the transaction to the tx flow for its Safe', async () => {
+  const SPACE_ID = '9f3c1a2b-4d5e-4f60-8a7b-1c2d3e4f5a6b'
+
+  const renderInSpace = (policy: PendingSpendingLimitPolicy = pending) =>
+    render(<SpendingLimitDetails policy={policy} onClose={jest.fn()} />, {
+      routerProps: { query: { spaceId: SPACE_ID } },
+    })
+
+  const expectReviewLinkToQueuedTx = () => {
+    const href = screen.getByRole('link', { name: 'Review transaction' }).getAttribute('href')
+    const url = new URL(href ?? '', window.location.origin)
+
+    expect(url.pathname).toBe(AppRoutes.transactions.tx)
+    expect(Object.fromEntries(url.searchParams)).toEqual({
+      id: getPendingTxId(pending),
+      safe: `${chain.shortName}:${pending.safe.address}`,
+      spaceId: SPACE_ID,
+    })
+  }
+
+  it('links a signer who has not signed to the transaction in the Safe queue', () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
     mockPendingTx({ txSummary })
 
-    const { user } = renderPending()
-    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+    renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
 
-    expect(setTxFlow).toHaveBeenCalledTimes(1)
-    render(setTxFlow.mock.calls[0][0])
-    expect(screen.getByTestId('safe-scope')).toHaveAttribute(
-      'data-scope',
-      `${pending.safe.chainId}:${pending.safe.address}`,
-    )
-    expect(screen.getByTestId('confirm-tx-flow')).toHaveAttribute('data-tx-id', txSummary.id)
+    expectReviewLinkToQueuedTx()
   })
 
-  it('steps aside while the tx flow is open, and comes back once it closes', async () => {
+  it('links anyone to the queue to execute a fully signed transaction', () => {
     mockWallet()
-    mockSpaceSafes(false, pending.safe)
-    mockPendingTx({ txSummary })
+    mockSpaceSafes(true, pending.safe)
+    mockPendingTx({ txSummary, confirmationsSubmitted: 2 })
 
-    const { rerender } = renderPending()
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />, <div />))
-    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument())
+    renderInSpace(mockPendingPolicy({ confirmationsSubmitted: 2, confirmationsRequired: 2 }))
 
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />))
-    expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    expectReviewLinkToQueuedTx()
   })
 
   it('offers a signer who already signed the link to share instead', () => {
@@ -281,13 +264,12 @@ describe('a pending spending limit', () => {
     expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
   })
 
-  it('copies a link that opens the transaction on its Safe', async () => {
+  it('copies a link that opens the transaction on its Safe, without the Space', async () => {
     mockWallet()
     mockSpaceSafes(true, pending.safe)
     mockPendingTx({ txSummary })
 
-    renderPending()
-    // After render: user-event installs its own clipboard stub on setup.
+    renderInSpace()
     const writeText = mockClipboard()
     act(() => {
       screen.getByRole('button', { name: 'Copy transaction link' }).click()
@@ -311,6 +293,17 @@ describe('a pending spending limit', () => {
     expect(screen.queryByText(/Sign and execute/)).not.toBeInTheDocument()
   })
 
+  it('keeps Review transaction disabled until the chain configs have loaded', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+    mockUseChain.mockReturnValue(undefined)
+
+    renderPending()
+
+    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeDisabled()
+  })
+
   it('offers to try again when the transaction could not be loaded', async () => {
     mockWallet()
     mockSpaceSafes(false, pending.safe)
@@ -322,6 +315,20 @@ describe('a pending spending limit', () => {
 
     expect(screen.getByText("The transaction couldn't be loaded.")).toBeInTheDocument()
     expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('hides the panel while a transaction flow is open, so its overlay does not cover the flow', () => {
+    mockWallet()
+    mockSpaceSafes(false, pending.safe)
+    mockPendingTx({ txSummary })
+
+    render(
+      <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+        <SpendingLimitDetails policy={pending} onClose={jest.fn()} />
+      </TxModalContext.Provider>,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('stops offering Review once the row has left the list, until it learns why', () => {
@@ -345,9 +352,9 @@ describe('a pending spending limit', () => {
     expect(connectWallet).toHaveBeenCalledTimes(1)
 
     mockWallet()
-    rerender(withTxModal(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />))
+    rerender(<SpendingLimitDetails policy={pending} onClose={jest.fn()} />)
 
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
   })
 
   it('reports a replaced transaction instead of offering a CTA that would fail', () => {
