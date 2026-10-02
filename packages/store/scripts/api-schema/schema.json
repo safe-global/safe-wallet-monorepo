@@ -3159,6 +3159,38 @@
         ]
       }
     },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, one entry per space with its Safes grouped by chain like the per-space endpoint. A space without Safes has an empty `safes` object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpacesSafesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members/invite": {
       "post": {
         "description": "Invites one or more users to join a space. Only space admins can send invitations.",
@@ -4185,6 +4217,38 @@
         "summary": "Submit a survey response for a space",
         "tags": [
           "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/entitlements": {
+      "get": {
+        "description": "The entitlements of every workspace the user is an active member of, keyed by workspace UUID. Each value is what the per-workspace endpoint returns.",
+        "operationId": "entitlementsGetAllEntitlementsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EntitlementsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get entitlements of all spaces",
+        "tags": [
+          "entitlements"
         ]
       }
     },
@@ -7251,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-615683f",
+    "version": "main-ecb600a",
     "contact": {}
   },
   "tags": [],
@@ -11067,6 +11131,33 @@
         },
         "required": [
           "safes"
+        ]
+      },
+      "GetSpacesSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          }
+        },
+        "required": [
+          "safes",
+          "spaceUuid"
         ]
       },
       "GetSpaceSafeResponse": {
