@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
-import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
+import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
+import { isSafeAccountGroup, type SafeAccountOption } from '../../../SafeAccountSelector/types'
 import { useEligibleSafeAccounts } from '../../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { useSpendingLimitSafeAccounts } from '../useSpendingLimitSafeAccounts'
 
@@ -8,45 +8,127 @@ jest.mock('../../../SafeAccountSelector/hooks/useEligibleSafeAccounts', () => ({
   useEligibleSafeAccounts: jest.fn(),
 }))
 
-// Sepolia and Polygon have an AllowanceModule deployment; chain 999999 does not exist.
+const mockConfigs = jest.fn()
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({
-    configs: [
-      { chainId: '11155111', chainName: 'Sepolia', shortName: 'sep', features: ['SPENDING_LIMIT'] },
-      { chainId: '137', chainName: 'Polygon', shortName: 'matic', features: [] },
-      { chainId: '999999', chainName: 'Nowhere', shortName: 'nowhere', features: ['SPENDING_LIMIT'] },
-    ],
-  }),
+  default: () => ({ configs: mockConfigs() }),
 }))
 
 const mockUseEligibleSafeAccounts = useEligibleSafeAccounts as jest.MockedFunction<typeof useEligibleSafeAccounts>
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
+const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'
 
-const option = (chainId: string): SafeAccountOption => ({
-  id: buildSafeAccountId(chainId, SAFE_A),
+const SEPOLIA = '11155111'
+const POLYGON = '137'
+const NOWHERE = '999999'
+
+// Sepolia and Polygon have an AllowanceModule deployment; chain 999999 does not exist.
+const CHAINS = [
+  {
+    chainId: SEPOLIA,
+    chainName: 'Sepolia',
+    shortName: 'sep',
+    features: ['SPENDING_LIMIT', 'POLICY_INDEXER_SPENDING_LIMIT'],
+  },
+  { chainId: POLYGON, chainName: 'Polygon', shortName: 'matic', features: ['SPENDING_LIMIT'] },
+  {
+    chainId: NOWHERE,
+    chainName: 'Nowhere',
+    shortName: 'nowhere',
+    features: ['SPENDING_LIMIT', 'POLICY_INDEXER_SPENDING_LIMIT'],
+  },
+  { chainId: '1', chainName: 'Ethereum', shortName: 'eth', features: [] },
+]
+
+const option = (chainId: string, address = SAFE_A, extra: Partial<SafeAccountOption> = {}): SafeAccountOption => ({
+  id: buildSafeAccountId(chainId, address),
   chainId,
-  address: SAFE_A,
+  address,
   eligibility: 'signer',
+  chain: { chainId, chainName: chainId, chainLogoUri: null, shortName: chainId },
+  ...extra,
 })
+
+const eligible = (accounts: SafeAccountOption[]) =>
+  mockUseEligibleSafeAccounts.mockReturnValue({
+    accounts: groupSafeAccounts(accounts),
+    isLoading: false,
+    isError: false,
+    hasWallet: true,
+    signersOnly: false,
+    refetch: jest.fn(),
+  })
+
+const reasons = (entries: ReturnType<typeof useSpendingLimitSafeAccounts>['accounts']) =>
+  entries
+    .flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
+    .map((account) => [account.chainId, account.ineligibleReason])
 
 describe('useSpendingLimitSafeAccounts', () => {
   beforeEach(() => {
-    mockUseEligibleSafeAccounts.mockReturnValue({
-      accounts: [option('11155111'), option('137'), option('999999')].map((account) => ({ ...account })),
-      isLoading: false,
-      isError: false,
-      hasWallet: true,
-      signersOnly: false,
-      refetch: jest.fn(),
-    })
+    mockConfigs.mockReturnValue(CHAINS)
   })
 
-  it('keeps Safes on chains with the spending-limit feature and a known module deployment only', () => {
+  it('hides Safes on chains without the spending-limit feature or a module deployment', () => {
+    eligible([option(SEPOLIA), option('1', SAFE_B), option(NOWHERE, SAFE_B)])
+
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
-    expect(result.current.accounts.map((entry) => ('chainId' in entry ? entry.chainId : 'group'))).toEqual(['11155111'])
+    expect(reasons(result.current.accounts)).toEqual([[SEPOLIA, undefined]])
+  })
+
+  it('keeps but disables Safes on chains the Policy Indexer does not index', () => {
+    eligible([option(SEPOLIA), option(POLYGON, SAFE_B)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(reasons(result.current.accounts)).toEqual([
+      [SEPOLIA, undefined],
+      [POLYGON, 'unsupported-chain'],
+    ])
+  })
+
+  it('keeps a multichain Safe grouped with only its unindexed chains disabled', () => {
+    eligible([option(SEPOLIA), option(POLYGON), option('1')])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    const [group] = result.current.accounts
+    expect(isSafeAccountGroup(group)).toBe(true)
+    expect(reasons([group])).toEqual([
+      [SEPOLIA, undefined],
+      [POLYGON, 'unsupported-chain'],
+    ])
+  })
+
+  it('keeps a group whose every chain is unindexed, with every row disabled', () => {
+    mockConfigs.mockReturnValue(CHAINS.map((chain) => ({ ...chain, features: ['SPENDING_LIMIT'] })))
+    eligible([option(SEPOLIA), option(POLYGON)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    const [group] = result.current.accounts
+    expect(isSafeAccountGroup(group)).toBe(true)
+    expect(reasons([group]).every(([, reason]) => reason === 'unsupported-chain')).toBe(true)
+  })
+
+  it('lets the network reason win over not-activated', () => {
+    eligible([option(POLYGON, SAFE_A, { ineligibleReason: 'not-activated' })])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(reasons(result.current.accounts)).toEqual([[POLYGON, 'unsupported-chain']])
+  })
+
+  it('returns no accounts while the chain configs are still empty', () => {
+    mockConfigs.mockReturnValue([])
+    eligible([option(SEPOLIA)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(result.current.accounts).toEqual([])
   })
 
   it('passes the loading, error and wallet state through', () => {
