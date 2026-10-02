@@ -24,32 +24,30 @@ describe('formatResetUtc', () => {
 })
 
 describe('formatLastUpdated', () => {
-  const at = (createdAt?: number) => ({ ...usdc, createdAt })
-
   // The suite runs under TZ=CET, so a local-time formatter would render 05:35.
   it('renders the time in UTC regardless of the local zone', () => {
-    expect(formatLastUpdated([{ spender: '0x1', allowances: [at(1_782_272_100)] }])).toBe('Jun 24, 2026 · 03:35 UTC')
+    expect(formatLastUpdated([{ allowances: [{ createdAt: 1_782_272_100 }] }])).toBe('Jun 24, 2026 · 03:35 UTC')
   })
 
   it('takes the latest allowance set across every spender', () => {
     const spenders = [
-      { spender: '0x1', allowances: [at(1_782_272_100), at(1_782_316_800)] },
-      { spender: '0x2', allowances: [at(1_782_400_000)] },
+      { allowances: [{ createdAt: 1_782_272_100 }, { createdAt: 1_782_316_800 }] },
+      { allowances: [{ createdAt: 1_782_400_000 }] },
     ]
 
     expect(formatLastUpdated(spenders)).toBe('Jun 25, 2026 · 15:06 UTC')
   })
 
   it('uses a 24-hour clock rather than rendering midnight as 24:00', () => {
-    expect(formatLastUpdated([{ spender: '0x1', allowances: [at(1_782_259_200)] }])).toBe('Jun 24, 2026 · 00:00 UTC')
+    expect(formatLastUpdated([{ allowances: [{ createdAt: 1_782_259_200 }] }])).toBe('Jun 24, 2026 · 00:00 UTC')
   })
 
   it('returns nothing when no allowance carries a timestamp', () => {
-    expect(formatLastUpdated([{ spender: '0x1', allowances: [at()] }])).toBeUndefined()
+    expect(formatLastUpdated([{ allowances: [{}] }])).toBeUndefined()
   })
 
   it('treats a zero timestamp as missing rather than rendering 1970', () => {
-    expect(formatLastUpdated([{ spender: '0x1', allowances: [at(0)] }])).toBeUndefined()
+    expect(formatLastUpdated([{ allowances: [{ createdAt: 0 }] }])).toBeUndefined()
   })
 })
 

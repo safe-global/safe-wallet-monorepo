@@ -384,7 +384,7 @@ describe('a pending spending limit', () => {
     expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
-  // Pending edits carry the active allowance's createdAt, so only the status keeps it off the panel.
+  // Only a queued removal carries the active allowance's createdAt, so it is the case that tests the status check.
   it.each([
     ['a queued creation', mockPendingPolicy()],
     ['a queued update', mockPendingUpdate()],

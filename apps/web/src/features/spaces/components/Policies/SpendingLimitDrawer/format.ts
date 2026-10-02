@@ -1,4 +1,4 @@
-import type { PolicyAllowance, PolicySpender } from '../types'
+import type { PolicyAllowance } from '../types'
 import { formatTokenAmount, getResetPeriodLabel } from '../utils/policyLabel'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
@@ -31,7 +31,9 @@ export const formatResetUtc = (resetsAtMinute: number): string => {
 const MS_PER_SECOND = 1_000
 
 /** `Jun 24, 2026 · 03:35 UTC`, from the latest allowance (re-)set. `updatedAt` is skipped: spending bumps it too. */
-export const formatLastUpdated = (spenders: PolicySpender[]): string | undefined => {
+export const formatLastUpdated = (
+  spenders: { allowances: Pick<PolicyAllowance, 'createdAt'>[] }[],
+): string | undefined => {
   const createdAts = spenders.flatMap(({ allowances }) =>
     allowances.flatMap(({ createdAt }) => (createdAt != null && createdAt > 0 ? [createdAt] : [])),
   )
