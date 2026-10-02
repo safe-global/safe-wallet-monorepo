@@ -44,18 +44,18 @@
     "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
   },
   "devDependencies": {
-    "@storybook/builder-webpack5": "^10.2.6",
-    "@storybook/react": "^10.2.6",
+    "@storybook/builder-webpack5": "^10.6.0",
+    "@storybook/react": "^10.6.0",
     "@typescript/native": "npm:typescript@7.0.2",
-    "ajv": "^8.18.0",
+    "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
     "husky": "^9.1.6",
     "knip": "^5.0.0",
     "lint-staged": "^16.2.7",
     "msw": "^2.7.3",
-    "prettier": "^3.6.2",
-    "storybook": "^10.2.7",
-    "turbo": "^2.9.14"
+    "prettier": "^3.9.9",
+    "storybook": "^10.6.0",
+    "turbo": "^2.11.3"
   },
   "dependenciesMeta": {
     "cypress": {

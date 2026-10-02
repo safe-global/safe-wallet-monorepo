@@ -20,10 +20,11 @@ type LedgerHashState = string | undefined
 ```
 
 **State Values**:
-| Value | Meaning | UI Behavior |
-|-------|---------|-------------|
-| `undefined` | No dialog to show | Dialog is hidden |
-| `"0x..."` | Transaction hash | Dialog is visible, displays hash |
+
+| Value       | Meaning           | UI Behavior                      |
+| ----------- | ----------------- | -------------------------------- |
+| `undefined` | No dialog to show | Dialog is hidden                 |
+| `"0x..."`   | Transaction hash  | Dialog is visible, displays hash |
 
 **State Transitions**:
 
@@ -95,15 +96,17 @@ undefined ───────────────────────�
 **Persistence**: None (in-memory only, resets on page reload)
 
 **Properties**:
-| Property | Type | Description |
-|----------|------|-------------|
-| state | `string \| undefined` | Current hash to display or undefined |
+
+| Property | Type                  | Description                          |
+| -------- | --------------------- | ------------------------------------ |
+| state    | `string \| undefined` | Current hash to display or undefined |
 
 **Methods**:
-| Method | Parameters | Returns | Description |
-|--------|------------|---------|-------------|
-| useStore | none | `string \| undefined` | React hook to subscribe to state |
-| setStore | `value: string \| undefined` | `void` | Update state (internal) |
+
+| Method   | Parameters                   | Returns               | Description                      |
+| -------- | ---------------------------- | --------------------- | -------------------------------- |
+| useStore | none                         | `string \| undefined` | React hook to subscribe to state |
+| setStore | `value: string \| undefined` | `void`                | Update state (internal)          |
 
 ### LedgerHashComparison Component
 

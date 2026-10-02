@@ -156,8 +156,7 @@ export const makeEndpoint = (config: RpcConfig) => {
 
   const handler = http.post(config.url, async ({ request }) => {
     const body = (await request.json()) as
-      | { id: number; method: string; params: unknown[] }
-      | Array<{ id: number; method: string; params: unknown[] }>
+      { id: number; method: string; params: unknown[] } | Array<{ id: number; method: string; params: unknown[] }>
     const calls = Array.isArray(body) ? body : [body]
     const response = Array.isArray(body) ? body.map(respondOne) : respondOne(body)
     if (config.gateLogs && calls.some((call) => call.method === 'eth_getLogs')) {

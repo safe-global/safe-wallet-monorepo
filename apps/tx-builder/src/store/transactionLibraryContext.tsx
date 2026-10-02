@@ -287,15 +287,13 @@ const generateBatchFile = ({
 }
 
 const convertToBatchTransactions = (transactions: ProposedTransaction[]): BatchTransaction[] => {
-  return transactions.map(
-    ({ description }: ProposedTransaction): BatchTransaction => ({
-      to: description.to,
-      value: description.value,
-      data: description.customTransactionData,
-      contractMethod: description.contractMethod,
-      contractInputsValues: description.contractFieldsValues,
-    }),
-  )
+  return transactions.map(({ description }: ProposedTransaction): BatchTransaction => ({
+    to: description.to,
+    value: description.value,
+    data: description.customTransactionData,
+    contractMethod: description.contractMethod,
+    contractInputsValues: description.contractFieldsValues,
+  }))
 }
 
 const convertToProposedTransactions = (batchFile: BatchFile, chainInfo: ChainInfo): ProposedTransaction[] => {
