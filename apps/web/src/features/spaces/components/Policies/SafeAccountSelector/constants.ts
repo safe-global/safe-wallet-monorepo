@@ -40,3 +40,9 @@ export const INELIGIBILITY_TEXT: Record<SafeAccountIneligibility, string> = {
 export const SAFE_ACCOUNT_SELECTOR_LABEL = 'Which Safe Account does this apply to?'
 
 export const SAFE_ACCOUNT_SELECTOR_PLACEHOLDER = 'Select Safe account'
+
+export const NESTED_SAFES_NOTICE_TITLE = 'Nested Safe accounts'
+
+/** Each flow names what it manages, so the notice points at the right settings page. */
+export const getNestedSafesNoticeText = (policy: 'proposers' | 'spending limits') =>
+  `To manage ${policy} for the Nested Safe accounts, go to the Safe account settings.`

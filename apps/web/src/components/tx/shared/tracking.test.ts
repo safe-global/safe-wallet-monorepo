@@ -346,6 +346,26 @@ describe('trackTxEvents', () => {
     })
   })
 
+  describe('gasPaymentOption property', () => {
+    it('attaches Gas Payment Option to the execution event when provided', () => {
+      trackTxEvents(baseDetails, false, true, false, false, false, undefined, false, 2, undefined, 'SUBSCRIPTION')
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: TX_EVENTS.EXECUTE.action }),
+        expect.objectContaining({ [MixpanelEventParams.GAS_PAYMENT_OPTION]: 'SUBSCRIPTION' }),
+      )
+    })
+
+    it('omits Gas Payment Option when arg is undefined', () => {
+      trackTxEvents(baseDetails, false, true, false, false, false, undefined, false, 2)
+
+      expect(mockTrackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: TX_EVENTS.EXECUTE.action }),
+        expect.not.objectContaining({ [MixpanelEventParams.GAS_PAYMENT_OPTION]: expect.anything() }),
+      )
+    })
+  })
+
   describe('execution variants (Transaction Executed)', () => {
     it('should track EXECUTE_VIA_PARENT with Mixpanel properties when isParentSigner is true', () => {
       trackTxEvents(

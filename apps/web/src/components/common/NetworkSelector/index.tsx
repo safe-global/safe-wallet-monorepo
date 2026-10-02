@@ -19,6 +19,7 @@ import { type KeyboardEvent, type ReactElement, useCallback, useMemo, useRef, us
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
@@ -29,41 +30,30 @@ import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
 import { cn } from '@/utils/cn'
 
-export const getNetworkLink = (
-  router: NextRouter,
+const KEPT_QUERY_PARAMS = ['safeViewRedirectURL', 'appUrl', 'next'] as const
+
+type KeptQuery = Partial<Record<(typeof KEPT_QUERY_PARAMS)[number], string>>
+
+const pickKeptQuery = (query: NextRouter['query']): KeptQuery =>
+  Object.fromEntries(
+    KEPT_QUERY_PARAMS.flatMap((key) => {
+      const value = query[key]
+      return typeof value === 'string' && value ? [[key, value]] : []
+    }),
+  )
+
+/** Links to the same page on the given chain; keeps only `spaceId` and KEPT_QUERY_PARAMS. */
+export const buildChainSwitchHref = (
+  router: Pick<NextRouter, 'pathname' | 'query'>,
   safeAddress: string,
-  chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
+  { shortName }: Pick<Chain, 'shortName'>,
 ) => {
-  const { shortName } = chainInfo
-  const isSafeOpened = safeAddress !== ''
+  const target = safeAddress ? { safe: `${shortName}:${safeAddress}` } : { chain: shortName }
 
-  const query = (
-    isSafeOpened
-      ? {
-          safe: `${shortName}:${safeAddress}`,
-        }
-      : { chain: shortName }
-  ) as {
-    safe?: string
-    chain?: string
-    safeViewRedirectURL?: string
-    appUrl?: string
-  }
-
-  const route = {
+  return {
     pathname: router.pathname,
-    query,
+    query: withSpaceId({ ...target, ...pickKeptQuery(router.query) }, router.query.spaceId),
   }
-
-  const queryParams = ['safeViewRedirectURL', 'appUrl'] as const
-
-  for (const key of queryParams) {
-    if (router.query?.[key]) {
-      route.query[key] = router.query?.[key].toString()
-    }
-  }
-
-  return route
 }
 
 const UndeployedNetworkMenuItem = ({
@@ -340,7 +330,7 @@ const NetworkSelector = ({
           className={css.menuItem}
         >
           <Link
-            href={getNetworkLink(router, safeAddress, chain)}
+            href={buildChainSwitchHref(router, safeAddress, chain)}
             onClick={() => {
               onSwitchNetwork()
               onChainSelect?.()

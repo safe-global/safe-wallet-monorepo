@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import ClaimTrialModal, { claimCopy, _freeLabel } from '../ClaimTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
@@ -102,10 +102,7 @@ describe('ClaimTrialModal', () => {
   it('links to the full feature comparison under the header', () => {
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
-    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute(
-      'href',
-      SAFE_PRO_ANNOUNCEMENT_URL,
-    )
+    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
   })
 
   it('offers the Business trial and, when the Workspace fits the seats, goes straight to Stripe', () => {

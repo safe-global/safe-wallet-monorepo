@@ -12,12 +12,14 @@ import {
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { Errors, logError } from '@/services/exceptions'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()
   const [simulationRequestStatus, setSimulationRequestStatus] = useState<FETCH_STATUS>(FETCH_STATUS.NOT_ASKED)
   const [requestError, setRequestError] = useState<string | undefined>(undefined)
   const tenderly = useAppSelector(selectTenderly)
+  const scope = useSafeScope()
 
   const simulationLink = useMemo(
     () => getSimulationLink(simulation?.simulation.id || '', tenderly),
@@ -36,7 +38,7 @@ export const useSimulation = (): UseSimulationReturn => {
       setRequestError(undefined)
 
       try {
-        const simulationPayload = await getSimulationPayload(params)
+        const simulationPayload = await getSimulationPayload(params, scope)
 
         const data = await getSimulation(simulationPayload, tenderly)
 
@@ -49,7 +51,7 @@ export const useSimulation = (): UseSimulationReturn => {
         setSimulationRequestStatus(FETCH_STATUS.ERROR)
       }
     },
-    [tenderly],
+    [tenderly, scope],
   )
 
   return {

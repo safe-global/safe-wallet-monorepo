@@ -51,7 +51,7 @@ describe('useStepUpCallback', () => {
     mockDispatch.mockImplementation((action) => action)
     sessionStorage.clear()
     mockReconcileAuth.mockResolvedValue('authenticated')
-    mockReplayStepUpAction.mockResolvedValue(undefined)
+    mockReplayStepUpAction.mockResolvedValue(false)
     setSearch('')
   })
 
@@ -169,6 +169,20 @@ describe('useStepUpCallback', () => {
     await waitFor(() => {
       expect(mockDispatch).toHaveBeenCalledWith(stepUpSettled())
     })
+  })
+
+  it('should, when the replay sends the browser to another page, keep the splash up', async () => {
+    saveStepUpTrip(TRIP_ACTION)
+    mockReplayStepUpAction.mockResolvedValue(true)
+
+    renderHook(() => useStepUpCallback())
+
+    await waitFor(() => {
+      expect(mockReplayStepUpAction).toHaveBeenCalledTimes(1)
+    })
+    await Promise.resolve()
+    expect(mockDispatch).toHaveBeenCalledWith(stepUpReturning())
+    expect(mockDispatch).not.toHaveBeenCalledWith(stepUpSettled())
   })
 
   it('should, when the challenge failed, still settle', async () => {

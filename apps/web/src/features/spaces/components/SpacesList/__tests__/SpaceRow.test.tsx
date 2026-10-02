@@ -41,14 +41,26 @@ describe('SpaceRow', () => {
     expect(link).toHaveAttribute('href', `${AppRoutes.spaces.index}?spaceId=${space.uuid}`)
   })
 
-  it('shows the PRO pill with the tier only for paid workspaces, asking the plan of that workspace', () => {
+  it('shows the PRO pill with the tier for an active subscription', () => {
     mockUseSpaceSubscription.mockReturnValue({ subscription: { plan: { name: 'Business' } }, status: 'active' })
-    const { rerender } = render(<SpaceRow space={space} />)
+    render(<SpaceRow space={space} />)
+
     expect(screen.getByTestId('space-row-pro-badge')).toHaveTextContent('· Business')
     expect(mockUseSpaceSubscription).toHaveBeenCalledWith(space.uuid)
+  })
 
+  it('shows Free access instead of the plan tier during a trial', () => {
     mockUseSpaceSubscription.mockReturnValue({ subscription: { plan: { name: 'Business' } }, status: 'trialing' })
-    rerender(<SpaceRow space={space} />)
+    render(<SpaceRow space={space} />)
+
+    const badge = screen.getByTestId('space-row-pro-badge')
+    expect(badge).toHaveTextContent('· Free access')
+    expect(badge).not.toHaveTextContent('Business')
+  })
+
+  it('does not show the PRO pill without a live subscription', () => {
+    render(<SpaceRow space={space} />)
+
     expect(screen.queryByTestId('space-row-pro-badge')).not.toBeInTheDocument()
   })
 

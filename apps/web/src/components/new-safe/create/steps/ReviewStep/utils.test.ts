@@ -1,9 +1,11 @@
+import { faker } from '@faker-js/faker'
 import { ExecutionMethod } from '@/components/tx/ExecutionMethodSelector'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import {
   buildTransactionOptions,
   getDeploymentType,
   getEffectivePayMethod,
+  getNewSafeHomeUrl,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -185,5 +187,18 @@ describe('getWillRelay', () => {
 
   it('returns false when both canRelay is false and method is not RELAY', () => {
     expect(getWillRelay(false, ExecutionMethod.WALLET)).toBe(false)
+  })
+})
+
+describe('getNewSafeHomeUrl', () => {
+  const safeAddress = faker.finance.ethereumAddress()
+  const spaceId = faker.string.uuid()
+
+  it('links to the home of the Safe in the Workspace', () => {
+    expect(getNewSafeHomeUrl('sep', safeAddress, spaceId)).toBe(`/home?safe=sep%3A${safeAddress}&spaceId=${spaceId}`)
+  })
+
+  it('links to the home of the Safe outside a Workspace', () => {
+    expect(getNewSafeHomeUrl('sep', safeAddress, null)).toBe(`/home?safe=sep%3A${safeAddress}`)
   })
 })

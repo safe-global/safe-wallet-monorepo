@@ -26,12 +26,20 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: () => ({ currentData: { id: 7 } }),
 }))
 
-type SpaceSafesQueryResult = { currentData: { safes: Record<string, string[]> } | undefined }
-const mockUseSpaceSafesGetV1Query: jest.Mock<SpaceSafesQueryResult, unknown[]> = jest.fn(() => ({
-  currentData: undefined,
-}))
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpaceSafesGetV1Query: (...args: unknown[]) => mockUseSpaceSafesGetV1Query(...args),
+let mockSpaceSafes: Record<string, Record<string, string[]>> = {}
+let mockSeatLimit: number | null = 40
+let mockIsEligibilityLoading = false
+let mockHasPlan: boolean | undefined = true
+// Like the real hook, a skipped request has no Safes and is not loading
+const mockEligibility = (enabled: boolean) => ({
+  getSafes: (spaceId: string) => (enabled ? mockSpaceSafes[spaceId] : undefined),
+  getLimit: () => mockSeatLimit,
+  hasPlan: () => mockHasPlan,
+  isLoading: enabled && mockIsEligibilityLoading,
+})
+const mockUseSpacesSafeEligibility = jest.fn<ReturnType<typeof mockEligibility>, [boolean]>(mockEligibility)
+jest.mock('../../../../../hooks/useSpacesSafeEligibility', () => ({
+  useSpacesSafeEligibility: (enabled: boolean) => mockUseSpacesSafeEligibility(enabled),
 }))
 
 const CURRENT_USER_ID = 7
@@ -87,10 +95,6 @@ const mockPlans: {
   plan: { daysLeft: number | null } | null
 } = { tierName: 'Business', isTrialing: false, isTrialEndingSoon: false, plan: null }
 jest.mock('../../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
-let mockSeatLimit: number | null = 40
-jest.mock('../../../../../hooks/useSpaceSafeLimit', () => ({
-  useSpaceSafeLimit: () => ({ limit: mockSeatLimit, isLoading: false }),
-}))
 
 jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
@@ -224,8 +228,11 @@ describe('SpaceSelectorDropdown', () => {
     mockSafeAddressFromUrl = ''
     mockChainId = '1'
     mockIsAuthenticated = true
-    mockUseSpaceSafesGetV1Query.mockImplementation(() => ({ currentData: undefined }))
+    mockSpaceSafes = {}
     mockSeatLimit = 40
+    mockIsEligibilityLoading = false
+    mockHasPlan = true
+    mockUseIsSafeProEnabled.mockReturnValue(false)
   })
 
   it('adds an accessible label to the trigger', () => {
@@ -404,10 +411,13 @@ describe('SpaceSelectorDropdown', () => {
 
     it('still offers a full Workspace that already holds this Safe on another chain (same seat)', () => {
       mockSafeAddressFromUrl = '0x0000000000000000000000000000000000001234'
-      mockUseSpaceSafesGetV1Query.mockImplementation(() => ({
-        currentData: { safes: { '10': ['0x0000000000000000000000000000000000001234'] } },
-      }))
-      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: LIMIT, members: adminMembersForCurrentUser }]
+      mockSeatLimit = 2
+      mockSpaceSafes = {
+        'uuid-1': {
+          '10': ['0x0000000000000000000000000000000000001234', '0x0000000000000000000000000000000000005678'],
+        },
+      }
+      const spaces = [{ uuid: 'uuid-1', name: 'Full Space', safeCount: 2, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
@@ -594,14 +604,15 @@ describe('SpaceSelectorDropdown', () => {
     const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 
     const setMembership = (membership: Record<string, Record<string, string[]>>) => {
-      mockUseSpaceSafesGetV1Query.mockImplementation((...args: unknown[]) => {
-        const { spaceId } = args[0] as { spaceId: string }
-        const safes = membership[spaceId]
-        return { currentData: safes ? { safes } : undefined }
-      })
+      mockSpaceSafes = membership
     }
 
-    it('disables a space that already contains the current Safe', () => {
+    it('opens a Workspace that already contains the current Safe instead of adding it again', async () => {
+      const mockAddToSpace = jest.fn().mockResolvedValue(true)
+      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
+        useAddSafeToSpace: jest.Mock
+      }
+      useAddSafeToSpace.mockReturnValue({ addToSpace: mockAddToSpace, loadingSpaceId: null })
       mockSafeAddressFromUrl = SAFE_ADDRESS
       setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] }, 'uuid-2': { '1': [] } })
 
@@ -618,8 +629,60 @@ describe('SpaceSelectorDropdown', () => {
         .find((btn) => btn.querySelector('span')?.textContent === 'AlreadyIn')
       const notInBtn = screen.getAllByRole('button').find((btn) => btn.querySelector('span')?.textContent === 'NotIn')
 
-      expect(alreadyInBtn).toBeDisabled()
+      expect(alreadyInBtn).not.toBeDisabled()
       expect(notInBtn).not.toBeDisabled()
+
+      await act(async () => {
+        fireEvent.click(alreadyInBtn!)
+      })
+
+      expect(mockAddToSpace).not.toHaveBeenCalled()
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { ...mockRouterQuery, spaceId: 'uuid-1' } })
+    })
+
+    it('opens a Workspace that already contains the Safe for a member who is not an admin', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
+
+      const spaces = [{ uuid: 'uuid-1', name: 'AlreadyIn', safeCount: 1, members: memberMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'AlreadyIn')
+      expect(btn).not.toBeDisabled()
+    })
+
+    it('tells an admin to choose a plan for a Workspace without one, not that it is full', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      mockHasPlan = false
+      mockSeatLimit = 0
+
+      const spaces = [{ uuid: 'uuid-1', name: 'NoPlan', safeCount: 0, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'NoPlan')
+      expect(btn).toBeDisabled()
+      expect(screen.getByText('Choose a plan for this Workspace to add Safe accounts')).toBeInTheDocument()
+      expect(screen.queryByText(/up to 0/)).not.toBeInTheDocument()
+    })
+
+    it('names the seats of the plan for a full Workspace under Safe Pro', () => {
+      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      mockSeatLimit = 1
+      setMembership({ 'uuid-1': { '1': ['0x0000000000000000000000000000000000000001'] } })
+
+      const spaces = [{ uuid: 'uuid-1', name: 'Full', safeCount: 1, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      expect(
+        screen.getByText('Your plan covers 1 Safe account, and all are in use. Upgrade to add more.'),
+      ).toBeInTheDocument()
     })
 
     it('shows the "already in workspace" tooltip for matching spaces', () => {
@@ -689,6 +752,39 @@ describe('SpaceSelectorDropdown', () => {
       expect(btn).not.toBeDisabled()
     })
 
+    it('disables every Workspace until its Safes and limit are known', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      mockIsEligibilityLoading = true
+
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 0, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'Space')
+      expect(btn).toBeDisabled()
+    })
+
+    it('counts the seats from the Safes of the Workspace, not from its cached Safe count', () => {
+      mockSafeAddressFromUrl = SAFE_ADDRESS
+      mockSeatLimit = 2
+      setMembership({
+        'uuid-1': {
+          '1': ['0x0000000000000000000000000000000000000001'],
+          '137': ['0x0000000000000000000000000000000000000002', '0x0000000000000000000000000000000000000001'],
+        },
+      })
+
+      const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 0, members: adminMembersForCurrentUser }]
+      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
+
+      const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'Space')
+      expect(btn).toBeDisabled()
+      expect(screen.getByText('You can have up to 2 Safes per Workspace')).toBeInTheDocument()
+    })
+
     it('skips the membership query while the dropdown is closed and fires it once opened', () => {
       mockSafeAddressFromUrl = SAFE_ADDRESS
       setMembership({ 'uuid-1': { '1': [SAFE_ADDRESS] } })
@@ -696,11 +792,11 @@ describe('SpaceSelectorDropdown', () => {
       const spaces = [{ uuid: 'uuid-1', name: 'Space', safeCount: 1, members: adminMembersForCurrentUser }]
       render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} />)
 
-      expect(mockUseSpaceSafesGetV1Query).not.toHaveBeenCalled()
+      expect(mockUseSpacesSafeEligibility).toHaveBeenLastCalledWith(false)
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
 
-      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'uuid-1' }, { skip: false })
+      expect(mockUseSpacesSafeEligibility).toHaveBeenLastCalledWith(true)
     })
 
     it('skips the membership query when the user is signed out', () => {
@@ -713,7 +809,7 @@ describe('SpaceSelectorDropdown', () => {
 
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
 
-      expect(mockUseSpaceSafesGetV1Query).toHaveBeenCalledWith({ spaceId: 'uuid-1' }, { skip: true })
+      expect(mockUseSpacesSafeEligibility).toHaveBeenLastCalledWith(false)
     })
 
     it('matches membership when the stored address differs in case from the URL address', () => {
@@ -726,24 +822,12 @@ describe('SpaceSelectorDropdown', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Add Safe to Workspace' }))
 
       const btn = screen.getAllByRole('button').find((b) => b.querySelector('span')?.textContent === 'AlreadyIn')
-      expect(btn).toBeDisabled()
+      expect(btn).not.toBeDisabled()
       expect(screen.getByText('Safe is already in this Workspace')).toBeInTheDocument()
     })
   })
 
-  describe('onSpaceAdded callback propagation', () => {
-    it('passes onSpaceAdded to useAddSafeToSpace hook', () => {
-      const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
-        useAddSafeToSpace: jest.Mock
-      }
-      const onSpaceAdded = jest.fn()
-      const spaces = [{ uuid: 'uuid-1', name: 'Alpha', safeCount: 0 }]
-
-      render(<SpaceSelectorDropdown triggerVariant="addToWorkspace" spaces={spaces} onSpaceAdded={onSpaceAdded} />)
-
-      expect(useAddSafeToSpace).toHaveBeenCalledWith(expect.objectContaining({ onSpaceAdded }))
-    })
-
+  describe('adding a Safe', () => {
     it('closes the dropdown after successfully adding a Safe to a Space', async () => {
       const mockAddToSpace = jest.fn().mockResolvedValue(true)
       const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
@@ -989,7 +1073,7 @@ describe('SpaceSelectorDropdown', () => {
       expect(alphaButton?.querySelector('svg')).not.toBeInTheDocument()
     })
 
-    it('does not throw when onSpaceAdded is not provided', async () => {
+    it('adds the Safe to the chosen Workspace', async () => {
       const mockAddToSpace = jest.fn().mockResolvedValue(true)
       const { useAddSafeToSpace } = jest.requireMock('../../../hooks/useAddSafeToSpace') as {
         useAddSafeToSpace: jest.Mock
