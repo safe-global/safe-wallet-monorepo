@@ -217,6 +217,22 @@ describe('getTokensForDelegates', () => {
     const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, [delegate], [])
     expect(spendingLimits.length).toBe(2)
   })
+
+  // A Safe whose limits were all removed still has the module enabled, and `getDelegates` decodes to an empty Result.
+  it('returns no limits for an empty decoded delegate list', async () => {
+    const mockContract = {
+      interface: spendingLimitInterface,
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+    } as unknown as AllowanceModule
+    const emptyDelegates = spendingLimitInterface.decodeFunctionResult(
+      'getDelegates',
+      spendingLimitInterface.encodeFunctionResult('getDelegates', [[], 0]),
+    ).results
+
+    const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, emptyDelegates, [])
+
+    expect(spendingLimits).toEqual([])
+  })
 })
 
 describe('getTokenAllowanceForDelegate', () => {
