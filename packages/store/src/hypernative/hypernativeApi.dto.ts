@@ -107,8 +107,18 @@ export type HypernativeTokenExchangeRequestDto = {
 }
 
 /**
+ * Request DTO for exchanging a refresh token for a new access/refresh token pair
+ */
+export type HypernativeTokenRefreshRequestDto = {
+  grant_type: 'refresh_token'
+  client_id: string
+  refresh_token: string
+}
+
+/**
  * Hypernative API token response format
- * The API wraps the OAuth token response in a `data` object
+ * The API wraps the OAuth token response in a `data` object.
+ * Shared by both the authorization_code and refresh_token grants.
  */
 export type HypernativeTokenExchangeResponseDto = {
   data: {
@@ -116,7 +126,31 @@ export type HypernativeTokenExchangeResponseDto = {
     expires_in: number
     scope: string
     token_type: string
+    refresh_token?: string
+    refresh_expires_in?: number
   }
+}
+
+/**
+ * A failed OAuth call. The API wraps the RFC 6749 §5.2 body in its standard envelope, so the code
+ * that says whether the grant is recoverable sits at `error.error`, not at the top level.
+ */
+export type HypernativeOAuthErrorEnvelopeDto = {
+  success: false
+  data: null
+  error?: {
+    error: string
+    error_description?: string
+  }
+}
+
+/**
+ * What `transformErrorResponse` actually receives from `fetchBaseQuery`: the HTTP status plus the
+ * parsed body, which is absent entirely for a transport-level failure.
+ */
+export type HypernativeQueryErrorDto = {
+  status: number | string
+  data?: HypernativeOAuthErrorEnvelopeDto
 }
 
 /**
