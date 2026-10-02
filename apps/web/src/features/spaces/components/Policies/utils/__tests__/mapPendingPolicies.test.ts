@@ -210,6 +210,23 @@ describe('mapPendingPolicies', () => {
     expect(row.data.spenders[0].allowances).toHaveLength(1)
   })
 
+  it('should, when an edit deletes the allowances and then the spender, list each allowance once', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'delete-allowance', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+          { kind: 'remove-delegate', delegate: MOCK_ADDRESSES.alice, removeAllowances: false },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('remove')
+    expect(row.data.spenders).toHaveLength(1)
+    expect(row.data.spenders[0].allowances).toHaveLength(1)
+  })
+
   it('should, when an allowance is reset, show it with nothing spent', () => {
     const [row] = mapPendingPolicies(
       [
