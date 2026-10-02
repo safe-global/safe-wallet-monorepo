@@ -3,18 +3,18 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder } from '@/tests/builders/chains'
 import type { AppDispatch } from '@/store'
 
 describe('delegationMessages', () => {
-  const chainId = '1'
+  const chainId = faker.string.numeric()
   const parentSafeAddress = checksumAddress(faker.finance.ethereumAddress())
   const delegateAddress = checksumAddress(faker.finance.ethereumAddress())
   const nestedSafeAddress = checksumAddress(faker.finance.ethereumAddress())
   const signature = `0x${faker.string.hexadecimal({ length: 130 })}`
   const messageHash = `0x${faker.string.hexadecimal({ length: 64 })}`
-
-  const createTypedData = (delegate: string = delegateAddress) =>
-    getDelegateTypedData(chainId, delegate, nestedSafeAddress)
 
   describe('buildDelegationOrigin', () => {
     it('should build correct JSON string for add action', () => {
@@ -53,11 +53,20 @@ describe('delegationMessages', () => {
     })
   })
 
-  describe('createDelegationMessage', () => {
-    const typedData = createTypedData()
+  describe.each([
+    { service: 'queue service', features: [FEATURES.QUEUE_SERVICE], domainName: 'Safe Queue Service' },
+    { service: 'transaction service', features: [], domainName: 'Safe Transaction Service' },
+  ])('createDelegationMessage with $service typed data', ({ features, domainName }) => {
+    const chain = chainBuilder().with({ chainId, features }).build()
+    const typedData = getDelegateTypedData(chain, delegateAddress, nestedSafeAddress)
     const origin = buildDelegationOrigin('add', delegateAddress, nestedSafeAddress)
 
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
     it('should successfully create message by dispatching correct action', async () => {
+      const initiate = jest.spyOn(cgwApi.endpoints.messagesCreateMessageV1, 'initiate')
       const mockUnwrap = jest.fn().mockResolvedValue({})
       const mockDispatch = jest.fn().mockReturnValue({ unwrap: mockUnwrap })
 
@@ -72,6 +81,18 @@ describe('delegationMessages', () => {
 
       expect(mockDispatch).toHaveBeenCalled()
       expect(mockUnwrap).toHaveBeenCalled()
+
+      const { message } = initiate.mock.calls[0][0].createMessageDto
+      expect(JSON.parse(JSON.stringify(message))).toEqual(message)
+      expect(message).toEqual(
+        expect.objectContaining({
+          domain: expect.objectContaining({ name: domainName, chainId: Number(chainId) }),
+          primaryType: 'Delegate',
+          message: expect.objectContaining({
+            delegateAddress: expect.stringMatching(new RegExp(`^${delegateAddress}$`, 'i')),
+          }),
+        }),
+      )
     })
 
     it('should confirm existing message when 400 "already exists" error with same action', async () => {

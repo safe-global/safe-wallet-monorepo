@@ -1,6 +1,11 @@
 import { renderHook, act } from '@/src/tests/test-utils'
 import { useDelegate } from './useDelegate'
 import { selectAllChains } from '@/src/store/chains'
+import { faker } from '@faker-js/faker'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 const TEST_PRIVATE_KEY = '0xdd503e13625fa99fdea1e1dfb180dd3de94ee4d16c858bb04128b46225f92f84'
 // The address corresponding to the test private key
@@ -11,7 +16,19 @@ const TEST_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const mockDispatch = jest.fn()
 const mockUseAppSelector = jest.fn()
 const mockStorePrivateKey = jest.fn()
-const mockRegisterDelegate = jest.fn()
+const mockRegisterDelegateV2 = jest.fn()
+const mockRegisterDelegateV3 = jest.fn()
+const mockGetDelegateTypedData = jest.mocked(getDelegateTypedData)
+
+const withoutQueueService = () =>
+  faker.helpers.arrayElements(Object.values(FEATURES).filter((feature) => feature !== FEATURES.QUEUE_SERVICE))
+
+const transactionServiceChain = () => chainBuilder().with({ features: withoutQueueService() }).build()
+
+const queueServiceChain = () =>
+  chainBuilder()
+    .with({ features: [...withoutQueueService(), FEATURES.QUEUE_SERVICE] })
+    .build()
 
 // Mock ethers Wallet. Signing now goes through `signingKey.sign()` on the raw
 // EIP-712 digest, and `hashDelegateTypedData` (real impl) calls these ethers
@@ -35,7 +52,7 @@ jest.mock('ethers', () => {
     },
     verifyMessage: () => 'mockedVerification',
     ZeroAddress: '0x0000000000000000000000000000000000000000',
-    TypedDataEncoder: { hashStruct: () => `0x${'00'.repeat(32)}` },
+    TypedDataEncoder: { hashStruct: () => `0x${'00'.repeat(32)}`, hash: () => `0x${'00'.repeat(32)}` },
     concat: () => '0x',
     keccak256: () => `0x${'00'.repeat(32)}`,
   }
@@ -72,10 +89,18 @@ jest.mock('@/src/store/chains', () => ({
   selectAllChains: jest.fn(),
 }))
 
+jest.mock('@safe-global/utils/services/delegates', () => {
+  const actual = jest.requireActual<typeof import('@safe-global/utils/services/delegates')>(
+    '@safe-global/utils/services/delegates',
+  )
+  return { ...actual, getDelegateTypedData: jest.fn(actual.getDelegateTypedData) }
+})
+
 // Import the real addDelegate, no need to mock it
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
   cgwApi: {
-    useDelegatesPostDelegateV3Mutation: () => [mockRegisterDelegate],
+    useDelegatesPostDelegateV2Mutation: () => [mockRegisterDelegateV2],
+    useDelegatesPostDelegateV3Mutation: () => [mockRegisterDelegateV3],
   },
 }))
 
@@ -93,16 +118,17 @@ jest.mock('@/src/utils/logger', () => ({
 }))
 
 describe('useDelegate', () => {
+  let mockChains: Chain[]
+
   beforeEach(() => {
     jest.clearAllMocks()
+
+    mockChains = [queueServiceChain(), transactionServiceChain()]
 
     // Mock chains data
     mockUseAppSelector.mockImplementation((selector: unknown) => {
       if (selector === selectAllChains) {
-        return [
-          { chainId: '1', name: 'Ethereum' },
-          { chainId: '137', name: 'Polygon' },
-        ]
+        return mockChains
       }
       return null
     })
@@ -111,7 +137,8 @@ describe('useDelegate', () => {
     mockStorePrivateKey.mockResolvedValue(true)
 
     // Mock successful delegate registration
-    mockRegisterDelegate.mockResolvedValue({ data: 'success' })
+    mockRegisterDelegateV2.mockResolvedValue({ data: 'success' })
+    mockRegisterDelegateV3.mockResolvedValue({ data: 'success' })
 
     // Mock setTimeout to execute immediately in tests
     jest.useFakeTimers()
@@ -158,7 +185,10 @@ describe('useDelegate', () => {
     })
 
     // Verify the delegate was registered on all chains
-    expect(mockRegisterDelegate).toHaveBeenCalledTimes(2) // Once for each chain
+    expect(mockRegisterDelegateV3).toHaveBeenCalledTimes(1)
+    expect(mockRegisterDelegateV3).toHaveBeenCalledWith(expect.objectContaining({ chainId: mockChains[0].chainId }))
+    expect(mockRegisterDelegateV2).toHaveBeenCalledTimes(1)
+    expect(mockRegisterDelegateV2).toHaveBeenCalledWith(expect.objectContaining({ chainId: mockChains[1].chainId }))
 
     // Verify the delegate was added to the Redux store
     expect(mockDispatch).toHaveBeenCalled()
@@ -191,7 +221,8 @@ describe('useDelegate', () => {
     expect(delegateResult.error).toBe('Failed to securely store delegate key')
 
     // Check that delegate registration was not attempted
-    expect(mockRegisterDelegate).not.toHaveBeenCalled()
+    expect(mockRegisterDelegateV2).not.toHaveBeenCalled()
+    expect(mockRegisterDelegateV3).not.toHaveBeenCalled()
 
     // Check that the hook's state was updated correctly
     expect(result.current.isLoading).toBe(false)
@@ -221,7 +252,14 @@ describe('useDelegate', () => {
     expect(delegateResult.delegateAddress).toBeTruthy()
 
     // Verify the delegate was registered with the safe address
-    expect(mockRegisterDelegate).toHaveBeenCalledWith(
+    expect(mockRegisterDelegateV3).toHaveBeenCalledWith(
+      expect.objectContaining({
+        createDelegateDto: expect.objectContaining({
+          safe: TEST_SAFE_ADDRESS,
+        }),
+      }),
+    )
+    expect(mockRegisterDelegateV2).toHaveBeenCalledWith(
       expect.objectContaining({
         createDelegateDto: expect.objectContaining({
           safe: TEST_SAFE_ADDRESS,
@@ -231,5 +269,71 @@ describe('useDelegate', () => {
 
     // Just verify that dispatch was called - we'll trust that the real addDelegate implementation works
     expect(mockDispatch.mock.calls[0][0].payload.delegateInfo.safe).toBe(TEST_SAFE_ADDRESS)
+  })
+
+  it('should register via the v3 endpoint with queue service typed data on chains with QUEUE_SERVICE', async () => {
+    const chain = queueServiceChain()
+    mockChains = [chain]
+    const safe = faker.finance.ethereumAddress()
+
+    const { result } = renderHook(() => useDelegate())
+
+    let delegateAddress: string | undefined
+
+    await act(async () => {
+      delegateAddress = (await result.current.createDelegate(TEST_PRIVATE_KEY, safe)).delegateAddress
+    })
+
+    expect(mockGetDelegateTypedData).toHaveBeenCalledWith(chain, delegateAddress, safe)
+    expect(mockGetDelegateTypedData).toHaveReturnedWith({
+      domain: { name: 'Safe Queue Service', version: '1.0', chainId: Number(chain.chainId), safe },
+      types: expect.any(Object),
+      message: { delegateAddress, totp: expect.any(Number), action: 'add' },
+      primaryType: 'Delegate',
+    })
+    expect(mockRegisterDelegateV3).toHaveBeenCalledWith({
+      chainId: chain.chainId,
+      createDelegateDto: {
+        safe,
+        delegate: delegateAddress,
+        delegator: OWNER_ADDRESS,
+        signature: 'mockedSignature',
+        label: 'Mobile App Delegate',
+      },
+    })
+    expect(mockRegisterDelegateV2).not.toHaveBeenCalled()
+  })
+
+  it('should register via the v2 endpoint with transaction service typed data on chains without QUEUE_SERVICE', async () => {
+    const chain = transactionServiceChain()
+    mockChains = [chain]
+    const safe = faker.finance.ethereumAddress()
+
+    const { result } = renderHook(() => useDelegate())
+
+    let delegateAddress: string | undefined
+
+    await act(async () => {
+      delegateAddress = (await result.current.createDelegate(TEST_PRIVATE_KEY, safe)).delegateAddress
+    })
+
+    expect(mockGetDelegateTypedData).toHaveBeenCalledWith(chain, delegateAddress, safe)
+    expect(mockGetDelegateTypedData).toHaveReturnedWith({
+      domain: { name: 'Safe Transaction Service', version: '1.0', chainId: Number(chain.chainId) },
+      types: expect.any(Object),
+      message: { delegateAddress, totp: expect.any(Number) },
+      primaryType: 'Delegate',
+    })
+    expect(mockRegisterDelegateV2).toHaveBeenCalledWith({
+      chainId: chain.chainId,
+      createDelegateDto: {
+        safe,
+        delegate: delegateAddress,
+        delegator: OWNER_ADDRESS,
+        signature: 'mockedSignature',
+        label: 'Mobile App Delegate',
+      },
+    })
+    expect(mockRegisterDelegateV3).not.toHaveBeenCalled()
   })
 })
