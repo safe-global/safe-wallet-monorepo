@@ -95,6 +95,43 @@ describe('mapPendingPolicies', () => {
     })
   })
 
+  it('should, when an edit of an active policy re-adds its delegate, render an update rather than a creation', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'add-delegate', delegate: MOCK_ADDRESSES.alice },
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: MOCK_TOKENS.usdc.address,
+            amount: '2000000000',
+            resetPeriodMinutes: 43_200,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('update')
+  })
+
+  it('should, when a spender is added to an active policy, render an update', () => {
+    const [row] = mapPendingPolicies([mockPendingDto()], activeRows(), resolveKnownTokens)
+
+    expect(row.operation).toBe('update')
+  })
+
+  it('should, when the queued tx enables the module, render a creation even beside an active policy', () => {
+    const [row] = mapPendingPolicies(
+      [withChanges([{ kind: 'enable-module' }, ...mockPendingDto().data.changes])],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('create')
+  })
+
   it('should, when a used limit is edited as a reset then a set, render one allowance with nothing spent', () => {
     const [row] = mapPendingPolicies(
       [

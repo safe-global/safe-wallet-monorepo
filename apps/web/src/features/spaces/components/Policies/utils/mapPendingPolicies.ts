@@ -42,14 +42,10 @@ const getOperation = (changes: PendingChange[], active: ActiveSpendingLimit | un
     return 'remove'
   }
 
-  const createsSomething = changes.some(
-    (change) =>
-      change.kind === 'enable-module' ||
-      change.kind === 'add-delegate' ||
-      (change.kind === 'set-allowance' && !findActiveAllowance(active, change.delegate, change.token)),
-  )
+  // Not `add-delegate`: an edit re-registers every spender it writes to, so it says nothing about the policy existing.
+  const createsPolicy = !active || changes.some((change) => change.kind === 'enable-module')
 
-  return createsSomething ? 'create' : 'update'
+  return createsPolicy ? 'create' : 'update'
 }
 
 const toSpenders = (
