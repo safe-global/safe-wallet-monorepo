@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useRouter } from 'next/router'
+import { stringify } from 'querystring'
 import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -9,6 +11,8 @@ import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
@@ -23,6 +27,7 @@ interface UseAddSafeToSpaceResult {
 }
 
 export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOptions): UseAddSafeToSpaceResult => {
+  const router = useRouter()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
@@ -41,12 +46,20 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
     setLoadingSpaceId(spaceId)
+    // The step-up reloads the page, so onSpaceAdded cannot move the user into the Workspace
+    const { spaceId: _replaced, ...query } = router.query
+    const stepUpReturnUrl = `${router.pathname}?${stringify(withSpaceId(query, spaceId))}`
+    dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+    let isStepUpPending = false
     try {
       const result = await addSafeToSpace({
         spaceId,
         createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
       })
-      if (isElevationRequiredError(result.error)) return false
+      if (isElevationRequiredError(result.error)) {
+        isStepUpPending = true
+        return false
+      }
       if (result.error) {
         const seatLimit = getSeatLimitMessage(result.error)
         if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
@@ -71,6 +84,7 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       showError(error instanceof Error ? error.message : '')
       return false
     } finally {
+      if (!isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       setLoadingSpaceId(null)
     }
   }
