@@ -70,9 +70,9 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   {
     from: 'Starter',
     label: {
-      Starter: '10 sponsored transactions per month',
-      Business: '50 sponsored transactions per month',
-      Enterprise: 'Unlimited sponsored transactions',
+      Starter: '10 eligible sponsored transactions per month, up to €5 each',
+      Business: '50 eligible sponsored transactions per month, up to €5 each',
+      Enterprise: 'Unlimited eligible sponsored transactions, up to €10 each',
     },
   },
   { from: 'Starter', label: 'Shared address book' },
@@ -162,7 +162,7 @@ export const COMPARE_COPY_V2 = {
 
 /** Unreleased: listed on the cards with a "Soon" chip, never in the compare table. */
 export const COMING_SOON_V2: Pick<CompareRowV2, 'feature' | 'values'>[] = [
-  { feature: PAY_GAS_FROM_SAFE, values: every(true) },
+  { feature: PAY_GAS_FROM_SAFE, values: fromBusiness },
   { feature: SAFENET_CHECKS, values: fromBusiness },
   { feature: 'More policies', values: fromBusiness },
 ]
@@ -176,9 +176,10 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: MEMBERS, values: every('Unlimited') },
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
-        feature: 'Sponsored transactions per month',
+        feature: 'Eligible sponsored transactions per month',
         values: { Starter: '10', Business: '50', Enterprise: 'Unlimited' },
       },
+      { feature: 'Sponsoring limit per transaction', values: { Starter: '€5', Business: '€5', Enterprise: '€10' } },
     ],
   },
   {

@@ -185,7 +185,7 @@ export const PlanCardV2 = ({
                 label={`${PLAN_CARD_COPY_V2.seatsLabel} ${tier.name}`}
               />
               {!actions.readOnly && (
-                <div className="flex flex-wrap gap-2 [&>*]:flex-1" data-testid="plan-ctas">
+                <div className="flex flex-col gap-2" data-testid="plan-ctas">
                   <PlanCtaV2 pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
                   {isPrimary && <SalesCtaV2 label={PLAN_CARD_COPY_V2.talkToSales} kind="sales" />}
                 </div>
