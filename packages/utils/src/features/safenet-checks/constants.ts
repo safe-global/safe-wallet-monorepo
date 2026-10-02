@@ -109,6 +109,22 @@ export const LATE_WINDOW_BLOCKS = 720
 export const PLAIN_DEADLINE_BLOCKS = 240
 
 /**
+ * Attestation-latency allowance: how many blocks past the reveal deadline a
+ * verdict-less check stays pending before it reads as TIMED_OUT. The committee
+ * only attests RESOLVED checks, and resolution itself lands at the reveal
+ * deadline, so a healthy attestation always trails the deadline (5–11 blocks
+ * observed on Sepolia). Without the allowance every checked transaction
+ * flashes "check failed" before its attestation upgrades it to BENIGN.
+ *
+ * ponytail: a fixed BLOCK count standing in for a wall-clock latency, with only
+ * 4 blocks of margin over the worst observed case (deadline+11). This file is
+ * tuned to {@link BLOCK_TIME_SECONDS} (Gnosis, 5s); on a 5s chain 15 blocks is
+ * 75s, below the 60-132s the Sepolia observations imply. Upgrade path: derive
+ * this from {@link BLOCK_TIME_SECONDS}, or express the allowance in seconds.
+ */
+export const ATTESTATION_GRACE_BLOCKS = 15
+
+/**
  * How long after submission an UNAVAILABLE read keeps polling. Covers the race
  * where the first read lands before the check request is mined; Gnosis blocks
  * every ~5s, so a request mines well inside this window.

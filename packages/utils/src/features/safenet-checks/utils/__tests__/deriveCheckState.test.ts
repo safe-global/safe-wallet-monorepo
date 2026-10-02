@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { ATTESTATION_GRACE_BLOCKS } from '../../constants'
 import { deriveCheckState } from '../deriveCheckState'
 import {
   attestedEvent,
@@ -34,8 +35,11 @@ const derive = (
   attestation: AttestationVerification = UNVERIFIED_ATTESTATION,
 ) => deriveCheckState({ events, headBlock, attestation })
 
-// A request that times out at block 150.
+// A request that times out at block 150; with the attestation-latency
+// allowance the wallet declares TIMED_OUT past 150 + ATTESTATION_GRACE_BLOCKS.
 const request = () => requestCreatedEvent({ deadlineBlock: '150', commitDeadlineBlock: '150' })
+const GRACE_END = String(150 + ATTESTATION_GRACE_BLOCKS)
+const PAST_GRACE = String(150 + ATTESTATION_GRACE_BLOCKS + 1)
 
 describe('deriveCheckState — precedence table', () => {
   it('SUBMITTED when only proposed', () => {
@@ -124,23 +128,27 @@ describe('deriveCheckState — precedence table', () => {
     expect(derive(events, '140')).toBe(CheckStatus.MALICIOUS)
   })
 
-  it('TIMED_OUT past the deadline with no verdict', () => {
-    expect(derive([proposedEvent(), request()], '151')).toBe(CheckStatus.TIMED_OUT)
+  it('TIMED_OUT past the deadline plus the attestation grace, with no verdict', () => {
+    expect(derive([proposedEvent(), request()], PAST_GRACE)).toBe(CheckStatus.TIMED_OUT)
   })
 
-  it('TIMED_OUT for a frozen dispute past the deadline', () => {
+  it('TIMED_OUT for a frozen dispute past the deadline plus grace', () => {
     const events = [proposedEvent(), request(), disputeResolvedEvent()]
-    expect(derive(events, '151')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive(events, PAST_GRACE)).toBe(CheckStatus.TIMED_OUT)
   })
 })
 
-describe('deriveCheckState — head == deadline boundary', () => {
+describe('deriveCheckState — deadline and grace boundary', () => {
   it('stays IN_PROGRESS at head == deadline (reveal window is inclusive)', () => {
     expect(derive([proposedEvent(), request()], '150')).toBe(CheckStatus.IN_PROGRESS)
   })
 
-  it('TIMED_OUT one block later', () => {
-    expect(derive([proposedEvent(), request()], '151')).toBe(CheckStatus.TIMED_OUT)
+  it('stays IN_PROGRESS one block past the deadline — the attestation trails it by design', () => {
+    expect(derive([proposedEvent(), request()], '151')).toBe(CheckStatus.IN_PROGRESS)
+  })
+
+  it('stays IN_PROGRESS at head == deadline + grace (allowance is inclusive)', () => {
+    expect(derive([proposedEvent(), request()], GRACE_END)).toBe(CheckStatus.IN_PROGRESS)
   })
 })
 

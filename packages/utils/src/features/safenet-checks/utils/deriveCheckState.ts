@@ -1,3 +1,4 @@
+import { ATTESTATION_GRACE_BLOCKS } from '../constants'
 import {
   AttestationVerificationStatus,
   CheckEventType,
@@ -60,7 +61,10 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
  *  2. Attested → `BENIGN` only if the FROST signature verified,
  *     `VERIFICATION_FAILED` if it did not, else `AWAITING_VERIFICATION`.
  *     Above the deadline check so a late attestation beats `TIMED_OUT`.
- *  3. Past the deadline block → `TIMED_OUT` (incl. frozen disputes).
+ *  3. Past the deadline block plus {@link ATTESTATION_GRACE_BLOCKS} →
+ *     `TIMED_OUT` (incl. frozen disputes). The allowance covers the protocol's
+ *     structural attestation latency: resolution lands at the reveal deadline
+ *     and the committee attests only resolved checks.
  *  4. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
  *     NOT `BENIGN` without a verified attestation).
  *  5. Any proposal event → `SUBMITTED`.
@@ -89,7 +93,7 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
   }
 
   const deadline = deadlineBlockOf(events)
-  if (deadline !== null && headBlock !== null && BigInt(headBlock) > deadline) {
+  if (deadline !== null && headBlock !== null && BigInt(headBlock) > deadline + BigInt(ATTESTATION_GRACE_BLOCKS)) {
     return CheckStatus.TIMED_OUT
   }
 
