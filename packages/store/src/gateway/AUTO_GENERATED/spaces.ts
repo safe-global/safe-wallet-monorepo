@@ -113,6 +113,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/audit-log/actors` }),
         providesTags: ['spaces'],
       }),
+      spaceSafesGetAllV1: build.query<SpaceSafesGetAllV1ApiResponse, SpaceSafesGetAllV1ApiArg>({
+        query: () => ({ url: `/v1/spaces/safes` }),
+        providesTags: ['spaces'],
+      }),
       spaceSafesCreateV1: build.mutation<SpaceSafesCreateV1ApiResponse, SpaceSafesCreateV1ApiArg>({
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/safes`,
@@ -325,6 +329,12 @@ export type SpaceAuditGetAuditLogActorsV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type SpaceSafesGetAllV1ApiResponse = /** status 200 Safes of all spaces retrieved successfully */ {
+  [key: string]: {
+    [key: string]: string[]
+  }
+}
+export type SpaceSafesGetAllV1ApiArg = void
 export type SpaceSafesCreateV1ApiResponse = unknown
 export type SpaceSafesCreateV1ApiArg = {
   /** Space UUID to add Safes to */
@@ -859,6 +869,8 @@ export const {
   useLazySpaceAuditGetAuditLogV1Query,
   useSpaceAuditGetAuditLogActorsV1Query,
   useLazySpaceAuditGetAuditLogActorsV1Query,
+  useSpaceSafesGetAllV1Query,
+  useLazySpaceSafesGetAllV1Query,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesGetV1Query,
   useLazySpaceSafesGetV1Query,

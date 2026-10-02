@@ -3014,6 +3014,51 @@
         ]
       }
     },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, keyed by space UUID and grouped by chain like the per-space endpoint. A space without Safes maps to an empty object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "example": {
+                    "{spaceUuid}": {
+                      "{chainId}": [
+                        "0x..."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/safes": {
       "post": {
         "description": "Adds one or more Safe addresses to a space. This allows the space members to collectively manage these Safes.",
@@ -4185,6 +4230,38 @@
         "summary": "Submit a survey response for a space",
         "tags": [
           "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/entitlements": {
+      "get": {
+        "description": "The entitlements of every workspace the user is an active member of, keyed by workspace UUID. Each value is what the per-workspace endpoint returns.",
+        "operationId": "entitlementsGetAllEntitlementsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EntitlementsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get entitlements of all spaces",
+        "tags": [
+          "entitlements"
         ]
       }
     },
