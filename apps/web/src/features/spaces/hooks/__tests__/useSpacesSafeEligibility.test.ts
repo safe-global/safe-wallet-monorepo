@@ -70,6 +70,29 @@ describe('useSpacesSafeEligibility', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
+  it('tells whether each Workspace has a plan', () => {
+    mockUseEntitlementsGetAllEntitlementsV1Query.mockReturnValue(
+      queryResult({
+        currentData: {
+          [spaceId]: { ...seatsEntitlements(5), plan: { id: 'starter', name: 'Starter', cycleEndsAt: null } },
+          [otherSpaceId]: seatsEntitlements(0),
+        },
+      }),
+    )
+    const { result } = renderHook(() => useSpacesSafeEligibility(true))
+
+    expect(result.current.hasPlan(spaceId)).toBe(true)
+    expect(result.current.hasPlan(otherSpaceId)).toBe(false)
+    expect(result.current.hasPlan(faker.string.uuid())).toBeUndefined()
+  })
+
+  it('treats every Workspace as having a plan while Safe Pro is off', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(false)
+    const { result } = renderHook(() => useSpacesSafeEligibility(true))
+
+    expect(result.current.hasPlan(otherSpaceId)).toBe(true)
+  })
+
   it('leaves the limit unknown for a Workspace without a seats meter', () => {
     const { result } = renderHook(() => useSpacesSafeEligibility(true))
 

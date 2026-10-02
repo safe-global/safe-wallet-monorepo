@@ -17,6 +17,8 @@ type SpacesSafeEligibility = {
   getSafes: (spaceId: string) => SpaceSafes | undefined
   /** Under Safe Pro, undefined until the seats meter of the Workspace arrives. */
   getLimit: (spaceId: string) => SafeLimit
+  /** Undefined while the entitlements of the Workspace are unknown; always true without Safe Pro. */
+  hasPlan: (spaceId: string) => boolean | undefined
   isLoading: boolean
 }
 
@@ -51,9 +53,16 @@ export const useSpacesSafeEligibility = (enabled: boolean): SpacesSafeEligibilit
     return seats ? seats.quota : undefined
   }
 
+  const hasPlan = (spaceId: string): boolean | undefined => {
+    if (!isSafePro) return true
+    const entitlements = entitlementsQuery.currentData?.[spaceId]
+    return entitlements ? entitlements.plan !== null : undefined
+  }
+
   return {
     getSafes: (spaceId) => safesBySpace.get(spaceId),
     getLimit,
+    hasPlan,
     isLoading:
       isQueryLoading(safesQuery) || isQueryLoading(entitlementsQuery) || isRetryingSafes || isRetryingEntitlements,
   }
