@@ -14,7 +14,6 @@ import {
   COMPARE_COPY_V2,
   getCardComingSoonV2,
   getCardFeaturesV2,
-  getFeaturesHeadingV2,
   getPlanContentV2,
   PLAN_CARD_COPY_V2,
   RECOMMENDED_PLAN,
@@ -156,19 +155,12 @@ export const PlanCardV2 = ({
 
         <div className="mt-5 flex flex-col gap-0.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
           {price && (
-            <>
-              <div className="flex items-baseline gap-1">
-                <Typography variant="h3">{price.headline}</Typography>
-                <Typography variant="paragraph-small" color="muted">
-                  {price.suffix}
-                </Typography>
-              </div>
-              {price.perSafe && (
-                <Typography variant="paragraph-small" color="muted" data-testid="plan-per-safe">
-                  {price.perSafe}
-                </Typography>
-              )}
-            </>
+            <div className="flex items-baseline gap-1">
+              <Typography variant="h3">{price.headline}</Typography>
+              <Typography variant="paragraph-small" color="muted">
+                {price.suffix}
+              </Typography>
+            </div>
           )}
         </div>
 
@@ -202,7 +194,7 @@ export const PlanCardV2 = ({
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
-            {content && <Typography variant="paragraph-small-bold">{getFeaturesHeadingV2(tier.name)}</Typography>}
+            {content && <Typography variant="paragraph-small-bold">{PLAN_CARD_COPY_V2.featuresHeading}</Typography>}
             <List className="gap-3" data-testid="plan-features">
               {features.map((label, index) => (
                 <ListItem key={label} size="sm" className="items-start py-0">
