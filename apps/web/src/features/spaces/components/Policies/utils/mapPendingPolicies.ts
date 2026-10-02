@@ -42,14 +42,10 @@ const getOperation = (changes: PendingChange[], active: ActiveSpendingLimit | un
     return 'remove'
   }
 
-  const createsSomething = changes.some(
-    (change) =>
-      change.kind === 'enable-module' ||
-      change.kind === 'add-delegate' ||
-      (change.kind === 'set-allowance' && !findActiveAllowance(active, change.delegate, change.token)),
-  )
+  // Not `add-delegate`: an edit re-registers every spender it writes to, so it says nothing about the policy existing.
+  const createsPolicy = !active || changes.some((change) => change.kind === 'enable-module')
 
-  return createsSomething ? 'create' : 'update'
+  return createsPolicy ? 'create' : 'update'
 }
 
 const toSpenders = (
@@ -82,7 +78,9 @@ const toSpenders = (
         break
       case 'remove-delegate': {
         const current = active?.data.spenders.find((spender) => sameAddress(spender.spender, change.delegate))
-        spenderFor(change.delegate).allowances.push(...(current?.allowances ?? []))
+        spenderFor(change.delegate)
+        // Upserted: the edit flow deletes each allowance before it unlinks the delegate.
+        current?.allowances.forEach((allowance) => upsertAllowance(change.delegate, allowance))
         break
       }
       case 'set-allowance': {
@@ -112,7 +110,7 @@ const toSpenders = (
       }
       case 'delete-allowance': {
         const current = findActiveAllowance(active, change.delegate, change.token)
-        if (current) spenderFor(change.delegate).allowances.push(current)
+        if (current) upsertAllowance(change.delegate, current)
         break
       }
     }

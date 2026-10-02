@@ -146,7 +146,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
-    expect(screen.queryByText('Editing a spending limit is coming soon.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Upgrade to Business to edit spending limits.')).not.toBeInTheDocument()
   })
 
   it('manage: keeps an unenforced policy out of the edit flow', () => {
@@ -163,7 +163,7 @@ describe('SpendingLimitActions', () => {
     ).toBeInTheDocument()
   })
 
-  it('manage: disables editing while no edit flow is supplied', () => {
+  it('manage: disables editing and points to the upgrade while no edit flow is supplied', () => {
     render(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'manage', disabled: false }}
@@ -172,7 +172,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   describe('copy-link', () => {

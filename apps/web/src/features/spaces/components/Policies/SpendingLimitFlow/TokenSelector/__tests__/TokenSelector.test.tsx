@@ -1,3 +1,4 @@
+import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -18,6 +19,18 @@ import {
 } from '../constants'
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+// Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.
+jest.mock('@/components/ui/tooltip', () => ({
+  Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
+  TooltipTrigger: ({
+    render: { type: Element, props },
+    children,
+  }: {
+    render: ReactElement<{ children?: ReactNode }>
+    children?: ReactNode
+  }) => <Element {...props}>{children}</Element>,
+  TooltipContent: ({ children }: { children: ReactNode }) => <span data-testid="tooltip-content">{children}</span>,
+}))
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 
 const option = (overrides: Partial<TokenOption> = {}): TokenOption => tokenOptionBuilder().with(overrides).build()
@@ -289,6 +302,60 @@ describe('TokenSelector — excludeAddresses', () => {
 
     expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
     expect(screen.queryByRole('option', { name: /WBTC/ })).not.toBeInTheDocument()
+  })
+})
+
+describe('TokenSelector — disabledAddresses', () => {
+  const reason = faker.lorem.sentence()
+
+  it('lists a disabled token with its reason and does not select it on click', async () => {
+    const onChange = jest.fn()
+    const { user } = renderSelector({
+      onChange,
+      disabledAddresses: [heldUsdc.address.toLowerCase()],
+      disabledReason: reason,
+    })
+    await openSelector(user)
+
+    const usdc = screen.getByRole('option', { name: /USDC/ })
+    expect(usdc).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(reason)
+
+    await user.click(usdc)
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('still finds a disabled token by its address instead of showing no results', async () => {
+    const { user } = renderSelector({ disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    const input = await openSelector(user)
+
+    await user.type(input, heldUsdc.address)
+
+    await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(1))
+    expect(screen.getByRole('option', { name: /USDC/ })).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.queryByText(NO_TOKENS_FOUND_TEXT)).not.toBeInTheDocument()
+  })
+
+  it('does not commit a disabled first match on Enter', async () => {
+    const onChange = jest.fn()
+    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    const input = await openSelector(user)
+
+    await user.type(input, 'USDC')
+    await user.keyboard('{Enter}')
+
+    expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('leaves the other tokens selectable', async () => {
+    const onChange = jest.fn()
+    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    await openSelector(user)
+
+    await user.click(screen.getByRole('option', { name: /ETH/ }))
+
+    expect(onChange).toHaveBeenCalledWith(heldEth.address)
   })
 })
 
