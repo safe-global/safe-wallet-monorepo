@@ -38,6 +38,7 @@ jest.mock('@/features/__core__', () => ({
     }) => (hypernativeAuth && showActiveStatus ? <span>Hypernative Guardian is active</span> : null),
     HnCustomChecksCard: () => null,
     SafenetChecksSection: () => null,
+    SafenetShieldRow: () => null,
   })),
 }))
 
@@ -70,6 +71,7 @@ describe('SafeShieldWidget', () => {
       needsRiskConfirmation: false,
       isRiskConfirmed: false,
       setIsRiskConfirmed: jest.fn(),
+      setSafenetPhase: jest.fn(),
       setRecipientAddresses: jest.fn(),
       setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),

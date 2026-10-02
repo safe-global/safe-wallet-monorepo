@@ -31,6 +31,7 @@ import {
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative'
 import { useSafeProAccess } from '@/features/spaces'
+import type { SafenetCheckPhase } from '@/features/safenet-checks/types'
 
 type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
@@ -44,6 +45,9 @@ type SafeShieldContextType = {
   needsRiskConfirmation: boolean
   isRiskConfirmed: boolean
   setIsRiskConfirmed: Dispatch<SetStateAction<boolean>>
+  /** Reported by the Safenet checks prototype row; a risk raises the risk acknowledgement. */
+  safenetPhase?: SafenetCheckPhase
+  setSafenetPhase: Dispatch<SetStateAction<SafenetCheckPhase | undefined>>
   // Safe-level analysis (untrusted Safe check)
   safeAnalysis: SafeAnalysisResult | null
   addToTrustedList: () => void
@@ -92,6 +96,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
+  const [safenetPhase, setSafenetPhase] = useState<SafenetCheckPhase>()
+  const hasSafenetRisk = safenetPhase === 'risk'
 
   const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
@@ -107,17 +113,21 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
     // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
     const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
+      hasCriticalThreat ||
+      hasCriticalDeadlock ||
+      hasPoisoning ||
+      hasSafenetRisk ||
+      safeAnalysis?.severity === Severity.CRITICAL
 
     return {
       needsRiskConfirmation,
       primaryThreatSeverity: severity,
     }
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
+  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning, hasSafenetRisk])
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
+  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning, hasSafenetRisk])
 
   return (
     <SafeShieldContext.Provider
@@ -133,6 +143,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         needsRiskConfirmation,
         isRiskConfirmed,
         setIsRiskConfirmed,
+        safenetPhase,
+        setSafenetPhase,
         safeAnalysis,
         addToTrustedList,
         hasProFeatures,

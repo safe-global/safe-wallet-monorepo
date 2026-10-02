@@ -15,7 +15,7 @@ jest.mock('../../hooks/useHasOwnTenderly', () => ({ useHasOwnTenderly: () => moc
 // Explicit stubs: spreading the real module here pulls a circular import chain into the mock factory.
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '1', features: ['TX_SIMULATION'] }),
-  useHasFeature: () => true,
+  useHasFeature: (feature: string) => feature !== 'SAFENET_CHECKS_PROTOTYPE',
 }))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
   ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),

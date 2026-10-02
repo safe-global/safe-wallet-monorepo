@@ -24,6 +24,7 @@ jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
 
 jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => true,
+  useCurrentChain: () => undefined,
 }))
 
 // Selector-aware so real selectors run against a known slice, rather than every selector in the
