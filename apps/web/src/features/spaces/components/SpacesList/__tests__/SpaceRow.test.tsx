@@ -82,6 +82,13 @@ describe('SpaceRow', () => {
     expect(await screen.findByTestId('space-row-pro-badge')).toHaveTextContent('· Business')
   })
 
+  it('keeps the PRO pill without a label when an active plan has no name', async () => {
+    serveEntitlements({ [space.uuid]: { ...businessPlan('active'), name: null } })
+    render(<SpaceRow space={space} />, signedIn)
+
+    expect(await screen.findByTestId('space-row-pro-badge')).toHaveTextContent(/^$/)
+  })
+
   it('shows Free access instead of the plan name during a trial', async () => {
     serveEntitlements({ [space.uuid]: businessPlan('trialing') })
     render(<SpaceRow space={space} />, signedIn)

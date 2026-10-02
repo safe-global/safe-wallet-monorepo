@@ -76,12 +76,12 @@ const SpaceRow = ({
               isCompact
             />
           </div>
-          {badgeLabel && (
+          {plan && (
             <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
               <span className="block h-4 w-6">
                 <ProChip className="size-full" />
               </span>
-              · {badgeLabel}
+              {badgeLabel && `· ${badgeLabel}`}
             </Badge>
           )}
         </Link>
