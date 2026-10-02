@@ -56,12 +56,14 @@ jest.mock('../../TokenSelector', () => ({
     value,
     onChange,
     excludeAddresses = [],
+    disabledAddresses = [],
     helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
     value?: string
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
+    disabledAddresses?: string[]
     helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
@@ -71,7 +73,7 @@ jest.mock('../../TokenSelector', () => ({
         {mockTokens
           .filter((token) => !excludeAddresses.includes(token.address))
           .map((token) => (
-            <option key={token.address} value={token.address}>
+            <option key={token.address} value={token.address} disabled={disabledAddresses.includes(token.address)}>
               {token.symbol}
             </option>
           ))}
@@ -286,7 +288,7 @@ describe('TokenLimitCard', () => {
       mockUseExisting.mockReturnValue({ loading: false })
     })
 
-    it('hides a token the spender already has a limit for', () => {
+    it('lists a token the spender already has a limit for, but not as a choice', () => {
       mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
 
       renderRows([createEmptyLimit()], undefined, SPENDER)
@@ -294,7 +296,8 @@ describe('TokenLimitCard', () => {
       const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
         (option) => option.textContent,
       )
-      expect(options).toEqual(['none', 'ETH', 'DAI'])
+      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI'])
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeDisabled()
     })
 
     it('keeps the token for a spender without a limit on it', () => {
@@ -302,7 +305,7 @@ describe('TokenLimitCard', () => {
 
       renderRows([createEmptyLimit()], undefined, '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd')
 
-      expect(screen.getByRole('option', { name: 'USDC' })).toBeInTheDocument()
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeEnabled()
     })
 
     it('flags a token picked before the limits loaded once they arrive', async () => {
