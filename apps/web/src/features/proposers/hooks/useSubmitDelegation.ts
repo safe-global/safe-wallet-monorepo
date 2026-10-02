@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
-import { useDelegateMutations } from '@/features/proposers/hooks/useDelegateMutations'
+import { useDelegateMutations } from './useDelegateMutations'
 import { isTotpValid } from '@/features/proposers/utils/totp'
 import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 import useChainId from '@/hooks/useChainId'
