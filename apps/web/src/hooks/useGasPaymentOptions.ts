@@ -76,12 +76,12 @@ export const useGasPaymentOptions = ({
     ],
   )
 
-  // Only a source that can still change the answer holds the offer back; Pro waits only when nothing free is on offer.
+  // Only a source that can still change the answer holds the offer back.
   const isSettling =
     (!isBatch && isWalletCheckLoading) ||
     (chainOptions.includes('NO_FEE_CAMPAIGN') && campaign.isLoading) ||
     (chainOptions.includes('FREE_DAILY_LIMIT') && isRelaysLoading) ||
-    (chainOptions.includes('SUBSCRIPTION') && isProLoading && offer === null)
+    (chainOptions.includes('SUBSCRIPTION') && isProLoading)
 
   const exclude = useCallback((options: SponsoredOption[]) => {
     setExcluded((current) => new Set([...current, ...options]))
