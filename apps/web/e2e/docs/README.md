@@ -214,12 +214,14 @@ test('create transaction', async ({ safePage }) => {
 
 ## Environment Variables
 
-| Variable              | Default                                        | Description                                                    |
-| --------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `CI`                  | (unset)                                        | Set to `true` in CI — enables retries, parallel workers, JUnit |
-| `PLAYWRIGHT_BASE_URL` | `localhost:3000` (dev) / `localhost:8080` (CI) | App URL                                                        |
-| `SAFE_CGW_BASE_URL`   | `https://safe-client.staging.5afe.dev`         | CGW API URL                                                    |
-| `WALLET_CREDENTIALS`  | (unset)                                        | Private key for wallet connection (future)                     |
+| Variable                     | Default                                        | Description                                                                                                                |
+| ---------------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `CI`                         | (unset)                                        | Set to `true` in CI — enables retries, parallel workers, JUnit                                                             |
+| `PLAYWRIGHT_BASE_URL`        | `localhost:3000` (dev) / `localhost:8080` (CI) | App URL                                                                                                                    |
+| `SAFE_CGW_BASE_URL`          | `https://safe-client.staging.5afe.dev`         | CGW API URL                                                                                                                |
+| `WALLET_CREDENTIALS`         | (unset)                                        | Private key for wallet connection (future)                                                                                 |
+| `E2E_STEP_UP_CREDENTIALS`    | (unset)                                        | JSON with the OIDC session + TOTP secret and/or SIWE key for `step-up-live.spec.ts`; see `src/data/step-up-credentials.ts` |
+| `E2E_STEP_UP_WINDOW_SECONDS` | `60`                                           | CGW elevation window of the target environment (`AUTH_ELEVATION_WINDOW_SECONDS`)                                           |
 
 ## Debugging a Failed Test
 
