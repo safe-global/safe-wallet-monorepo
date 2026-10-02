@@ -62,10 +62,7 @@ export type ClosedDrawerState = {
 }
 
 export type SpendingLimitDrawerState =
-  | ActiveDrawerState
-  | UnenforcedDrawerState
-  | PendingDrawerState
-  | ClosedDrawerState
+  ActiveDrawerState | UnenforcedDrawerState | PendingDrawerState | ClosedDrawerState
 
 export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 

@@ -503,8 +503,7 @@ export const dispatchModuleTxExecution = async (
 
 export async function dispatchSafeAppsTx(
   args: { safeAppRequestId: RequestId; txId?: string } & (
-    | { safeTx: SafeTransaction; provider: Eip1193Provider }
-    | { safeTxHash: string }
+    { safeTx: SafeTransaction; provider: Eip1193Provider } | { safeTxHash: string }
   ),
 ): Promise<string> {
   let safeTxHash: string
