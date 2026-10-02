@@ -100,8 +100,7 @@ export const extractRevertSelector = (error: unknown): string | undefined => {
   // viem wraps the revert bytes in a ContractFunctionRevertedError cause
   if (error instanceof ViemBaseError) {
     const reverted = error.walk((e) => e instanceof ContractFunctionRevertedError) as
-      | ContractFunctionRevertedError
-      | undefined
+      ContractFunctionRevertedError | undefined
     const raw = reverted?.raw
     if (typeof raw === 'string' && raw.length >= 10) {
       return raw.slice(0, 10).toLowerCase()

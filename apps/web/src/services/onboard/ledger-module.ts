@@ -405,9 +405,8 @@ async function waitForAction<
   { observable }: ExecuteDeviceActionReturnType<Output, Error, IntermediateValue>,
   { rejectWhenLocked = false }: WaitForActionOptions = {},
 ): Promise<Output> {
-  const { DeviceActionStatus, DeviceLockedError, UserInteractionRequired } = await import(
-    '@ledgerhq/device-management-kit'
-  )
+  const { DeviceActionStatus, DeviceLockedError, UserInteractionRequired } =
+    await import('@ledgerhq/device-management-kit')
 
   let subscription: Subscription | undefined
 

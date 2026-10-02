@@ -13,9 +13,7 @@ export const SEVERITY_TO_TITLE: Record<Severity, string> = {
 // Statuses reportable for multiple recipients at once (backend-driven). The client-only
 // RESEMBLES_TRUSTED_ADDRESS is excluded — address-poisoning renders per-address, never consolidated.
 type MultiResultStatus =
-  | Exclude<RecipientStatus, RecipientStatus.RESEMBLES_TRUSTED_ADDRESS>
-  | BridgeStatus
-  | ContractStatus
+  Exclude<RecipientStatus, RecipientStatus.RESEMBLES_TRUSTED_ADDRESS> | BridgeStatus | ContractStatus
 
 // Builds a plural summary like "3 addresses …" for a consolidated group.
 type MultiResultDescription = (count: number, total?: number) => string

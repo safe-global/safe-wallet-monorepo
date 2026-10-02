@@ -46,8 +46,7 @@ jest.mock('@/components/common/AddressBookInput', () => {
     const error = name
       .split('.')
       .reduce<unknown>((acc, key) => (acc as Record<string, unknown> | undefined)?.[key], errors) as
-      | { message?: string }
-      | undefined
+      { message?: string } | undefined
     return (
       <div>
         <input
