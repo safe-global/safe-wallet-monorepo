@@ -1,6 +1,6 @@
 import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks/types'
 import { isRunningPhase } from './copy'
-import type { SafenetCheckOutcome, SafenetCheckState, SafenetScenario, SafenetSignerRole } from './types'
+import type { SafenetCheckOutcome, SafenetCheckState, SafenetScenario } from './types'
 
 export const SUBMITTED_DURATION_MS = 3_000
 
@@ -21,21 +21,21 @@ const outcomeState = (outcome: SafenetCheckOutcome, startedAtMs: number): Safene
 }
 
 /**
- * The check state a viewer sees at `nowMs` for the given scenario. Progress is only ever
- * submitted → checking → outcome: the middle phase may not be observable, so no sub-stages.
+ * The check state at `nowMs`. No `startedAtMs` means nobody has signed yet, so no check exists.
+ * Progress is only ever submitted → checking → outcome: the middle phase may not be observable.
  */
 export const resolveCheckState = (
   scenario: SafenetScenario,
-  role: SafenetSignerRole,
-  startedAtMs: number,
+  startedAtMs: number | undefined,
   nowMs: number,
   options: { isExecuted?: boolean } = {},
 ): SafenetCheckState => {
   if (!scenario.enhancedExecution) return { phase: 'locked' }
-  if (role === 'first-signer' && !options.isExecuted) return { phase: 'before-sign' }
+  if (options.isExecuted) return outcomeState(scenario.outcome, startedAtMs ?? 0)
+  if (startedAtMs === undefined) return { phase: 'before-sign' }
 
   const outcome = outcomeState(scenario.outcome, startedAtMs)
-  if (options.isExecuted || scenario.timing === 'instant' || isRunningPhase(outcome.phase)) return outcome
+  if (scenario.timing === 'instant' || isRunningPhase(outcome.phase)) return outcome
 
   const elapsedMs = nowMs - startedAtMs
   if (elapsedMs < SUBMITTED_DURATION_MS) return { phase: 'submitted', startedAtMs }

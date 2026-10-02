@@ -1,80 +1,45 @@
-import { useContext, useEffect, useRef, useState, type ReactElement } from 'react'
-import { CircleAlert, Info } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { cn } from '@/utils/cn'
-import { getCardCaption, isRunningPhase, type SafenetFlowStep } from '../copy'
-import type { SafenetCheckState } from '../types'
-import { resolveRole, useSafenetCheckState } from '../useSafenetCheckState'
-import { useSafenetScenario } from '../useSafenetScenario'
+import type { ReactElement } from 'react'
+import { Info } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Typography } from '@/components/ui/typography'
+import { getActionNote } from '../copy'
+import type { SafenetCheckState, SafenetSignerRole } from '../types'
+import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 
 export type SafenetCardCaptionViewProps = {
   state: SafenetCheckState
-  step: SafenetFlowStep
-  isWaiting?: boolean
-  onWait?: () => void
+  role: SafenetSignerRole
+  nowMs: number
 }
 
-/** Safenet note just above a tx card's buttons. Advisory: waiting never disables the primary action. */
-export const SafenetCardCaptionView = ({
-  state,
-  step,
-  isWaiting = false,
-  onWait,
-}: SafenetCardCaptionViewProps): ReactElement => {
-  const captionRef = useRef<HTMLDivElement>(null)
-  const isRunning = isRunningPhase(state.phase)
-  const { text, isRisk } = getCardCaption(state.phase, step, isWaiting)
-  const Icon = isRisk ? CircleAlert : Info
+/** Safenet note above the Sign or Execute button. Advisory: it never disables the action. */
+export const SafenetCardCaptionView = ({ state, role, nowMs }: SafenetCardCaptionViewProps): ReactElement => {
+  const { text, isRisk } = getActionNote(state.phase, role, { etaMs: state.etaMs, nowMs })
 
-  // Waiting means the signer asked to hear about the verdict, so take them to it when it lands.
-  useEffect(() => {
-    if (isWaiting && !isRunning) captionRef.current?.focus()
-  }, [isWaiting, isRunning])
+  if (isRisk) {
+    return (
+      <Alert variant="destructive" className="mt-4" data-testid="safenet-card-caption" data-phase={state.phase}>
+        <AlertSeverityIcon variant="destructive" />
+        <AlertDescription>{text}</AlertDescription>
+      </Alert>
+    )
+  }
 
   return (
-    <div
-      ref={captionRef}
-      tabIndex={-1}
-      data-testid="safenet-card-caption"
-      data-phase={state.phase}
-      className={cn(
-        'mt-4 flex items-center gap-2 rounded-md text-xs leading-4 outline-none',
-        isRisk
-          ? 'border border-[var(--color-error-light)] bg-[var(--color-error-background)] px-3 py-2 text-[var(--color-error-dark)]'
-          : 'text-muted-foreground',
-      )}
-    >
-      <Icon className="size-3.5 shrink-0" aria-hidden />
-      <span className="flex-1" aria-live="polite">
+    <div data-testid="safenet-card-caption" data-phase={state.phase} className="mt-4 flex items-start gap-2">
+      <Info className="mt-0.5 size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+      <Typography variant="paragraph-mini" color="muted" aria-live="polite">
         {text}
-      </span>
-      {isRunning && step !== 'review' && !isWaiting && onWait && (
-        <Button variant="ghost-muted" size="xs" onClick={onWait}>
-          Wait for result
-        </Button>
-      )}
+      </Typography>
     </div>
   )
 }
 
-/** Safenet note above the buttons of the review, sign or execute card. */
-export const SafenetCardCaption = ({ step }: { step: SafenetFlowStep }): ReactElement | null => {
-  const { isCreation, willExecute, onlyExecute } = useContext(TxFlowContext)
-  const { scenario, startedAtMs } = useSafenetScenario()
-  const check = useSafenetCheckState(resolveRole(scenario.role, { isCreation, willExecute, onlyExecute }))
-  const [waitingFor, setWaitingFor] = useState<number>()
-
+export const SafenetCardCaption = (): ReactElement | null => {
+  const { check, role } = useFlowSafenetCheck()
   if (!check) return null
 
-  return (
-    <SafenetCardCaptionView
-      state={check.state}
-      step={step}
-      isWaiting={waitingFor === startedAtMs}
-      onWait={() => setWaitingFor(startedAtMs)}
-    />
-  )
+  return <SafenetCardCaptionView state={check.state} role={role} nowMs={check.nowMs} />
 }
 
 export default SafenetCardCaption

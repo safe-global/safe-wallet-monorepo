@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useIsSafenetPrototypeEnabled } from '../useIsSafenetPrototypeEnabled'
+import { useCheckStartedAt } from './checkStarts'
 import { isRunningPhase } from './copy'
 import { resolveCheckState } from './resolveCheckState'
 import type { SafenetCheckState, SafenetScenario, SafenetSignerRole } from './types'
@@ -9,33 +10,37 @@ export type SafenetFlowRoleInput = {
   isCreation: boolean
   willExecute: boolean
   onlyExecute: boolean
+  /** This signature brings the tx to its threshold. */
+  completesThreshold: boolean
 }
 
-/** The signer's role in the current tx flow, unless the scenario forces one. */
+/** Who the viewer is in the current tx flow, unless the scenario forces a role. Only the copy depends on it. */
 export const resolveRole = (scenarioRole: SafenetScenario['role'], flow: SafenetFlowRoleInput): SafenetSignerRole => {
   if (scenarioRole !== 'auto') return scenarioRole
-  if (flow.isCreation) return flow.willExecute ? 'single-owner' : 'first-signer'
   if (flow.willExecute || flow.onlyExecute) return 'executor'
-  return 'co-signer'
+  if (flow.completesThreshold) return 'final-signer'
+  return flow.isCreation ? 'first-signer' : 'co-signer'
 }
 
 const TICK_MS = 1_000
 
 /**
- * MOCK source for every Safenet prototype surface: the check state for the viewer's role, from
- * the dev scenario instead of the chain. `null` when the prototype is off or the chain is not
- * Ethereum or Gnosis Chain. Swap the scenario read for `useSafenetCheck` + `fromPublicStatus`
- * to wire up real data.
+ * MOCK source for every Safenet prototype surface. A check exists only once the tx has its first
+ * signature, so no `safeTxHash` means `before-sign`. A tx signed in another browser counts as
+ * checked long ago, unless the dev scenario was restarted since. `null` when the prototype is off
+ * or the chain has no Safenet. Swap for `useSafenetCheck` + `fromPublicStatus` to wire up real data.
  */
 export const useSafenetCheckState = (
-  role: SafenetSignerRole,
+  safeTxHash: string | undefined,
   options: { isExecuted?: boolean } = {},
 ): { state: SafenetCheckState; nowMs: number } | null => {
   const isEnabled = useIsSafenetPrototypeEnabled()
-  const { scenario, startedAtMs } = useSafenetScenario()
+  const { scenario } = useSafenetScenario()
+  const recordedStartMs = useCheckStartedAt(safeTxHash)
   const [nowMs, setNowMs] = useState(Date.now)
 
-  const state = resolveCheckState(scenario, role, startedAtMs, nowMs, options)
+  const startedAtMs = safeTxHash ? (recordedStartMs ?? scenario.startedAtMs ?? 0) : undefined
+  const state = resolveCheckState(scenario, startedAtMs, nowMs, options)
   const isRunning = isEnabled && isRunningPhase(state.phase)
 
   useEffect(() => {

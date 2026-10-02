@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode } from 'react'
+import { type ReactElement } from 'react'
 import { Typography } from '@/components/ui/typography'
 import type {
   ContractAnalysisResults,
@@ -11,7 +11,6 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
 import type { ChecksCount } from '../utils/countChecks'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
-import { cn } from '@/utils/cn'
 
 const headerVisibilityDelay = 500
 
@@ -22,9 +21,6 @@ export const SafeShieldHeader = ({
   deadlock = [{}, undefined, false],
   overallStatus,
   checks,
-  isPending = false,
-  trailing,
-  variant = 'pill',
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
@@ -33,12 +29,6 @@ export const SafeShieldHeader = ({
   overallStatus?: { severity: Severity; title: string }
   /** "N of M checks passed" replaces the plain title while nothing is amiss. */
   checks?: ChecksCount
-  /** A check is still running: shows a pulsing dot before the label. */
-  isPending?: boolean
-  /** Right-aligned extra, e.g. a countdown. */
-  trailing?: ReactNode
-  /** `cap`: a full-width top row with a bottom border, for an outlined card (Safenet prototype). */
-  variant?: 'pill' | 'cap'
 }): ReactElement => {
   const [_recipientResults, recipientError, recipientLoading = false] = recipient
   const [_contractResults, contractError, contractLoading = false] = contract
@@ -66,30 +56,15 @@ export const SafeShieldHeader = ({
   const label = error ? 'Checks unavailable' : isLoadingVisible ? 'Analyzing...' : (okTitle ?? 'Copilot')
 
   return (
-    <div className={cn(variant === 'pill' && 'px-1 pt-1')}>
+    <div className="px-1 pt-1">
       <div
         data-testid="safe-shield-status"
-        className={cn(
-          'flex flex-row items-center gap-2',
-          variant === 'pill' ? 'rounded-md px-4 py-2' : 'h-9 border-b border-border px-3',
-        )}
+        className="flex flex-row rounded-md px-4 py-2"
         style={{ backgroundColor: headerBgColor }}
       >
-        {isPending && !isLoadingVisible && (
-          <span
-            className="size-1.5 shrink-0 rounded-full motion-safe:animate-pulse"
-            style={{ backgroundColor: headerTextColor }}
-            aria-hidden
-          />
-        )}
         <Typography variant="paragraph-mini-bold" className="uppercase" style={{ color: headerTextColor }}>
           {label}
         </Typography>
-        {trailing && !isLoadingVisible && (
-          <Typography variant="paragraph-mini" className="ml-auto" style={{ color: headerTextColor }}>
-            {trailing}
-          </Typography>
-        )}
       </div>
     </div>
   )

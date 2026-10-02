@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MOCK_DATA_NOTE, STORY_NOW_MS, STORY_STATES } from '../__fixtures__/checkStates'
+import { MOCK_DATA_NOTE, STORY_STATES } from '../__fixtures__/checkStates'
 import { SafenetQueueChipView } from './SafenetQueueChip'
 
 const meta = {
@@ -8,13 +8,11 @@ const meta = {
   parameters: {
     docs: { description: { component: `Per-transaction Safenet state in the queue. ${MOCK_DATA_NOTE}` } },
   },
-  args: { nowMs: STORY_NOW_MS },
 } satisfies Meta<typeof SafenetQueueChipView>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Submitted: Story = { args: { state: STORY_STATES.submitted } }
 export const Checking: Story = { args: { state: STORY_STATES.checking } }
 export const NoIssuesFound: Story = { args: { state: STORY_STATES['no-issues'] } }
 export const RiskDetected: Story = { args: { state: STORY_STATES.risk } }

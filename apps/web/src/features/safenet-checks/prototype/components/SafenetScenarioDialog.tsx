@@ -21,7 +21,7 @@ const ROLE_OPTIONS: Array<{ value: SafenetScenario['role']; label: string }> = [
   { value: 'first-signer', label: 'First signer' },
   { value: 'co-signer', label: 'Co-signer' },
   { value: 'executor', label: 'Executor' },
-  { value: 'single-owner', label: '1/1 owner' },
+  { value: 'final-signer', label: 'Last signer (meets the threshold)' },
 ]
 
 const OUTCOME_OPTIONS: Array<{ value: SafenetCheckOutcome; label: string }> = [

@@ -355,7 +355,7 @@ export const ExecuteForm = ({
           <Separator bleed="6" />
         </div>
 
-        <safenetPrototype.SafenetCardCaption step="execute" />
+        <safenetPrototype.SafenetCardCaption />
 
         <TxCardActions>
           {/* Submit button */}

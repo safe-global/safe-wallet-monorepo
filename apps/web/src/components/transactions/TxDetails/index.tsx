@@ -48,6 +48,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { SafenetChecksPrototypeFeature } from '@/features/safenet-checks'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -59,6 +60,7 @@ type TxDetailsProps = {
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
   const txNotes = useLoadFeature(TxNotesFeature)
   const hn = useLoadFeature(HypernativeFeature)
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
@@ -205,6 +207,8 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
           />
 
           {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
+
+          {isQueue && safeTxHash && <safenetPrototype.SafenetTxStatus safeTxHash={safeTxHash} chainId={safe.chainId} />}
 
           {isQueue && (
             <div className={css.buttons}>

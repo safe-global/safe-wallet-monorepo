@@ -31,7 +31,6 @@ import {
 } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
-import { cn } from '@/utils/cn'
 
 export const SafeShieldContent = ({
   recipient,
@@ -114,7 +113,7 @@ export const SafeShieldContent = ({
   )
 
   return (
-    <div className={cn(!isSafenetPrototype && 'px-1 pb-1')}>
+    <div className="px-1 pb-1">
       {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
@@ -127,10 +126,7 @@ export const SafeShieldContent = ({
 
         {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
 
-        <div
-          data-testid="open-checks-list"
-          className={cn(isSafenetPrototype && 'flex flex-col divide-y divide-border')}
-        >
+        <div data-testid="open-checks-list">
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
@@ -164,9 +160,8 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          {shouldShowContent && !isSafenetPrototype && <safenet.SafenetChecksSection />}
-
-          {shouldShowContent && isSafenetPrototype && !isSafePro && <safenetPrototype.SafenetShieldRow />}
+          {shouldShowContent &&
+            (isSafenetPrototype ? <safenetPrototype.SafenetShieldRow /> : <safenet.SafenetChecksSection />)}
 
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
@@ -177,20 +172,10 @@ export const SafeShieldContent = ({
           )}
         </div>
 
-        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent || isSafenetPrototype) && (
-          <div
-            className={cn('flex flex-col', isSafenetPrototype ? 'border-t border-border' : 'mt-1 rounded-md bg-muted')}
-            data-testid="pro-checks-section"
-          >
-            <ProChecksRow hasProFeatures={hasProFeatures} variant={isSafenetPrototype ? 'divider' : 'chip'} />
-            <div
-              className={cn(
-                'flex flex-col',
-                isSafenetPrototype
-                  ? 'divide-y divide-border'
-                  : 'gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary',
-              )}
-            >
+        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent) && (
+          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
+            <ProChecksRow hasProFeatures={hasProFeatures} />
+            <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
               {hasProFeatures ? (
                 <AnalysisGroupCard
                   data-testid="recipient-analysis-group-card"
@@ -219,8 +204,6 @@ export const SafeShieldContent = ({
                 />
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
-
-              {isSafenetPrototype && <safenetPrototype.SafenetShieldRow />}
             </div>
           </div>
         )}

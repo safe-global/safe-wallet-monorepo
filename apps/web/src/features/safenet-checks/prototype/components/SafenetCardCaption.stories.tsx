@@ -1,20 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MOCK_DATA_NOTE, STORY_STATES } from '../__fixtures__/checkStates'
+import { MOCK_DATA_NOTE, STORY_NOW_MS, STORY_STATES } from '../__fixtures__/checkStates'
 import { SafenetCardCaptionView } from './SafenetCardCaption'
 
 const meta = {
   title: 'Features/SafenetChecks/Prototype/SafenetCardCaption',
   component: SafenetCardCaptionView,
   parameters: {
-    docs: { description: { component: `Safenet caption under a tx card's buttons. ${MOCK_DATA_NOTE}` } },
+    docs: { description: { component: `Safenet note above the Sign or Execute button. ${MOCK_DATA_NOTE}` } },
   },
-  args: { onWait: () => {} },
+  args: { nowMs: STORY_NOW_MS },
   decorators: [
     (Story) => (
-      <div className="w-[560px] overflow-hidden rounded-xl bg-card p-6">
-        <div className="flex justify-end">
-          <span className="rounded-md bg-foreground px-6 py-2 text-sm text-background">Execute</span>
-        </div>
+      <div className="w-[560px] rounded-xl bg-card p-6">
         <Story />
       </div>
     ),
@@ -24,11 +21,11 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const ReviewBeforeSigning: Story = { args: { state: STORY_STATES['before-sign'], step: 'review' } }
-export const ReviewChecking: Story = { args: { state: STORY_STATES.checking, step: 'review' } }
-export const SignChecking: Story = { args: { state: STORY_STATES.checking, step: 'sign' } }
-export const ExecuteChecking: Story = { args: { state: STORY_STATES.checking, step: 'execute' } }
-export const ExecuteWaiting: Story = { args: { state: STORY_STATES.checking, step: 'execute', isWaiting: true } }
-export const ExecuteNoIssues: Story = { args: { state: STORY_STATES['no-issues'], step: 'execute' } }
-export const ExecuteRisk: Story = { args: { state: STORY_STATES.risk, step: 'execute' } }
-export const ExecuteUnavailable: Story = { args: { state: STORY_STATES.unavailable, step: 'execute' } }
+export const FirstSignerBeforeSigning: Story = { args: { state: STORY_STATES['before-sign'], role: 'first-signer' } }
+export const LastSignerBeforeSigning: Story = { args: { state: STORY_STATES['before-sign'], role: 'final-signer' } }
+export const CoSignerChecking: Story = { args: { state: STORY_STATES.checking, role: 'co-signer' } }
+export const LastSignerChecking: Story = { args: { state: STORY_STATES.checking, role: 'final-signer' } }
+export const ExecutorChecking: Story = { args: { state: STORY_STATES.checking, role: 'executor' } }
+export const ExecutorNoIssues: Story = { args: { state: STORY_STATES['no-issues'], role: 'executor' } }
+export const ExecutorRisk: Story = { args: { state: STORY_STATES.risk, role: 'executor' } }
+export const ExecutorUnavailable: Story = { args: { state: STORY_STATES.unavailable, role: 'executor' } }

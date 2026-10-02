@@ -2,11 +2,14 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { chainBuilder } from '@/tests/builders/chains'
+import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+import { clearCheckStarts, recordCheckStart } from '../../checkStarts'
+import { SAFENET_LEARN_MORE_URL, SAFENET_NAME } from '../../copy'
 import { SafenetShieldRow, SafenetShieldRowView } from '../SafenetShieldRow'
-import { SafenetShieldFootView } from '../SafenetShieldFoot'
 import { SafenetCardCaptionView } from '../SafenetCardCaption'
-import { SafenetTxRailView } from '../SafenetTxRail'
 import { SafenetHistoryRowView } from '../SafenetHistoryRow'
+import { SafenetQueueChip, SafenetQueueChipView } from '../SafenetQueueChip'
+import { SafenetTxStatusView } from '../SafenetTxStatus'
 
 jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(),
@@ -34,74 +37,75 @@ describe('Safenet prototype surfaces', () => {
     expect(mockSetSafenetPhase).not.toHaveBeenCalledWith('risk')
   })
 
-  it('announces Shield row status changes politely', () => {
-    render(<SafenetShieldRowView state={{ phase: 'submitted', startedAtMs: START }} />)
-    expect(screen.getByText('Sent to Safenet for an independent check.').closest('[aria-live]')).toHaveAttribute(
-      'aria-live',
-      'polite',
-    )
+  it('shows the before-signing state in a new transaction flow, with no tooltip', () => {
+    render(<SafenetShieldRow />)
+    expect(screen.getByTestId('safenet-shield-row')).toHaveAttribute('data-phase', 'before-sign')
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
-  it('explains the wait from the Shield row while checking', () => {
-    render(<SafenetShieldRowView state={{ phase: 'checking' }} />)
-    expect(screen.getByRole('button', { name: 'Why does this take longer?' })).toBeInTheDocument()
+  it('shows the running check in the Shield of a signed transaction', () => {
+    const safeTxHash = `0x${'cd'.repeat(32)}`
+    clearCheckStarts()
+    recordCheckStart(safeTxHash)
+    render(
+      <TxFlowContext.Provider
+        value={{ ...initialContext, txId: `multisig_0x81e84a1e121Add6514170396E864033e087E6216_${safeTxHash}` }}
+      >
+        <SafenetShieldRow />
+      </TxFlowContext.Provider>,
+    )
+    expect(screen.getByTestId('safenet-shield-row')).toHaveAttribute('data-phase', 'submitted')
+    expect(mockSetSafenetPhase).toHaveBeenCalledWith('submitted')
+  })
+
+  it('names Safenet and links out to learn more before signing', () => {
+    render(<SafenetShieldRowView state={{ phase: 'before-sign' }} nowMs={START} />)
+    expect(screen.getByTestId('safenet-name')).toHaveTextContent(SAFENET_NAME)
+    expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute('href', SAFENET_LEARN_MORE_URL)
+  })
+
+  it('says a running check takes about a minute, politely', () => {
+    render(<SafenetShieldRowView state={{ phase: 'checking', etaMs: START + 60_000 }} nowMs={START} />)
+    const status = screen.getByText(/It takes about a minute/)
+    expect(status.closest('[aria-live]')).toHaveAttribute('aria-live', 'polite')
   })
 
   it('offers a one-tap enable when the check is locked', () => {
     const onEnable = jest.fn()
-    render(<SafenetShieldRowView state={{ phase: 'locked' }} onEnable={onEnable} />)
+    render(<SafenetShieldRowView state={{ phase: 'locked' }} nowMs={START} onEnable={onEnable} />)
     fireEvent.click(screen.getByRole('button', { name: 'Turn on' }))
     expect(onEnable).toHaveBeenCalled()
   })
 
   it('links a Shield verdict to the Safenet explorer, but not a running check', () => {
-    const { rerender } = render(<SafenetShieldRowView state={{ phase: 'checking' }} explorerHref={EXPLORER} />)
+    const { rerender } = render(
+      <SafenetShieldRowView state={{ phase: 'checking' }} nowMs={START} explorerHref={EXPLORER} />,
+    )
     expect(screen.queryByRole('link', { name: /Safenet explorer/ })).not.toBeInTheDocument()
 
-    rerender(<SafenetShieldRowView state={{ phase: 'no-issues' }} explorerHref={EXPLORER} />)
+    rerender(<SafenetShieldRowView state={{ phase: 'no-issues' }} nowMs={START} explorerHref={EXPLORER} />)
     expect(screen.getByRole('link', { name: /Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
   })
 
-  it('shows progress and the ETA at the foot of the Shield while checking', () => {
-    render(
-      <SafenetShieldFootView
-        state={{ phase: 'checking', startedAtMs: START, etaMs: START + 60_000 }}
-        nowMs={START + 17_000}
-      />,
-    )
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '28')
-    expect(screen.getByText('Ready in ~43 seconds')).toBeInTheDocument()
+  it('shows a risk above the action as an alert', () => {
+    render(<SafenetCardCaptionView state={{ phase: 'risk' }} role="executor" nowMs={START} />)
+    expect(screen.getByRole('alert')).toHaveTextContent('Review it before you execute.')
   })
 
-  it('offers to wait for a running check at the execute step without forcing it', () => {
-    const onWait = jest.fn()
-    render(<SafenetCardCaptionView state={{ phase: 'checking', startedAtMs: START }} step="execute" onWait={onWait} />)
-    expect(
-      screen.getByText('Safenet has not reported yet. You can execute now or wait for the result.'),
-    ).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Wait for result' }))
-    expect(onWait).toHaveBeenCalled()
+  it('keeps the queue status visible with the Safenet name', () => {
+    render(<SafenetQueueChipView state={{ phase: 'no-issues' }} />)
+    expect(screen.getByTestId('safenet-queue-chip')).toHaveTextContent('Safenet: No issues found')
   })
 
-  it('moves focus to the caption once a waited-for check lands', () => {
-    const { rerender } = render(
-      <SafenetCardCaptionView state={{ phase: 'checking', startedAtMs: START }} step="sign" isWaiting />,
-    )
-    rerender(<SafenetCardCaptionView state={{ phase: 'no-issues', startedAtMs: START }} step="sign" isWaiting />)
-    expect(screen.getByTestId('safenet-card-caption')).toHaveFocus()
+  it('shows the second signer a finished check in the queue', () => {
+    render(<SafenetQueueChip safeTxHash={`0x${'ab'.repeat(32)}`} />)
+    expect(screen.getByTestId('safenet-queue-chip')).toHaveAttribute('data-phase', 'no-issues')
   })
 
-  it('marks the current rail step and shows Safenet under Sign', () => {
-    render(
-      <SafenetTxRailView
-        current="confirm"
-        safenet={{ state: { phase: 'before-sign' }, nowMs: START }}
-        signatures={{ submitted: 1, required: 2 }}
-      />,
-    )
-    expect(screen.getByText('Confirm').closest('li')).toHaveAttribute('aria-current', 'step')
-    expect(screen.getByText('Offchain · free · 1 of 2 signed')).toBeInTheDocument()
-    expect(screen.getByTestId('safenet-rail-note')).toHaveTextContent('Safenet starts here')
+  it('shows the result and explorer link in the expanded transaction', () => {
+    render(<SafenetTxStatusView state={{ phase: 'risk' }} nowMs={START} explorerHref={EXPLORER} />)
+    expect(screen.getByTestId('safenet-tx-status')).toHaveTextContent('Safenet: Risk detected')
+    expect(screen.getByRole('link', { name: /Safenet explorer/ })).toHaveAttribute('href', EXPLORER)
   })
 
   it('links to the Safenet explorer in history only once there is a verdict', () => {

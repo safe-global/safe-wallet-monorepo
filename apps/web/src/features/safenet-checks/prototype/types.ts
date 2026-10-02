@@ -14,7 +14,7 @@ export type SafenetCheckOutcome = Extract<
   'submitted' | 'checking' | 'no-issues' | 'risk' | 'unavailable'
 >
 
-export type SafenetSignerRole = 'first-signer' | 'co-signer' | 'executor' | 'single-owner'
+export type SafenetSignerRole = 'first-signer' | 'co-signer' | 'final-signer' | 'executor'
 
 export type SafenetScenarioTiming = 'instant' | 'about-60s' | 'never'
 

@@ -1,5 +1,4 @@
-import { useMemo, type ReactElement, type ReactNode } from 'react'
-import { Card } from '@/components/ui/card'
+import { useMemo, type ReactElement } from 'react'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -23,13 +22,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
-import {
-  SafenetChecksPrototypeFeature,
-  useIsSafenetPrototypeEnabled,
-  withSafenetCheck,
-} from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__'
-import type { SafenetCheckPhase } from '@/features/safenet-checks/types'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -39,16 +31,6 @@ const shieldLogoOnHover = [
   'hover:[&_.shield-lines]:fill-[var(--color-static-main)]',
   'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
 ].join(' ')
-
-/** The Safenet prototype draws the panel as an outlined design-library card, matching its tx rail. */
-const ShieldPanel = ({ isOutlined, children }: { isOutlined: boolean; children: ReactNode }): ReactElement =>
-  isOutlined ? (
-    <Card size="none" variant="outlined" radius="lg">
-      {children}
-    </Card>
-  ) : (
-    <div className="overflow-hidden rounded-lg bg-card">{children}</div>
-  )
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -63,7 +45,6 @@ export const SafeShieldDisplay = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
-  safenetPhase,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -78,8 +59,6 @@ export const SafeShieldDisplay = ({
   hasProFeatures?: boolean
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
-  /** Set while the Safenet checks prototype shows a check; folds it into the header. */
-  safenetPhase?: SafenetCheckPhase
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -95,7 +74,7 @@ export const SafeShieldDisplay = ({
     [hypernativeAuth],
   )
 
-  const baseOverallStatus = useMemo(
+  const overallStatus = useMemo(
     () =>
       getOverallStatus(
         recipientResults,
@@ -108,7 +87,7 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
-  const baseChecks = useMemo(
+  const checks = useMemo(
     () =>
       countChecks({
         threat: threatResults,
@@ -132,30 +111,20 @@ export const SafeShieldDisplay = ({
     ],
   )
 
-  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
-  const isSafenetPrototype = useIsSafenetPrototypeEnabled()
-  const { overallStatus, checks, isPending } = useMemo(
-    () => withSafenetCheck(safenetPhase, baseOverallStatus, baseChecks),
-    [safenetPhase, baseOverallStatus, baseChecks],
-  )
-
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
       {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
           two curves stay concentric instead of the inner corner cutting inside the outer one. */}
-      <ShieldPanel isOutlined={isSafenetPrototype}>
+      <div className="overflow-hidden rounded-lg bg-card">
         <SafeShieldHeader
-          variant={isSafenetPrototype ? 'cap' : 'pill'}
           recipient={recipient}
           contract={contract}
           threat={threat}
           deadlock={deadlock}
           overallStatus={overallStatus}
           checks={checks}
-          isPending={isPending}
-          trailing={isPending ? <safenetPrototype.SafenetHeaderEta /> : undefined}
         />
 
         <SafeShieldContent
@@ -173,15 +142,11 @@ export const SafeShieldDisplay = ({
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
         />
-      </ShieldPanel>
+      </div>
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          {isSafenetPrototype ? (
-            <safenetPrototype.SafenetShieldPill phase={safenetPhase} />
-          ) : (
-            <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
-          )}
+          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
         </ExternalLink>
       </div>
     </div>

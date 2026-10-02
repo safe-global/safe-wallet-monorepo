@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { clearCheckStarts } from './checkStarts'
 import type { SafenetScenario } from './types'
 
 const STORAGE_KEY = 'safenetPrototypeScenario'
@@ -11,13 +12,9 @@ export const DEFAULT_SCENARIO: SafenetScenario = {
   enhancedExecution: true,
 }
 
-// One shared start per page load, so moving between surfaces never restarts the wait.
-const SESSION_STARTED_AT_MS = Date.now()
-
 export type SafenetScenarioControls = {
   scenario: SafenetScenario
-  startedAtMs: number
-  /** Applies the change and restarts the check, as if the first signature was just submitted. */
+  /** Applies the change and restarts every check, as if each tx was just signed for the first time. */
   updateScenario: (change: Partial<SafenetScenario>) => void
   restartCheck: () => void
 }
@@ -29,6 +26,7 @@ export const useSafenetScenario = (): SafenetScenarioControls => {
 
   const updateScenario = useCallback(
     (change: Partial<SafenetScenario>) => {
+      clearCheckStarts()
       setStored((prev) => ({ ...DEFAULT_SCENARIO, ...prev, ...change, startedAtMs: Date.now() }))
     },
     [setStored],
@@ -36,10 +34,5 @@ export const useSafenetScenario = (): SafenetScenarioControls => {
 
   const restartCheck = useCallback(() => updateScenario({}), [updateScenario])
 
-  return {
-    scenario,
-    startedAtMs: scenario.startedAtMs ?? SESSION_STARTED_AT_MS,
-    updateScenario,
-    restartCheck,
-  }
+  return { scenario, updateScenario, restartCheck }
 }

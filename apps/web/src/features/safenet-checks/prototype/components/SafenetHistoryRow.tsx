@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
 import ExternalLink from '@/components/common/ExternalLink'
-import { SAFENET_EXPLORER_URL } from '@safe-global/utils/features/safenet-checks/constants'
 import { PHASE_PRESENTATION, isVerdictPhase } from '../copy'
+import { getSafenetExplorerHref } from '../explorer'
 import type { SafenetCheckPhase, SafenetCheckState } from '../types'
 import { useSafenetCheckState } from '../useSafenetCheckState'
 
@@ -57,13 +57,16 @@ export const SafenetHistoryRow = ({
   isExecuted,
   isLast,
 }: SafenetHistoryRowProps): ReactElement | null => {
-  const check = useSafenetCheckState('co-signer', { isExecuted })
+  const check = useSafenetCheckState(safeTxHash, { isExecuted })
   if (!check || check.state.phase === 'locked') return null
 
-  // MOCK: the real link targets the attestation; this is the explorer's safeTx route.
-  const explorerHref = `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
-
-  return <SafenetHistoryRowView state={check.state} explorerHref={explorerHref} isLast={isLast} />
+  return (
+    <SafenetHistoryRowView
+      state={check.state}
+      explorerHref={getSafenetExplorerHref(chainId, safeTxHash)}
+      isLast={isLast}
+    />
+  )
 }
 
 export default SafenetHistoryRow

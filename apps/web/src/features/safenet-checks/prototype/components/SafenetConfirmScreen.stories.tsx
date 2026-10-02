@@ -1,4 +1,3 @@
-import type { ComponentProps } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
 import { FullAnalysisBuilder, RecipientAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
@@ -8,14 +7,13 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
-import { SafeShieldProvider, useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 // eslint-disable-next-line no-restricted-imports -- the story renders the real panel the prototype plugs into
 import { SafeShieldDisplay } from '@/features/safe-shield/components/SafeShieldDisplay'
 import { MOCK_DATA_NOTE } from '../__fixtures__/checkStates'
 import type { SafenetScenario } from '../types'
-import type { SafenetFlowStep } from '../copy'
+import { clearCheckStarts } from '../checkStarts'
 import { SafenetCardCaption } from './SafenetCardCaption'
-import { SafenetTxRail } from './SafenetTxRail'
 
 faker.seed(456)
 
@@ -26,25 +24,18 @@ const analysis = FullAnalysisBuilder.verifiedContract(faker.finance.ethereumAddr
   .threat(FullAnalysisBuilder.noThreat().build().threat)
   .build()
 
-const ShieldPanel = (props: ComponentProps<typeof SafeShieldDisplay>) => {
-  const { safenetPhase } = useSafeShield()
-  return <SafeShieldDisplay {...props} safenetPhase={safenetPhase} />
-}
-
-const PRIMARY_LABEL: Record<SafenetFlowStep, string> = { review: 'Continue', sign: 'Sign', execute: 'Execute' }
+const TX_ID = `multisig_0x81e84a1e121Add6514170396E864033e087E6216_0x${'ab'.repeat(32)}`
 
 type ScreenProps = {
   scenario: SafenetScenario
-  flow: { isCreation: boolean; willExecute: boolean; step: number; stepCount: number }
-  cardStep: SafenetFlowStep
+  /** How long ago the first signature started the check. */
+  startedAgoMs?: number
+  flow: { isCreation: boolean; willExecute: boolean; txId?: string }
 }
 
-const ConfirmScreen = ({ flow, cardStep }: ScreenProps) => (
+const ConfirmScreen = ({ flow }: ScreenProps) => (
   <TxFlowContext.Provider value={{ ...initialContext, ...flow }}>
     <div className="flex items-start gap-6 bg-background p-6">
-      <div className="pt-[46px]">
-        <SafenetTxRail step={flow.step} stepCount={flow.stepCount} />
-      </div>
       <div className="w-[560px] shrink-0">
         <Typography variant="h3" className="mb-2">
           Confirm transaction
@@ -57,15 +48,15 @@ const ConfirmScreen = ({ flow, cardStep }: ScreenProps) => (
             <span className="text-muted-foreground">To</span>
             <span className="font-mono text-xs break-all">0x81e84a1e121Add6514170396E864033e087E6216</span>
           </div>
-          <SafenetCardCaption step={cardStep} />
+          <SafenetCardCaption />
           <TxCardActions>
             <Button variant="outline">Back</Button>
-            <Button size="submit">{PRIMARY_LABEL[cardStep]}</Button>
+            <Button size="submit">{flow.willExecute ? 'Execute' : 'Sign'}</Button>
           </TxCardActions>
         </TxCard>
       </div>
       <div className="w-80 shrink-0 pt-10">
-        <ShieldPanel {...analysis} />
+        <SafeShieldDisplay {...analysis} />
       </div>
     </div>
   </TxFlowContext.Provider>
@@ -78,14 +69,18 @@ const meta = {
     layout: 'fullscreen',
     docs: {
       description: {
-        component: `The real rail, tx card chrome and Safe Shield panel with the Safenet prototype on. The card body is a stand-in. ${MOCK_DATA_NOTE}`,
+        component: `The real tx card chrome and Safe Shield panel with the Safenet prototype on, at the Sign or Execute step. The card body is a stand-in. ${MOCK_DATA_NOTE}`,
       },
     },
   },
   tags: ['skip-visual-test'],
   loaders: [
     async ({ args }) => {
-      window.localStorage.setItem(SCENARIO_KEY, JSON.stringify({ ...args.scenario, startedAtMs: Date.now() - 17_000 }))
+      clearCheckStarts()
+      window.localStorage.setItem(
+        SCENARIO_KEY,
+        JSON.stringify({ ...args.scenario, startedAtMs: Date.now() - (args.startedAgoMs ?? 17_000) }),
+      )
       return {}
     },
   ],
@@ -108,46 +103,35 @@ type Story = StoryObj<typeof meta>
 const baseScenario: SafenetScenario = {
   role: 'auto',
   outcome: 'no-issues',
-  timing: 'never',
+  timing: 'about-60s',
   enhancedExecution: true,
 }
 
-export const BeforeSigning: Story = {
-  args: {
-    scenario: baseScenario,
-    flow: { isCreation: true, willExecute: false, step: 1, stepCount: 3 },
-    cardStep: 'review',
-  },
+/** New transaction: nobody has signed, so there is no check yet. */
+export const FirstSignerBeforeSigning: Story = {
+  args: { scenario: { ...baseScenario, role: 'first-signer' }, flow: { isCreation: true, willExecute: false } },
 }
 
-export const Checking: Story = {
+export const CoSignerChecking: Story = {
+  args: { scenario: baseScenario, flow: { isCreation: false, willExecute: false, txId: TX_ID } },
+}
+
+/** The common case: the check finished before the second signer opened the transaction. */
+export const SecondSignerCheckDone: Story = {
   args: {
     scenario: baseScenario,
-    flow: { isCreation: false, willExecute: false, step: 0, stepCount: 2 },
-    cardStep: 'review',
+    startedAgoMs: 10 * 60_000,
+    flow: { isCreation: false, willExecute: false, txId: TX_ID },
   },
 }
 
 export const ExecuteChecking: Story = {
-  args: {
-    scenario: baseScenario,
-    flow: { isCreation: false, willExecute: true, step: 1, stepCount: 2 },
-    cardStep: 'execute',
-  },
+  args: { scenario: baseScenario, flow: { isCreation: false, willExecute: true, txId: TX_ID } },
 }
 
 export const ExecuteRiskDetected: Story = {
   args: {
     scenario: { ...baseScenario, outcome: 'risk', timing: 'instant' },
-    flow: { isCreation: false, willExecute: true, step: 1, stepCount: 2 },
-    cardStep: 'execute',
-  },
-}
-
-export const ExecuteNoIssues: Story = {
-  args: {
-    scenario: { ...baseScenario, timing: 'instant' },
-    flow: { isCreation: false, willExecute: true, step: 1, stepCount: 2 },
-    cardStep: 'execute',
+    flow: { isCreation: false, willExecute: true, txId: TX_ID },
   },
 }

@@ -2,20 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { SAFENET_EXPLORER_URL } from '@safe-global/utils/features/safenet-checks/constants'
 import { MOCK_DATA_NOTE, STORY_NOW_MS, STORY_STATES } from '../__fixtures__/checkStates'
 import { SafenetShieldRowView } from './SafenetShieldRow'
-import { SafenetShieldFootView } from './SafenetShieldFoot'
 
 const meta = {
   title: 'Features/SafenetChecks/Prototype/SafenetShieldRow',
   component: SafenetShieldRowView,
-  parameters: { docs: { description: { component: `Safenet row in the Safe Shield panel. ${MOCK_DATA_NOTE}` } } },
-  args: { explorerHref: SAFENET_EXPLORER_URL, onEnable: () => {} },
+  parameters: { docs: { description: { component: `Safenet section in the Safe Shield panel. ${MOCK_DATA_NOTE}` } } },
+  args: { explorerHref: SAFENET_EXPLORER_URL, nowMs: STORY_NOW_MS, onEnable: () => {} },
   decorators: [
-    (Story, { args }) => (
-      <div className="w-80 overflow-hidden rounded-lg border border-border bg-card">
+    (Story) => (
+      <div className="w-80 overflow-hidden rounded-lg bg-card">
         <Story />
-        {(args.state.phase === 'checking' || args.state.phase === 'submitted') && (
-          <SafenetShieldFootView state={args.state} nowMs={STORY_NOW_MS} />
-        )}
       </div>
     ),
   ],

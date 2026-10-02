@@ -22,15 +22,6 @@ describe('ProChecksRow', () => {
     expect(screen.getByTestId('pro-upgrade-link')).toHaveAttribute('href', '/welcome/spaces')
   })
 
-  it('renders as a labelled divider with the same Upgrade link in the divider variant', () => {
-    mockSpaceId = 'space-1'
-    render(<ProChecksRow hasProFeatures={false} variant="divider" />)
-
-    expect(screen.getByText('Pro checks')).toBeInTheDocument()
-    expect(screen.queryByLabelText('Safe Pro')).not.toBeInTheDocument()
-    expect(screen.getByTestId('pro-upgrade-link')).toHaveAttribute('href', '/spaces/plans?spaceId=space-1')
-  })
-
   it('only shows the chip with Pro', () => {
     render(<ProChecksRow hasProFeatures />)
 

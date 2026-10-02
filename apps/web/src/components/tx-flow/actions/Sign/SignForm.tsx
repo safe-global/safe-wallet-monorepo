@@ -114,7 +114,7 @@ export const SignForm = ({
       <div>
         <Separator bleed="6" />
 
-        <safenetPrototype.SafenetCardCaption step="sign" />
+        <safenetPrototype.SafenetCardCaption />
 
         {/* Submit button */}
         <TxCardActions>

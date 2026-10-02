@@ -146,7 +146,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       {showSafenetStatus && safeTxHash && (
         <div style={{ gridArea: 'safenet' }} className={css.safenet}>
           {isSafenetPrototype ? (
-            <safenetPrototype.SafenetQueueChip />
+            <safenetPrototype.SafenetQueueChip safeTxHash={safeTxHash} />
           ) : (
             <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
           )}

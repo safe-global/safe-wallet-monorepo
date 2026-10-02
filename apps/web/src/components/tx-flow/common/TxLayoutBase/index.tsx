@@ -10,8 +10,6 @@ import { ProgressBar } from '@/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
-import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksPrototypeFeature, useIsSafenetPrototypeEnabled } from '@/features/safenet-checks'
 import SafeShieldWidget from '@/features/safe-shield'
 import css from './styles.module.css'
 
@@ -108,34 +106,21 @@ const TxLayoutBase = ({
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isDarkMode = useDarkMode()
-  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
-  const showSafenetRail = useIsSafenetPrototypeEnabled() && !isBatch && !isMessage
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
       {!isReplacement && !hideStatusRail && !isSmallScreen && (
         /* Icons-only below 1200px (see StatusLabel) — the rail gives its 200px back to the card
            rather than squeezing it, since the card is what the user is actually filling in. */
-        <div
-          className={classnames(
-            'w-14',
-            showSafenetRail
-              ? 'pt-[46px] min-[1200px]:w-[240px] min-[1440px]:w-[320px]'
-              : 'pt-10 min-[1200px]:w-[200px]',
-          )}
-        >
+        <div className="w-14 pt-10 min-[1200px]:w-[200px]">
           <aside>
             <div className="fixed flex flex-col gap-6">
-              {showSafenetRail ? (
-                <safenetPrototype.SafenetTxRail step={step} stepCount={stepCount} txSummary={txSummary} />
-              ) : (
-                <TxStatusWidget
-                  isLastStep={step === stepCount - 1}
-                  txSummary={txSummary}
-                  isBatch={isBatch}
-                  isMessage={isMessage}
-                />
-              )}
+              <TxStatusWidget
+                isLastStep={step === stepCount - 1}
+                txSummary={txSummary}
+                isBatch={isBatch}
+                isMessage={isMessage}
+              />
             </div>
           </aside>
         </div>

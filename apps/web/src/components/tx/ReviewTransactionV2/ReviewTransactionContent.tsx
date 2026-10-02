@@ -20,8 +20,6 @@ import { Separator } from '@/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksPrototypeFeature } from '@/features/safenet-checks'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
 
@@ -43,7 +41,6 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
 }): ReactElement => {
   const { isBatch, isCreation, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } = useContext(TxFlowContext)
-  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
   const { needsRiskConfirmation, isRiskConfirmed } = safeShield
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -83,8 +80,6 @@ export const ReviewTransactionContent = ({
         <Slot name={SlotName.Footer} />
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
-
-        <safenetPrototype.SafenetCardCaption step="review" />
 
         <TxCardActions className="!mt-0">
           {/* Continue button */}
