@@ -38,7 +38,7 @@ const FORM_ID = 'select-safes-form'
 const SelectSafesOnboarding = (): ReactElement => {
   const wallet = useWallet()
   const totalSteps = useOnboardingStepCount()
-  const { spaceId, handleBack, handleSkip, redirectToNextStep } = useOnboardingNavigation()
+  const { spaceId, handleBack, handleSkip, redirectToNextStep, nextStepUrl } = useOnboardingNavigation()
   const router = useRouter()
   const offersTrial = useOffersTrial(spaceId)
   const {
@@ -62,7 +62,7 @@ const SelectSafesOnboarding = (): ReactElement => {
     step,
     safesToName,
     showSelectStep,
-  } = useOnboardingSubmit(spaceId, redirectToNextStep, allSafes)
+  } = useOnboardingSubmit(spaceId, redirectToNextStep, allSafes, nextStepUrl)
   const isNameStep = step === 'name'
 
   const { control, setValue } = formMethods
