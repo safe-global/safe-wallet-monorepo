@@ -4,7 +4,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { parseDelegationOrigin } from '@/features/proposers/utils/delegationParsing'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
-import type { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
 
 /**
@@ -32,7 +32,7 @@ export async function createDelegationMessage(
   dispatch: AppDispatch,
   chainId: string,
   parentSafeAddress: string,
-  delegateTypedData: ReturnType<typeof getDelegateTypedData>,
+  delegateTypedData: DelegateTypedData,
   signature: string,
   origin: string,
 ): Promise<void> {

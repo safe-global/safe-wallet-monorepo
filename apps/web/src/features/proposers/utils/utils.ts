@@ -3,18 +3,24 @@ import { EthSafeSignature, buildContractSignature, buildSignatureBytes } from '@
 import { SigningMethod } from '@safe-global/types-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
 import type { JsonRpcSigner } from 'ethers'
-import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
-import type { DelegateAction } from '@safe-global/utils/services/delegates'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import {
+  getDelegateTypedData,
+  hashDelegateTypedData,
+  isQueueServiceDelegateTypedData,
+} from '@safe-global/utils/services/delegates'
+import type { DelegateAction, DelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
 import { isSmartContractWallet } from '@/utils/wallets'
 
-// Bypasses ethers' high-level signTypedData because the delegate domain
-// contains a non-standard `safe` field that ethers rejects. The wallet itself
-// (MetaMask, etc.) handles arbitrary EIP-712 payloads via eth_signTypedData_v4.
-const signDelegateTypedData = async (
-  signer: JsonRpcSigner,
-  typedData: ReturnType<typeof getDelegateTypedData>,
-): Promise<string> => {
+type DelegateChain = Pick<Chain, 'chainId' | 'features'>
+
+// The queue service domain has a non-standard `safe` field that ethers' signTypedData rejects, so it goes to the wallet as raw eth_signTypedData_v4.
+const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateTypedData): Promise<string> => {
+  if (!isQueueServiceDelegateTypedData(typedData)) {
+    return signTypedData(signer, typedData)
+  }
+
   const signature = await signer.provider.send('eth_signTypedData_v4', [
     signer.address.toLowerCase(),
     JSON.stringify(typedData),
@@ -23,13 +29,13 @@ const signDelegateTypedData = async (
 }
 
 export const signProposerTypedData = async (
-  chainId: string,
+  chain: DelegateChain,
   proposerAddress: string,
   safeAddress: string,
   action: DelegateAction,
   signer: JsonRpcSigner,
 ) => {
-  const typedData = getDelegateTypedData(chainId, proposerAddress, safeAddress, action)
+  const typedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
   return signDelegateTypedData(signer, typedData)
 }
 
@@ -46,22 +52,22 @@ export const signProposerTypedData = async (
  * can recover the signer correctly.
  */
 export const signProposerTypedDataForSafe = async (
-  chainId: string,
+  chain: DelegateChain,
   proposerAddress: string,
   parentSafeAddress: string,
   safeAddress: string,
   action: DelegateAction,
   signer: JsonRpcSigner,
 ) => {
-  // Step 1: Compute the delegate typed data hash (custom hasher — ethers rejects `safe` in domain)
-  const delegateTypedData = getDelegateTypedData(chainId, proposerAddress, safeAddress, action)
+  // Step 1: Compute the delegate typed data hash
+  const delegateTypedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
   const delegateHash = hashDelegateTypedData(delegateTypedData)
 
   // Step 2: Build the SafeMessage typed data that the CompatibilityFallbackHandler uses
   const safeMessageTypedData = {
     domain: {
       verifyingContract: parentSafeAddress,
-      chainId: Number(chainId),
+      chainId: Number(chain.chainId),
     },
     types: {
       SafeMessage: [{ type: 'bytes', name: 'message' }],

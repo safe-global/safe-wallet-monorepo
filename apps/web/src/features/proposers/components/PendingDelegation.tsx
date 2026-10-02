@@ -60,7 +60,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
     : ''
 
   const handleSign = async () => {
-    if (!wallet?.provider) return
+    if (!wallet?.provider || !chain) return
 
     setError(undefined)
     setIsSignLoading(true)
@@ -71,7 +71,7 @@ function PendingDelegation({ delegation, onRefetch }: PendingDelegationProps): R
       const signingAction = SIGNING_ACTION_BY_DELEGATION[delegation.action]
 
       const eoaSignature = await signProposerTypedDataForSafe(
-        chainId,
+        chain,
         delegation.delegateAddress,
         delegation.parentSafeAddress,
         delegation.nestedSafeAddress,

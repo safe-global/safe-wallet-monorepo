@@ -13,6 +13,8 @@ import {
   DelegateCleanupErrorType,
 } from '@/src/services/delegate-cleanup'
 import { StandardErrorResult, ErrorType } from '@/src/utils/errors'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { type DeleteDelegate } from '@/src/hooks/useDelegateCleanup/utils'
 
 // Re-export types for backward compatibility
 export type { DelegateCleanupError, DelegateCleanupProgress } from '@/src/services/delegate-cleanup'
@@ -57,7 +59,16 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
 
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  const [deleteDelegate] = cgwApi.useDelegatesDeleteDelegateV3Mutation()
+  const [deleteDelegateV2] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
+  const [deleteDelegateV3] = cgwApi.useDelegatesDeleteDelegateV3Mutation()
+
+  const deleteDelegate = useCallback<DeleteDelegate>(
+    (chain, delegateAddress, deleteDelegateDto) =>
+      hasFeature(chain, FEATURES.QUEUE_SERVICE)
+        ? deleteDelegateV3({ chainId: chain.chainId, delegateAddress, deleteDelegateV3Dto: deleteDelegateDto })
+        : deleteDelegateV2({ chainId: chain.chainId, delegateAddress, deleteDelegateV2Dto: deleteDelegateDto }),
+    [deleteDelegateV2, deleteDelegateV3],
+  )
 
   const cleanupService = useMemo(() => {
     return new DelegateCleanupService({

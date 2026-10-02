@@ -1,8 +1,12 @@
 import { useCallback } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import {
+  useDelegatesGetDelegatesV2Query,
   useDelegatesGetDelegatesV3Query,
+  useLazyDelegatesGetDelegatesV2Query,
   useLazyDelegatesGetDelegatesV3Query,
   type DelegatesGetDelegatesV3ApiArg,
   type DelegatePage,
@@ -17,13 +21,19 @@ const useProposers = () => {
     safeAddress,
   } = useSafeInfo()
 
-  const shouldFetch = Boolean(chainId && safeAddress)
+  const isQueueService = useHasFeature(FEATURES.QUEUE_SERVICE)
+  const shouldFetch = Boolean(chainId && safeAddress) && isQueueService !== undefined
 
   const queryArg: DelegatesGetDelegatesV3ApiArg | undefined = shouldFetch ? { chainId, safe: safeAddress } : undefined
 
-  return useDelegatesGetDelegatesV3Query(queryArg as DelegatesGetDelegatesV3ApiArg, {
-    skip: !shouldFetch,
+  const transactionServiceResult = useDelegatesGetDelegatesV2Query(queryArg as DelegatesGetDelegatesV3ApiArg, {
+    skip: !shouldFetch || isQueueService,
   })
+  const queueServiceResult = useDelegatesGetDelegatesV3Query(queryArg as DelegatesGetDelegatesV3ApiArg, {
+    skip: !shouldFetch || !isQueueService,
+  })
+
+  return isQueueService ? queueServiceResult : transactionServiceResult
 }
 
 // Awaits the delegates query, for callers that must answer once and cannot revise the answer later.
@@ -34,7 +44,10 @@ export const useGetIsWalletProposer = (): (() => Promise<boolean>) => {
     safeAddress,
   } = useSafeInfo()
   const { data } = useProposers()
-  const [fetchProposers] = useLazyDelegatesGetDelegatesV3Query()
+  const isQueueService = useHasFeature(FEATURES.QUEUE_SERVICE)
+  const [fetchTransactionServiceProposers] = useLazyDelegatesGetDelegatesV2Query()
+  const [fetchQueueServiceProposers] = useLazyDelegatesGetDelegatesV3Query()
+  const fetchProposers = isQueueService ? fetchQueueServiceProposers : fetchTransactionServiceProposers
 
   const isProposer = data ? hasDelegate(data, wallet?.address) : undefined
   const walletAddress = wallet?.address

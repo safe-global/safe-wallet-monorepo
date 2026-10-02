@@ -1,10 +1,7 @@
 import { useCallback, useState } from 'react'
-import {
-  useDelegatesPostDelegateV3Mutation,
-  useDelegatesDeleteDelegateV3Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
+import { useDelegateMutations } from '@/features/proposers/hooks/useDelegateMutations'
 import { isTotpValid } from '@/features/proposers/utils/totp'
 import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 import useChainId from '@/hooks/useChainId'
@@ -18,8 +15,7 @@ import type { PendingDelegation } from '@/features/proposers/types'
 export const useSubmitDelegation = () => {
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
-  const [addDelegateV3] = useDelegatesPostDelegateV3Mutation()
-  const [deleteDelegateV3] = useDelegatesDeleteDelegateV3Mutation()
+  const { addDelegate, deleteDelegate } = useDelegateMutations()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<Error>()
 
@@ -43,7 +39,7 @@ export const useSubmitDelegation = () => {
         )
 
         if (delegation.action === 'add') {
-          await addDelegateV3({
+          await addDelegate({
             chainId,
             createDelegateDto: {
               safe: safeAddress,
@@ -52,17 +48,17 @@ export const useSubmitDelegation = () => {
               signature: eip1271Signature,
               label: PROPOSER_LABEL_PLACEHOLDER,
             },
-          }).unwrap()
+          })
         } else if (delegation.action === 'remove') {
-          await deleteDelegateV3({
+          await deleteDelegate({
             chainId,
             delegateAddress: delegation.delegateAddress,
-            deleteDelegateV3Dto: {
+            deleteDelegateDto: {
               delegator: delegation.parentSafeAddress,
               safe: safeAddress,
               signature: eip1271Signature,
             },
-          }).unwrap()
+          })
         }
       } catch (error) {
         const err = asError(error)
@@ -72,7 +68,7 @@ export const useSubmitDelegation = () => {
         setIsSubmitting(false)
       }
     },
-    [chainId, safeAddress, addDelegateV3, deleteDelegateV3],
+    [chainId, safeAddress, addDelegate, deleteDelegate],
   )
 
   return { submitDelegation, isSubmitting, submitError }
