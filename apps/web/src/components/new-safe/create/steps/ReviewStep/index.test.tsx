@@ -637,7 +637,7 @@ describe('ReviewStep', () => {
       expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
     })
 
-    it('adds the Safe to the Workspace on every network in one request, from the last network', async () => {
+    it('adds the Safe to the space for every network in one request, from the last network', async () => {
       mockUseIsAdmin.mockReturnValue(true)
       const persistSpy = mockCreation()
       const data = buildMultiChainData()
@@ -650,13 +650,16 @@ describe('ReviewStep', () => {
       })
 
       expect(persistSpy).toHaveBeenCalledTimes(2)
-      expect(persistSpy).toHaveBeenNthCalledWith(1, expect.objectContaining({ chainId: first.chainId, spaceId: null }))
+      expect(persistSpy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ chainId: first.chainId, chainIdsToAddToSpace: [] }),
+      )
       expect(persistSpy).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
           chainId: last.chainId,
           spaceId: MOCK_SPACE_UUID,
-          spaceChainIds: [first.chainId, last.chainId],
+          chainIdsToAddToSpace: [first.chainId, last.chainId],
         }),
       )
     })
@@ -674,7 +677,7 @@ describe('ReviewStep', () => {
       })
 
       expect(persistSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({ spaceChainIds: [data.networks[1].chainId] }),
+        expect.objectContaining({ chainIdsToAddToSpace: [data.networks[1].chainId] }),
       )
     })
 

@@ -297,19 +297,19 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const createSafeResults: CreateSafeResult[] = []
       for (const [index, network] of data.networks.entries()) {
-        // The step-up replays one request, so the last network adds every created network to the Workspace at once.
-        const spaceChainIds =
-          index === data.networks.length - 1
-            ? [
-                ...createSafeResults.filter((r) => r.success && !r.alreadyDeployed).map((r) => r.chain.chainId),
-                network.chainId,
-              ]
-            : []
+        // The step-up replays one request, so the last network adds the Safe to the space for every created network at once.
+        const isLastNetwork = index === data.networks.length - 1
+        const chainIdsToAddToSpace = isLastNetwork
+          ? [
+              ...createSafeResults.filter((r) => r.success && !r.alreadyDeployed).map((r) => r.chain.chainId),
+              network.chainId,
+            ]
+          : []
         const { stepUpPending, ...result } = await createSafe(
           network,
           replayedSafeWithNonce,
           safeAddress,
-          spaceChainIds,
+          chainIdsToAddToSpace,
         )
         if (stepUpPending) isStepUpPending = true
         createSafeResults.push(result)
@@ -372,7 +372,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     chain: Chain,
     props: ReplayedSafeProps,
     safeAddress: string,
-    spaceChainIds: string[],
+    chainIdsToAddToSpace: string[],
   ): Promise<CreateSafeResult & { stepUpPending?: true }> => {
     if (!wallet) return { chain, safeAddress, success: false }
 
@@ -406,13 +406,13 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           props,
           name: data.name,
           payMethod: effectivePayMethod,
-          spaceId: spaceChainIds.length > 0 ? spaceId : null,
+          spaceId,
           isUserAuthenticated,
           isAdminOfActiveSpace,
           spaceSafeCount,
           spaceSafeLimit,
           isMultiChainCreation: isMultiChainDeployment,
-          spaceChainIds,
+          chainIdsToAddToSpace,
           provider,
           dispatch,
         })

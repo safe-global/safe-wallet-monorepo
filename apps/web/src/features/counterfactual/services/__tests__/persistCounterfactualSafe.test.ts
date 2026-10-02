@@ -157,7 +157,7 @@ describe('persistCounterfactualSafe', () => {
       ...baseArgs,
       spaceId: MOCK_SPACE_UUID,
       isUserAuthenticated: true,
-      spaceChainIds: ['1', '100'],
+      chainIdsToAddToSpace: ['1', '100'],
       dispatch,
     })
 
@@ -171,6 +171,24 @@ describe('persistCounterfactualSafe', () => {
         ],
       },
     })
+    expect(result.ok).toBe(true)
+  })
+
+  it('skips the space add when given no chains to add', async () => {
+    const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
+
+    const result = await persistCounterfactualSafe({
+      ...baseArgs,
+      spaceId: MOCK_SPACE_UUID,
+      isUserAuthenticated: true,
+      chainIdsToAddToSpace: [],
+      dispatch,
+    })
+
+    expect(userInitiate).toHaveBeenCalledTimes(1)
+    expect(spaceInitiate).not.toHaveBeenCalled()
+    expect(showNotificationImpl).not.toHaveBeenCalled()
+    expect(replayImpl).toHaveBeenCalled()
     expect(result.ok).toBe(true)
   })
 
