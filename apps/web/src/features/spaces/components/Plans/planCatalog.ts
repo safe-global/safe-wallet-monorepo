@@ -4,7 +4,7 @@ import type { PlanTier } from './types'
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
 
 /** Largest yearly saving across plans. */
-export const YEARLY_SAVINGS_PERCENT = 13
+export const YEARLY_SAVINGS_LABEL = 'Save ~10%'
 
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
@@ -39,7 +39,6 @@ export type PlanNameV2 = (typeof PLAN_ORDER)[number]
 
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
-export const MULTIPLE_WORKSPACES = 'Multi-Workspace agreements available'
 export const NAMED_SUPPORT_CONTACT = 'Named support contact'
 
 export type PlanContentV2 = {
@@ -70,7 +69,6 @@ type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, stri
 
 /** Card lists, in the compare table's section order. `from` is the first plan that includes it. */
 export const CARD_FEATURES_V2: CardFeatureV2[] = [
-  { from: 'Enterprise', label: MULTIPLE_WORKSPACES },
   { from: 'Enterprise', label: 'Custom Safe capacity' },
   {
     from: 'Starter',
@@ -109,7 +107,9 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
-  yearlySavings: `Save up to ${YEARLY_SAVINGS_PERCENT}%`,
+  yearlySavings: YEARLY_SAVINGS_LABEL,
+  termsApply: 'Terms apply:',
+  proTerms: 'Safe Pro Terms',
   billingCycleLabel: 'Billing cycle',
   monthly: 'Monthly',
   yearly: 'Yearly',
@@ -177,7 +177,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
     title: 'Limits',
     rows: [
-      { feature: 'Workspaces', values: { Starter: '1', Business: '1', Enterprise: 'Multiple' } },
+      { feature: 'Workspaces', values: every('1') },
       { feature: MEMBERS, values: every('Unlimited') },
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {

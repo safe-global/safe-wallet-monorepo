@@ -1,3 +1,4 @@
+import { ArrowUpRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
@@ -5,7 +6,6 @@ import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { SALES_PROMPT_V2 } from '../planCatalog'
-import { CtaArrow } from './CtaArrow'
 
 const trackSalesPrompt = () =>
   trackEvent(
@@ -28,7 +28,7 @@ export default function SalesPromptCard() {
           onClick={trackSalesPrompt}
         >
           {SALES_PROMPT_V2.action}
-          <CtaArrow variant="reveal" external />
+          <ArrowUpRight data-icon="inline-end" />
         </Button>
       </CardContent>
     </Card>

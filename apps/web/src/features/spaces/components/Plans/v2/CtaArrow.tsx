@@ -1,14 +1,13 @@
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
 const ARROW_EASE = 'duration-300 ease-soft motion-reduce:transition-none'
 
 /** Animates on `group/plan` hover. The negative margin keeps the label centred. */
-export const CtaArrow = ({ variant, external }: { variant: 'nudge' | 'reveal'; external?: boolean }) => {
-  const Icon = external ? ArrowUpRight : ArrowRight
+export const CtaArrow = ({ variant }: { variant: 'nudge' | 'reveal' }) => {
   if (variant === 'nudge') {
     return (
-      <Icon
+      <ArrowRight
         data-icon="inline-end"
         data-cta-arrow="nudge"
         className={cn(
@@ -29,7 +28,7 @@ export const CtaArrow = ({ variant, external }: { variant: 'nudge' | 'reveal'; e
         ARROW_EASE,
       )}
     >
-      <Icon
+      <ArrowRight
         className={cn(
           '-translate-x-1 transition-transform group-hover/plan:translate-x-0 group-focus-within/plan:translate-x-0',
           ARROW_EASE,

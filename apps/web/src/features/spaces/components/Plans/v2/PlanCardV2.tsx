@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -60,7 +61,7 @@ const SalesCtaV2 = ({ label, kind }: { label: string; kind: 'sales' | 'account-t
     }}
   >
     {label}
-    <CtaArrow variant="reveal" external />
+    <ArrowUpRight data-icon="inline-end" />
   </Button>
 )
 
