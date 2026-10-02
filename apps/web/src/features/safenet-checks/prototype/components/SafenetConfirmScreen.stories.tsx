@@ -42,7 +42,7 @@ type ScreenProps = {
 const ConfirmScreen = ({ flow, cardStep }: ScreenProps) => (
   <TxFlowContext.Provider value={{ ...initialContext, ...flow }}>
     <div className="flex items-start gap-6 bg-background p-6">
-      <div className="pt-10">
+      <div className="pt-[46px]">
         <SafenetTxRail step={flow.step} stepCount={flow.stepCount} />
       </div>
       <div className="w-[560px] shrink-0">
@@ -57,11 +57,11 @@ const ConfirmScreen = ({ flow, cardStep }: ScreenProps) => (
             <span className="text-muted-foreground">To</span>
             <span className="font-mono text-xs break-all">0x81e84a1e121Add6514170396E864033e087E6216</span>
           </div>
+          <SafenetCardCaption step={cardStep} />
           <TxCardActions>
             <Button variant="outline">Back</Button>
             <Button size="submit">{PRIMARY_LABEL[cardStep]}</Button>
           </TxCardActions>
-          <SafenetCardCaption step={cardStep} />
         </TxCard>
       </div>
       <div className="w-80 shrink-0 pt-10">

@@ -84,6 +84,8 @@ export const ReviewTransactionContent = ({
         <NetworkWarning />
         <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
 
+        <safenetPrototype.SafenetCardCaption step="review" />
+
         <TxCardActions className="!mt-0">
           {/* Continue button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
@@ -103,8 +105,6 @@ export const ReviewTransactionContent = ({
             }}
           </CheckWallet>
         </TxCardActions>
-
-        <safenetPrototype.SafenetCardCaption step="review" />
       </TxCard>
     </>
   )

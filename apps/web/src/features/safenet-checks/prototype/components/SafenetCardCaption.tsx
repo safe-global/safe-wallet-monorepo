@@ -15,7 +15,7 @@ export type SafenetCardCaptionViewProps = {
   onWait?: () => void
 }
 
-/** Full-bleed caption under a tx card's buttons. Advisory: waiting never disables the primary action. */
+/** Safenet note just above a tx card's buttons. Advisory: waiting never disables the primary action. */
 export const SafenetCardCaptionView = ({
   state,
   step,
@@ -39,10 +39,10 @@ export const SafenetCardCaptionView = ({
       data-testid="safenet-card-caption"
       data-phase={state.phase}
       className={cn(
-        '-mx-6 -mb-6 mt-2 flex items-center gap-2 border-t px-6 py-2.5 text-[11px] leading-4 outline-none',
+        'mt-4 flex items-center gap-2 rounded-md text-xs leading-4 outline-none',
         isRisk
-          ? 'border-[var(--color-error-light)] bg-[var(--color-error-background)] text-[var(--color-error-dark)]'
-          : 'border-border text-muted-foreground',
+          ? 'border border-[var(--color-error-light)] bg-[var(--color-error-background)] px-3 py-2 text-[var(--color-error-dark)]'
+          : 'text-muted-foreground',
       )}
     >
       <Icon className="size-3.5 shrink-0" aria-hidden />
@@ -58,7 +58,7 @@ export const SafenetCardCaptionView = ({
   )
 }
 
-/** Safenet caption under the review, sign or execute card. */
+/** Safenet note above the buttons of the review, sign or execute card. */
 export const SafenetCardCaption = ({ step }: { step: SafenetFlowStep }): ReactElement | null => {
   const { isCreation, willExecute, onlyExecute } = useContext(TxFlowContext)
   const { scenario, startedAtMs } = useSafenetScenario()

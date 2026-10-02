@@ -114,7 +114,7 @@ export const SafeShieldContent = ({
   )
 
   return (
-    <div className="px-1 pb-1">
+    <div className={cn(!isSafenetPrototype && 'px-1 pb-1')}>
       {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
@@ -129,7 +129,7 @@ export const SafeShieldContent = ({
 
         <div
           data-testid="open-checks-list"
-          className={cn(isSafenetPrototype && 'flex flex-col gap-1 pt-1 [&>*]:rounded-md [&>*]:bg-muted-secondary')}
+          className={cn(isSafenetPrototype && 'flex flex-col divide-y divide-border')}
         >
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
@@ -179,14 +179,16 @@ export const SafeShieldContent = ({
 
         {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent || isSafenetPrototype) && (
           <div
-            className={cn('mt-1 flex flex-col', !isSafenetPrototype && 'rounded-md bg-muted')}
+            className={cn('flex flex-col', isSafenetPrototype ? 'border-t border-border' : 'mt-1 rounded-md bg-muted')}
             data-testid="pro-checks-section"
           >
             <ProChecksRow hasProFeatures={hasProFeatures} variant={isSafenetPrototype ? 'divider' : 'chip'} />
             <div
               className={cn(
-                'flex flex-col gap-1 [&>*]:rounded-md [&>*]:bg-muted-secondary',
-                !isSafenetPrototype && 'px-1 pb-1',
+                'flex flex-col',
+                isSafenetPrototype
+                  ? 'divide-y divide-border'
+                  : 'gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary',
               )}
             >
               {hasProFeatures ? (

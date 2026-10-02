@@ -11,6 +11,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
 import type { ChecksCount } from '../utils/countChecks'
 import { useDelayedLoading } from '../hooks/useDelayedLoading'
+import { cn } from '@/utils/cn'
 
 const headerVisibilityDelay = 500
 
@@ -23,6 +24,7 @@ export const SafeShieldHeader = ({
   checks,
   isPending = false,
   trailing,
+  variant = 'pill',
 }: {
   recipient?: AsyncResult<RecipientAnalysisResults>
   contract?: AsyncResult<ContractAnalysisResults>
@@ -35,6 +37,8 @@ export const SafeShieldHeader = ({
   isPending?: boolean
   /** Right-aligned extra, e.g. a countdown. */
   trailing?: ReactNode
+  /** `cap`: a full-width top row with a bottom border, for an outlined card (Safenet prototype). */
+  variant?: 'pill' | 'cap'
 }): ReactElement => {
   const [_recipientResults, recipientError, recipientLoading = false] = recipient
   const [_contractResults, contractError, contractLoading = false] = contract
@@ -62,10 +66,13 @@ export const SafeShieldHeader = ({
   const label = error ? 'Checks unavailable' : isLoadingVisible ? 'Analyzing...' : (okTitle ?? 'Copilot')
 
   return (
-    <div className="px-1 pt-1">
+    <div className={cn(variant === 'pill' && 'px-1 pt-1')}>
       <div
         data-testid="safe-shield-status"
-        className="flex flex-row items-center gap-2 rounded-md px-4 py-2"
+        className={cn(
+          'flex flex-row items-center gap-2',
+          variant === 'pill' ? 'rounded-md px-4 py-2' : 'h-9 border-b border-border px-3',
+        )}
         style={{ backgroundColor: headerBgColor }}
       >
         {isPending && !isLoadingVisible && (

@@ -355,6 +355,8 @@ export const ExecuteForm = ({
           <Separator bleed="6" />
         </div>
 
+        <safenetPrototype.SafenetCardCaption step="execute" />
+
         <TxCardActions>
           {/* Submit button */}
           <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
@@ -391,7 +393,6 @@ export const ExecuteForm = ({
           </CheckWallet>
         </TxCardActions>
       </form>
-      <safenetPrototype.SafenetCardCaption step="execute" />
     </>
   )
 }

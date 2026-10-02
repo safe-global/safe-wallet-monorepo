@@ -1,5 +1,7 @@
 import { useContext, type ReactElement } from 'react'
 import { Check } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -69,14 +71,23 @@ export const SafenetTxRailView = ({ current, safenet, signatures }: SafenetTxRai
   const isFlagged = phase === 'risk' || phase === 'unavailable'
 
   return (
-    <nav
+    <Card
+      as="nav"
+      size="none"
+      variant="outlined"
+      radius="lg"
       aria-label="Transaction steps"
       data-testid="safenet-tx-rail"
-      className="w-14 overflow-hidden rounded-lg border border-border bg-card shadow-sm min-[1200px]:w-[184px]"
+      className="w-14 min-[1200px]:w-[240px] min-[1440px]:w-[320px]"
     >
-      <div className="flex h-8 items-center gap-2 border-b border-border bg-muted px-3 text-[9.5px] font-medium tracking-[0.12em] text-muted-foreground uppercase">
-        <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground" />
-        <span className="sr-only min-[1200px]:not-sr-only">Transaction</span>
+      <div className="flex h-9 items-center gap-2 border-b border-border bg-muted px-3">
+        <span className="size-1.5 shrink-0 rounded-full bg-muted-foreground" aria-hidden />
+        <Typography
+          variant="paragraph-mini-bold"
+          className="sr-only uppercase text-muted-foreground min-[1200px]:not-sr-only"
+        >
+          Transaction
+        </Typography>
       </div>
       <ol className="px-3 pt-3 pb-1.5">
         {STEPS.map(({ key, title, sub }, index) => {
@@ -138,7 +149,7 @@ export const SafenetTxRailView = ({ current, safenet, signatures }: SafenetTxRai
           )
         })}
       </ol>
-    </nav>
+    </Card>
   )
 }
 

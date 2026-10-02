@@ -1,5 +1,5 @@
-import { useMemo, type ReactElement } from 'react'
-import { cn } from '@/utils/cn'
+import { useMemo, type ReactElement, type ReactNode } from 'react'
+import { Card } from '@/components/ui/card'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -39,6 +39,16 @@ const shieldLogoOnHover = [
   'hover:[&_.shield-lines]:fill-[var(--color-static-main)]',
   'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
 ].join(' ')
+
+/** The Safenet prototype draws the panel as an outlined design-library card, matching its tx rail. */
+const ShieldPanel = ({ isOutlined, children }: { isOutlined: boolean; children: ReactNode }): ReactElement =>
+  isOutlined ? (
+    <Card size="none" variant="outlined" radius="lg">
+      {children}
+    </Card>
+  ) : (
+    <div className="overflow-hidden rounded-lg bg-card">{children}</div>
+  )
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -135,8 +145,9 @@ export const SafeShieldDisplay = ({
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
       {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
           two curves stay concentric instead of the inner corner cutting inside the outer one. */}
-      <div className={cn('overflow-hidden rounded-lg', isSafenetPrototype ? 'bg-muted' : 'bg-card')}>
+      <ShieldPanel isOutlined={isSafenetPrototype}>
         <SafeShieldHeader
+          variant={isSafenetPrototype ? 'cap' : 'pill'}
           recipient={recipient}
           contract={contract}
           threat={threat}
@@ -162,7 +173,7 @@ export const SafeShieldDisplay = ({
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
         />
-      </div>
+      </ShieldPanel>
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
