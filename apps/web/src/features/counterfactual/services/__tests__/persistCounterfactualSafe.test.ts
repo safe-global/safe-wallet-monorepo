@@ -397,7 +397,7 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
   })
 
-  it('translates the gateway elevation marker instead of putting it in front of the user', async () => {
+  it('rolls back the user-level Safe and asks for the verification when the user cancels it', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'space-create-thunk') {
         return { error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } } }
@@ -417,6 +417,7 @@ describe('persistCounterfactualSafe', () => {
       expect(result.error.message).not.toContain(ELEVATION_REQUIRED_ERROR)
       expect(result.error.message).toBe(ELEVATION_REQUIRED_MESSAGE)
     }
+    expect(dispatch).toHaveBeenCalledWith({ type: 'user-delete-thunk' })
   })
 
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {

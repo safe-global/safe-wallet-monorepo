@@ -35,6 +35,7 @@ export default [
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/public/step-up-complete.js',
     ],
   },
   ...next,
