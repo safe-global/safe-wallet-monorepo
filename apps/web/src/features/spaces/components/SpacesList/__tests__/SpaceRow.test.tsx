@@ -49,11 +49,13 @@ describe('SpaceRow', () => {
     expect(mockUseSpaceSubscription).toHaveBeenCalledWith(space.uuid)
   })
 
-  it('identifies a trial separately from its plan tier', () => {
+  it('shows Free access instead of the plan tier during a trial', () => {
     mockUseSpaceSubscription.mockReturnValue({ subscription: { plan: { name: 'Business' } }, status: 'trialing' })
     render(<SpaceRow space={space} />)
 
-    expect(screen.getByTestId('space-row-pro-badge')).toHaveTextContent('· Business · Trial')
+    const badge = screen.getByTestId('space-row-pro-badge')
+    expect(badge).toHaveTextContent('· Free access')
+    expect(badge).not.toHaveTextContent('Business')
   })
 
   it('does not show the PRO pill without a live subscription', () => {
