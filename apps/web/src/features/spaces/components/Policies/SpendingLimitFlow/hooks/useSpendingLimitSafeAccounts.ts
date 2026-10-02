@@ -30,10 +30,7 @@ export const useSpendingLimitChainSets = (): SpendingLimitChainSets & { isLoadin
   }, [configs, loading])
 }
 
-/**
- * `useEligibleSafeAccounts` with every row kept: a chain where no limit can be created is disabled with that reason,
- * one the Policy Indexer does not cover with a pointer to the Safe settings. A not-activated Safe keeps that reason.
- */
+/** `useEligibleSafeAccounts` with no row dropped: a chain that cannot take a limit is disabled with a reason instead. */
 export const useSpendingLimitSafeAccounts = () => {
   const eligible = useEligibleSafeAccounts()
   const { creatable, indexed, isLoading: isChainsLoading } = useSpendingLimitChainSets()

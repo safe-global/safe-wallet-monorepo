@@ -156,7 +156,6 @@ export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
 
-/** The Polygon side of the group is on a network the Policy Indexer does not cover. */
 export const UnsupportedNetwork: Story = {
   args: {
     accounts: [

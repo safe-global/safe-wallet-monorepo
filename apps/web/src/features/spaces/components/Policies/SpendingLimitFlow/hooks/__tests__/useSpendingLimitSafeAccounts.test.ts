@@ -25,7 +25,6 @@ const SEPOLIA = '11155111'
 const POLYGON = '137'
 const NOWHERE = '999999'
 
-// Sepolia and Polygon have an AllowanceModule deployment; chain 999999 does not exist.
 const CHAINS = [
   {
     chainId: SEPOLIA,
