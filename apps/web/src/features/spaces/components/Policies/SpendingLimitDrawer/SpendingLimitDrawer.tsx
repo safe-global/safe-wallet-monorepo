@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import type { LinkProps } from 'next/link'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
@@ -41,7 +42,7 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
   policy: QueuedSpendingLimitPolicy
   transactionLink?: string
-  onReviewTransaction?: () => void
+  reviewTransactionHref?: LinkProps['href']
   onRetry?: () => void
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
   outcome?: PendingTxOutcome
@@ -71,7 +72,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
     ? {
         pending: {
           transactionLink: props.transactionLink,
-          onReviewTransaction: props.onReviewTransaction,
+          reviewTransactionHref: props.reviewTransactionHref,
           onRetry: props.onRetry,
         },
       }

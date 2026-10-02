@@ -12,6 +12,7 @@ import { Typography } from '@/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
+import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from '../components/ParentSafeWalletNotice'
 import SafeAccountSelector from '../SafeAccountSelector'
 import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
@@ -39,6 +40,7 @@ export type ProposerRoleFormProps = {
   defaultValues?: Partial<ProposerRoleFormValues>
   isSubmitting?: boolean
   errorMessage?: ReactNode
+  parentSafeWallet?: ParentSafeWalletNoticeProps
 }
 
 const ProposerRoleForm = ({
@@ -50,6 +52,7 @@ const ProposerRoleForm = ({
   defaultValues,
   isSubmitting = false,
   errorMessage,
+  parentSafeWallet,
 }: ProposerRoleFormProps) => {
   const methods = useForm<ProposerRoleFormValues>({
     defaultValues: { proposer: '', name: '', ...defaultValues },
@@ -79,7 +82,7 @@ const ProposerRoleForm = ({
 
   const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
   const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
-  const canSubmit = !isSafeBlocked && formState.isValid
+  const canSubmit = !isSafeBlocked && !parentSafeWallet && formState.isValid
 
   // The picked Safe stays even when typed as its own proposer, so the field keeps it and validation explains why.
   const accountOptions = useMemo(
@@ -112,6 +115,8 @@ const ProposerRoleForm = ({
               hasWallet={safeAccounts.hasWallet}
               notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
             />
+
+            {parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
 
             <div className="flex flex-col gap-1">
               <AddressBookInput

@@ -56,7 +56,6 @@ export const setHandleResponseHook = (hook: HandleResponseHook) => {
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
   headers: {
-    'Content-Type': 'application/json',
     Accept: 'application/json',
   },
   prepareHeaders: async (headers, api) => {

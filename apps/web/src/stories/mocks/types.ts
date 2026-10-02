@@ -43,6 +43,8 @@ export interface FeatureFlags {
   twoFactorAwarenessBanner?: boolean
   /** SAFE_STAKING - Safenet SAFE staking entry points (default: false) */
   safeStaking?: boolean
+  /** SAFE_PRO - Safe Pro plans and billing (default: false) */
+  safePro?: boolean
 }
 
 /**

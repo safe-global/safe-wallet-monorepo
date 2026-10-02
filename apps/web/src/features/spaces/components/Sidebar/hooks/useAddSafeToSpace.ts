@@ -1,32 +1,32 @@
 import { useState } from 'react'
 import { useRouter } from 'next/router'
+import type { SerializedError } from '@reduxjs/toolkit'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { stringify } from 'querystring'
-import { useSpaceSafesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useSpaceSafesCreateV1Mutation, type SpaceSafeDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import type { SpaceItem } from '../types'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
-import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
-interface UseAddSafeToSpaceOptions {
-  spaces: SpaceItem[]
-  onSpaceAdded?: (space: SpaceItem) => void
-}
+type AddOutcome = 'added' | 'stepUp' | 'failed'
 
 interface UseAddSafeToSpaceResult {
   addToSpace: (spaceId: string) => Promise<boolean>
   loadingSpaceId: string | null
 }
 
-export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOptions): UseAddSafeToSpaceResult => {
+/** Adds the current Safe to a Workspace, then opens the Safe in that Workspace. */
+export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
   const router = useRouter()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
@@ -43,50 +43,61 @@ export const useAddSafeToSpace = ({ spaces, onSpaceAdded }: UseAddSafeToSpaceOpt
       }),
     )
 
+  const handleAddError = (error: FetchBaseQueryError | SerializedError) => {
+    const seatLimit = getSeatLimitMessage(error)
+    // Refreshes the meters of every Workspace, so the Workspace selector also sees the spent seats
+    if (seatLimit) dispatch(entitlementsApi.util.invalidateTags(['entitlements']))
+    showError(seatLimit ?? getRtkQueryErrorMessage(error))
+  }
+
+  const handleAdded = (spaceId: string, added: SpaceSafeDto, spaceQuery: typeof router.query) => {
+    dispatch(
+      showNotification({
+        message: 'Successfully added Safe to Workspace.',
+        variant: 'success',
+        groupKey: 'add-safe-to-workspace-success',
+      }),
+    )
+    trackEvent(
+      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
+      { workspace_id: spaceId, safe_address: added.address, chain_id: added.chainId },
+    )
+    void router.replace({ pathname: router.pathname, query: spaceQuery }, undefined, { shallow: true })
+  }
+
+  const requestAdd = async (
+    spaceId: string,
+    toAdd: SpaceSafeDto,
+    spaceQuery: typeof router.query,
+  ): Promise<AddOutcome> => {
+    const result = await addSafeToSpace({ spaceId, createSpaceSafesDto: { safes: [toAdd] } })
+    if (isElevationRequiredError(result.error)) return 'stepUp'
+    if (result.error) {
+      handleAddError(result.error)
+      return 'failed'
+    }
+    handleAdded(spaceId, toAdd, spaceQuery)
+    return 'added'
+  }
+
   const addToSpace = async (spaceId: string): Promise<boolean> => {
     if (!chain?.chainId || !safe.address.value) return false
-    setLoadingSpaceId(spaceId)
-    // The step-up reloads the page, so onSpaceAdded cannot move the user into the Workspace
+    const toAdd = { chainId: chain.chainId, address: safe.address.value }
     const { spaceId: _replaced, ...query } = router.query
-    const stepUpReturnUrl = `${router.pathname}?${stringify(withSpaceId(query, spaceId))}`
+    const spaceQuery = withSpaceId(query, spaceId)
+    // A step-up reloads the page, so it returns to this URL instead
+    const stepUpReturnUrl = `${router.pathname}?${stringify(spaceQuery)}`
+
+    setLoadingSpaceId(spaceId)
     dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
-    let isStepUpPending = false
-    try {
-      const result = await addSafeToSpace({
-        spaceId,
-        createSpaceSafesDto: { safes: [{ chainId: chain.chainId, address: safe.address.value }] },
-      })
-      if (isElevationRequiredError(result.error)) {
-        isStepUpPending = true
-        return false
-      }
-      if (result.error) {
-        const seatLimit = getSeatLimitMessage(result.error)
-        if (seatLimit) refreshSpaceEntitlements(dispatch, spaceId)
-        showError(seatLimit ?? getRtkQueryErrorMessage(result.error))
-        return false
-      }
-      dispatch(
-        showNotification({
-          message: 'Successfully added Safe to Workspace.',
-          variant: 'success',
-          groupKey: 'add-safe-to-workspace-success',
-        }),
-      )
-      trackEvent(
-        { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-        { workspace_id: spaceId, safe_address: safe.address.value, chain_id: chain.chainId },
-      )
-      const space = spaces.find((s) => s.uuid === spaceId)
-      if (space) onSpaceAdded?.(space)
-      return true
-    } catch (error: unknown) {
+    const outcome = await requestAdd(spaceId, toAdd, spaceQuery).catch((error: unknown): AddOutcome => {
+      logError(Errors._651, error)
       showError(error instanceof Error ? error.message : '')
-      return false
-    } finally {
-      if (!isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
-      setLoadingSpaceId(null)
-    }
+      return 'failed'
+    })
+    if (outcome !== 'stepUp') dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
+    setLoadingSpaceId(null)
+    return outcome === 'added'
   }
 
   return { addToSpace, loadingSpaceId }

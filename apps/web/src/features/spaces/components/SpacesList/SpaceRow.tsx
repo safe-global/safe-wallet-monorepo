@@ -36,7 +36,12 @@ const SpaceRow = ({
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
   // The badge only needs the subscription; the entitlements the Plans page also loads are one request per row too many.
   const { subscription, status } = useSpaceSubscription(space.uuid)
-  const planName = status === 'active' ? (getSubscriptionPlanName(subscription) ?? undefined) : undefined
+  const badgeLabel =
+    status === 'trialing'
+      ? 'Free access'
+      : status === 'active'
+        ? (getSubscriptionPlanName(subscription) ?? undefined)
+        : undefined
 
   const handleOpenWorkspace = () => {
     trackEvent(
@@ -70,12 +75,12 @@ const SpaceRow = ({
               isCompact
             />
           </div>
-          {planName && (
+          {badgeLabel && (
             <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
               <span className="block h-4 w-6">
                 <ProChip className="size-full" />
               </span>
-              · {planName}
+              · {badgeLabel}
             </Badge>
           )}
         </Link>

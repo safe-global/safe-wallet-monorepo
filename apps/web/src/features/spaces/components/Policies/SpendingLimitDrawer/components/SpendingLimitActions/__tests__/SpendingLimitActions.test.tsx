@@ -8,7 +8,7 @@ const setup = (state: SpendingLimitDrawerState) =>
   render(
     <SpendingLimitActions
       state={state}
-      pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
+      pending={{ transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }}
       onEdit={jest.fn()}
       onConnectWallet={jest.fn()}
     />,
@@ -72,7 +72,7 @@ describe('SpendingLimitActions', () => {
     const { user } = renderWithUserEvent(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'connect', disabled: false, helper: 'Connect a signer wallet to edit.' }}
-        pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
+        pending={{ transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }}
         onEdit={jest.fn()}
         onConnectWallet={onConnectWallet}
       />,
@@ -99,7 +99,7 @@ describe('SpendingLimitActions', () => {
       required: 2,
     })
 
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByText('should never render')).not.toBeInTheDocument()
   })
 

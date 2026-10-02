@@ -779,6 +779,124 @@ describe('txSender', () => {
     })
   })
 
+  describe('dispatchTxRelay refusals', () => {
+    const safeAddress = toBeHex('0x789', 20)
+    const safe = {
+      address: { value: safeAddress },
+      chainId: '5',
+      version: '1.3.0',
+    } as unknown as Parameters<typeof dispatchTxRelay>[1]
+    const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+    const relay = (sponsorSpaceId?: string) =>
+      dispatchTxRelay(
+        createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 }),
+        safe,
+        'multisig_0x1',
+        chain,
+        undefined,
+        undefined,
+        undefined,
+        sponsorSpaceId,
+      )
+
+    beforeEach(() => {
+      jest.spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract').mockResolvedValue({
+        encode: jest.fn(() => '0xabcd'),
+      } as unknown as Awaited<ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>>)
+    })
+
+    it('types an unavailable gas payment option (409) on the chain route', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () =>
+          HttpResponse.json(
+            {
+              code: 'GAS_PAYMENT_OPTION_UNAVAILABLE',
+              requested: 'PAY_FROM_SAFE',
+              reason: 'NOT_LISTED',
+              available: [],
+              message: 'Gas payment option PAY_FROM_SAFE is unavailable.',
+              statusCode: 409,
+            },
+            { status: 409 },
+          ),
+        ),
+      )
+
+      await expect(relay()).rejects.toMatchObject({
+        name: 'GasPaymentOptionUnavailableError',
+        requested: 'PAY_FROM_SAFE',
+        reason: 'NOT_LISTED',
+        available: [],
+        message: 'Gas payment option PAY_FROM_SAFE is unavailable.',
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'FAILED',
+        expect.objectContaining({ error: expect.objectContaining({ name: 'GasPaymentOptionUnavailableError' }) }),
+      )
+    })
+
+    it('types a spent daily limit (429) on the chain route', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () =>
+          HttpResponse.json({ message: 'Relay limit reached', statusCode: 429 }, { status: 429 }),
+        ),
+      )
+
+      await expect(relay()).rejects.toMatchObject({ name: 'RelayLimitReachedError', message: 'Relay limit reached' })
+    })
+
+    it('types a missing relayer (403) on the chain route', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () =>
+          HttpResponse.json({ message: 'No relayer defined', statusCode: 403 }, { status: 403 }),
+        ),
+      )
+
+      await expect(relay()).rejects.toMatchObject({ name: 'RelayerUnavailableError', message: 'No relayer defined' })
+    })
+
+    it('types a 409 on the space route and re-reads the Workspace entitlements', async () => {
+      const entitlementsRead = jest.fn()
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
+          HttpResponse.json(
+            {
+              code: 'GAS_PAYMENT_OPTION_UNAVAILABLE',
+              requested: 'SUBSCRIPTION',
+              reason: 'NOT_A_WORKSPACE_SAFE',
+              available: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
+              message: 'Safe is not in the Workspace.',
+              statusCode: 409,
+            },
+            { status: 409 },
+          ),
+        ),
+        http.get(`${GATEWAY_URL}/v1/spaces/space-1/entitlements`, () => {
+          entitlementsRead()
+          return HttpResponse.json({ plan: null, entitlements: [] })
+        }),
+      )
+
+      await expect(relay('space-1')).rejects.toMatchObject({
+        name: 'GasPaymentOptionUnavailableError',
+        requested: 'SUBSCRIPTION',
+        reason: 'NOT_A_WORKSPACE_SAFE',
+        available: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
+      })
+      await waitFor(() => expect(entitlementsRead).toHaveBeenCalledTimes(1))
+    })
+
+    it('leaves a 403 on the space route untyped', async () => {
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/spaces/space-1/chains/5/relay`, () =>
+          HttpResponse.json({ message: 'Forbidden', statusCode: 403 }, { status: 403 }),
+        ),
+      )
+
+      await expect(relay('space-1')).rejects.toMatchObject({ name: 'Error' })
+    })
+  })
+
   describe('dispatchBatchExecutionRelay', () => {
     it('should relay a batch execution', async () => {
       const mockMultisendAddress = zeroPadValue('0x1234', 20)
@@ -859,6 +977,45 @@ describe('txSender', () => {
 
       expect(receivedBody).toEqual({ to: mockMultisendAddress, data: '0xfefe', version: '1.3.0' })
       expect(txEvents.txDispatch).toHaveBeenCalledWith('RELAYING', expect.objectContaining({ taskId: '0xspace' }))
+    })
+
+    it('types an unavailable gas payment option (409) for a batch', async () => {
+      const safeAddress = toBeHex('0x567', 20)
+      const txs = [{ txId: 'multisig_0x01', detailedExecutionInfo: { type: 'MULTISIG' } } as TransactionDetails]
+      const multisendContractMock = {
+        encode: jest.fn(() => '0xfefe'),
+        getAddress: () => zeroPadValue('0x1234', 20),
+      } as unknown as MultiSendCallOnlyContractImplementationType
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () =>
+          HttpResponse.json(
+            {
+              code: 'GAS_PAYMENT_OPTION_UNAVAILABLE',
+              requested: 'PAY_FROM_SAFE',
+              reason: 'NO_RELAYER',
+              available: [],
+              message: 'Gas payment option PAY_FROM_SAFE is unavailable.',
+              statusCode: 409,
+            },
+            { status: 409 },
+          ),
+        ),
+      )
+
+      await expect(
+        dispatchBatchExecutionRelay(txs, multisendContractMock, '0x1234', '5', safeAddress, '1.3.0'),
+      ).rejects.toMatchObject({
+        name: 'GasPaymentOptionUnavailableError',
+        requested: 'PAY_FROM_SAFE',
+        reason: 'NO_RELAYER',
+      })
+      expect(txEvents.txDispatch).toHaveBeenCalledWith(
+        'FAILED',
+        expect.objectContaining({
+          txId: 'multisig_0x01',
+          error: expect.objectContaining({ name: 'GasPaymentOptionUnavailableError' }),
+        }),
+      )
     })
   })
 })
