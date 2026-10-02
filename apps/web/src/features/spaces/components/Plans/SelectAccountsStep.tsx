@@ -38,7 +38,7 @@ export const _initialSelection = (items: AllSafeItems): Record<string, boolean> 
 }
 
 export const seatsTooltip = (planName: string, limit: number): string =>
-  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available in My accounts. You can swap them in any time.`
 
 /** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({

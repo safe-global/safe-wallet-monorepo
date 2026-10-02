@@ -87,7 +87,7 @@ const UsageMeter = ({
 
 const statusText = (plan: PlanSummary | null, endDate: string | null, isSeatsFull: boolean): string | null => {
   if (plan === null) {
-    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available outside the Workspace.'
+    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available in My accounts.'
   }
   if (plan.status === 'active') {
     return isSeatsFull ? 'Safe accounts above the limit remain available in My accounts.' : null

@@ -39,7 +39,7 @@ const CHECKOUT_RELEASED_STATUSES: CheckoutReturnStatus[] = ['error', 'timeout', 
 
 export const _PLAN_ERROR_COPY = {
   title: 'Your plan could not be checked',
-  body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available outside the Workspace.',
+  body: 'We could not load the plan of this Workspace. Try again, or come back later, your Safe accounts remain available in My accounts.',
 }
 
 /** Mounted on every Workspace page; none of the modals it shows can be dismissed. */

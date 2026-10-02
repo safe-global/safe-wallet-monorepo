@@ -131,15 +131,14 @@ const PlanCta = ({
     case 'change':
       return (
         <Button
+          variant="outline"
           size="lg"
           weight="semibold"
-          accentIcon
           className="w-full"
           disabled={isBusy}
           onClick={() => onSubscribe?.(pick)}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
         </Button>
       )
   }
