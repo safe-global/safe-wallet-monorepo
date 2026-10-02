@@ -120,7 +120,7 @@ describe('useGasPaymentOptions', () => {
 
   it.each<[string, GasPaymentOption[], () => void, boolean]>([
     ['the campaign', ['NO_FEE_CAMPAIGN'], () => mockCampaign({ isLoading: true }), true],
-    ['the daily limit', ['FREE_DAILY_LIMIT'], () => mockRelays(undefined, true), true],
+    ['the daily limit', ['FREE_DAILY_LIMIT'], () => mockRelays({ remaining: 4, limit: 5 }, true), true],
     [
       'the plan',
       ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
@@ -251,6 +251,7 @@ describe('useGasPaymentOptions', () => {
   })
 
   it('offers a Safe on a plan the plan for a batch', () => {
+    walletCanRelaySpy.mockReturnValue([undefined, undefined, false])
     mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx(), isBatch: true }))

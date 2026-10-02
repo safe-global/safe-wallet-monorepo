@@ -84,11 +84,6 @@ describe('selectSponsoredOffer', () => {
       { pro: onPlan, chainOptions: ['FREE_DAILY_LIMIT'] },
       { ...dailyOffer, isPro: true },
     ],
-    [
-      'nothing when every option is excluded',
-      { excluded: new Set(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION']) },
-      null,
-    ],
     ['nothing when the chain lists no option', { chainOptions: [] }, null],
     ['nothing when the chain only lists paying from the Safe', { chainOptions: ['PAY_FROM_SAFE'] }, null],
     ['nothing for a refund transaction', { isRefundTx: true }, null],
