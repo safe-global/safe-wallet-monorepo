@@ -8,6 +8,8 @@ import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { useAppDispatch } from '@/store'
 
 interface MemberInvite {
   // Can be a wallet address, ENS name, or email.
@@ -42,7 +44,8 @@ export const toInviteName = (identifier: string): string => {
   return sanitized.length >= NAME_MIN_LENGTH ? sanitized : 'Member'
 }
 
-const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
+const useInviteForm = (spaceId: string | undefined, onSuccess: () => void, nextStepUrl?: string) => {
+  const dispatch = useAppDispatch()
   const [inviteMembers] = useMembersInviteUserV1Mutation()
 
   const [error, setError] = useState<string>()
@@ -83,6 +86,9 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     // so the spinner stays up through the route change. On every other exit the finally
     // block resets isSubmitting so a failed/aborted submit can never leave the button stuck.
     let succeeded = false
+    // A step-up reloads the page, so it has to return to the next step for its replay to move the user on.
+    if (nextStepUrl) dispatch(stepUpReturnUrlSet(nextStepUrl))
+    let isStepUpPending = false
     try {
       const usersToInvite: InviteUsersDto['users'] = validMembers.map((member) =>
         buildInviteUserPayload({
@@ -97,7 +103,10 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
         inviteUsersDto: { users: usersToInvite },
       })
 
-      if (isElevationRequiredError(result.error)) return
+      if (isElevationRequiredError(result.error)) {
+        isStepUpPending = true
+        return
+      }
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error) || 'Failed to invite members. Please try again.')
         return
@@ -120,6 +129,7 @@ const useInviteForm = (spaceId: string | undefined, onSuccess: () => void) => {
     } catch {
       setError('Something went wrong inviting members. Please try again.')
     } finally {
+      if (nextStepUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(nextStepUrl))
       if (!succeeded) setIsSubmitting(false)
     }
   })
