@@ -156,6 +156,19 @@ export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
 
+/** The Polygon side of the group is on a network the Policy Indexer does not cover. */
+export const UnsupportedNetwork: Story = {
+  args: {
+    accounts: [
+      account('1', EF_SAFE, { name: 'Treasury' }),
+      ...groupSafeAccounts([
+        account('1', OPS_SAFE, { name: 'Team operations' }),
+        account('137', OPS_SAFE, { name: 'Team operations', ineligibleReason: 'unsupported-chain' }),
+      ]),
+    ],
+  },
+}
+
 export const AccountsLoading: Story = {
   tags: ['skip-visual-test'],
   args: { accounts: [], isAccountsLoading: true },
