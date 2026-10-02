@@ -10,6 +10,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '../constants'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -140,6 +141,73 @@ describe('ProposerRoleForm', () => {
 
       await screen.findByText('You need to activate this Safe before transacting')
       expect(submitButton()).toBeDisabled()
+    })
+
+    it('shows the parent Safe notice with a settings link and blocks submit when the wallet is a parent Safe', async () => {
+      renderForm({
+        safeAccount: treasury.id,
+        defaultValues: { proposer: PROPOSER },
+        parentSafeWallet: {
+          ...PARENT_SAFE_WALLET_COPY,
+          safeName: 'Treasury',
+          parentSafeName: 'Ops',
+          settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } },
+        },
+      })
+
+      expect(screen.getByText('Add this proposer on the Safe account level')).toBeInTheDocument()
+      expect(screen.getByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+        'Your connected wallet, Ops, is a parent Safe account of Treasury. To grant this role on its behalf, open the settings of Treasury with a signer of Ops.',
+      )
+      expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('/settings/setup?safe='),
+      )
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('closes the flow and pushes the settings route itself when the link is clicked', async () => {
+      const onNavigate = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
+      const settingsHref = { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } }
+      const { user } = renderWithUserEvent(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          safeAccounts={eligible}
+          onSafeAccountChange={jest.fn()}
+          safeAccount={treasury.id}
+          parentSafeWallet={{
+            ...PARENT_SAFE_WALLET_COPY,
+            safeName: 'Treasury',
+            parentSafeName: 'Ops',
+            settingsHref,
+            onNavigate,
+          }}
+        />,
+        { routerProps: { push } },
+      )
+
+      await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
+
+      expect(onNavigate).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledWith(settingsHref)
+    })
+
+    it('keeps the settings link mousedown from the document-level navigation guard', () => {
+      const guard = jest.fn()
+      document.addEventListener('mousedown', guard)
+      renderForm({
+        safeAccount: treasury.id,
+        parentSafeWallet: { ...PARENT_SAFE_WALLET_COPY, safeName: 'Treasury', parentSafeName: 'Ops', settingsHref: {} },
+      })
+
+      fireEvent.mouseDown(screen.getByRole('link', { name: 'Go to Safe settings' }))
+      fireEvent.mouseDown(screen.getByTestId('parent-safe-wallet-notice'))
+
+      expect(guard).toHaveBeenCalledTimes(1)
+      document.removeEventListener('mousedown', guard)
     })
 
     it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {

@@ -47,7 +47,7 @@ const setup = (
         {...shared}
         policy={policy}
         transactionLink={TRANSACTION_LINK}
-        onReviewTransaction={jest.fn()}
+        reviewTransactionHref="/transactions/tx?id=0x9f3c"
         outcome={outcome}
       />
     ) : (
@@ -131,7 +131,7 @@ describe('SpendingLimitDrawer', () => {
       screen.getByText('The spending limit is not active as the transaction is not yet executed.'),
     ).toBeInTheDocument()
     expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 

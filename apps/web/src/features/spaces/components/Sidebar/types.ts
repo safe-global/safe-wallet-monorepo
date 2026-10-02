@@ -82,7 +82,6 @@ export interface SpaceSelectorProps {
   spaceInitial?: string
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
-  onSpaceAdded?: (space: SpaceItem) => void
 }
 
 export type SidebarVariantContentProps = SpaceSelectorProps & {
@@ -100,7 +99,6 @@ export interface SafeWorkspaceHeaderAddToWorkspace {
   variant: 'addToWorkspace'
   selectedSpace?: SpaceItem
   spaces?: SpaceItem[]
-  onSpaceAdded?: (space: SpaceItem) => void
 }
 
 export type SafeWorkspaceHeaderProps = SafeWorkspaceHeaderBackToSpace | SafeWorkspaceHeaderAddToWorkspace

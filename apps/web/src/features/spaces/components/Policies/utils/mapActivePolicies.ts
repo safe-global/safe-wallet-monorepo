@@ -33,6 +33,7 @@ const toAllowance = (
     remaining: (remaining > 0n ? remaining : 0n).toString(),
     resetPeriodMinutes: allowance.resetPeriodMinutes,
     resetsAtMinute: allowance.resetsAtMinute,
+    createdAt: allowance.createdAt,
   }
 }
 

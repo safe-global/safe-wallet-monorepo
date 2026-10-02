@@ -22,7 +22,7 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675'
 
-const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, onReviewTransaction: fn() }
+const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }
 
 const OVERVIEW = {
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',

@@ -19,17 +19,15 @@ const buildWorkspaceHeader = (
   selectedSpace: SpaceItem | undefined,
   spaceInitial: string | undefined,
   spaces: SpaceItem[] | undefined,
-  onSpaceAdded: ((space: SpaceItem) => void) | undefined,
 ): SafeWorkspaceHeaderProps =>
   selectedSpace
     ? { variant: 'backToSpace', spaceName: selectedSpace.name, spaceInitial, spaceId: selectedSpace.uuid }
-    : { variant: 'addToWorkspace', selectedSpace, spaces, onSpaceAdded }
+    : { variant: 'addToWorkspace', selectedSpace, spaces }
 
 export const SafeSidebarContent = ({
   selectedSpace,
   spaces,
   spaceInitial,
-  onSpaceAdded,
   isLoading = false,
 }: SidebarVariantContentProps): ReactElement => {
   const chain = useCurrentChain()
@@ -108,7 +106,7 @@ export const SafeSidebarContent = ({
     isItemActive,
   })
 
-  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces, onSpaceAdded)
+  const workspaceHeader = buildWorkspaceHeader(selectedSpace, spaceInitial, spaces)
 
   return (
     <SafeSidebarVariant
