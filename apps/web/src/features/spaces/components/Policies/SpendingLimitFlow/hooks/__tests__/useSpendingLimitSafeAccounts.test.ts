@@ -9,10 +9,11 @@ jest.mock('../../../SafeAccountSelector/hooks/useEligibleSafeAccounts', () => ({
 }))
 
 const mockConfigs = jest.fn()
+const mockChainsLoading = jest.fn<boolean, []>()
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: mockConfigs() }),
+  default: () => ({ configs: mockConfigs(), loading: mockChainsLoading() }),
 }))
 
 const mockUseEligibleSafeAccounts = useEligibleSafeAccounts as jest.MockedFunction<typeof useEligibleSafeAccounts>
@@ -69,6 +70,7 @@ const reasons = (entries: ReturnType<typeof useSpendingLimitSafeAccounts>['accou
 describe('useSpendingLimitSafeAccounts', () => {
   beforeEach(() => {
     mockConfigs.mockReturnValue(CHAINS)
+    mockChainsLoading.mockReturnValue(false)
   })
 
   it('disables Safes on chains without the spending-limit feature or a module deployment', () => {
@@ -119,21 +121,35 @@ describe('useSpendingLimitSafeAccounts', () => {
     expect(reasons([group]).every(([, reason]) => reason === 'unsupported-chain')).toBe(true)
   })
 
-  it('lets the network reason win over not-activated', () => {
+  it('keeps not-activated over the network reason', () => {
     eligible([option(POLYGON, SAFE_A, { ineligibleReason: 'not-activated' })])
 
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
-    expect(reasons(result.current.accounts)).toEqual([[POLYGON, 'unsupported-chain']])
+    expect(reasons(result.current.accounts)).toEqual([[POLYGON, 'not-activated']])
   })
 
-  it('returns no accounts while the chain configs are still empty', () => {
+  it('reports loading with no accounts while the chain configs load', () => {
     mockConfigs.mockReturnValue([])
+    mockChainsLoading.mockReturnValue(true)
     eligible([option(SEPOLIA)])
 
     const { result } = renderHook(() => useSpendingLimitSafeAccounts())
 
     expect(result.current.accounts).toEqual([])
+    expect(result.current.isLoading).toBe(true)
+  })
+
+  it('disables every Safe when no loaded chain can create a spending limit', () => {
+    mockConfigs.mockReturnValue(CHAINS.map((chain) => ({ ...chain, features: [] })))
+    eligible([option(SEPOLIA), option(POLYGON, SAFE_B)])
+
+    const { result } = renderHook(() => useSpendingLimitSafeAccounts())
+
+    expect(reasons(result.current.accounts)).toEqual([
+      [SEPOLIA, 'no-spending-limits'],
+      [POLYGON, 'no-spending-limits'],
+    ])
   })
 
   it('never empties a non-empty eligible list once the chain configs are loaded', () => {

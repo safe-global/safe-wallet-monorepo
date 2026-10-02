@@ -12,13 +12,14 @@ export type SpendingLimitChainSets = {
   indexed: ReadonlySet<string>
 }
 
-export const useSpendingLimitChainSets = (): SpendingLimitChainSets => {
-  const { configs } = useChains()
+export const useSpendingLimitChainSets = (): SpendingLimitChainSets & { isLoading: boolean } => {
+  const { configs, loading } = useChains()
   return useMemo(() => {
     const creatableChains = configs.filter(
       (chain) => hasFeature(chain, FEATURES.SPENDING_LIMIT) && !!getLatestSpendingLimitAddress(chain.chainId),
     )
     return {
+      isLoading: !!loading,
       creatable: new Set(creatableChains.map((chain) => chain.chainId)),
       indexed: new Set(
         creatableChains
@@ -26,20 +27,20 @@ export const useSpendingLimitChainSets = (): SpendingLimitChainSets => {
           .map((chain) => chain.chainId),
       ),
     }
-  }, [configs])
+  }, [configs, loading])
 }
 
 /**
- * `useEligibleSafeAccounts` with every row kept: a chain the Policy Indexer does not cover is disabled with a
- * pointer to the Safe settings, one where no limit can be created at all is disabled with that reason instead.
+ * `useEligibleSafeAccounts` with every row kept: a chain where no limit can be created is disabled with that reason,
+ * one the Policy Indexer does not cover with a pointer to the Safe settings. A not-activated Safe keeps that reason.
  */
 export const useSpendingLimitSafeAccounts = () => {
   const eligible = useEligibleSafeAccounts()
-  const { creatable, indexed } = useSpendingLimitChainSets()
+  const { creatable, indexed, isLoading: isChainsLoading } = useSpendingLimitChainSets()
   const accounts = useMemo(() => {
-    if (creatable.size === 0) return []
-    const marked = markSafeAccountsOffChains(eligible.accounts, indexed, 'unsupported-chain')
-    return markSafeAccountsOffChains(marked, creatable, 'no-spending-limits')
-  }, [eligible.accounts, creatable, indexed])
-  return { ...eligible, accounts }
+    if (isChainsLoading) return []
+    const marked = markSafeAccountsOffChains(eligible.accounts, creatable, 'no-spending-limits')
+    return markSafeAccountsOffChains(marked, indexed, 'unsupported-chain')
+  }, [eligible.accounts, creatable, indexed, isChainsLoading])
+  return { ...eligible, accounts, isLoading: eligible.isLoading || isChainsLoading }
 }

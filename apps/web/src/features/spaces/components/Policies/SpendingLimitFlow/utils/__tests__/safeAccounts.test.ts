@@ -28,7 +28,7 @@ describe('markSafeAccountsOffChains', () => {
   it('marks entries off the supported chains and leaves the others untouched', () => {
     const entries = [option('1', SAFE_A), option('137', SAFE_B)]
 
-    const result = markSafeAccountsOffChains(entries, new Set(['1']))
+    const result = markSafeAccountsOffChains(entries, new Set(['1']), 'unsupported-chain')
 
     expect(result).toEqual([option('1', SAFE_A), { ...option('137', SAFE_B), ineligibleReason: 'unsupported-chain' }])
   })
@@ -36,7 +36,7 @@ describe('markSafeAccountsOffChains', () => {
   it('keeps a multichain group together with only its unsupported chains marked', () => {
     const entries = groupSafeAccounts([option('1', SAFE_A), option('137', SAFE_A)])
 
-    const [group] = markSafeAccountsOffChains(entries, new Set(['1']))
+    const [group] = markSafeAccountsOffChains(entries, new Set(['1']), 'unsupported-chain')
 
     expect(isSafeAccountGroup(group) && group.accounts.map((account) => account.ineligibleReason)).toEqual([
       undefined,
@@ -44,36 +44,38 @@ describe('markSafeAccountsOffChains', () => {
     ])
   })
 
-  it('lets the network reason win over a not-activated one', () => {
+  it('keeps a not-activated reason over the network one', () => {
     const notActivated = { ...option('137', SAFE_A), ineligibleReason: 'not-activated' as const }
 
-    const [row] = markSafeAccountsOffChains([notActivated], new Set(['1']))
+    const [row] = markSafeAccountsOffChains([notActivated], new Set(['1']), 'unsupported-chain')
 
-    expect(row).toMatchObject({ ineligibleReason: 'unsupported-chain' })
+    expect(row).toMatchObject({ ineligibleReason: 'not-activated' })
   })
 
   it('marks everything when no chain is supported', () => {
-    const result = markSafeAccountsOffChains([option('1', SAFE_A), option('137', SAFE_B)], new Set())
+    const result = markSafeAccountsOffChains(
+      [option('1', SAFE_A), option('137', SAFE_B)],
+      new Set(),
+      'no-spending-limits',
+    )
 
-    expect(result.every((entry) => !isSafeAccountGroup(entry) && entry.ineligibleReason === 'unsupported-chain')).toBe(
+    expect(result.every((entry) => !isSafeAccountGroup(entry) && entry.ineligibleReason === 'no-spending-limits')).toBe(
       true,
     )
   })
 
-  it('stamps the given reason instead of the default one', () => {
-    const [row] = markSafeAccountsOffChains([option('1', SAFE_A)], new Set(), 'no-spending-limits')
+  it('keeps the earlier reason when marked twice', () => {
+    const marked = markSafeAccountsOffChains(
+      [option('1', SAFE_A), option('137', SAFE_B)],
+      new Set(['1']),
+      'no-spending-limits',
+    )
 
-    expect(row).toMatchObject({ ineligibleReason: 'no-spending-limits' })
-  })
-
-  it('lets a later marking override an earlier one', () => {
-    const marked = markSafeAccountsOffChains([option('1', SAFE_A), option('137', SAFE_B)], new Set(['1']))
-
-    const result = markSafeAccountsOffChains(marked, new Set(['137']), 'no-spending-limits')
+    const result = markSafeAccountsOffChains(marked, new Set(['137']), 'unsupported-chain')
 
     expect(result.map((entry) => !isSafeAccountGroup(entry) && entry.ineligibleReason)).toEqual([
-      'no-spending-limits',
       'unsupported-chain',
+      'no-spending-limits',
     ])
   })
 })
