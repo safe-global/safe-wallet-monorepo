@@ -33,8 +33,8 @@ export const UNENFORCED_HELPER =
 
 export const TX_LOAD_FAILED_HELPER = "The transaction couldn't be loaded."
 
-/** Dropped once WA-3156 supplies an `onEdit` handler. */
-export const EDIT_UNAVAILABLE_HELPER = 'Editing a spending limit is coming soon.'
+/** The page withholds `onEdit` only when the Workspace's plan does not include policies. */
+export const EDIT_LOCKED_HELPER = 'Upgrade to Business to edit spending limits.'
 
 /** The trailing full stop lives here, not at the call site, so the sentence is punctuated in one place. */
 export const signedAndWaitingLine = (missing: number): string => `You've signed. ${formatAwaitingSignatures(missing)}.`

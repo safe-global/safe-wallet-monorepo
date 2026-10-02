@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
-import { EDIT_UNAVAILABLE_HELPER, TX_LOAD_FAILED_HELPER } from '../../messages'
+import { EDIT_LOCKED_HELPER, TX_LOAD_FAILED_HELPER } from '../../messages'
 import type { SpendingLimitDrawerState } from '../../resolveState'
 import { CopyTransactionLink } from '../CopyTransactionLink'
 
@@ -36,7 +36,7 @@ const SpendingLimitActions = ({
         <PolicyDrawerActions
           actionLabel="Edit"
           onClick={onEdit}
-          hint={state.helper ?? (onEdit ? undefined : EDIT_UNAVAILABLE_HELPER)}
+          hint={state.helper ?? (onEdit ? undefined : EDIT_LOCKED_HELPER)}
           disabled={state.disabled || !onEdit}
         />
       )
