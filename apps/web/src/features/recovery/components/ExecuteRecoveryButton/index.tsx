@@ -31,38 +31,43 @@ export default function ExecuteRecoveryButton({
     setTxFlow(<RecoveryAttemptFlow item={recovery} />)
   }
 
+  const getRecoveryBlockedReason = (): string | null => {
+    if (isWrongChain) {
+      return `Switch your wallet network to ${chain?.chainName} to execute this transaction`
+    }
+    if (!isDisabled) {
+      return null
+    }
+    return isNext
+      ? 'You can execute the recovery after the specified review window'
+      : 'Previous recovery proposals must be executed or cancelled first'
+  }
+
+  const blockedReason = getRecoveryBlockedReason()
+
   return (
     <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
       {(isOk) => {
-        const tooltipTitle =
-          !isOk || isDisabled
-            ? isWrongChain
-              ? `Switch your wallet network to ${chain?.chainName} to execute this transaction`
-              : isNext
-                ? 'You can execute the recovery after the specified review window'
-                : 'Previous recovery proposals must be executed or cancelled first'
-            : null
-
         const button = (
           <Button
             data-testid="execute-btn"
             onClick={onClick}
             variant="default"
             disabled={!isOk || isDisabled}
-            size={compact ? 'sm' : 'action'}
+            size={compact ? 'default' : 'action'}
           >
             Execute
           </Button>
         )
 
-        if (!tooltipTitle) {
+        if (!blockedReason) {
           return button
         }
 
         return (
           <Tooltip>
             <TooltipTrigger render={<span />}>{button}</TooltipTrigger>
-            <TooltipContent>{tooltipTitle}</TooltipContent>
+            <TooltipContent>{blockedReason}</TooltipContent>
           </Tooltip>
         )
       }}

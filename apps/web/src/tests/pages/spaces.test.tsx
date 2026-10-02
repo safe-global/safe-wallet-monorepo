@@ -15,9 +15,11 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: jest.fn(),
 }))
 
+let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
   useFeatureFlagRedirect: jest.fn(),
+  useLandingSpaceId: () => mockLanding,
 }))
 
 const SpaceDashboardPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="dash">space {spaceId}</div>
@@ -43,9 +45,34 @@ const setup = ({
 describe('SpacePage (/spaces)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockLanding = { spaceId: null, isLoading: false }
   })
 
-  it('redirects to /welcome/spaces when there is no spaceId, preserving query params', async () => {
+  it('opens the last Workspace used when there is no spaceId', async () => {
+    const landingSpaceId = '11111111-1111-1111-1111-111111111111'
+    mockLanding = { spaceId: landingSpaceId, isLoading: false }
+    setup({ query: { safe: 'eth:0xabc' } })
+
+    render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: AppRoutes.spaces.index,
+        query: { safe: 'eth:0xabc', spaceId: landingSpaceId },
+      }),
+    )
+  })
+
+  it('waits for the Workspaces of the user before it redirects', () => {
+    mockLanding = { spaceId: null, isLoading: true }
+    setup({ spaceId: undefined })
+
+    render(<SpacePage />)
+
+    expect(mockReplace).not.toHaveBeenCalled()
+  })
+
+  it('redirects to /welcome/spaces when there is no spaceId and no active Workspace', async () => {
     setup({ spaceId: undefined })
 
     render(<SpacePage />)
@@ -54,11 +81,12 @@ describe('SpacePage (/spaces)', () => {
   })
 
   it('renders the space dashboard when spaceId is present', async () => {
-    setup({ spaceId: '7' })
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setup({ spaceId })
 
     const { findByTestId } = render(<SpacePage />)
 
-    expect(await findByTestId('dash')).toHaveTextContent('space 7')
+    expect(await findByTestId('dash')).toHaveTextContent(`space ${spaceId}`)
     expect(mockReplace).not.toHaveBeenCalled()
   })
 
@@ -93,6 +121,17 @@ describe('SpacePage (/spaces)', () => {
         pathname: AppRoutes.welcome.spaces,
         query: { spaceId: ['1', '2'] },
       }),
+    )
+    expect(queryByTestId('dash')).not.toBeInTheDocument()
+  })
+
+  it('treats a malformed spaceId as missing and redirects', async () => {
+    setup({ query: { spaceId: 'space-7' } })
+
+    const { queryByTestId } = render(<SpacePage />)
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.spaces, query: { spaceId: 'space-7' } }),
     )
     expect(queryByTestId('dash')).not.toBeInTheDocument()
   })

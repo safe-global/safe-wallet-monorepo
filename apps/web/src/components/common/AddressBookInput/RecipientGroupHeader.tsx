@@ -42,8 +42,8 @@ const RecipientGroupHeader = ({
         <TooltipTrigger render={<Info size={14} className={css.groupInfoIcon} />} />
         <TooltipContent>
           {isSpace
-            ? `Shared with everyone in ${workspaceName ?? 'your workspace'}. Only Workspace admins can add or change these contacts.`
-            : 'Saved only in this browser, from your old address book. Not shared with your workspace.'}
+            ? `Shared with everyone in ${workspaceName ?? 'your Workspace'}. Only Workspace admins can add or change these contacts.`
+            : 'Saved only in this browser, from your old address book. Not shared with your Workspace.'}
         </TooltipContent>
       </Tooltip>
 

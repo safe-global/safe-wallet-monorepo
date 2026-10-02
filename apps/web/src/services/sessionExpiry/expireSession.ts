@@ -6,7 +6,7 @@ import { showNotification } from '@/store/notificationsSlice'
 import { AppRoutes } from '@/config/routes'
 
 export const SESSION_EXPIRED_GROUP_KEY = 'session-expired'
-export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to workspaces again.'
+export const SESSION_EXPIRED_MESSAGE = 'Your session has expired. Please sign in to Workspaces again.'
 
 export const isForbidden = (error: unknown): error is FetchBaseQueryError => getHttpStatusFromError(error) === 403
 

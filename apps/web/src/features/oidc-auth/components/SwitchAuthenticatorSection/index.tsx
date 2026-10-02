@@ -52,7 +52,7 @@ const SwitchAuthenticatorSection = () => {
         )}
       </div>
       <Typography variant="paragraph-small" color="muted" className="mb-4 block max-w-[560px]">
-        Required for everyone in this workspace. Signing in takes your email code and a 6-digit code from your
+        Required for everyone in this Workspace. Signing in takes your email code and a 6-digit code from your
         authenticator app.
       </Typography>
 

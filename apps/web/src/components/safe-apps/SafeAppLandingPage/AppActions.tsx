@@ -61,6 +61,7 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
       const safe = `${safeToUse?.shortName}:${safeToUse?.address}`
       const href: UrlObject = {
         pathname: AppRoutes.apps.open,
+        // eslint-disable-next-line no-restricted-syntax -- The shared Safe App page picks one of the user's Safes and has no Workspace
         query: { safe, appUrl },
       }
 

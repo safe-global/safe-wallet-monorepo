@@ -122,7 +122,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
 
         await deleteDelegate({
-          chainId,
+          chain,
           delegateAddress: proposer.delegate,
           deleteDelegateDto: {
             delegator: parentSafeAddress,
@@ -147,7 +147,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
           }).unwrap()
         } else {
           await deleteDelegate({
-            chainId,
+            chain,
             delegateAddress: proposer.delegate,
             deleteDelegateDto: {
               delegator: proposer.delegator,
@@ -165,7 +165,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
           variant: 'success',
           groupKey: 'delete-proposer-success',
           title: 'Proposer deleted successfully!',
-          message: `${shortenAddress(proposer.delegate)} can not suggest transactions anymore.`,
+          message: `${shortenAddress(proposer.delegate)} cannot suggest transactions anymore.`,
         }),
       )
       setOpen(false)

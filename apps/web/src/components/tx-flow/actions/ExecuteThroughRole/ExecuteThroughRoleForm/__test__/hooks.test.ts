@@ -126,7 +126,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await new Promise((resolve) => setTimeout(resolve, 25))
 
@@ -148,7 +148,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
@@ -169,7 +169,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await waitFor(() => expect(result.current).toHaveLength(1))
 

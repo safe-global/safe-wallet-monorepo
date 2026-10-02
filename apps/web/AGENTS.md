@@ -118,7 +118,7 @@ RPC-specific context (`getRpcErrorContext`) rules: [docs/rpc-endpoint-attributio
 
 ## Web Testing
 
-Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md). The matrix and tooling below are web-specific.
+Before writing or changing any test, read the cross-cutting conventions in [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md). The matrix and tooling below are web-specific; mock patterns, including how to set or assert `window.location` (non-configurable in jsdom 26), live in [docs/TESTING.md](docs/TESTING.md).
 
 ### E2E tests
 

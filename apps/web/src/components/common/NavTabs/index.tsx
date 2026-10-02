@@ -2,11 +2,13 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const activeHref = tabs.map((tab) => tab.href).includes(router.pathname) ? router.pathname : tabs[0]?.href
-  const query = router.query.safe ? { safe: router.query.safe } : undefined
+  const query = safeLinkQuery.safe ? safeLinkQuery : undefined
 
   // Mounting Tabs with value=undefined (tabs still loading) locks Base UI into uncontrolled mode
   // and the active tab is never highlighted once the tabs arrive.

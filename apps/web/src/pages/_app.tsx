@@ -4,6 +4,7 @@ import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
 const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
@@ -22,7 +23,7 @@ import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
+import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
@@ -38,7 +39,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification } from '@/features/spaces'
+import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -124,6 +125,7 @@ const SafeScopedSubscriptions = (): null => {
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   useInviteNotification()
+  useSafeWorkspaceCheck()
   return null
 }
 
@@ -145,6 +147,7 @@ const InitApp = (): ReactElement | null => {
   useSessionExpiryGuard()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
+  useRememberSpace()
 
   return <SafeScopedSubscriptions />
 }

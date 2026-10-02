@@ -9,6 +9,7 @@ const relayer = (type: Relayer['type']): Relayer => ({
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
+  gasPaymentOptions: ['SUBSCRIPTION'],
 })
 
 const buildChain = (features: FEATURES[], chainRelayer: Relayer | null) =>

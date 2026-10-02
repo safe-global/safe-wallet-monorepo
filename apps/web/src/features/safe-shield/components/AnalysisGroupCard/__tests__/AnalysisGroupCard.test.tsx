@@ -59,4 +59,33 @@ describe('AnalysisGroupCard with expandedGroups', () => {
     expect(screen.getByText('desc-a')).toBeInTheDocument()
     expect(screen.queryByText('desc-b')).not.toBeInTheDocument()
   })
+
+  it('expands and collapses from the keyboard', async () => {
+    const { user } = renderWithUserEvent(
+      <AnalysisGroupCard
+        data={
+          {
+            '0x': {
+              THREAT: [
+                { severity: Severity.WARN, type: ThreatStatus.MODERATE, title: 'Threat A', description: 'desc-a' },
+              ],
+            },
+          } as unknown as Parameters<typeof AnalysisGroupCard>[0]['data']
+        }
+      />,
+    )
+
+    await screen.findByText('Threat A')
+    await user.tab()
+    const header = screen.getByRole('button', { name: /Threat A/ })
+    expect(header).toHaveFocus()
+    expect(header).toHaveAttribute('aria-expanded', 'false')
+
+    await user.keyboard('{Enter}')
+    expect(header).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('desc-a')).toBeVisible()
+
+    await user.keyboard(' ')
+    expect(header).toHaveAttribute('aria-expanded', 'false')
+  })
 })

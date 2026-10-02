@@ -1,11 +1,12 @@
 import { renderHook, act, waitFor } from '@/tests/test-utils'
 import { useSubmitDelegation } from '../useSubmitDelegation'
-import * as useChainIdModule from '@/hooks/useChainId'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import * as useChainsModule from '@/hooks/useChains'
 import * as utilsModule from '@/features/proposers/utils/utils'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder } from '@/tests/builders/chains'
 import type { PendingDelegation } from '@/features/proposers/types'
 import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
 
@@ -33,7 +34,10 @@ const {
 >('@safe-global/store/gateway/AUTO_GENERATED/delegates')
 
 describe('useSubmitDelegation', () => {
-  const chainId = faker.string.numeric()
+  const queueServiceChain = chainBuilder()
+    .with({ features: [FEATURES.QUEUE_SERVICE] })
+    .build()
+  const transactionServiceChain = chainBuilder().with({ features: [] }).build()
   const safeAddress = checksumAddress(faker.finance.ethereumAddress())
   const parentSafeAddress = checksumAddress(faker.finance.ethereumAddress())
   const delegateAddress = checksumAddress(faker.finance.ethereumAddress())
@@ -66,9 +70,8 @@ describe('useSubmitDelegation', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(useChainIdModule, 'default').mockReturnValue(chainId)
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(queueServiceChain)
     jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(safeAddress)
-    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
     jest.spyOn(utilsModule, 'encodeEIP1271Signature').mockResolvedValue(encodedSignature)
 
     mockAddDelegateV2 = mutationTrigger()
@@ -91,6 +94,20 @@ describe('useSubmitDelegation', () => {
     )
   })
 
+  it('should throw error when the chain config is not loaded', async () => {
+    jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(undefined)
+    const { result } = renderHook(() => useSubmitDelegation())
+
+    await expect(result.current.submitDelegation(createPendingDelegation())).rejects.toThrow(
+      'Cannot submit delegation: chain config is not loaded',
+    )
+
+    expect(utilsModule.encodeEIP1271Signature).not.toHaveBeenCalled()
+    expect(mockAddDelegateV2).not.toHaveBeenCalled()
+    expect(mockAddDelegateV3).not.toHaveBeenCalled()
+    expect(result.current.isSubmitting).toBe(false)
+  })
+
   it('should call addDelegateV3 for add action with correct params', async () => {
     const { result } = renderHook(() => useSubmitDelegation())
     const delegation = createPendingDelegation({ action: 'add' })
@@ -101,7 +118,7 @@ describe('useSubmitDelegation', () => {
 
     expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
     expect(mockAddDelegateV3).toHaveBeenCalledWith({
-      chainId,
+      chainId: queueServiceChain.chainId,
       createDelegateDto: {
         safe: safeAddress,
         delegate: delegateAddress,
@@ -124,7 +141,7 @@ describe('useSubmitDelegation', () => {
 
     expect(utilsModule.encodeEIP1271Signature).toHaveBeenCalledWith(parentSafeAddress, preparedSignature)
     expect(mockDeleteDelegateV3).toHaveBeenCalledWith({
-      chainId,
+      chainId: queueServiceChain.chainId,
       delegateAddress,
       deleteDelegateV3Dto: {
         delegator: parentSafeAddress,
@@ -138,7 +155,7 @@ describe('useSubmitDelegation', () => {
 
   describe('without QUEUE_SERVICE', () => {
     beforeEach(() => {
-      jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+      jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(transactionServiceChain)
     })
 
     it('should call addDelegateV2 for add action with correct params', async () => {
@@ -150,7 +167,7 @@ describe('useSubmitDelegation', () => {
       })
 
       expect(mockAddDelegateV2).toHaveBeenCalledWith({
-        chainId,
+        chainId: transactionServiceChain.chainId,
         createDelegateDto: {
           safe: safeAddress,
           delegate: delegateAddress,
@@ -172,7 +189,7 @@ describe('useSubmitDelegation', () => {
       })
 
       expect(mockDeleteDelegateV2).toHaveBeenCalledWith({
-        chainId,
+        chainId: transactionServiceChain.chainId,
         delegateAddress,
         deleteDelegateV2Dto: {
           delegator: parentSafeAddress,

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { id, zeroPadValue } from 'ethers'
-import { JsonRpcProvider } from 'ethers'
+import type { JsonRpcProvider } from 'ethers'
 import cloneDeep from 'lodash/cloneDeep'
 import type { TransactionAddedEvent, Delay } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import type { TransactionReceipt } from 'ethers'
@@ -8,10 +8,9 @@ import type { TransactionReceipt } from 'ethers'
 import {
   _getRecoveryStateItem,
   _getRecoveryQueueItemTimestamps,
-  _getSafeCreationReceipt,
   _isMaliciousRecovery,
+  _addedTransactionsCache,
 } from '../recovery-state'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { getMultiSendCallOnlyDeployment, getSafeSingletonDeployment } from '@safe-global/safe-deployments'
 import { Interface } from 'ethers'
@@ -20,10 +19,6 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import { getModuleInstance, KnownContracts, ContractAbis } from '@gnosis.pm/zodiac'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
-
-jest.mock('@/hooks/wallets/web3')
-
-const mockUseWeb3ReadOnly = useWeb3ReadOnly as jest.MockedFunction<typeof useWeb3ReadOnly>
 
 const latestSafeVersion = getLatestSafeVersion(
   chainBuilder().with({ chainId: '1', recommendedMasterCopyVersion: '1.4.1' }).build(),
@@ -40,8 +35,7 @@ const DELAY_INTERFACE = new Interface(ContractAbis[KnownContracts.DELAY])
 
 describe('recovery-state', () => {
   beforeEach(() => {
-    // Clear memoization cache
-    _getSafeCreationReceipt.cache.clear?.()
+    _addedTransactionsCache.clear()
   })
 
   describe('isMaliciousRecovery', () => {
@@ -262,94 +256,311 @@ describe('recovery-state', () => {
     })
   })
 
-  describe('getSafeCreationReceipt', () => {
-    beforeEach(() => {
-      jest.clearAllMocks()
-    })
+  describe('queryAddedTransactions', () => {
+    const TOPIC = id('TransactionAdded(uint256,bytes32,address,uint256,bytes,uint8)')
+    const BLOCK_TIME = 12
 
-    it('should return the Safe creation receipt', async () => {
-      const transactionService = faker.internet.url({ appendSlash: false })
+    function setup({
+      txNonce,
+      queueNonce,
+      createdAt,
+      latestBlock,
+      queryFilter,
+      address = faker.finance.ethereumAddress(),
+    }: {
+      txNonce: bigint
+      queueNonce: bigint
+      createdAt: bigint
+      latestBlock: number
+      queryFilter: jest.Mock
+      address?: string
+    }) {
       const safeAddress = faker.finance.ethereumAddress()
-      const transactionHash = `0x${faker.string.hexadecimal()}`
-      const receipt = {
-        blockHash: faker.string.alphanumeric(),
-      } as TransactionReceipt
 
-      global.fetch = jest.fn().mockImplementation(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve({ transactionHash }),
-          status: 200,
-          ok: true,
-        })
-      })
+      const mockProvider = createMockWeb3Provider([
+        {
+          signature: DELAY_INTERFACE.getFunction('getModulesPaginated')?.selector!,
+          returnType: 'raw',
+          returnValue: DELAY_INTERFACE.encodeFunctionResult('getModulesPaginated', [
+            [faker.finance.ethereumAddress()],
+            SENTINEL_ADDRESS,
+          ]),
+        },
+        { signature: DELAY_INTERFACE.getFunction('txExpiration')?.selector!, returnType: 'uint256', returnValue: 0n },
+        { signature: DELAY_INTERFACE.getFunction('txCooldown')?.selector!, returnType: 'uint256', returnValue: 60n },
+        { signature: DELAY_INTERFACE.getFunction('txNonce')?.selector!, returnType: 'uint256', returnValue: txNonce },
+        {
+          signature: DELAY_INTERFACE.getFunction('queueNonce')?.selector!,
+          returnType: 'uint256',
+          returnValue: queueNonce,
+        },
+      ])
+      ;(mockProvider.getTransactionReceipt as jest.Mock).mockResolvedValue({
+        from: faker.finance.ethereumAddress(),
+      } as TransactionReceipt)
+      mockProvider.getBlockNumber = jest.fn().mockResolvedValue(latestBlock)
+      const getBlock = jest.fn(async (blockNumber: number) => ({ timestamp: blockNumber * BLOCK_TIME }))
+      mockProvider.getBlock = getBlock as unknown as JsonRpcProvider['getBlock']
 
-      const provider = {
-        getTransactionReceipt: () => Promise.resolve(receipt),
-      } as unknown as JsonRpcProvider
-      mockUseWeb3ReadOnly.mockReturnValue(provider)
+      const delayModifier = {
+        ...getModuleInstance(KnownContracts.DELAY, address, mockProvider),
+        filters: { TransactionAdded: () => ({ getTopicFilter: jest.fn().mockResolvedValue([TOPIC]) }) },
+        getAddress: jest.fn().mockResolvedValue(address),
+        txCreatedAt: jest.fn().mockResolvedValue(createdAt),
+        queryFilter,
+      } as unknown as Delay
 
-      const creationReceipt = await _getSafeCreationReceipt({
-        transactionService,
-        safeAddress,
-        provider,
-      })
-
-      expect(receipt).toStrictEqual(creationReceipt)
-    })
-
-    it('should memoize the Safe creation receipt', async () => {
-      const transactionService = faker.internet.url({ appendSlash: false })
-      const safeAddress = faker.finance.ethereumAddress()
-      const transactionHash = `0x${faker.string.hexadecimal()}`
-      const receipt = {
-        blockHash: faker.string.alphanumeric(),
-      } as TransactionReceipt
-
-      global.fetch = jest.fn().mockImplementation(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve({ transactionHash }),
-          status: 200,
-          ok: true,
-        })
-      })
-
-      const provider = {
-        getTransactionReceipt: () => Promise.resolve(receipt),
-      } as unknown as JsonRpcProvider
-      mockUseWeb3ReadOnly.mockReturnValue(provider)
-
-      Array.from({ length: 3 }).forEach(async () => {
-        await _getSafeCreationReceipt({
-          transactionService,
+      const run = () =>
+        _getRecoveryStateItem({
+          delayModifier,
           safeAddress,
-          provider,
+          provider: mockProvider,
+          chainId,
+          version: '1.3.0',
         })
-      })
 
-      expect(global.fetch).toHaveBeenCalledTimes(1)
+      return { run, getBlock }
+    }
+
+    // blockNumber 0 is far behind every `latestBlock` below, so these are cacheable by default
+    const event = (queueNonce: bigint, blockNumber = 0) => ({
+      args: { queueNonce, to: faker.finance.ethereumAddress(), value: 0n, data: '0x' },
+      blockNumber,
     })
 
-    it('should throw an error if the Safe creation receipt cannot be fetched', async () => {
-      const transactionService = faker.internet.url({ appendSlash: false })
-      const safeAddress = faker.finance.ethereumAddress()
-
-      global.fetch = jest.fn().mockImplementation(() => {
-        return Promise.resolve({
-          status: 500,
-          ok: false,
-        })
+    it('should find recently queued txs in the first window without bisecting', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n)])
+      const { run, getBlock } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
       })
 
-      const provider = new JsonRpcProvider()
-      mockUseWeb3ReadOnly.mockReturnValue(provider)
+      const { queue } = await run()
 
-      expect(
-        _getSafeCreationReceipt({
-          transactionService,
-          safeAddress,
-          provider,
-        }),
-      ).rejects.toThrow('Error fetching Safe creation details')
+      expect(queue).toHaveLength(1)
+      expect(queryFilter).toHaveBeenCalledTimes(1)
+      expect(queryFilter).toHaveBeenCalledWith(expect.anything(), 90_001, 100_000)
+      expect(getBlock).not.toHaveBeenCalled()
+    })
+
+    it('should walk back up to three windows before bisecting', async () => {
+      const queryFilter = jest
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([event(0n)])
+      const { run, getBlock } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const { queue } = await run()
+
+      expect(queue).toHaveLength(1)
+      expect(queryFilter.mock.calls.map(([, from, to]) => [from, to])).toEqual([
+        [90_001, 100_000],
+        [80_001, 90_000],
+        [70_001, 80_000],
+      ])
+      expect(getBlock).not.toHaveBeenCalled()
+    })
+
+    it('should bisect to the block the oldest queued tx was created and scan forward from there', async () => {
+      const queryFilter = jest
+        .fn()
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([event(0n), event(1n)])
+      const { run, getBlock } = setup({
+        txNonce: 0n,
+        queueNonce: 2n,
+        createdAt: BigInt(55_000 * BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const { queue } = await run()
+
+      expect(queue).toHaveLength(2)
+      expect(queryFilter.mock.calls.map(([, from, to]) => [from, to])).toEqual([
+        [90_001, 100_000],
+        [80_001, 90_000],
+        [70_001, 80_000],
+        [55_000, 64_999],
+        [65_000, 70_000],
+      ])
+      expect(getBlock.mock.calls.length).toBeLessThanOrEqual(17)
+    })
+
+    it('should stop at genesis without bisecting when the chain is shorter than three windows', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([])
+      const { run, getBlock } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 25_000,
+        queryFilter,
+      })
+
+      const { queue } = await run()
+
+      expect(queue).toEqual([])
+      expect(queryFilter.mock.calls.map(([, from, to]) => [from, to])).toEqual([
+        [15_001, 25_000],
+        [5_001, 15_000],
+        [0, 5_000],
+      ])
+      expect(getBlock).not.toHaveBeenCalled()
+    })
+
+    it('should halve the window when the RPC rejects the range', async () => {
+      const queryFilter = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('range exceeds limit'))
+        .mockRejectedValueOnce(new Error('range exceeds limit'))
+        .mockResolvedValue([event(0n)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const { queue } = await run()
+
+      expect(queue).toHaveLength(1)
+      expect(queryFilter.mock.calls.map(([, from, to]) => [from, to])).toEqual([
+        [90_001, 100_000],
+        [95_001, 100_000],
+        [97_501, 100_000],
+      ])
+    })
+
+    it('should rethrow once the window cannot shrink any further', async () => {
+      const error = new Error('range exceeds limit')
+      const queryFilter = jest.fn().mockRejectedValue(error)
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      await expect(run()).rejects.toThrow(error)
+      expect(queryFilter).toHaveBeenCalledTimes(5)
+    })
+
+    it('should throw if the queued tx has no creation time', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([])
+      const { run } = setup({ txNonce: 0n, queueNonce: 1n, createdAt: 0n, latestBlock: 100_000, queryFilter })
+
+      await expect(run()).rejects.toThrow('Could not determine when recovery 0 was queued')
+      expect(queryFilter).toHaveBeenCalledTimes(3)
+    })
+
+    it('should not query logs again for nonces already found in the session', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const first = await run()
+      const second = await run()
+
+      expect(first.queue).toHaveLength(1)
+      expect(second.queue).toHaveLength(1)
+      expect(queryFilter).toHaveBeenCalledTimes(1)
+    })
+
+    it('should only query logs for nonces missing from the cache', async () => {
+      const address = faker.finance.ethereumAddress()
+      const firstQueryFilter = jest.fn().mockResolvedValue([event(0n)])
+      await setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter: firstQueryFilter,
+        address,
+      }).run()
+
+      const secondQueryFilter = jest.fn().mockResolvedValue([event(1n)])
+      const { queue } = await setup({
+        txNonce: 0n,
+        queueNonce: 2n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter: secondQueryFilter,
+        address,
+      }).run()
+
+      expect(queue.map((item) => item.args.queueNonce)).toEqual([0n, 1n])
+      expect(secondQueryFilter).toHaveBeenCalledTimes(1)
+      expect(secondQueryFilter.mock.calls[0][0][1]).toEqual([zeroPadValue('0x01', 32)])
+    })
+
+    it('should not cache reorged events', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([{ ...event(0n), removed: true }])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      await run()
+      await run()
+
+      expect(queryFilter).toHaveBeenCalledTimes(2)
+    })
+
+    it('should not cache events still within reorg range of the chain head', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_995)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      const first = await run()
+      const second = await run()
+
+      expect(first.queue).toHaveLength(1)
+      expect(second.queue).toHaveLength(1)
+      expect(queryFilter).toHaveBeenCalledTimes(2)
+    })
+
+    it('should cache events buried deeper than the reorg range', async () => {
+      const queryFilter = jest.fn().mockResolvedValue([event(0n, 99_000)])
+      const { run } = setup({
+        txNonce: 0n,
+        queueNonce: 1n,
+        createdAt: BigInt(BLOCK_TIME),
+        latestBlock: 100_000,
+        queryFilter,
+      })
+
+      await run()
+      await run()
+
+      expect(queryFilter).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -357,22 +568,10 @@ describe('recovery-state', () => {
     it('should return the recovery state from the Safe creation block', async () => {
       const safeAddress = faker.finance.ethereumAddress()
       const version = '1.3.0'
-      const transactionService = faker.internet.url({ appendSlash: false })
-      const transactionHash = `0x${faker.string.hexadecimal()}`
-      const safeCreationReceipt = {
-        blockNumber: faker.number.int(),
-      } as TransactionReceipt
+      const latestBlock = 5_000
       const transactionAddedReceipt = {
         from: faker.finance.ethereumAddress(),
       } as TransactionReceipt
-
-      global.fetch = jest.fn().mockImplementation(() => {
-        return Promise.resolve({
-          json: () => Promise.resolve({ transactionHash }),
-          status: 200,
-          ok: true,
-        })
-      })
 
       const recoverers = [faker.finance.ethereumAddress()]
       const expiry = 0n
@@ -440,9 +639,10 @@ describe('recovery-state', () => {
           returnValue: queueNonce,
         },
       ])
-      ;(mockProvider.getTransactionReceipt as jest.MockedFunction<JsonRpcProvider['getTransactionReceipt']>)
-        .mockResolvedValueOnce(safeCreationReceipt)
-        .mockResolvedValue(transactionAddedReceipt)
+      ;(
+        mockProvider.getTransactionReceipt as jest.MockedFunction<JsonRpcProvider['getTransactionReceipt']>
+      ).mockResolvedValue(transactionAddedReceipt)
+      mockProvider.getBlockNumber = jest.fn().mockResolvedValue(latestBlock)
 
       const mockDelayModifierAddress = faker.finance.ethereumAddress()
 
@@ -465,7 +665,6 @@ describe('recovery-state', () => {
       const recoveryState = await _getRecoveryStateItem({
         delayModifier: patchedDelayModifier as unknown as Delay,
         safeAddress,
-        transactionService,
         provider: mockProvider,
         chainId,
         version,
@@ -500,17 +699,17 @@ describe('recovery-state', () => {
           },
         ],
       })
+      expect(queryFilterMock).toHaveBeenCalledTimes(1)
       expect(queryFilterMock).toHaveBeenCalledWith(
         [...topics, [zeroPadValue('0x02', 32), zeroPadValue('0x03', 32)]],
-        safeCreationReceipt.blockNumber,
-        'latest',
+        0,
+        latestBlock,
       )
     })
 
     it('should not query data if the queueNonce equals the txNonce', async () => {
       const safeAddress = faker.finance.ethereumAddress()
       const version = '1.3.0'
-      const transactionService = faker.internet.url({ appendSlash: true })
 
       const recoverers = [faker.finance.ethereumAddress()]
       const expiry = 0n
@@ -573,7 +772,6 @@ describe('recovery-state', () => {
       const recoveryState = await _getRecoveryStateItem({
         delayModifier: patchedDelayModifier as unknown as Delay,
         safeAddress,
-        transactionService,
         provider: mockProvider,
         chainId,
         version,

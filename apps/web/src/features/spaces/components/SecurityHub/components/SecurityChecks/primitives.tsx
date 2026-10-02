@@ -10,6 +10,7 @@ import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../SeverityIcon/SeverityIcon'
+import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 
 /** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */
 const toneToCssVar = (color: string): string => `var(--color-${color.replace('.', '-')})`
@@ -135,14 +136,17 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
  * Label precedence: `ScanResult.ctaLabelOverride` → `checkDefs[id].ctaLabel`.
  */
 export const makeBuildCta =
-  (checkDefs: SecurityContract['checkDefs']) =>
+  (checkDefs: SecurityContract['checkDefs'], spaceId: string | null) =>
   (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
     if (!safeQueryParam) return null
     const def = checkDefs[checkId]
     if (!def) return null
     if (result && isPassingStatus(result.status)) return null
     const label = result?.ctaLabelOverride || def.ctaLabel
-    return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
+    return {
+      label,
+      href: withSpaceIdInUrl(`${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}`, spaceId),
+    }
   }
 
 const ctaClassName =

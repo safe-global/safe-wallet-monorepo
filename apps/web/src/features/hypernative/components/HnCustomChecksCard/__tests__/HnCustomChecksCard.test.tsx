@@ -3,7 +3,7 @@ import { HnCustomChecksCard } from '../index'
 import type { ThreatAnalysisResults, ThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { Severity, ThreatStatus, StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock HnAnalysisGroupCard — forward expandedGroups to a data attribute and render overflowRow as children
 jest.mock('../../HnAnalysisGroupCard', () => ({
@@ -61,14 +61,6 @@ describe('HnCustomChecksCard', () => {
     }
   }
 
-  const createAuthenticatedAuth = (overrides?: Partial<HypernativeAuthStatus>): HypernativeAuthStatus => ({
-    isAuthenticated: true,
-    isTokenExpired: false,
-    initiateLogin: jest.fn(),
-    logout: jest.fn(),
-    ...overrides,
-  })
-
   const createChecks = (count: number): ThreatAnalysisResult[] =>
     Array.from({ length: count }, (_, i) =>
       createCustomCheckResult({ title: `Check ${i + 1}`, severity: Severity.WARN }),
@@ -81,7 +73,7 @@ describe('HnCustomChecksCard', () => {
         undefined,
         false,
       ]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder().build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -96,7 +88,9 @@ describe('HnCustomChecksCard', () => {
         undefined,
         false,
       ]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: true })
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: true })
+        .build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -111,7 +105,9 @@ describe('HnCustomChecksCard', () => {
         undefined,
         false,
       ]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: true })
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: true })
+        .build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -167,7 +163,9 @@ describe('HnCustomChecksCard', () => {
     it('should render HnAnalysisGroupCard when there are custom checks and hypernativeAuth is authenticated', () => {
       const customChecks = [createCustomCheckResult()]
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(customChecks), undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: true, isTokenExpired: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: false })
+        .build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -239,7 +237,7 @@ describe('HnCustomChecksCard', () => {
   describe('top-3 cap and overflow row', () => {
     it('renders overflow row with +2 when 5 custom checks exist', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [{ CUSTOM_CHECKS: createChecks(5) }, undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth()
+      const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -254,7 +252,7 @@ describe('HnCustomChecksCard', () => {
 
     it('renders no overflow row when 3 custom checks exist', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [{ CUSTOM_CHECKS: createChecks(3) }, undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth()
+      const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -278,7 +276,7 @@ describe('HnCustomChecksCard', () => {
       useSafeShieldAssessmentUrl.mockReturnValueOnce(null)
 
       const threat: AsyncResult<ThreatAnalysisResults> = [{ CUSTOM_CHECKS: createChecks(5) }, undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth()
+      const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 
@@ -335,7 +333,7 @@ describe('HnCustomChecksCard', () => {
     it('should prioritize authentication check over custom checks existence', () => {
       const customChecks = [createCustomCheckResult()]
       const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(customChecks), undefined, false]
-      const hypernativeAuth = createAuthenticatedAuth({ isAuthenticated: false })
+      const hypernativeAuth = hypernativeAuthStatusBuilder().build()
 
       render(<HnCustomChecksCard threat={threat} hypernativeAuth={hypernativeAuth} />)
 

@@ -10,6 +10,7 @@ jest.mock('@/components/ui/tooltip', () => ({
 }))
 
 const longName = 'Nested safe with more owners than fit'
+const address = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
 
 describe('shouldOpenTooltip', () => {
   const clipped = { scrollWidth: 200, clientWidth: 100 }
@@ -31,6 +32,14 @@ describe('shouldOpenTooltip', () => {
     expect(shouldOpenTooltip(true, 'trigger-hover', clipped)).toBe(true)
   })
 
+  it('opens on hover regardless of clipping when the tooltip reveals more than the text', () => {
+    expect(shouldOpenTooltip(true, 'trigger-hover', fits, true)).toBe(true)
+  })
+
+  it('still ignores focus when the tooltip reveals more than the text', () => {
+    expect(shouldOpenTooltip(true, 'trigger-focus', fits, true)).toBe(false)
+  })
+
   it('does not open when there is no element to measure', () => {
     expect(shouldOpenTooltip(true, 'trigger-hover', null)).toBe(false)
   })
@@ -45,5 +54,12 @@ describe('TruncatedText', () => {
   it('wires the full text into the tooltip content', () => {
     render(<TruncatedText text={longName} variant="paragraph-small-medium" data-testid="name" />)
     expect(screen.getByTestId('tooltip-content')).toHaveTextContent(longName)
+  })
+
+  it('reveals fullText instead, where the rendered text is already an abbreviation', () => {
+    render(<TruncatedText text="0x9fC3...213e" fullText={address} data-testid="address" />)
+
+    expect(screen.getByTestId('address')).toHaveTextContent('0x9fC3...213e')
+    expect(screen.getByTestId('tooltip-content')).toHaveTextContent(address)
   })
 })

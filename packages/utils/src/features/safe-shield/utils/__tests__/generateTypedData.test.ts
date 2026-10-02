@@ -4,7 +4,7 @@ import { isEIP712TypedData } from '../../../../utils/safe-messages'
 import { normalizeTypedData } from '../../../../utils/web3'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
-import { faker } from '@faker-js/faker/.'
+import { faker } from '@faker-js/faker'
 
 jest.mock('@safe-global/protocol-kit')
 jest.mock('../../../../utils/safe-messages')

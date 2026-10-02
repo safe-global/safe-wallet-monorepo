@@ -24,6 +24,13 @@ import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useSafeProAccess } from '@/features/spaces'
+import NextLink from 'next/link'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { AppRoutes } from '@/config/routes'
+import { useAppSelector } from '@/store'
+import { selectHasOwnTenderly } from '@/store/settingsSlice'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
   isSuccess && !isError && !isCallTraceError
@@ -62,6 +69,31 @@ const CompactSimulationButton = ({
   )
 }
 
+const SimulationSetupLink = () => {
+  const safeLinkQuery = useSafeLinkQuery()
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <NextLink
+            href={{ pathname: AppRoutes.settings.environmentVariables, query: safeLinkQuery }}
+            data-testid="queued-tx-simulation-setup"
+            className="flex flex-row items-center gap-1 rounded-lg bg-[var(--color-background-main)] px-2 py-1 no-underline"
+          >
+            <TenderlyIcon className="h-4" />
+            <Typography variant="paragraph-small-bold">Set up simulation</Typography>
+          </NextLink>
+        }
+      />
+      <TooltipContent>
+        Built-in simulation is part of Safe Pro. To simulate on your own Tenderly project, add its URL and access token
+        in Settings › Environment variables.
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
   const { safe } = useSafeInfo()
   const isSafeOwner = useIsSafeOwner()
@@ -86,6 +118,8 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   const simulation = useSimulation()
   const { simulationLink, simulateTransaction } = simulation
   const status = simulation ? getSimulationStatus(simulation) : undefined
+  const { hasProFeatures, isLoading: isProAccessLoading } = useSafeProAccess()
+  const hasOwnTenderly = useAppSelector(selectHasOwnTenderly)
 
   const handleSimulation = () => {
     if (safeTransaction && executionOwner) {
@@ -93,8 +127,13 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
     }
   }
 
-  if (safeTransactionError || !canSimulate || !executionOwner) {
+  if (safeTransactionError || !canSimulate || !executionOwner || isProAccessLoading) {
     return null
+  }
+
+  // Without Safe Pro and without an own Tenderly project nothing is simulated; lead to settings to bring one, as Safe Shield does.
+  if (!hasProFeatures && !hasOwnTenderly) {
+    return <SimulationSetupLink />
   }
 
   if (status?.isLoading) {

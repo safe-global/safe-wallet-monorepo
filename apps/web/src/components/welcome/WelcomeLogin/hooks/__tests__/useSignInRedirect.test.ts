@@ -53,7 +53,7 @@ const setupMocks = ({ isAuthenticated = true, isOidcLoginPending = false, router
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
-        lastUsedSpace: null,
+        landingSpaceHint: null,
         isStoreHydrated: true,
         isOidcLoginPending,
       },
@@ -86,7 +86,7 @@ describe('useSignInRedirect', () => {
   // -----------------------------------------------------------------------
 
   describe('when user is new (no spaces)', () => {
-    it('does not redirect after sign-in (they stay on the Workspaces tab)', async () => {
+    it('does not redirect after sign-in (they stay on the workspaces tab)', async () => {
       setupMocks()
 
       const { result } = renderHook(() => useSignInRedirect(defaultProps))
@@ -227,7 +227,7 @@ describe('useSignInRedirect', () => {
         const fakeState = {
           auth: {
             sessionExpiresAt: Date.now() + 86400000,
-            lastUsedSpace: null,
+            landingSpaceHint: null,
             isStoreHydrated: true,
             isOidcLoginPending: false,
           },
@@ -283,6 +283,26 @@ describe('useSignInRedirect', () => {
       })
 
       expect(mockPush).not.toHaveBeenCalled()
+    })
+
+    it('opens the Workspace of the URL after sign-in, even with several Workspaces and an invite', async () => {
+      setupMocks()
+
+      const { result } = renderHook(() =>
+        useSignInRedirect({
+          ...defaultProps,
+          spacesAmount: 3,
+          inviteAmount: 1,
+          singleSpaceId: null,
+          requestedSpaceId: 'space-7',
+        }),
+      )
+
+      await act(async () => {
+        result.current.setHasSignedIn(true)
+      })
+
+      expect(mockPush).toHaveBeenCalledWith({ pathname: '/spaces', query: { spaceId: 'space-7' } })
     })
 
     it('still redirects to the single space when there are no invites', async () => {

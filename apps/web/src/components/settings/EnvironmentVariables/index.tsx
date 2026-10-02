@@ -8,6 +8,7 @@ import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
 import SettingsCard from '../SettingsCard'
+import { reloadPage } from '@/utils/navigation'
 
 export enum EnvVariablesField {
   rpc = 'rpc',
@@ -58,7 +59,7 @@ const EnvironmentVariables = () => {
       }),
     )
 
-    location.reload()
+    reloadPage()
   })
 
   const onResetRpc = () => setValue(EnvVariablesField.rpc, '')

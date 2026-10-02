@@ -27,12 +27,10 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
-import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
+import { useSpaceSafeSelectorItems, type DropdownTab } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
-
-type DropdownTab = 'workspace' | 'local'
 
 const HIDDEN_ROUTES = [
   AppRoutes.welcome.accounts,
@@ -40,8 +38,6 @@ const HIDDEN_ROUTES = [
   AppRoutes.newSafe.create,
   AppRoutes.newSafe.advancedCreate,
   AppRoutes.newSafe.load,
-  AppRoutes.terms,
-  AppRoutes.privacy,
   AppRoutes.licenses,
   AppRoutes.imprint,
   AppRoutes.cookie,
@@ -92,7 +88,7 @@ function SignInWorkspaceCta({ label, onSignIn }: { label: string; onSignIn: () =
   return (
     <div className="flex flex-col items-center gap-3 px-4 py-8 text-center" data-testid="dropdown-signin-cta">
       <p className="text-sm text-muted-foreground">
-        Sign in to a workspace to collaborate on Safe accounts with your team.
+        Sign in to a Workspace to collaborate on Safe accounts with your team.
       </p>
       <Button variant="secondary" size="sm" onClick={onSignIn} data-testid="dropdown-signin-btn">
         {label}
@@ -222,17 +218,16 @@ function SpaceSafeBar() {
 
   // Manual sort turns the active tab's list into a drag-to-reorder list. The order persists to the
   // same scope the welcome/workspace tables use — trusted for My accounts, this space for the
-  // workspace tab — so every surface stays in sync. Disabled while searching (a drop would persist a
-  // partial order). The Workspace tab has no scope outside a space, so it isn't reorderable there.
+  // workspace tab — so every surface stays in sync. The Workspace tab has no scope outside a space,
+  // so it isn't reorderable there. Kept defined while searching so the dropdown doesn't swap the list
+  // component (which steals focus from the search input); dragging is disabled there instead.
   const reorderScope = activeTab === 'local' ? TRUSTED_ORDER_SCOPE : spaceId ? getSpaceOrderScope(spaceId) : undefined
   const handleReorder =
-    orderBy === OrderByOption.MANUAL && !search.trim() && reorderScope
+    orderBy === OrderByOption.MANUAL && reorderScope
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  // Only surface the space name when the current safe actually belongs to it. Off a space context
-  // `useCurrentSpaceId` still resolves a fallback space (last-used / first in the list), so `space`
-  // is populated even for a safe in no workspace — labelling the tab with it would be misleading.
+  // Only surface the space name when the current safe belongs to the Workspace of the URL.
   const workspaceLabel = isInSpaceContext
     ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
     : 'Workspace'
@@ -264,7 +259,7 @@ function SpaceSafeBar() {
   const emptyStateOverride =
     activeTab === 'workspace' && !isInSpaceContext ? (
       <SignInWorkspaceCta
-        label={isSignedIn ? 'View workspaces' : 'Sign in'}
+        label={isSignedIn ? 'View Workspaces' : 'Sign in'}
         onSignIn={() => router.push({ pathname: AppRoutes.welcome.spaces })}
       />
     ) : activeTab === 'local' && !hasWallet ? (
@@ -306,7 +301,7 @@ function SpaceSafeBar() {
           items={unionItems}
           listItems={listItems}
           selectedItemId={selectedItemId}
-          onItemSelect={handleItemSelect}
+          onItemSelect={(itemId) => handleItemSelect(itemId, activeTab)}
           isLoading={showSelectorSkeleton}
           isError={isError}
           onRetry={refetch}

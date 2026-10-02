@@ -2,7 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
-import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
+import { buildSignatureBytes, type MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import { cgwApi as relayApi } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import { getStoreInstance } from '@/store'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -19,6 +19,7 @@ import { didRevert } from '@/utils/ethers-utils'
 import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
 import proposeTx from '../proposeTransaction'
+import confirmTx from '../confirmTransaction'
 import { txDispatch, TxEvent } from '../txEvents'
 import { waitForRelayedTx } from '@/services/tx/txMonitor'
 import { getReadOnlyCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
@@ -35,20 +36,26 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import chains from '@safe-global/utils/config/chains'
 import { createExistingTx } from './create'
 import { getRelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { getQuotaExceededError, QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
+import {
+  GasPaymentOptionUnavailableError,
+  getGasPaymentOptionUnavailableError,
+  getRelayerUnavailableError,
+  getRelayLimitReachedError,
+} from '@safe-global/utils/services/gasPaymentErrors'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 
 /**
- * Propose a transaction
- * If txId is passed, it's an existing tx being signed
+ * Propose a new transaction
  */
 export const dispatchTxProposal = async ({
   chainId,
   safeAddress,
   sender,
   safeTx,
-  txId,
   origin,
   scope,
 }: {
@@ -56,7 +63,6 @@ export const dispatchTxProposal = async ({
   safeAddress: string
   sender: string
   safeTx: SafeTransaction
-  txId?: string
   origin?: string
   scope?: TxSenderScope
 }): Promise<TransactionDetails> => {
@@ -67,27 +73,62 @@ export const dispatchTxProposal = async ({
   try {
     proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin)
   } catch (error) {
-    if (txId) {
-      txDispatch(TxEvent.SIGNATURE_PROPOSE_FAILED, { txId, chainId, safeAddress, error: asError(error) })
-    } else {
-      txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
-    }
+    txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
     throw error
   }
 
   // Dispatch a success event only if the tx is signed
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
-    txDispatch(txId ? TxEvent.SIGNATURE_PROPOSED : TxEvent.PROPOSED, {
-      txId: proposedTx?.txId,
-      signerAddress: txId ? sender : undefined,
-      nonce: safeTx.data.nonce,
-      chainId,
-      safeAddress,
-    })
+    txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce, chainId, safeAddress })
   }
 
   return proposedTx
+}
+
+/**
+ * Add the sender's signature to an already proposed transaction
+ */
+export const dispatchTxConfirmation = async ({
+  chainId,
+  safeAddress,
+  sender,
+  safeTx,
+  txId,
+  scope,
+}: {
+  chainId: string
+  safeAddress: string
+  sender: string
+  safeTx: SafeTransaction
+  txId: string
+  scope?: TxSenderScope
+}): Promise<TransactionDetails> => {
+  const safeSDK = getAndValidateSafeSDK(scope)
+  const safeTxHash = await safeSDK.getTransactionHash(safeTx)
+
+  let confirmedTx: TransactionDetails | undefined
+  try {
+    const signature = safeTx.signatures.get(sender.toLowerCase())
+    if (!signature) {
+      throw new Error(`No signature from ${sender} found on transaction ${txId}`)
+    }
+
+    confirmedTx = await confirmTx(chainId, safeTxHash, buildSignatureBytes([signature]))
+  } catch (error) {
+    txDispatch(TxEvent.SIGNATURE_PROPOSE_FAILED, { txId, chainId, safeAddress, error: asError(error) })
+    throw error
+  }
+
+  txDispatch(TxEvent.SIGNATURE_PROPOSED, {
+    txId: confirmedTx.txId,
+    signerAddress: sender,
+    nonce: safeTx.data.nonce,
+    chainId,
+    safeAddress,
+  })
+
+  return confirmedTx
 }
 
 /**
@@ -480,6 +521,18 @@ export async function dispatchSafeAppsTx(
   return safeTxHash
 }
 
+// Typed CGW refusals (422 simulation, 402 quota, 409 option, 429 limit, chain-route 403) let the UI block, retry or fall back.
+const getRelayError = (error: unknown, sponsorSpaceId?: string | null): Error =>
+  getRelaySimulationError(error) ??
+  (sponsorSpaceId ? getQuotaExceededError(error) : undefined) ??
+  getGasPaymentOptionUnavailableError(error) ??
+  getRelayLimitReachedError(error) ??
+  (sponsorSpaceId ? undefined : getRelayerUnavailableError(error)) ??
+  asError(error)
+
+const isStaleEntitlementsError = (error: Error): boolean =>
+  error instanceof QuotaExceededError || error instanceof GasPaymentOptionUnavailableError
+
 export const dispatchTxRelay = async (
   safeTx: SafeTransaction,
   safe: SafeState,
@@ -488,6 +541,8 @@ export const dispatchTxRelay = async (
   gasLimit?: string | number | bigint,
   acceptUnverifiedSimulation?: boolean,
   scope?: TxSenderScope,
+  /** A Safe Pro Workspace paying for the relay out of its allowance; without it the chain's relayer policy applies. */
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
@@ -509,19 +564,37 @@ export const dispatchTxRelay = async (
   ])
 
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId: safe.chainId,
-      relayDto: {
-        to: safe.address.value,
-        data,
-        gasLimit: gasLimit?.toString(),
-        version: safe.version ?? getLatestSafeVersion(chain),
-        safeTxHash,
-        acceptUnverifiedSimulation,
-      },
-    })
-
-    const relayResponse = await store.dispatch(relayAction).unwrap()
+    const version = safe.version ?? getLatestSafeVersion(chain)
+    const relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId: safe.chainId,
+              spaceRelayDto: { to: safe.address.value, data, version, safeTxHash, acceptUnverifiedSimulation },
+            }),
+          )
+          .unwrap()
+          .then((response) => {
+            // The Workspace just spent a sponsored transaction; every meter on screen should say so.
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
+      : await store
+          .dispatch(
+            relayApi.endpoints.relayRelayV1.initiate({
+              chainId: safe.chainId,
+              relayDto: {
+                to: safe.address.value,
+                data,
+                gasLimit: gasLimit?.toString(),
+                version,
+                safeTxHash,
+                acceptUnverifiedSimulation,
+              },
+            }),
+          )
+          .unwrap()
     const taskId = relayResponse.taskId
 
     if (!taskId) {
@@ -539,9 +612,9 @@ export const dispatchTxRelay = async (
     // Monitor relay tx
     waitForRelayedTx(taskId, [txId], safe.chainId, safe.address.value, safeTx.data.nonce)
   } catch (error) {
-    // CGW pre-relay simulation surfaces SIMULATION_FAILED / INDETERMINATE_SIMULATION as a typed
-    // error so the UI can block or offer an explicit retry; everything else stays as-is.
-    const finalError = getRelaySimulationError(error) ?? asError(error)
+    const finalError = getRelayError(error, sponsorSpaceId)
+    // A space-route refusal means the meter on screen is stale.
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
     txDispatch(TxEvent.FAILED, {
       txId,
       error: finalError,
@@ -560,6 +633,7 @@ export const dispatchBatchExecutionRelay = async (
   chainId: string,
   safeAddress: string,
   safeVersion: string,
+  sponsorSpaceId?: string | null,
 ) => {
   const store = getStoreInstance()
   const to = multiSendContract.getAddress()
@@ -569,27 +643,36 @@ export const dispatchBatchExecutionRelay = async (
 
   let relayResponse
   try {
-    const relayAction = relayApi.endpoints.relayRelayV1.initiate({
-      chainId,
-      relayDto: {
-        to,
-        data,
-        version: safeVersion,
-      },
-    })
-
-    relayResponse = await store.dispatch(relayAction).unwrap()
+    relayResponse = sponsorSpaceId
+      ? await store
+          .dispatch(
+            relayApi.endpoints.spaceRelayRelayV1.initiate({
+              spaceId: sponsorSpaceId,
+              chainId,
+              spaceRelayDto: { to, data, version: safeVersion },
+            }),
+          )
+          .unwrap()
+          .then((response) => {
+            refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
+            return response
+          })
+      : await store
+          .dispatch(relayApi.endpoints.relayRelayV1.initiate({ chainId, relayDto: { to, data, version: safeVersion } }))
+          .unwrap()
   } catch (error) {
+    const finalError = getRelayError(error, sponsorSpaceId)
+    if (sponsorSpaceId && isStaleEntitlementsError(finalError)) refreshSpaceEntitlements(store.dispatch, sponsorSpaceId)
     txs.forEach(({ txId }) => {
       txDispatch(TxEvent.FAILED, {
         txId,
         chainId,
         safeAddress,
-        error: asError(error),
+        error: finalError,
         groupKey,
       })
     })
-    throw error
+    throw finalError
   }
 
   const taskId = relayResponse.taskId

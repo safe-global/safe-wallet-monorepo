@@ -201,7 +201,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
       if (shouldEthSign && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {
-        await addDelegate({ chainId, createDelegateDto })
+        await addDelegate({ chain, createDelegateDto })
       }
 
       saveNameLocally()

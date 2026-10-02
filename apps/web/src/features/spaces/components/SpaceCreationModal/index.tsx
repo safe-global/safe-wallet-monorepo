@@ -7,10 +7,10 @@ import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
+import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
@@ -43,13 +43,12 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       if (response.data) {
         const spaceId = response.data.uuid
         trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
-        dispatch(setLastUsedSpace(spaceId))
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 
         dispatch(
           showNotification({
-            message: `Created workspace with name ${name}.`,
+            message: `Created Workspace with name ${name}.`,
             variant: 'success',
             groupKey: 'create-space-success',
           }),
@@ -73,7 +72,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
       dialogTitle={
         <>
           <SpaceIcon className="mr-2 size-6 fill-none" />
-          Create workspace
+          Create Workspace
         </>
       }
       hideChainIndicator
@@ -95,7 +94,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
                 />
               </div>
               <Typography variant="paragraph-small" color="muted">
-                How is my data processed? Read our <ExternalLink href={AppRoutes.privacy}>privacy policy</ExternalLink>
+                How is my data processed? Read our <ExternalLink href={PRIVACY_URL}>privacy policy</ExternalLink>
               </Typography>
 
               {error && (
@@ -110,7 +109,7 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
               className="p-4 pt-0"
               onCancel={onClose}
               cancelTestId="cancel-btn"
-              confirmLabel="Create workspace"
+              confirmLabel="Create Workspace"
               confirmType="submit"
               confirmDisabled={!formState.isValid || isSubmitting}
               confirmLoading={isSubmitting}

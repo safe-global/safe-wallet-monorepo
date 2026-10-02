@@ -22,7 +22,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 
 // Helper to render with a specific store instance for notification assertions
 const renderWithStore = (ui: React.ReactElement) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const result = rtlRender(ui, {
     wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>,
   })
@@ -155,7 +155,7 @@ describe('UpdateSpaceForm', () => {
       const notifications = state.notifications
       expect(notifications.length).toBeGreaterThan(0)
       const lastNotification = notifications[notifications.length - 1]
-      expect(lastNotification.message).toBe('Updated workspace name')
+      expect(lastNotification.message).toBe('Updated Workspace name')
       expect(lastNotification.variant).toBe('success')
       expect(lastNotification.groupKey).toBe('space-update-name')
     })

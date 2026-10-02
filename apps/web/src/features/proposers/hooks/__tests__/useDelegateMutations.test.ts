@@ -2,10 +2,9 @@ import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { mockHasFeature } from '@/tests/mocks/hooks'
+import { chainBuilder } from '@/tests/builders/chains'
 import { useDelegateMutations } from '../useDelegateMutations'
 
-jest.mock('@/hooks/useChains', () => ({ useHasFeature: jest.fn() }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
   useDelegatesPostDelegateV2Mutation: jest.fn(),
   useDelegatesPostDelegateV3Mutation: jest.fn(),
@@ -33,7 +32,10 @@ const randomAddress = () => checksumAddress(faker.finance.ethereumAddress())
 const resolvingTrigger = () => jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
 
 describe('useDelegateMutations', () => {
-  const chainId = faker.string.numeric()
+  const queueServiceChain = chainBuilder()
+    .with({ features: [FEATURES.QUEUE_SERVICE] })
+    .build()
+  const transactionServiceChain = chainBuilder().with({ features: [] }).build()
   const delegateAddress = randomAddress()
   const createDelegateDto = {
     safe: randomAddress(),
@@ -68,28 +70,26 @@ describe('useDelegateMutations', () => {
   })
 
   describe('with QUEUE_SERVICE', () => {
-    beforeEach(() => {
-      mockHasFeature({ [FEATURES.QUEUE_SERVICE]: true })
-    })
+    const chain = queueServiceChain
 
     it('adds the delegate through the queue service and resolves with the unwrapped result', async () => {
       const response = faker.string.uuid()
       addDelegateV3.mockReturnValue({ unwrap: () => Promise.resolve(response) })
       const { result } = renderHook(() => useDelegateMutations())
 
-      await expect(result.current.addDelegate({ chainId, createDelegateDto })).resolves.toBe(response)
+      await expect(result.current.addDelegate({ chain, createDelegateDto })).resolves.toBe(response)
 
-      expect(addDelegateV3).toHaveBeenCalledWith({ chainId, createDelegateDto })
+      expect(addDelegateV3).toHaveBeenCalledWith({ chainId: chain.chainId, createDelegateDto })
       expect(addDelegateV2).not.toHaveBeenCalled()
     })
 
     it('deletes the delegate through the queue service with the v3 DTO key', async () => {
       const { result } = renderHook(() => useDelegateMutations())
 
-      await result.current.deleteDelegate({ chainId, delegateAddress, deleteDelegateDto })
+      await result.current.deleteDelegate({ chain, delegateAddress, deleteDelegateDto })
 
       expect(deleteDelegateV3).toHaveBeenCalledWith({
-        chainId,
+        chainId: chain.chainId,
         delegateAddress,
         deleteDelegateV3Dto: deleteDelegateDto,
       })
@@ -101,33 +101,31 @@ describe('useDelegateMutations', () => {
       deleteDelegateV3.mockReturnValue({ unwrap: () => Promise.reject(error) })
       const { result } = renderHook(() => useDelegateMutations())
 
-      await expect(result.current.deleteDelegate({ chainId, delegateAddress, deleteDelegateDto })).rejects.toBe(error)
+      await expect(result.current.deleteDelegate({ chain, delegateAddress, deleteDelegateDto })).rejects.toBe(error)
     })
   })
 
   describe('without QUEUE_SERVICE', () => {
-    beforeEach(() => {
-      mockHasFeature({ [FEATURES.QUEUE_SERVICE]: false })
-    })
+    const chain = transactionServiceChain
 
     it('adds the delegate through the transaction service and resolves with the unwrapped result', async () => {
       const response = faker.string.uuid()
       addDelegateV2.mockReturnValue({ unwrap: () => Promise.resolve(response) })
       const { result } = renderHook(() => useDelegateMutations())
 
-      await expect(result.current.addDelegate({ chainId, createDelegateDto })).resolves.toBe(response)
+      await expect(result.current.addDelegate({ chain, createDelegateDto })).resolves.toBe(response)
 
-      expect(addDelegateV2).toHaveBeenCalledWith({ chainId, createDelegateDto })
+      expect(addDelegateV2).toHaveBeenCalledWith({ chainId: chain.chainId, createDelegateDto })
       expect(addDelegateV3).not.toHaveBeenCalled()
     })
 
     it('deletes the delegate through the transaction service with the v2 DTO key', async () => {
       const { result } = renderHook(() => useDelegateMutations())
 
-      await result.current.deleteDelegate({ chainId, delegateAddress, deleteDelegateDto })
+      await result.current.deleteDelegate({ chain, delegateAddress, deleteDelegateDto })
 
       expect(deleteDelegateV2).toHaveBeenCalledWith({
-        chainId,
+        chainId: chain.chainId,
         delegateAddress,
         deleteDelegateV2Dto: deleteDelegateDto,
       })
@@ -139,19 +137,19 @@ describe('useDelegateMutations', () => {
       addDelegateV2.mockReturnValue({ unwrap: () => Promise.reject(error) })
       const { result } = renderHook(() => useDelegateMutations())
 
-      await expect(result.current.addDelegate({ chainId, createDelegateDto })).rejects.toBe(error)
+      await expect(result.current.addDelegate({ chain, createDelegateDto })).rejects.toBe(error)
     })
   })
 
-  it('switches mutations when the chain flag changes', async () => {
-    mockHasFeature({ [FEATURES.QUEUE_SERVICE]: false })
-    const { result, rerender } = renderHook(() => useDelegateMutations())
+  it('routes each call by the chain it is given', async () => {
+    const { result } = renderHook(() => useDelegateMutations())
 
-    mockHasFeature({ [FEATURES.QUEUE_SERVICE]: true })
-    rerender()
-    await result.current.addDelegate({ chainId, createDelegateDto })
+    await result.current.addDelegate({ chain: transactionServiceChain, createDelegateDto })
+    await result.current.addDelegate({ chain: queueServiceChain, createDelegateDto })
 
-    expect(addDelegateV3).toHaveBeenCalledWith({ chainId, createDelegateDto })
-    expect(addDelegateV2).not.toHaveBeenCalled()
+    expect(addDelegateV2).toHaveBeenCalledTimes(1)
+    expect(addDelegateV2).toHaveBeenCalledWith({ chainId: transactionServiceChain.chainId, createDelegateDto })
+    expect(addDelegateV3).toHaveBeenCalledTimes(1)
+    expect(addDelegateV3).toHaveBeenCalledWith({ chainId: queueServiceChain.chainId, createDelegateDto })
   })
 })

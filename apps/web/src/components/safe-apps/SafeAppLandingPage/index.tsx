@@ -78,6 +78,7 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
                 <TryDemo
                   demoUrl={{
                     pathname: AppRoutes.apps.open,
+                    // eslint-disable-next-line no-restricted-syntax -- The demo Safe is in no Workspace
                     query: { safe: SAFE_APPS_DEMO_SAFE_MAINNET, appUrl },
                   }}
                   onClick={handleDemoClick}

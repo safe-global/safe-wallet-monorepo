@@ -25,6 +25,10 @@ import {
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -136,6 +140,10 @@ const listeners = [
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
   forbiddenSessionListener,
 ]
 
@@ -192,10 +200,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
-type MakeStoreOptions = {
-  skipBroadcast?: boolean
-}
-export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
+export const makeStore = (initialState?: Partial<RootState>) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -208,9 +213,7 @@ export const makeStore = (initialState?: Partial<RootState>, options?: MakeStore
     preloadedState: initialState,
   })
 
-  if (!options?.skipBroadcast) {
-    listenToBroadcast(store)
-  }
+  listenToBroadcast(store)
 
   setupListeners(store.dispatch)
 

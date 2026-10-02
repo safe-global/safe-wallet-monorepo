@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { parseUnits, AbiCoder } from 'ethers'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
@@ -18,20 +17,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
-
-export const NO_TOKEN_SELECTED_ERROR = 'Select a token'
-
-export const _validateSpendingLimit = (val: string, decimals?: number | null) => {
-  // Without a selected token the decimals are unknown, so the amount cannot be valid yet.
-  if (decimals == null) return NO_TOKEN_SELECTED_ERROR
-  // Allowance amount is uint96 https://github.com/safe-global/safe-modules/blob/main/modules/allowances/contracts/AllowanceModule.sol#L52
-  try {
-    const amount = parseUnits(val, decimals)
-    AbiCoder.defaultAbiCoder().encode(['int96'], [amount])
-  } catch (e) {
-    return Number(val) > 1 ? 'Amount is too big' : 'Amount is too small'
-  }
-}
+import { validateSpendingLimitAmount } from '../../services/spendingLimitValidation'
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()
@@ -63,7 +49,7 @@ const CreateSpendingLimit = () => {
     (value: string) =>
       validateAmount(value) ||
       validateDecimalLength(value, tokenDecimals) ||
-      _validateSpendingLimit(value, tokenDecimals),
+      validateSpendingLimitAmount(value, tokenDecimals),
     [tokenDecimals],
   )
 

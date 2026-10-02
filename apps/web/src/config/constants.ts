@@ -153,6 +153,9 @@ export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducin
 
 export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
 
+export const SAFE_PRO_USER_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-user-terms`
+export const SAFE_PRO_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-terms`
+
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
 export const STAGING_HYPERNATIVE_OUTREACH_ID = parseInt(

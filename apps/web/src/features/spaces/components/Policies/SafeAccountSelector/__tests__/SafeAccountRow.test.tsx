@@ -55,4 +55,20 @@ describe('SafeAccountSummary', () => {
 
     expect(screen.getByTestId('row-end-column')).toBeEmptyDOMElement()
   })
+
+  it('keeps the stats on their table widths, so a list of rows lines up', () => {
+    render(<SafeAccountSummary account={account({ name: 'Treasury', threshold: 3, owners: 5 })} />)
+
+    expect(screen.getByTestId('row-threshold-column')).toHaveClass('w-14')
+    expect(screen.getByTestId('row-networks-column')).toHaveClass('w-20')
+    expect(screen.getByTestId('row-end-column')).toHaveClass('sm:w-[100px]')
+  })
+
+  it('gives the stat columns width back to the address when it is the only row', () => {
+    render(<SafeAccountSummary account={account({ name: 'Treasury', threshold: 3, owners: 5 })} fitStats />)
+
+    expect(screen.getByTestId('row-threshold-column')).toHaveClass('w-auto')
+    expect(screen.getByTestId('row-networks-column')).toHaveClass('w-auto')
+    expect(screen.getByTestId('row-end-column')).toHaveClass('sm:w-auto')
+  })
 })

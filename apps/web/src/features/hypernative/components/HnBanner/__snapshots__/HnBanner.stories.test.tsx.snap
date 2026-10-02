@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./HnBanner.stories Default 1`] = `
 <div
@@ -10,7 +10,7 @@ exports[`./HnBanner.stories Default 1`] = `
     <div
       class="banner"
       role="button"
-      style="cursor: pointer;"
+      style="background: linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%); cursor: pointer;"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -33,6 +33,7 @@ exports[`./HnBanner.stories Default 1`] = `
             class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
             data-slot="typography"
             data-variant="h4"
+            style="color: var(--color-static-primary);"
           >
             Enforce enterprise-grade security
           </h4>
@@ -40,6 +41,7 @@ exports[`./HnBanner.stories Default 1`] = `
             class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
             data-slot="typography"
             data-variant="paragraph-small"
+            style="color: var(--color-static-text-secondary);"
           >
             Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
              
@@ -53,6 +55,7 @@ exports[`./HnBanner.stories Default 1`] = `
           <button
             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 bannerCtaText"
             data-slot="button"
+            style="color: var(--color-static-primary);"
             tabindex="0"
             type="button"
           >
@@ -83,6 +86,7 @@ exports[`./HnBanner.stories Default 1`] = `
       <button
         aria-label="close"
         class="closeButton"
+        style="color: var(--color-text-secondary);"
         type="button"
       >
         <svg
@@ -121,7 +125,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
     <div
       class="banner"
       role="button"
-      style="cursor: pointer;"
+      style="background: linear-gradient(90deg, #1c5538 0%, #1c1c1c 54.327%, #1c1c1c 100%); cursor: pointer;"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -144,6 +148,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
             class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal bannerText bannerTitle"
             data-slot="typography"
             data-variant="h4"
+            style="color: var(--color-static-primary);"
           >
             Enforce enterprise-grade security
           </h4>
@@ -151,6 +156,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
             class="m-0 text-sm leading-5 font-normal bannerText bannerDescription"
             data-slot="typography"
             data-variant="paragraph-small"
+            style="color: var(--color-static-text-secondary);"
           >
             Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
              
@@ -164,6 +170,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
           <button
             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 bannerCtaText"
             data-slot="button"
+            style="color: var(--color-static-primary);"
             tabindex="0"
             type="button"
           >

@@ -40,7 +40,6 @@ export const SafeSidebarWorkspaceHeader = ({
             triggerVariant="addToWorkspace"
             selectedSpace={workspaceHeader.selectedSpace}
             spaces={workspaceHeader.spaces}
-            onSpaceAdded={workspaceHeader.onSpaceAdded}
           />
         )
       }
@@ -53,7 +52,7 @@ export const SafeSidebarWorkspaceHeader = ({
                 size="lg"
                 className={css.addSafeToWorkspaceTrigger}
                 data-testid="add-safe-to-workspace-button"
-                aria-label="Add Safe to workspace"
+                aria-label="Add Safe to Workspace"
                 aria-haspopup="dialog"
               />
             }
@@ -61,7 +60,7 @@ export const SafeSidebarWorkspaceHeader = ({
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to Workspace</span>
           </DialogTrigger>
           <DialogContent
             padding="none"

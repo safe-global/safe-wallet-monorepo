@@ -1,0 +1,376 @@
+import { act, renderHook } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import type { OnboardAPI } from '@web3-onboard/core'
+import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import * as proposerUtils from '@/features/proposers/utils/utils'
+import * as useChainIdModule from '@/hooks/useChainId'
+import * as useChainsModule from '@/hooks/useChains'
+import * as useSafeAddressModule from '@/hooks/useSafeAddress'
+import * as useOnboardModule from '@/hooks/wallets/useOnboard'
+import * as useWalletModule from '@/hooks/wallets/useWallet'
+import * as web3ReadOnlyModule from '@/hooks/wallets/web3ReadOnly'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
+import * as sdk from '@/services/tx/tx-sender/sdk'
+import { getStoreInstance } from '@/store'
+import { selectNotifications } from '@/store/notificationsSlice'
+import { chainBuilder } from '@/tests/builders/chains'
+import { connectedWalletBuilder } from '@/tests/builders/wallet'
+import { useGrantProposer } from '../useGrantProposer'
+import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
+import { useIsAdmin } from '../../../../../hooks/useSpaceMembers'
+
+jest.mock('../../../../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(() => true),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/delegates'),
+  useDelegatesPostDelegateV1Mutation: jest.fn(),
+  useDelegatesPostDelegateV2Mutation: jest.fn(),
+  useDelegatesPostDelegateV3Mutation: jest.fn(),
+}))
+
+const { useDelegatesPostDelegateV1Mutation, useDelegatesPostDelegateV2Mutation, useDelegatesPostDelegateV3Mutation } =
+  jest.requireMock<
+    Record<
+      | 'useDelegatesPostDelegateV1Mutation'
+      | 'useDelegatesPostDelegateV2Mutation'
+      | 'useDelegatesPostDelegateV3Mutation',
+      jest.Mock
+    >
+  >('@safe-global/store/gateway/AUTO_GENERATED/delegates')
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+
+const CHAIN_ID = faker.string.numeric()
+const SAFE = checksumAddress(faker.finance.ethereumAddress())
+const PROPOSER = checksumAddress(faker.finance.ethereumAddress())
+const signer = {} as JsonRpcSigner
+const provider = {} as JsonRpcProvider
+
+const mutation = () => {
+  const trigger = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve({}) })
+  return { trigger, tuple: [trigger, { isLoading: false, reset: jest.fn() }] }
+}
+
+const wallet = (label: string) => connectedWalletBuilder().with({ label, chainId: CHAIN_ID }).build()
+
+const onboard = {} as OnboardAPI
+
+// Mirrors `assertWalletChain`: the wallet the flow signs with is the one it returns, post-switch.
+const connect = (label: string) => {
+  const connected = wallet(label)
+  jest.spyOn(useWalletModule, 'default').mockReturnValue(connected)
+  jest.spyOn(sdk, 'assertWalletChain').mockResolvedValue(connected)
+  return connected
+}
+
+describe.each([
+  { service: 'queue service', isQueueService: true },
+  { service: 'transaction service', isQueueService: false },
+])('useGrantProposer on a $service chain', ({ service, isQueueService }) => {
+  const chain = chainBuilder()
+    .with({ chainId: CHAIN_ID, features: isQueueService ? [FEATURES.QUEUE_SERVICE] : [] })
+    .build()
+
+  let addV1: ReturnType<typeof mutation>
+  let addDelegate: ReturnType<typeof mutation>
+  let otherAddDelegate: ReturnType<typeof mutation>
+  let addOrRequestContact: jest.Mock
+
+  beforeEach(() => {
+    localStorage.clear()
+    jest.mocked(trackEvent).mockClear()
+    addV1 = mutation()
+    const addV2 = mutation()
+    const addV3 = mutation()
+    addDelegate = isQueueService ? addV3 : addV2
+    otherAddDelegate = isQueueService ? addV2 : addV3
+    addOrRequestContact = jest.fn().mockResolvedValue(undefined)
+    jest.spyOn(addOrRequestContactModule, 'useAddOrRequestWorkspaceContact').mockReturnValue(addOrRequestContact)
+    useDelegatesPostDelegateV1Mutation.mockReturnValue(addV1.tuple)
+    useDelegatesPostDelegateV2Mutation.mockReturnValue(addV2.tuple)
+    useDelegatesPostDelegateV3Mutation.mockReturnValue(addV3.tuple)
+    jest.spyOn(useChainIdModule, 'default').mockReturnValue(CHAIN_ID)
+    jest.spyOn(useChainsModule, 'useChain').mockReturnValue(chain)
+    jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(SAFE)
+    jest.spyOn(useOnboardModule, 'default').mockReturnValue(onboard)
+    connect('MetaMask')
+    jest.spyOn(web3ReadOnlyModule, 'useWeb3ReadOnly').mockReturnValue(provider)
+    jest.spyOn(sdk, 'getAssertedChainSigner').mockResolvedValue(signer)
+    jest.spyOn(proposerUtils, 'addressIsNotSmartContract').mockReturnValue(async () => undefined)
+    jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xtyped')
+    jest.spyOn(proposerUtils, 'signProposerData').mockResolvedValue('0xethsign')
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  const submit = async (values = { proposer: PROPOSER, name: 'Nicole' }, addressBook = {}, safeLabel?: string) => {
+    const rendered = renderHook(() => useGrantProposer(), { initialReduxState: { addressBook } })
+    let ok = false
+    await act(async () => {
+      ok = await rendered.result.current.grantProposerRole(values, safeLabel)
+    })
+    return { ok, result: rendered.result }
+  }
+
+  it(`signs typed data for the selected Safe and posts it to the ${service} endpoint`, async () => {
+    const { ok } = await submit()
+
+    expect(ok).toBe(true)
+    expect(jest.mocked(useChainsModule.useChain)).toHaveBeenCalledWith(CHAIN_ID)
+    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(chain, PROPOSER, SAFE, 'add', signer)
+    expect(addDelegate.trigger).toHaveBeenCalledWith({
+      chainId: CHAIN_ID,
+      createDelegateDto: {
+        delegate: PROPOSER,
+        delegator: expect.any(String),
+        label: PROPOSER_LABEL_PLACEHOLDER,
+        signature: '0xtyped',
+        safe: SAFE,
+      },
+    })
+    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
+    expect(addV1.trigger).not.toHaveBeenCalled()
+    expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
+  })
+
+  it('uses the connected wallet as the delegator', async () => {
+    const connected = connect('MetaMask')
+
+    await submit()
+
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(connected.address)
+  })
+
+  it('uses eth_sign and the v1 endpoint for Trezor', async () => {
+    connect('Trezor')
+
+    const { ok } = await submit()
+
+    expect(ok).toBe(true)
+    expect(proposerUtils.signProposerData).toHaveBeenCalledWith(PROPOSER, signer)
+    expect(addV1.trigger).toHaveBeenCalledWith({
+      chainId: CHAIN_ID,
+      createDelegateDto: expect.objectContaining({ signature: '0xethsign', safe: SAFE }),
+    })
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
+    expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+  })
+
+  it('checks the proposer against the scoped chain and provider before signing', async () => {
+    await submit()
+
+    expect(proposerUtils.addressIsNotSmartContract).toHaveBeenCalledWith(
+      CHAIN_ID,
+      SMART_CONTRACT_PROPOSER_ERROR,
+      provider,
+    )
+  })
+
+  it('adds the name to the Workspace on the selected chain for an admin, not the local address book', async () => {
+    await submit({ proposer: PROPOSER, name: 'Nicole' })
+
+    const state = getStoreInstance().getState()
+    expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
+    expect(state.addressBook).toEqual({})
+    expect(selectNotifications(state)).toEqual([
+      expect.objectContaining({
+        variant: 'success',
+        groupKey: 'add-proposer-success',
+        autoHideDuration: 7000,
+        title: 'Proposer added successfully!',
+      }),
+    ])
+  })
+
+  it('names the proposer and the Safe it was added to in the success message', async () => {
+    await submit({ proposer: PROPOSER, name: '  Nicole  ' }, {}, 'Treasury (0xAAAA...AAaA)')
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `Nicole (${shortenAddress(PROPOSER)}) can now suggest transactions for Treasury (0xAAAA...AAaA).`,
+      }),
+    ])
+  })
+
+  it('falls back to the addresses in the success message without a name or a Safe label', async () => {
+    await submit({ proposer: PROPOSER, name: '   ' })
+
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([
+      expect.objectContaining({
+        message: `${shortenAddress(PROPOSER)} can now suggest transactions for ${shortenAddress(SAFE)}.`,
+      }),
+    ])
+  })
+
+  describe('for a member', () => {
+    beforeEach(() => jest.mocked(useIsAdmin).mockReturnValue(false))
+    afterEach(() => jest.mocked(useIsAdmin).mockReturnValue(true))
+
+    it('keeps the sanitised name of a new contact in the local address book and requests it', async () => {
+      await submit({ proposer: PROPOSER, name: '  Nicole  ' })
+
+      expect(getStoreInstance().getState().addressBook).toEqual({ [CHAIN_ID]: { [PROPOSER]: 'Nicole' } })
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Nicole', chainIds: [CHAIN_ID] })
+    })
+
+    it('leaves the local name of a known contact alone', async () => {
+      await submit({ proposer: PROPOSER, name: 'Bob' }, { [CHAIN_ID]: { [PROPOSER]: 'Alice' } })
+
+      expect(getStoreInstance().getState().addressBook[CHAIN_ID]?.[PROPOSER]).toBe('Alice')
+      expect(addOrRequestContact).toHaveBeenCalledWith({ address: PROPOSER, name: 'Bob', chainIds: [CHAIN_ID] })
+    })
+  })
+
+  it('never sends the entered name to the API', async () => {
+    await submit({ proposer: PROPOSER, name: 'Nicole' })
+
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.label).toBe(PROPOSER_LABEL_PLACEHOLDER)
+  })
+
+  it('switches the wallet to the selected Safe chain before signing', async () => {
+    await submit()
+
+    expect(sdk.assertWalletChain).toHaveBeenCalledWith(onboard, CHAIN_ID)
+    const switchOrder = jest.mocked(sdk.assertWalletChain).mock.invocationCallOrder[0]
+    expect(jest.mocked(proposerUtils.signProposerTypedData).mock.invocationCallOrder[0]).toBeGreaterThan(switchOrder)
+  })
+
+  it('signs as the wallet returned by the chain switch, not the pre-switch one', async () => {
+    const switched = wallet('MetaMask')
+    jest.spyOn(sdk, 'assertWalletChain').mockResolvedValue(switched)
+
+    await submit()
+
+    expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(switched.address)
+  })
+
+  it('surfaces a refused chain switch without signing or posting', async () => {
+    jest.spyOn(sdk, 'assertWalletChain').mockRejectedValue(new Error('Wallet connected to wrong chain.'))
+
+    const { ok, result } = await submit()
+
+    expect(ok).toBe(false)
+    expect(result.current.error?.message).toBe('Wallet connected to wrong chain.')
+    expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(addOrRequestContact).not.toHaveBeenCalled()
+  })
+
+  it('tracks the submit event as soon as the user submits', async () => {
+    await submit()
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.PROPOSER_SUBMITTED, {
+      [MixpanelEventParams.CHAIN_ID]: CHAIN_ID,
+    })
+  })
+
+  it('tracks the submit event even when the request then fails', async () => {
+    addDelegate.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
+
+    await submit()
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.PROPOSER_SUBMITTED, {
+      [MixpanelEventParams.CHAIN_ID]: CHAIN_ID,
+    })
+  })
+
+  it('blocks a smart-contract proposer before asking for a signature', async () => {
+    jest.spyOn(proposerUtils, 'addressIsNotSmartContract').mockReturnValue(async () => SMART_CONTRACT_PROPOSER_ERROR)
+
+    const { ok, result } = await submit()
+
+    expect(ok).toBe(false)
+    expect(result.current.blockedReason).toBe(SMART_CONTRACT_PROPOSER_ERROR)
+    expect(result.current.error).toBeUndefined()
+    expect(sdk.getAssertedChainSigner).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+  })
+
+  it('surfaces a rejected signature as an error without posting or saving the name', async () => {
+    jest.spyOn(proposerUtils, 'signProposerTypedData').mockRejectedValue(new Error('User rejected'))
+
+    const { ok, result } = await submit()
+
+    expect(ok).toBe(false)
+    expect(result.current.error?.message).toBe('User rejected')
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(addOrRequestContact).not.toHaveBeenCalled()
+    expect(selectNotifications(getStoreInstance().getState())).toEqual([])
+  })
+
+  it('surfaces a failed request as an error without saving the name', async () => {
+    addDelegate.trigger.mockReturnValue({ unwrap: () => Promise.reject(new Error('422')) })
+
+    const { ok, result } = await submit()
+
+    expect(ok).toBe(false)
+    expect(result.current.error?.message).toBe('422')
+    expect(addOrRequestContact).not.toHaveBeenCalled()
+  })
+
+  it('does nothing without a connected wallet', async () => {
+    jest.spyOn(useWalletModule, 'default').mockReturnValue(null)
+
+    const { ok } = await submit()
+
+    expect(ok).toBe(false)
+    expect(proposerUtils.addressIsNotSmartContract).not.toHaveBeenCalled()
+    expect(sdk.getAssertedChainSigner).not.toHaveBeenCalled()
+  })
+
+  it('does nothing while the chain config is not loaded', async () => {
+    jest.spyOn(useChainsModule, 'useChain').mockReturnValue(undefined)
+
+    const { ok } = await submit()
+
+    expect(ok).toBe(false)
+    expect(sdk.assertWalletChain).not.toHaveBeenCalled()
+    expect(addDelegate.trigger).not.toHaveBeenCalled()
+    expect(addV1.trigger).not.toHaveBeenCalled()
+  })
+
+  it('clears the previous error and blocked reason on the next attempt', async () => {
+    addDelegate.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
+    const { result } = renderHook(() => useGrantProposer())
+
+    await act(async () => {
+      await result.current.grantProposerRole({ proposer: PROPOSER, name: 'Nicole' })
+    })
+    expect(result.current.error?.message).toBe('422')
+
+    await act(async () => {
+      await result.current.grantProposerRole({ proposer: PROPOSER, name: 'Nicole' })
+    })
+    expect(result.current.error).toBeUndefined()
+    expect(result.current.isSubmitting).toBe(false)
+  })
+
+  it('clears the error and blocked reason on reset', async () => {
+    addDelegate.trigger.mockReturnValueOnce({ unwrap: () => Promise.reject(new Error('422')) })
+    const { result } = renderHook(() => useGrantProposer())
+
+    await act(async () => {
+      await result.current.grantProposerRole({ proposer: PROPOSER, name: 'Nicole' })
+    })
+    expect(result.current.error?.message).toBe('422')
+
+    act(() => result.current.reset())
+
+    expect(result.current.error).toBeUndefined()
+    expect(result.current.blockedReason).toBeUndefined()
+  })
+})

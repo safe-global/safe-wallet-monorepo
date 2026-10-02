@@ -7,7 +7,17 @@ jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
   useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
-  SAFE_ACCOUNTS_LIMIT: jest.requireActual('@/features/spaces/constants').SAFE_ACCOUNTS_LIMIT,
+  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
+  useCurrentSpaceSafeCount: () => 40,
+}))
+jest.mock('../../../hooks/useSeatUpsell', () => ({
+  useSeatUpsell: () => ({
+    isSafePro: true,
+    tierName: 'Business',
+    limit: 40,
+    upgradePlanName: undefined,
+    plansHref: '/spaces/plans?spaceId=1',
+  }),
 }))
 
 const mockTrackEvent = jest.fn()
@@ -129,7 +139,7 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByTestId(ADD_ROW)).not.toHaveAttribute('title')
   })
 
-  it('navigates to /new-safe/create with the originating page as `next` when "Create new Safe" is clicked', () => {
+  it('navigates to /new-safe/create with the Workspace and the originating page as `next` when "Create new Safe" is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
@@ -137,35 +147,41 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
-  it('shows a warning on the "Create new Safe" row when the workspace is at the safe limit', () => {
+  it('explains the seat limit and reframes both rows when an admin hits it', () => {
     mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
 
-    expect(screen.getByText(/already has 40 Safes/i)).toBeInTheDocument()
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 40 Safe accounts')
+    expect(screen.getByText('Manage accounts')).toBeInTheDocument()
+    expect(screen.getByText('Swap one out to add another · 40 of 40')).toBeInTheDocument()
+    expect(screen.getByText('Create new')).toBeInTheDocument()
+    expect(screen.getByText('Created outside the Workspace, in My accounts')).toBeInTheDocument()
   })
 
-  it('does not show the safe-limit warning to non-admins even when the workspace is at the limit', () => {
+  it('does not show the seat limit to non-admins even when the workspace is at the limit', () => {
     mockIsAdmin = false
     mockIsAtSafeLimit = true
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
 
-    expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('seat-limit-banner')).not.toBeInTheDocument()
+    expect(screen.getByText('Select from my accounts')).toBeInTheDocument()
   })
 
-  it('does not show the safe-limit warning when the workspace is below the limit', () => {
+  it('does not show the seat limit when the workspace is below it', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
 
-    expect(screen.queryByText(/already has 40 Safes/i)).not.toBeInTheDocument()
+    expect(screen.queryByTestId('seat-limit-banner')).not.toBeInTheDocument()
+    expect(screen.getByText('Create new Safe')).toBeInTheDocument()
   })
 
   it('still navigates to /new-safe/create when at the limit (creation is never blocked)', () => {
@@ -173,11 +189,11 @@ describe('AddAccountsChooser', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
-    fireEvent.click(screen.getByText('Create new Safe'))
+    fireEvent.click(screen.getByText('Create new'))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
@@ -190,7 +206,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 

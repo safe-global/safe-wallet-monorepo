@@ -28,6 +28,7 @@ import { getCreateCallContractDeployment } from '@safe-global/utils/services/con
 import { useAllSafes, useGetHref, type SafeItem } from '@/hooks/safes'
 import { useLoadFeature } from '@/features/__core__'
 import { WalletConnectFeature } from '@/features/walletconnect'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSafes = true): WalletSDK | undefined => {
   const { safe } = useSafeInfo()
@@ -245,10 +246,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
       async showTxStatus(safeTxHash) {
         router.push({
           pathname: AppRoutes.transactions.tx,
-          query: {
-            safe: router.query.safe,
-            id: safeTxHash,
-          },
+          query: withSpaceId({ safe: router.query.safe, id: safeTxHash }, router.query.spaceId),
         })
       },
 

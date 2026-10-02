@@ -70,7 +70,7 @@ const setupMocks = ({
     const fakeState = {
       auth: {
         sessionExpiresAt: isAuthenticated ? Date.now() + 86400000 : null,
-        lastUsedSpace: null,
+        landingSpaceHint: null,
         isStoreHydrated,
       },
     }
@@ -98,8 +98,8 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('public routes', () => {
-    it('should allow access to /terms', async () => {
-      setupMocks({ pathname: AppRoutes.terms, wallet: null, isAuthenticated: false })
+    it('should allow access to /licenses', async () => {
+      setupMocks({ pathname: AppRoutes.licenses, wallet: null, isAuthenticated: false })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
@@ -125,8 +125,8 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
-    it('should allow access to /privacy', async () => {
-      setupMocks({ pathname: AppRoutes.privacy, wallet: null, isAuthenticated: false })
+    it('should allow access to /imprint', async () => {
+      setupMocks({ pathname: AppRoutes.imprint, wallet: null, isAuthenticated: false })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
@@ -287,6 +287,26 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({
         success: false,
         redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef`,
+      })
+    })
+
+    it('should preserve ?spaceId= with ?safe= in the welcome/spaces redirect when unauthenticated', async () => {
+      const spaceId = '11111111-1111-1111-1111-111111111111'
+      setupMocks({
+        pathname: AppRoutes.spaces.createSpace,
+        query: { safe: '1:0xdeadbeef', spaceId },
+        wallet: { address: '0x123' },
+        walletContext: { isReady: true },
+        isStoreHydrated: true,
+        isAuthenticated: false,
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({
+        success: false,
+        redirectTo: `${AppRoutes.welcome.spaces}?safe=1%3A0xdeadbeef&spaceId=${spaceId}`,
       })
     })
 

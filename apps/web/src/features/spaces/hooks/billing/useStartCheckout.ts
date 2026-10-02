@@ -1,0 +1,25 @@
+import { useCallback } from 'react'
+import { useLazyBillingGetCheckoutUrlV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { getCheckoutReturnUrl } from './returnUrl'
+import { useBillingSpaceId } from './useBillingSpaceId'
+import { navigateTo } from '@/utils/navigation'
+
+export const useStartCheckout = (spaceId?: string | null, returnPathname?: string) => {
+  const gatedSpaceId = useBillingSpaceId(spaceId)
+  const [trigger, { isFetching, isError }] = useLazyBillingGetCheckoutUrlV1Query()
+
+  const startCheckout = useCallback(
+    async (paymentLinkId: string) => {
+      if (!gatedSpaceId) return
+      const result = await trigger({
+        spaceId: gatedSpaceId,
+        paymentLinkId,
+        returnUrl: getCheckoutReturnUrl(gatedSpaceId, returnPathname),
+      })
+      if (result.data) navigateTo(result.data.url)
+    },
+    [gatedSpaceId, returnPathname, trigger],
+  )
+
+  return { startCheckout, isRedirecting: isFetching, isError }
+}

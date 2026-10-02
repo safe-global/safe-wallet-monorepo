@@ -18,6 +18,10 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { useCurrentChain } from '@/hooks/useChains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { countChecks } from '../utils/countChecks'
+import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 
 const shieldLogoOnHover = [
   'cursor-pointer',
@@ -39,6 +43,8 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus = true,
   safeAnalysis,
   onAddToTrustedList,
+  hasProFeatures = true,
+  isSafePro = true,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -50,13 +56,18 @@ export const SafeShieldDisplay = ({
   showHypernativeActiveStatus?: boolean
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
+  hasProFeatures?: boolean
+  /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
+  isSafePro?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
   const [threatResults] = threat || []
   const [deadlockResults] = deadlock || []
-  const { hasSimulationError } = useCheckSimulation(safeTx)
+  const { hasSimulationError, isSimulationSuccess } = useCheckSimulation(safeTx)
   const isDarkMode = useDarkMode()
+  const chain = useCurrentChain()
+  const hasSimulation = Boolean(chain && hasFeature(chain, FEATURES.TX_SIMULATION))
 
   const hnLoginRequired = useMemo(
     () => hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired),
@@ -76,6 +87,30 @@ export const SafeShieldDisplay = ({
     [recipientResults, contractResults, threatResults, hasSimulationError, hnLoginRequired, deadlockResults],
   )
 
+  const checks = useMemo(
+    () =>
+      countChecks({
+        threat: threatResults,
+        recipient: recipientResults,
+        contract: contractResults,
+        deadlock: deadlockResults,
+        hasProFeatures,
+        hasSimulation,
+        isSimulationSuccess,
+        isContractCall: isContractCall(safeTx),
+      }),
+    [
+      threatResults,
+      recipientResults,
+      contractResults,
+      deadlockResults,
+      hasProFeatures,
+      hasSimulation,
+      isSimulationSuccess,
+      safeTx,
+    ],
+  )
+
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
   return (
@@ -89,6 +124,7 @@ export const SafeShieldDisplay = ({
           threat={threat}
           deadlock={deadlock}
           overallStatus={overallStatus}
+          checks={checks}
         />
 
         <SafeShieldContent
@@ -103,6 +139,8 @@ export const SafeShieldDisplay = ({
           showHypernativeActiveStatus={showHypernativeActiveStatus}
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
+          hasProFeatures={hasProFeatures}
+          isSafePro={isSafePro}
         />
       </div>
 

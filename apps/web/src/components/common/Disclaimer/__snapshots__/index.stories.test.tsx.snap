@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./index.stories BlockedAddress 1`] = `
 <div
@@ -137,7 +137,7 @@ exports[`./index.stories LegalDisclaimer 1`] = `
                     class="underline-offset-4 transition-colors outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary decoration-primary/40 hover:decoration-current font-bold no-underline hover:text-muted-foreground hover:no-underline"
                     data-slot="link"
                     data-variant="default"
-                    href="/terms"
+                    href="https://safe.global/terms"
                     rel="noreferrer noopener"
                     target="_blank"
                   >

@@ -1,13 +1,12 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
@@ -20,11 +19,32 @@ const useSpaceSubmit = (
 ) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  // Under Safe Pro a freshly created Workspace is offered its trial before the wizard moves on.
+  const [createdSpaceId, setCreatedSpaceId] = useState<string>()
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
+  const isSafePro = useIsSafeProEnabled()
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
+
+  const getSelectSafesQuery = useCallback(
+    (targetSpaceId: string): Record<string, string> => {
+      const next = sanitizeNextUrl(router.query.next)
+      return { spaceId: targetSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) }
+    },
+    [router.query.next, safe],
+  )
+
+  const goToSelectSafes = useCallback(
+    (targetSpaceId: string) => {
+      router.push({ pathname: AppRoutes.welcome.selectSafes, query: getSelectSafesQuery(targetSpaceId) })
+    },
+    [router, getSelectSafesQuery],
+  )
+
+  const selectSafesUrl = createdSpaceId
+    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
+    : undefined
 
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
@@ -34,11 +54,7 @@ const useSpaceSubmit = (
       throw new Error(getRtkQueryErrorMessage(response.error))
     }
 
-    const next = sanitizeNextUrl(router.query.next)
-    router.push({
-      pathname: AppRoutes.welcome.selectSafes,
-      query: { spaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
-    })
+    goToSelectSafes(spaceId ?? '')
   }
 
   const createSpace = async (name: string) => {
@@ -48,13 +64,12 @@ const useSpaceSubmit = (
       const newSpaceId = response.data.uuid
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
-      dispatch(setLastUsedSpace(newSpaceId))
-
-      const next = sanitizeNextUrl(router.query.next)
-      router.push({
-        pathname: AppRoutes.welcome.selectSafes,
-        query: { spaceId: newSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
-      })
+      if (isSafePro) {
+        setCreatedSpaceId(newSpaceId)
+        setIsSubmitting(false)
+        return
+      }
+      goToSelectSafes(newSpaceId)
     }
 
     if (response.error) {
@@ -63,6 +78,8 @@ const useSpaceSubmit = (
   }
 
   const onSubmit = handleSubmit(async (data) => {
+    // The Workspace exists and waits on its trial offer; submitting again would create a second one.
+    if (createdSpaceId) return
     setError(undefined)
 
     try {
@@ -79,7 +96,7 @@ const useSpaceSubmit = (
       const errorMessage =
         error instanceof Error
           ? error.message
-          : `Failed ${isEditMode ? 'updating' : 'creating'} the workspace. Please try again.`
+          : `Failed ${isEditMode ? 'updating' : 'creating'} the Workspace. Please try again.`
       setError(errorMessage)
     }
   })
@@ -88,6 +105,9 @@ const useSpaceSubmit = (
     error,
     isSubmitting,
     onSubmit,
+    createdSpaceId,
+    goToSelectSafes,
+    selectSafesUrl,
   }
 }
 

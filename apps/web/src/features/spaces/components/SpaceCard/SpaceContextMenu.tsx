@@ -1,14 +1,22 @@
 import { type MouseEvent, useState } from 'react'
-import { EllipsisVertical } from 'lucide-react'
+import { Download, EllipsisVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@/public/images/common/edit.svg'
-import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  type GetSpaceResponse,
+  useLazyAddressBooksGetAddressBookItemsV1Query,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
+import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
 import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
+import { useSpaceDeletionGuard } from '@/features/spaces'
 
 enum ModalType {
   RENAME = 'rename',
@@ -18,10 +26,31 @@ enum ModalType {
 const defaultOpen = { [ModalType.RENAME]: false, [ModalType.REMOVE]: false }
 
 const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
+  const dispatch = useAppDispatch()
+  const [fetchAddressBook, { isFetching: isDownloading }] = useLazyAddressBooksGetAddressBookItemsV1Query()
+  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isMenuOpen ? space.uuid : null)
+
+  const handleDownload = async (e: MouseEvent) => {
+    e.stopPropagation()
+    try {
+      const { data } = await fetchAddressBook({ spaceId: space.uuid }).unwrap()
+      downloadCsv(`workspace-${space.uuid}-address-book.csv`, spaceAddressBookToCsv(data))
+    } catch {
+      dispatch(
+        showNotification({
+          message: 'Failed to download the shared address book. Please try again.',
+          variant: 'error',
+          groupKey: 'download-address-book-error',
+        }),
+      )
+    }
+  }
 
   const handleOpenModal = (e: MouseEvent, type: keyof typeof open) => {
     e.stopPropagation()
+    setIsMenuOpen(false)
     setOpen((prev) => ({ ...prev, [type]: true }))
   }
 
@@ -31,7 +60,7 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
         <DropdownMenuTrigger
           render={
             <Button
@@ -53,10 +82,30 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
             <span>Rename</span>
           </DropdownMenuItem>
 
-          <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-            <DropdownMenuItem data-testid="remove-button" onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}>
-              <DeleteIcon className="text-[var(--color-error-main)]" />
-              <span>Remove</span>
+          <Tooltip>
+            <TooltipTrigger render={<div />}>
+              <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
+                <DropdownMenuItem
+                  data-testid="remove-button"
+                  disabled={isDeletionBlocked}
+                  onClick={isDeletionBlocked ? undefined : (e) => handleOpenModal(e, ModalType.REMOVE)}
+                >
+                  <DeleteIcon className="text-[var(--color-error-main)]" />
+                  <span>Remove</span>
+                </DropdownMenuItem>
+              </Track>
+            </TooltipTrigger>
+            {blockedReason && <TooltipContent side="left">{blockedReason}</TooltipContent>}
+          </Tooltip>
+
+          <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK} label={SPACE_LABELS.space_context_menu}>
+            <DropdownMenuItem
+              data-testid="download-address-book-button"
+              disabled={isDownloading}
+              onClick={handleDownload}
+            >
+              <Download className="text-muted-foreground" />
+              <span>Download shared address book</span>
             </DropdownMenuItem>
           </Track>
         </DropdownMenuContent>

@@ -4,7 +4,7 @@ import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
 import { useDelegateMutations } from './useDelegateMutations'
 import { isTotpValid } from '@/features/proposers/utils/totp'
 import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
-import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { PendingDelegation } from '@/features/proposers/types'
 
@@ -13,7 +13,7 @@ import type { PendingDelegation } from '@/features/proposers/types'
  * Wraps the preparedSignature in EIP-1271 format and calls the appropriate endpoint.
  */
 export const useSubmitDelegation = () => {
-  const chainId = useChainId()
+  const chain = useCurrentChain()
   const safeAddress = useSafeAddress()
   const { addDelegate, deleteDelegate } = useDelegateMutations()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -29,6 +29,10 @@ export const useSubmitDelegation = () => {
         throw new Error('Cannot submit delegation: preparedSignature is not available')
       }
 
+      if (!chain) {
+        throw new Error('Cannot submit delegation: chain config is not loaded')
+      }
+
       setIsSubmitting(true)
       setSubmitError(undefined)
 
@@ -40,7 +44,7 @@ export const useSubmitDelegation = () => {
 
         if (delegation.action === 'add') {
           await addDelegate({
-            chainId,
+            chain,
             createDelegateDto: {
               safe: safeAddress,
               delegate: delegation.delegateAddress,
@@ -51,7 +55,7 @@ export const useSubmitDelegation = () => {
           })
         } else if (delegation.action === 'remove') {
           await deleteDelegate({
-            chainId,
+            chain,
             delegateAddress: delegation.delegateAddress,
             deleteDelegateDto: {
               delegator: delegation.parentSafeAddress,
@@ -68,7 +72,7 @@ export const useSubmitDelegation = () => {
         setIsSubmitting(false)
       }
     },
-    [chainId, safeAddress, addDelegate, deleteDelegate],
+    [chain, safeAddress, addDelegate, deleteDelegate],
   )
 
   return { submitDelegation, isSubmitting, submitError }

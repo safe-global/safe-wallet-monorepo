@@ -16,6 +16,7 @@ import { useGetSpaceAddressBook } from '@/features/spaces'
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn((): SpaceAddressBookItemDto[] => []),
+  useSpaceAddressBookState: jest.fn(() => ({ items: [], isLoading: false, isError: false })),
 }))
 
 const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>

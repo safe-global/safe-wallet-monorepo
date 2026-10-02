@@ -1,0 +1,232 @@
+import { act, renderHook } from '@testing-library/react'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder } from '@/tests/builders/chains'
+import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../mocks/policies'
+import { useRemoveProposer } from '../useRemoveProposer'
+
+const mockDeleteV1 = jest.fn()
+const mockUseAddressBookItem = jest.fn()
+const mockDeleteV2 = jest.fn()
+const mockDeleteV3 = jest.fn()
+const mockUseChain = jest.fn()
+const mockDispatch = jest.fn()
+const mockShowNotification = jest.fn()
+const mockAssertWalletChain = jest.fn()
+const mockIsEthSignWallet = jest.fn()
+const mockSignTypedData = jest.fn()
+const mockSignData = jest.fn()
+const SIGNER = { address: 'signer' }
+let mockOnboard: object | null = {}
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
+  useDelegatesDeleteDelegateV1Mutation: () => [mockDeleteV1],
+  useDelegatesDeleteDelegateV2Mutation: () => [mockDeleteV2],
+  useDelegatesDeleteDelegateV3Mutation: () => [mockDeleteV3],
+  useDelegatesPostDelegateV2Mutation: () => [jest.fn()],
+  useDelegatesPostDelegateV3Mutation: () => [jest.fn()],
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  useChain: (...args: unknown[]) => mockUseChain(...args),
+}))
+
+jest.mock('@/hooks/wallets/useOnboard', () => ({
+  __esModule: true,
+  default: () => mockOnboard,
+}))
+
+jest.mock('@/services/tx/tx-sender/sdk', () => ({
+  assertWalletChain: (...args: unknown[]) => mockAssertWalletChain(...args),
+  getAssertedChainSigner: async () => SIGNER,
+}))
+
+jest.mock('@/features/proposers/utils/utils', () => ({
+  signProposerTypedData: (...args: unknown[]) => mockSignTypedData(...args),
+  signProposerData: (...args: unknown[]) => mockSignData(...args),
+}))
+
+jest.mock('@/utils/wallets', () => ({
+  isEthSignWallet: () => mockIsEthSignWallet(),
+}))
+
+jest.mock('@/store', () => ({
+  useAppDispatch: () => mockDispatch,
+}))
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: (...args: unknown[]) => mockUseAddressBookItem(...args),
+}))
+
+jest.mock('@/store/notificationsSlice', () => ({
+  showNotification: (...args: unknown[]) => mockShowNotification(...args),
+}))
+
+const policy = asActivePolicy(mockProposerPolicy())
+const ref = { policy, proposer: policy.data.proposers[0] }
+const unwrapped = (value?: unknown) => ({ unwrap: () => Promise.resolve(value) })
+
+describe.each([
+  { service: 'queue service', isQueueService: true },
+  { service: 'transaction service', isQueueService: false },
+])('useRemoveProposer on a $service chain', ({ service, isQueueService }) => {
+  const chain = chainBuilder()
+    .with({ chainId: MOCK_SAFES.treasury.chainId, features: isQueueService ? [FEATURES.QUEUE_SERVICE] : [] })
+    .build()
+  const mockDelete = isQueueService ? mockDeleteV3 : mockDeleteV2
+  const mockOtherDelete = isQueueService ? mockDeleteV2 : mockDeleteV3
+  const dtoKey = isQueueService ? 'deleteDelegateV3Dto' : 'deleteDelegateV2Dto'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockUseChain.mockReturnValue(chain)
+    mockOnboard = {}
+    mockAssertWalletChain.mockResolvedValue({ address: MOCK_ADDRESSES.alice, provider: {}, label: 'MetaMask' })
+    mockIsEthSignWallet.mockReturnValue(false)
+    mockSignTypedData.mockResolvedValue('0xtyped')
+    mockSignData.mockResolvedValue('0xethsign')
+    mockDeleteV1.mockReturnValue(unwrapped())
+    mockDeleteV2.mockReturnValue(unwrapped())
+    mockDeleteV3.mockReturnValue(unwrapped())
+    mockUseAddressBookItem.mockReturnValue(undefined)
+  })
+
+  it(`should, when confirmed, switch to the Safe chain, sign the typed data and delete the delegate through the ${service}`, async () => {
+    const onRemoved = jest.fn()
+    const { result } = renderHook(() => useRemoveProposer(ref, onRemoved))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockAssertWalletChain).toHaveBeenCalledWith(mockOnboard, MOCK_SAFES.treasury.chainId)
+    expect(mockUseChain).toHaveBeenCalledWith(MOCK_SAFES.treasury.chainId)
+    expect(mockSignTypedData).toHaveBeenCalledWith(
+      chain,
+      MOCK_ADDRESSES.bob,
+      MOCK_SAFES.treasury.address,
+      'delete',
+      SIGNER,
+    )
+    expect(mockDelete).toHaveBeenCalledWith({
+      chainId: MOCK_SAFES.treasury.chainId,
+      delegateAddress: MOCK_ADDRESSES.bob,
+      [dtoKey]: { delegator: MOCK_ADDRESSES.alice, safe: MOCK_SAFES.treasury.address, signature: '0xtyped' },
+    })
+    expect(mockOtherDelete).not.toHaveBeenCalled()
+    expect(mockDispatch).toHaveBeenCalledTimes(1)
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Proposer deleted successfully!',
+        autoHideDuration: 7000,
+        message: '0x0000...0B0b cannot suggest transactions for 0x8675...a19b anymore.',
+      }),
+    )
+    expect(onRemoved).toHaveBeenCalledTimes(1)
+    expect(result.current.error).toBeUndefined()
+  })
+
+  it('should name the proposer and the Safe from the address book in the confirmation', async () => {
+    mockUseAddressBookItem.mockImplementation((address: string) =>
+      address === MOCK_ADDRESSES.bob ? { name: 'Bob' } : { name: 'Treasury' },
+    )
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockUseAddressBookItem).toHaveBeenCalledWith(MOCK_ADDRESSES.bob, MOCK_SAFES.treasury.chainId)
+    expect(mockUseAddressBookItem).toHaveBeenCalledWith(MOCK_SAFES.treasury.address, MOCK_SAFES.treasury.chainId)
+    expect(mockShowNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Bob (0x0000...0B0b) cannot suggest transactions for Treasury (0x8675...a19b) anymore.',
+      }),
+    )
+  })
+
+  it('should, when the wallet only signs with eth_sign, use the v1 endpoint', async () => {
+    mockIsEthSignWallet.mockReturnValue(true)
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockSignData).toHaveBeenCalledWith(MOCK_ADDRESSES.bob, SIGNER)
+    expect(mockDeleteV1).toHaveBeenCalledWith({
+      chainId: MOCK_SAFES.treasury.chainId,
+      delegateAddress: MOCK_ADDRESSES.bob,
+      deleteDelegateDto: { delegate: MOCK_ADDRESSES.bob, delegator: MOCK_ADDRESSES.alice, signature: '0xethsign' },
+    })
+    expect(mockDeleteV2).not.toHaveBeenCalled()
+    expect(mockDeleteV3).not.toHaveBeenCalled()
+  })
+
+  it('should, when the delete fails, surface the error and keep the proposer', async () => {
+    mockDelete.mockReturnValue({ unwrap: () => Promise.reject(new Error('Invalid signature')) })
+    const onRemoved = jest.fn()
+    const { result } = renderHook(() => useRemoveProposer(ref, onRemoved))
+
+    await act(() => result.current.removeProposer())
+
+    expect(result.current.error?.message).toBe('Invalid signature')
+    expect(result.current.isRemoving).toBe(false)
+    expect(onRemoved).not.toHaveBeenCalled()
+  })
+
+  it('should, when the user rejects the signature, delete nothing', async () => {
+    mockSignTypedData.mockRejectedValue(new Error('User rejected'))
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockDelete).not.toHaveBeenCalled()
+    expect(result.current.error?.message).toBe('User rejected')
+  })
+
+  it('should, when no wallet is connected, ask to connect one', async () => {
+    mockOnboard = null
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(result.current.error?.message).toBe('Please connect your wallet first')
+    expect(mockAssertWalletChain).not.toHaveBeenCalled()
+  })
+
+  it('should, when the chain config is not loaded, ask to connect a wallet without signing', async () => {
+    mockUseChain.mockReturnValue(undefined)
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(result.current.error?.message).toBe('Please connect your wallet first')
+    expect(mockAssertWalletChain).not.toHaveBeenCalled()
+    expect(mockSignTypedData).not.toHaveBeenCalled()
+    expect(mockDelete).not.toHaveBeenCalled()
+  })
+
+  it('should, when another owner tries to remove the role, refuse before asking for a signature', async () => {
+    mockAssertWalletChain.mockResolvedValue({
+      address: '0x1111111111111111111111111111111111111111',
+      provider: {},
+      label: 'MetaMask',
+    })
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(result.current.error?.message).toBe(
+      'Only the signer who granted this proposer role, or the proposer themselves, can remove it',
+    )
+    expect(mockSignTypedData).not.toHaveBeenCalled()
+    expect(mockDelete).not.toHaveBeenCalled()
+  })
+
+  it('should, when the proposer removes itself, delete the grant on behalf of its delegator', async () => {
+    mockAssertWalletChain.mockResolvedValue({ address: MOCK_ADDRESSES.bob, provider: {}, label: 'MetaMask' })
+    const { result } = renderHook(() => useRemoveProposer(ref, jest.fn()))
+
+    await act(() => result.current.removeProposer())
+
+    expect(mockDelete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        [dtoKey]: expect.objectContaining({ delegator: MOCK_ADDRESSES.alice }),
+      }),
+    )
+  })
+})

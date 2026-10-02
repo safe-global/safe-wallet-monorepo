@@ -1,9 +1,38 @@
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
+import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import useWallet from '@/hooks/wallets/useWallet'
+import { mockStarterPlan } from '../mocks/plan'
+import {
+  asActivePolicy,
+  mockActivatingPolicy,
+  mockActiveSpendingLimit,
+  mockMultiSpenderPolicy,
+  mockPendingPolicy,
+  mockPolicies,
+  mockProposerPolicy,
+} from '../mocks/policies'
+import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
+import ProposerRoleFlow from '../ProposerRoleFlow'
+import { mockWallet } from '@/tests/mocks/hooks'
+import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import { safeItemBuilder } from '@/tests/builders/safeItem'
+import EditSpendingLimitFlow from '../SpendingLimitFlow/EditFlow'
 import Policies from '../index'
+import SpendingLimitFlow from '../SpendingLimitFlow'
+
+jest.mock('@/hooks/wallets/useWallet')
+
+jest.mock('../ProposerRoleFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="proposer-role-flow" />,
+}))
+
+const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
 let mockHasSeenSpendingLimitIntro: boolean | undefined = false
 let mockHasSeenProposerIntro: boolean | undefined = false
@@ -19,13 +48,65 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   ),
 }))
 
+// The flow pulls in the protocol-kit initialiser; the page test only needs the flow's identity.
+jest.mock('../../../hooks/useSpaceSafeOverviews', () => ({
+  useSpaceSafeOverviews: () => ({ ownedByChain: {}, isOwnershipResolved: true }),
+}))
+
+jest.mock('../SpendingLimitDetails/hooks/usePendingPolicyTransaction')
+
+jest.mock('../SpendingLimitFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="spending-limit-flow" />,
+}))
+
+jest.mock('../SpendingLimitFlow/EditFlow', () => ({
+  __esModule: true,
+  default: () => <div data-testid="edit-spending-limit-flow" />,
+}))
+
+jest.mock('../../../hooks/useSpaceSafes', () => ({ useSpaceSafes: jest.fn() }))
+
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
+const mockUseSpaceSafes = useSpaceSafes as jest.MockedFunction<typeof useSpaceSafes>
+
+const mockSignerOf = (policy: ReturnType<typeof mockActiveSpendingLimit>) =>
+  mockUseSpaceSafes.mockReturnValue({
+    allSafes: [
+      safeItemBuilder().with({ chainId: policy.safe.chainId, address: policy.safe.address, isReadOnly: false }).build(),
+    ],
+    isLoading: false,
+    isError: false,
+    error: undefined,
+    refetch: jest.fn(),
+    isUninitialized: false,
+  })
+
+const mockUsePendingPolicyTransaction = jest.mocked(usePendingPolicyTransaction)
+
+const renderWithTxModal = () => {
+  const setTxFlow = jest.fn()
+  const utils = renderWithUserEvent(
+    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+      <Policies />
+    </TxModalContext.Provider>,
+  )
+  return { ...utils, setTxFlow }
+}
 
 describe('Policies', () => {
   beforeEach(() => {
     mockHasSeenSpendingLimitIntro = false
     mockHasSeenProposerIntro = false
     jest.clearAllMocks()
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [],
+      isLoading: false,
+      isError: false,
+      error: undefined,
+      refetch: jest.fn(),
+      isUninitialized: false,
+    })
   })
 
   it('renders the page title', () => {
@@ -34,29 +115,23 @@ describe('Policies', () => {
     expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
   })
 
-  it('renders the description as designed', () => {
+  it('should, under the title, describe policies and link to the help centre', () => {
     render(<Policies />)
 
-    expect(
-      screen.getByText(
-        /Policies are rules that help you manage your Safe accounts\. Set them up once and they will run onchain, automatically\./,
-      ),
-    ).toBeInTheDocument()
-  })
-
-  it('links Learn more to the policies documentation', () => {
-    render(<Policies />)
-
+    expect(screen.getByText(/Policies are rules that help you/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Learn more' })).toHaveAttribute('href', HelpCenterArticle.POLICIES)
   })
 
-  it('styles Learn more like the Proposers section', () => {
-    render(<Policies />)
+  it('should hide the description while the policies are loading', () => {
+    render(<Policies isLoading />)
 
-    const link = screen.getByRole('link', { name: 'Learn more' })
+    expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
+  })
 
-    expect(link.querySelector('.external-link-icon')).toBeInTheDocument()
-    expect(link).toHaveClass('font-bold', 'hover:text-muted-foreground')
+  it('should hide the description when the policies failed to load', () => {
+    render(<Policies isError />)
+
+    expect(screen.queryByText(/Policies are rules that help you/)).not.toBeInTheDocument()
   })
 
   it('renders the policy catalogue', () => {
@@ -64,7 +139,6 @@ describe('Policies', () => {
 
     expect(screen.getByText('Spending limit')).toBeInTheDocument()
     expect(screen.getByText('Proposer')).toBeInTheDocument()
-    expect(screen.getByText('Account recovery')).toBeInTheDocument()
     expect(screen.getByText('Something missing?')).toBeInTheDocument()
   })
 
@@ -136,7 +210,7 @@ describe('Policies', () => {
     it('explains the proposer role before the flow starts', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -144,7 +218,7 @@ describe('Policies', () => {
     it('returns to the catalogue with nothing started when dismissed', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
@@ -154,7 +228,7 @@ describe('Policies', () => {
     it('records that it has been shown', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
       await user.click(screen.getByRole('button', { name: 'Close' }))
 
       expect(mockSetHasSeenProposerIntro).toHaveBeenCalledWith(true)
@@ -165,7 +239,7 @@ describe('Policies', () => {
       mockHasSeenProposerIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
@@ -174,7 +248,7 @@ describe('Policies', () => {
       mockHasSeenSpendingLimitIntro = true
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
     })
@@ -182,10 +256,32 @@ describe('Policies', () => {
     it('opens the proposer intro and no other policy dialog', async () => {
       const { user } = renderWithUserEvent(<Policies />)
 
-      await user.click(screen.getByTestId('policy-catalogue-tile-proposer'))
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
 
       expect(screen.getByTestId('proposer-intro-dialog')).toBeInTheDocument()
       expect(screen.getAllByRole('dialog')).toHaveLength(1)
+    })
+
+    it('opens the proposer flow from the intro', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+      await user.click(await screen.findByRole('button', { name: 'Set up proposer' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      await waitFor(() => expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument())
+    })
+
+    it('opens the flow directly once the intro has been seen', async () => {
+      mockHasSeenProposerIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
     })
   })
 
@@ -210,12 +306,442 @@ describe('Policies', () => {
     })
   })
 
-  it('opens no intro for the policies that have no flow yet', async () => {
-    const { user } = renderWithUserEvent(<Policies />)
+  describe('the Something missing? tile', () => {
+    const originalOpen = window.open
+    const mockOpen = jest.fn()
 
-    await user.click(screen.getByTestId('policy-catalogue-tile-suggestion'))
+    beforeEach(() => {
+      window.open = mockOpen
+    })
 
-    expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    afterAll(() => {
+      window.open = originalOpen
+    })
+
+    it('opens the request-policy form in a popup window', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      expect(mockOpen).toHaveBeenCalledTimes(1)
+      expect(mockOpen.mock.calls[0][0]).toBe(REQUEST_POLICY_FORM_URL)
+      expect(mockOpen.mock.calls[0][1]).toBe('_blank')
+
+      const features = mockOpen.mock.calls[0][2]
+      expect(features).toContain('popup=yes')
+      expect(features).toContain(`width=${REQUEST_POLICY_FORM_WIDTH}`)
+      expect(features).toContain(`height=${REQUEST_POLICY_FORM_HEIGHT}`)
+      expect(features).toContain('noopener,noreferrer')
+    })
+
+    it('centres the popup over the current window', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      const expectedLeft = window.screenX + (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2
+      const expectedTop = window.screenY + (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2
+      expect(mockOpen.mock.calls[0][2]).toContain(`left=${Math.round(expectedLeft)},top=${Math.round(expectedTop)}`)
+    })
+
+    it('opens no intro dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-suggestion')).getByRole('button'))
+
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('spending-limit-intro-dialog')).not.toBeInTheDocument()
+    })
+  })
+
+  /**
+   * Reviewing what governs a workspace's Safes requires no signing capability, so the page is
+   * readable without a connected wallet. This is what makes the page usable by someone auditing
+   * the workspace rather than operating it.
+   */
+  describe('without a connected wallet', () => {
+    it('should, when no wallet is connected and the space has no policies, render the catalogue', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+    })
+
+    it('should, when no wallet is connected and the space has policies, render the whole table', () => {
+      mockUseWallet.mockReturnValue(null)
+
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(mockPolicies().length)
+      expect(screen.getByPlaceholderText('Search')).toBeInTheDocument()
+    })
+  })
+
+  describe('populated mode', () => {
+    it('should, when the space has policies, render the list instead of the catalogue', () => {
+      render(<Policies policies={mockPolicies()} />)
+
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the last policy is revoked, render the catalogue again', () => {
+      const { rerender } = render(<Policies policies={mockPolicies()} />)
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.getByTestId('policy-catalogue')).toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies are still loading, render the heading and the loading state only', () => {
+      render(<Policies policies={[]} isLoading />)
+
+      expect(screen.getByRole('heading', { name: 'Policies' })).toBeInTheDocument()
+      expect(screen.getByTestId('policies-loading')).toHaveTextContent('Almost there…')
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when the policies failed to load, render the error state instead of the catalogue or the list', () => {
+      render(<Policies policies={mockPolicies()} isError />)
+
+      expect(screen.getByRole('alert')).toHaveTextContent('The website failed to load data. Please try again.')
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('policies-list')).not.toBeInTheDocument()
+    })
+
+    it('should, when Reload is clicked in the error state, ask the caller to reload', () => {
+      const onRetry = jest.fn()
+
+      render(<Policies policies={[]} isError onRetry={onRetry} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Reload' }))
+
+      expect(onRetry).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when the policies failed to load and there is no reload handler, render no Reload button', () => {
+      render(<Policies policies={[]} isError />)
+
+      expect(screen.queryByRole('button', { name: 'Reload' })).not.toBeInTheDocument()
+    })
+
+    it('should, when Add policy is clicked and no handler is given, open the add policy dialog', async () => {
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when Add policy is clicked and a handler is given, call it instead of opening the dialog', async () => {
+      const onAddPolicy = jest.fn()
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} onAddPolicy={onAddPolicy} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+
+      expect(onAddPolicy).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the proposer is picked in the add policy dialog, close it and start the proposer flow', async () => {
+      mockHasSeenProposerIntro = true
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      await waitFor(() => expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument())
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(ProposerRoleFlow)
+    })
+
+    it('should, when the proposer is picked before its intro was seen, show the intro first', async () => {
+      const { user } = renderWithUserEvent(<Policies policies={mockPolicies()} />)
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when a spending limit is picked in the add policy dialog, start the spending limit flow', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={mockPolicies()} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-spending-limit'))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+
+    it('should, when a proposer row is clicked and no handler is given, open the proposer drawer', () => {
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+      expect(screen.getByText('Proposer role')).toBeInTheDocument()
+    })
+
+    it('should, when a spending limit row is clicked, open its side panel', () => {
+      render(<Policies policies={[mockActiveSpendingLimit()]} />)
+      fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('should hold one open panel at a time, so a second row replaces the first', () => {
+      render(<Policies policies={[asActivePolicy(mockProposerPolicy()), mockActiveSpendingLimit()]} />)
+      const [proposerRow, spendingLimitRow] = screen.getAllByTestId('policy-open-button')
+
+      fireEvent.click(proposerRow)
+      expect(screen.getByRole('dialog', { name: 'Proposer role' })).toBeInTheDocument()
+
+      // The open drawer makes the row behind it inert, so the click goes to the element itself.
+      fireEvent.click(spendingLimitRow)
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+      expect(screen.queryByRole('dialog', { name: 'Proposer role' })).not.toBeInTheDocument()
+    })
+
+    it('should refresh the open panel when the policy is refetched', () => {
+      const spendingLimit = mockActiveSpendingLimit()
+      const { rerender } = render(<Policies policies={[spendingLimit]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+      expect(screen.queryByText('Spender 2')).not.toBeInTheDocument()
+
+      rerender(<Policies policies={[{ ...asActivePolicy(mockMultiSpenderPolicy()), id: spendingLimit.id }]} />)
+
+      expect(screen.getByText('Spender 2')).toBeInTheDocument()
+    })
+
+    it('should close the open panel when its policy leaves the response', () => {
+      const { rerender } = render(<Policies policies={[mockActiveSpendingLimit()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+
+      rerender(<Policies policies={[]} />)
+
+      expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+    })
+
+    describe('a pending spending limit', () => {
+      beforeEach(() => {
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [] })
+      })
+
+      it('should, when its row is clicked, open the side panel in its pending state', () => {
+        render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('Pending signatures')).toBeInTheDocument()
+      })
+
+      it('should, for a row already executed and waiting for the indexer, open the panel as executed', () => {
+        render(<Policies policies={[mockActivatingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+        expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
+      })
+
+      it('should keep its panel open after the row leaves the queue, so the panel can say why', () => {
+        const { rerender } = render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], outcome: 'deleted' })
+        rerender(<Policies policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was deleted.')).toBeInTheDocument()
+      })
+
+      it('should keep its panel open once the row turns activating, and say it was executed', () => {
+        const { rerender } = render(<Policies policies={[mockPendingPolicy()]} />)
+        fireEvent.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+        mockUsePendingPolicyTransaction.mockReturnValue({ confirmedBy: [], outcome: 'executed' })
+        rerender(<Policies policies={[mockActivatingPolicy()]} />)
+
+        expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+        expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
+      })
+    })
+
+    it('should, when a table row is clicked, report the policy it belongs to', () => {
+      const onSelectPolicy = jest.fn()
+      const proposerPolicy = asActivePolicy(mockProposerPolicy())
+
+      render(<Policies policies={[proposerPolicy]} onSelectPolicy={onSelectPolicy} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+      expect(onSelectPolicy).toHaveBeenCalledWith(proposerPolicy)
+    })
+  })
+
+  describe('starting the spending limit flow', () => {
+    const renderWithTxModal = () => {
+      const setTxFlow = jest.fn()
+      const value: TxModalContextType = { txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }
+      const utils = renderWithUserEvent(
+        <TxModalContext.Provider value={value}>
+          <Policies />
+        </TxModalContext.Provider>,
+      )
+      return { ...utils, setTxFlow }
+    }
+
+    it('opens the flow when the intro is confirmed', async () => {
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Set up spending limit' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+
+    it('opens the flow straight from the tile once the intro has been shown', async () => {
+      mockHasSeenSpendingLimitIntro = true
+      const { user, setTxFlow } = renderWithTxModal()
+
+      await user.click(screen.getByRole('button', { name: /Spending limit/ }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0]).toMatchObject({ type: SpendingLimitFlow })
+    })
+  })
+
+  describe('a plan that does not include policies', () => {
+    it('should, when the plan is given, render the upsell banner naming the workspace and the plan', () => {
+      render(<Policies locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
+
+      expect(screen.getByTestId('policy-upsell-banner')).toHaveTextContent('Acme Inc is on Starter')
+      expect(screen.getByRole('button', { name: /Upgrade to Business/ })).toBeInTheDocument()
+    })
+
+    it('should, when no plan is given, render no banner', () => {
+      render(<Policies />)
+
+      expect(screen.queryByTestId('policy-upsell-banner')).not.toBeInTheDocument()
+    })
+
+    it('should, when the banner button is clicked, call onUpgrade', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(screen.getByRole('button', { name: /Upgrade to Business/ }))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when a locked tile is clicked, call onUpgrade and open no intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
+
+      await user.click(within(screen.getByTestId('policy-catalogue-tile-proposer')).getByRole('button'))
+
+      expect(onUpgrade).toHaveBeenCalledTimes(1)
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+    })
+
+    it('should, when the workspace has policies, keep listing them under the banner', () => {
+      render(<Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />)
+
+      expect(screen.getByTestId('policy-upsell-banner')).toBeInTheDocument()
+      expect(screen.getByTestId('policies-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('policy-catalogue')).not.toBeInTheDocument()
+    })
+
+    it('should, when the plan does not include a policy, disable it in the add policy dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(screen.getByTestId('add-policy-option-proposer')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-spending-limit')).toHaveAttribute('aria-disabled', 'true')
+      expect(screen.getByTestId('add-policy-option-suggestion')).not.toHaveAttribute('aria-disabled')
+      expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
+      expect(screen.queryByTestId('proposer-intro-dialog')).not.toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
+    })
+
+    it('should, when a policy the plan includes is picked in the add policy dialog, open its intro dialog', async () => {
+      const onUpgrade = jest.fn()
+      const { user } = renderWithUserEvent(
+        <Policies
+          policies={mockPolicies()}
+          locked={{ ...mockStarterPlan, lockedPolicies: ['spending-limit'], onUpgrade }}
+        />,
+      )
+
+      await user.click(screen.getByTestId('add-policy-button'))
+      await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+      expect(await screen.findByTestId('proposer-intro-dialog')).toBeInTheDocument()
+      expect(onUpgrade).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('editing a spending limit', () => {
+    it('opens the edit flow for the Safe whose panel is open, and leaves the panel mounted', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+      await user.click(screen.getByRole('button', { name: 'Edit' }))
+
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      expect(setTxFlow.mock.calls[0][0].type).toBe(EditSpendingLimitFlow)
+      expect(setTxFlow.mock.calls[0][0].props.safe).toEqual(policy.safe)
+      // Left open rather than closed, so cancelling the flow lands back on the panel.
+      expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('hides the panel while a flow is open, as the pending panel does', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+    })
   })
 })

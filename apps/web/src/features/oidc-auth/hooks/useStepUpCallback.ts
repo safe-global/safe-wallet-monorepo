@@ -25,7 +25,7 @@ export const useStepUpCallback = () => {
     hasProcessed.current = true
     dispatch(stepUpReturning())
 
-    const processCallback = async () => {
+    const processCallback = async (): Promise<boolean> => {
       // `router.query` can still be empty before `router.isReady` on first render.
       const params = new URLSearchParams(window.location.search)
 
@@ -45,15 +45,20 @@ export const useStepUpCallback = () => {
         routerRef.current.replace({ pathname: routerRef.current.pathname, query: cleanQuery }, undefined, {
           shallow: true,
         })
-      } else {
-        await reconcileAuth(dispatch)
-        if (trip.action) await replayStepUpAction(dispatch, trip.action)
+        return false
       }
+
+      await reconcileAuth(dispatch)
+      return trip.action ? replayStepUpAction(dispatch, trip.action) : false
     }
 
     void processCallback()
-      .finally(() => dispatch(stepUpSettled()))
-      .catch(() => undefined)
+      .catch(() => false)
+      .then((isLeavingPage) => {
+        // A replay that sends the browser on (the Stripe checkout) keeps the splash up, so the
+        // page it is leaving does not show for an instant before the next one loads.
+        if (!isLeavingPage) dispatch(stepUpSettled())
+      })
   }, [dispatch])
 
   // Coming back from the challenge with the Back button restores this page from the

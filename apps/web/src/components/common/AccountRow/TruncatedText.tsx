@@ -6,6 +6,8 @@ import { cn } from '@/utils/cn'
 
 type TruncatedTextProps = {
   text: string
+  /** Set where `text` arrives abbreviated: the tooltip reveals this whether or not CSS also clipped it. */
+  fullText?: string
   className?: string
 } & Pick<VariantProps<typeof typographyVariants>, 'variant' | 'color'> &
   Omit<HTMLAttributes<HTMLSpanElement>, 'children' | 'color'>
@@ -24,21 +26,24 @@ export const shouldOpenTooltip = (
   requestedOpen: boolean,
   reason: string | undefined,
   el: Measurable | null,
+  revealsMoreThanTheText = false,
 ): boolean => {
   if (!requestedOpen || reason === 'trigger-focus') return false
+  if (revealsMoreThanTheText) return true
   return el !== null && el.scrollWidth > el.clientWidth
 }
 
 /**
  * Single-line text that ellipsizes (CSS `truncate`) to fit its container and reveals the full value
  * in a tooltip — but only when the text is actually clipped, so short names that already fit don't
- * get a redundant tooltip.
+ * get a redundant tooltip. `fullText` is for text that arrives abbreviated, which is always worth
+ * revealing.
  *
  * The tooltip is hover-only and click-through so it never traps neighbouring controls (e.g. the copy
  * button that sits directly beneath the name): it ignores focus-triggered opens and the popup is
  * pointer-events-none.
  */
-function TruncatedText({ text, variant, color, className, ...rest }: TruncatedTextProps) {
+function TruncatedText({ text, fullText, variant, color, className, ...rest }: TruncatedTextProps) {
   const ref = useRef<HTMLSpanElement>(null)
   const [open, setOpen] = useState(false)
 
@@ -46,7 +51,9 @@ function TruncatedText({ text, variant, color, className, ...rest }: TruncatedTe
     <Tooltip
       delay={OPEN_DELAY_MS}
       open={open}
-      onOpenChange={(nextOpen, details) => setOpen(shouldOpenTooltip(nextOpen, details.reason, ref.current))}
+      onOpenChange={(nextOpen, details) =>
+        setOpen(shouldOpenTooltip(nextOpen, details.reason, ref.current, fullText !== undefined))
+      }
       disableHoverablePopup
     >
       <TooltipTrigger
@@ -56,7 +63,7 @@ function TruncatedText({ text, variant, color, className, ...rest }: TruncatedTe
           </span>
         }
       />
-      <TooltipContent className="pointer-events-none">{text}</TooltipContent>
+      <TooltipContent className="pointer-events-none">{fullText ?? text}</TooltipContent>
     </Tooltip>
   )
 }

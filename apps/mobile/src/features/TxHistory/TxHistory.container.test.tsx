@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@/src/tests/test-utils'
+import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved, act } from '@/src/tests/test-utils'
 import { TxHistoryContainer } from './TxHistory.container'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
@@ -181,13 +181,8 @@ describe('TxHistoryContainer', () => {
     expect(screen.getByTestId('tx-history-initial-loader')).toBeTruthy()
 
     // Wait for transactions to load and loading skeleton to disappear
-    await waitFor(
-      () => {
-        expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
-        expect(screen.getByText('Received')).toBeTruthy()
-      },
-      { timeout: 3000 },
-    )
+    await waitForElementToBeRemoved(() => screen.queryByTestId('tx-history-initial-loader'), { timeout: 3000 })
+    expect(screen.getByText('Received')).toBeTruthy()
   }, 20000)
 
   it('shows pagination loading skeleton when loading more transactions', async () => {
@@ -329,12 +324,7 @@ describe('TxHistoryContainer', () => {
     render(<TxHistoryContainer />)
 
     // Wait for loading to complete
-    await waitFor(
-      () => {
-        expect(screen.queryByTestId('tx-history-initial-loader')).toBeNull()
-      },
-      { timeout: 3000 },
-    )
+    await waitForElementToBeRemoved(() => screen.queryByTestId('tx-history-initial-loader'), { timeout: 3000 })
 
     // Should not show any transaction items
     expect(screen.queryByText('Received')).toBeNull()

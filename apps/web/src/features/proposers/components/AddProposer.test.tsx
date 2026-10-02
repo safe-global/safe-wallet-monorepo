@@ -55,7 +55,6 @@ const mockDelegateChain = (isQueueService: boolean) => {
     .with({ features: isQueueService ? [FEATURES.QUEUE_SERVICE] : [] })
     .build()
   jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(chain)
-  jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(isQueueService)
   return chain
 }
 
@@ -254,7 +253,6 @@ describe('AddProposer signing logic', () => {
 
     beforeEach(() => {
       jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(undefined)
-      jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(undefined)
 
       mockUseWallet.mockReturnValue({
         address: fakerChecksummedAddress(),

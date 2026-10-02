@@ -498,6 +498,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin"
           }
         },
         "summary": "Get the billing portal session URL for a space",
@@ -584,6 +587,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin, or a payment link this workspace is not offered"
+          },
+          "409": {
+            "description": "This plan doesn't offer enough Safe seats for the workspace's current Safes"
           }
         },
         "summary": "Create a checkout session for a payment link",
@@ -637,7 +646,7 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, or a plan this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
@@ -657,6 +666,7 @@
     },
     "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
       "patch": {
+        "description": "Safes in `removedSafes` are removed from the workspace first, then the plan changes. If the plan change fails after that, the answer is 502 and sending the same request again finishes it.",
         "operationId": "billingUpdateSubscriptionV1",
         "parameters": [
           {
@@ -701,19 +711,19 @@
             }
           },
           "403": {
-            "description": "Not a member, or a plan this workspace is not offered"
+            "description": "Not an admin, a plan this workspace is not offered, or a named paymentLinkId this workspace is not offered"
           },
           "404": {
             "description": "Subscription not found"
           },
           "409": {
-            "description": "Already on this plan, the subscription is not updatable, or several offered links sell the plan and none was named"
+            "description": "One of:\n- Already on this plan\n- The subscription is not in an updatable state\n- Several offered links sell the plan and none was named\n- The target plan doesn't offer enough Safe seats for the workspace's current Safes"
           },
           "422": {
             "description": "The named payment link does not offer this plan"
           },
           "502": {
-            "description": "The billing service reported the plan change as unsuccessful"
+            "description": "The billing service reported the plan change as unsuccessful, or failed after `removedSafes` were removed"
           }
         },
         "summary": "Move a subscription onto another plan",
@@ -2349,10 +2359,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not a member of this space"
+            "description": "Access forbidden - user is not an active member of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space address book",
@@ -2404,10 +2414,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space address book",
@@ -2449,10 +2459,10 @@
             "description": "Invalid space identifier"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, space, or address book entry not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete address book entry",
@@ -3149,6 +3159,38 @@
         ]
       }
     },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, one entry per space with its Safes grouped by chain like the per-space endpoint. A space without Safes has an empty `safes` object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpacesSafesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members/invite": {
       "post": {
         "description": "Invites one or more users to join a space. Only space admins can send invitations.",
@@ -3768,6 +3810,296 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleRecipientAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze recipient address on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
+      "post": {
+        "description": "Performs combined contract and recipient analysis for a Safe transaction on a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeCounterpartyV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data used to analyze all counterparties involved.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterpartyAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterpartyAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze transaction counterparties on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/policies/active": {
+      "get": {
+        "description": "Returns the policies of every Safe in the Space. A Safe whose spending-limit or proposer data could not be read is omitted from the corresponding policies.",
+        "operationId": "spacePoliciesGetActivePoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivePolicyDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the active policies on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/policies/pending": {
+      "get": {
+        "description": "Returns the spending-limit changes in the transaction queue of every Safe in the Space. Detects only direct AllowanceModule calls and calls found one level inside a MultiSend batch, and only against known AllowanceModule deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial AllowanceModule fork is not detected.",
+        "operationId": "spacePoliciesGetPendingPoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PendingPolicyDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the pending policy changes on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/surveys/{slug}/state": {
       "get": {
         "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
@@ -3888,6 +4220,38 @@
         ]
       }
     },
+    "/v1/spaces/entitlements": {
+      "get": {
+        "description": "The entitlements of every workspace the user is an active member of, keyed by workspace UUID. Each value is what the per-workspace endpoint returns.",
+        "operationId": "entitlementsGetAllEntitlementsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EntitlementsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get entitlements of all spaces",
+        "tags": [
+          "entitlements"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/entitlements": {
       "get": {
         "description": "The single source of truth for what a workspace can do: the active plan and per-feature entitlements, with quotas and usage for metered ones. Free-tier workspaces get the same contract shape.",
@@ -3936,7 +4300,7 @@
     },
     "/v1/spaces/{spaceId}/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. Unlike the chain-scoped relay endpoint, the chain's own relayer policy does not apply: the allowance is the only limit. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
+        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. The chain must list SUBSCRIPTION among its gas payment options; no other option applies here. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
         "operationId": "spaceRelayRelayV1",
         "parameters": [
           {
@@ -3991,16 +4355,23 @@
             "description": "The workspace's sponsored-transaction allowance is spent. The body carries `quota`, `used` and `resetsAt` so a client can offer to pay for the transaction itself."
           },
           "403": {
-            "description": "Not a member of the workspace, the Safe is not one it holds, the chain has no relayer, or the transaction was denied"
+            "description": "Not a member of the workspace, or the transaction was denied"
           },
           "404": {
             "description": "Workspace not found"
           },
+          "409": {
+            "description": "SUBSCRIPTION cannot pay for this request: the chain does not list it or has no relayer, the Safe is not one the workspace holds, or the transaction refunds gas (`gasPrice` > 0).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Request failed schema validation, or the transaction was simulated and would revert (SIMULATION_FAILED) or could not be simulated (INDETERMINATE_SIMULATION)"
-          },
-          "501": {
-            "description": "The chain's relayer type is not supported"
           }
         },
         "summary": "Relay a transaction at a workspace's expense",
@@ -4190,6 +4561,16 @@
           "403": {
             "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
           },
+          "409": {
+            "description": "A transaction that refunds gas (`gasPrice` > 0) needs PAY_FROM_SAFE, which the chain does not offer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Relay rejected. The consumers MUST branch on the `code` field; `message` is informational. Possible cases: safeTxHash does not match the transaction data, unrecognised transaction type, SIMULATION_FAILED (Tenderly confirmed revert), or INDETERMINATE_SIMULATION (simulator unreachable; retry with `acceptUnverifiedSimulation=true` to proceed anyway).",
             "schema": {
@@ -4285,7 +4666,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
+        "description": "Retrieves the free relays left for a specific Safe on the given chain: the no-fee campaign quota where the chain lists NO_FEE_CAMPAIGN, otherwise the daily limit where it lists FREE_DAILY_LIMIT.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -4311,7 +4692,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
+            "description": "Safe transaction hash (0x prefixed hex string). Ignored; kept so existing clients do not break.",
             "schema": {
               "type": "string"
             }
@@ -4327,6 +4708,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The chain has no relayer or lists no free option, such as a chain that only lists PAY_FROM_SAFE"
           }
         },
         "summary": "Get remaining relays",
@@ -4668,6 +5052,9 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Disabled on Core. The body carries `{ code: \"SAFE_SHIELD_DISABLED_ON_CORE\", message }`."
           }
         },
         "summary": "Analyze recipient address",
@@ -5329,7 +5716,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
@@ -6928,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "main-ecb600a",
     "contact": {}
   },
   "tags": [],
@@ -7327,6 +7714,10 @@
           "metadata": {
             "type": "object",
             "nullable": true
+          },
+          "hasPaymentMethod": {
+            "type": "boolean",
+            "description": "Whether the subscription has a default payment method, or its customer does as a fallback"
           }
         },
         "required": [
@@ -7569,6 +7960,21 @@
           "lineItems"
         ]
       },
+      "RemovedSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
       "UpdateSubscriptionDto": {
         "type": "object",
         "properties": {
@@ -7579,6 +7985,13 @@
           "paymentLinkId": {
             "type": "string",
             "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          },
+          "removedSafes": {
+            "description": "Safes to remove from the workspace before the plan changes, so it fits the new plan. Safes the workspace does not hold are ignored",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RemovedSafeDto"
+            }
           }
         },
         "required": [
@@ -8344,17 +8757,33 @@
             "type": "boolean"
           },
           "safeTransactionSponsored": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Use gasPaymentOptions instead."
           },
           "enableTenderlySimulationBeforeRelay": {
             "type": "boolean"
+          },
+          "gasPaymentOptions": {
+            "type": "array",
+            "description": "Who may pay for a relayed transaction on this chain.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
           }
         },
         "required": [
           "type",
           "safeCreationSponsored",
           "safeTransactionSponsored",
-          "enableTenderlySimulationBeforeRelay"
+          "enableTenderlySimulationBeforeRelay",
+          "gasPaymentOptions"
         ]
       },
       "Chain": {
@@ -10691,10 +11120,44 @@
             "items": {
               "$ref": "#/components/schemas/SpaceSafeDto"
             }
+          },
+          "addressBookItems": {
+            "description": "Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
           }
         },
         "required": [
           "safes"
+        ]
+      },
+      "GetSpacesSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          }
+        },
+        "required": [
+          "safes",
+          "spaceUuid"
         ]
       },
       "GetSpaceSafeResponse": {
@@ -10888,12 +11351,17 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
           "status",
-          "email"
+          "email",
+          "address"
         ]
       },
       "MemberDto": {
@@ -11209,855 +11677,6 @@
         },
         "required": [
           "safes"
-        ]
-      },
-      "SurveyOptionDto": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "label"
-        ]
-      },
-      "SurveyPageDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "multiSelect": {
-            "type": "boolean"
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyOptionDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "subtitle",
-          "multiSelect",
-          "options"
-        ]
-      },
-      "SurveyContentDto": {
-        "type": "object",
-        "properties": {
-          "pages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyPageDto"
-            }
-          }
-        },
-        "required": [
-          "pages"
-        ]
-      },
-      "SurveyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "version": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "surveyContent": {
-            "$ref": "#/components/schemas/SurveyContentDto"
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "version",
-          "title",
-          "subtitle",
-          "surveyContent"
-        ]
-      },
-      "SpaceSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys"
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "SurveyStateDto": {
-        "type": "object",
-        "properties": {
-          "survey": {
-            "$ref": "#/components/schemas/SurveyDto"
-          },
-          "surveyResponse": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "survey",
-          "surveyResponse"
-        ]
-      },
-      "SubmitSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys",
-            "example": {
-              "use_cases": [
-                "run_payments",
-                "hold_assets"
-              ]
-            }
-          }
-        },
-        "required": [
-          "selections"
-        ]
-      },
-      "SurveyResponseResultDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "spaceUuid": {
-            "type": "string",
-            "description": "Space UUID"
-          },
-          "surveySlug": {
-            "type": "string"
-          },
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "spaceUuid",
-          "surveySlug",
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "FeatureKey": {
-        "type": "string",
-        "enum": [
-          "safe_seats",
-          "sponsored_transactions"
-        ],
-        "description": "Feature key from the entitlements catalog."
-      },
-      "BinaryEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "binary"
-            ]
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type"
-        ]
-      },
-      "ValueEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "value"
-            ]
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type",
-          "value"
-        ]
-      },
-      "MeteredEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "metered"
-            ]
-          },
-          "quota": {
-            "type": "number",
-            "nullable": true,
-            "description": "The plan's quota, never inflated to match usage; null means unlimited."
-          },
-          "used": {
-            "type": "number",
-            "description": "May legally exceed `quota`."
-          },
-          "resetsAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true,
-            "description": "Null for stock-type features (seats) that have no reset window."
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type",
-          "quota",
-          "used",
-          "resetsAt"
-        ]
-      },
-      "EntitlementsPlan": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Plan identifier in the billing service"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "cycleEndsAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true,
-            "description": "End of the current billing cycle"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "cycleEndsAt"
-        ]
-      },
-      "EntitlementsResponse": {
-        "type": "object",
-        "properties": {
-          "plan": {
-            "nullable": true,
-            "description": "Null when the workspace has no active subscription.",
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EntitlementsPlan"
-              }
-            ]
-          },
-          "entitlements": {
-            "type": "array",
-            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/BinaryEntitlement"
-                },
-                {
-                  "$ref": "#/components/schemas/ValueEntitlement"
-                },
-                {
-                  "$ref": "#/components/schemas/MeteredEntitlement"
-                }
-              ],
-              "discriminator": {
-                "propertyName": "type",
-                "mapping": {
-                  "binary": "#/components/schemas/BinaryEntitlement",
-                  "value": "#/components/schemas/ValueEntitlement",
-                  "metered": "#/components/schemas/MeteredEntitlement"
-                }
-              }
-            }
-          }
-        },
-        "required": [
-          "plan",
-          "entitlements"
-        ]
-      },
-      "SpaceRelayDto": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "data": {
-            "type": "string"
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route."
-          },
-          "acceptUnverifiedSimulation": {
-            "type": "boolean",
-            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
-          }
-        },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
-      },
-      "Relay": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "taskId"
-        ]
-      },
-      "SafeList": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "RelayDto": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "data": {
-            "type": "string"
-          },
-          "gasLimit": {
-            "type": "string",
-            "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash for relay-fee eligibility check"
-          },
-          "acceptUnverifiedSimulation": {
-            "type": "boolean",
-            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
-          }
-        },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
-      },
-      "RelayErrorResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "enum": [
-              "SIMULATION_FAILED",
-              "INDETERMINATE_SIMULATION"
-            ],
-            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable description of the error. Informational only; do not parse."
-          },
-          "statusCode": {
-            "type": "number",
-            "example": 422
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "statusCode"
-        ]
-      },
-      "RelayTaskStatusReceipt": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
-          }
-        },
-        "required": [
-          "transactionHash"
-        ]
-      },
-      "RelayTaskStatus": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "number",
-            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
-            "enum": [
-              100,
-              110,
-              200,
-              400,
-              500
-            ],
-            "example": 200
-          },
-          "receipt": {
-            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
-              }
-            ]
-          }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "RelaysRemaining": {
-        "type": "object",
-        "properties": {
-          "remaining": {
-            "type": "number"
-          },
-          "limit": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "remaining",
-          "limit"
-        ]
-      },
-      "SafeAppProvider": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url",
-          "name"
-        ]
-      },
-      "SafeAppAccessControl": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "value": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "SafeAppSocialProfile": {
-        "type": "object",
-        "properties": {
-          "platform": {
-            "type": "string",
-            "enum": [
-              "DISCORD",
-              "GITHUB",
-              "TWITTER",
-              "TELEGRAM",
-              "UNKNOWN"
-            ]
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "platform",
-          "url"
-        ]
-      },
-      "SafeApp": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string"
-          },
-          "chainIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "provider": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeAppProvider"
-              }
-            ]
-          },
-          "accessControl": {
-            "$ref": "#/components/schemas/SafeAppAccessControl"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "developerWebsite": {
-            "type": "string",
-            "nullable": true
-          },
-          "socialProfiles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SafeAppSocialProfile"
-            }
-          },
-          "featured": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "url",
-          "name",
-          "description",
-          "chainIds",
-          "accessControl",
-          "tags",
-          "features",
-          "socialProfiles",
-          "featured"
-        ]
-      },
-      "SafeState": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "implementation": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "modules": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fallbackHandler": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "guard": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "version": {
-            "type": "string",
-            "nullable": true
-          },
-          "implementationVersionState": {
-            "type": "string",
-            "enum": [
-              "UP_TO_DATE",
-              "OUTDATED",
-              "UNKNOWN"
-            ]
-          },
-          "collectiblesTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txQueuedTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txHistoryTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "messagesTag": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "nonce",
-          "threshold",
-          "owners",
-          "implementation",
-          "implementationVersionState"
-        ]
-      },
-      "SafeNonces": {
-        "type": "object",
-        "properties": {
-          "currentNonce": {
-            "type": "number"
-          },
-          "recommendedNonce": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "currentNonce",
-          "recommendedNonce"
-        ]
-      },
-      "SafeOverview": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fiatTotal": {
-            "type": "string"
-          },
-          "queued": {
-            "type": "number"
-          },
-          "awaitingConfirmation": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
         ]
       },
       "SingleRecipientAnalysisResultDto": {
@@ -12617,6 +12236,1479 @@
           "recipient",
           "contract",
           "deadlock"
+        ]
+      },
+      "ModuleEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "module"
+            ]
+          },
+          "moduleAddress": {
+            "type": "string",
+            "description": "The module enforcing the policy"
+          }
+        },
+        "required": [
+          "via",
+          "moduleAddress"
+        ]
+      },
+      "PolicyContractsDto": {
+        "type": "object",
+        "properties": {
+          "policyContract": {
+            "type": "string",
+            "description": "The policy implementation the guard delegates to"
+          },
+          "safePolicyGuard": {
+            "type": "string",
+            "description": "The SafePolicyGuard deployment"
+          }
+        },
+        "required": [
+          "policyContract",
+          "safePolicyGuard"
+        ]
+      },
+      "GuardSlotsDto": {
+        "type": "object",
+        "properties": {
+          "transactionGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          }
+        }
+      },
+      "GuardEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "guard"
+            ]
+          },
+          "guards": {
+            "$ref": "#/components/schemas/GuardSlotsDto"
+          }
+        },
+        "required": [
+          "via",
+          "guards"
+        ]
+      },
+      "OffChainEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "offchain"
+            ],
+            "description": "Nothing on chain enforces the policy, so it is access rather than an audited restriction"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "delegates"
+            ],
+            "description": "Where the grant is held"
+          }
+        },
+        "required": [
+          "via",
+          "source"
+        ]
+      },
+      "SpendingLimitAllowanceDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "spent": {
+            "type": "string",
+            "description": "Spent in the current window, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          },
+          "resetsAtMinute": {
+            "type": "number",
+            "nullable": true,
+            "description": "Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets"
+          },
+          "resetBoundaryIsExact": {
+            "type": "boolean",
+            "description": "False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected."
+          },
+          "isDelegateActive": {
+            "type": "boolean",
+            "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix seconds this allowance was (re-)established"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix seconds of the last event that changed this allowance"
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "amount",
+          "spent",
+          "resetPeriodMinutes",
+          "resetsAtMinute",
+          "resetBoundaryIsExact",
+          "isDelegateActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SpendingLimitSpenderDto": {
+        "type": "object",
+        "properties": {
+          "spender": {
+            "type": "string",
+            "description": "Name resolved by the client, never carried here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added"
+          },
+          "allowances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitAllowanceDto"
+            }
+          }
+        },
+        "required": [
+          "spender",
+          "isActive",
+          "allowances"
+        ]
+      },
+      "SpendingLimitPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The allowance module holding this state"
+          },
+          "spenders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitSpenderDto"
+            }
+          }
+        },
+        "required": [
+          "module",
+          "spenders"
+        ]
+      },
+      "ProposerGrantDto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "description": "The owner that granted the proposer"
+          },
+          "label": {
+            "type": "string",
+            "description": "The label this owner gave the proposer; empty when unlabelled"
+          }
+        },
+        "required": [
+          "delegator",
+          "label"
+        ]
+      },
+      "ProposerDto": {
+        "type": "object",
+        "properties": {
+          "proposer": {
+            "type": "string",
+            "description": "The address allowed to propose transactions"
+          },
+          "delegatedBy": {
+            "description": "The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerGrantDto"
+            }
+          }
+        },
+        "required": [
+          "proposer",
+          "delegatedBy"
+        ]
+      },
+      "ProposerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "proposers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerDto"
+            }
+          }
+        },
+        "required": [
+          "proposers"
+        ]
+      },
+      "SafeRefDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "ActivePolicyDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit",
+              "recovery",
+              "proposer",
+              "erc20-transfer",
+              "cosigner",
+              "allow",
+              "native-transfer",
+              "deny"
+            ]
+          },
+          "enforcement": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ModuleEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/GuardEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/OffChainEnforcementDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "via",
+              "mapping": {
+                "module": "#/components/schemas/ModuleEnforcementDto",
+                "guard": "#/components/schemas/GuardEnforcementDto",
+                "offchain": "#/components/schemas/OffChainEnforcementDto"
+              }
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "False when the policy is configured but not enforced"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SpendingLimitPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              }
+            ]
+          },
+          "safe": {
+            "description": "The Safe the policy is in effect on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "enforcement",
+          "enabled",
+          "data",
+          "safe"
+        ]
+      },
+      "EnableModuleChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "enable-module"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "AddDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "add-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The address being added as a delegate in AllowanceModule contract"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate"
+        ]
+      },
+      "RemoveDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "remove-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The delegate being removed"
+          },
+          "removeAllowances": {
+            "type": "boolean",
+            "description": "Whether the delegate's allowances are deleted along with it"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "removeAllowances"
+        ]
+      },
+      "SetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "amount",
+          "resetPeriodMinutes"
+        ]
+      },
+      "ResetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reset-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token"
+        ]
+      },
+      "DeleteAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delete-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token"
+        ]
+      },
+      "PendingSpendingLimitDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The AllowanceModule deployment holding this state"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EnableModuleChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AddDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "enable-module": "#/components/schemas/EnableModuleChangeDto",
+                  "add-delegate": "#/components/schemas/AddDelegateChangeDto",
+                  "remove-delegate": "#/components/schemas/RemoveDelegateChangeDto",
+                  "set-allowance": "#/components/schemas/SetAllowanceChangeDto",
+                  "reset-allowance": "#/components/schemas/ResetAllowanceChangeDto",
+                  "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              }
+            },
+            "description": "The AllowanceModule calls this transaction decodes to"
+          }
+        },
+        "required": [
+          "module",
+          "changes"
+        ]
+      },
+      "PendingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "queued-transaction"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit"
+            ]
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/ModuleEnforcementDto"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "The queued transaction this change was found in"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
+          },
+          "safe": {
+            "description": "The Safe the change is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "type",
+          "enforcement",
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "data",
+          "safe"
+        ]
+      },
+      "SurveyOptionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "SurveyPageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyOptionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "multiSelect",
+          "options"
+        ]
+      },
+      "SurveyContentDto": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyPageDto"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      },
+      "SurveyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "surveyContent": {
+            "$ref": "#/components/schemas/SurveyContentDto"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "version",
+          "title",
+          "subtitle",
+          "surveyContent"
+        ]
+      },
+      "SpaceSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "SurveyStateDto": {
+        "type": "object",
+        "properties": {
+          "survey": {
+            "$ref": "#/components/schemas/SurveyDto"
+          },
+          "surveyResponse": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "survey",
+          "surveyResponse"
+        ]
+      },
+      "SubmitSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys",
+            "example": {
+              "use_cases": [
+                "run_payments",
+                "hold_assets"
+              ]
+            }
+          }
+        },
+        "required": [
+          "selections"
+        ]
+      },
+      "SurveyResponseResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          },
+          "surveySlug": {
+            "type": "string"
+          },
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "spaceUuid",
+          "surveySlug",
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "FeatureKey": {
+        "type": "string",
+        "enum": [
+          "safe_seats",
+          "copilot_scans",
+          "sponsored_transactions",
+          "policies"
+        ],
+        "description": "Feature key from the entitlements catalog."
+      },
+      "BinaryEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "binary"
+            ]
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type"
+        ]
+      },
+      "ValueEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "value"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "value"
+        ]
+      },
+      "MeteredEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "metered"
+            ]
+          },
+          "quota": {
+            "type": "number",
+            "nullable": true,
+            "description": "The plan's quota, never inflated to match usage; null means unlimited."
+          },
+          "used": {
+            "type": "number",
+            "description": "May legally exceed `quota`."
+          },
+          "resetsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Null for stock-type features (seats) that have no reset window."
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "quota",
+          "used",
+          "resetsAt"
+        ]
+      },
+      "EntitlementsPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Plan identifier in the billing service"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "cycleEndsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "End of the current billing cycle"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cycleEndsAt"
+        ]
+      },
+      "EntitlementsResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "nullable": true,
+            "description": "Null when the workspace has no active subscription.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlan"
+              }
+            ]
+          },
+          "entitlements": {
+            "type": "array",
+            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BinaryEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/ValueEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/MeteredEntitlement"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "binary": "#/components/schemas/BinaryEntitlement",
+                  "value": "#/components/schemas/ValueEntitlement",
+                  "metered": "#/components/schemas/MeteredEntitlement"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "plan",
+          "entitlements"
+        ]
+      },
+      "SpaceRelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route."
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "Relay": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "GasPaymentOptionUnavailableResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "GAS_PAYMENT_OPTION_UNAVAILABLE"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "requested": {
+            "type": "string",
+            "enum": [
+              "FREE_DAILY_LIMIT",
+              "SUBSCRIPTION",
+              "PAY_FROM_SAFE",
+              "NO_FEE_CAMPAIGN"
+            ],
+            "description": "The gas payment option the request needed."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NOT_LISTED",
+              "NO_RELAYER",
+              "NOT_A_WORKSPACE_SAFE",
+              "REFUNDING_TRANSACTION"
+            ],
+            "description": "NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0)."
+          },
+          "available": {
+            "type": "array",
+            "description": "The options the chain lists; empty without a relayer.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode",
+          "requested",
+          "reason",
+          "available"
+        ]
+      },
+      "SafeList": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "RelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "gasLimit": {
+            "type": "string",
+            "nullable": true,
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash for relay-fee eligibility check"
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "RelayErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SIMULATION_FAILED",
+              "INDETERMINATE_SIMULATION"
+            ],
+            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode"
+        ]
+      },
+      "RelayTaskStatusReceipt": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
+          }
+        },
+        "required": [
+          "transactionHash"
+        ]
+      },
+      "RelayTaskStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
+            "enum": [
+              100,
+              110,
+              200,
+              400,
+              500
+            ],
+            "example": 200
+          },
+          "receipt": {
+            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "RelaysRemaining": {
+        "type": "object",
+        "properties": {
+          "remaining": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "remaining",
+          "limit"
+        ]
+      },
+      "SafeAppProvider": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "name"
+        ]
+      },
+      "SafeAppAccessControl": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SafeAppSocialProfile": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "DISCORD",
+              "GITHUB",
+              "TWITTER",
+              "TELEGRAM",
+              "UNKNOWN"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "url"
+        ]
+      },
+      "SafeApp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppProvider"
+              }
+            ]
+          },
+          "accessControl": {
+            "$ref": "#/components/schemas/SafeAppAccessControl"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "developerWebsite": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafeAppSocialProfile"
+            }
+          },
+          "featured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "name",
+          "description",
+          "chainIds",
+          "accessControl",
+          "tags",
+          "features",
+          "socialProfiles",
+          "featured"
+        ]
+      },
+      "SafeState": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "implementation": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "modules": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fallbackHandler": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "guard": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "implementationVersionState": {
+            "type": "string",
+            "enum": [
+              "UP_TO_DATE",
+              "OUTDATED",
+              "UNKNOWN"
+            ]
+          },
+          "collectiblesTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txQueuedTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txHistoryTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "messagesTag": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "nonce",
+          "threshold",
+          "owners",
+          "implementation",
+          "implementationVersionState"
+        ]
+      },
+      "SafeNonces": {
+        "type": "object",
+        "properties": {
+          "currentNonce": {
+            "type": "number"
+          },
+          "recommendedNonce": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "currentNonce",
+          "recommendedNonce"
+        ]
+      },
+      "SafeOverview": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fiatTotal": {
+            "type": "string"
+          },
+          "queued": {
+            "type": "number"
+          },
+          "awaitingConfirmation": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "threshold",
+          "owners",
+          "fiatTotal",
+          "queued"
         ]
       },
       "ThreatAnalysisRequestDto": {

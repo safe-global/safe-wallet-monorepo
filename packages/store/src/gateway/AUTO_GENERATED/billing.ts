@@ -154,6 +154,8 @@ export type Subscription = {
   currentPeriodStart?: number | null
   currentPeriodEnd?: number | null
   metadata?: object | null
+  /** Whether the subscription has a default payment method, or its customer does as a fallback */
+  hasPaymentMethod?: boolean
 }
 export type MarketingFeature = {
   name: string
@@ -213,11 +215,17 @@ export type UpdateSubscriptionResult = {
   subscriptionId: string
   success: boolean
 }
+export type RemovedSafeDto = {
+  chainId: string
+  address: string
+}
 export type UpdateSubscriptionDto = {
   /** The price id of the plan to move the subscription onto */
   planId: string
   /** Which offered payment link sells that plan. Only needed to disambiguate when several do */
   paymentLinkId?: string
+  /** Safes to remove from the workspace before the plan changes, so it fits the new plan. Safes the workspace does not hold are ignored */
+  removedSafes?: RemovedSafeDto[]
 }
 export type CheckoutSession = {
   id: string

@@ -1,4 +1,4 @@
-import WalletOverview from 'src/components/common/WalletOverview'
+import WalletOverview from '@/components/common/WalletOverview'
 import useWallet from '@/hooks/wallets/useWallet'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'

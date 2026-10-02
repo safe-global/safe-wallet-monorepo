@@ -1,0 +1,156 @@
+/**
+ * The resolved policy shape the UI consumes. It mirrors the CGW response, except that
+ * `token` is joined from the tokens endpoint and `remaining` is derived.
+ *
+ * No type carries a name. Policy names are not stored on chain and are not in the CGW response;
+ * they live in the space address book and the frontend resolves them.
+ */
+
+export type PolicyType = 'spending-limit' | 'recovery' | 'proposer'
+
+/**
+ * How the policy is enforced. A proposer grant is enforced by no contract, so it has no module
+ * address and nothing to link to. This is on the wire so that components can branch on it instead
+ * of checking the policy type.
+ */
+export type PolicyEnforcement = { via: 'module'; moduleAddress: string } | { via: 'offchain'; source: 'delegates' }
+
+/** CGW has no Safe ID. A Safe is identified by its chain and its address. */
+export type PolicySafe = {
+  address: string
+  chainId: string
+}
+
+export type PolicyTokenInfo = {
+  address: string
+  symbol: string
+  decimals: number
+  logoUri?: string | null
+}
+
+export type PolicyAllowance = {
+  /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
+  token: PolicyTokenInfo
+  /** Base units. */
+  amount: string
+  /** Base units, spent in the current period. */
+  spent: string
+  /** Base units, `amount - spent`. Derived — CGW does not return it. */
+  remaining: string
+  /** Minutes, matching the allowance module's own unit. 0 means the allowance does not repeat. */
+  resetPeriodMinutes: number
+  /** Unix MINUTES; null when one-time. */
+  resetsAtMinute: number | null
+  /** Unix SECONDS the allowance was set or re-set. Queued set-allowance changes omit it; queued resets and removals keep the active one's. */
+  createdAt?: number
+}
+
+export type PolicySpender = {
+  spender: string
+  allowances: PolicyAllowance[]
+}
+
+/** One policy per Safe holds every spender for that Safe. There is no policy per spender. */
+export type SpendingLimitPolicyData = {
+  spenders: PolicySpender[]
+}
+
+export type RecoveryPolicyData = {
+  recoverers: string[]
+  reviewWindowSeconds: number
+  /** 0 = never expires. */
+  proposalExpirySeconds: number
+  pendingRecovery: {
+    proposedAt: number
+    executableAt: number
+    expiresAt: number | null
+    isExecutable: boolean
+    proposedBy: string
+  } | null
+}
+
+export type ProposerGrant = {
+  /** The grant outlives its granter: this signer may no longer be an owner of the Safe. */
+  delegator: string
+  label: string
+}
+
+export type Proposer = {
+  proposer: string
+  delegatedBy: ProposerGrant[]
+}
+
+/** CGW sends every proposer of a Safe in one policy; `mapActivePolicies` splits it into one per proposer. */
+export type ProposerPolicyData = {
+  proposers: Proposer[]
+}
+
+type PolicyBase = {
+  /** Stable across requests. Table rows and the open detail panel are keyed on it. */
+  id: string
+  safe: PolicySafe
+  enforcement: PolicyEnforcement
+  /**
+   * For module-enforced policies, whether the module is enabled on the Safe. A configured policy
+   * whose module is disabled enforces nothing, and the table says so rather than calling it active.
+   */
+  enabled: boolean
+}
+
+export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
+export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
+export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
+
+export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy
+
+/** What a queued Safe transaction would do to a policy once it executes. */
+export type PendingPolicyOperation = 'create' | 'update' | 'remove'
+
+type PendingPolicyBase = PolicyBase & {
+  /** `activating`: executed onchain, not yet reported by the indexer. */
+  status: 'pending' | 'activating'
+  /** A queued removal and a queued creation need different wording, so the two are distinguished. */
+  operation: PendingPolicyOperation
+  safeTxHash: string
+  nonce: number
+  confirmationsSubmitted: number
+  confirmationsRequired: number
+  proposedAt: number
+}
+
+/** A proposer grant is granted off chain and takes effect at once, so it is never pending. */
+export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
+export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
+export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
+
+/** Still in the queue, as opposed to executed and waiting for the indexer. */
+export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+
+export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
+
+/** One table row: an active or a pending policy. */
+export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
+
+export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
+  policy.status === 'pending' || policy.status === 'activating'
+
+export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
+  policy.type === 'spending-limit'
+
+export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
+  policy.type === 'proposer'
+
+export const hasRecoveryData = (policy: Policy): policy is Extract<Policy, { type: 'recovery' }> =>
+  policy.type === 'recovery'
+
+/**
+ * The status a row renders. A module that is present but not enabled is shown as unenforced.
+ * Calling it active would tell the user the Safe is protected when it is not.
+ */
+export const getPolicyStatus = (policy: Policy): PolicyStatus => {
+  if (isPendingPolicy(policy)) return policy.status
+  if (policy.enabled) return 'active'
+
+  // A proposer grant has no module to switch on, so one that is not in force was never activated.
+  return isProposerPolicy(policy) ? 'not-activated' : 'unenforced'
+}

@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
+import { cn } from '@/utils/cn'
 import ChainLogo from './ChainLogo'
 import type { SafeItemDataChain } from '../types'
 
@@ -46,6 +47,7 @@ const SafeRowStats = ({
   awaitingConfirmation = 0,
   thresholdIconOnly = false,
   showPending = true,
+  fitColumns = false,
 }: {
   threshold: number
   owners: number
@@ -57,21 +59,24 @@ const SafeRowStats = ({
   thresholdIconOnly?: boolean
   /** Set false where no queued-transaction data exists, to reclaim the column. */
   showPending?: boolean
+  /** One row, so nothing to line up with: each column takes its content's width. */
+  fitColumns?: boolean
 }) => {
   const iconOnlyThreshold = thresholdIconOnly || !owners
   const thresholdLabel = iconOnlyThreshold ? 'Signer threshold' : `${threshold} out of ${owners} signers required`
   const visibleChains = chains.slice(0, MAX_CHAIN_LOGOS)
   const overflowChains = chains.slice(MAX_CHAIN_LOGOS)
   const pendingLabel = formatPendingLabel(pending, awaitingConfirmation)
+  const columnClass = (tableWidth: string) => cn('flex shrink-0 justify-center', fitColumns ? 'w-auto' : tableWidth)
 
   return (
     <>
-      <span className="flex w-14 shrink-0 justify-center" data-testid="row-threshold-column">
+      <span className={columnClass('w-14')} data-testid="row-threshold-column">
         <StatTooltip label={thresholdLabel} triggerClassName="inline-flex">
           <ThresholdBadge threshold={threshold} owners={owners} iconOnly={iconOnlyThreshold} />
         </StatTooltip>
       </span>
-      <span className="flex w-20 shrink-0 justify-center" data-testid="row-networks-column">
+      <span className={columnClass('w-20')} data-testid="row-networks-column">
         <span className="flex items-center rounded-full bg-foreground/5 p-0.5">
           {visibleChains.map((chainItem, index) => {
             const hasNeighbourOnTop = index < visibleChains.length - 1 || overflowChains.length > 0
@@ -101,7 +106,7 @@ const SafeRowStats = ({
         </span>
       </span>
       {showPending && (
-        <span className="flex w-12 shrink-0 justify-center" data-testid="row-pending-column">
+        <span className={columnClass('w-12')} data-testid="row-pending-column">
           {pending > 0 ? (
             <StatTooltip label={pendingLabel} triggerClassName="inline-flex">
               <PendingBadge count={pending} awaitingConfirmation={awaitingConfirmation} compact />

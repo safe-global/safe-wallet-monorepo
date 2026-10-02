@@ -16,9 +16,11 @@ import { useHasFeature } from '@/hooks/useChains'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const SafeApps: NextPage = () => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { remoteSafeApps, remoteSafeAppsLoading, pinnedSafeApps, pinnedSafeAppIds } = useSafeApps()
   const { filteredApps, query, setQuery, setSelectedCategories, setOptimizedWithBatchFilter, selectedCategories } =
     useSafeAppsFilters(remoteSafeApps)
@@ -42,9 +44,9 @@ const SafeApps: NextPage = () => {
   useEffect(() => {
     const appUrl = router.query.appUrl as string
     if (appUrl) {
-      router.push({ pathname: AppRoutes.apps.open, query: { safe: router.query.safe, appUrl } })
+      router.push({ pathname: AppRoutes.apps.open, query: { ...safeLinkQuery, appUrl } })
     }
-  }, [router])
+  }, [router, safeLinkQuery])
 
   return (
     <>

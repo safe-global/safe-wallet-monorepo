@@ -26,6 +26,11 @@ import { SPACE_LABELS, SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 import SpaceSafeContextMenu from './SpaceSafeContextMenu'
+import SeatLimitBanner from './SeatLimitBanner'
+import SelectedCounter from '../SelectedCounter'
+import { seatsTooltip } from '../Plans/PlanStatusCard'
+import { useSeatUpsell } from '../../hooks/useSeatUpsell'
+import { countSeats } from '@/utils/spaces'
 
 const SpaceSafeAccounts = () => {
   const { allSafes, isError: isSpaceSafesError, error: spaceSafesError, refetch: refetchSpaceSafes } = useSpaceSafes()
@@ -59,6 +64,9 @@ const SpaceSafeAccounts = () => {
   const visibleSafes = debouncedSearchQuery ? filteredSafes : displaySafes
 
   const isSpaceEmpty = allSafes.length === 0
+  const { isSafePro, tierName, limit } = useSeatUpsell()
+  const usedSeats = countSeats(spaceSafeAddresses)
+  const isAtSeatLimit = isSafePro && limit !== null && usedSeats >= limit
 
   return (
     <>
@@ -67,14 +75,20 @@ const SpaceSafeAccounts = () => {
         Safe accounts
       </Typography>
 
+      {isAtSeatLimit && <SeatLimitBanner className="mb-6" />}
+
       <div className="mb-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:gap-4">
-        {isAdmin && (
-          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
-            <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
-          </Track>
-        )}
         {!isSpaceEmpty && !isSpaceSafesError && (
           <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-4">
+            {isSafePro && limit !== null && (
+              <SelectedCounter
+                count={usedSeats}
+                limit={limit}
+                isAtLimit={isAtSeatLimit}
+                showSelected={false}
+                tooltip={seatsTooltip(tierName, limit)}
+              />
+            )}
             <InputGroup variant="search" inputSize="lg" className="flex-1">
               <InputGroupAddon>
                 <Search className="size-4" />
@@ -93,6 +107,11 @@ const SpaceSafeAccounts = () => {
               className="border-border shadow-xs hover:bg-foreground/[0.06] aria-expanded:bg-foreground/[0.06]"
             />
           </div>
+        )}
+        {isAdmin && (
+          <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.accounts_page}>
+            <AddAccountsChooser buttonVariant="default" buttonLabel="Add accounts" entryPoint="safe_accounts" />
+          </Track>
         )}
       </div>
 

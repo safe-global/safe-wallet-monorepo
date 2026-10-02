@@ -19,8 +19,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success' | 'info' | 'positive' | 'negative' | 'subtle' | 'ghost' | 'link')
- * - `size` ('sm' | 'default' | 'lg' | 'auto' | 'status')
+ * - `variant` ('default' | 'secondary' | 'destructive' | 'outline' | 'warning' | 'success' | 'info' | 'positive' | 'brand' | 'negative' | 'subtle' | 'card' | 'ghost' | 'link')
+ * - `size` ('sm' | 'default' | 'lg' | 'auto' | 'chip' | 'status')
  * - `shape` ('pill' | 'tag' | 'status')
  * - `render`
  * - `className`
@@ -45,10 +45,12 @@ const badgeVariants = cva(
           'bg-accent-secondary text-accent-secondary-foreground border-transparent dark:bg-accent-secondary/20 dark:text-accent-success',
         info: 'bg-info-subtle text-foreground border-transparent',
         positive: 'bg-success-subtle text-foreground border-transparent',
+        brand: 'bg-success-tint text-badge-dot-success border-transparent',
         negative: 'bg-destructive/10 text-destructive border-transparent dark:bg-destructive/20',
         // Neutral tint for counts and metadata that carry no status — the fill only lifts the pill
         // off the surface, so it follows the foreground colour in both themes.
         subtle: 'bg-foreground/5 text-muted-foreground border-transparent',
+        card: 'bg-card text-foreground border-border [button]:hover:bg-muted',
         ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
         link: 'text-primary underline-offset-4 hover:underline',
       },
@@ -58,6 +60,8 @@ const badgeVariants = cva(
         default: 'h-5 px-2 py-0.5 text-xs',
         lg: 'h-6 px-2.5 py-0 text-sm',
         auto: 'h-auto px-2.5 py-1 text-xs',
+        // A toggle chip that sits next to the 36px form controls.
+        chip: 'h-8 gap-1.5 px-3 text-sm',
         // The Obra DS status badge, as used by the 2FA badges. Pair with `shape="status"`.
         status: 'h-6 gap-1.5 px-2 py-[3px] text-xs leading-4',
       },

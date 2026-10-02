@@ -22,6 +22,24 @@ describe('EnhancedTable', () => {
     expect(getAllByTestId('table-row')).toHaveLength(3)
   })
 
+  const manyRows = (count: number) =>
+    Array.from({ length: count }, (_, i) => ({
+      key: String(i),
+      cells: { name: { content: `row ${i}`, rawValue: i }, value: { content: '', rawValue: i } },
+    }))
+
+  it('hides the pagination controls when every row fits on the smallest page', () => {
+    const { queryByTestId } = render(<EnhancedTable headCells={headCells} rows={manyRows(10)} />)
+
+    expect(queryByTestId('table-pagination')).not.toBeInTheDocument()
+  })
+
+  it('shows the pagination controls once the rows exceed the smallest page size', () => {
+    const { getByTestId } = render(<EnhancedTable headCells={headCells} rows={manyRows(11)} />)
+
+    expect(getByTestId('table-pagination')).toBeInTheDocument()
+  })
+
   // The panel variant renders inside a surface its parent draws, so the table brings no card chrome.
   describe('panel', () => {
     const surface = (container: HTMLElement) =>

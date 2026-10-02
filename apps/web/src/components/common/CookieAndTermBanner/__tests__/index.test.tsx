@@ -20,7 +20,7 @@ jest.mock('next/router', () => ({
 
 // Helper to render with Redux store
 const renderWithStore = (ui: React.ReactElement, preloadedState?: any) => {
-  const store = makeStore(preloadedState, { skipBroadcast: true })
+  const store = makeStore(preloadedState)
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   const result = rtlRender(ui, { wrapper })
   return { ...result, store }

@@ -2,9 +2,12 @@ import { type ReactElement, useCallback, useEffect, useRef, useState } from 'rea
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { useSecurityScan } from '@/features/security'
 import { useChain } from '@/hooks/useChains'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { Drawer, DrawerBody, DrawerHeader, DrawerSubtitle, DrawerTitle } from '@/components/common/Drawer'
+import Identicon from '@/components/common/Identicon'
+import CopyButton from '@/components/common/CopyButton'
+import { Typography } from '@/components/ui/typography'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { HnSignupFlow } from '@/features/hypernative'
-import SecurityDrawerHeader from './SecurityDrawerHeader'
 import SecurityDrawerContent from './SecurityDrawerContent'
 import type { SelectedSafe, SpaceSafeEntry } from '../../types'
 
@@ -46,26 +49,32 @@ const SecurityReportDrawer = ({
 
   return (
     <>
-      <Sheet
+      <Drawer
+        // Keep the Drawer mounted while closed so the sheet can play its slide-out animation
         open={!!selectedSafe}
-        onOpenChange={(open) => {
-          if (!open) onClose()
-        }}
+        onClose={onClose}
+        ariaLabel="Security report"
       >
-        <SheetContent
-          side="right"
-          showCloseButton={false}
-          aria-label="Security report"
-          variant="floating"
-          surface="muted"
-          padding="none"
-          // eslint-disable-next-line no-restricted-syntax -- w-[440px]! beats base data-[side]:w-3/4 specificity; gap-0 removes base gap-4
-          className="w-[440px]! gap-0"
-        >
-          {selectedSafe && (
-            <div className="flex min-h-0 gap-3 flex-1 flex-col overflow-hidden">
-              <SecurityDrawerHeader address={selectedSafe.address} name={selectedEntry?.name} onClose={onClose} />
+        {selectedSafe && (
+          <>
+            <DrawerHeader>
+              <Identicon address={selectedSafe.address} size={28} />
+              <div className="min-w-0">
+                <DrawerTitle>
+                  <span title={selectedEntry?.name || selectedSafe.address}>
+                    {selectedEntry?.name || shortenAddress(selectedSafe.address)}
+                  </span>
+                </DrawerTitle>
+                <DrawerSubtitle>
+                  <Typography variant="paragraph-mini" className="text-[10px] text-muted-foreground">
+                    {shortenAddress(selectedSafe.address)}
+                  </Typography>
+                  <CopyButton text={selectedSafe.address} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
+                </DrawerSubtitle>
+              </div>
+            </DrawerHeader>
 
+            <DrawerBody>
               <SecurityDrawerContent
                 scanContext={scanContext}
                 results={results}
@@ -74,10 +83,10 @@ const SecurityReportDrawer = ({
                 safeQueryParam={chain?.shortName ? `${chain.shortName}:${selectedSafe.address}` : undefined}
                 onHnSignupClick={handleHnSignupClick}
               />
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
+            </DrawerBody>
+          </>
+        )}
+      </Drawer>
 
       <HnSignupFlow open={isHnSignupOpen} onClose={() => setIsHnSignupOpen(false)} />
     </>

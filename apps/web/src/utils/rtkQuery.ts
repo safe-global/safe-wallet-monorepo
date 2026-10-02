@@ -15,8 +15,9 @@ export const RTK_QUERY_ERROR_MESSAGES = {
   generic: 'Something went wrong. Please try again, or contact support if it persists.',
 } as const
 
-// Shown when the backend blocks a resource for legal reasons but sends no message of its own.
-export const LEGAL_UNAVAILABILITY_FALLBACK = 'This Safe account is unavailable for legal reasons'
+// Shown for a blocked Safe, so the gateway's own wording — "Blocked in your region by provider
+// edge-node-7", the reason for a legal block — never reaches users.
+export const SAFE_UNAVAILABLE_MESSAGE = 'This Safe account is unavailable.'
 
 // Same general copy as `generic`, but keeps the HTTP status visible so the failure stays debuggable.
 export const getGenericErrorWithStatus = (status: number): string =>
@@ -30,14 +31,14 @@ const getBackendMessage = (error: FetchBaseQueryError): string | undefined => {
 }
 
 /**
- * The backend's reason for a `451 Unavailable for legal reasons` response, or `undefined` for any
- * other failure. Callers use it to tell a blocked resource apart from a generic loading error.
+ * Copy for a `451 Unavailable for legal reasons` response, or `undefined` for any other failure.
+ * Callers use it to tell a blocked Safe apart from a generic loading error.
  */
-export const getLegalUnavailabilityMessage = (
+export const getSafeUnavailableMessage = (
   error: FetchBaseQueryError | SerializedError | undefined,
 ): string | undefined => {
   if (!error || !('status' in error) || error.status !== HTTP_UNAVAILABLE_FOR_LEGAL_REASONS) return undefined
-  return getBackendMessage(error) || LEGAL_UNAVAILABILITY_FALLBACK
+  return SAFE_UNAVAILABLE_MESSAGE
 }
 
 /**
