@@ -1,5 +1,6 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
@@ -80,6 +81,10 @@ jest.mock('../../TokenSelector', () => ({
   ),
 }))
 
+jest.mock('@safe-global/utils/utils/formatNumber', () => ({
+  ...jest.requireActual('@safe-global/utils/utils/formatNumber'),
+  getLocalDecimalSeparator: jest.fn(() => '.'),
+}))
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
@@ -88,6 +93,7 @@ jest.mock('../../ExistingSpendingLimitsProvider', () => ({
 
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
+const mockDecimalSeparator = jest.mocked(getLocalDecimalSeparator)
 
 const Harness = ({
   limits,
@@ -149,6 +155,10 @@ describe('TokenLimitCard', () => {
     })
   })
 
+  afterEach(() => {
+    mockDecimalSeparator.mockReturnValue('.')
+  })
+
   it("shows the Safe's balance of the selected token under the token field", async () => {
     const { user } = renderRows()
 
@@ -172,6 +182,18 @@ describe('TokenLimitCard', () => {
     await user.type(screen.getByTestId('limit-amount-input'), '2')
 
     expect(screen.getByTestId('amount-fiat')).toHaveTextContent(/4[,.]000/)
+  })
+
+  it('stores an amount typed in a comma-decimal locale with a dot, as the send flow does', async () => {
+    mockDecimalSeparator.mockReturnValue(',')
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), ZERO_ADDRESS)
+    await user.type(screen.getByTestId('limit-amount-input'), '1.5')
+    await user.click(screen.getByRole('button', { name: 'validate' }))
+
+    expect(screen.getByTestId('limit-amount-input')).toHaveValue('1,5')
+    expect(await screen.findByTestId('amount-fiat')).toHaveTextContent(/3[,.]000/)
   })
 
   it('stays quiet about fiat until an amount is entered, rather than claiming $0.00', async () => {

@@ -209,7 +209,11 @@ const TokenLimitCard = ({
                 </HelperLine>
               }
               data-testid="limit-amount-input"
-              {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
+              {...register(amountPath, {
+                // NumberField writes the locale's decimal separator; store a dot, as TokenAmountInput does.
+                setValueAs: (value: unknown) => (typeof value === 'string' ? value.replace(/,/g, '.') : value),
+                validate: (value) => validateLimitAmount(value, decimals),
+              })}
             />
           </div>
         </div>
