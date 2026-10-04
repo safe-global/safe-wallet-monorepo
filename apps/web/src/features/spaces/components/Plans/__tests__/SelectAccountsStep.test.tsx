@@ -39,38 +39,59 @@ jest.mock('@/features/myAccounts', () => ({
   }: {
     items: Array<{ chainId?: string; address: string; name: string; safes?: Array<{ chainId: string }> }>
     selection: { selectedKeys: Set<string>; onToggle: (line: AccountLine, checked: boolean) => void }
-  }) => (
-    <>
-      {items.map((item) => {
-        // A multi-chain group is one row: checked while every chain of it is, toggled as a whole.
-        const isGroup = Boolean(item.safes)
-        const key = isGroup ? `multichain_${item.address}` : `${item.chainId}:${item.address}`
-        const checked = isGroup
-          ? item.safes!.every((safe) => selection.selectedKeys.has(`${safe.chainId}:${item.address}`))
-          : selection.selectedKeys.has(key)
-        return (
-          <input
-            key={key}
-            type="checkbox"
-            aria-label={item.name}
-            checked={checked}
-            onChange={(e) =>
-              selection.onToggle(
+  }) => {
+    const row = (
+      key: string,
+      label: string,
+      checked: boolean,
+      line: { variant: AccountLine['variant']; address: string; source: unknown },
+    ) => (
+      <input
+        key={key}
+        type="checkbox"
+        aria-label={label}
+        checked={checked}
+        onChange={(e) => selection.onToggle({ key, displayName: label, ...line } as AccountLine, e.target.checked)}
+      />
+    )
+    return (
+      <>
+        {items.flatMap((item) => {
+          // A multi-chain group is a row checked while every chain of it is, plus one row per chain.
+          if (item.safes) {
+            const leafKeys = item.safes.map((safe) => `${safe.chainId}:${item.address}`)
+            return [
+              row(
+                `multichain_${item.address}`,
+                item.name,
+                leafKeys.every((key) => selection.selectedKeys.has(key)),
                 {
-                  key,
-                  variant: isGroup ? 'group' : 'single',
+                  variant: 'group',
                   address: item.address,
-                  displayName: item.name,
                   source: item,
-                } as AccountLine,
-                e.target.checked,
-              )
-            }
-          />
-        )
-      })}
-    </>
-  ),
+                },
+              ),
+              ...item.safes.map((safe, index) =>
+                row(leafKeys[index], `${item.name} on ${safe.chainId}`, selection.selectedKeys.has(leafKeys[index]), {
+                  variant: 'single',
+                  address: item.address,
+                  source: safe,
+                }),
+              ),
+            ]
+          }
+          const key = `${item.chainId}:${item.address}`
+          return [
+            row(key, item.name, selection.selectedKeys.has(key), {
+              variant: 'single',
+              address: item.address,
+              source: item,
+            }),
+          ]
+        })}
+      </>
+    )
+  },
 }))
 
 const renderStep = (props: Partial<React.ComponentProps<typeof SelectAccountsStep>> = {}) =>
@@ -133,6 +154,31 @@ describe('SelectAccountsStep', () => {
     fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
     expect(onContinue).toHaveBeenCalledWith([
       { chainId: '1', address: '0xD' },
+      { chainId: '10', address: '0xD' },
+    ])
+  })
+
+  it('tells a Safe deselected on one network apart from the accounts leaving the Workspace', () => {
+    mockAllSafes = [treasury, payroll, multi]
+    const onContinue = jest.fn()
+    renderStep({ onContinue })
+
+    // Dropping one network of Ops frees no seat: the Safe stays in the Workspace on the other.
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Ops on 10' }))
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('3 of 2 selected')
+    expect(screen.getByText('Deselect 1 Safe account to fit the plan.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Payroll' }))
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
+    expect(
+      screen.getByText(
+        '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts; the others keep their seats.',
+      ),
+    ).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Continue to checkout/ }))
+    expect(onContinue).toHaveBeenCalledWith([
+      { chainId: '1', address: '0xB' },
       { chainId: '10', address: '0xD' },
     ])
   })

@@ -10,8 +10,8 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import { countSeats } from '@/utils/spaces'
 import type { SafeRef } from './types'
+import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import SelectedCounter from '../SelectedCounter'
@@ -74,12 +74,9 @@ export default function SelectAccountsStep({
     flaggedAddresses: NO_FLAGGED,
     limit,
   })
-  const removed = useMemo(
-    () => leavesOf(allSafes).filter((safe) => !selectedKeys.has(getSafeId(safe))),
-    [allSafes, selectedKeys],
-  )
-
-  const removedCount = countSeats(removed.map(({ address }) => address))
+  const leaves = useMemo(() => leavesOf(allSafes), [allSafes])
+  const removed = useMemo(() => leaves.filter((safe) => !selectedKeys.has(getSafeId(safe))), [leaves, selectedKeys])
+  const removedNote = removedSafesNote(summarizeRemovedSafes(leaves, removed))
 
   return (
     <>
@@ -142,13 +139,10 @@ export default function SelectAccountsStep({
           </AlertDescription>
         </Alert>
       ) : (
-        removed.length > 0 && (
+        removedNote && (
           <Alert variant="warning">
             <AlertSeverityIcon variant="warning" />
-            <AlertDescription>
-              {removedCount === 1 ? '1 Safe account' : `${removedCount} Safe accounts`} will be removed from the
-              Workspace. They remain available in My accounts.
-            </AlertDescription>
+            <AlertDescription>{removedNote}</AlertDescription>
           </Alert>
         )
       )}
