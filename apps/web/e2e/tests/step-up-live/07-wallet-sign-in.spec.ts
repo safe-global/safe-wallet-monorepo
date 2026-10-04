@@ -18,7 +18,7 @@ test.describe('Step-up live — wallet sign-in', { tag: '@step-up-live' }, () =>
     const page = await walletSession(creds.adminKey as string)
     const traffic = recordStepUpTraffic(page)
     const ws = new WorkspacePage(page)
-    const workspaceName = uniqueLabel('Step-up wallet ws')
+    const workspaceName = uniqueLabel('Wallet ws')
     const [address] = STEP_UP_SAFES
     const safeName = uniqueLabel('Wallet Safe')
     const contact = uniqueLabel('Wallet contact')
@@ -61,8 +61,8 @@ test.describe('Step-up live — wallet sign-in', { tag: '@step-up-live' }, () =>
 
     await test.step('C3: rename the Workspace', async () => {
       await ws.goto('/spaces/settings/general', spaceId)
-      await ws.renameWorkspace(`${workspaceName} renamed`)
-      await expect(page.getByTestId('space-name-input')).toHaveValue(`${workspaceName} renamed`)
+      await ws.renameWorkspace(`${workspaceName} 2`)
+      await expect(page.getByTestId('space-name-input')).toHaveValue(`${workspaceName} 2`)
     })
 
     await test.step('C8, C9: switch to Starter and back to Business', async () => {
