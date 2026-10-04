@@ -51,6 +51,14 @@ export const SAFES = {
   SEP_PROPOSER_SAFE: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
 } as const
 
+/** Deployed Sepolia Safes the live step-up suite adds to and removes from its Workspace (add-by-address accepts them) */
+export const STEP_UP_SAFES = [
+  '0x377c63A9d443CFB18F49a614f74D16a84787BF46',
+  '0x9483963b55139C81A8B96132ABa85482a44Ffd61',
+  '0x392CBB8182f6b58dA6Fe2368b370c9BACe8440ad',
+  '0x424204cC19524a55664A58e34Ff1F3F1d4525525',
+] as const
+
 /** Fiat value below which "Hide small balances" hides a token — mirrors DUST_THRESHOLD in src/config/constants.ts */
 export const DUST_THRESHOLD_USD = 0.01
 

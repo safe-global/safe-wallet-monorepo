@@ -36,7 +36,7 @@ const COOKIE_STATE = JSON.stringify({
  * Prevents popups and modals from blocking test flows.
  * Mirrors: cypress/support/e2e.js beforeEach()
  */
-async function seedLocalStorage(page: Page): Promise<void> {
+export async function seedLocalStorage(page: Page): Promise<void> {
   await page.addInitScript(
     ({ cookiesKey, safeLabsKey, outreachKey, cookieState }) => {
       // Cookie + terms consent

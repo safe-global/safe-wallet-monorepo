@@ -1,105 +1,59 @@
 /**
- * Credentials for the live step-up suite (`tests/regression/step-up-live.spec.ts`), read from
- * `E2E_STEP_UP_CREDENTIALS`. Both identities are optional; tests that need a missing one skip.
+ * Identities for the live step-up suite (`step-up-live.config.ts`), read from environment variables:
  *
- * {
- *   "oidc": { "storageState": "<base64 Playwright storage state>", "totpSecret": "<base32>", "spaceId": "<uuid>" },
- *   "siwe": { "privateKey": "0x…", "spaceId": "<uuid>" }
- * }
- *
- * The OIDC storage state must hold a live Auth0 session (cookies on the Auth0 tenant domain) as well as
- * the CGW `access_token` cookie: sign-in needs an emailed code, so the suite starts from a saved session.
+ * - `STEP_UP_EMAIL` + `STEP_UP_TOTP_SECRET`: an email user with an enrolled authenticator (the secret is shown under
+ *   "Trouble scanning?" when enrolling). Required.
+ * - `STEP_UP_ADMIN_KEY`, `STEP_UP_MEMBER_KEY`: private keys of two wallets that sign in with Ethereum. Optional; the
+ *   wallet tests skip without them.
+ * - `STEP_UP_EMAIL_CODE_FILE`: for unattended runs, a file the emailed sign-in code is written to. Without it the
+ *   login opens a browser and waits for the code to be typed in.
+ * - `STEP_UP_SPACE_ID`: reuse an existing Workspace with a plan instead of creating one through onboarding.
  */
-import type { BrowserContextOptions } from '@playwright/test'
-
-type StorageState = Exclude<BrowserContextOptions['storageState'], string | undefined>
-
-export type OidcStepUpCredentials = {
-  storageState: StorageState
-  totpSecret: string
-  spaceId: string
-}
-
-export type SiweStepUpCredentials = {
-  privateKey: string
-  spaceId: string
-}
 
 export type StepUpCredentials = {
-  oidc?: OidcStepUpCredentials
-  siwe?: SiweStepUpCredentials
+  email: string
+  totpSecret: string
+  adminKey?: string
+  memberKey?: string
+  emailCodeFile?: string
+  spaceId?: string
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const PRIVATE_KEY = /^0x[0-9a-fA-F]{64}$/
 const BASE32 = /^[A-Z2-7]+=*$/i
+const EMAIL = /^[^\s@]+@[^\s@]+$/
 
-const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
+type Env = Record<string, string | undefined>
 
-function requireString(record: Record<string, unknown>, path: string, field: string, pattern?: RegExp): string {
-  const value = record[field]
-  if (typeof value !== 'string' || value.trim() === '') {
-    throw new Error(`E2E_STEP_UP_CREDENTIALS: ${path}.${field} must be a non-empty string.`)
-  }
-  if (pattern && !pattern.test(value.trim())) {
-    throw new Error(`E2E_STEP_UP_CREDENTIALS: ${path}.${field} has an invalid format.`)
-  }
-  return value.trim()
+function read(env: Env, name: string, pattern?: RegExp): string | undefined {
+  const value = env[name]?.trim()
+  if (!value) return undefined
+  if (pattern && !pattern.test(value)) throw new Error(`${name} has an invalid format.`)
+  return value
 }
 
-function parseStorageState(encoded: string): StorageState {
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(Buffer.from(encoded, 'base64').toString('utf8'))
-  } catch {
-    throw new Error('E2E_STEP_UP_CREDENTIALS: oidc.storageState must be base64-encoded JSON.')
+export function getStepUpCredentials(env: Env = process.env): StepUpCredentials {
+  const email = read(env, 'STEP_UP_EMAIL', EMAIL)
+  const totpSecret = read(env, 'STEP_UP_TOTP_SECRET', BASE32)
+  if (!email || !totpSecret) throw new Error('Set STEP_UP_EMAIL and STEP_UP_TOTP_SECRET to run the step-up suite.')
+
+  return {
+    email,
+    totpSecret,
+    adminKey: read(env, 'STEP_UP_ADMIN_KEY', PRIVATE_KEY),
+    memberKey: read(env, 'STEP_UP_MEMBER_KEY', PRIVATE_KEY),
+    emailCodeFile: read(env, 'STEP_UP_EMAIL_CODE_FILE'),
+    spaceId: read(env, 'STEP_UP_SPACE_ID', UUID),
   }
-  if (!isRecord(parsed) || !Array.isArray(parsed.cookies) || !Array.isArray(parsed.origins)) {
-    throw new Error('E2E_STEP_UP_CREDENTIALS: oidc.storageState must be a Playwright storage state.')
-  }
-  return parsed as StorageState
-}
-
-export function getStepUpCredentials(raw: string | undefined = process.env.E2E_STEP_UP_CREDENTIALS): StepUpCredentials {
-  if (!raw || raw.trim() === '') return {}
-
-  let parsed: unknown
-  try {
-    parsed = JSON.parse(raw)
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error)
-    throw new Error(`Failed to parse E2E_STEP_UP_CREDENTIALS as JSON: ${message}`)
-  }
-  if (!isRecord(parsed)) throw new Error('E2E_STEP_UP_CREDENTIALS must be a JSON object.')
-
-  const credentials: StepUpCredentials = {}
-
-  if (parsed.oidc !== undefined) {
-    if (!isRecord(parsed.oidc)) throw new Error('E2E_STEP_UP_CREDENTIALS: oidc must be an object.')
-    credentials.oidc = {
-      storageState: parseStorageState(requireString(parsed.oidc, 'oidc', 'storageState')),
-      totpSecret: requireString(parsed.oidc, 'oidc', 'totpSecret', BASE32),
-      spaceId: requireString(parsed.oidc, 'oidc', 'spaceId', UUID),
-    }
-  }
-
-  if (parsed.siwe !== undefined) {
-    if (!isRecord(parsed.siwe)) throw new Error('E2E_STEP_UP_CREDENTIALS: siwe must be an object.')
-    credentials.siwe = {
-      privateKey: requireString(parsed.siwe, 'siwe', 'privateKey', PRIVATE_KEY),
-      spaceId: requireString(parsed.siwe, 'siwe', 'spaceId', UUID),
-    }
-  }
-
-  return credentials
 }
 
 /** Seconds a second factor stays fresh on the target CGW (`AUTH_ELEVATION_WINDOW_SECONDS`, 60 on dev/staging). */
-export function getElevationWindowSeconds(raw: string | undefined = process.env.E2E_STEP_UP_WINDOW_SECONDS): number {
+export function getElevationWindowSeconds(raw: string | undefined = process.env.STEP_UP_WINDOW_SECONDS): number {
   if (!raw) return 60
   const seconds = Number(raw)
   if (!Number.isInteger(seconds) || seconds <= 0) {
-    throw new Error('E2E_STEP_UP_WINDOW_SECONDS must be a positive integer.')
+    throw new Error('STEP_UP_WINDOW_SECONDS must be a positive integer.')
   }
   return seconds
 }

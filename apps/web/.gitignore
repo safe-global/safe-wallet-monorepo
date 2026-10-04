@@ -5,6 +5,7 @@ public/work*.js
 coverage
 reports
 report.json
+e2e/.auth/
 public/sw.js
 public/firebase*.js
 public/fallback*.js

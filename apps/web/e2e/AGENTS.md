@@ -15,4 +15,6 @@ Cypress → Playwright migration: follow [docs/CYPRESS_MIGRATION_GUIDE.md](docs/
 
 The `pw:*` scripts live in the web workspace — run as `yarn workspace @safe-global/web <script>`: `pw:test` (all), `pw:test:smoke` / `pw:test:api` / `pw:test:ui` / `pw:test:regression` (by tag), `pw:report` (HTML report), `pw:ci` (CI mode — `@smoke|@api` with retries).
 
+Live 2FA step-up suite (`tests/step-up-live/`, own config `step-up-live.config.ts`, excluded from `pw:test`): `pw:step-up`, then `pw:step-up:report`. It drives the real dev CGW, Auth0 and Stripe sandbox and never runs in CI — see [docs/step-up-live.md](docs/step-up-live.md).
+
 CI: smoke + api run on **every PR** touching `apps/web/**` or `packages/**` (`web-pw-smoke.yml`); the full suite runs on demand and on a weekday cron (`web-pw-full-ondemand.yml`).

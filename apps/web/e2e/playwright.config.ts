@@ -6,6 +6,7 @@ const baseURL = process.env.PLAYWRIGHT_BASE_URL || (isCI ? 'http://localhost:808
 
 export default defineConfig({
   testDir: './tests',
+  testIgnore: '**/step-up-live/**',
   timeout: 60_000,
   expect: { timeout: 10_000 },
   fullyParallel: isCI,
