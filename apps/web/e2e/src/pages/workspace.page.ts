@@ -23,11 +23,15 @@ export class WorkspacePage {
   }
 
   /** Closes the "free access is active" and "account is all set" modals that follow Stripe and Safe creation. */
-  async closeWelcomeModals(): Promise<void> {
-    for (let i = 0; i < 3; i++) {
-      const cta = this.dialog.getByRole('button', { name: /Get started|Let.s go/i })
-      if (!(await cta.isVisible().catch(() => false))) return
-      await cta.click()
+  async closeWelcomeModals(appearWithin = 10_000): Promise<void> {
+    const cta = this.page.getByRole('dialog').getByRole('button', { name: /Get started|Let.s go/i })
+    await cta
+      .first()
+      .waitFor({ timeout: appearWithin })
+      .catch(() => undefined)
+    for (let i = 0; i < 3 && (await cta.first().isVisible()); i++) {
+      await cta.first().click()
+      await this.page.waitForTimeout(1000)
     }
   }
 
@@ -97,7 +101,7 @@ export class WorkspacePage {
   }
 
   async skipSelectSafes(): Promise<void> {
-    await this.page.getByText(/Skip, add Safes later/i).click()
+    await this.page.getByRole('button', { name: /^Skip, add Safe/i }).click()
   }
 
   async inviteInOnboarding(address: string): Promise<void> {
@@ -106,8 +110,8 @@ export class WorkspacePage {
   }
 
   async finishSurvey(): Promise<void> {
-    await this.page.getByText('Hold assets').click()
-    await this.page.getByRole('button', { name: /Create Workspace/i }).click()
+    await this.page.getByTestId('survey-option-card').first().click()
+    await this.page.getByRole('button', { name: /^Create Workspace$/ }).click()
   }
 
   // Safe accounts
