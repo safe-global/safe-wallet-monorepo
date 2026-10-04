@@ -29,7 +29,7 @@ type StepUpFixtures = {
 const featureFlags = process.env.STEP_UP_FEATURE_FLAGS
 
 export const test = base.extend<StepUpFixtures>({
-  safePage: async ({ safePage }, use, testInfo) => {
+  safePage: async ({ safePage }, provide, testInfo) => {
     await safePage.addInitScript(
       ({ ns, flags }) => {
         // A saved session can carry a wallet without its key, which opens a blocking "Connect with Private Key" dialog.
@@ -48,30 +48,30 @@ export const test = base.extend<StepUpFixtures>({
         return route.continue({ url: url.toString() })
       },
     )
-    await use(safePage)
+    await provide(safePage)
     // Auth0 rotates its session cookie on every challenge; the next test must start from the rotated one.
     if (testInfo.project.name === 'flows') await safePage.context().storageState({ path: OIDC_STORAGE_STATE })
   },
-  creds: async ({}, use) => {
-    await use(getStepUpCredentials())
+  creds: async ({}, provide) => {
+    await provide(getStepUpCredentials())
   },
-  auth0: async ({ safePage }, use) => {
-    await use(new Auth0Page(safePage))
+  auth0: async ({ safePage }, provide) => {
+    await provide(new Auth0Page(safePage))
   },
-  traffic: async ({ safePage }, use) => {
+  traffic: async ({ safePage }, provide) => {
     const traffic = recordStepUpTraffic(safePage)
-    await use(traffic)
+    await provide(traffic)
     traffic.stop()
   },
-  lapse: async ({ safePage }, use) => {
-    await use(() => waitForWindowToLapse(safePage))
+  lapse: async ({ safePage }, provide) => {
+    await provide(() => waitForWindowToLapse(safePage))
   },
-  stepUp: async ({ auth0, creds }, use) => {
-    await use(() => auth0.completeWithAuthenticator(creds.totpSecret))
+  stepUp: async ({ auth0, creds }, provide) => {
+    await provide(() => auth0.completeWithAuthenticator(creds.totpSecret))
   },
-  walletSession: async ({ browser }, use, testInfo) => {
+  walletSession: async ({ browser }, provide, testInfo) => {
     const pages: Page[] = []
-    await use(async (privateKey) => {
+    await provide(async (privateKey) => {
       const context = await browser.newContext({
         baseURL: testInfo.project.use.baseURL,
         viewport: { width: 1400, height: 900 },
@@ -94,11 +94,11 @@ export const test = base.extend<StepUpFixtures>({
         await testInfo.attach(`wallet ${index + 1} video`, { path: await video.path(), contentType: 'video/webm' })
     }
   },
-  workspace: async ({ creds }, use) => {
+  workspace: async ({ creds }, provide) => {
     const run = readRunState()
     const spaceId = creds.spaceId ?? run?.spaceId
     test.skip(!spaceId, 'No Workspace yet: run the onboarding spec first or set STEP_UP_SPACE_ID.')
-    await use({ spaceId: spaceId as string, spaceName: run?.spaceName ?? '' })
+    await provide({ spaceId: spaceId as string, spaceName: run?.spaceName ?? '' })
   },
 })
 
