@@ -37,6 +37,12 @@ export class WorkspacePage {
 
   // Onboarding
 
+  /** The Workspace id once the app has put it in the URL (onboarding adds it after creating the Workspace). */
+  async spaceIdFromUrl(): Promise<string> {
+    await this.page.waitForURL(/[?&]spaceId=[0-9a-f-]{36}/, { timeout: 60_000 })
+    return new URL(this.page.url()).searchParams.get('spaceId') as string
+  }
+
   async createWorkspace(name: string): Promise<void> {
     await this.page.goto('/welcome/create-space')
     await this.page.waitForLoadState('networkidle').catch(() => undefined)

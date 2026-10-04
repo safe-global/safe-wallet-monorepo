@@ -26,9 +26,7 @@ test.describe('Step-up live — onboarding', { tag: '@step-up-live' }, () => {
     await ws.createWorkspace(name)
     await ws.waitForTrialOffer()
     expect(traffic.callsTo('POST', /\/v1\/spaces$/).map((c) => c.status)).toEqual([201])
-    const spaceId = new URL(safePage.url()).searchParams.get('spaceId')
-    expect(spaceId).toBeTruthy()
-    writeRunState({ spaceId: spaceId as string, spaceName: name })
+    writeRunState({ spaceId: await ws.spaceIdFromUrl(), spaceName: name })
 
     await test.step('A12: Claim free access after the window → step-up → Stripe checkout', async () => {
       await lapse()

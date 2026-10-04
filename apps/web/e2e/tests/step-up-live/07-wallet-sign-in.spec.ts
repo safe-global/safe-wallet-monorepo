@@ -30,7 +30,6 @@ test.describe('Step-up live — wallet sign-in', { tag: '@step-up-live' }, () =>
     await test.step('C10, C11: create a Workspace, claim free access, invite, finish the survey', async () => {
       await ws.createWorkspace(workspaceName)
       await ws.waitForTrialOffer()
-      spaceId = new URL(page.url()).searchParams.get('spaceId') ?? ''
       await outsideWindow()
       await ws.claimFreeAccess.click()
       await ws.startStripeTrial(`step-up-wallet+${Date.now()}@example.com`)
@@ -38,7 +37,7 @@ test.describe('Step-up live — wallet sign-in', { tag: '@step-up-live' }, () =>
       await ws.skipSelectSafes()
       await ws.inviteInOnboarding(Wallet.createRandom().address)
       await ws.finishSurvey()
-      await expect(page).toHaveURL(/\/spaces\?spaceId=/)
+      spaceId = await ws.spaceIdFromUrl()
     })
 
     await test.step('C7, C15: add a Safe by address with a name, rename it, remove it', async () => {
