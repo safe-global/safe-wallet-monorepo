@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../mocks/policies'
+import { mockMultiSpenderPolicy, mockPendingEdit, mockSpendingLimitPolicy } from '../../../mocks/policies'
 import SpendingLimits from './SpendingLimits'
 
 const meta = {
@@ -25,4 +25,9 @@ export const Pending: Story = {
 /** Each spender gets its own card, including one with a token CGW has no logo for. */
 export const MultiSpender: Story = {
   args: { spenders: mockMultiSpenderPolicy().data.spenders, showUsage: true },
+}
+
+/** A queued edit marks each limit as added, changed or removed, and strikes through the removed one. */
+export const PendingEdit: Story = {
+  args: { spenders: mockPendingEdit().data.spenders, showUsage: false },
 }
