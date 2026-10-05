@@ -62,14 +62,20 @@ export const getYearlySavingV2 = (
   return { amount: formatPlanPrice(saved, currency), percent: percentFormat.format(saved / twelveMonthsPrice) }
 }
 
-/** A card's yearly saving: its own on a yearly card, or what switching to the same Safe count saves on a monthly one. */
+/**
+ * A card's yearly saving at the same Safe count. The CGW leaves the current plan's own price out of the offers, so a
+ * yearly option can lack its monthly reference; the counterpart card, which carries the subscription, fills it in.
+ */
 export const getCardSavingV2 = (
   tier: PlanTier,
   option: PlanSeatOption | undefined,
-  yearlyTier: PlanTier | undefined,
+  counterpartTier: PlanTier | undefined,
 ): YearlySavingV2 | undefined => {
-  if (!option) return undefined
-  if (tier.billingCycle === 'year') return getYearlySavingV2(option.originalPrice, option.price, tier.currency)
-  const yearlyOption = yearlyTier?.options.find((candidate) => candidate.label === option.label)
-  return getYearlySavingV2(option.price === null ? null : option.price * 12, yearlyOption?.price, tier.currency)
+  if (option?.price == null) return undefined
+  const counterpart = counterpartTier?.options.find((candidate) => candidate.label === option.label)
+  if (tier.billingCycle === 'year') {
+    const twelveMonths = option.originalPrice ?? (counterpart?.price == null ? null : counterpart.price * 12)
+    return getYearlySavingV2(twelveMonths, option.price, tier.currency)
+  }
+  return getYearlySavingV2(option.price * 12, counterpart?.price, tier.currency)
 }

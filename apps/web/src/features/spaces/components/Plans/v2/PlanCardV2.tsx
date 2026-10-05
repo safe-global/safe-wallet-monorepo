@@ -105,7 +105,7 @@ export const PlanCardV2 = ({
   tier,
   seatsLabel,
   onSeatsChange,
-  yearlyTier,
+  counterpartTier,
   onSwitchToYearly,
   ...actions
 }: {
@@ -113,8 +113,8 @@ export const PlanCardV2 = ({
   /** Safe count picked on the other billing cycle, so switching cycles keeps it. */
   seatsLabel?: string
   onSeatsChange?: (label: string) => void
-  /** The same plan billed yearly, so a monthly card can show what switching saves. */
-  yearlyTier?: PlanTier
+  /** The same plan on the other billing cycle, to compare monthly and yearly prices. */
+  counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
 } & PlanCardV2Actions) => {
   const content = getPlanContentV2(tier.name)
@@ -131,7 +131,7 @@ export const PlanCardV2 = ({
     tier.options[0]
   const price = option ? getPlanPriceV2(tier, option) : undefined
   const isYearly = tier.billingCycle === 'year'
-  const saving = getCardSavingV2(tier, option, yearlyTier)
+  const saving = getCardSavingV2(tier, option, counterpartTier)
   const features = getCardFeaturesV2(tier.name) ?? tier.features
 
   // Always render all five rows so the subgrid lines up across cards.
@@ -243,13 +243,13 @@ export const PlanCardV2 = ({
             <>
               <Separator />
               <div className="flex flex-col gap-1" data-testid="plan-support">
-                <div className="flex items-center justify-between gap-2">
-                  <Typography variant="paragraph-medium">{PLAN_CARD_COPY_V2.supportLabel}</Typography>
-                  <Typography variant="paragraph-bold" className="relative isolate" data-testid="plan-support-level">
+                <Typography variant="paragraph-bold" data-testid="plan-support-level">
+                  <span className="relative isolate">
                     {content.support.level}
                     <span aria-hidden className={SUPPORT_HIGHLIGHT_CLASSES} />
-                  </Typography>
-                </div>
+                  </span>{' '}
+                  {PLAN_CARD_COPY_V2.support}
+                </Typography>
                 <Typography variant="paragraph-small" color="muted">
                   {content.support.detail}
                 </Typography>

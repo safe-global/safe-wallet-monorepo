@@ -118,8 +118,8 @@ export const PLAN_CARD_COPY_V2 = {
   talkToSales: 'Talk to sales',
   custom: 'Custom',
   customSuffix: 'Annual term',
+  support: 'support',
   featuresHeading: (supportLevel: string) => `${supportLevel} support, plus:`,
-  supportLabel: 'Support',
   seatsLabel: 'Safe accounts for',
 } as const
 

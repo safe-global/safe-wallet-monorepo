@@ -79,7 +79,10 @@ export default function PlanCatalogV2({
             tier={tier}
             seatsLabel={seatsByPlan[tier.name]}
             onSeatsChange={(label) => setSeatsByPlan((picked) => ({ ...picked, [tier.name]: label }))}
-            yearlyTier={tiers.find((other) => other.name === tier.name && other.billingCycle === 'year')}
+            counterpartTier={tiers.find(
+              (other) =>
+                other.name === tier.name && other.billingCycle !== null && other.billingCycle !== tier.billingCycle,
+            )}
             onSwitchToYearly={() => setCycle('year')}
             {...actions}
           />

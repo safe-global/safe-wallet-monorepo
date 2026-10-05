@@ -133,6 +133,16 @@ describe('getCardSavingV2', () => {
     })
   })
 
+  it('takes the monthly price from the current plan card when the offers leave it out', () => {
+    const yearlyWithoutReference = option({ price: 17_990, originalPrice: null })
+    const currentMonthly = tier({ id: 'current', isCurrent: true, options: [option({ price: 1669 })] })
+
+    expect(getCardSavingV2(yearlyTier, yearlyWithoutReference, currentMonthly)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
   it('shows a monthly card what the same Safe count saves yearly', () => {
     expect(getCardSavingV2(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
     expect(getCardSavingV2(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
