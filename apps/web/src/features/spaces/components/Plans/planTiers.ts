@@ -185,7 +185,7 @@ const mergeCurrentTier = (offered: PlanTier[], current: PlanTier): PlanTier[] =>
 }
 
 const rank = (name: string): number => {
-  const index = PLAN_ORDER.indexOf(name)
+  const index = PLAN_ORDER.findIndex((plan) => plan === name)
   return index === -1 ? PLAN_ORDER.length : index
 }
 
@@ -200,6 +200,13 @@ export const buildPlanTiers = (
     : offered
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
+
+/** Tiers for the selected billing cycle. Keeps the current plan if the other cycle has no matching offer. */
+export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
+  tiers.filter((tier) => {
+    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
+    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
+  })
 
 /** Monthly trial offers for the claim modal: the seat count leads the plan's own selling points, verbatim. */
 export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>

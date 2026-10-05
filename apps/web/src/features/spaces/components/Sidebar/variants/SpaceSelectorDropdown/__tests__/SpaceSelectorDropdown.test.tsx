@@ -88,6 +88,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 const mockUseIsSafeProEnabled = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+jest.mock('../../../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => false }))
 const mockPlans: {
   tierName: string
   isTrialing: boolean

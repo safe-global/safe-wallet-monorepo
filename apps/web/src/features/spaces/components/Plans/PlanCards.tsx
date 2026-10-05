@@ -13,7 +13,8 @@ import { Typography } from '@/components/ui/typography'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { cn } from '@/utils/cn'
-import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
+import { YEARLY_SAVINGS_LABEL } from './planCatalog'
+import { formatPlanPrice, getPlanCta, getVisibleTiers, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
 
 type Cycle = 'month' | 'year'
@@ -21,7 +22,6 @@ type Cycle = 'month' | 'year'
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
 /** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
-export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
@@ -29,14 +29,17 @@ const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.lab
 const findSeatOption = (options: PlanSeatOption[], seatsLabel: string | undefined) =>
   seatsLabel === undefined ? undefined : options.find((option) => option.label === seatsLabel)
 
-const Seats = ({
+export const Seats = ({
   options,
   value,
   onChange,
+  label,
 }: {
   options: PlanSeatOption[]
   value: PlanSeatOption
   onChange: (option: PlanSeatOption) => void
+  /** Accessible name for the control, e.g. "Safe accounts for Business". */
+  label?: string
 }) =>
   options.length > 1 ? (
     <Select
@@ -46,7 +49,7 @@ const Seats = ({
         if (next) onChange(next)
       }}
     >
-      <SelectTrigger className="w-full">
+      <SelectTrigger className="w-full" aria-label={label}>
         {/* The closed trigger would otherwise print the raw value, the payment link id. */}
         <SelectValue>{value.label}</SelectValue>
       </SelectTrigger>
@@ -59,7 +62,7 @@ const Seats = ({
       </SelectContent>
     </Select>
   ) : (
-    <Input readOnly value={value.label} />
+    <Input readOnly value={value.label} aria-label={label} />
   )
 
 export type PlanCardActions = {
@@ -267,11 +270,7 @@ export function PlanCatalog({
   const [cycle, setCycle] = useState<Cycle>('month')
   const [seatsByPlan, setSeatsByPlan] = useState<Record<string, string>>({})
   const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
-  // The current card stays put when the other cycle has no offer of that plan to replace it.
-  const visible = tiers.filter((tier) => {
-    if (tier.billingCycle === null || tier.billingCycle === cycle) return true
-    return Boolean(tier.isCurrent) && !tiers.some((other) => other.name === tier.name && other.billingCycle === cycle)
-  })
+  const visible = getVisibleTiers(tiers, cycle)
 
   return (
     <div className="flex flex-col gap-6">
