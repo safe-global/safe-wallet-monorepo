@@ -103,8 +103,16 @@ const PlanCta = ({
       )
     case 'billing':
       return (
-        <Button size="lg" weight="semibold" accentIcon className="w-full" disabled={isBusy} onClick={onManage}>
-          {cta.label}
+        <Button
+          size="lg"
+          weight="semibold"
+          accentIcon
+          // eslint-disable-next-line no-restricted-syntax -- the label wraps on a narrow plan card, so the button grows
+          className="h-auto min-h-10 w-full py-2"
+          disabled={isBusy}
+          onClick={onManage}
+        >
+          <span className="min-w-0 whitespace-normal text-center leading-tight">{cta.label}</span>
           <ArrowRight data-icon="inline-end" />
         </Button>
       )
