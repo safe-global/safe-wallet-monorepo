@@ -54,6 +54,7 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   epoch: null,
   oracle: null,
   deadlineBlock: null,
+  requests: [],
   windowCoverage: 'heuristic',
   ...over,
 })

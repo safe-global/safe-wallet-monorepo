@@ -1,5 +1,5 @@
 import type { AttestationVerification, CheckStatus } from './status'
-import type { Hex, NormalizedCheckEvent } from './events'
+import type { CheckEventBase, Hex, NormalizedCheckEvent } from './events'
 
 /**
  * How much the block window a read used can prove. `proven`: the window was
@@ -11,6 +11,49 @@ import type { Hex, NormalizedCheckEvent } from './events'
  * look everywhere the check could be.
  */
 export type WindowCoverage = 'proven' | 'heuristic'
+
+/** The Oracle's request state, mapped from `getRequest` ordinals 1..5. */
+export type OracleRequestState = 'PENDING' | 'FROZEN' | 'RESOLVED_APPROVED' | 'RESOLVED_DENIED' | 'TIMED_OUT'
+
+/**
+ * What a request resolved to, derived only from its state and vote counts. A
+ * mixed-vote ruling (`RULED_*`) is a Council decision, never a unanimous one.
+ */
+export type RequestOutcome =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'DENIED'
+  | 'DISPUTED'
+  | 'RULED_SECURE'
+  | 'RULED_INSECURE'
+  | 'NO_RULING'
+  | 'TIMED_OUT'
+
+/** Identity of one Oracle request, from the allowlisted proposal that named it. */
+export type RequestRef = {
+  requestId: Hex
+  epoch: string
+  oracle: string
+  oracleDataHash: Hex
+  /** The checked Safe's home chain, not the protocol chain. */
+  chainId: string
+  safe: string
+  proposedAt: CheckEventBase
+}
+
+/** One request's authoritative state at the observed head. */
+export type RequestRead = RequestRef & {
+  state: OracleRequestState
+  outcome: RequestOutcome
+  commitDeadlineBlock: string
+  revealDeadlineBlock: string
+  /** Null when no dispute opened. */
+  arbitrationDeadlineBlock: string | null
+  committedCount: number
+  revealedCount: number
+  approveCount: number
+  denyCount: number
+}
 
 /**
  * The full read-layer view of one check at one poll. Everything numeric is a
@@ -34,6 +77,8 @@ export type SafenetCheckSnapshot = {
   deadlineBlock: string | null
   /** Chain head observed at snapshot time — the deadline is compared to this. */
   headBlock: string | null
+  /** Every allowlisted request this read discovered, in proposal order. */
+  requests: RequestRead[]
   attestation: AttestationVerification
   /**
    * When the attestation landed on chain, in ms. Null until attested, and

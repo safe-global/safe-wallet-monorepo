@@ -19,6 +19,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   oracle: null,
   deadlineBlock: null,
   headBlock: null,
+  requests: [],
   attestation: UNVERIFIED_ATTESTATION,
   attestedAtMs: null,
   aimedAtMs: null,

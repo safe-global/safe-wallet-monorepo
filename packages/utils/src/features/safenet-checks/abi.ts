@@ -17,6 +17,10 @@ const TX_TUPLE =
   '(uint256 chainId, address safe, address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 nonce)'
 const FROST_SIG_TUPLE = '((uint256 x, uint256 y) r, uint256 z)'
 
+/** `getRequest` return: the padding members are real ABI fields. */
+const REQUEST_TUPLE =
+  '((uint64 commitDeadline, uint24 daoFeeShare, uint64 revealDeadline, uint96 bondTarget, uint8 _padding, address sponsor, uint96 slashAmount) terms, (uint8 state, uint96 fee, uint64 arbitrationDeadline, uint16 committedCount, uint16 revealedCount, uint16 approveSentinelCount, uint16 denySentinelCount, uint24 _padding) progress)'
+
 export const CONSENSUS_EVENT_FRAGMENTS = [
   `event TransactionProposed(bytes32 indexed safeTxHash, bytes32 indexed safeId, address indexed oracle, uint64 epoch, bytes oracleData, ${TX_TUPLE} transaction)`,
   `event TransactionAttested(bytes32 indexed safeTxHash, bytes32 indexed safeId, address indexed oracle, uint64 epoch, bytes32 oracleDataHash, bytes32 signatureId, ${FROST_SIG_TUPLE} attestation)`,
@@ -49,6 +53,10 @@ export const CONSENSUS_READ_ABI = ['function getEpochGroupId(uint64 epoch) view 
 
 export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
+] as const
+
+export const ORACLE_READ_ABI = [
+  `function getRequest(bytes32 requestId) view returns (${REQUEST_TUPLE} request)`,
 ] as const
 
 export const consensusInterface = new Interface(CONSENSUS_EVENT_FRAGMENTS)

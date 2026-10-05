@@ -13,3 +13,13 @@ decoder parses with — they cannot drift from the fragments, and deliberate
 fragment changes are guarded by the literal topic0 pins in `__tests__/abi.test.ts`.
 Re-capture the Sepolia fixtures with `tools/safenet-proposer` (workspace repo)
 against the live deployment; the Gnosis pair by scanning the beta Consensus.
+
+## `gnosis-aegis.json`
+
+Two live captures from the Gnosis Chain test deployment (chain 100; Consensus `0x98810887…`, Oracle `0x544F12bA…`,
+deployed at block 48,280,806; not proven production). `provenance` records the addresses, `capturedAt` and the RPC.
+Each capture holds the raw `eth_getLogs` entries of one check (Consensus logs by `safeTxHash`, Oracle logs by
+`requestId`) and the verbatim ABI bytes `getRequest(bytes32)` returned at the fixed block
+`requestState.blockNumber` (48,597,645), so the expectation stays stable after the request settles.
+
+Captures: `approved-first` (`RESOLVED_APPROVED`, 2 approve) and `disputed-split` (`FROZEN`, 1 approve, 1 deny).

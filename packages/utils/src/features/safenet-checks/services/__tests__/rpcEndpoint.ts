@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
-import { Interface } from 'ethers'
-import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
+import { Interface, ZeroAddress, id } from 'ethers'
+import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI, ORACLE_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'
 
 /**
@@ -39,12 +39,56 @@ export type RpcConfig = {
   failGroupKey?: boolean
   /** Hold `eth_getLogs` responses until the returned gate releases them. */
   gateLogs?: boolean
+  /** `getRequest` answers by lowercase requestId with raw ABI bytes; an unlisted id reverts. Omitted: all PENDING. */
+  requests?: Record<string, string>
+  /** Delay `getRequest` answers so overlapping calls stay in flight together. */
+  getRequestDelayMs?: number
 }
 
 const hexToNum = (value: string): number => Number(BigInt(value))
 
 const consensusRead = new Interface([...CONSENSUS_READ_ABI])
 const coordinatorRead = new Interface([...COORDINATOR_READ_ABI])
+const oracleRead = new Interface([...ORACLE_READ_ABI])
+const GET_REQUEST = oracleRead.getFunction('getRequest')!.selector
+const REQUEST_NOT_FOUND = id('RequestNotFound()').slice(0, 10)
+
+/** The ABI bytes `getRequest` answers for a request in `state`, with every count and deadline zero. */
+export const encodeRequest = (state: number): string =>
+  oracleRead.encodeFunctionResult('getRequest', [
+    { terms: [0, 0, 0, 0n, 0, ZeroAddress, 0n], progress: [state, 0n, 0, 0, 0, 0, 0, 0] },
+  ])
+
+/** `blockTags`: the tag each `getRequest` was pinned to; `peak`: most calls in flight at once. */
+type Reads = { inFlight: number; peak: number; blockTags: unknown[] }
+type RpcCall = { method: string; params: unknown[] }
+
+const isGetRequest = ({ method, params }: RpcCall): boolean => {
+  const tx = params[0] as { data?: string } | undefined
+  return method === 'eth_call' && tx?.data?.startsWith(GET_REQUEST) === true
+}
+
+/** The `eth_call`s no other branch answers: `getRequest` from `config.requests`, or an error. */
+const answerOtherCall = (config: RpcConfig, data: string) => {
+  if (!data.startsWith(GET_REQUEST)) return { error: { code: 3, message: 'unexpected eth_call' } }
+  const result = config.requests ? config.requests[`0x${data.slice(10, 74)}`.toLowerCase()] : encodeRequest(1)
+  if (result !== undefined) return { result }
+  return { error: { code: 3, message: 'execution reverted', data: REQUEST_NOT_FOUND } }
+}
+
+/** Counts the `getRequest`s of one HTTP body as in flight, and holds their answers for `delayMs`. */
+const holdReads = async (reads: Reads, calls: RpcCall[], delayMs = 0): Promise<void> => {
+  const gets = calls.filter(isGetRequest)
+  reads.blockTags.push(...gets.map((call) => call.params[1]))
+  reads.inFlight += gets.length
+  reads.peak = Math.max(reads.peak, reads.inFlight)
+  if (gets.length && delayMs) {
+    const { promise, resolve } = Promise.withResolvers<void>()
+    setTimeout(resolve, delayMs)
+    await promise
+  }
+  reads.inFlight -= gets.length
+}
 
 const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
   const topic0s = (Array.isArray(filter.topics[0]) ? filter.topics[0] : [filter.topics[0]]) as string[]
@@ -63,6 +107,7 @@ const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
 /** One JSON-RPC endpoint recorder + responder. Handles single and batched bodies. */
 export const makeEndpoint = (config: RpcConfig) => {
   const getLogsCalls: GetLogsFilter[] = []
+  const reads: Reads = { inFlight: 0, peak: 0, blockTags: [] }
   const methods: string[] = []
 
   const blockTimestamp = (number: number): number => {
@@ -142,7 +187,7 @@ export const makeEndpoint = (config: RpcConfig) => {
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
 
-        return err('unexpected eth_call')
+        return { jsonrpc: '2.0', id: req.id, ...answerOtherCall(config, call.data) }
       }
       default:
         return err(`unhandled ${req.method}`)
@@ -160,11 +205,12 @@ export const makeEndpoint = (config: RpcConfig) => {
       | Array<{ id: number; method: string; params: unknown[] }>
     const calls = Array.isArray(body) ? body : [body]
     const response = Array.isArray(body) ? body.map(respondOne) : respondOne(body)
+    await holdReads(reads, calls, config.getRequestDelayMs)
     if (config.gateLogs && calls.some((call) => call.method === 'eth_getLogs')) {
       arrival.resolve()
       await release.promise
     }
     return HttpResponse.json(response)
   })
-  return { handler, getLogsCalls, methods, gate: { logsArrived: arrival.promise, releaseLogs: release.resolve } }
+  return { handler, getLogsCalls, methods, reads, gate: { logsArrived: arrival.promise, releaseLogs: release.resolve } }
 }

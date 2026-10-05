@@ -112,6 +112,7 @@ export const safenetCheckApi = createApi({
             oracle: read.oracle,
             deadlineBlock: read.deadlineBlock,
             headBlock: read.headBlock,
+            requests: read.requests,
             attestation,
             attestedAtMs,
             aimedAtMs,

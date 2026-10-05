@@ -420,6 +420,7 @@ describe('SafenetReader.fetchCheckState', () => {
     // The live re-proposal is the newest one, so its id must survive the cap.
     expect(result.epoch).toBe('20')
     expect(orac[0].topics[1]).toContain(result.requestId)
+    expect(result.requests.map((r) => r.requestId)).toEqual(epochs.slice(-16).map((e) => requestIdFor(String(e))))
   })
 
   it('returns a Redux-serializable result — no bigints survive the read', async () => {
