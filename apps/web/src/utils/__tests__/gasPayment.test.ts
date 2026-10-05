@@ -5,13 +5,24 @@ import { getGasPayment, selectSponsoredOffer, type GasPaymentInputs, type Sponso
 const spaceId = faker.string.uuid()
 const meter = { used: 10, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
+const withoutPlan = {
+  isEnabled: true,
+  isPro: false,
+  isLoading: false,
+  isError: false,
+  left: null,
+  meter: null,
+  spaceId: null,
+}
+const withPlan = { isEnabled: true, isPro: true, isLoading: false, isError: false, left: 40, meter, spaceId }
+
 const buildInputs = (overrides: Partial<GasPaymentInputs> = {}): GasPaymentInputs => ({
   chainOptions: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
   isRefundTx: false,
   walletCanRelay: true,
   campaign: { isEligible: true, remaining: 3, limit: 5, isGasTooHigh: false },
   daily: { remaining: 4, limit: 5 },
-  pro: { isEnabled: true, isPro: true, isLoading: false, left: 40, meter, spaceId },
+  pro: withoutPlan,
   excluded: new Set(),
   ...overrides,
 })
@@ -21,7 +32,7 @@ const dailyOffer: SponsoredOffer = {
   option: 'FREE_DAILY_LIMIT',
   disabledReason: null,
   relays: { remaining: 4, limit: 5 },
-  isPro: true,
+  isPro: false,
 }
 const subscriptionOffer: SponsoredOffer = {
   option: 'SUBSCRIPTION',
@@ -46,61 +57,51 @@ describe('selectSponsoredOffer', () => {
       dailyOffer,
     ],
     [
-      'the daily limit to a Safe without a plan',
-      {
-        pro: { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null },
-        excluded: new Set(['NO_FEE_CAMPAIGN']),
-      },
-      { ...dailyOffer, isPro: false },
-    ],
-    [
       'the daily limit with the plan unknown while it loads',
-      {
-        chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: false, isLoading: true, left: null, meter: null, spaceId: null },
-      },
+      { chainOptions: ['FREE_DAILY_LIMIT'], pro: { ...withoutPlan, isLoading: true } },
       { ...dailyOffer, isPro: null },
     ],
     [
-      'the subscription when no daily relay is left',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: { remaining: 0, limit: 5 } },
-      subscriptionOffer,
+      'the daily limit with the plan unknown after its lookup failed',
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: { ...withoutPlan, isError: true } },
+      { ...dailyOffer, isPro: null },
     ],
     [
-      'the subscription when the daily relays are unknown',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: undefined },
-      subscriptionOffer,
-    ],
-    [
-      'the subscription when the campaign and the daily limit are excluded',
+      'nothing to a Safe without a plan once the campaign and the daily limit are excluded',
       { excluded: new Set(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT']) },
+      null,
+    ],
+    ['the plan before the campaign and the daily limit to a Safe on a plan', { pro: withPlan }, subscriptionOffer],
+    [
+      'the plan to a Safe on a plan when the daily relays are unknown',
+      { pro: withPlan, daily: undefined },
       subscriptionOffer,
     ],
     [
-      'nothing when every option is excluded',
-      { excluded: new Set(['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION']) },
+      'the plan disabled once spent, with daily relays left',
+      { pro: { ...withPlan, left: 0 } },
+      { ...subscriptionOffer, left: 0, disabledReason: 'LIMIT_REACHED' },
+    ],
+    [
+      'nothing to a Safe on a plan once the plan is excluded',
+      { pro: withPlan, excluded: new Set(['SUBSCRIPTION']) },
       null,
+    ],
+    [
+      'the campaign to a Safe on a plan where the chain does not list the plan',
+      { pro: withPlan, chainOptions: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT'] },
+      campaignOffer,
+    ],
+    [
+      'the daily limit marked Pro where the chain does not list the plan',
+      { pro: withPlan, chainOptions: ['FREE_DAILY_LIMIT'] },
+      { ...dailyOffer, isPro: true },
     ],
     ['nothing when the chain lists no option', { chainOptions: [] }, null],
     ['nothing when the chain only lists paying from the Safe', { chainOptions: ['PAY_FROM_SAFE'] }, null],
     ['nothing for a refund transaction', { isRefundTx: true }, null],
     ['nothing when the wallet cannot relay', { walletCanRelay: false }, null],
-    [
-      'no subscription without a plan',
-      {
-        chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null },
-      },
-      null,
-    ],
-    [
-      'no subscription without a Workspace',
-      {
-        chainOptions: ['SUBSCRIPTION'],
-        pro: { isEnabled: true, isPro: true, isLoading: false, left: 4, meter, spaceId: null },
-      },
-      null,
-    ],
+    ['no subscription without a plan', { chainOptions: ['SUBSCRIPTION'] }, null],
   ])('offers %s', (_label, overrides, expected) => {
     expect(selectSponsoredOffer(buildInputs(overrides)).offer).toEqual(expected)
   })
@@ -125,57 +126,55 @@ describe('selectSponsoredOffer', () => {
     expect(selectSponsoredOffer(buildInputs({ campaign })).offer).toEqual(expected)
   })
 
-  it('offers an exhausted subscription disabled', () => {
-    const { offer } = selectSponsoredOffer(
-      buildInputs({ chainOptions: ['SUBSCRIPTION'], pro: { ...buildInputs().pro, left: 0 } }),
-    )
-
-    expect(offer).toEqual({ ...subscriptionOffer, left: 0, disabledReason: 'LIMIT_REACHED' })
-  })
-
-  const freePro = { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null }
   const spentDaily = { remaining: 0, limit: 5 }
 
   it.each<[string, Partial<GasPaymentInputs>, boolean]>([
     [
       'the daily relays are spent on a chain that lists the subscription',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: freePro, daily: spentDaily },
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily },
       true,
     ],
     [
       'Safe Pro is off',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: { ...freePro, isEnabled: false }, daily: spentDaily },
+      {
+        chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
+        pro: { ...withoutPlan, isEnabled: false },
+        daily: spentDaily,
+      },
       false,
     ],
     [
       'the Safe is on a plan',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, pro: { ...freePro, isPro: true } },
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, pro: withPlan },
       false,
     ],
     [
-      'the chain does not list the subscription',
-      { chainOptions: ['FREE_DAILY_LIMIT'], pro: freePro, daily: spentDaily },
+      'the Safe is on a plan and the plan is excluded',
+      {
+        chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
+        daily: spentDaily,
+        pro: withPlan,
+        excluded: new Set(['SUBSCRIPTION']),
+      },
       false,
     ],
     [
-      'the chain does not list the daily limit',
-      { chainOptions: ['SUBSCRIPTION'], pro: freePro, daily: spentDaily },
+      'the plan lookup failed',
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, pro: { ...withoutPlan, isError: true } },
       false,
     ],
-    [
-      'the daily relays are unknown',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: freePro, daily: undefined },
-      false,
-    ],
-    ['a daily relay is left', { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: freePro }, false],
+    ['the chain does not list the subscription', { chainOptions: ['FREE_DAILY_LIMIT'], daily: spentDaily }, false],
+    ['the chain does not list the daily limit', { chainOptions: ['SUBSCRIPTION'], daily: spentDaily }, false],
+    ['the daily relays are unknown', { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: undefined }, false],
+    ['a daily relay is left', { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'] }, false],
     [
       'it is a refund transaction',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: freePro, daily: spentDaily, isRefundTx: true },
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, isRefundTx: true },
       false,
     ],
     [
       'the wallet cannot relay',
-      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: freePro, daily: spentDaily, walletCanRelay: false },
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, walletCanRelay: false },
       false,
     ],
   ])('shows the Pro upsell only when %s', (_label, overrides, expected) => {
