@@ -71,10 +71,10 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   )
   const [entry] = useState(takePlansEntry)
   const isReady = isSafePro && !isPlanLoading && !isOffersLoading && !isUninitialized
-  const isViewedTracked = useRef(false)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (!isReady || isViewedTracked.current) return
-    isViewedTracked.current = true
+    if (!isReady || hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       ...entry,
       [MixpanelEventParams.PLAN_STATUS]: toPlanStatus(status),

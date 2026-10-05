@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
@@ -11,7 +11,10 @@ import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
 const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => {
+  const hasTrackedView = useRef(false)
   useEffect(() => {
+    if (hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: 'sidebar' })
   }, [])
 

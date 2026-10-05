@@ -62,10 +62,10 @@ const TrialEndingChooser = ({
     ? formatDate(Date.parse(currentPlan.periodEndsAt))
     : 'the end of your free access'
   const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.REMINDER_MODAL }
-  const isViewedTracked = useRef(false)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (isLoading || isViewedTracked.current) return
-    isViewedTracked.current = true
+    if (isLoading || hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {
       [MixpanelEventParams.LOCATION]: PlanLocation.REMINDER_MODAL,
       [MixpanelEventParams.FREE_ACCESS_DAYS_LEFT]: currentPlan.daysLeft ?? undefined,

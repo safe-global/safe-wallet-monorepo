@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from 'react'
+import { useEffect, useRef, type ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -51,8 +51,11 @@ const SponsoredTxsCounter = ({
   isPro: boolean
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (!isPro) trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
+    if (isPro || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
   }, [isPro])
 
   return (

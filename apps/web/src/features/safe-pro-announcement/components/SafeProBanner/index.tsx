@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ArrowUpRight, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { ICON_STROKE } from '@/components/common/iconStroke'
@@ -21,7 +21,10 @@ const SafeProBanner = ({
   location?: SafeProBannerLocation
 }) => {
   const isLive = useIsSafeProEnabled()
+  const hasTrackedView = useRef(false)
   useEffect(() => {
+    if (hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
   }, [location])
 

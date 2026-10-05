@@ -32,10 +32,10 @@ export default function SeatLimitBanner({
   className?: string
 }) {
   const { tierName, limit, upgradePlanName, plansHref } = useSeatUpsell()
-  const isPromptTracked = useRef(false)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (limit === null || !upgradePlanName || isPromptTracked.current) return
-    isPromptTracked.current = true
+    if (limit === null || !upgradePlanName || hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
   }, [limit, upgradePlanName])
   if (limit === null) return null

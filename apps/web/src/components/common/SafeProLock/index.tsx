@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import NextLink, { type LinkProps } from 'next/link'
 import { Lock } from 'lucide-react'
 import { highlightSafePro } from '@/components/common/ProHighlight'
@@ -21,7 +21,10 @@ const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps[
     [MixpanelEventParams.FEATURE]: feature,
     [MixpanelEventParams.LOCATION]: UpgradeLocation.SETTINGS_SETUP,
   }
+  const hasTrackedView = useRef(false)
   useEffect(() => {
+    if (hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
   }, [feature]) // eslint-disable-line react-hooks/exhaustive-deps -- prompt is derived from feature
 

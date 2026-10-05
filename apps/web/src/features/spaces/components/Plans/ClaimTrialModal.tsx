@@ -169,10 +169,10 @@ export default function ClaimTrialModal({
     [MixpanelEventParams.ENTRY_POINT]:
       variant === 'new' ? FreeAccessEntryPoint.CREATE_WORKSPACE : FreeAccessEntryPoint.WORKSPACE_LOGIN,
   }
-  const isViewedTracked = useRef(false)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (isLoading || isViewedTracked.current) return
-    isViewedTracked.current = true
+    if (isLoading || hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_VIEWED, {
       ...entry,
       [MixpanelEventParams.FREE_ACCESS_LENGTH]: trialPeriodDays ?? undefined,

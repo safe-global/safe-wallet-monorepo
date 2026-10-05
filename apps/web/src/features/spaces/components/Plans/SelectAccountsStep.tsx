@@ -81,10 +81,10 @@ export default function SelectAccountsStep({
     () => leavesOf(allSafes).filter((safe) => !selectedKeys.has(getSafeId(safe))),
     [allSafes, selectedKeys],
   )
-  const isViewedTracked = useRef(false)
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (isLoading || isViewedTracked.current) return
-    isViewedTracked.current = true
+    if (isLoading || hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED, {
       [MixpanelEventParams.ACCOUNTS_AVAILABLE]: seatCount,
       [MixpanelEventParams.PLAN_LIMIT]: limit,

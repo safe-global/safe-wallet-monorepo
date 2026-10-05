@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ArrowRight, Lock } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +26,10 @@ const PROMPT = {
 }
 
 const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsellBannerProps) => {
+  const hasTrackedView = useRef(false)
   useEffect(() => {
+    if (hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
   }, [])
 

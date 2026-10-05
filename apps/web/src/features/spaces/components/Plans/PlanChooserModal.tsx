@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useRef, useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -76,7 +76,10 @@ export default function PlanChooserModal({
   const { title, subtitle } = chooserCopy(reason, endedAt)
   const trimming = pick && needsTrim(pick.option.seats) ? pick : undefined
   const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.LOCKED_MODAL }
+  const hasTrackedView = useRef(false)
   useEffect(() => {
+    if (hasTrackedView.current) return
+    hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'admin' })
   }, [])
 

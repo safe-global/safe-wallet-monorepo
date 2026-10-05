@@ -1,4 +1,4 @@
-import { useEffect, type ReactElement } from 'react'
+import { useEffect, useRef, type ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -22,8 +22,11 @@ const PROMPT = {
 export const ProChecksRow = ({ hasProFeatures }: { hasProFeatures: boolean }): ReactElement => {
   const { spaceId } = useSafeProAccess()
   const href = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (!hasProFeatures) trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
+    if (hasProFeatures || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
   }, [hasProFeatures])
 
   return (

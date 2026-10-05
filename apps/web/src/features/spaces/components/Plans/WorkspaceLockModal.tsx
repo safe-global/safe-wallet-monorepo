@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -53,8 +53,11 @@ const MemberLockedNotice = ({
   onBack: () => void
 }) => {
   const isPlanLock = reason !== 'trial-offered'
+  const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (isPlanLock) trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'member' })
+    if (!isPlanLock || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'member' })
   }, [isPlanLock])
 
   return (
