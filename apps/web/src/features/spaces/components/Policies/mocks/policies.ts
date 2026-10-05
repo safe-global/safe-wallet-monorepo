@@ -18,6 +18,8 @@ const DAY = 86_400
 const DAY_MINUTES = 1_440
 /** 2026-10-01T00:00:00Z, in unix minutes. */
 const RESETS_AT_MINUTE = 29_846_880
+/** 2026-06-24T03:35:00Z, in unix seconds. */
+export const ALLOWANCE_CREATED_AT = 1_782_272_100
 
 export const MOCK_SAFES = {
   treasury: { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', chainId: '1' },
@@ -71,6 +73,7 @@ const allowance = (
   remaining: (BigInt(amount) - BigInt(spent)).toString(),
   resetPeriodMinutes,
   resetsAtMinute: resetPeriodMinutes === 0 ? null : resetsAtMinute,
+  createdAt: ALLOWANCE_CREATED_AT,
 })
 
 export const mockSpendingLimitPolicy = (overrides: Partial<SpendingLimitPolicy> = {}): SpendingLimitPolicy => ({
@@ -149,17 +152,28 @@ export const mockProposerPolicy = (overrides: Partial<ProposerPolicy> = {}): Pro
   ...overrides,
 })
 
-export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> = {}): QueuedSpendingLimitPolicy => ({
-  ...mockSpendingLimitPolicy({ id: '0xspending-limit-pending', safe: MOCK_SAFES.payroll }),
-  status: 'pending',
-  operation: 'create',
-  safeTxHash: '0x9f3c1b7a2d4e5f60718293a4b5c6d7e8f9012345678990abcdef0123456789ab',
-  nonce: 42,
-  confirmationsSubmitted: 1,
-  confirmationsRequired: 2,
-  proposedAt: 1_781_300_000,
-  ...overrides,
-})
+export const mockPendingPolicy = (overrides: Partial<QueuedSpendingLimitPolicy> = {}): QueuedSpendingLimitPolicy => {
+  const policy: QueuedSpendingLimitPolicy = {
+    ...mockSpendingLimitPolicy({ id: '0xspending-limit-pending', safe: MOCK_SAFES.payroll }),
+    status: 'pending',
+    operation: 'create',
+    safeTxHash: '0x9f3c1b7a2d4e5f60718293a4b5c6d7e8f9012345678990abcdef0123456789ab',
+    nonce: 42,
+    confirmationsSubmitted: 1,
+    confirmationsRequired: 2,
+    proposedAt: 1_781_300_000,
+    ...overrides,
+  }
+  if (policy.operation === 'remove') return policy
+
+  // mapPendingPolicies builds a queued set-allowance from scratch, so it has no createdAt.
+  const spenders = policy.data.spenders.map((spender) => ({
+    ...spender,
+    allowances: spender.allowances.map((allowance) => ({ ...allowance, createdAt: undefined })),
+  }))
+
+  return { ...policy, data: { spenders } }
+}
 
 /** Executed onchain, not yet reported by the indexer. */
 export const mockActivatingPolicy = (

@@ -29,7 +29,7 @@ const OUTCOME_BY_STATUS: Partial<Record<TransactionDetails['txStatus'], PendingT
 }
 
 export type PendingPolicyTransaction = {
-  /** Undefined until loaded; the review flow needs it. */
+  /** Undefined until loaded. */
   txSummary?: Transaction
   /** Addresses that have confirmed. Empty until loaded. */
   confirmedBy: string[]

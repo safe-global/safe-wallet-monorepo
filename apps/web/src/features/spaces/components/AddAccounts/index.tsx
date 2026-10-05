@@ -23,7 +23,7 @@ import {
   useSpaceAddressBookState,
   useIsAdmin,
   useSpaceSafes,
-  useUpsertWorkspaceSafeNames,
+  usePrepareWorkspaceSafeNames,
 } from '@/features/spaces'
 import {
   NameAccountsFields,
@@ -68,7 +68,6 @@ import SafeLimitError from '../SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { seatsTooltip } from '../Plans/PlanStatusCard'
 import { Link } from '@/components/ui/link'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
@@ -139,7 +138,7 @@ const AddAccounts = ({
   const sortComparator = getComparator(orderBy)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
-  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const prepareNames = usePrepareWorkspaceSafeNames()
   const {
     items: spaceAddressBook,
     isLoading: isAddressBookLoading,
@@ -235,7 +234,10 @@ const AddAccounts = ({
   const isAtLimit = isSpaceAtSafeLimit(seatCount, limit)
   const isSelectionLocked = isAtLimit || limit === undefined
   const { isSafePro, tierName, plansHref } = useSeatUpsell(spaceId)
-  const limitTooltip = isSafePro && typeof limit === 'number' ? seatsTooltip(tierName, limit) : safeLimitTooltip(limit)
+  const limitTooltip =
+    isSafePro && typeof limit === 'number'
+      ? `${tierName ? `Your ${tierName} plan` : 'Your plan'} covers ${limit} Safe accounts.\nAt ${limit}, deselect one to add another. Safe accounts you leave out remain available in My accounts.`
+      : safeLimitTooltip(limit)
 
   // Safes already in the workspace stay visible but locked: shown checked, dimmed, and not toggleable.
   const spaceSafeKeys = useMemo(
@@ -304,12 +306,18 @@ const AddAccounts = ({
         })
       }
 
+      const preparedNames = prepareNames(buildWorkspaceSafeNames(data.names, safesToWrite))
+      if (preparedNames.error !== undefined) {
+        setError(preparedNames.error)
+        return
+      }
+
       try {
-        // Add new safes
+        // Add new Safes and their names
         if (safesToAdd.length > 0) {
           const result = await addSafesToSpace({
             spaceId: spaceId ?? '',
-            createSpaceSafesDto: { safes: safesToAdd },
+            createSpaceSafesDto: { safes: safesToAdd, addressBookItems: preparedNames.items },
           })
 
           if (isElevationRequiredError(result.error)) return
@@ -352,12 +360,6 @@ const AddAccounts = ({
               { workspace_id: spaceId, safe_address: address, chain_id: chainId },
             )
           })
-        }
-
-        const namesResult = await upsertWorkspaceNames(buildWorkspaceSafeNames(data.names, safesToWrite))
-        if (namesResult.error) {
-          setError(namesResult.error)
-          return
         }
 
         // Show success notification
@@ -651,11 +653,7 @@ const AddAccounts = ({
                       disabled={!hasSomethingToSubmit || !isAddressBookReady || isSubmitting}
                       className="flex-1"
                     >
-                      {isSubmitting ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        `Add accounts (${countSafeAccounts(newSafes)})`
-                      )}
+                      {isSubmitting ? <Loader2 className="size-4 animate-spin" /> : 'Save'}
                     </Button>
                   </div>
                 </form>

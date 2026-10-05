@@ -9,19 +9,15 @@ import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useSigner } from '@/hooks/wallets/useWallet'
+import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
-import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
-import { useSafeSponsoredTxs } from '@/features/spaces'
-import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
-import { useNoFeeCampaignEligibility, useGasTooHigh, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
-import { hasRemainingRelays } from '@/utils/relaying'
+import { useGasPaymentOptions } from '@/hooks/useGasPaymentOptions'
+import { getGasPayment } from '@/utils/gasPayment'
+import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
@@ -39,11 +35,7 @@ import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { SafeTxContext } from '../../SafeTxProvider'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
-import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
-import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
 
 export const ExecuteForm = ({
   safeTx,
@@ -80,86 +72,30 @@ export const ExecuteForm = ({
   const { setTxFlow } = useContext(TxModalContext)
   const scope = useSafeScope()
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
-  const { isSubmitDisabled, isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } =
-    useContext(TxFlowContext)
+  const {
+    isSubmitDisabled,
+    isSubmitLoading,
+    setIsSubmitLoading,
+    setSubmitError,
+    setIsRejectedByUser,
+    setGasPaymentOption,
+  } = useContext(TxFlowContext)
 
-  // SC wallets can relay fully signed transactions
-  const [walletCanRelay, , walletCanRelayLoading] = useWalletCanRelay(safeTx)
-  const relays = useRelaysBySafe()
-  const sponsoredTxs = useSafeSponsoredTxs()
-  const { isEligible: isNoFeeCampaign, remaining, limit, blockedAddress } = useNoFeeCampaignEligibility()
-  const isNoFeeCampaignEnabled = useIsNoFeeCampaignEnabled()
-  const gasTooHigh = useGasTooHigh(safeTx)
-
-  // GTF Safe-pays must go via relayer. WALLET execution would double-charge (network gas + Safe fee).
-  // For confirmers, the structural fingerprint of the signed payload is the only source of truth:
-  // a stale `gtfPaymentMode === 'safe'` from the user's persisted preference must NOT force the
-  // relay path on a tx whose payload doesn't carry the GTF fee fields (would fail in handlePayment).
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
-  const requiresRelay =
-    (safeTx && isGtfSafePaid(safeTx.data)) ||
-    (isGtfChain && !!safeTx && safeTx.signatures.size === 0 && gtfPaymentMode === 'safe' && !!gtfSelectedGasToken)
-
-  // We default to relay, but the option is only shown if we canRelay
+  const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ safeTx })
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
-
-  const noFeeCampaignEligible = !isGtfChain && isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress
-
-  // Safe-pays bypasses the no-fee campaign and the daily relay quota; a Pro Safe spends its Workspace's allowance.
-  const hasSponsoring = sponsoredTxs.isPro ? sponsoredTxs.canSponsor : hasRemainingRelays(relays[0])
-  const canRelay = walletCanRelay && (requiresRelay || (!isGtfChain && !noFeeCampaignEligible && hasSponsoring))
-  const canNoFeeCampaign = !requiresRelay && noFeeCampaignEligible && !gasTooHigh && !!remaining && remaining > 0
-  const isLimitReached = noFeeCampaignEligible && remaining === 0
-  // Like the no-fee limit: the selector stays on screen with sponsoring disabled, so the user sees the count and the reset.
-  const isProExhausted = sponsoredTxs.isPro && sponsoredTxs.left === 0
+  const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
+  const willRelay = gasPayer !== 'WALLET'
+  const showExecutionSelector = offer !== null || showsProUpsell
 
   useEffect(() => {
-    if (requiresRelay) {
-      setExecutionMethod(ExecutionMethod.RELAY)
-      return
-    }
-    if (gasTooHigh || isLimitReached || isProExhausted) {
-      setExecutionMethod(ExecutionMethod.WALLET)
-    }
-  }, [requiresRelay, gasTooHigh, isLimitReached, isProExhausted])
-
-  // Handle execution method changes
-  const handleExecutionMethodChange = (method: ExecutionMethod | ((prev: ExecutionMethod) => ExecutionMethod)) => {
-    const newMethod = typeof method === 'function' ? method(executionMethod) : method
-    setExecutionMethod(newMethod)
-  }
-
-  // Show execution selector when either no-fee campaign OR relay is available
-  // Also show if gas is too high but feature is otherwise available (to show disabled state)
-  // Or if limit is reached (to show 0/X available state)
-  const showExecutionSelector =
-    !requiresRelay &&
-    !isGtfChain &&
-    (canNoFeeCampaign ||
-      canRelay ||
-      (isNoFeeCampaignEnabled && isNoFeeCampaign && !blockedAddress && gasTooHigh) ||
-      isLimitReached ||
-      isProExhausted)
-
-  // Determine which method will be used
-  const willRelay = !!(canRelay && executionMethod === ExecutionMethod.RELAY)
-  const willNoFeeCampaign = !!(
-    isNoFeeCampaignEnabled &&
-    canNoFeeCampaign &&
-    executionMethod === ExecutionMethod.NO_FEE_CAMPAIGN
-  )
-  // Wait for the async SC-wallet check to settle — `walletCanRelay` is undefined while loading.
-  const relayUnavailableForGtf = requiresRelay && !canRelay && !walletCanRelayLoading
+    setGasPaymentOption(gasPayer)
+    return () => setGasPaymentOption(undefined)
+  }, [gasPayer, setGasPaymentOption])
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
-  // Safe-pays runs via relayer (not the wallet), so the simulated `from` doesn't match the
-  // real msg.sender on execTransaction. We still run the check, the inner-call revert that
-  // catches issues like spam-token transfers fails regardless of who calls execTransaction,
-  // and missing that signal silently in Safe-pays is worse than the simulated-from drift.
   const { executionValidationError } = useIsValidExecution(
     safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
@@ -170,13 +106,12 @@ export const ExecuteForm = ({
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
-  // The Workspace ran out of sponsored transactions while this one was in flight.
-  const [quotaError, setQuotaError] = useState<QuotaExceededError | undefined>(undefined)
+  const [refusalMessage, setRefusalMessage] = useState<string>()
 
   // Clear a stale simulation verdict when the payload changes (e.g. user edits params / gas token).
   useEffect(() => {
     setRelaySimError(undefined)
-    setQuotaError(undefined)
+    setRefusalMessage(undefined)
   }, [safeTx?.data])
 
   // `acceptUnverifiedSimulation` is only set when the user explicitly retries past an
@@ -185,6 +120,7 @@ export const ExecuteForm = ({
     setIsSubmitLoading(true)
     setSubmitError(undefined)
     setRelaySimError(undefined)
+    setRefusalMessage(undefined)
     setIsRejectedByUser(false)
 
     const txOptions = getTxOptions(advancedParams, currentChain)
@@ -198,19 +134,20 @@ export const ExecuteForm = ({
         safeTx,
         txId,
         origin,
-        willRelay || willNoFeeCampaign,
+        willRelay,
         acceptUnverifiedSimulation,
-        willRelay ? sponsoredTxs.spaceId : null,
+        sponsorSpaceId,
       )
     } catch (_err) {
       const err = asError(_err)
+      const refusal = getGasPaymentRefusal(err, gasPayer)
       if (isWalletRejection(err)) {
         setIsRejectedByUser(true)
       } else if (err instanceof RelaySimulationError) {
         setRelaySimError(err)
-      } else if (err instanceof QuotaExceededError) {
-        setQuotaError(err)
-        handleExecutionMethodChange(ExecutionMethod.WALLET)
+      } else if (refusal) {
+        exclude(refusal.excluded)
+        setRefusalMessage(refusal.message)
       } else {
         trackError(Errors._804, err)
         setSubmitError(err)
@@ -239,12 +176,6 @@ export const ExecuteForm = ({
 
   const cannotPropose = !isOwner && !onlyExecute
 
-  // Parent Safe as executor cannot pay gas from the (child) Safe. The relay path doesn't
-  // support this nested execution flow at this moment. Block Execute when both conditions hold so
-  // the user can't submit a tx that would dead end at sign time.
-  const signer = useSigner()
-  const blockSafePaysFromNestedExecutor = signer?.isSafe === true && !!requiresRelay
-
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
@@ -252,47 +183,38 @@ export const ExecuteForm = ({
     disableSubmit ||
     isExecutionLoop ||
     cannotPropose ||
-    relayUnavailableForGtf ||
-    blockSafePaysFromNestedExecutor ||
     relaySimError?.code === 'SIMULATION_FAILED' ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        {!requiresRelay && (
-          <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
-            <AdvancedParams
-              willExecute
-              params={advancedParams}
-              recommendedGasLimit={gasLimit}
-              onFormSubmit={setAdvancedParams}
-              gasLimitError={gasLimitError}
-              willRelay={willRelay}
-              noFeeCampaign={
-                (canNoFeeCampaign || isLimitReached) && executionMethod !== ExecutionMethod.WALLET
-                  ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
-                  : undefined
-              }
-            />
+        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
+          <AdvancedParams
+            willExecute
+            params={advancedParams}
+            recommendedGasLimit={gasLimit}
+            onFormSubmit={setAdvancedParams}
+            gasLimitError={gasLimitError}
+            willRelay={willRelay}
+            noFeeCampaign={
+              offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
+                ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
+                : undefined
+            }
+          />
 
-            {showExecutionSelector && (
-              <div className={css.noTopBorder}>
-                <ExecutionMethodSelector
-                  executionMethod={executionMethod}
-                  setExecutionMethod={handleExecutionMethodChange}
-                  relays={canNoFeeCampaign ? undefined : relays[0]}
-                  noFeeCampaign={
-                    isNoFeeCampaign && !blockedAddress
-                      ? { isEligible: true, remaining: remaining || 0, limit: limit || 0 }
-                      : undefined
-                  }
-                  gasTooHigh={gasTooHigh}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          {showExecutionSelector && (
+            <div className={css.noTopBorder}>
+              <ExecutionMethodSelector
+                executionMethod={executionMethod}
+                setExecutionMethod={setExecutionMethod}
+                offer={offer}
+                showsProUpsell={showsProUpsell}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Error messages */}
         {cannotPropose ? (
@@ -301,14 +223,7 @@ export const ExecuteForm = ({
           <ErrorMessage>
             Cannot execute a transaction from the Safe account itself, please connect a different account.
           </ErrorMessage>
-        ) : relayUnavailableForGtf ? (
-          <ErrorMessage>Safe-paid fees requires a relayer, which is currently unavailable.</ErrorMessage>
-        ) : blockSafePaysFromNestedExecutor ? (
-          <ErrorMessage level="info">
-            Can&apos;t pay gas from this Safe account when executing through a parent Safe account. Sign the
-            transaction, or switch to another signer to execute.
-          </ErrorMessage>
-        ) : !walletCanPay && !willRelay && !willNoFeeCampaign ? (
+        ) : !walletCanPay && !willRelay ? (
           <ErrorMessage level="info">
             Your connected wallet doesn&apos;t have enough funds to execute this transaction.
           </ErrorMessage>
@@ -316,7 +231,7 @@ export const ExecuteForm = ({
           <TxCheckError error={checkError} context="estimation" />
         ) : null}
 
-        {quotaError && <ErrorMessage level="warning">{sponsoredQuotaMessage(quotaError)}</ErrorMessage>}
+        {refusalMessage && <ErrorMessage level="warning">{refusalMessage}</ErrorMessage>}
 
         {/* CGW pre-relay simulation verdict */}
         {relaySimError?.code === 'SIMULATION_FAILED' && (

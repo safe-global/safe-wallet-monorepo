@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
+import { highlightSafePro } from '@/components/common/ProHighlight'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
@@ -40,11 +41,10 @@ export const _initialSelection = (items: AllSafeItems): Record<string, boolean> 
 }
 
 export const seatsTooltip = (planName: string, limit: number): string =>
-  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available in My accounts. You can swap them in any time.`
 
 /** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
-  title = 'Select Safe accounts for your plan',
   limit,
   planName,
   continueLabel = 'Continue to checkout',
@@ -53,7 +53,6 @@ export default function SelectAccountsStep({
   isSubmitting,
   error,
 }: {
-  title?: string
   limit: number
   planName: string
   /** Names where the step leads: Stripe for a new plan, the change summary for a live one. */
@@ -103,7 +102,7 @@ export default function SelectAccountsStep({
   return (
     <>
       <Typography variant="h3" as={DialogTitle}>
-        {title}
+        {highlightSafePro('Select Safe accounts for your Safe Pro plan')}
       </Typography>
 
       <Alert variant="info">
@@ -112,7 +111,7 @@ export default function SelectAccountsStep({
           {planName} covers {limit} Safe accounts
         </AlertTitle>
         <AlertDescription>
-          Safe accounts you leave out remain available in My accounts. You can swap them in any time.
+          At {limit}, deselect one to add another. Safe accounts you leave out remain available in My accounts.
         </AlertDescription>
       </Alert>
 

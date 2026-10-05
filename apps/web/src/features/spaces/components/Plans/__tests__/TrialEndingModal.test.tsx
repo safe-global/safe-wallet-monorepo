@@ -168,6 +168,7 @@ describe('TrialEndingModal', () => {
 
     expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
     expect(screen.getByText(/add a payment method by Dec 5, 2026, your Workspace will be locked/)).toBeInTheDocument()
+    expect(screen.getByTestId('trial-reminder-tooltip')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
@@ -220,7 +221,7 @@ describe('TrialEndingModal', () => {
     expect(screen.getByRole('heading', { name: 'Your free access will end in 7 days' })).toBeInTheDocument()
     expect(
       screen.getByText(
-        'Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method.',
+        /Acme Inc will be locked on Dec 5, 2026 unless an admin chooses a plan and adds a payment method\.\sYour Safe accounts remain available in My accounts\./,
       ),
     ).toBeInTheDocument()
     expect(screen.getByText('Starter')).toBeInTheDocument()
@@ -228,6 +229,7 @@ describe('TrialEndingModal', () => {
     expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add payment method' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Continue without Safe Pro' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('trial-reminder-tooltip')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()

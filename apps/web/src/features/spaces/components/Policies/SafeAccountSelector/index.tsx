@@ -86,7 +86,8 @@ const SafeAccountSelector = ({
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
   const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
-  const ineligibilityText = selectedAccount?.ineligibleReason && INELIGIBILITY_TEXT[selectedAccount.ineligibleReason]
+  const ineligibilityText =
+    !readOnly && selectedAccount?.ineligibleReason ? INELIGIBILITY_TEXT[selectedAccount.ineligibleReason] : undefined
   const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {

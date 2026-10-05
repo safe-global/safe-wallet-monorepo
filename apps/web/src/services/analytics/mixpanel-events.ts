@@ -228,6 +228,7 @@ export enum MixpanelEventParams {
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
   GAS_PAYMENT_SOURCE = 'Gas Payment Source',
+  GAS_PAYMENT_OPTION = 'Gas Payment Option',
   ERROR_DOMAIN = 'Error Domain',
   ERROR_TYPE = 'Error Type',
   ERROR_LAYER = 'Error Layer',

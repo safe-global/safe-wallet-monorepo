@@ -31,20 +31,17 @@ jest.mock('../../../hooks/billing/useBillingPortal', () => ({
 jest.mock('../SelectAccountsStep', () => ({
   __esModule: true,
   default: ({
-    title,
     limit,
     planName,
     onBack,
     onContinue,
   }: {
-    title: string
     limit: number
     planName: string
     onBack: () => void
     onContinue: (removed: Array<{ chainId: string; address: string }>) => void
   }) => (
     <div data-testid="select-accounts-step" data-limit={limit} data-plan={planName}>
-      {title}
       <button onClick={onBack}>step-back</button>
       <button onClick={() => onContinue([{ chainId: '1', address: '0xC' }])}>step-continue</button>
     </div>
@@ -140,7 +137,6 @@ describe('PlanChooserModal', () => {
     expect(mockCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
-    expect(screen.getByTestId('select-accounts-step')).toHaveTextContent('Choose Safe accounts for your plan')
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
 
     fireEvent.click(screen.getByText('step-back'))

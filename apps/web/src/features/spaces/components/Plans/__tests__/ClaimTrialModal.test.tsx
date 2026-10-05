@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import ClaimTrialModal, { claimCopy, _freeLabel } from '../ClaimTrialModal'
@@ -80,7 +80,7 @@ describe('ClaimTrialModal', () => {
   afterEach(() => jest.restoreAllMocks())
 
   it('adapts the headline to the migrated 60-day grace and to a regular trial', () => {
-    expect(claimCopy(60).title).toBe('Your Workspace moved to Safe Pro on Oct 6, 2026')
+    expect(claimCopy(60).title).toBe('Your Workspace moved to Safe Pro')
     expect(claimCopy(30)).toMatchObject({
       title: 'Start your 30-day free access to Safe Pro',
       subtitle: 'All Pro features unlocked. No billing details needed upfront.',
@@ -107,23 +107,18 @@ describe('ClaimTrialModal', () => {
   it('links to the full feature comparison under the header', () => {
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
-    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute(
-      'href',
-      SAFE_PRO_ANNOUNCEMENT_URL,
-    )
+    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
   })
 
   it('offers the Business trial and, when the Workspace fits the seats, goes straight to Stripe', () => {
     const onBack = jest.fn()
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} />)
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent(
-      'Your Workspace moved to Safe Pro on Oct 6, 2026',
-    )
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Your Workspace moved to Safe Pro')
     expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('€499')
     expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('Free')
-    expect(screen.getByText('Available until Dec 5, 2026.')).toBeInTheDocument()
+    expect(screen.getByText('Available until Dec 5, 2026. You can subscribe any time after that.')).toBeInTheDocument()
     expect(screen.getByText('20 Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Policy engine')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
@@ -168,7 +163,7 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByText('Your first 60 days are free.')).toBeInTheDocument()
     expect(screen.getByText(/No payment method required/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-end-tooltip')).toBeInTheDocument()
-    expect(screen.getByText('Unlimited Workspace members')).toBeInTheDocument()
+    expect(screen.queryByText('Unlimited Workspace members')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
 

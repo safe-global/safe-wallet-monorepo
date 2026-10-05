@@ -10,7 +10,7 @@ import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -331,7 +331,7 @@ export function PlanCatalog({
           </TabsList>
         </Tabs>
 
-        <Link href={SAFE_PRO_ANNOUNCEMENT_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+        <Link href={SAFE_PRO_PRICING_URL} target="_blank" rel="noopener noreferrer" variant="muted">
           Compare all features <ArrowUpRight />
         </Link>
       </div>

@@ -41,6 +41,7 @@ const SponsoredTxsCounter = ({
   left,
   quota,
   resetsAt,
+  isSubscription,
   isPro,
 }: {
   /** Null reads as unlimited. */
@@ -48,7 +49,10 @@ const SponsoredTxsCounter = ({
   /** The plan's allowance per cycle on a Pro Safe, the free daily limit otherwise. */
   quota: number | null
   resetsAt: string | null
-  isPro: boolean
+  /** Counts a plan's allowance per cycle instead of the free daily limit. */
+  isSubscription: boolean
+  /** Shows the Pro chip instead of the upgrade button; null (plan unknown, or Pro does not apply as in Safe creation) shows neither. */
+  isPro: boolean | null
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
   const hasTrackedView = useRef(false)
@@ -63,12 +67,12 @@ const SponsoredTxsCounter = ({
       <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
         {left === null ? (
           <span>Unlimited sponsored transactions</span>
-        ) : isPro && quota !== null ? (
+        ) : isSubscription && quota !== null ? (
           <span>
             <span className="font-semibold" data-testid="sponsored-txs-left">
               {left}
             </span>
-            <span className="text-muted-foreground"> of {quota} sponsored transactions left</span>
+            <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
           </span>
         ) : (
           <span className="inline-flex items-center gap-1">
@@ -94,7 +98,9 @@ const SponsoredTxsCounter = ({
         {resets && <span className="text-xs text-muted-foreground">· Resets {resets}</span>}
       </Typography>
 
-      {isPro ? (
+      {isPro === null ? (
+        <span className="block h-5 w-8 shrink-0" aria-hidden />
+      ) : isPro ? (
         <span className="block h-5 w-8 shrink-0" role="img" aria-label="Safe Pro">
           <ProChip className="size-full" />
         </span>

@@ -3159,6 +3159,38 @@
         ]
       }
     },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, one entry per space with its Safes grouped by chain like the per-space endpoint. A space without Safes has an empty `safes` object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpacesSafesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/members/invite": {
       "post": {
         "description": "Invites one or more users to join a space. Only space admins can send invitations.",
@@ -4188,6 +4220,38 @@
         ]
       }
     },
+    "/v1/spaces/entitlements": {
+      "get": {
+        "description": "The entitlements of every workspace the user is an active member of, keyed by workspace UUID. Each value is what the per-workspace endpoint returns.",
+        "operationId": "entitlementsGetAllEntitlementsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EntitlementsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get entitlements of all spaces",
+        "tags": [
+          "entitlements"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/entitlements": {
       "get": {
         "description": "The single source of truth for what a workspace can do: the active plan and per-feature entitlements, with quotas and usage for metered ones. Free-tier workspaces get the same contract shape.",
@@ -4236,7 +4300,7 @@
     },
     "/v1/spaces/{spaceId}/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. Unlike the chain-scoped relay endpoint, the chain's own relayer policy does not apply: the allowance is the only limit. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
+        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. The chain must list SUBSCRIPTION among its gas payment options; no other option applies here. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
         "operationId": "spaceRelayRelayV1",
         "parameters": [
           {
@@ -4291,16 +4355,23 @@
             "description": "The workspace's sponsored-transaction allowance is spent. The body carries `quota`, `used` and `resetsAt` so a client can offer to pay for the transaction itself."
           },
           "403": {
-            "description": "Not a member of the workspace, the Safe is not one it holds, the chain has no relayer, or the transaction was denied"
+            "description": "Not a member of the workspace, or the transaction was denied"
           },
           "404": {
             "description": "Workspace not found"
           },
+          "409": {
+            "description": "SUBSCRIPTION cannot pay for this request: the chain does not list it or has no relayer, the Safe is not one the workspace holds, or the transaction refunds gas (`gasPrice` > 0).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Request failed schema validation, or the transaction was simulated and would revert (SIMULATION_FAILED) or could not be simulated (INDETERMINATE_SIMULATION)"
-          },
-          "501": {
-            "description": "The chain's relayer type is not supported"
           }
         },
         "summary": "Relay a transaction at a workspace's expense",
@@ -4490,6 +4561,16 @@
           "403": {
             "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
           },
+          "409": {
+            "description": "A transaction that refunds gas (`gasPrice` > 0) needs PAY_FROM_SAFE, which the chain does not offer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Relay rejected. The consumers MUST branch on the `code` field; `message` is informational. Possible cases: safeTxHash does not match the transaction data, unrecognised transaction type, SIMULATION_FAILED (Tenderly confirmed revert), or INDETERMINATE_SIMULATION (simulator unreachable; retry with `acceptUnverifiedSimulation=true` to proceed anyway).",
             "schema": {
@@ -4585,7 +4666,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
+        "description": "Retrieves the free relays left for a specific Safe on the given chain: the no-fee campaign quota where the chain lists NO_FEE_CAMPAIGN, otherwise the daily limit where it lists FREE_DAILY_LIMIT.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -4611,7 +4692,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
+            "description": "Safe transaction hash (0x prefixed hex string). Ignored; kept so existing clients do not break.",
             "schema": {
               "type": "string"
             }
@@ -4627,6 +4708,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The chain has no relayer or lists no free option, such as a chain that only lists PAY_FROM_SAFE"
           }
         },
         "summary": "Get remaining relays",
@@ -7231,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-5d1ff92",
+    "version": "main-002f9cb",
     "contact": {}
   },
   "tags": [],
@@ -8673,17 +8757,33 @@
             "type": "boolean"
           },
           "safeTransactionSponsored": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Use gasPaymentOptions instead."
           },
           "enableTenderlySimulationBeforeRelay": {
             "type": "boolean"
+          },
+          "gasPaymentOptions": {
+            "type": "array",
+            "description": "Who may pay for a relayed transaction on this chain.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
           }
         },
         "required": [
           "type",
           "safeCreationSponsored",
           "safeTransactionSponsored",
-          "enableTenderlySimulationBeforeRelay"
+          "enableTenderlySimulationBeforeRelay",
+          "gasPaymentOptions"
         ]
       },
       "Chain": {
@@ -11020,10 +11120,44 @@
             "items": {
               "$ref": "#/components/schemas/SpaceSafeDto"
             }
+          },
+          "addressBookItems": {
+            "description": "Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
           }
         },
         "required": [
           "safes"
+        ]
+      },
+      "GetSpacesSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          }
+        },
+        "required": [
+          "safes",
+          "spaceUuid"
         ]
       },
       "GetSpaceSafeResponse": {
@@ -13012,6 +13146,14 @@
           "resetsAt"
         ]
       },
+      "EntitlementsPlanStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "trialing"
+        ],
+        "description": "Status of the subscription the plan comes from"
+      },
       "EntitlementsPlan": {
         "type": "object",
         "properties": {
@@ -13028,12 +13170,21 @@
             "type": "string",
             "nullable": true,
             "description": "End of the current billing cycle"
+          },
+          "status": {
+            "description": "Status of the subscription the plan comes from",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlanStatus"
+              }
+            ]
           }
         },
         "required": [
           "id",
           "name",
-          "cycleEndsAt"
+          "cycleEndsAt",
+          "status"
         ]
       },
       "EntitlementsResponse": {
@@ -13116,6 +13267,66 @@
         },
         "required": [
           "taskId"
+        ]
+      },
+      "GasPaymentOptionUnavailableResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "GAS_PAYMENT_OPTION_UNAVAILABLE"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "requested": {
+            "type": "string",
+            "enum": [
+              "FREE_DAILY_LIMIT",
+              "SUBSCRIPTION",
+              "PAY_FROM_SAFE",
+              "NO_FEE_CAMPAIGN"
+            ],
+            "description": "The gas payment option the request needed."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NOT_LISTED",
+              "NO_RELAYER",
+              "NOT_A_WORKSPACE_SAFE",
+              "REFUNDING_TRANSACTION"
+            ],
+            "description": "NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0)."
+          },
+          "available": {
+            "type": "array",
+            "description": "The options the chain lists; empty without a relayer.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode",
+          "requested",
+          "reason",
+          "available"
         ]
       },
       "SafeList": {

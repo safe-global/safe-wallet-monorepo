@@ -19,6 +19,7 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   switchAuthenticator: false,
   twoFactorAwarenessBanner: false,
   safeStaking: false,
+  safePro: false,
 }
 
 /**
@@ -36,6 +37,7 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   switchAuthenticator: 'SWITCH_AUTHENTICATOR',
   twoFactorAwarenessBanner: 'TWO_FACTOR_AWARENESS_BANNER',
   safeStaking: 'SAFE_STAKING',
+  safePro: 'SAFE_PRO',
 }
 
 /**

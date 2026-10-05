@@ -123,6 +123,22 @@ describe('useSpaceSubmit under Safe Pro', () => {
     })
   })
 
+  it('gives the Safes step of the created Workspace as a URL, so a step-up can return there', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    expect(result.current.selectSafesUrl).toBeUndefined()
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(result.current.selectSafesUrl).toBe('/welcome?spaceId=11111111-1111-1111-1111-111111111111&next=%2Fbalances')
+  })
+
   it('never creates a second Workspace while the first waits on its trial offer', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({
       data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },

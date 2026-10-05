@@ -45,6 +45,8 @@ type PersistArgs = {
    *  entry) instead of swallowing it as success. Single-create flows keep the
    *  soft toast-and-succeed behavior. */
   isMultiChainCreation?: boolean
+  /** Chains this call adds the Safe to the space for, in one request; defaults to `chainId`, `[]` skips the space add. */
+  chainIdsToAddToSpace?: string[]
   /** Read-only provider for `chainId`, used to check the Safe isn't already
    *  deployed. Must target `chainId`; when absent the check is skipped. */
   provider?: JsonRpcProvider
@@ -80,6 +82,7 @@ export const persistCounterfactualSafe = async ({
   spaceSafeLimit,
   holdsSeatInSpace,
   isMultiChainCreation,
+  chainIdsToAddToSpace = [chainId],
   provider,
   dispatch,
 }: PersistArgs): Promise<PersistResult> => {
@@ -118,7 +121,7 @@ export const persistCounterfactualSafe = async ({
       return { ok: false, error: toPersistError(userResult.error) }
     }
 
-    if (spaceId !== null) {
+    if (spaceId !== null && chainIdsToAddToSpace.length > 0) {
       if (!isAdminOfActiveSpace) {
         // Backend gates this endpoint on admin role and would 403. Inform the
         // user — the safe is still persisted at the user level above.
@@ -142,7 +145,7 @@ export const persistCounterfactualSafe = async ({
         const spaceResult = await dispatch(
           spacesApi.endpoints.spaceSafesCreateV1.initiate({
             spaceId,
-            createSpaceSafesDto: { safes: [{ chainId, address: safeAddress }] },
+            createSpaceSafesDto: { safes: chainIdsToAddToSpace.map((id) => ({ chainId: id, address: safeAddress })) },
           }),
         )
         if ('error' in spaceResult) {

@@ -13,8 +13,10 @@ import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import { useSpaceSubscription } from '../../hooks/billing/useSpaceSubscription'
-import { getSubscriptionPlanName } from '../../hooks/billing/subscription'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
+import { useBillingSpaceId } from '../../hooks/billing/useBillingSpaceId'
+import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -34,9 +36,13 @@ const SpaceRow = ({
   showDivider?: boolean
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
-  // The badge only needs the subscription; the entitlements the Plans page also loads are one request per row too many.
-  const { subscription, status } = useSpaceSubscription(space.uuid)
-  const planName = status === 'active' ? (getSubscriptionPlanName(subscription) ?? undefined) : undefined
+  const billingSpaceId = useBillingSpaceId(space.uuid)
+  // All rows share the one cached request of all Workspaces' entitlements
+  const { plan } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
+    ...SPACE_REFRESH_OPTIONS,
+    selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
+  })
+  const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   const handleOpenWorkspace = () => {
     trackEvent(
@@ -70,12 +76,12 @@ const SpaceRow = ({
               isCompact
             />
           </div>
-          {planName && (
+          {plan && (
             <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
               <span className="block h-4 w-6">
                 <ProChip className="size-full" />
               </span>
-              · {planName}
+              {badgeLabel && `· ${badgeLabel}`}
             </Badge>
           )}
         </Link>

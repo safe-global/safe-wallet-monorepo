@@ -8,7 +8,7 @@ const setup = (state: SpendingLimitDrawerState) =>
   render(
     <SpendingLimitActions
       state={state}
-      pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
+      pending={{ transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }}
       onEdit={jest.fn()}
       onConnectWallet={jest.fn()}
     />,
@@ -72,7 +72,7 @@ describe('SpendingLimitActions', () => {
     const { user } = renderWithUserEvent(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'connect', disabled: false, helper: 'Connect a signer wallet to edit.' }}
-        pending={{ transactionLink: TRANSACTION_LINK, onReviewTransaction: jest.fn() }}
+        pending={{ transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }}
         onEdit={jest.fn()}
         onConnectWallet={onConnectWallet}
       />,
@@ -99,7 +99,7 @@ describe('SpendingLimitActions', () => {
       required: 2,
     })
 
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByText('should never render')).not.toBeInTheDocument()
   })
 
@@ -146,7 +146,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
-    expect(screen.queryByText('Editing a spending limit is coming soon.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Upgrade to Business to edit spending limits.')).not.toBeInTheDocument()
   })
 
   it('manage: keeps an unenforced policy out of the edit flow', () => {
@@ -163,7 +163,7 @@ describe('SpendingLimitActions', () => {
     ).toBeInTheDocument()
   })
 
-  it('manage: disables editing while no edit flow is supplied', () => {
+  it('manage: disables editing and points to the upgrade while no edit flow is supplied', () => {
     render(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'manage', disabled: false }}
@@ -172,7 +172,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   describe('copy-link', () => {
