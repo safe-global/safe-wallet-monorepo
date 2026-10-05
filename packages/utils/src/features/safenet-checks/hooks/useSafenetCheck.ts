@@ -103,10 +103,6 @@ export const useSafenetCheck = (
   const unavailableReason =
     status !== CheckStatus.UNAVAILABLE ? undefined : resolveUnavailableReason(snapshot, hasError)
 
-  // Events are sorted ascending, so [0] substitutes for the deadline on the
-  // plain path, which does not emit one.
-  const firstEventBlock = snapshot?.events[0] !== undefined ? String(snapshot.events[0].blockNumber) : null
-
   // A landed poll re-runs this, so the grace window below is re-evaluated
   // against a fresh clock instead of the one from the first read.
   const fulfilledAt = query.fulfilledTimeStamp
@@ -124,7 +120,6 @@ export const useSafenetCheck = (
         status,
         headBlock: snapshot?.headBlock ?? null,
         deadlineBlock: snapshot?.deadlineBlock ?? null,
-        firstEventBlock,
         submittedAtMs: aim,
         attestedAtMs: snapshot?.attestedAtMs ?? null,
         nowMs: Date.now(),
@@ -137,7 +132,6 @@ export const useSafenetCheck = (
     snapshot?.headBlock,
     snapshot?.deadlineBlock,
     snapshot?.attestedAtMs,
-    firstEventBlock,
     aim,
     fulfilledAt,
   ])

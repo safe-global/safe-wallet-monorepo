@@ -21,13 +21,12 @@ import {
   type NormalizedCheckEvent,
   type OracleAttestedEvent,
   type OracleProposedEvent,
-  type PlainAttestedEvent,
   type WindowCoverage,
 } from '../types'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
 import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
-import { plainProposalHash, transactionProposalHash } from '../utils/proposalHash'
+import { transactionProposalHash } from '../utils/proposalHash'
 
 /**
  * Everything one poll reads off-chain for a single check. Numeric values are
@@ -432,24 +431,15 @@ export class SafenetReader {
    * A group-key fetch failure is retryable (`PENDING`); a signature that does
    * not verify is terminal (`INVALID`).
    */
-  async verifyAttestation(attested: OracleAttestedEvent | PlainAttestedEvent): Promise<AttestationVerification> {
-    // The two paths sign different EIP-712 preimages; the event type decides.
-    const message =
-      attested.type === CheckEventType.ORACLE_ATTESTED
-        ? transactionProposalHash({
-            chainId: this.chainId,
-            consensus: this.consensus,
-            epoch: attested.epoch,
-            oracle: attested.oracle,
-            oracleDataHash: attested.oracleDataHash,
-            safeTxHash: attested.safeTxHash,
-          })
-        : plainProposalHash({
-            chainId: this.chainId,
-            consensus: this.consensus,
-            epoch: attested.epoch,
-            safeTxHash: attested.safeTxHash,
-          })
+  async verifyAttestation(attested: OracleAttestedEvent): Promise<AttestationVerification> {
+    const message = transactionProposalHash({
+      chainId: this.chainId,
+      consensus: this.consensus,
+      epoch: attested.epoch,
+      oracle: attested.oracle,
+      oracleDataHash: attested.oracleDataHash,
+      safeTxHash: attested.safeTxHash,
+    })
 
     let groupKey: { x: string; y: string }
     try {

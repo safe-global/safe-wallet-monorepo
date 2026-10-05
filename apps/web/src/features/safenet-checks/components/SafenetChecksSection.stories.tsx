@@ -5,7 +5,8 @@ import { faker } from '@faker-js/faker'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { createMockChain } from '@safe-global/test'
-import { buildPlainProposedLog } from '@safe-global/utils/features/safenet-checks/builders'
+import { SAFENET_ORACLE_ADDRESSES } from '@safe-global/utils/features/safenet-checks'
+import { buildOracleProposedLog } from '@safe-global/utils/features/safenet-checks/builders'
 import type { RawLog } from '@safe-global/utils/features/safenet-checks/utils/decodeLogs'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -139,7 +140,10 @@ export const Submitted: Story = {
       handlers: [
         chainConfig,
         rpcHolding([
-          buildPlainProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 32_939n }, { blockNumber: HEAD_BLOCK - 20 }),
+          buildOracleProposedLog(
+            { safeTxHash: SAFE_TX_HASH, epoch: 32_939n, oracle: SAFENET_ORACLE_ADDRESSES[0] },
+            { blockNumber: HEAD_BLOCK - 20 },
+          ),
         ]),
       ],
     },
