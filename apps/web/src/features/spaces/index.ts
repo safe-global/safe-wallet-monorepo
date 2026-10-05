@@ -104,6 +104,7 @@ export {
 
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
+export { useIsSafeInCurrentSpace } from './hooks/useIsSafeInCurrentSpace'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'
