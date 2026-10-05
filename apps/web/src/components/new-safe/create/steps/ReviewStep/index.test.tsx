@@ -1,6 +1,7 @@
 import type { NewSafeFormData } from '@/components/new-safe/create'
 import * as useChains from '@/hooks/useChains'
 import * as relay from '@/utils/relaying'
+import * as remainingRelays from '@/hooks/useRemainingRelays'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { render } from '@/tests/test-utils'
@@ -19,6 +20,7 @@ import * as notificationsSlice from '@/store/notificationsSlice'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { getStoreInstance } from '@/store'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
 jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
@@ -144,7 +146,7 @@ describe('ReviewStep', () => {
       <ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
     )
 
-    expect(queryByText('Who will pay gas fees:')).not.toBeInTheDocument()
+    expect(queryByText('Who will pay gas fees')).not.toBeInTheDocument()
   })
 
   it('should display the network fee for counterfactual safes if the user selects pay now', async () => {
@@ -193,7 +195,33 @@ describe('ReviewStep', () => {
       fireEvent.click(payNow)
     })
 
-    expect(getByText(/Who will pay gas fees:/)).toBeInTheDocument()
+    expect(getByText(/Who will pay gas fees/)).toBeInTheDocument()
+  })
+
+  it('shows the daily relay counter without a Pro upsell when Safe Pro is on, since a new Safe has no plan', () => {
+    const mockData: NewSafeFormData = {
+      name: 'Test',
+      networks: [mockChain],
+      threshold: 1,
+      owners: [{ name: '', address: '0x1' }],
+      saltNonce: 0,
+      safeVersion: LATEST_SAFE_VERSION as SafeVersion,
+    }
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+    jest.spyOn(relay, 'hasRemainingRelays').mockReturnValue(true)
+    jest
+      .spyOn(remainingRelays, 'useLeastRemainingRelays')
+      .mockReturnValue([{ remaining: 3, limit: 5 }, undefined, false])
+
+    render(<ReviewStep data={mockData} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />)
+
+    act(() => {
+      fireEvent.click(screen.getByText('Pay now'))
+    })
+
+    expect(screen.getByText(/free transactions left today/)).toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
   })
 
   const authReduxState = {
@@ -455,6 +483,8 @@ describe('ReviewStep', () => {
       return jest.spyOn(cfServices, 'persistCounterfactualSafe').mockResolvedValue({ ok: true })
     }
 
+    const newSafeHomeUrl = `/home?safe=${chainWithFeatures.shortName}%3A0x0000000000000000000000000000000000000001&spaceId=${MOCK_SPACE_UUID}`
+
     const singleChainData = (): NewSafeFormData => ({
       name: 'Test',
       networks: [chainWithFeatures],
@@ -548,13 +578,178 @@ describe('ReviewStep', () => {
         fireEvent.click(screen.getByTestId('review-step-next-btn'))
       })
 
-      expect(push).toHaveBeenCalledWith({
-        pathname: '/home',
-        query: {
-          safe: `${chainWithFeatures.shortName}:0x0000000000000000000000000000000000000001`,
-          spaceId: MOCK_SPACE_UUID,
-        },
+      expect(push).toHaveBeenCalledWith(newSafeHomeUrl)
+    })
+
+    it('returns from a step-up to the new Safe in the Workspace when Pay later needs one', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
       })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBe(newSafeHomeUrl)
+      expect(push).not.toHaveBeenCalled()
+      expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+    })
+
+    it('drops the step-up return URL once Pay later finishes without a step-up', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const returnUrlsDuringPersist: Array<string | undefined> = []
+      mockCreation().mockImplementation(async () => {
+        returnUrlsDuringPersist.push(getStoreInstance().getState().stepUp.returnUrl)
+        return { ok: true }
+      })
+
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(returnUrlsDuringPersist).toEqual([newSafeHomeUrl])
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+    })
+
+    it('sets no step-up return URL for Pay later outside a Workspace', async () => {
+      mockCreation().mockImplementation(async () => {
+        expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+        return { ok: true }
+      })
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        initialReduxState: authReduxState,
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(cfServices.persistCounterfactualSafe).toHaveBeenCalledTimes(1)
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+    })
+
+    it('sets no step-up return URL for Pay now, which adds the Safe to the Workspace only after deployment', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      const returnUrlsDuringDeployment: Array<string | undefined> = []
+      jest.spyOn(createLogic, 'createNewSafe').mockImplementation(async () => {
+        returnUrlsDuringDeployment.push(getStoreInstance().getState().stepUp.returnUrl)
+      })
+
+      render(
+        <ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />,
+        inSpace,
+      )
+
+      act(() => {
+        fireEvent.click(screen.getByText('Pay now'))
+      })
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).not.toHaveBeenCalled()
+      expect(returnUrlsDuringDeployment).toEqual([undefined])
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBeUndefined()
+    })
+
+    it('adds the Safe to the space for every network in one request, from the last network', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      const data = buildMultiChainData()
+      const [first, last] = data.networks
+
+      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenCalledTimes(2)
+      expect(persistSpy).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ chainId: first.chainId, chainIdsToAddToSpace: [] }),
+      )
+      expect(persistSpy).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          chainId: last.chainId,
+          spaceId: MOCK_SPACE_UUID,
+          chainIdsToAddToSpace: [first.chainId, last.chainId],
+        }),
+      )
+    })
+
+    it('leaves a network where the Safe was already deployed out of the Workspace request', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      persistSpy.mockResolvedValueOnce({ ok: true, skipped: 'already-deployed' })
+      const data = buildMultiChainData()
+
+      render(<ReviewStep data={data} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, inSpace)
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(persistSpy).toHaveBeenLastCalledWith(
+        expect.objectContaining({ chainIdsToAddToSpace: [data.networks[1].chainId] }),
+      )
+    })
+
+    it('waits for the step-up instead of opening the Safe when the multi-network Workspace add needs one', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      const persistSpy = mockCreation()
+      persistSpy
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={buildMultiChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(push).not.toHaveBeenCalled()
+      expect(getStoreInstance().getState().stepUp.returnUrl).toBe(newSafeHomeUrl)
+      expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
+    })
+
+    it('keeps the Safe name when the single-network Workspace add needs a step-up', async () => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockCreation().mockResolvedValue({ ok: false, error: new Error('elevation_required'), stepUpPending: true })
+      const push = jest.fn(() => Promise.resolve(true))
+
+      render(<ReviewStep data={singleChainData()} onSubmit={jest.fn()} onBack={jest.fn()} setStep={jest.fn()} />, {
+        ...inSpace,
+        routerProps: { ...inSpace.routerProps, push },
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('review-step-next-btn'))
+      })
+
+      expect(
+        getStoreInstance().getState().addressBook[chainWithFeatures.chainId]?.[
+          '0x0000000000000000000000000000000000000001'
+        ],
+      ).toBe('Test')
+      expect(push).not.toHaveBeenCalled()
     })
 
     it('ignores a Workspace stored by another tab when the URL has none', async () => {

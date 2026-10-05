@@ -1,6 +1,7 @@
 import { useId, useMemo, type ReactNode } from 'react'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { cn } from '@/utils/cn'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -46,6 +47,8 @@ export type SafeAccountSelectorProps = {
   hasWallet?: boolean
   /** Replaces the helper text when set. */
   errorMessage?: string
+  /** Pinned above the options, so it is read before a Safe is picked. */
+  notice?: { title: ReactNode; description: ReactNode }
   name?: string
   id?: string
 }
@@ -72,6 +75,7 @@ const SafeAccountSelector = ({
   onSwitchWallet,
   hasWallet = true,
   errorMessage,
+  notice,
   name,
   id,
 }: SafeAccountSelectorProps) => {
@@ -82,7 +86,8 @@ const SafeAccountSelector = ({
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
   const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
-  const ineligibilityText = selectedAccount?.ineligibleReason && INELIGIBILITY_TEXT[selectedAccount.ineligibleReason]
+  const ineligibilityText =
+    !readOnly && selectedAccount?.ineligibleReason ? INELIGIBILITY_TEXT[selectedAccount.ineligibleReason] : undefined
   const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {
@@ -201,6 +206,18 @@ const SafeAccountSelector = ({
         </SelectTrigger>
 
         <SelectContent className="max-h-80" alignItemWithTrigger={false}>
+          {notice && (
+            <Alert
+              variant="info"
+              className="mx-1 mb-1 w-auto px-4 py-3 *:data-[slot=alert-description]:text-muted-foreground"
+              data-testid="safe-account-selector-notice"
+            >
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle className="text-sm font-normal">{notice.title}</AlertTitle>
+              <AlertDescription>{notice.description}</AlertDescription>
+            </Alert>
+          )}
+
           {renderPopupContent()}
         </SelectContent>
       </Select>

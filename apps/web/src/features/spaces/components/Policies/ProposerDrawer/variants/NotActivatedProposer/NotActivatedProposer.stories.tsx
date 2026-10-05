@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { createMockStory } from '@/stories/mocks'
 import { NotActivatedProposer } from './NotActivatedProposer'
 
 const PARENT_SAFE = {
@@ -11,16 +12,18 @@ const OVERVIEW = {
   proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Marc' },
   appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0', name: 'Marketing' },
   initiatedBy: { address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000', name: 'Jacob' },
+  chainId: '1',
   lastUpdated: '06.24.26 03:35 AM UTC',
   enforcedBy: 'Safe module',
 }
 
+// The Network row reads chain config, so the stories need a store and the chains endpoint.
+const setup = createMockStory({ layout: 'none' })
+
 const meta = {
   title: 'Features/Spaces/Policies/ProposerDrawer/variants/NotActivatedProposer',
   component: NotActivatedProposer,
-  parameters: {
-    layout: 'centered',
-  },
+  parameters: { ...setup.parameters, layout: 'centered' },
   tags: ['autodocs'],
   args: {
     safe: PARENT_SAFE,
@@ -28,6 +31,7 @@ const meta = {
     overview: OVERVIEW,
   },
   decorators: [
+    setup.decorator,
     (Story) => (
       <div className="w-[408px]">
         <Story />
