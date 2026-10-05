@@ -10,7 +10,7 @@ import { List, ListItem, ListItemText } from '@/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_PRO_PRICING_URL } from '@/config/constants'
+import { SAFE_PRO_PRICING_URL, SAFE_PRO_TERMS_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { cn } from '@/utils/cn'
 import { formatPlanPrice, getPlanCta, priceSuffix } from './planTiers'
@@ -20,8 +20,8 @@ type Cycle = 'month' | 'year'
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
-/** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
-export const YEARLY_SAVINGS_LABEL = 'Save up to 13%'
+/** Legal's wording: the yearly saving is 10.0–12.3% depending on the plan. */
+export const YEARLY_SAVINGS_LABEL = 'Save ~10%'
 
 const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
 
@@ -211,7 +211,9 @@ export const PlanCard = ({
                 <Typography variant="h4" className={cn(selectable && 'line-through')}>
                   {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
                 </Typography>
-                <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
+                <Typography color="muted">
+                  {price === null ? 'Annual term' : `${priceSuffix(tier.billingCycle)} · excl. VAT`}
+                </Typography>
                 {selectable && (
                   <Typography variant="paragraph-large-bold" color="success">
                     Free
@@ -306,6 +308,13 @@ export function PlanCatalog({
           />
         ))}
       </div>
+
+      <Typography variant="paragraph-small" color="muted" align="center">
+        Terms apply:{' '}
+        <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          Safe Pro Terms
+        </Link>
+      </Typography>
     </div>
   )
 }

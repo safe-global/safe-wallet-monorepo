@@ -15,19 +15,19 @@ const SHARED_FEATURES = [
 ]
 
 export const PLAN_FEATURES: Record<string, string[]> = {
-  Starter: ['10 sponsored transactions per month', ...SHARED_FEATURES, 'Builder API access'],
+  Starter: ['10 eligible sponsored transactions per month, up to €5 each', ...SHARED_FEATURES, 'Builder API access'],
   Business: [
-    '50 sponsored transactions per month',
+    '50 eligible sponsored transactions per month, up to €5 each',
     ...SHARED_FEATURES,
     'Growth API access',
-    'Pay fees from Safe accounts',
+    'Pay fees from Safe accounts (coming soon)',
     'Policy engine',
   ],
   Enterprise: [
-    'Unlimited sponsored transactions',
+    'Unlimited eligible sponsored transactions, up to €10 each',
     ...SHARED_FEATURES,
     'Scale API access',
-    'Pay fees from Safe accounts',
+    'Pay fees from Safe accounts (coming soon)',
     'Policy engine',
   ],
 }
@@ -38,6 +38,8 @@ export const ENTERPRISE_TIER: PlanTier = {
   name: 'Enterprise',
   currency: 'eur',
   billingCycle: null,
-  options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
+  options: [
+    { paymentLinkId: null, priceId: null, label: 'More than 20 Safe accounts', price: null, originalPrice: null },
+  ],
   features: PLAN_FEATURES.Enterprise,
 }
