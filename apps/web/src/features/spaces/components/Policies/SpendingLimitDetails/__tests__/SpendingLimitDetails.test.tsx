@@ -109,14 +109,14 @@ describe('SpendingLimitDetails', () => {
     mockAddressBooks({})
   })
 
-  it('shows a signer of the Safe the edit action, waiting on the edit flow', () => {
+  it('shows a signer of the Safe the edit action, held back by the plan while no edit flow is supplied', () => {
     mockWallet()
     mockSpaceSafes(false)
 
     setup()
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeInTheDocument()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   it('tells a wallet that does not sign for the Safe why it cannot edit', () => {

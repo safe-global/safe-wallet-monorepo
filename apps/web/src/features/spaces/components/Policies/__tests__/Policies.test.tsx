@@ -729,6 +729,42 @@ describe('Policies', () => {
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
     })
 
+    it('keeps Edit disabled and points to the upgrade while the plan locks spending limits', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+      expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
+    })
+
+    it('keeps Edit available when only proposers are locked', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies
+            policies={[policy]}
+            locked={{ ...mockStarterPlan, lockedPolicies: ['proposer'], onUpgrade: jest.fn() }}
+          />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Edit' })).toBeEnabled()
+    })
+
     it('hides the panel while a flow is open, as the pending panel does', async () => {
       const policy = mockActiveSpendingLimit()
       mockWallet()

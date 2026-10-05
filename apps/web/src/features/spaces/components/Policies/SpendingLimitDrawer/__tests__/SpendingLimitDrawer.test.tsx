@@ -158,11 +158,11 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  it('disables editing until an edit flow is supplied', () => {
+  it('disables editing and points to the upgrade while no edit flow is supplied', () => {
     setup(mockActiveSpendingLimit(), MOCK_VIEWERS.signer, {})
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   it('leaves out the last updated row while the payload carries no timestamp', () => {
