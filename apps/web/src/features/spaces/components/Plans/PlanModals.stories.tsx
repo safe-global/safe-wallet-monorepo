@@ -85,6 +85,12 @@ export const LockedTrialEnded: Story = {
   ),
 }
 
+/** A Workspace that never had a plan: locked until an admin picks one. */
+export const LockedNoPlan: Story = {
+  parameters: withBilling([]),
+  render: () => <PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={() => {}} />,
+}
+
 /** Trial Ending with the redesigned plan cards behind SAFE_PRO_PLANS_V2. */
 export const RedesignedTrialEnding: Story = {
   parameters: withBilling([trial], PAID_LINKS, setupV2),
@@ -101,6 +107,13 @@ export const RedesignedLockedTrialEnded: Story = {
   ),
   decorators: [setupV2.decorator],
   render: LockedTrialEnded.render,
+}
+
+/** Locked No Plan with the redesigned plan cards behind SAFE_PRO_PLANS_V2. */
+export const RedesignedLockedNoPlan: Story = {
+  parameters: withBilling([], PAID_LINKS, setupV2),
+  decorators: [setupV2.decorator],
+  render: LockedNoPlan.render,
 }
 
 /** The last payment failed: the Workspace is locked until billing is fixed or another plan is picked. */

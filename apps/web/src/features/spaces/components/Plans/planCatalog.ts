@@ -4,7 +4,7 @@ import type { PlanTier } from './types'
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
 
 /** Largest yearly saving across plans. */
-export const YEARLY_SAVINGS_PERCENT = 13
+export const YEARLY_SAVINGS_LABEL = 'Save ~10%'
 
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
@@ -39,8 +39,8 @@ export type PlanNameV2 = (typeof PLAN_ORDER)[number]
 
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
-export const MULTIPLE_WORKSPACES = 'Multi-Workspace agreements available'
 export const NAMED_SUPPORT_CONTACT = 'Named support contact'
+export const POLICIES = 'Policies (spending limits, proposers)'
 
 export type PlanContentV2 = {
   /** Who the plan is for, one line under its name. */
@@ -70,7 +70,6 @@ type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, stri
 
 /** Card lists, in the compare table's section order. `from` is the first plan that includes it. */
 export const CARD_FEATURES_V2: CardFeatureV2[] = [
-  { from: 'Enterprise', label: MULTIPLE_WORKSPACES },
   { from: 'Enterprise', label: 'Custom Safe capacity' },
   {
     from: 'Starter',
@@ -82,9 +81,7 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   },
   { from: 'Starter', label: 'Shared address book' },
   { from: 'Starter', label: 'Workspace activity log' },
-  { from: 'Business', label: 'Spending limits' },
-  { from: 'Business', label: 'Transaction proposers' },
-  { from: 'Business', label: 'Self-custodial account recovery' },
+  { from: 'Business', label: POLICIES },
   { from: 'Starter', label: 'Advanced threat analysis' },
   { from: 'Starter', label: 'Transaction simulation' },
   { from: 'Enterprise', label: NAMED_SUPPORT_CONTACT },
@@ -106,7 +103,9 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
-  yearlySavings: `Save up to ${YEARLY_SAVINGS_PERCENT}%`,
+  yearlySavings: YEARLY_SAVINGS_LABEL,
+  termsApply: 'Terms apply:',
+  proTerms: 'Safe Pro Terms',
   billingCycleLabel: 'Billing cycle',
   monthly: 'Monthly',
   yearly: 'Yearly',
@@ -161,7 +160,7 @@ export const COMPARE_COPY_V2 = {
   addOn: 'Add on',
 }
 
-/** Unreleased: listed on the cards with a "Soon" chip, never in the compare table. */
+/** Unreleased: listed on the cards with a "Soon" chip; a compare table row marks it with `isComingSoon`. */
 export const COMING_SOON_V2: Pick<CompareRowV2, 'feature' | 'values'>[] = [
   { feature: PAY_GAS_FROM_SAFE, values: fromBusiness },
   { feature: SAFENET_CHECKS, values: fromBusiness },
@@ -173,7 +172,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
     title: 'Limits',
     rows: [
-      { feature: 'Workspaces', values: { Starter: '1', Business: '1', Enterprise: 'Multiple' } },
+      { feature: 'Workspaces', values: every('1') },
       { feature: MEMBERS, values: every('Unlimited') },
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
@@ -189,9 +188,8 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
       { feature: 'Shared address book', values: every(true) },
       { feature: 'Workspace activity log', values: every(true) },
       { feature: 'Nested Safe support', values: every(true) },
-      { feature: 'Spending limits', values: fromBusiness },
-      { feature: 'Transaction proposers', values: fromBusiness },
-      { feature: 'Self-custodial account recovery', values: fromBusiness },
+      { feature: POLICIES, values: fromBusiness },
+      { feature: PAY_GAS_FROM_SAFE, values: fromBusiness, isComingSoon: true },
     ],
   },
   {

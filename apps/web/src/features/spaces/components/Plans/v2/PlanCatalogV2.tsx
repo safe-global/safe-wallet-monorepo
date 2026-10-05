@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
+import { SAFE_PRO_TERMS_URL } from '@/config/constants'
 import { READ_ONLY_NOTE } from '../PlanCards'
 import { COMPARE_COPY_V2, PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getVisibleTiers } from '../planTiers'
@@ -83,6 +84,13 @@ export default function PlanCatalogV2({
           {READ_ONLY_NOTE}
         </Typography>
       )}
+
+      <Typography variant="paragraph-mini" color="muted" align="center">
+        {PLAN_CARD_COPY_V2.termsApply}{' '}
+        <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          {PLAN_CARD_COPY_V2.proTerms}
+        </Link>
+      </Typography>
     </div>
   )
 

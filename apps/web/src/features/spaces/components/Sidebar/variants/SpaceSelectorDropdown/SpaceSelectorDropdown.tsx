@@ -36,7 +36,6 @@ import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 import { useSpacesSafeEligibility } from '../../../../hooks/useSpacesSafeEligibility'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../../../hooks/billing/subscription'
 import { useIsSafeProPlansV2Enabled } from '../../../../hooks/useIsSafeProPlansV2Enabled'
-import { StatusDot } from '../../../Plans/v2/StatusDot'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
 export const NO_PLAN_TOOLTIP = 'Choose a plan for this Workspace to add Safe accounts'
@@ -217,14 +216,9 @@ export const SpaceSelectorDropdown = ({
                 className={cn(
                   css.spaceSelectorSubtitle,
                   'block truncate',
-                  !isSafePro || isPlansV2
-                    ? 'text-muted-foreground'
-                    : isTrialEndingSoon
-                      ? 'text-warning-strong'
-                      : 'text-green-500',
+                  !isSafePro ? 'text-muted-foreground' : isTrialEndingSoon ? 'text-warning-strong' : 'text-green-500',
                 )}
               >
-                {isSafePro && isPlansV2 && <StatusDot isWarning={isTrialEndingSoon} className="mr-1.5 align-middle" />}
                 {planLabel}
               </span>
             </div>
