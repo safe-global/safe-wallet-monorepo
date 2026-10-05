@@ -61,7 +61,7 @@ describe('removedSafesNote', () => {
 
   it('covers both in one sentence when the list mixes them', () => {
     expect(removedSafesNote({ accounts: 1, partialAccounts: 1, partialNetworks: 1 })).toBe(
-      '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts; the others keep their seats.',
+      '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts, the others keep their seats.',
     )
   })
 })

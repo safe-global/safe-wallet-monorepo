@@ -191,7 +191,7 @@ describe('ChangePlanDialog', () => {
     )
 
     expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
-      '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts; the others keep their seats.',
+      '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts, the others keep their seats.',
     )
   })
 
