@@ -57,7 +57,10 @@ const offer = (planName: string, paymentLinkId: string, seats: number, price: nu
   billingCycle: 'month',
   trialPeriodDays: 60,
 })
-const BUSINESS = { name: 'Business', offers: [offer('Business', 'pl_business', 20, 499)] }
+const BUSINESS = {
+  name: 'Business',
+  offers: [{ ...offer('Business', 'pl_business', 20, 499), features: ['Policy engine'] }],
+}
 const STARTER = { name: 'Starter', offers: [offer('Starter', 'pl_starter', 2, 149)] }
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 
