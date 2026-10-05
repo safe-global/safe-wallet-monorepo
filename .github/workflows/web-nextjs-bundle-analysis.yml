@@ -99,53 +99,54 @@ jobs:
           name: bundle
           path: apps/web/.next/analyze/__bundle_analysis.json
 
-      - name: List artifacts from default branch
+      - name: List artifacts
         id: list_artifacts
+        if: github.event_name == 'pull_request'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
+          REPO_ID: ${{ github.repository_id }}
         run: |
-          runs=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
-            "https://api.github.com/repos/$REPO/actions/workflows/web-nextjs-bundle-analysis.yml/runs?event=push&branch=dev&status=success&per_page=1")
+          artifact_id=$(gh api "repos/$REPO/actions/artifacts?name=bundle&per_page=100" --jq \
+            "[.artifacts[] | select(.expired == false and .workflow_run.head_branch == \"dev\" and .workflow_run.head_repository_id == $REPO_ID)][0].id // empty")
 
-          artifacts_url=$(echo "$runs" | jq -r '.workflow_runs[0].artifacts_url')
-          artifacts=$(curl -s -H "Authorization: Bearer $GH_TOKEN" "$artifacts_url")
-
-          artifact_id=$(echo "$artifacts" | jq -r '.artifacts[] | select(.name=="bundle" and .expired==false) | .id')
-
-          echo "artifact_id=$artifact_id" >> $GITHUB_OUTPUT
+          if [ -z "$artifact_id" ]; then
+            echo "::warning::No dev bundle found in the latest 100 bundle artifacts; skipping the comparison."
+          fi
+          echo "artifact_id=$artifact_id" >> "$GITHUB_OUTPUT"
 
       - name: Download artifact zip
+        if: steps.list_artifacts.outputs.artifact_id != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           ARTIFACT_ID: ${{ steps.list_artifacts.outputs.artifact_id }}
-        run: |
-          curl -L \
-            -H "Authorization: Bearer $GH_TOKEN" \
-            -o artifact.zip \
-            "https://api.github.com/repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip"
+        run: gh api "repos/$REPO/actions/artifacts/$ARTIFACT_ID/zip" > artifact.zip
 
       - name: Unzip artifact
+        if: steps.list_artifacts.outputs.artifact_id != ''
         run: unzip artifact.zip -d apps/web/.next/analyze/base && mkdir -p apps/web/.next/analyze/base/bundle && mv apps/web/.next/analyze/base/__bundle_analysis.json apps/web/.next/analyze/base/bundle/
 
       - name: Compare with base branch bundle
-        if: success() && github.event.number
+        if: success() && github.event.number && steps.list_artifacts.outputs.artifact_id != ''
         run: |
           cd apps/web
           ls -laR .next/analyze/base && npx -p nextjs-bundle-analysis@0.5.0 compare
 
       - name: Get Comment Body
         id: get-comment-body
-        if: success() && github.event.number
+        if: success() && github.event.number && steps.list_artifacts.outputs.artifact_id != ''
         # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#multiline-strings
         run: |
           cd apps/web
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$(cat .next/analyze/__bundle_analysis_comment.txt)" >> $GITHUB_OUTPUT
-          echo EOF >> $GITHUB_OUTPUT
+          {
+            echo "body<<EOF"
+            printf '%s\n' "$(cat .next/analyze/__bundle_analysis_comment.txt)"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
 
       - name: Comment
+        if: steps.get-comment-body.outputs.body != ''
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: next-bundle-analysis
