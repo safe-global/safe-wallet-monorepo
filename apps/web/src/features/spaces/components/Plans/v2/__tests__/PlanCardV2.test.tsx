@@ -69,4 +69,28 @@ describe('PlanCardV2', () => {
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
+  it('marks only the plan in force as current', () => {
+    const { rerender } = render(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan()} />)
+    expect(screen.getByTestId('plan-current-badge')).toHaveTextContent('Current')
+
+    rerender(<PlanCardV2 tier={BUSINESS} />)
+
+    expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
+  })
+  it('opens the other billing cycle on the Safe count of the plan in force', () => {
+    const yearly: PlanTier = {
+      ...BUSINESS,
+      id: 'Business-year',
+      billingCycle: 'year',
+      options: [option(5, 719_000), option(20, 1_799_000)],
+    }
+    render(<PlanCardV2 tier={yearly} currentPlan={businessPlan({ seatsLabel: '20 Safe accounts' })} />)
+
+    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
+  })
+  it('heads the feature list with the plan support level', () => {
+    render(<PlanCardV2 tier={BUSINESS} />)
+
+    expect(screen.getByText('Priority support, plus:')).toBeInTheDocument()
+  })
 })

@@ -1,6 +1,6 @@
 import { ENTERPRISE_TIER } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { getPlanCtaV2, getPlanPriceV2 } from '../planCardsV2'
+import { getCardSavingV2, getPlanCtaV2, getPlanPriceV2, getYearlySavingV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -88,7 +88,6 @@ describe('getPlanPriceV2', () => {
     expect(getPlanPriceV2(tier(), option({ price: 669 }))).toEqual({
       headline: '€669',
       suffix: '/mo',
-      line: 'Billed monthly · excl. VAT',
     })
   })
 
@@ -96,7 +95,6 @@ describe('getPlanPriceV2', () => {
     expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ price: 17_424 }))).toEqual({
       headline: '€17,424',
       suffix: '/yr',
-      line: 'Billed yearly · excl. VAT',
     })
   })
 
@@ -104,7 +102,39 @@ describe('getPlanPriceV2', () => {
     expect(getPlanPriceV2(ENTERPRISE_TIER, ENTERPRISE_TIER.options[0])).toEqual({
       headline: 'Custom',
       suffix: 'Annual term',
-      line: 'Pricing by agreement · Billed annually',
     })
+  })
+})
+
+describe('getYearlySavingV2', () => {
+  it('shows what a year saves against twelve monthly payments', () => {
+    expect(getYearlySavingV2(1669 * 12, 17_990, 'eur')).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getYearlySavingV2(189 * 12, 1990, 'eur')).toEqual({ amount: '€278', percent: '12.3%' })
+  })
+
+  it('shows nothing without both prices or without a saving', () => {
+    expect(getYearlySavingV2(null, 17_990, 'eur')).toBeUndefined()
+    expect(getYearlySavingV2(20_028, undefined, 'eur')).toBeUndefined()
+    expect(getYearlySavingV2(12_000, 12_000, 'eur')).toBeUndefined()
+  })
+})
+
+describe('getCardSavingV2', () => {
+  const yearlyTier = tier({
+    id: 'Business-year',
+    billingCycle: 'year',
+    options: [option({ price: 17_990, originalPrice: 20_028 })],
+  })
+
+  it('shows a yearly card its own saving', () => {
+    expect(getCardSavingV2(yearlyTier, yearlyTier.options[0], undefined)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
+  it('shows a monthly card what the same Safe count saves yearly', () => {
+    expect(getCardSavingV2(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getCardSavingV2(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
   })
 })

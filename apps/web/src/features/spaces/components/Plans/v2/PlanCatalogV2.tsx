@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { ArrowDown } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Link } from '@/components/ui/link'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
-import { SAFE_PRO_TERMS_URL } from '@/config/constants'
+import { SAFE_PRO_SERVICE_DESCRIPTIONS_URL, SAFE_PRO_TERMS_URL } from '@/config/constants'
 import { READ_ONLY_NOTE } from '../PlanCards'
 import { COMPARE_COPY_V2, PLAN_CARD_COPY_V2 } from '../planCatalog'
 import { getVisibleTiers } from '../planTiers'
@@ -36,25 +35,31 @@ export default function PlanCatalogV2({
   const catalog = (
     <div className="@container flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-          <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
-            <TabsTrigger value="month">{PLAN_CARD_COPY_V2.monthly}</TabsTrigger>
-            <TabsTrigger value="year">
-              {PLAN_CARD_COPY_V2.yearly}
-              {hasYearly && (
-                <Badge variant="positive" size="status" shape="status" data-testid="yearly-savings">
-                  {PLAN_CARD_COPY_V2.yearlySavings}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
+            <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
+              <TabsTrigger value="month">{PLAN_CARD_COPY_V2.monthly}</TabsTrigger>
+              <TabsTrigger value="year">{PLAN_CARD_COPY_V2.yearly}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {hasYearly && cycle === 'month' && (
+            <Link
+              render={<button type="button" />}
+              variant="muted"
+              className="whitespace-nowrap"
+              data-testid="yearly-savings"
+              onClick={() => setCycle('year')}
+            >
+              {PLAN_CARD_COPY_V2.switchToYearly}
+            </Link>
+          )}
+        </div>
 
         {!embedded && (
           <Link
             href={`#${COMPARE_FEATURES_ID}`}
             variant="muted"
-            className="whitespace-nowrap"
+            className="hidden whitespace-nowrap @2xl:inline"
             onClick={(event) => {
               if (!onCompareFeatures) return
               event.preventDefault()
@@ -67,13 +72,15 @@ export default function PlanCatalogV2({
       </div>
 
       {/* One shared row track per card section (the cards subgrid into it), so rows align whatever wraps. */}
-      <div className="flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
+      <div className="group/plans flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
         {visible.map((tier) => (
           <PlanCardV2
             key={tier.id}
             tier={tier}
             seatsLabel={seatsByPlan[tier.name]}
             onSeatsChange={(label) => setSeatsByPlan((picked) => ({ ...picked, [tier.name]: label }))}
+            yearlyTier={tiers.find((other) => other.name === tier.name && other.billingCycle === 'year')}
+            onSwitchToYearly={() => setCycle('year')}
             {...actions}
           />
         ))}
@@ -89,6 +96,10 @@ export default function PlanCatalogV2({
         {PLAN_CARD_COPY_V2.termsApply}{' '}
         <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
           {PLAN_CARD_COPY_V2.proTerms}
+        </Link>
+        {' · '}
+        <Link href={SAFE_PRO_SERVICE_DESCRIPTIONS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          {PLAN_CARD_COPY_V2.serviceDescriptions}
         </Link>
       </Typography>
     </div>

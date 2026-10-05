@@ -60,7 +60,7 @@ const UsageMeter = ({
       variant={isV2 ? 'muted-secondary' : 'muted'}
       radius={isV2 ? 'lg-xl' : undefined}
       size="sm"
-      hairline={isV2}
+      bordered={isV2}
       className="flex-1"
     >
       <CardContent className="flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function PlanStatusCard({
   isManaging?: boolean
   /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
-  /** v2 style: hairline tiles, a neutral badge with a status dot, and the countdown in the status line. */
+  /** v2 style: bordered tiles, a neutral badge with a status dot, and the countdown in the status line. */
   appearance?: 'launch' | 'v2'
 }) {
   const isTrial = plan?.status === 'trialing'

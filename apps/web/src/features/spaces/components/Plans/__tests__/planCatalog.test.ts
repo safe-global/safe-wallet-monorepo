@@ -1,40 +1,22 @@
-import { getCardComingSoonV2, getCardFeaturesV2 } from '../planCatalog'
+import { getCardFeaturesV2 } from '../planCatalog'
+
+const SHARED = ['Shared address book', 'Activity log', 'Advanced threat analysis', 'Transaction simulation']
+const FROM_BUSINESS = ['MFA authentication', 'Policy engine', 'Transaction proposers']
 
 describe('getCardFeaturesV2', () => {
-  it('lists everything a plan includes, its own features before the shared ones', () => {
-    const business = getCardFeaturesV2('Business')
-
-    expect(business?.slice(0, 4)).toEqual([
-      '50 eligible sponsored transactions per month, up to €5 each',
-      'Spending limits',
-      'Transaction proposers',
-      'Self-custodial account recovery',
+  it('lists the Oct 6 feature list in the same order on every card', () => {
+    expect(getCardFeaturesV2('Starter')).toEqual(['10 sponsored transactions per month', ...SHARED])
+    expect(getCardFeaturesV2('Business')).toEqual(['50 sponsored transactions per month', ...SHARED, ...FROM_BUSINESS])
+    expect(getCardFeaturesV2('Enterprise')).toEqual([
+      'Unlimited sponsored transactions',
+      ...SHARED,
+      ...FROM_BUSINESS,
+      'Custom Safe capacity',
+      'Tailored contract & billing terms',
     ])
-    expect(business).toEqual(expect.arrayContaining(['Shared address book', 'Transaction simulation']))
-    expect(business).not.toContain('Custom Safe capacity')
-  })
-
-  it('gives Enterprise every card feature, with its own quota', () => {
-    const enterprise = getCardFeaturesV2('Enterprise')
-
-    expect(enterprise).toHaveLength(12)
-    expect(enterprise).toContain('Unlimited eligible sponsored transactions, up to €10 each')
-    expect(enterprise).not.toContain('50 eligible sponsored transactions per month, up to €5 each')
-  })
-
-  it('leaves out higher-plan features on Starter', () => {
-    expect(getCardFeaturesV2('Starter')).not.toContain('Spending limits')
   })
 
   it('has no list for an unknown plan', () => {
     expect(getCardFeaturesV2('Legacy')).toBeUndefined()
-  })
-})
-
-describe('getCardComingSoonV2', () => {
-  it('lists the coming features on every plan that gets them', () => {
-    expect(getCardComingSoonV2('Starter')).toEqual([])
-    expect(getCardComingSoonV2('Business')).toEqual(getCardComingSoonV2('Enterprise'))
-    expect(getCardComingSoonV2('Enterprise')).toHaveLength(3)
   })
 })

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
-import { ArrowUpRight, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -25,15 +25,15 @@ const TABLE_ID = `${COMPARE_FEATURES_ID}-table`
 const TITLE_ID = `${COMPARE_FEATURES_ID}-title`
 const PLANS = PLAN_ORDER
 
-/** Collapsed, the table shows this many features clearly and the next few fading out under the button. */
-export const VISIBLE_FEATURES = 5
-const PEEK_FEATURES = 2
+/** Collapsed, only the coming-soon rows show in full; the next row fades out under the button. */
+export const VISIBLE_FEATURES = COMPARE_SECTIONS_V2[0].rows.length
+const PEEK_FEATURES = 1
 
-const CompareValue = ({ value, isCurrent }: { value: CompareValueV2; isCurrent: boolean }) => {
+const CompareValue = ({ value }: { value: CompareValueV2 }) => {
   if (value === true) {
     return (
       <>
-        <FeatureCheck isEmphasized={isCurrent} />
+        <FeatureCheck />
         <span className="sr-only">{COMPARE_COPY_V2.included}</span>
       </>
     )
@@ -57,50 +57,28 @@ const trackDiscussAddOn = () =>
     { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.discuss_add_on },
   )
 
-const ADD_ON_ARROW_EASE = 'duration-300 ease-soft motion-reduce:transition-none'
-
-/** A plan's add-on value, opening the Guardian signup; an arrow slides in while it is hovered or focused. */
+/** Opens the Guardian signup. */
 const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => (
   <Link
     render={<button type="button" />}
-    className="group/add-on inline-flex items-center font-semibold"
+    className="font-semibold"
     onClick={() => {
       trackDiscussAddOn()
       onOpen()
     }}
   >
     {label}
-    <span
-      aria-hidden
-      className={cn(
-        'inline-flex w-0 overflow-hidden opacity-0 transition-[width,margin,opacity]',
-        'group-hover/add-on:ml-1 group-hover/add-on:w-4 group-hover/add-on:opacity-100',
-        'group-focus-visible/add-on:ml-1 group-focus-visible/add-on:w-4 group-focus-visible/add-on:opacity-100',
-        ADD_ON_ARROW_EASE,
-      )}
-    >
-      <ArrowUpRight
-        className={cn(
-          'size-4 -translate-x-1 transition-transform group-hover/add-on:translate-x-0 group-focus-visible/add-on:translate-x-0',
-          ADD_ON_ARROW_EASE,
-        )}
-      />
-    </span>
   </Link>
 )
 
 const CompareRow = ({
   row,
-  currentPlanName,
   isFolded,
-  isExpanded,
   onOpenAddOn,
   ref,
 }: {
   row: CompareRowV2
-  currentPlanName?: string
   isFolded: boolean
-  isExpanded: boolean
   onOpenAddOn: () => void
   ref?: Ref<HTMLTableRowElement>
 }) => (
@@ -114,6 +92,7 @@ const CompareRow = ({
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal whitespace-normal">
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {row.feature}
+        {row.isAddOn && <AddOnLink label={COMPARE_COPY_V2.learnMore} onOpen={onOpenAddOn} />}
         {row.isComingSoon && (
           <Badge variant="subtle" size="status" shape="status">
             {COMPARE_COPY_V2.soon}
@@ -123,11 +102,7 @@ const CompareRow = ({
     </TableHead>
     {PLANS.map((plan) => (
       <TableCell key={plan} className="px-4 py-3">
-        {row.isAddOn && typeof row.values[plan] === 'string' ? (
-          <AddOnLink label={row.values[plan]} onOpen={onOpenAddOn} />
-        ) : (
-          <CompareValue value={row.values[plan]} isCurrent={isExpanded && plan === currentPlanName} />
-        )}
+        <CompareValue value={row.values[plan]} />
       </TableCell>
     ))}
   </TableRow>
@@ -207,14 +182,12 @@ const CompareSection = ({
   section,
   index,
   isExpanded,
-  currentPlanName,
   onOpenAddOn,
   lastPeekRowRef,
 }: {
   section: CompareSectionV2
   index: number
   isExpanded: boolean
-  currentPlanName?: string
   onOpenAddOn: () => void
   lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
@@ -247,9 +220,7 @@ const CompareSection = ({
           key={row.feature}
           ref={firstRow + rowIndex === LAST_PEEK_ROW ? lastPeekRowRef : undefined}
           row={row}
-          currentPlanName={currentPlanName}
           isFolded={!isFoldable && !isExpanded && firstRow + rowIndex >= VISIBLE_FEATURES}
-          isExpanded={isExpanded}
           onOpenAddOn={onOpenAddOn}
         />
       ))}
@@ -295,14 +266,9 @@ export default function CompareFeaturesCard({
             onClick={() => onExpandedChange(!isExpanded)}
             className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <span className="flex flex-col gap-0.5">
-              <Typography variant="h4" id={TITLE_ID}>
-                {COMPARE_COPY_V2.title}
-              </Typography>
-              <Typography variant="paragraph-small" color="muted">
-                {COMPARE_COPY_V2.subtitle}
-              </Typography>
-            </span>
+            <Typography variant="h4" id={TITLE_ID}>
+              {COMPARE_COPY_V2.title}
+            </Typography>
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
               <ChevronDown
                 aria-hidden
@@ -334,7 +300,6 @@ export default function CompareFeaturesCard({
                     section={section}
                     index={index}
                     isExpanded={isExpanded}
-                    currentPlanName={currentPlanName}
                     onOpenAddOn={() => setGuardianOpen(true)}
                   />
                 ))}
@@ -346,7 +311,7 @@ export default function CompareFeaturesCard({
               aria-hidden={isExpanded || undefined}
               data-testid="compare-features-fade"
               className={cn(
-                'absolute inset-x-0 bottom-0 flex h-28 items-end justify-center rounded-b-xl pb-5 transition-opacity duration-300 ease-soft motion-reduce:transition-none',
+                'absolute inset-x-0 bottom-0 flex h-20 items-end justify-center rounded-b-xl pb-3 transition-opacity duration-300 ease-soft motion-reduce:transition-none',
                 isExpanded ? 'pointer-events-none opacity-0' : 'opacity-100',
               )}
             >

@@ -26,7 +26,7 @@ export const getTiersV2 = (tiers: PlanTier[]): PlanTier[] => {
   return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
 }
 
-export type PlanPriceV2 = { headline: string; suffix: string; line: string }
+export type PlanPriceV2 = { headline: string; suffix: string }
 
 /** Same totals as the launch page: €669/mo, or the full yearly amount per year. */
 export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPriceV2 => {
@@ -34,12 +34,42 @@ export const getPlanPriceV2 = (tier: PlanTier, option: PlanSeatOption): PlanPric
     return {
       headline: PLAN_CARD_COPY_V2.custom,
       suffix: PLAN_CARD_COPY_V2.customSuffix,
-      line: PLAN_CARD_COPY_V2.customLine,
     }
   }
   return {
     headline: formatPlanPrice(option.price, tier.currency),
     suffix: priceSuffix(tier.billingCycle),
-    line: tier.billingCycle === 'year' ? PLAN_CARD_COPY_V2.billedYearly : PLAN_CARD_COPY_V2.billedMonthly,
   }
+}
+
+export type YearlySavingV2 = { amount: string; percent: string }
+
+const percentFormat = new Intl.NumberFormat('en', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+/** How much less a yearly price costs than twelve monthly ones; undefined unless both prices exist and it saves. */
+export const getYearlySavingV2 = (
+  twelveMonthsPrice: number | null | undefined,
+  yearlyPrice: number | null | undefined,
+  currency: string,
+): YearlySavingV2 | undefined => {
+  if (twelveMonthsPrice == null || yearlyPrice == null) return undefined
+  const saved = twelveMonthsPrice - yearlyPrice
+  if (saved <= 0) return undefined
+  return { amount: formatPlanPrice(saved, currency), percent: percentFormat.format(saved / twelveMonthsPrice) }
+}
+
+/** A card's yearly saving: its own on a yearly card, or what switching to the same Safe count saves on a monthly one. */
+export const getCardSavingV2 = (
+  tier: PlanTier,
+  option: PlanSeatOption | undefined,
+  yearlyTier: PlanTier | undefined,
+): YearlySavingV2 | undefined => {
+  if (!option) return undefined
+  if (tier.billingCycle === 'year') return getYearlySavingV2(option.originalPrice, option.price, tier.currency)
+  const yearlyOption = yearlyTier?.options.find((candidate) => candidate.label === option.label)
+  return getYearlySavingV2(option.price === null ? null : option.price * 12, yearlyOption?.price, tier.currency)
 }

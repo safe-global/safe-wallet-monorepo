@@ -28,8 +28,8 @@ import { cn } from '@/utils/cn'
  *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand'),
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
- *   `hairline` (the design's hairline outline, for cards sitting on a card),
- *   `highlightOnHover` (lifts to the card surface and raised hairline shadow on hover and focus-within),
+ *   `bordered` (the standard `border-border` outline on top of any fill variant),
+ *   `highlightOnHover` (switches to the card surface on hover and focus-within),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -52,9 +52,9 @@ import { cn } from '@/utils/cn'
  * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
  * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
  * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
- * - 2026-09-28: Added `hairline` (0.5px + 1px zero-blur outline, `--shadow-hairline`; composes with `elevated`) and
- *   `size="offer"` (28px top, 24px bottom) for the Plans v2 cards
- * - 2026-09-28: Added `highlightOnHover` (card surface and raised shadow on hover and focus-within) for the Plans v2 cards
+ * - 2026-09-28: Added `size="offer"` (28px top, 24px bottom) for the Plans v2 cards
+ * - 2026-10-05: Added `bordered` (standard `border-border` outline that keeps the fill variant) for the Plans v2 cards
+ * - 2026-10-05: Added `highlightOnHover` (card surface on hover and focus-within) for the Plans v2 cards
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -93,26 +93,24 @@ const cardVariants = cva(
         true: 'border-2 border-mint shadow-lg',
         false: 'border-2 border-transparent',
       },
-      // Both resolve through compoundVariants so the element carries exactly one shadow utility.
-      elevated: { true: '', false: '' },
-      hairline: { true: '', false: '' },
+      elevated: {
+        true: 'shadow-lg',
+        false: '',
+      },
+      bordered: {
+        true: 'border border-border',
+        false: '',
+      },
       highlightOnHover: {
-        true: 'transition-[background-color,box-shadow] duration-300 ease-soft hover:bg-card hover:shadow-hairline-lg hover:duration-200 focus-within:bg-card focus-within:shadow-hairline-lg focus-within:duration-200 motion-reduce:transition-none',
+        true: 'transition-colors duration-200 hover:bg-card focus-within:bg-card motion-reduce:transition-none',
         false: '',
       },
     },
-    compoundVariants: [
-      { elevated: true, hairline: false, className: 'shadow-lg' },
-      { elevated: false, hairline: true, className: 'shadow-hairline' },
-      { elevated: true, hairline: true, className: 'shadow-hairline-lg' },
-    ],
     defaultVariants: {
       variant: 'default',
       surface: 'default',
       size: 'default',
       radius: 'lg',
-      elevated: false,
-      hairline: false,
     },
   },
 )
@@ -131,7 +129,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   radius = 'lg',
   selected,
   elevated,
-  hairline,
+  bordered,
   highlightOnHover,
   ...props
 }: CardProps<TElement>) {
@@ -145,7 +143,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-surface={surface}
       data-radius={radius}
       className={cn(
-        cardVariants({ size, variant, surface, radius, selected, elevated, hairline, highlightOnHover }),
+        cardVariants({ size, variant, surface, radius, selected, elevated, bordered, highlightOnHover }),
         className,
       )}
       {...props}
