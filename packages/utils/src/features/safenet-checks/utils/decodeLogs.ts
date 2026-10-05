@@ -142,7 +142,7 @@ const NORMALIZERS: Record<CheckEventType, Normalizer> = {
     sentinel: args.sentinel as string,
     approved: Boolean(args.approved),
     bondAmount: str(args.bondAmount),
-    reason: args.reason as string,
+    reason: stringOrNull(args, 'reason'),
   }),
   [CheckEventType.ORACLE_RESULT]: (args, base) => ({
     ...base,

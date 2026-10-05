@@ -41,7 +41,24 @@ export type RequestRef = {
   proposedAt: CheckEventBase
 }
 
-/** One request's authoritative state at the observed head. */
+export type SentinelVote = {
+  sentinel: string
+  /** Null while the sentinel has committed but not revealed. */
+  approved: boolean | null
+  /**
+   * Opaque text. A revealed empty reason is `''`; null when not revealed, or when the revealed bytes are not
+   * valid UTF-8 (then `approved` is set).
+   */
+  reason: string | null
+  bondAmount: string
+  commitTxHash: string | null
+  revealTxHash: string | null
+}
+
+/** How a non-unanimous or timed-out request closed, when the logs say. */
+export type RequestResolution = 'COUNCIL' | 'OUT_OF_SCOPE' | 'ARBITRATION_TIMEOUT' | 'REQUEST_TIMEOUT'
+
+/** One request's authoritative state at the observed head plus the votes and resolution its logs show. */
 export type RequestRead = RequestRef & {
   state: OracleRequestState
   outcome: RequestOutcome
@@ -53,6 +70,11 @@ export type RequestRead = RequestRef & {
   revealedCount: number
   approveCount: number
   denyCount: number
+  votes: SentinelVote[]
+  resolution: RequestResolution | null
+  /** Opaque text from the resolving event; null when unavailable. */
+  resolutionContext: string | null
+  resolutionTxHash: string | null
 }
 
 /**

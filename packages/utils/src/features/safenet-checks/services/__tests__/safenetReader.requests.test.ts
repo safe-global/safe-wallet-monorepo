@@ -6,7 +6,7 @@ import { SafenetReader, type SafenetReaderConfig } from '../safenetReader'
 import { EMPTY_ORACLE_DATA_HASH, buildOracleProposedLog } from '../../builders/rawLogs'
 import { transactionProposalHash } from '../../utils/proposalHash'
 import type { RawLog } from '../../utils/decodeLogs'
-import type { CheckEventBase, Hex, RequestRead } from '../../types'
+import type { CheckEventBase, Hex, RequestRead, SentinelVote } from '../../types'
 import { encodeRequest, makeEndpoint, type RpcConfig } from './rpcEndpoint'
 
 type Capture = Pick<RequestRead, 'requestId' | 'epoch' | 'oracleDataHash'> & {
@@ -71,8 +71,50 @@ const proposalLog = (epoch: bigint, blockNumber: number): RawLog =>
 const word = (rawResult: string, index: number): string =>
   BigInt(`0x${rawResult.slice(2 + 64 * index, 2 + 64 * (index + 1))}`).toString()
 
+const SENTINEL_1 = '0x6D081448c04d9ef7cf8EcF54207B1931ecc25312'
+const SENTINEL_2 = '0xc84a0928632382E75c543ACCeD101B9525027362'
+
+const vote = (
+  sentinel: string,
+  verdict: Pick<SentinelVote, 'approved' | 'reason'>,
+  commitTxHash: string,
+  revealTxHash: string,
+): SentinelVote => ({ sentinel, ...verdict, bondAmount: '800000000000000000000', commitTxHash, revealTxHash })
+
+/** Rows as the capture's commit and reveal logs show them, sorted by lowercase sentinel. */
+const VOTES: Record<string, SentinelVote[]> = {
+  'approved-first': [
+    vote(
+      SENTINEL_1,
+      { approved: true, reason: '' },
+      '0x4462d92d851483e7e32c8d175e108dd56be431c14a4bd3b00a8e68b7c6d507e0',
+      '0x5b86f8bd6e5e4aaa377eb6687bcbf61cdd002507aea5943ee1a17183d1c9b959',
+    ),
+    vote(
+      SENTINEL_2,
+      { approved: true, reason: '' },
+      '0x6cc066e1ad41f53f0d6caa172f3f6d3d205972bb25187289cddf39a198ff5734',
+      '0x734150a6e54f4d5c150574caa5dffe2f3ab0c410a433f563bc62e845a726909d',
+    ),
+  ],
+  'disputed-split': [
+    vote(
+      SENTINEL_1,
+      { approved: false, reason: 'R-4.6' },
+      '0xb4a4a30e1ed9c9936d6dba783cd6d09165dbff8909940021e9fbf1876e2019ea',
+      '0xc9fd101ec3c3a0b97251f719697eed99a3194fc31f00784e52b0b42c6c4a0200',
+    ),
+    vote(
+      SENTINEL_2,
+      { approved: true, reason: '' },
+      '0xd31f5b541c5f4e79a6e5e46db2cf879c03abef0b9f830500766ea9caa2146d33',
+      '0x2f1adb45e494e656d74fcb35c6a004b16c946a61bb398080f3e5af72d6c12c32',
+    ),
+  ],
+}
+
 describe('fetchCheckState: request state', () => {
-  it.each(captures)('$label: reads the state the Oracle returns at the head', async (c) => {
+  it.each(captures)('$label: reads the state at the head and the votes from the logs', async (c) => {
     const { rawResult, blockNumber } = c.requestState
     const { state, outcome, committedCount, revealedCount, approveCount, denyCount } = c.expected
     const endpoint = serve({ head: blockNumber, logs: c.logs, requests: { [c.requestId]: rawResult } })
@@ -98,6 +140,10 @@ describe('fetchCheckState: request state', () => {
       revealedCount,
       approveCount,
       denyCount,
+      votes: VOTES[c.label],
+      resolution: null,
+      resolutionContext: null,
+      resolutionTxHash: null,
     })
     expect(JSON.parse(JSON.stringify(request))).not.toHaveProperty('fee')
     expect(endpoint.reads.blockTags).toEqual([`0x${blockNumber.toString(16)}`])

@@ -116,7 +116,8 @@ export type SentinelRevealedEvent = CheckEventBase & {
   sentinel: string
   approved: boolean
   bondAmount: string
-  reason: string
+  /** Opaque text. `''` is a real value; `null` means the bytes are not valid UTF-8. */
+  reason: string | null
 }
 
 export type OracleResultEvent = CheckEventBase & {

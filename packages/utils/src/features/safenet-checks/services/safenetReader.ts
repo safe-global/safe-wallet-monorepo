@@ -386,11 +386,12 @@ export class SafenetReader {
     provider: JsonRpcProvider,
     refs: ReadonlyArray<RequestRef>,
     head: number,
+    evidence: ReadonlyArray<NormalizedCheckEvent>,
   ): Promise<RequestRead[]> {
     return mapLimit(refs, READ_CONCURRENCY, async (ref) => {
       const oracle = new Contract(ref.oracle, [...ORACLE_READ_ABI], provider)
       const facts = parseRequestFacts(await oracle.getRequest(ref.requestId, { blockTag: head }))
-      return buildRequestRead({ ref, facts })
+      return buildRequestRead({ ref, facts, evidence })
     })
   }
 
@@ -455,7 +456,6 @@ export class SafenetReader {
         })
         oracleEvents.push(...decodeLogs(oracleLogs))
       }
-      const requests = await this.readRequests(provider, refs, head)
 
       // The latest allowlisted proposal is the live one; `proposals` is in log order.
       const active = proposals.at(-1)
@@ -473,6 +473,7 @@ export class SafenetReader {
       // The maximum across all requests: after a cross-epoch re-proposal the
       // latest deadline belongs to the request that can still resolve.
       const deadline = deadlineBlockOf(events)
+      const requests = await this.readRequests(provider, refs, head, events)
 
       return {
         safeTxHash: safeTxHash as Hex,

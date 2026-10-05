@@ -163,6 +163,7 @@ describe('decodeLogs — dispute and timeout events', () => {
   const REQUEST_ID = '0x3333333333333333333333333333333333333333333333333333333333333333'
   const meta = { blockNumber: 10, logIndex: 2, transactionHash: `0x${'ab'.repeat(32)}` }
   const base = { requestId: REQUEST_ID, ...meta }
+  const SENTINEL = '0xa000000000000000000000000000000000000002'
 
   it('decodes DisputeTriggered with the arbitration deadline as a decimal string', () => {
     const logs = [buildDisputeTriggeredLog({ requestId: REQUEST_ID, deadline: 2n ** 40n }, meta)]
@@ -209,7 +210,21 @@ describe('decodeLogs — dispute and timeout events', () => {
       values: ['0xc3'],
       expected: { type: CheckEventType.DISPUTE_OUT_OF_SCOPE, ...base, context: null },
     },
-  ])('keeps $name with a null context when the string is not valid UTF-8', ({ log, types, values, expected }) => {
+    {
+      name: 'Revealed',
+      log: buildRevealedLog({ requestId: REQUEST_ID, sentinel: SENTINEL }, meta),
+      types: ['bool', 'uint96', 'bytes'],
+      values: [true, 5n, '0xc3'],
+      expected: {
+        type: CheckEventType.SENTINEL_REVEALED,
+        ...base,
+        sentinel: SENTINEL,
+        approved: true,
+        bondAmount: '5',
+        reason: null,
+      },
+    },
+  ])('keeps $name with a null string field when the bytes are not valid UTF-8', ({ log, types, values, expected }) => {
     const data = AbiCoder.defaultAbiCoder().encode(types, values)
     expect(decodeLogs([{ ...log, data }])).toEqual([expected])
   })
@@ -316,5 +331,28 @@ describe('decodeLogs — live-captured Sepolia relaunch attestation', () => {
     const [attested] = byType(events, CheckEventType.ORACLE_ATTESTED)
     expect(attested.chainId).toBe(proposed.chainId)
     expect(attested.safe.toLowerCase()).toBe(proposed.safe.toLowerCase())
+  })
+})
+
+describe('decodeLogs — real Gnosis attestation', () => {
+  type Attestation = { signatureId: string; r: { x: string; y: string }; z: string }
+  type Capture = { label: string; logs: RawLog[]; safeTxHash: string; oracleDataHash: string }
+  const { captures }: { captures: Array<Capture & { attestation: Attestation | null }> } = JSON.parse(
+    readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'),
+  )
+  const attestedCaptures = captures.flatMap(({ attestation, ...capture }) =>
+    attestation ? [{ ...capture, attestation }] : [],
+  )
+
+  it.each(attestedCaptures)('decodes the FROST signature of $label with its exact coordinates', (capture) => {
+    const [attested] = byType(decodeLogs(capture.logs), CheckEventType.ORACLE_ATTESTED)
+    const { signatureId, r, z } = capture.attestation
+
+    expect(attested).toMatchObject({
+      signatureId,
+      attestation: { r, z },
+      oracleDataHash: capture.oracleDataHash,
+      safeTxHash: capture.safeTxHash,
+    })
   })
 })
