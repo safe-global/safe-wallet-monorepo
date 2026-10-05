@@ -59,7 +59,6 @@ export const SafeShieldContent = ({
   hasProFeatures?: boolean
   /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
-  /** Off-chain message: only the threat analysis runs on it, so the Pro checks (and their locked rows) stay hidden. */
   isOffchainMessage?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
