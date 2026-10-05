@@ -30,6 +30,7 @@ const freeSponsoredTxs: SafeSponsoredTxs = {
   spaceId: null,
   canSponsor: false,
   isLoading: false,
+  isError: false,
 }
 
 const proSponsoredTxs: SafeSponsoredTxs = {
@@ -40,6 +41,7 @@ const proSponsoredTxs: SafeSponsoredTxs = {
   spaceId: faker.string.uuid(),
   canSponsor: true,
   isLoading: false,
+  isError: false,
 }
 
 const proLoading: SafeSponsoredTxs = {
@@ -50,6 +52,7 @@ const proLoading: SafeSponsoredTxs = {
   spaceId: null,
   canSponsor: false,
   isLoading: true,
+  isError: false,
 }
 
 const mockChain = (options: GasPaymentOption[]) =>
@@ -175,6 +178,18 @@ describe('useGasPaymentOptions', () => {
     mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
     rerender()
     expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: true })
+  })
+
+  it('offers the daily limit with the plan unknown and no upsell after its lookup failed', () => {
+    mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
+    mockUseSafeSponsoredTxs.mockReturnValue({ ...freeSponsoredTxs, isError: true })
+
+    const { result, rerender } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
+    expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: null })
+
+    mockRelays({ remaining: 0, limit: 5 })
+    rerender()
+    expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
   })
 
   it('shows no Pro upsell while the plan loads with the daily relays spent', () => {

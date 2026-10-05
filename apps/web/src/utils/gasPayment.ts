@@ -20,7 +20,7 @@ export type SponsoredOffer =
       option: 'FREE_DAILY_LIMIT'
       disabledReason: null
       relays: RelaysRemaining | undefined
-      /** The Safe is on a plan this chain does not sponsor, so the daily limit does; null while the plan loads or where Pro does not apply (Safe creation). */
+      /** The Safe is on a plan this chain does not sponsor, so the daily limit does; null while the plan loads or its lookup failed, or where Pro does not apply (Safe creation). */
       isPro: boolean | null
     }
   | {
@@ -37,7 +37,7 @@ export type GasPaymentInputs = {
   walletCanRelay: boolean
   campaign: { isEligible: boolean; remaining: number; limit: number; isGasTooHigh: boolean }
   daily: RelaysRemaining | undefined
-  pro: Pick<SafeSponsoredTxs, 'isEnabled' | 'isPro' | 'isLoading' | 'left' | 'meter' | 'spaceId'>
+  pro: Pick<SafeSponsoredTxs, 'isEnabled' | 'isPro' | 'isLoading' | 'isError' | 'left' | 'meter' | 'spaceId'>
   excluded: ReadonlySet<SponsoredOption>
 }
 
@@ -53,8 +53,8 @@ const getCampaignOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
 
 const getDailyOffer = (inputs: GasPaymentInputs): SponsoredOffer | null => {
   if (!isOffered('FREE_DAILY_LIMIT', inputs) || !(inputs.daily && inputs.daily.remaining > 0)) return null
-  // On a chain without the plan the offer does not wait for it, so isPro stays unknown while it loads.
-  const isPro = inputs.pro.isLoading ? null : inputs.pro.isPro
+  // On a chain without the plan the offer does not wait for it, so isPro stays unknown while it loads or after the lookup failed.
+  const isPro = inputs.pro.isLoading || inputs.pro.isError ? null : inputs.pro.isPro
   return { option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: inputs.daily, isPro }
 }
 
@@ -83,6 +83,7 @@ export const selectSponsoredOffer = (
     !offer &&
     pro.isEnabled &&
     !pro.isPro &&
+    !pro.isError &&
     chainOptions.includes('FREE_DAILY_LIMIT') &&
     chainOptions.includes('SUBSCRIPTION') &&
     daily?.remaining === 0

@@ -5,8 +5,16 @@ import { getGasPayment, selectSponsoredOffer, type GasPaymentInputs, type Sponso
 const spaceId = faker.string.uuid()
 const meter = { used: 10, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
-const freePro = { isEnabled: true, isPro: false, isLoading: false, left: null, meter: null, spaceId: null }
-const onPlan = { isEnabled: true, isPro: true, isLoading: false, left: 40, meter, spaceId }
+const freePro = {
+  isEnabled: true,
+  isPro: false,
+  isLoading: false,
+  isError: false,
+  left: null,
+  meter: null,
+  spaceId: null,
+}
+const onPlan = { isEnabled: true, isPro: true, isLoading: false, isError: false, left: 40, meter, spaceId }
 
 const buildInputs = (overrides: Partial<GasPaymentInputs> = {}): GasPaymentInputs => ({
   chainOptions: ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
@@ -51,6 +59,11 @@ describe('selectSponsoredOffer', () => {
     [
       'the daily limit with the plan unknown while it loads',
       { chainOptions: ['FREE_DAILY_LIMIT'], pro: { ...freePro, isLoading: true } },
+      { ...dailyOffer, isPro: null },
+    ],
+    [
+      'the daily limit with the plan unknown after its lookup failed',
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], pro: { ...freePro, isError: true } },
       { ...dailyOffer, isPro: null },
     ],
     [
@@ -139,6 +152,11 @@ describe('selectSponsoredOffer', () => {
         pro: onPlan,
         excluded: new Set(['SUBSCRIPTION']),
       },
+      false,
+    ],
+    [
+      'the plan lookup failed',
+      { chainOptions: ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'], daily: spentDaily, pro: { ...freePro, isError: true } },
       false,
     ],
     ['the chain does not list the subscription', { chainOptions: ['FREE_DAILY_LIMIT'], daily: spentDaily }, false],

@@ -25,7 +25,7 @@ export const useGasPaymentOptions = ({
 }): GasPaymentOptions => {
   const chain = useCurrentChain()
   const [relays, , isRelaysLoading] = useRelaysBySafe()
-  const { isEnabled, isPro, left, meter, spaceId, isLoading: isProLoading } = useSafeSponsoredTxs()
+  const { isEnabled, isPro, left, meter, spaceId, isLoading: isProLoading, isError } = useSafeSponsoredTxs()
   const campaign = useNoFeeCampaignEligibility()
   const isCampaignEnabled = useIsNoFeeCampaignEnabled()
   const isGasTooHigh = !!useGasTooHigh(safeTx)
@@ -54,7 +54,7 @@ export const useGasPaymentOptions = ({
           isGasTooHigh,
         },
         daily: relays,
-        pro: { isEnabled, isPro, isLoading: isProLoading, left, meter, spaceId },
+        pro: { isEnabled, isPro, isLoading: isProLoading, isError, left, meter, spaceId },
         excluded,
       }),
     [
@@ -69,6 +69,7 @@ export const useGasPaymentOptions = ({
       isEnabled,
       isPro,
       isProLoading,
+      isError,
       left,
       meter,
       spaceId,
