@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useChainId from '@/hooks/useChainId'
@@ -215,8 +216,9 @@ const TokenLimitCard = ({
               }
               data-testid="limit-amount-input"
               {...register(amountPath, {
-                // NumberField writes the locale's decimal separator; store a dot, as TokenAmountInput does.
-                setValueAs: (value: unknown) => (typeof value === 'string' ? value.replace(/,/g, '.') : value),
+                // NumberField leaves at most one separator, the locale's; store it as a dot.
+                setValueAs: (value: unknown) =>
+                  typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
                 validate: (value) => validateLimitAmount(value, decimals),
               })}
             />
