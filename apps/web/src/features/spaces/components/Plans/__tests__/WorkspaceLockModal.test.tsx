@@ -171,7 +171,7 @@ describe('WorkspaceLockModal', () => {
     mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
-    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { 'User Role': 'member' })
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
   })
 
   it('words the member explanation by lock reason', () => {

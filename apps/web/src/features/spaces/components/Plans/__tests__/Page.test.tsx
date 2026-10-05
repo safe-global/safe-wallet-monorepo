@@ -208,9 +208,6 @@ describe('SpacePlansPage', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       'Entry Point': 'direct',
-      'Plan Status': 'free_access',
-      'Plan Tier': 'business',
-      'User Role': 'admin',
       'Default Seats': 20,
       'Default Billing Period': 'monthly',
       'Plan Limit': 20,

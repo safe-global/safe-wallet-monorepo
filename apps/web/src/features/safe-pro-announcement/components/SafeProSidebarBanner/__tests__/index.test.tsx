@@ -7,8 +7,10 @@ import SafeProSidebarBanner from '../index'
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 describe('SafeProSidebarBanner', () => {
-  it('tracks viewed on mount', () => {
-    render(<SafeProSidebarBanner />)
+  it('tracks viewed once it is actually shown, not while it only holds its slot', () => {
+    const { rerender } = render(<SafeProSidebarBanner isShown={false} />)
+    expect(trackEvent).not.toHaveBeenCalled()
+    rerender(<SafeProSidebarBanner isShown />)
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { Location: 'sidebar' })
   })
 

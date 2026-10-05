@@ -61,6 +61,7 @@ export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSpons
 export { useSafeProAccess } from './hooks/useSafeProAccess'
 export { usePlanGate } from './hooks/usePlanGate'
 export { trackPlanSelectionStarted } from './components/Plans/planSelection'
+export { useSpacePlanState } from './hooks/useSpacePlanState'
 export { useSpaceDeletionGuard } from './hooks/billing/useSpaceDeletionGuard'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect, useRedirectWhenOff } from './hooks/useFeatureRedirect'

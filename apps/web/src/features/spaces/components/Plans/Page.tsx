@@ -14,7 +14,7 @@ import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from './planCatalog'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickProps, toCurrentPlan, toPlanStatus } from './planTiers'
+import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -47,8 +47,6 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     seats,
     sponsoredTxs,
     subscription,
-    status,
-    tierName,
     isTrialing,
     isLoading: isPlanLoading,
     isUninitialized,
@@ -77,9 +75,6 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
       ...entry,
-      [MixpanelEventParams.PLAN_STATUS]: toPlanStatus(status),
-      [MixpanelEventParams.PLAN_TIER]: tierName?.toLowerCase(),
-      [MixpanelEventParams.USER_ROLE]: isAdmin ? 'admin' : 'member',
       [MixpanelEventParams.DEFAULT_SEATS]: defaultSeats(tiers),
       [MixpanelEventParams.DEFAULT_BILLING_PERIOD]: BillingPeriod.MONTHLY,
       [MixpanelEventParams.PLAN_LIMIT]: seats?.quota ?? undefined,

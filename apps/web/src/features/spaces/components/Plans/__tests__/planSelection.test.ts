@@ -11,6 +11,9 @@ describe('planSelection', () => {
     trackPlanSelectionStarted({ 'Entry Point': 'sidebar' })
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, { 'Entry Point': 'sidebar' })
     expect(takePlansEntry()).toEqual({ 'Entry Point': 'sidebar' })
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+
     expect(takePlansEntry()).toEqual({ 'Entry Point': 'direct' })
+    expect(trackEvent).toHaveBeenLastCalledWith(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, { 'Entry Point': 'direct' })
   })
 })

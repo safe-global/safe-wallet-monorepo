@@ -73,7 +73,6 @@ const TrialEndingChooser = ({
     trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {
       [MixpanelEventParams.LOCATION]: PlanLocation.REMINDER_MODAL,
       [MixpanelEventParams.FREE_ACCESS_DAYS_LEFT]: currentPlan.daysLeft ?? undefined,
-      [MixpanelEventParams.USER_ROLE]: isAdmin ? 'admin' : 'member',
     })
   }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with the values of that moment
 

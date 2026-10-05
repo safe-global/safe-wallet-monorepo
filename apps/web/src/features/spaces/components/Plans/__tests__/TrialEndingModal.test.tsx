@@ -176,7 +176,6 @@ describe('TrialEndingModal', () => {
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {
       Location: 'reminder_modal',
       'Free Access Days Left': 7,
-      'User Role': 'admin',
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Add payment method' }))

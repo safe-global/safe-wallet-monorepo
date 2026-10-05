@@ -80,7 +80,7 @@ export default function PlanChooserModal({
   useEffect(() => {
     if (hasTrackedView.current) return
     hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'admin' })
+    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
   }, [])
 
   const start = () => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)

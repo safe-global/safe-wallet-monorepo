@@ -10,13 +10,22 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
-const SafeProSidebarBanner = ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => {
+const SafeProSidebarBanner = ({
+  className,
+  onDismiss,
+  isShown = true,
+}: {
+  className?: string
+  onDismiss?: () => void
+  /** The footer keeps the banner mounted but invisible while another card holds its slot. */
+  isShown?: boolean
+}) => {
   const hasTrackedView = useRef(false)
   useEffect(() => {
-    if (hasTrackedView.current) return
+    if (!isShown || hasTrackedView.current) return
     hasTrackedView.current = true
     trackEvent(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: 'sidebar' })
-  }, [])
+  }, [isShown])
 
   return (
     <div

@@ -109,7 +109,7 @@ describe('PlanChooserModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(onBack).toHaveBeenCalled()
-    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { 'User Role': 'admin' })
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
   })
 
   it('goes straight to Stripe when the picked plan covers the Workspace', () => {

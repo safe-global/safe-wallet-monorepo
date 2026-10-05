@@ -6,7 +6,6 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { SafeProNoticeModal } from '../SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -63,7 +62,7 @@ const MemberLockedNotice = ({
   useEffect(() => {
     if (!isPlanLock || hasTrackedView.current) return
     hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, { [MixpanelEventParams.USER_ROLE]: 'member' })
+    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
   }, [isPlanLock])
 
   return (

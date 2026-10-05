@@ -12,11 +12,14 @@ export const trackPlanSelectionStarted = (props: Props): void => {
   pendingEntry = props
 }
 
-/** The entry that led here, consumed once; a Plans page opened without one was reached directly. */
+/** The entry that led here, consumed once; a Plans page opened without one was reached directly and starts the flow itself. */
 export const takePlansEntry = (): Props => {
-  const entry = pendingEntry ?? { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.DIRECT }
+  const entry = pendingEntry
   pendingEntry = undefined
-  return entry
+  if (entry) return entry
+  const direct = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.DIRECT }
+  trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, direct)
+  return direct
 }
 
 export const _resetPlansEntry = (): void => {
