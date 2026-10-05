@@ -21,7 +21,6 @@ export const ENTERPRISE_TIER: PlanTier = {
     'MFA authentication',
     'Policy engine',
     'Transaction proposers',
-    'Pay gas fees from Safe account',
     'Custom Safe capacity',
     'Multiple workspaces',
     'Tailored contract & billing terms',
