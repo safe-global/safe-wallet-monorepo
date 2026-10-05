@@ -1,7 +1,12 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryApi } from '@reduxjs/toolkit/query'
+import { INFURA_TOKEN } from '@safe-global/utils/config/constants'
+import { apiSliceWithChainsConfig } from '../gateway/chains'
+import type { RpcUri } from '../gateway/AUTO_GENERATED/chains'
 import {
   AttestationVerificationStatus,
   CheckStatus,
+  SAFENET_CHAIN_ID,
   UNVERIFIED_ATTESTATION,
   bindAttestations,
   deriveCheckState,
@@ -61,6 +66,33 @@ const selectAttestation = async (
   return best
 }
 
+const configuredRpcUrl = (rpcUri: RpcUri | undefined): string => {
+  if (!rpcUri?.value) throw new Error('Safenet chain RPC configuration unavailable')
+  if (rpcUri.authentication === 'API_KEY_PATH' && !INFURA_TOKEN) {
+    throw new Error('Safenet chain RPC token unavailable')
+  }
+  return rpcUri.authentication === 'API_KEY_PATH' ? `${rpcUri.value}${INFURA_TOKEN}` : rpcUri.value
+}
+
+const configuredReader = async ({ dispatch, getState }: Pick<BaseQueryApi, 'dispatch' | 'getState'>) => {
+  // The key the app already queried chains with; env and the web default only before that.
+  const serviceKey =
+    apiSliceWithChainsConfig.util.selectCachedArgsForQuery(
+      getState() as Parameters<typeof apiSliceWithChainsConfig.util.selectCachedArgsForQuery>[0],
+      'getChainsConfigV2',
+    )[0] ||
+    process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY ||
+    process.env.EXPO_PUBLIC_CONFIG_SERVICE_KEY ||
+    'WALLET_WEB'
+  const chainQuery = dispatch(apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(serviceKey))
+  try {
+    const chainConfig = await chainQuery
+    return getSafenetReader(configuredRpcUrl(chainConfig.data?.entities[SAFENET_CHAIN_ID]?.rpcUri))
+  } finally {
+    chainQuery.unsubscribe()
+  }
+}
+
 /**
  * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
  * attestation that does not name them is not this check's evidence. There is
@@ -76,7 +108,7 @@ export const safenetCheckApi = createApi({
       async queryFn(identity, { getState, dispatch }) {
         const { safeTxHash, chainId, safeAddress } = identity
         try {
-          const reader = getSafenetReader()
+          const reader = await configuredReader({ dispatch, getState })
           // Read at execution time, so every poll replays the best aim known
           // then — never the timestamp of whichever surface subscribed first.
           const aimedAtMs = resolveAim(identity)

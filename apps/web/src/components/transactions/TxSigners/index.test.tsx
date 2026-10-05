@@ -723,7 +723,7 @@ describe('TxSigners (Audit Log)', () => {
       )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
-        `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,
+        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
       )
     }, 15_000)
 

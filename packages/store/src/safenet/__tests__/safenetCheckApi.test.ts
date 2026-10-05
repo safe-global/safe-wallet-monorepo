@@ -1,4 +1,6 @@
 import { configureStore, type UnknownAction } from '@reduxjs/toolkit'
+import { createMockChain } from '@safe-global/test'
+import { apiSliceWithChainsConfig, chainsAdapter, initialState } from '../../gateway/chains'
 import {
   AttestationVerificationStatus,
   CheckStatus,
@@ -58,14 +60,31 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   ...over,
 })
 
-const makeTestStore = () =>
-  configureStore({
+const RPC_URL = 'https://rpc.safe.global/100/'
+
+const makeTestStore = (includeSafenetChain = true) => {
+  const store = configureStore({
     reducer: {
       [safenetCheckSlice.name]: safenetCheckSlice.reducer,
       [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
+      [apiSliceWithChainsConfig.reducerPath]: apiSliceWithChainsConfig.reducer,
     },
-    middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware),
+    middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware, apiSliceWithChainsConfig.middleware),
   })
+  store.dispatch(
+    apiSliceWithChainsConfig.util.upsertQueryEntries([
+      {
+        endpointName: 'getChainsConfigV2',
+        arg: 'WALLET_WEB',
+        value: chainsAdapter.setAll(
+          initialState,
+          includeSafenetChain ? [createMockChain({ chainId: '100', rpcUri: RPC_URL })] : [],
+        ),
+      },
+    ]),
+  )
+  return store
+}
 
 const runQuery = (store: ReturnType<typeof makeTestStore>, over: Partial<CheckTarget> = {}) =>
   store.dispatch(
@@ -96,6 +115,19 @@ beforeEach(() => {
 })
 
 describe('safenetCheckApi.getSafenetCheck', () => {
+  it('uses the Safenet chain RPC and returns an error when that chain config is missing', async () => {
+    fakeReader.fetchCheckState.mockResolvedValue(baseRead())
+    const store = makeTestStore()
+    expect((await runQuery(store)).data?.status).toBe(CheckStatus.UNAVAILABLE)
+    expect(mockedGetReader).toHaveBeenCalledWith(RPC_URL)
+
+    mockedGetReader.mockClear()
+    const missingChainStore = makeTestStore(false)
+    expect((await runQuery(missingChainStore)).error).toEqual({
+      message: 'Safenet chain RPC configuration unavailable',
+    })
+    expect(mockedGetReader).not.toHaveBeenCalled()
+  })
   // The non-oracle path is the only one live beta emits, so it needs its own
   // case: it reaches the same verify call, with no requestId in the read.
   it('verifies a non-oracle attestation and derives BENIGN', async () => {
@@ -323,9 +355,17 @@ describe('safenetCheckApi.getSafenetCheck', () => {
           return safenetCheckSlice.reducer(state, action)
         },
         [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
+        [apiSliceWithChainsConfig.reducerPath]: apiSliceWithChainsConfig.reducer,
       },
-      middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware),
+      middleware: (getDefault) => getDefault().concat(safenetCheckApi.middleware, apiSliceWithChainsConfig.middleware),
     })
+    await store.dispatch(
+      apiSliceWithChainsConfig.util.upsertQueryData(
+        'getChainsConfigV2',
+        'WALLET_WEB',
+        chainsAdapter.setAll(initialState, [createMockChain({ chainId: '100', rpcUri: RPC_URL })]),
+      ),
+    )
     fakeReader.fetchCheckState.mockResolvedValue(
       baseRead({ events: [plainAttestedEvent({ safeTxHash: HASH, ...BOUND })] }),
     )

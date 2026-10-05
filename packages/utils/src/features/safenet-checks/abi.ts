@@ -33,11 +33,15 @@ export const CONSENSUS_PLAIN_EVENT_FRAGMENTS = [
 ] as const
 
 export const SENTINEL_EVENT_FRAGMENTS = [
-  'event NewRequest(bytes32 indexed requestId, address indexed sponsor, uint96 fee, uint96 bondTarget, uint96 slashAmount, uint64 commitDeadline, uint64 revealDeadline)',
+  'event NewRequest(bytes32 indexed requestId, address indexed sponsor, uint96 fee, uint96 bondTarget, uint24 daoFeeShare, uint96 slashAmount, uint64 commitDeadline, uint64 revealDeadline)',
   'event Committed(bytes32 indexed requestId, address indexed sentinel, uint96 bondAmount)',
   'event Revealed(bytes32 indexed requestId, address indexed sentinel, bool approved, uint96 bondAmount, string reason)',
   'event OracleResult(bytes32 indexed requestId, address indexed sponsor, bytes result, bool approved)',
   'event DisputeResolved(bytes32 indexed requestId, uint8 outcome, uint128 slashed, string reason)',
+  'event DisputeTriggered(bytes32 indexed requestId, uint64 deadline)',
+  'event DisputeOutOfScope(bytes32 indexed requestId, string context)',
+  'event ArbitrationTimedOut(bytes32 indexed requestId)',
+  'event RequestTimedOut(bytes32 indexed requestId)',
 ] as const
 
 /** Read (view) functions the reader calls, from the protocol explorer's ABIs. */
@@ -103,6 +107,26 @@ export const EVENT_DISPATCH: readonly TopicDispatch[] = [
     iface: sentinelInterface,
     eventName: 'DisputeResolved',
     type: CheckEventType.DISPUTE_RESOLVED,
+  },
+  {
+    iface: sentinelInterface,
+    eventName: 'DisputeTriggered',
+    type: CheckEventType.DISPUTE_TRIGGERED,
+  },
+  {
+    iface: sentinelInterface,
+    eventName: 'DisputeOutOfScope',
+    type: CheckEventType.DISPUTE_OUT_OF_SCOPE,
+  },
+  {
+    iface: sentinelInterface,
+    eventName: 'ArbitrationTimedOut',
+    type: CheckEventType.ARBITRATION_TIMED_OUT,
+  },
+  {
+    iface: sentinelInterface,
+    eventName: 'RequestTimedOut',
+    type: CheckEventType.REQUEST_TIMED_OUT,
   },
 ]
 

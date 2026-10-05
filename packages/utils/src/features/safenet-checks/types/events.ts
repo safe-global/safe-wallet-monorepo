@@ -27,6 +27,10 @@ export enum CheckEventType {
   ORACLE_RESULT = 'ORACLE_RESULT',
   /** `DisputeResolved` — a frozen/contested request was resolved. */
   DISPUTE_RESOLVED = 'DISPUTE_RESOLVED',
+  DISPUTE_TRIGGERED = 'DISPUTE_TRIGGERED',
+  DISPUTE_OUT_OF_SCOPE = 'DISPUTE_OUT_OF_SCOPE',
+  ARBITRATION_TIMED_OUT = 'ARBITRATION_TIMED_OUT',
+  REQUEST_TIMED_OUT = 'REQUEST_TIMED_OUT',
 }
 
 /** Fields present on every decoded event; used for ordering and de-duplication. */
@@ -126,6 +130,26 @@ export type DisputeResolvedEvent = CheckEventBase & {
   slashed: string
 }
 
+/**
+ * `DisputeResolved.outcome` values: `SentinelOracleRequest.State` indexes (`NONE` = 0).
+ * `resolveDispute` emits only these two; timeouts and out-of-scope rulings emit their own events.
+ */
+export enum DisputeOutcome {
+  RESOLVED_APPROVED = 3,
+  RESOLVED_DENIED = 4,
+}
+
+export type DisputeTriggeredEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_TRIGGERED
+  requestId: Hex
+  deadlineBlock: string
+}
+
+export type InconclusiveEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_OUT_OF_SCOPE | CheckEventType.ARBITRATION_TIMED_OUT | CheckEventType.REQUEST_TIMED_OUT
+  requestId: Hex
+}
+
 export type NormalizedCheckEvent =
   | OracleProposedEvent
   | OracleAttestedEvent
@@ -136,6 +160,8 @@ export type NormalizedCheckEvent =
   | SentinelRevealedEvent
   | OracleResultEvent
   | DisputeResolvedEvent
+  | DisputeTriggeredEvent
+  | InconclusiveEvent
 
 /** The two attesting events. Both carry the attested Safe's chain id and address. */
 export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent

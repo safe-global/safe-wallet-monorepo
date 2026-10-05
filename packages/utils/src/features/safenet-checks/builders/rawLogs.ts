@@ -183,6 +183,7 @@ export const buildNewRequestLog = (
     sponsor?: string
     fee?: bigint
     bondTarget?: bigint
+    daoFeeShare?: bigint
     slashAmount?: bigint
     commitDeadline?: bigint
     revealDeadline?: bigint
@@ -197,6 +198,7 @@ export const buildNewRequestLog = (
       spec.sponsor ?? addr(),
       spec.fee ?? 1000n,
       spec.bondTarget ?? 10000n,
+      spec.daoFeeShare ?? 10000n,
       spec.slashAmount ?? 100n,
       spec.commitDeadline ?? 150n,
       spec.revealDeadline ?? 160n,
