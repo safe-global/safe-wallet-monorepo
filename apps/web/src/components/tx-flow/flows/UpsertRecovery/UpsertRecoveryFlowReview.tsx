@@ -9,11 +9,9 @@ import InfoIcon from '@/public/images/notifications/info.svg'
 import { getRecoveryUpsertTransactions } from '@/features/recovery/services'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
-import { UpsertRecoveryFlowFields } from '.'
 import { TOOLTIP_TITLES } from '../../common/constants'
-import { useRecoveryPeriods } from './useRecoveryPeriods'
 import type { UpsertRecoveryFlowProps } from '.'
-import { isCustomDelaySelected } from './utils'
+import { formatRecoveryPeriod } from './utils'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -24,7 +22,6 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
   const web3ReadOnly = useWeb3ReadOnly()
   const { safe, safeAddress } = useSafeInfo()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const periods = useRecoveryPeriods()
 
   const { data } = useContext<TxFlowContextType<UpsertRecoveryFlowProps>>(TxFlowContext)
 
@@ -52,14 +49,8 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
     return <ErrorMessage>No data provided</ErrorMessage>
   }
 
-  const { recoverer, customDelay, selectedDelay } = data
-
-  const isCustomDelay = isCustomDelaySelected(selectedDelay ?? '')
-
-  const expiryLabel = periods.expiration.find(({ value }) => value === data?.[UpsertRecoveryFlowFields.expiry])!.label
-  const delayLabel = isCustomDelay
-    ? `${customDelay} days`
-    : periods.delay.find(({ value }) => value === selectedDelay)?.label
+  const { recoverer, delay, expiry } = data
+  const expirySeconds = Number(expiry)
 
   return (
     <ReviewTransaction {...props}>
@@ -84,10 +75,10 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
           </>
         }
       >
-        {delayLabel}
+        {formatRecoveryPeriod(Number(delay))}
       </TxDataRow>
 
-      {expiryLabel !== '0' && (
+      {expirySeconds !== 0 && (
         <TxDataRow
           title={
             <>
@@ -101,7 +92,7 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
             </>
           }
         >
-          {expiryLabel}
+          {formatRecoveryPeriod(expirySeconds)}
         </TxDataRow>
       )}
 
