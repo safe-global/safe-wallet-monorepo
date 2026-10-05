@@ -13,7 +13,7 @@ import {
   UNAVAILABLE_GRACE_POLL_MS,
 } from '../../constants'
 import { CheckStatus, UNVERIFIED_ATTESTATION, type SafenetCheckSnapshot } from '../../types'
-import { buildBenignSnapshot, buildSnapshot, plainProposedEvent } from '../../builders'
+import { buildBenignSnapshot, buildSnapshot, proposedEvent } from '../../builders'
 
 jest.mock('@safe-global/store/safenet/safenetCheckApi', () => ({
   useGetSafenetCheckQuery: jest.fn(),
@@ -245,16 +245,14 @@ describe('useSafenetCheck', () => {
       expect(lastOptions().pollingInterval).toBe(0)
     })
 
-    // The plain (non-oracle) path never emits a deadline — the hook substitutes
-    // the first observed event's block, so a never-attested check still stops.
-    it('polls fast on the plain path while inside the substitute deadline', () => {
+    it('polls fast when the proposal has no on-chain deadline', () => {
       mockQuery.mockReturnValue(
         queryResult({
           data: buildSnapshot({
             status: CheckStatus.SUBMITTED,
-            headBlock: '150',
+            headBlock: '10000',
             deadlineBlock: null,
-            events: [plainProposedEvent({ blockNumber: 100 })],
+            events: [proposedEvent({ blockNumber: 100 })],
           }),
         }),
       )
@@ -328,7 +326,7 @@ describe('useSafenetCheck', () => {
             status: CheckStatus.SUBMITTED,
             headBlock: '150',
             deadlineBlock: null,
-            events: [plainProposedEvent({ blockNumber: 100 })],
+            events: [proposedEvent({ blockNumber: 100 })],
           }),
           fulfilledTimeStamp: 2,
         }),
