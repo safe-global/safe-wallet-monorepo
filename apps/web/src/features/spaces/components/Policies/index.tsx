@@ -253,7 +253,9 @@ const Policies = ({
           policy={openedPolicy}
           isUnlisted={!listedPolicy}
           onClose={closeDetails}
-          onEdit={() => editSpendingLimit(openedPolicy.safe)}
+          onEdit={
+            locked?.lockedPolicies.includes('spending-limit') ? undefined : () => editSpendingLimit(openedPolicy.safe)
+          }
         />
       )}
     </div>
