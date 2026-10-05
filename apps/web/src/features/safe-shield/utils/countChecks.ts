@@ -32,7 +32,6 @@ export const countChecks = ({
   isSimulationSuccess: boolean
   /** The transaction calls a contract, so the contract row is on screen (with results or locked). */
   isContractCall?: boolean
-  /** Off-chain message: no locked Pro rows and no simulation, only the threat analysis counts. */
   isOffchainMessage?: boolean
 }): ChecksCount => {
   const isOk = (status: { severity: Severity } | undefined) => status?.severity === Severity.OK

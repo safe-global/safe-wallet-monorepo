@@ -85,8 +85,7 @@ export const SafeShieldContent = ({
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
-  // Without Pro the section still shows, with its locked rows as an upsell — except on an off-chain
-  // message, where none of those checks would ever run.
+
   const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
 
   // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
