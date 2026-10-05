@@ -45,7 +45,7 @@ export type AttestationInput = {
   /** Epoch group public key, affine coordinates as decimal strings. */
   groupKey: { x: string; y: string }
   attestation: { r: { x: string; y: string }; z: string }
-  /** The signed message — the EIP-712 proposal hash for the path that emitted it. */
+  /** The signed message — the EIP-712 proposal hash, which is also the oracle request id. */
   message: Hex
 }
 

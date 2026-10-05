@@ -1,13 +1,21 @@
 import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks'
+import {
+  AttestationVerificationStatus,
+  CheckStatus,
+  SAFENET_EXPLORER_URL,
+  type Hex,
+  type OracleAttestedEvent,
+  type SafenetCheckSnapshot,
+} from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import {
+  attestedEvent,
   buildBenignSnapshot,
   buildCheckView,
+  buildRequestSnapshot,
   buildSnapshot,
-  plainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
@@ -24,8 +32,44 @@ const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSaf
 const mockUseChain = useChain as jest.MockedFunction<typeof useChain>
 
 const HASH = `0x${'ab'.repeat(32)}`
+const SAFE_TX_HASH = HASH as Hex
+const REQUEST_ID = `0x${'cd'.repeat(32)}` as Hex
+const DENIED_REQUEST_ID = `0x${'ef'.repeat(32)}` as Hex
+const SIGNATURE_ID = `0x${'12'.repeat(32)}` as Hex
 
 const view = buildCheckView
+
+type Approval = { attested?: OracleAttestedEvent | null; attestedAtMs?: number | null }
+
+const benignSnapshot = ({
+  attested = attestedEvent({ safeTxHash: SAFE_TX_HASH }),
+  attestedAtMs = null,
+}: Approval = {}): SafenetCheckSnapshot => {
+  const attestation = {
+    status: AttestationVerificationStatus.VERIFIED,
+    signatureId: attested?.signatureId ?? SIGNATURE_ID,
+    message: REQUEST_ID,
+  }
+  const request = buildRequestSnapshot({
+    requestId: REQUEST_ID,
+    state: 'RESOLVED_APPROVED',
+    outcome: 'APPROVED',
+    attestation,
+    attestedEvent: attested,
+    attestedAtMs,
+  })
+  return buildBenignSnapshot({
+    safeTxHash: SAFE_TX_HASH,
+    events: attested ? [attested] : [],
+    requestId: REQUEST_ID,
+    epoch: request.epoch,
+    oracle: request.oracle,
+    deadlineBlock: request.revealDeadlineBlock,
+    attestation,
+    attestedAtMs,
+    requests: [request],
+  })
+}
 
 describe('SafenetAuditRow', () => {
   beforeEach(() => {
@@ -41,7 +85,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('renders nothing when no check was observed (UNAVAILABLE)', () => {
-    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.UNAVAILABLE })
+    const snapshot = buildSnapshot({ safeTxHash: SAFE_TX_HASH, status: CheckStatus.UNAVAILABLE })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.UNAVAILABLE, publicStatus: CheckStatus.UNAVAILABLE }),
     )
@@ -52,7 +96,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('renders a Simulating step by Safenet while the check is in flight', () => {
-    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.IN_PROGRESS })
+    const snapshot = buildSnapshot({ safeTxHash: SAFE_TX_HASH, status: CheckStatus.IN_PROGRESS })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.IN_PROGRESS, publicStatus: CheckStatus.IN_PROGRESS }),
     )
@@ -66,13 +110,8 @@ describe('SafenetAuditRow', () => {
   })
 
   it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      events: [attested],
-      // The link must point at the event whose signature produced the verdict.
-      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
-    })
+    const attested = attestedEvent({ safeTxHash: SAFE_TX_HASH })
+    const snapshot = benignSnapshot({ attested })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -97,12 +136,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('falls back to the Safenet explorer hash route when the chain config is unknown', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
-    const snapshot = buildBenignSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      events: [attested],
-      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
-    })
+    const snapshot = benignSnapshot()
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -112,13 +146,13 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
       'href',
-      `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${HASH}`,
+      `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=1&safeTxHash=${HASH}`,
     )
   })
 
   it('dates the No-issues step from the attested block', () => {
     // 2026-08-03T09:39:45Z — the block the attestation landed in, not read time.
-    const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, attestedAtMs: 1_785_749_985_000 })
+    const snapshot = benignSnapshot({ attestedAtMs: 1_785_749_985_000 })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -129,7 +163,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('renders No issues found without a date when the attested header could not be read', () => {
-    const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, attestedAtMs: null })
+    const snapshot = benignSnapshot({ attestedAtMs: null })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -140,15 +174,9 @@ describe('SafenetAuditRow', () => {
     expect(screen.queryByText(/2026/)).not.toBeInTheDocument()
   })
 
-  it('drops the proof link when a pinned BENIGN outlives a refetch that lost the attestation', () => {
-    // Reorg / flaky-RPC refetch: merged status stays BENIGN (monotonic pin) but
-    // the fresh snapshot no longer carries the attestation. The generic explorer
-    // route is not proof, so the row must not present one.
-    const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      status: CheckStatus.BENIGN,
-      attestation: { status: AttestationVerificationStatus.UNVERIFIED, signatureId: null, message: null },
-    })
+  it('renders No issues found without a proof link when no attested log backs the verdict', () => {
+    // Getter-only evidence (the attested log fell outside the read window) has no transaction to point at.
+    const snapshot = benignSnapshot({ attested: null })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
     )
@@ -160,13 +188,27 @@ describe('SafenetAuditRow', () => {
   })
 
   it.each([
-    ['INVALID', AttestationVerificationStatus.INVALID],
-    ['VERIFIED', AttestationVerificationStatus.VERIFIED],
-  ])('renders Risk detected without a link when MALICIOUS (attestation %s)', (_name, attestationStatus) => {
+    ['alone', false],
+    ['beside a verified approval of the same hash', true],
+  ])('renders Risk detected without a link when MALICIOUS (%s)', (_name, withVerifiedSibling) => {
+    const denied = buildRequestSnapshot({
+      requestId: DENIED_REQUEST_ID,
+      state: 'RESOLVED_DENIED',
+      outcome: 'DENIED',
+      committedCount: 2,
+      revealedCount: 2,
+      denyCount: 2,
+    })
     const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
+      safeTxHash: SAFE_TX_HASH,
       status: CheckStatus.MALICIOUS,
-      attestation: { status: attestationStatus, signatureId: null, message: null },
+      outcome: 'DENIED',
+      requestId: denied.requestId,
+      epoch: denied.epoch,
+      oracle: denied.oracle,
+      deadlineBlock: denied.revealDeadlineBlock,
+      requests: withVerifiedSibling ? [...benignSnapshot().requests, denied] : [denied],
+      evidenceComplete: true,
     })
     mockUseSafenetCheck.mockReturnValue(
       view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),

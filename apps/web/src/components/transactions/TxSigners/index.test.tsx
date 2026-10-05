@@ -682,21 +682,37 @@ describe('TxSigners (Audit Log)', () => {
     it('renders the step for THIS transaction hash with the flag on', async () => {
       useHasFeature.mockReturnValue(true)
       mockSafeInfo({ chainId: '1', threshold: 1, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
-      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const { buildBenignSnapshot, plainAttestedEvent } = jest.requireActual(
+      const { CheckStatus, AttestationVerificationStatus, SAFENET_EXPLORER_URL } = jest.requireActual(
+        '@safe-global/utils/features/safenet-checks',
+      )
+      const { attestedEvent, buildBenignSnapshot, buildRequestSnapshot } = jest.requireActual(
         '@safe-global/utils/features/safenet-checks/builders',
       )
-      const { AttestationVerificationStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const attested = plainAttestedEvent({ safeTxHash: safenetTxHash })
+      const requestId = `0x${'cd'.repeat(32)}`
+      const attested = attestedEvent({ safeTxHash: safenetTxHash })
+      const attestation = {
+        status: AttestationVerificationStatus.VERIFIED,
+        signatureId: attested.signatureId,
+        message: requestId,
+      }
+      const attestedAtMs = 1_785_749_985_000
       useSafenetCheck.mockReturnValue({
         snapshot: buildBenignSnapshot({
           safeTxHash: safenetTxHash,
           events: [attested],
-          attestation: {
-            status: AttestationVerificationStatus.VERIFIED,
-            signatureId: attested.signatureId,
-            message: null,
-          },
+          requestId,
+          attestation,
+          attestedAtMs,
+          requests: [
+            buildRequestSnapshot({
+              requestId,
+              state: 'RESOLVED_APPROVED',
+              outcome: 'APPROVED',
+              attestation,
+              attestedEvent: attested,
+              attestedAtMs,
+            }),
+          ],
         }),
         status: CheckStatus.BENIGN,
         publicStatus: CheckStatus.BENIGN,
@@ -723,7 +739,7 @@ describe('TxSigners (Audit Log)', () => {
       )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
-        `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,
+        `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`,
       )
     }, 15_000)
 

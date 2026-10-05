@@ -36,7 +36,6 @@ import executionMethod from './executionMethodSlice'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
-import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin'
 import { GATEWAY_URL, isTestingEnv, CONFIG_SERVICE_KEY } from '../config/constants'
 import { web3API } from './signersBalance'
@@ -125,8 +124,7 @@ export const persistBlacklist = [
   'toast',
   walletKitSliceName,
   // Safenet checks are read live from chain each session — never persist the
-  // RTK Query cache or the pinned verdicts.
-  safenetCheckSlice.name,
+  // RTK Query cache.
   safenetCheckApi.reducerPath,
 ]
 
@@ -175,7 +173,6 @@ const combinedReducer = combineReducers({
   draftTx,
   toast,
   walletKit: persistedWalletKit,
-  [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [web3API.reducerPath]: web3API.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,

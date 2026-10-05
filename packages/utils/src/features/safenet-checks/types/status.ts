@@ -6,9 +6,9 @@ import type { Hex } from './events'
  * `VERIFICATION_FAILED` never becomes `BENIGN`.
  */
 export enum CheckStatus {
-  /** Proposed onchain, no oracle activity yet. */
+  /** Proposed onchain, no sentinel has committed yet. */
   SUBMITTED = 'SUBMITTED',
-  /** Oracle request opened / sentinels active, pre-deadline, no verdict. */
+  /** Sentinels are active, a dispute is open, or an approval awaits its attestation. */
   IN_PROGRESS = 'IN_PROGRESS',
   /** Attested onchain but the FROST signature has not been verified yet. */
   AWAITING_VERIFICATION = 'AWAITING_VERIFICATION',
@@ -16,11 +16,11 @@ export enum CheckStatus {
   VERIFICATION_FAILED = 'VERIFICATION_FAILED',
   /** Attested AND cryptographically verified. The only green state. */
   BENIGN = 'BENIGN',
-  /** A negative verdict was observed (rejected / disapproved). */
+  /** A rejection or a Council ruling that the transaction is insecure. */
   MALICIOUS = 'MALICIOUS',
-  /** Deadline passed without a resolving verdict (includes frozen disputes). */
+  /** The request closed without a result. An open (frozen) dispute is not timed out. */
   TIMED_OUT = 'TIMED_OUT',
-  /** The reader could not determine state (RPC/config failure). */
+  /** No request, or a ruling that carries no attestation. The snapshot's `outcome` says which. */
   UNAVAILABLE = 'UNAVAILABLE',
 }
 

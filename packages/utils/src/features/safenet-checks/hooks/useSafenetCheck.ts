@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
-import { selectPinnedVerdict, type SafenetCheckPartialState } from '@safe-global/store/safenet/safenetCheckSlice'
 import { recordAim } from '@safe-global/store/safenet/safenetAimRegistry'
 import { POLL_INTERVAL_FAST_MS, POLL_INTERVAL_LATE_MS } from '../constants'
 import { CheckStatus, toPublicStatus, type PublicCheckStatus, type UnavailableReason } from '../types/status'
 import type { SafenetCheckSnapshot } from '../types/snapshot'
 import { computePollingInterval } from '../utils/computePollingInterval'
 import type { CheckTarget } from '../utils/attestations'
-import { mergeMonotonic } from '../utils/mergeMonotonic'
 
 export type SafenetCheckView = {
-  /** The last good snapshot; retained across a failed refetch (see `isStale`). */
+  /** The last complete snapshot; retained across a failed refetch (see `isStale`). */
   snapshot: SafenetCheckSnapshot | undefined
-  /** Internal merged status. Can be `AWAITING_VERIFICATION` or `VERIFICATION_FAILED`. */
+  /** Internal status. Can be `AWAITING_VERIFICATION` or `VERIFICATION_FAILED`. */
   status: CheckStatus
   publicStatus: PublicCheckStatus
   /**
-   * Set only while the merged status is `UNAVAILABLE` — see
-   * {@link UnavailableReason}. `undefined` before the first read resolves.
+   * Set only while the status is `UNAVAILABLE` and no request outcome explains
+   * it — see {@link UnavailableReason}. `undefined` before the first read resolves.
    */
   unavailableReason: UnavailableReason | undefined
   isLoading: boolean
@@ -29,30 +26,71 @@ export type SafenetCheckView = {
 }
 
 /**
- * Which `UNAVAILABLE` a resolved read means. `NO_CHECK` is a factual claim
- * about the chain, so only a window that covers the check's whole possible
- * lifetime licenses it; over any other window the read found nothing where it
+ * Which `UNAVAILABLE` a resolved read means, or `undefined` while the status is a
+ * real one. A retained snapshot with an outcome (a Council secure ruling, no
+ * ruling) is UNAVAILABLE for a known reason, so it claims none. `NO_CHECK` is a
+ * factual claim about the chain, so only discovery that proved the absence of any
+ * request licenses it; over any other window the read found nothing where it
  * looked, which is a weaker statement. A snapshot outranks the error: an error
  * over retained data is a failed refetch, and the snapshot is still what we know.
  */
 const resolveUnavailableReason = (
+  status: CheckStatus,
   snapshot: SafenetCheckSnapshot | undefined,
   hasError: boolean,
 ): UnavailableReason | undefined => {
-  if (snapshot !== undefined) return snapshot.windowCoverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN'
+  if (status !== CheckStatus.UNAVAILABLE) return undefined
+  if (snapshot !== undefined) {
+    if (snapshot.outcome !== null) return undefined
+    return snapshot.windowCoverage === 'proven' ? 'NO_CHECK' : 'WINDOW_UNCERTAIN'
+  }
   return hasError ? 'READ_FAILED' : undefined
 }
 
 /**
+ * Re-derive the poll interval from the latest result. The interval feeds back
+ * into the query, so the (state → interval → next poll) loop is reconfigured from
+ * the query's own output via an effect. A landed poll (`fulfilledAt`) re-runs it,
+ * so the grace window is re-evaluated against a fresh clock.
+ */
+const usePollingSchedule = (input: {
+  snapshot: SafenetCheckSnapshot | undefined
+  hasError: boolean
+  aim: number | null
+  fulfilledAt: number | undefined
+  setPollingInterval: (interval: number) => void
+}): void => {
+  const { snapshot, hasError, aim, fulfilledAt, setPollingInterval } = input
+  useEffect(() => {
+    // A failed poll — with or without retained data — is a transient endpoint
+    // problem, not a settled check: retry at the slow cadence. This is the only
+    // recovery path on mobile, which has no focus-refetch listeners.
+    if (hasError) {
+      setPollingInterval(POLL_INTERVAL_LATE_MS)
+      return
+    }
+    setPollingInterval(
+      computePollingInterval({
+        requests: snapshot?.requests ?? [],
+        headBlock: snapshot?.headBlock ?? null,
+        submittedAtMs: aim,
+        nowMs: Date.now(),
+      }),
+    )
+  }, [hasError, snapshot?.requests, snapshot?.headBlock, aim, fulfilledAt, setPollingInterval])
+}
+
+/**
  * Subscribe to a check's chain-read lifecycle for a `safeTxHash`. Wraps the
- * store's `getSafenetCheck` query with the dynamic poll interval, the merge
- * against the session-pinned verdict, and the stale/UNAVAILABLE error mapping.
+ * store's `getSafenetCheck` query with the dynamic poll interval and the
+ * stale/UNAVAILABLE error mapping. Every poll replaces the snapshot as a unit,
+ * so the status always belongs to the request the snapshot names.
  * Platform-neutral (no DOM access). `target` is the Safe being viewed, which
- * every attestation must name. `timestampMs` is this surface's idea of the
- * submission time: it is offered to the aim registry, which keeps the earliest
- * offer and aims every read of this check with it. Surfaces therefore need not
- * agree — a surface offering an earlier time re-aims the shared read once, and
- * a later one changes nothing.
+ * every request and attestation must name. `timestampMs` is this surface's idea
+ * of the submission time: it is offered to the aim registry, which keeps the
+ * earliest offer and aims every read of this check with it. Surfaces therefore
+ * need not agree — a surface offering an earlier time re-aims the shared read
+ * once, and a later one changes nothing.
  */
 export const useSafenetCheck = (
   safeTxHash: string | undefined,
@@ -71,21 +109,15 @@ export const useSafenetCheck = (
   // React discards costs nothing: the registry keeps the minimum of all offers.
   const aim = skip ? null : recordAim(identity, timestampMs)
 
-  // The interval feeds back into the query below, so the (status → interval →
-  // next poll) loop is reconfigured from the query's own output via an effect.
   const [pollingInterval, setPollingInterval] = useState(POLL_INTERVAL_FAST_MS)
 
   const query = useGetSafenetCheckQuery(identity, {
     skip,
     pollingInterval,
-    // No refetchOnFocus: a settled check does not change, and a history page
-    // would cost ~3 chain reads per row on every tab switch back.
     skipPollingIfUnfocused: true,
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
   })
-
-  const pinned = useSelector((state: SafenetCheckPartialState) =>
-    safeTxHash && !skip ? selectPinnedVerdict(state, { safeTxHash, ...target }) : undefined,
-  )
 
   const snapshot = query.data
   const hasData = snapshot !== undefined
@@ -94,53 +126,12 @@ export const useSafenetCheck = (
   const hasError = query.error !== undefined
   const isStale = hasError && hasData
 
-  // With no snapshot to show the base is UNAVAILABLE; the monotonic merge
-  // still keeps any pinned floor from an earlier success.
-  const base = snapshot?.status ?? CheckStatus.UNAVAILABLE
-  const status = mergeMonotonic(pinned?.status, base)
+  const status = snapshot?.status ?? CheckStatus.UNAVAILABLE
   const publicStatus = toPublicStatus(status)
 
-  const unavailableReason =
-    status !== CheckStatus.UNAVAILABLE ? undefined : resolveUnavailableReason(snapshot, hasError)
+  const unavailableReason = resolveUnavailableReason(status, snapshot, hasError)
 
-  // Events are sorted ascending, so [0] substitutes for the deadline on the
-  // plain path, which does not emit one.
-  const firstEventBlock = snapshot?.events[0] !== undefined ? String(snapshot.events[0].blockNumber) : null
-
-  // A landed poll re-runs this, so the grace window below is re-evaluated
-  // against a fresh clock instead of the one from the first read.
-  const fulfilledAt = query.fulfilledTimeStamp
-
-  useEffect(() => {
-    // A failed fetch with nothing to show is a transient endpoint problem, not
-    // "no check exists" — keep retrying at the slow cadence. This is the only
-    // recovery path on mobile, which has no focus-refetch listeners.
-    if (hasError && !hasData) {
-      setPollingInterval(POLL_INTERVAL_LATE_MS)
-      return
-    }
-    setPollingInterval(
-      computePollingInterval({
-        status,
-        headBlock: snapshot?.headBlock ?? null,
-        deadlineBlock: snapshot?.deadlineBlock ?? null,
-        firstEventBlock,
-        submittedAtMs: aim,
-        attestedAtMs: snapshot?.attestedAtMs ?? null,
-        nowMs: Date.now(),
-      }),
-    )
-  }, [
-    hasError,
-    hasData,
-    status,
-    snapshot?.headBlock,
-    snapshot?.deadlineBlock,
-    snapshot?.attestedAtMs,
-    firstEventBlock,
-    aim,
-    fulfilledAt,
-  ])
+  usePollingSchedule({ snapshot, hasError, aim, fulfilledAt: query.fulfilledTimeStamp, setPollingInterval })
 
   const { refetch: queryRefetch } = query
 

@@ -1,33 +1,37 @@
 import {
+  buildArbitrationTimedOutLog,
   buildCommittedLog,
+  buildDisputeOutOfScopeLog,
   buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
   buildNewRequestLog,
   buildOracleAttestedLog,
   buildOracleProposedLog,
   buildOracleResultLog,
-  buildPlainAttestedLog,
-  buildPlainProposedLog,
+  buildRequestTimedOutLog,
   buildRevealedLog,
 } from './rawLogs'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import type {
+  ArbitrationTimedOutEvent,
+  DisputeOutOfScopeEvent,
   DisputeResolvedEvent,
+  DisputeTriggeredEvent,
   NormalizedCheckEvent,
   OracleAttestedEvent,
   OracleProposedEvent,
   OracleResultEvent,
-  PlainAttestedEvent,
-  PlainProposedEvent,
   RequestCreatedEvent,
+  RequestTimedOutEvent,
   SentinelCommittedEvent,
   SentinelRevealedEvent,
 } from '../types'
 
 /**
- * `NormalizedCheckEvent` factories for status-machine and merge tests, DERIVED
- * from the `rawLogs` builders: each base shape is a real raw log pushed through
- * the real decoder, so these can never drift from what `decodeLogs` actually
- * produces. Overrides express test intent on top.
+ * `NormalizedCheckEvent` factories for status-machine and snapshot tests,
+ * DERIVED from the `rawLogs` builders: each base shape is a real raw log pushed
+ * through the real decoder, so these can never drift from what `decodeLogs`
+ * actually produces. Overrides express test intent on top.
  */
 
 const decodeOne = <T extends NormalizedCheckEvent>(log: RawLog): T => {
@@ -43,16 +47,6 @@ export const proposedEvent = (over: Partial<OracleProposedEvent> = {}): OraclePr
 
 export const attestedEvent = (over: Partial<OracleAttestedEvent> = {}): OracleAttestedEvent => ({
   ...decodeOne<OracleAttestedEvent>(buildOracleAttestedLog()),
-  ...over,
-})
-
-export const plainProposedEvent = (over: Partial<PlainProposedEvent> = {}): PlainProposedEvent => ({
-  ...decodeOne<PlainProposedEvent>(buildPlainProposedLog()),
-  ...over,
-})
-
-export const plainAttestedEvent = (over: Partial<PlainAttestedEvent> = {}): PlainAttestedEvent => ({
-  ...decodeOne<PlainAttestedEvent>(buildPlainAttestedLog()),
   ...over,
 })
 
@@ -76,7 +70,27 @@ export const oracleResultEvent = (over: Partial<OracleResultEvent> = {}): Oracle
   ...over,
 })
 
+export const disputeTriggeredEvent = (over: Partial<DisputeTriggeredEvent> = {}): DisputeTriggeredEvent => ({
+  ...decodeOne<DisputeTriggeredEvent>(buildDisputeTriggeredLog()),
+  ...over,
+})
+
 export const disputeResolvedEvent = (over: Partial<DisputeResolvedEvent> = {}): DisputeResolvedEvent => ({
   ...decodeOne<DisputeResolvedEvent>(buildDisputeResolvedLog()),
+  ...over,
+})
+
+export const disputeOutOfScopeEvent = (over: Partial<DisputeOutOfScopeEvent> = {}): DisputeOutOfScopeEvent => ({
+  ...decodeOne<DisputeOutOfScopeEvent>(buildDisputeOutOfScopeLog()),
+  ...over,
+})
+
+export const arbitrationTimedOutEvent = (over: Partial<ArbitrationTimedOutEvent> = {}): ArbitrationTimedOutEvent => ({
+  ...decodeOne<ArbitrationTimedOutEvent>(buildArbitrationTimedOutLog()),
+  ...over,
+})
+
+export const requestTimedOutEvent = (over: Partial<RequestTimedOutEvent> = {}): RequestTimedOutEvent => ({
+  ...decodeOne<RequestTimedOutEvent>(buildRequestTimedOutLog()),
   ...over,
 })

@@ -1,34 +1,37 @@
 import { renderHook } from '@testing-library/react'
-import { useSelector } from 'react-redux'
 import { useGetSafenetCheckQuery } from '@safe-global/store/safenet/safenetCheckApi'
-import type { PinnedVerdict } from '@safe-global/store/safenet/safenetCheckSlice'
 import { forgetAim, recordAim, resolveAim } from '@safe-global/store/safenet/safenetAimRegistry'
 import { useSafenetCheck } from '../useSafenetCheck'
 import {
   ARBITRATION_POLL_MS,
-  ARBITRATION_WINDOW_MS,
+  LATE_WINDOW_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
   UNAVAILABLE_GRACE_POLL_MS,
 } from '../../constants'
-import { CheckStatus, UNVERIFIED_ATTESTATION, type SafenetCheckSnapshot } from '../../types'
-import { buildBenignSnapshot, buildSnapshot, plainProposedEvent } from '../../builders'
+import { AttestationVerificationStatus, CheckStatus, type SafenetCheckSnapshot, type WindowCoverage } from '../../types'
+import { buildBenignSnapshot, buildCheckView, buildRequestSnapshot, buildSnapshot } from '../../builders'
 
 jest.mock('@safe-global/store/safenet/safenetCheckApi', () => ({
   useGetSafenetCheckQuery: jest.fn(),
 }))
-jest.mock('react-redux', () => ({ useSelector: jest.fn() }))
 
 const mockQuery = useGetSafenetCheckQuery as unknown as jest.Mock
-const mockSelector = useSelector as unknown as jest.Mock
 
 const HASH = ('0x' + 'ab'.repeat(32)) as `0x${string}`
-const TARGET = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000abc' }
 const OTHER_HASH = ('0x' + 'cd'.repeat(32)) as `0x${string}`
+const TARGET = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000abc' }
+const OTHER_SAFE = { chainId: '100', safeAddress: '0x0000000000000000000000000000000000000def' }
+const UNRESOLVED = { chainId: '', safeAddress: '' }
 /** A transaction's submission date, and a later surrogate a surface might offer. */
 const PROPOSED_AT = 1_700_000_000_000
 const LATER_OFFER = PROPOSED_AT + 3_600_000
+
+const REVEAL_DEADLINE_BLOCK = 160
+const ARBITRATION_DEADLINE_BLOCK = 200
+
+type RulingOutcome = 'RULED_SECURE' | 'NO_RULING'
 
 /** The slice of the RTK query result the hook consumes, as the mock returns it. */
 type QueryResult = {
@@ -57,14 +60,65 @@ const FETCH_ERROR = { message: 'rpc down' }
 /** Last options object the query hook was invoked with. */
 const lastOptions = () => mockQuery.mock.calls[mockQuery.mock.calls.length - 1][1]
 
+const pendingAt = (headBlock: number): SafenetCheckSnapshot =>
+  buildSnapshot({
+    safeTxHash: HASH,
+    status: CheckStatus.SUBMITTED,
+    outcome: 'PENDING',
+    headBlock: String(headBlock),
+    requests: [buildRequestSnapshot({ revealDeadlineBlock: String(REVEAL_DEADLINE_BLOCK) })],
+  })
+
+const approvedAt = (
+  headBlock: number,
+  verification: AttestationVerificationStatus,
+  status: CheckStatus,
+): SafenetCheckSnapshot =>
+  buildSnapshot({
+    safeTxHash: HASH,
+    status,
+    outcome: 'APPROVED',
+    headBlock: String(headBlock),
+    requests: [
+      buildRequestSnapshot({
+        state: 'RESOLVED_APPROVED',
+        outcome: 'APPROVED',
+        revealDeadlineBlock: String(REVEAL_DEADLINE_BLOCK),
+        committedCount: 2,
+        revealedCount: 2,
+        approveCount: 2,
+        attestation: { status: verification, signatureId: null, message: null },
+      }),
+    ],
+  })
+
+const disputedAt = (headBlock: number): SafenetCheckSnapshot =>
+  buildSnapshot({
+    safeTxHash: HASH,
+    status: CheckStatus.IN_PROGRESS,
+    outcome: 'DISPUTED',
+    headBlock: String(headBlock),
+    requests: [
+      buildRequestSnapshot({
+        state: 'FROZEN',
+        outcome: 'DISPUTED',
+        revealDeadlineBlock: String(REVEAL_DEADLINE_BLOCK),
+        arbitrationDeadlineBlock: String(ARBITRATION_DEADLINE_BLOCK),
+        committedCount: 2,
+        revealedCount: 2,
+        approveCount: 1,
+        denyCount: 1,
+      }),
+    ],
+  })
+
 beforeEach(() => {
   mockQuery.mockReset()
-  mockSelector.mockReset()
   refetchFn.mockReset()
-  mockSelector.mockReturnValue(undefined)
   // The aim registry is module state shared by every surface, so one test's
   // offer would aim the next test's read.
   forgetAim({ safeTxHash: HASH, ...TARGET })
+  forgetAim({ safeTxHash: HASH, ...UNRESOLVED })
   forgetAim({ safeTxHash: OTHER_HASH, ...TARGET })
 })
 
@@ -74,8 +128,67 @@ describe('useSafenetCheck', () => {
 
     renderHook(() => useSafenetCheck(undefined, null, TARGET))
 
-    expect(mockQuery.mock.calls[0][0]).toEqual({ safeTxHash: '', ...TARGET })
-    expect(mockQuery.mock.calls[0][1]).toMatchObject({ skip: true })
+    expect(lastOptions().skip).toBe(true)
+  })
+
+  describe('Safe context gating', () => {
+    // useSafeInfo returns defaultSafeInfo before the Safe resolves, whose chain
+    // id and address are both ''. Subscribing then would aim a read at nothing
+    // and leave a second cache entry behind once the real Safe lands.
+    it.each([
+      ['no chain id', { chainId: '', safeAddress: TARGET.safeAddress }],
+      ['no Safe address', { chainId: TARGET.chainId, safeAddress: '' }],
+      ['neither', UNRESOLVED],
+    ])('skips the query while the Safe context has %s', (_name, target) => {
+      mockQuery.mockReturnValue(queryResult())
+
+      renderHook(() => useSafenetCheck(HASH, null, target))
+
+      expect(lastOptions().skip).toBe(true)
+    })
+
+    it('opens exactly one subscription, aimed at the resolved Safe', () => {
+      mockQuery.mockReturnValue(queryResult())
+      const { rerender } = renderHook(({ target }) => useSafenetCheck(HASH, null, target), {
+        initialProps: { target: UNRESOLVED },
+      })
+      expect(lastOptions().skip).toBe(true)
+
+      rerender({ target: TARGET })
+
+      expect(lastOptions().skip).toBe(false)
+      const subscribed = mockQuery.mock.calls.filter((call) => call[1].skip === false)
+      expect(subscribed).toHaveLength(1)
+      expect(subscribed[0][0]).toMatchObject(TARGET)
+    })
+  })
+
+  describe('shared query identity', () => {
+    const subscribedArgs = (hash: string, timestampMs: number | null, target = TARGET) => {
+      mockQuery.mockClear()
+      renderHook(() => useSafenetCheck(hash, timestampMs, target))
+      return mockQuery.mock.calls[0][0]
+    }
+
+    beforeEach(() => {
+      mockQuery.mockReturnValue(queryResult())
+    })
+
+    it('keys surfaces of one check on the same entry whatever submission time each offers', () => {
+      const first = subscribedArgs(HASH, PROPOSED_AT)
+      const second = subscribedArgs(HASH, LATER_OFFER)
+      const third = subscribedArgs(HASH, null)
+
+      expect(second).toEqual(first)
+      expect(third).toEqual(first)
+    })
+
+    it.each([
+      ['another transaction', OTHER_HASH, TARGET],
+      ['another Safe', HASH, OTHER_SAFE],
+    ])('keys %s on a different entry', (_name, hash, target) => {
+      expect(subscribedArgs(hash, null, target)).not.toEqual(subscribedArgs(HASH, null))
+    })
   })
 
   describe('block window aim', () => {
@@ -93,9 +206,9 @@ describe('useSafenetCheck', () => {
     it('offers nothing while the Safe context is unresolved', () => {
       mockQuery.mockReturnValue(queryResult())
 
-      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, { chainId: '', safeAddress: '' }))
+      renderHook(() => useSafenetCheck(HASH, PROPOSED_AT, UNRESOLVED))
 
-      expect(resolveAim({ safeTxHash: HASH, ...TARGET })).toBeNull()
+      expect(resolveAim({ safeTxHash: HASH, ...UNRESOLVED })).toBeNull()
     })
 
     it('re-aims the shared read exactly once when a surface knows an earlier time', () => {
@@ -153,115 +266,61 @@ describe('useSafenetCheck', () => {
 
       expect(refetchFn).not.toHaveBeenCalled()
     })
-
-    it('anchors the UNAVAILABLE grace window on the earliest offer, not this surface`s', () => {
-      jest.useFakeTimers()
-      // The queue row offers a timestamp one hour later than the proposal. The
-      // grace window is 10 minutes wide, so aiming it at the summary timestamp
-      // would keep polling a check-less transaction an hour past its close.
-      jest.setSystemTime(PROPOSED_AT + UNAVAILABLE_GRACE_MS + 1_000)
-      recordAim({ safeTxHash: HASH, ...TARGET }, PROPOSED_AT)
-      mockQuery.mockReturnValue(
-        queryResult({
-          data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, aimedAtMs: PROPOSED_AT }),
-          fulfilledTimeStamp: 1,
-        }),
-      )
-
-      renderHook(() => useSafenetCheck(HASH, LATER_OFFER, TARGET))
-
-      expect(lastOptions().pollingInterval).toBe(0)
-      jest.useRealTimers()
-    })
-  })
-
-  describe('Safe context gating', () => {
-    // useSafeInfo returns defaultSafeInfo before the Safe resolves, whose chain
-    // id and address are both ''. Subscribing then would aim a read at nothing
-    // and leave a second cache entry behind once the real Safe lands.
-    const UNRESOLVED = { chainId: '', safeAddress: '' }
-
-    it.each([
-      ['no chain id', { chainId: '', safeAddress: TARGET.safeAddress }],
-      ['no Safe address', { chainId: TARGET.chainId, safeAddress: '' }],
-      ['neither', UNRESOLVED],
-    ])('skips the query while the Safe context has %s', (_name, target) => {
-      mockQuery.mockReturnValue(queryResult())
-
-      renderHook(() => useSafenetCheck(HASH, null, target))
-
-      expect(lastOptions().skip).toBe(true)
-    })
-
-    it('opens exactly one subscription, aimed at the resolved Safe', () => {
-      mockQuery.mockReturnValue(queryResult())
-      const { rerender } = renderHook(({ target }) => useSafenetCheck(HASH, null, target), {
-        initialProps: { target: UNRESOLVED },
-      })
-      expect(lastOptions().skip).toBe(true)
-
-      rerender({ target: TARGET })
-
-      expect(lastOptions().skip).toBe(false)
-      const subscribed = mockQuery.mock.calls.filter((call) => call[1].skip === false)
-      expect(subscribed).toHaveLength(1)
-      expect(subscribed[0][0]).toMatchObject(TARGET)
-    })
-
-    it('never reads a pinned verdict for an unresolved Safe', () => {
-      mockQuery.mockReturnValue(queryResult())
-
-      renderHook(() => useSafenetCheck(HASH, null, UNRESOLVED))
-
-      // The selector must not fall back to a hash-only lookup.
-      expect(mockSelector.mock.results[0].value).toBeUndefined()
-    })
   })
 
   describe('polling interval selection', () => {
-    const ATTESTED = 1_785_749_985_000
+    const polledAfter = (snapshot: SafenetCheckSnapshot, fulfilledTimeStamp: number) => {
+      mockQuery.mockReturnValue(queryResult({ data: snapshot, fulfilledTimeStamp }))
+    }
 
-    afterEach(() => jest.useRealTimers())
+    it('polls a pending request fast through its reveal deadline and slowly after it', () => {
+      polledAfter(pendingAt(REVEAL_DEADLINE_BLOCK), 1)
+      const { rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
 
-    it('polls slowly on a verified BENIGN inside the arbitration window, unfocused tabs excepted', () => {
-      jest.useFakeTimers()
-      jest.setSystemTime(ATTESTED + 60_000)
-      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
+      polledAfter(pendingAt(REVEAL_DEADLINE_BLOCK + 1), 2)
+      rerender()
+
+      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
+    })
+
+    const AWAITING_CASES: Array<[string, AttestationVerificationStatus, CheckStatus]> = [
+      ['unattested', AttestationVerificationStatus.UNVERIFIED, CheckStatus.IN_PROGRESS],
+      ['attested with the group key pending', AttestationVerificationStatus.PENDING, CheckStatus.AWAITING_VERIFICATION],
+    ]
+
+    it.each(AWAITING_CASES)(
+      'polls an approved request that is %s fast through the late window and slowly after it',
+      (_name, verification, status) => {
+        const lastFastBlock = REVEAL_DEADLINE_BLOCK + LATE_WINDOW_BLOCKS
+        polledAfter(approvedAt(lastFastBlock, verification, status), 1)
+        const { rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+        expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
+
+        polledAfter(approvedAt(lastFastBlock + 1, verification, status), 2)
+        rerender()
+
+        expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
+      },
+    )
+
+    it.each([
+      ['before its reveal deadline', REVEAL_DEADLINE_BLOCK - 10],
+      ['past its arbitration deadline', ARBITRATION_DEADLINE_BLOCK + 5_000],
+    ])('polls a disputed request at the arbitration cadence %s', (_name, headBlock) => {
+      polledAfter(disputedAt(headBlock), 1)
 
       renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(ARBITRATION_POLL_MS)
-      // The one deliberate option keeping background tabs off the chain.
-      expect(lastOptions().skipPollingIfUnfocused).toBe(true)
     })
 
-    it('stops polling once the arbitration window has closed', () => {
-      jest.useFakeTimers()
-      jest.setSystemTime(ATTESTED + ARBITRATION_WINDOW_MS)
-      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
+    it('stops polling once the check is settled BENIGN, before any deadline has passed', () => {
+      polledAfter(buildBenignSnapshot({ safeTxHash: HASH, headBlock: String(REVEAL_DEADLINE_BLOCK - 5) }), 1)
 
       renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(0)
-    })
-
-    // The plain (non-oracle) path never emits a deadline — the hook substitutes
-    // the first observed event's block, so a never-attested check still stops.
-    it('polls fast on the plain path while inside the substitute deadline', () => {
-      mockQuery.mockReturnValue(
-        queryResult({
-          data: buildSnapshot({
-            status: CheckStatus.SUBMITTED,
-            headBlock: '150',
-            deadlineBlock: null,
-            events: [plainProposedEvent({ blockNumber: 100 })],
-          }),
-        }),
-      )
-
-      renderHook(() => useSafenetCheck(HASH, null, TARGET))
-
-      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
     })
   })
 
@@ -272,7 +331,13 @@ describe('useSafenetCheck', () => {
 
     // A read aimed from the submission time that reached the head: the empty
     // result is the real "no check yet" the grace window exists for.
-    const noCheck = () => buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, windowCoverage: 'proven' })
+    const noCheck = () =>
+      buildSnapshot({
+        safeTxHash: HASH,
+        status: CheckStatus.UNAVAILABLE,
+        windowCoverage: 'proven',
+        aimedAtMs: SUBMITTED,
+      })
 
     it('keeps polling slowly while the check request may still be mining', () => {
       jest.useFakeTimers()
@@ -311,6 +376,25 @@ describe('useSafenetCheck', () => {
       expect(lastOptions().pollingInterval).toBe(0)
     })
 
+    it('anchors the window on the earliest offer, not this surface`s', () => {
+      // The queue row offers a timestamp one hour later than the proposal. Read
+      // from that offer the window would still be open; from the proposal it
+      // closed long ago.
+      jest.useFakeTimers()
+      jest.setSystemTime(LATER_OFFER + 1_000)
+      recordAim({ safeTxHash: HASH, ...TARGET }, PROPOSED_AT)
+      mockQuery.mockReturnValue(
+        queryResult({
+          data: buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, aimedAtMs: PROPOSED_AT }),
+          fulfilledTimeStamp: 1,
+        }),
+      )
+
+      renderHook(() => useSafenetCheck(HASH, LATER_OFFER, TARGET))
+
+      expect(lastOptions().pollingInterval).toBe(0)
+    })
+
     it('picks the check up at the fast cadence when it lands inside the window', () => {
       jest.useFakeTimers()
       jest.setSystemTime(SUBMITTED + 1_000)
@@ -318,20 +402,11 @@ describe('useSafenetCheck', () => {
       const { result, rerender } = renderHook(() => useSafenetCheck(HASH, SUBMITTED, TARGET))
       expect(result.current.unavailableReason).toBe('NO_CHECK')
       // The cadence that gets the check picked up at all: without it the read
-      // below never happens and NO_CHECK stays pinned for the session.
+      // below never happens and NO_CHECK stays for the session.
       expect(lastOptions().pollingInterval).toBe(UNAVAILABLE_GRACE_POLL_MS)
 
       mockQuery.mockReturnValue(
-        queryResult({
-          data: buildSnapshot({
-            safeTxHash: HASH,
-            status: CheckStatus.SUBMITTED,
-            headBlock: '150',
-            deadlineBlock: null,
-            events: [plainProposedEvent({ blockNumber: 100 })],
-          }),
-          fulfilledTimeStamp: 2,
-        }),
+        queryResult({ data: { ...pendingAt(REVEAL_DEADLINE_BLOCK), aimedAtMs: SUBMITTED }, fulfilledTimeStamp: 2 }),
       )
       rerender()
 
@@ -340,8 +415,13 @@ describe('useSafenetCheck', () => {
     })
   })
 
-  describe('error mapping', () => {
-    it('maps an error with no data to UNAVAILABLE', () => {
+  describe('failed polls', () => {
+    const failedPollCases: Array<[string, () => SafenetCheckSnapshot | undefined]> = [
+      ['no snapshot', () => undefined],
+      ['a settled snapshot', () => buildBenignSnapshot({ safeTxHash: HASH })],
+    ]
+
+    it('maps an error with no snapshot to UNAVAILABLE and does not call it stale', () => {
       mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
@@ -351,35 +431,24 @@ describe('useSafenetCheck', () => {
       expect(result.current.isStale).toBe(false)
     })
 
-    it('keeps retrying at the slow cadence when the first fetch failed (nothing to show)', () => {
-      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
-
-      renderHook(() => useSafenetCheck(HASH, null, TARGET))
-
-      // A transient endpoint failure must not read as "no check exists" and
-      // stop polling — on mobile this retry is the only recovery path.
-      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
-    })
-
-    it('holds the slow cadence while a retry is in flight (error retained, request pending)', () => {
-      // RTK Query flips isError off during a retry's pending phase but retains
-      // `error`; keying on isError here advertised interval 0 mid-retry.
-      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, isError: false, isFetching: true }))
+    // A transient endpoint failure must not read as a settled check and stop
+    // polling: on mobile this retry is the only recovery path.
+    it.each(failedPollCases)('retries at the slow cadence over %s', (_name, retained) => {
+      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, data: retained() }))
 
       renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
     })
 
-    it('restores the computed interval once a retry succeeds', () => {
-      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
-      const { rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+    // RTK Query flips isError off during a retry's pending phase but retains
+    // `error`; keying on isError advertised interval 0 mid-retry.
+    it.each(failedPollCases)('holds the slow cadence while a retry over %s is in flight', (_name, retained) => {
+      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, isError: false, isFetching: true, data: retained() }))
+
+      renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
       expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
-
-      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
-      rerender()
-
-      expect(lastOptions().pollingInterval).toBe(0)
     })
 
     it('keeps the last snapshot and flags isStale on an error with retained data', () => {
@@ -392,11 +461,100 @@ describe('useSafenetCheck', () => {
       expect(result.current.isStale).toBe(true)
       expect(result.current.snapshot).toBe(snapshot)
     })
+
+    it('recovers once a retry succeeds: fresh snapshot, no longer stale, computed interval restored', () => {
+      const retained = pendingAt(REVEAL_DEADLINE_BLOCK)
+      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, data: retained, fulfilledTimeStamp: 1 }))
+      const { result, rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+      expect(result.current.isStale).toBe(true)
+      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_LATE_MS)
+
+      const recovered = approvedAt(
+        REVEAL_DEADLINE_BLOCK + 1,
+        AttestationVerificationStatus.UNVERIFIED,
+        CheckStatus.IN_PROGRESS,
+      )
+      mockQuery.mockReturnValue(queryResult({ data: recovered, fulfilledTimeStamp: 2 }))
+      rerender()
+
+      expect(result.current.isStale).toBe(false)
+      expect(result.current.snapshot).toBe(recovered)
+      expect(lastOptions().pollingInterval).toBe(POLL_INTERVAL_FAST_MS)
+    })
+  })
+
+  describe('status', () => {
+    it.each([
+      [CheckStatus.SUBMITTED, CheckStatus.SUBMITTED],
+      [CheckStatus.IN_PROGRESS, CheckStatus.IN_PROGRESS],
+      [CheckStatus.AWAITING_VERIFICATION, CheckStatus.IN_PROGRESS],
+      [CheckStatus.VERIFICATION_FAILED, CheckStatus.TIMED_OUT],
+      [CheckStatus.BENIGN, CheckStatus.BENIGN],
+      [CheckStatus.MALICIOUS, CheckStatus.MALICIOUS],
+      [CheckStatus.TIMED_OUT, CheckStatus.TIMED_OUT],
+      [CheckStatus.UNAVAILABLE, CheckStatus.UNAVAILABLE],
+    ])('reports a %s snapshot as %s publicly', (status, publicStatus) => {
+      mockQuery.mockReturnValue(queryResult({ data: buildSnapshot({ safeTxHash: HASH, status }) }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(result.current.status).toBe(status)
+      expect(result.current.publicStatus).toBe(publicStatus)
+    })
+
+    it('is UNAVAILABLE before any snapshot exists', () => {
+      mockQuery.mockReturnValue(queryResult())
+
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
+      expect(result.current.publicStatus).toBe(CheckStatus.UNAVAILABLE)
+    })
+
+    it('follows a later snapshot down as readily as up, with no verdict held over', () => {
+      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }), fulfilledTimeStamp: 1 }))
+      const { result, rerender } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+      expect(result.current.status).toBe(CheckStatus.BENIGN)
+
+      const reorged = pendingAt(REVEAL_DEADLINE_BLOCK)
+      mockQuery.mockReturnValue(queryResult({ data: reorged, fulfilledTimeStamp: 2 }))
+      rerender()
+
+      expect(result.current.snapshot).toBe(reorged)
+      expect(result.current.status).toBe(CheckStatus.SUBMITTED)
+      expect(result.current.publicStatus).toBe(CheckStatus.SUBMITTED)
+    })
   })
 
   describe('unavailable reason', () => {
-    const emptyRead = (windowCoverage: 'proven' | 'heuristic') =>
-      buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, windowCoverage })
+    const emptyRead = (windowCoverage: WindowCoverage) =>
+      buildSnapshot({ safeTxHash: HASH, status: CheckStatus.UNAVAILABLE, outcome: null, windowCoverage })
+
+    const rulingRead = (outcome: RulingOutcome, windowCoverage: WindowCoverage) => {
+      const request = buildRequestSnapshot({
+        state: outcome === 'RULED_SECURE' ? 'RESOLVED_APPROVED' : 'TIMED_OUT',
+        outcome,
+        committedCount: 2,
+        revealedCount: 2,
+        approveCount: 1,
+        denyCount: 1,
+      })
+      return buildSnapshot({
+        safeTxHash: HASH,
+        status: CheckStatus.UNAVAILABLE,
+        outcome,
+        requestId: request.requestId,
+        requests: [request],
+        windowCoverage,
+      })
+    }
+
+    const RULING_READS: Array<[RulingOutcome, WindowCoverage]> = [
+      ['RULED_SECURE', 'proven'],
+      ['RULED_SECURE', 'heuristic'],
+      ['NO_RULING', 'proven'],
+      ['NO_RULING', 'heuristic'],
+    ]
 
     it('reports NO_CHECK when a window covering the whole lifetime found nothing', () => {
       mockQuery.mockReturnValue(queryResult({ data: emptyRead('proven') }))
@@ -424,15 +582,6 @@ describe('useSafenetCheck', () => {
       expect(result.current.unavailableReason).toBe('READ_FAILED')
     })
 
-    it('never reports READ_FAILED while the first read is in flight', () => {
-      mockQuery.mockReturnValue(queryResult({ isLoading: true, isFetching: true }))
-
-      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
-
-      expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
-      expect(result.current.unavailableReason).toBeUndefined()
-    })
-
     it.each(['proven', 'heuristic'] as const)(
       'keeps the retained %s-window snapshot`s reason when a refetch fails over it',
       (coverage) => {
@@ -444,8 +593,33 @@ describe('useSafenetCheck', () => {
       },
     )
 
-    it('reports no reason once a check is observed', () => {
-      mockQuery.mockReturnValue(queryResult({ data: buildBenignSnapshot({ safeTxHash: HASH }) }))
+    it.each(RULING_READS)('reports no reason for a %s ruling read over a %s window', (outcome, coverage) => {
+      mockQuery.mockReturnValue(queryResult({ data: rulingRead(outcome, coverage) }))
+
+      const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+      expect(result.current.status).toBe(CheckStatus.UNAVAILABLE)
+      expect(result.current.unavailableReason).toBeUndefined()
+    })
+
+    it.each(['RULED_SECURE', 'NO_RULING'] as const)(
+      'never turns a retained %s ruling into a failed read when a refetch fails over it',
+      (outcome) => {
+        mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR, data: rulingRead(outcome, 'proven') }))
+
+        const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
+
+        expect(result.current.isStale).toBe(true)
+        expect(result.current.unavailableReason).toBeUndefined()
+      },
+    )
+
+    it.each([
+      ['a settled BENIGN check', () => buildBenignSnapshot({ safeTxHash: HASH }), undefined],
+      ['a check in progress over a heuristic window', () => pendingAt(REVEAL_DEADLINE_BLOCK), undefined],
+      ['a retained check in progress after a failed refetch', () => pendingAt(REVEAL_DEADLINE_BLOCK), FETCH_ERROR],
+    ])('reports no reason once a check is observed: %s', (_name, snapshot, error) => {
+      mockQuery.mockReturnValue(queryResult({ data: snapshot(), error }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
@@ -453,33 +627,27 @@ describe('useSafenetCheck', () => {
     })
   })
 
-  describe('read-path pin merge', () => {
-    it('never downgrades below the pinned verdict', () => {
-      const pinned: PinnedVerdict = { status: CheckStatus.BENIGN, atBlock: '10', verification: UNVERIFIED_ATTESTATION }
-      mockSelector.mockReturnValue(pinned)
-      // A reorg drops the attestation and the fresh read derives IN_PROGRESS.
-      mockQuery.mockReturnValue(
-        queryResult({ data: buildSnapshot({ status: CheckStatus.IN_PROGRESS, safeTxHash: HASH }) }),
-      )
+  describe('loading', () => {
+    it('presents the empty view, with no reason, while the first read is in flight', () => {
+      mockQuery.mockReturnValue(queryResult({ isLoading: true, isFetching: true }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
-      expect(result.current.status).toBe(CheckStatus.BENIGN)
-      expect(result.current.publicStatus).toBe(CheckStatus.BENIGN)
+      expect(result.current).toEqual(
+        buildCheckView({ isLoading: true, isFetching: true, refetch: result.current.refetch }),
+      )
     })
 
-    it('keeps the pinned verdict through a transient UNAVAILABLE', () => {
-      const pinned: PinnedVerdict = {
-        status: CheckStatus.MALICIOUS,
-        atBlock: '10',
-        verification: UNVERIFIED_ATTESTATION,
-      }
-      mockSelector.mockReturnValue(pinned)
-      mockQuery.mockReturnValue(queryResult({ error: FETCH_ERROR }))
+    it('keeps the snapshot on show, and not loading, while a refetch is in flight', () => {
+      const snapshot = buildBenignSnapshot({ safeTxHash: HASH })
+      mockQuery.mockReturnValue(queryResult({ data: snapshot, isFetching: true }))
 
       const { result } = renderHook(() => useSafenetCheck(HASH, null, TARGET))
 
-      expect(result.current.status).toBe(CheckStatus.MALICIOUS)
+      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isFetching).toBe(true)
+      expect(result.current.snapshot).toBe(snapshot)
+      expect(result.current.status).toBe(CheckStatus.BENIGN)
     })
   })
 
@@ -492,10 +660,13 @@ describe('useSafenetCheck', () => {
     expect(refetchFn).toHaveBeenCalledTimes(1)
   })
 
-  it('does not call refetch on a skipped query', () => {
+  it.each([
+    ['no safeTxHash', undefined, TARGET],
+    ['an unresolved Safe', HASH, UNRESOLVED],
+  ])('does not call refetch on a query skipped for %s', (_name, hash, target) => {
     mockQuery.mockReturnValue(queryResult())
 
-    const { result } = renderHook(() => useSafenetCheck(undefined, null, TARGET))
+    const { result } = renderHook(() => useSafenetCheck(hash, null, target))
     result.current.refetch()
 
     expect(refetchFn).not.toHaveBeenCalled()

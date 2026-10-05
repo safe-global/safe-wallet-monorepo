@@ -1,315 +1,223 @@
-import { computePollingInterval } from '../computePollingInterval'
+import { buildRequestSnapshot } from '../../builders'
 import {
   ARBITRATION_POLL_MS,
-  ARBITRATION_WINDOW_MS,
   LATE_WINDOW_BLOCKS,
-  PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
   UNAVAILABLE_GRACE_POLL_MS,
 } from '../../constants'
-import { CheckStatus } from '../../types'
+import { AttestationVerificationStatus as Attestation, type RequestOutcome, type RequestSnapshot } from '../../types'
+import { computePollingInterval } from '../computePollingInterval'
 
-describe('computePollingInterval', () => {
-  it.each([CheckStatus.MALICIOUS, CheckStatus.VERIFICATION_FAILED])(
-    'stops polling on the terminal status %s',
-    (status) => {
-      expect(computePollingInterval({ status, headBlock: '10', deadlineBlock: '150', firstEventBlock: '100' })).toBe(0)
-    },
-  )
+const REVEAL_DEADLINE = 1_000
+const ARBITRATION_DEADLINE = 1_400
+const SUBMITTED_AT = 1_700_000_000_000
+const FAR_BLOCKS = 5_000_000
 
-  describe('BENIGN — bounded arbitration window instead of an immediate stop', () => {
-    const ATTESTED = 1_700_000_000_000
-    const benign = { status: CheckStatus.BENIGN, headBlock: '200', deadlineBlock: '150', firstEventBlock: '100' }
+const OUTCOME_SHAPES: Record<RequestOutcome, Partial<RequestSnapshot>> = {
+  PENDING: { state: 'PENDING' },
+  APPROVED: { state: 'RESOLVED_APPROVED', committedCount: 2, revealedCount: 2, approveCount: 2 },
+  DENIED: { state: 'RESOLVED_DENIED', committedCount: 2, revealedCount: 2, denyCount: 2 },
+  DISPUTED: {
+    state: 'FROZEN',
+    committedCount: 2,
+    revealedCount: 2,
+    approveCount: 1,
+    denyCount: 1,
+    arbitrationDeadlineBlock: String(ARBITRATION_DEADLINE),
+  },
+  RULED_SECURE: { state: 'RESOLVED_APPROVED', committedCount: 3, revealedCount: 3, approveCount: 2, denyCount: 1 },
+  RULED_INSECURE: { state: 'RESOLVED_DENIED', committedCount: 3, revealedCount: 3, approveCount: 1, denyCount: 2 },
+  NO_RULING: { state: 'TIMED_OUT', committedCount: 2, revealedCount: 2, approveCount: 1, denyCount: 1 },
+  TIMED_OUT: { state: 'TIMED_OUT' },
+}
 
-    it('polls slowly inside the arbitration window (a rejection can still land)', () => {
-      expect(computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + 1_000 })).toBe(
-        ARBITRATION_POLL_MS,
-      )
-    })
-
-    it('polls slowly right up to the last ms of the arbitration window', () => {
-      expect(
-        computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + ARBITRATION_WINDOW_MS - 1 }),
-      ).toBe(ARBITRATION_POLL_MS)
-    })
-
-    it('stops at the arbitration boundary', () => {
-      expect(
-        computePollingInterval({ ...benign, attestedAtMs: ATTESTED, nowMs: ATTESTED + ARBITRATION_WINDOW_MS }),
-      ).toBe(0)
-    })
-
-    it('stops past the arbitration window (a settled check must not poll forever)', () => {
-      expect(
-        computePollingInterval({
-          ...benign,
-          attestedAtMs: ATTESTED,
-          nowMs: ATTESTED + ARBITRATION_WINDOW_MS + 60_000,
-        }),
-      ).toBe(0)
-    })
-
-    it('stops on an attestation stamped in the future (clock skew must not stretch the window)', () => {
-      expect(computePollingInterval({ ...benign, attestedAtMs: ATTESTED + 3_600_000, nowMs: ATTESTED })).toBe(0)
-    })
-
-    it('stops when the attestation time is unknown (nothing anchors the window)', () => {
-      expect(computePollingInterval({ ...benign, attestedAtMs: null, nowMs: ATTESTED })).toBe(0)
-      expect(computePollingInterval(benign)).toBe(0)
-    })
+const request = (outcome: RequestOutcome, over: Partial<RequestSnapshot> = {}): RequestSnapshot =>
+  buildRequestSnapshot({
+    outcome,
+    revealDeadlineBlock: String(REVEAL_DEADLINE),
+    ...OUTCOME_SHAPES[outcome],
+    ...over,
   })
 
-  describe('UNAVAILABLE — bounded grace window instead of an immediate stop', () => {
-    const SUBMITTED = 1_700_000_000_000
-    const unavailable = { status: CheckStatus.UNAVAILABLE, headBlock: null, deadlineBlock: null, firstEventBlock: null }
+const approved = (status: Attestation): RequestSnapshot =>
+  request('APPROVED', { attestation: { status, signatureId: null, message: null } })
 
-    it('polls slowly inside the grace window (the check request may still be mining)', () => {
-      expect(computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, nowMs: SUBMITTED + 1_000 })).toBe(
-        UNAVAILABLE_GRACE_POLL_MS,
-      )
-    })
+const poll = (
+  requests: RequestSnapshot[],
+  head: number | null,
+  timing: { submittedAtMs?: number | null; nowMs?: number } = {},
+): number => computePollingInterval({ requests, headBlock: head === null ? null : String(head), ...timing })
 
-    it('polls slowly right up to the last ms of the grace window', () => {
-      expect(
-        computePollingInterval({
-          ...unavailable,
-          submittedAtMs: SUBMITTED,
-          nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS - 1,
-        }),
-      ).toBe(UNAVAILABLE_GRACE_POLL_MS)
-    })
+describe('computePollingInterval — no request found', () => {
+  const pollAfter = (timing: { submittedAtMs?: number | null; nowMs?: number }): number =>
+    computePollingInterval({ requests: [], headBlock: null, ...timing })
 
-    it('stops at the grace boundary', () => {
-      expect(
-        computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED, nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS }),
-      ).toBe(0)
-    })
-
-    it('stops past the grace window (a row with no check must not poll forever)', () => {
-      expect(
-        computePollingInterval({
-          ...unavailable,
-          submittedAtMs: SUBMITTED,
-          nowMs: SUBMITTED + UNAVAILABLE_GRACE_MS + 60_000,
-        }),
-      ).toBe(0)
-    })
-
-    it('stops on a submission stamped in the future (clock skew must not stretch the window)', () => {
-      expect(computePollingInterval({ ...unavailable, submittedAtMs: SUBMITTED + 3_600_000, nowMs: SUBMITTED })).toBe(0)
-    })
-
-    it('stops when the submission time is unknown (nothing anchors the window)', () => {
-      expect(computePollingInterval({ ...unavailable, submittedAtMs: null, nowMs: 1_700_000_000_000 })).toBe(0)
-      expect(computePollingInterval(unavailable)).toBe(0)
-    })
-
-    it('keeps the grace window while a pinned snapshot is present', () => {
-      // NO_CHECK arrives with a snapshot and its head block; the window still
-      // applies, since the missing check is what polling waits for.
-      expect(
-        computePollingInterval({
-          status: CheckStatus.UNAVAILABLE,
-          headBlock: '200',
-          deadlineBlock: '150',
-          firstEventBlock: '100',
-          submittedAtMs: SUBMITTED,
-          nowMs: SUBMITTED + 1_000,
-        }),
-      ).toBe(UNAVAILABLE_GRACE_POLL_MS)
-    })
+  it.each<[string, number]>([
+    ['at the moment of submission', 0],
+    ['shortly after submission', 1_000],
+    ['in the last millisecond of the window', UNAVAILABLE_GRACE_MS - 1],
+  ])('polls slowly %s', (_when, age) => {
+    expect(pollAfter({ submittedAtMs: SUBMITTED_AT, nowMs: SUBMITTED_AT + age })).toBe(UNAVAILABLE_GRACE_POLL_MS)
   })
 
-  it('polls fast before the deadline', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.IN_PROGRESS,
-        headBlock: '140',
-        deadlineBlock: '150',
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_FAST_MS)
+  it.each<[string, number]>([
+    ['exactly when the window ends', UNAVAILABLE_GRACE_MS],
+    ['after the window', UNAVAILABLE_GRACE_MS + 60_000],
+    ['for a submission stamped one millisecond in the future', -1],
+    ['for a submission stamped an hour in the future', -3_600_000],
+  ])('stops %s', (_when, age) => {
+    expect(pollAfter({ submittedAtMs: SUBMITTED_AT, nowMs: SUBMITTED_AT + age })).toBe(0)
   })
 
-  it('polls fast at head == deadline (still in-window)', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.IN_PROGRESS,
-        headBlock: '150',
-        deadlineBlock: '150',
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_FAST_MS)
+  it('stops when the submission time is unknown', () => {
+    expect(pollAfter({ submittedAtMs: null, nowMs: SUBMITTED_AT })).toBe(0)
+    expect(pollAfter({ nowMs: SUBMITTED_AT })).toBe(0)
   })
 
-  it('drops to the late interval at head == deadline + 1 (first out-of-window block)', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.TIMED_OUT,
-        headBlock: '151',
-        deadlineBlock: '150',
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_LATE_MS)
+  it('stops when the caller gives no clock reading', () => {
+    expect(pollAfter({ submittedAtMs: SUBMITTED_AT })).toBe(0)
   })
 
-  it('polls fast when the head is unknown, even with a deadline on record', () => {
-    // The arithmetic needs both sides. A missing head fails open to fast,
-    // and must not be read as "past the deadline".
-    expect(
-      computePollingInterval({
-        status: CheckStatus.IN_PROGRESS,
-        headBlock: null,
-        deadlineBlock: '150',
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_FAST_MS)
+  it('applies the window whatever head the empty read observed', () => {
+    expect(poll([], REVEAL_DEADLINE, { submittedAtMs: SUBMITTED_AT, nowMs: SUBMITTED_AT + 1_000 })).toBe(
+      UNAVAILABLE_GRACE_POLL_MS,
+    )
+  })
+})
+
+describe('computePollingInterval — pending request', () => {
+  it.each<[string, number]>([
+    ['well before its reveal deadline', REVEAL_DEADLINE - 500],
+    ['one block before its reveal deadline', REVEAL_DEADLINE - 1],
+    ['exactly at its reveal deadline', REVEAL_DEADLINE],
+  ])('polls fast with the head %s', (_where, head) => {
+    expect(poll([request('PENDING')], head)).toBe(POLL_INTERVAL_FAST_MS)
   })
 
-  it('polls fast on a pinned TIMED_OUT whose re-read lost both anchors', () => {
-    // A transient empty read nulls the anchors while the pin keeps the status.
-    // Failing open keeps the late-BENIGN upgrade reachable.
-    expect(
-      computePollingInterval({
-        status: CheckStatus.TIMED_OUT,
-        headBlock: '10000',
-        deadlineBlock: null,
-        firstEventBlock: null,
-      }),
-    ).toBe(POLL_INTERVAL_FAST_MS)
+  it.each<[string, number]>([
+    ['one block after its reveal deadline', REVEAL_DEADLINE + 1],
+    ['far beyond its reveal deadline', REVEAL_DEADLINE + FAR_BLOCKS],
+  ])('keeps polling slowly, never stops, with the head %s', (_where, head) => {
+    expect(poll([request('PENDING')], head)).toBe(POLL_INTERVAL_LATE_MS)
   })
 
-  it('polls fast when nothing anchors a deadline yet (first read not landed)', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.SUBMITTED,
-        headBlock: '140',
-        deadlineBlock: null,
-        firstEventBlock: null,
-      }),
-    ).toBe(POLL_INTERVAL_FAST_MS)
+  it('polls fast while the head is unknown', () => {
+    expect(poll([request('PENDING')], null)).toBe(POLL_INTERVAL_FAST_MS)
   })
+})
 
-  it('polls slowly in the post-deadline late window (a late BENIGN can still land)', () => {
-    expect(
-      computePollingInterval({
-        status: CheckStatus.TIMED_OUT,
-        headBlock: '200',
-        deadlineBlock: '150',
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_LATE_MS)
-  })
+describe.each([Attestation.UNVERIFIED, Attestation.PENDING])(
+  'computePollingInterval — approval with a %s attestation',
+  (status) => {
+    const lateWindowEnd = REVEAL_DEADLINE + LATE_WINDOW_BLOCKS
 
-  it('polls slowly right up to the end of the late window', () => {
-    const deadline = 150
-    const head = deadline + LATE_WINDOW_BLOCKS
-    expect(
-      computePollingInterval({
-        status: CheckStatus.TIMED_OUT,
-        headBlock: String(head),
-        deadlineBlock: String(deadline),
-        firstEventBlock: '100',
-      }),
-    ).toBe(POLL_INTERVAL_LATE_MS)
-  })
-
-  it('stops once the late window closes', () => {
-    const deadline = 150
-    const head = deadline + LATE_WINDOW_BLOCKS + 1
-    expect(
-      computePollingInterval({
-        status: CheckStatus.TIMED_OUT,
-        headBlock: String(head),
-        deadlineBlock: String(deadline),
-        firstEventBlock: '100',
-      }),
-    ).toBe(0)
-  })
-
-  describe('plain path — no on-chain deadline, first event anchors the window', () => {
-    const first = 1_000
-
-    it('polls fast within PLAIN_DEADLINE_BLOCKS of the first event', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.SUBMITTED,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS),
-          deadlineBlock: null,
-          firstEventBlock: String(first),
-        }),
-      ).toBe(POLL_INTERVAL_FAST_MS)
+    it.each<[string, number]>([
+      ['before the reveal deadline', REVEAL_DEADLINE - 1],
+      ['past the reveal deadline', REVEAL_DEADLINE + 1],
+      ['exactly at the end of the late window', lateWindowEnd],
+    ])('polls fast with the head %s', (_where, head) => {
+      expect(poll([approved(status)], head)).toBe(POLL_INTERVAL_FAST_MS)
     })
 
-    it('drops to the late interval past the substitute deadline', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.SUBMITTED,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + 1),
-          deadlineBlock: null,
-          firstEventBlock: String(first),
-        }),
-      ).toBe(POLL_INTERVAL_LATE_MS)
+    it.each<[string, number]>([
+      ['one block past the late window', lateWindowEnd + 1],
+      ['far past the late window', lateWindowEnd + FAR_BLOCKS],
+    ])('keeps polling slowly, never stops, with the head %s', (_where, head) => {
+      expect(poll([approved(status)], head)).toBe(POLL_INTERVAL_LATE_MS)
     })
 
-    it('still polls slowly at the last block of the late window (inclusive close)', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.SUBMITTED,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + LATE_WINDOW_BLOCKS),
-          deadlineBlock: null,
-          firstEventBlock: String(first),
-        }),
-      ).toBe(POLL_INTERVAL_LATE_MS)
+    it('polls fast while the head is unknown', () => {
+      expect(poll([approved(status)], null)).toBe(POLL_INTERVAL_FAST_MS)
     })
+  },
+)
 
-    it('stops once the late window closes — a never-attested check must not poll forever', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.SUBMITTED,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + LATE_WINDOW_BLOCKS + 1),
-          deadlineBlock: null,
-          firstEventBlock: String(first),
-        }),
-      ).toBe(0)
-    })
-
-    it('an on-chain deadline wins over the substitute', () => {
-      // Deadline far beyond the substitute window: still fast.
-      expect(
-        computePollingInterval({
-          status: CheckStatus.IN_PROGRESS,
-          headBlock: String(first + PLAIN_DEADLINE_BLOCKS + LATE_WINDOW_BLOCKS + 100),
-          deadlineBlock: String(first + 10_000),
-          firstEventBlock: String(first),
-        }),
-      ).toBe(POLL_INTERVAL_FAST_MS)
-    })
+describe('computePollingInterval — open dispute', () => {
+  it.each<[string, number]>([
+    ['before the reveal deadline', REVEAL_DEADLINE - 1],
+    ['before its arbitration deadline', ARBITRATION_DEADLINE - 1],
+    ['exactly at its arbitration deadline', ARBITRATION_DEADLINE],
+    ['one block past its arbitration deadline', ARBITRATION_DEADLINE + 1],
+    ['far past its arbitration deadline', ARBITRATION_DEADLINE + FAR_BLOCKS],
+  ])('polls on the arbitration cadence with the head %s', (_where, head) => {
+    expect(poll([request('DISPUTED')], head)).toBe(ARBITRATION_POLL_MS)
   })
 
-  describe('AWAITING_VERIFICATION — the status a PENDING verification produces', () => {
-    it('keeps polling fast before the deadline (the group key can still arrive)', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.AWAITING_VERIFICATION,
-          headBlock: '140',
-          deadlineBlock: '150',
-          firstEventBlock: '100',
-        }),
-      ).toBe(POLL_INTERVAL_FAST_MS)
-    })
+  it('polls on the arbitration cadence while the head is unknown', () => {
+    expect(poll([request('DISPUTED')], null)).toBe(ARBITRATION_POLL_MS)
+  })
+})
 
-    it('keeps polling slowly through the late window', () => {
-      expect(
-        computePollingInterval({
-          status: CheckStatus.AWAITING_VERIFICATION,
-          headBlock: '200',
-          deadlineBlock: '150',
-          firstEventBlock: '100',
-        }),
-      ).toBe(POLL_INTERVAL_LATE_MS)
-    })
+describe('computePollingInterval — settled requests', () => {
+  const HEADS: Array<number | null> = [null, 0, REVEAL_DEADLINE, REVEAL_DEADLINE + LATE_WINDOW_BLOCKS, FAR_BLOCKS]
+
+  const SETTLED: Array<[string, RequestSnapshot]> = [
+    ['an approval with a verified attestation', approved(Attestation.VERIFIED)],
+    ['an approval whose attestation failed verification', approved(Attestation.INVALID)],
+    ['a unanimous denial', request('DENIED')],
+    ['a Council secure ruling', request('RULED_SECURE')],
+    ['a Council insecure ruling', request('RULED_INSECURE')],
+    ['a request closed without a ruling', request('NO_RULING')],
+    ['a timed-out request', request('TIMED_OUT')],
+  ]
+
+  it.each(SETTLED)('stops polling for %s at every head', (_label, settled) => {
+    expect(HEADS.map((head) => poll([settled], head))).toEqual(HEADS.map(() => 0))
+  })
+
+  it('stops for several settled requests together', () => {
+    const requests = SETTLED.map(([, settled]) => settled)
+
+    expect(HEADS.map((head) => poll(requests, head))).toEqual(HEADS.map(() => 0))
+  })
+
+  it('ignores the grace window once a request exists', () => {
+    expect(poll([request('DENIED')], REVEAL_DEADLINE, { submittedAtMs: SUBMITTED_AT, nowMs: SUBMITTED_AT })).toBe(0)
+  })
+})
+
+describe('computePollingInterval — several requests', () => {
+  it('lets a pending request in its fast window beat a dispute', () => {
+    expect(poll([request('DISPUTED'), request('PENDING')], REVEAL_DEADLINE)).toBe(POLL_INTERVAL_FAST_MS)
+  })
+
+  it('lets a slowly polled pending request beat a dispute', () => {
+    expect(poll([request('DISPUTED'), request('PENDING')], REVEAL_DEADLINE + 1)).toBe(POLL_INTERVAL_LATE_MS)
+  })
+
+  it('keeps the arbitration cadence for a dispute beside settled requests', () => {
+    const requests = [approved(Attestation.VERIFIED), request('DISPUTED'), request('DENIED'), request('TIMED_OUT')]
+
+    expect(poll(requests, ARBITRATION_DEADLINE + FAR_BLOCKS)).toBe(ARBITRATION_POLL_MS)
+  })
+
+  it('lets a request that can still change beat settled siblings', () => {
+    expect(poll([request('DENIED'), request('PENDING')], REVEAL_DEADLINE)).toBe(POLL_INTERVAL_FAST_MS)
+    expect(poll([approved(Attestation.VERIFIED), approved(Attestation.PENDING)], REVEAL_DEADLINE + 1)).toBe(
+      POLL_INTERVAL_FAST_MS,
+    )
+  })
+
+  it('keeps each request on its own reveal deadline', () => {
+    const early = request('PENDING')
+    const late = request('PENDING', { revealDeadlineBlock: String(REVEAL_DEADLINE + 1_000) })
+
+    expect(poll([early, late], REVEAL_DEADLINE + 500)).toBe(POLL_INTERVAL_FAST_MS)
+    expect(poll([early, late], REVEAL_DEADLINE + 1_001)).toBe(POLL_INTERVAL_LATE_MS)
+  })
+
+  it('does not depend on the order of the requests', () => {
+    const requests = [request('DISPUTED'), request('DENIED'), approved(Attestation.UNVERIFIED), request('PENDING')]
+    const head = REVEAL_DEADLINE + 1
+
+    expect(poll([...requests].reverse(), head)).toBe(poll(requests, head))
+  })
+
+  it('polls a pending request on its own cadence whatever the submission time says', () => {
+    const longAfterSubmission = { submittedAtMs: SUBMITTED_AT, nowMs: SUBMITTED_AT + UNAVAILABLE_GRACE_MS * 10 }
+
+    expect(poll([request('PENDING')], REVEAL_DEADLINE, longAfterSubmission)).toBe(POLL_INTERVAL_FAST_MS)
   })
 })

@@ -2,36 +2,11 @@ import { TypedDataEncoder, concat, keccak256, AbiCoder } from 'ethers'
 import type { Hex } from '../types'
 
 /**
- * EIP-712 preimages the FROST attestations sign. The domain is ONLY
+ * The EIP-712 preimage the FROST attestations sign. The domain is ONLY
  * `{ chainId, verifyingContract }` — no name/version/salt — and `chainId` is
  * the Safenet chain Consensus is deployed to, NOT the Safe's home chain
  * carried in the event.
  */
-
-/**
- * The message a non-oracle `TransactionAttested` signs — what live Gnosis
- * beta traffic emits.
- */
-export type PlainProposal = {
-  chainId: string
-  /** The Consensus contract address — the EIP-712 `verifyingContract`. */
-  consensus: string
-  epoch: string
-  safeTxHash: Hex
-}
-
-export const PLAIN_PROPOSAL_TYPES = {
-  TransactionProposal: [
-    { name: 'epoch', type: 'uint64' },
-    { name: 'safeTxHash', type: 'bytes32' },
-  ],
-}
-
-export const plainProposalHash = ({ chainId, consensus, epoch, safeTxHash }: PlainProposal): Hex =>
-  TypedDataEncoder.hash({ chainId: BigInt(chainId), verifyingContract: consensus }, PLAIN_PROPOSAL_TYPES, {
-    epoch: BigInt(epoch),
-    safeTxHash,
-  }) as Hex
 
 /**
  * The oracle-transaction proposal hash — one message type for every oracle
@@ -41,7 +16,13 @@ export const plainProposalHash = ({ chainId, consensus, epoch, safeTxHash }: Pla
  * of through `TypedDataEncoder` (which needs the raw bytes). This hash is the
  * FROST-signed message AND the oracle `requestId`.
  */
-export type TransactionProposal = PlainProposal & {
+export type TransactionProposal = {
+  /** The Safenet chain id — NOT the Safe's home chain. */
+  chainId: string
+  /** The Consensus contract address — the EIP-712 `verifyingContract`. */
+  consensus: string
+  epoch: string
+  safeTxHash: Hex
   oracle: string
   oracleDataHash: Hex
 }

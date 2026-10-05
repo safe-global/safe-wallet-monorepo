@@ -9,15 +9,11 @@ import type { Hex } from '@safe-global/types-kit'
 export type { Hex }
 
 export enum CheckEventType {
-  /** Consensus `TransactionProposed` from the unified oracle pair (`safeId` + oracle). */
+  /** Consensus `TransactionProposed` (`safeId` + oracle). */
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
-  /** Consensus `TransactionAttested` from the oracle pair — carries the FROST signature. */
+  /** Consensus `TransactionAttested` — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
-  /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
-  PLAIN_PROPOSED = 'PLAIN_PROPOSED',
-  /** Consensus `TransactionAttested` — the non-oracle attestation. */
-  PLAIN_ATTESTED = 'PLAIN_ATTESTED',
-  /** Sentinel `NewRequest` — carries the per-check deadline block. */
+  /** Sentinel `NewRequest` — the request's opening terms. */
   REQUEST_CREATED = 'REQUEST_CREATED',
   /** Sentinel `Committed` — a blind commitment; the verdict arrives with the reveal. */
   SENTINEL_COMMITTED = 'SENTINEL_COMMITTED',
@@ -25,8 +21,16 @@ export enum CheckEventType {
   SENTINEL_REVEALED = 'SENTINEL_REVEALED',
   /** `OracleResult` — the oracle's final approved flag. */
   ORACLE_RESULT = 'ORACLE_RESULT',
-  /** `DisputeResolved` — a frozen/contested request was resolved. */
+  /** `DisputeTriggered` — the sentinels split; the request is frozen for arbitration. */
+  DISPUTE_TRIGGERED = 'DISPUTE_TRIGGERED',
+  /** `DisputeResolved` — the arbitration Council ruled on a frozen request. */
   DISPUTE_RESOLVED = 'DISPUTE_RESOLVED',
+  /** `DisputeOutOfScope` — arbitration declined the dispute. */
+  DISPUTE_OUT_OF_SCOPE = 'DISPUTE_OUT_OF_SCOPE',
+  /** `ArbitrationTimedOut` — the arbitration deadline passed without a ruling. */
+  ARBITRATION_TIMED_OUT = 'ARBITRATION_TIMED_OUT',
+  /** `RequestTimedOut` — the request closed without enough reveals. */
+  REQUEST_TIMED_OUT = 'REQUEST_TIMED_OUT',
 }
 
 /** Fields present on every decoded event; used for ordering and de-duplication. */
@@ -39,6 +43,7 @@ export type CheckEventBase = {
 export type OracleProposedEvent = CheckEventBase & {
   type: CheckEventType.ORACLE_PROPOSED
   safeTxHash: Hex
+  /** The checked Safe's home chain, not the Safenet chain. */
   chainId: string
   safe: string
   epoch: string
@@ -55,6 +60,7 @@ type FrostSignature = {
 export type OracleAttestedEvent = CheckEventBase & {
   type: CheckEventType.ORACLE_ATTESTED
   safeTxHash: Hex
+  /** The checked Safe's home chain, not the Safenet chain. */
   chainId: string
   safe: string
   epoch: string
@@ -65,31 +71,13 @@ export type OracleAttestedEvent = CheckEventBase & {
   oracleDataHash: Hex
 }
 
-export type PlainProposedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_PROPOSED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-}
-
-export type PlainAttestedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_ATTESTED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-  signatureId: Hex
-  attestation: FrostSignature
-}
-
 export type RequestCreatedEvent = CheckEventBase & {
   type: CheckEventType.REQUEST_CREATED
   requestId: Hex
   proposer: string
   fee: string
   bondTarget: string
-  /** The reveal deadline — past it an unattested request can only time out. */
+  /** The reveal deadline block. */
   deadlineBlock: string
   commitDeadlineBlock: string
 }
@@ -119,23 +107,47 @@ export type OracleResultEvent = CheckEventBase & {
   result: Hex
 }
 
+export type DisputeTriggeredEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_TRIGGERED
+  requestId: Hex
+  arbitrationDeadlineBlock: string
+}
+
 export type DisputeResolvedEvent = CheckEventBase & {
   type: CheckEventType.DISPUTE_RESOLVED
   requestId: Hex
   outcome: number
   slashed: string
+  /** Opaque Council text. An empty string is a real value, distinct from missing evidence. */
+  context: string
+}
+
+export type DisputeOutOfScopeEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_OUT_OF_SCOPE
+  requestId: Hex
+  /** Opaque text; never parsed or translated. */
+  context: string
+}
+
+export type ArbitrationTimedOutEvent = CheckEventBase & {
+  type: CheckEventType.ARBITRATION_TIMED_OUT
+  requestId: Hex
+}
+
+export type RequestTimedOutEvent = CheckEventBase & {
+  type: CheckEventType.REQUEST_TIMED_OUT
+  requestId: Hex
 }
 
 export type NormalizedCheckEvent =
   | OracleProposedEvent
   | OracleAttestedEvent
-  | PlainProposedEvent
-  | PlainAttestedEvent
   | RequestCreatedEvent
   | SentinelCommittedEvent
   | SentinelRevealedEvent
   | OracleResultEvent
+  | DisputeTriggeredEvent
   | DisputeResolvedEvent
-
-/** The two attesting events. Both carry the attested Safe's chain id and address. */
-export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent
+  | DisputeOutOfScopeEvent
+  | ArbitrationTimedOutEvent
+  | RequestTimedOutEvent

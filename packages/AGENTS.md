@@ -45,4 +45,4 @@ No barrel export — import from sub-paths (`@safe-global/theme/palettes`, `/tok
 
 ## packages/utils integration tests
 
-`yarn workspace @safe-global/utils test:integration` runs `*.integration.test.ts` against a **live Safenet devnet** (`SAFENET_IT_RPC`) and is excluded from default/turbo runs. Don't run it casually, and never name ordinary unit tests `*.integration.test.ts`.
+`yarn workspace @safe-global/utils test:integration` runs `*.integration.test.ts` read-only against **live Gnosis Chain** (the pinned Safenet deployment) through the RPC in `SAFENET_IT_RPC`, and is skipped when that variable is unset. It is excluded from default/turbo runs. Don't run it casually, and never name ordinary unit tests `*.integration.test.ts`.

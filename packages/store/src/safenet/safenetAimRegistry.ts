@@ -1,4 +1,4 @@
-import { checkKey, type CheckIdentity } from './safenetCheckSlice'
+import { checkKey, type CheckIdentity } from './checkIdentity'
 
 /**
  * The submission time each check's block window is aimed at: the earliest

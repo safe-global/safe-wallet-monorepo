@@ -1,32 +1,28 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import {
   AttestationVerificationStatus,
-  CheckStatus,
   UNVERIFIED_ATTESTATION,
   bindAttestations,
   deriveCheckState,
   getSafenetReader,
-  mergeMonotonic,
+  isEvidenceComplete,
+  type AttestationCandidate,
   type AttestationVerification,
-  type AttestedCheckEvent,
+  type CheckReadResult,
+  type RequestRead,
+  type RequestSnapshot,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
-import {
-  checkKey,
-  pinVerdict,
-  selectPinnedVerdict,
-  type CheckIdentity,
-  type SafenetCheckPartialState,
-} from './safenetCheckSlice'
+import { checkKey, type CheckIdentity } from './checkIdentity'
 import { forgetAim, resolveAim } from './safenetAimRegistry'
 
 /**
  * Standalone chain-reading API for Safenet checks — no HTTP endpoint, the work
- * happens in a custom `queryFn` (the ofac.ts pattern): read the chain, verify
- * the attestation, run the status machine, merge against the session-pinned
- * verdict. A fetch failure returns `{ error }`; RTK Query keeps serving the
- * last good snapshot.
+ * happens in a custom `queryFn` (the ofac.ts pattern): read the chain, bind the
+ * requests to the viewed Safe, verify each request's own attestation, run the
+ * status machine. A successful poll replaces the snapshot as a unit; a failure
+ * returns `{ error }` and RTK Query keeps serving the last complete snapshot.
  */
 const noopBaseQuery = async () => ({ data: null })
 
@@ -39,22 +35,29 @@ const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
   [AttestationVerificationStatus.UNVERIFIED]: 0,
 }
 
-type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+type SelectedAttestation = { candidate: AttestationCandidate; attestation: AttestationVerification }
 
 /**
- * Verify candidates in order and stop at the first signature that verifies. An
- * attestation that does not verify is only this check's verdict when no other
- * one does, so the strongest result wins rather than the earliest.
+ * Verify one request's candidates in order and stop at the first signature that
+ * verifies. An attestation that does not verify is only this request's result
+ * when no other one does, so the strongest result wins rather than the earliest.
+ * A verification only counts when it answered this request's own question: its
+ * message must be the request id and its signature id the candidate's.
  */
 const selectAttestation = async (
   reader: SafenetReader,
-  candidates: ReadonlyArray<AttestedCheckEvent>,
+  candidates: ReadonlyArray<AttestationCandidate>,
 ): Promise<SelectedAttestation | null> => {
   let best: SelectedAttestation | null = null
-  for (const event of candidates) {
-    const attestation = await reader.verifyAttestation(event)
+  for (const candidate of candidates) {
+    const result = await reader.verifyAttestation(candidate.input)
+    const answered = result.message === candidate.requestId && result.signatureId === candidate.input.signatureId
+    const attestation: AttestationVerification =
+      result.status === AttestationVerificationStatus.VERIFIED && !answered
+        ? { ...result, status: AttestationVerificationStatus.INVALID }
+        : result
     if (best === null || VERIFICATION_RANK[attestation.status] > VERIFICATION_RANK[best.attestation.status]) {
-      best = { event, attestation }
+      best = { candidate, attestation }
     }
     if (attestation.status === AttestationVerificationStatus.VERIFIED) break
   }
@@ -62,63 +65,113 @@ const selectAttestation = async (
 }
 
 /**
- * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
- * attestation that does not name them is not this check's evidence. There is
- * deliberately no timestamp here: every surface rendering one check shares this
- * entry, so the read window is aimed through the aim registry, which keeps the
- * earliest submission time any surface offered.
+ * Attach a request's own verification. Only a real attested log is dated; a
+ * getter-only attestation has no block to date, and a failed header read keeps
+ * the date null without suppressing the signature evidence.
+ */
+const snapshotRequest = async (
+  reader: SafenetReader,
+  request: RequestRead,
+  candidates: ReadonlyArray<AttestationCandidate>,
+): Promise<RequestSnapshot> => {
+  const selected = await selectAttestation(
+    reader,
+    candidates.filter((candidate) => candidate.requestId === request.requestId),
+  )
+  if (!selected) return { ...request, attestation: UNVERIFIED_ATTESTATION, attestedEvent: null, attestedAtMs: null }
+  const { event } = selected.candidate
+  return {
+    ...request,
+    attestation: selected.attestation,
+    attestedEvent: event,
+    attestedAtMs: event ? await reader.blockTimeMs(event.blockNumber) : null,
+  }
+}
+
+type DecidingFields = Pick<SafenetCheckSnapshot, 'epoch' | 'oracle' | 'deadlineBlock' | 'attestation' | 'attestedAtMs'>
+
+const NO_DECIDING_REQUEST: DecidingFields = {
+  epoch: null,
+  oracle: null,
+  deadlineBlock: null,
+  attestation: UNVERIFIED_ATTESTATION,
+  attestedAtMs: null,
+}
+
+/** The snapshot fields that describe the deciding request. Its deadline is arbitration when disputed, else reveal. */
+const decidingFields = (request: RequestSnapshot | undefined): DecidingFields =>
+  request
+    ? {
+        epoch: request.epoch,
+        oracle: request.oracle,
+        deadlineBlock: request.outcome === 'DISPUTED' ? request.arbitrationDeadlineBlock : request.revealDeadlineBlock,
+        attestation: request.attestation,
+        attestedAtMs: request.attestedAtMs,
+      }
+    : NO_DECIDING_REQUEST
+
+/** One snapshot whose every request-scoped field belongs to the single deciding request. */
+const assembleSnapshot = (input: {
+  read: CheckReadResult
+  events: SafenetCheckSnapshot['events']
+  requests: RequestSnapshot[]
+  aimedAtMs: number | null
+}): SafenetCheckSnapshot => {
+  const { read, events, requests, aimedAtMs } = input
+  const decision = deriveCheckState({ requests })
+  return {
+    safeTxHash: read.safeTxHash,
+    chainId: read.chainId,
+    status: decision.status,
+    outcome: decision.outcome,
+    requestId: decision.requestId,
+    ...decidingFields(requests.find((request) => request.requestId === decision.requestId)),
+    headBlock: read.headBlock,
+    headAtMs: read.headAtMs,
+    observedAtMs: Date.now(),
+    aimedAtMs,
+    windowCoverage: read.windowCoverage,
+    requests,
+    evidenceComplete: isEvidenceComplete(requests, read.windowCoverage),
+    events,
+  }
+}
+
+/**
+ * `chainId` and `safeAddress` are the Safe the check is being viewed for; a
+ * request or attestation that does not name them is not this check's evidence.
+ * There is deliberately no timestamp here: every surface rendering one check
+ * shares this entry, so the read window is aimed through the aim registry, which
+ * keeps the earliest submission time any surface offered.
  */
 export const safenetCheckApi = createApi({
   reducerPath: 'safenetCheckApi',
   baseQuery: noopBaseQuery,
   endpoints: (builder) => ({
     getSafenetCheck: builder.query<SafenetCheckSnapshot, CheckIdentity>({
-      async queryFn(identity, { getState, dispatch }) {
-        const { safeTxHash, chainId, safeAddress } = identity
+      async queryFn(identity, { getState }): Promise<{ data: SafenetCheckSnapshot } | { error: { message: string } }> {
         try {
+          const target = { chainId: identity.chainId, safeAddress: identity.safeAddress }
           const reader = getSafenetReader()
           // Read at execution time, so every poll replays the best aim known
           // then — never the timestamp of whichever surface subscribed first.
           const aimedAtMs = resolveAim(identity)
-          const read = await reader.fetchCheckState(safeTxHash, { timestampMs: aimedAtMs })
+          // The last complete snapshot carries the requests to refresh and the head to not fall behind.
+          // The selector reads only this API's own slice of the root state.
+          const previous = safenetCheckApi.endpoints.getSafenetCheck.select(identity)(getState() as never).data
+          const read = await reader.fetchCheckState(identity.safeTxHash, {
+            target,
+            timestampMs: aimedAtMs,
+            knownRequests: previous?.requests,
+            minimumBlock: previous?.headBlock == null ? undefined : Number(previous.headBlock),
+          })
 
-          const { events, candidates } = bindAttestations(read.events, { chainId, safeAddress })
-          const selected = await selectAttestation(reader, candidates)
-          // The header read only dates the audit step, and it is gated on an
-          // attestation existing. Cost is one extra call per poll that observes
-          // one — for a settled check that is one poll when the group key loads,
-          // and every poll while it does not or while arbitration stays open.
-          const [attestation, attestedAtMs]: [AttestationVerification, number | null] = selected
-            ? [selected.attestation, await reader.blockTimeMs(selected.event.blockNumber)]
-            : [UNVERIFIED_ATTESTATION, null]
-
-          const derived = deriveCheckState({ events, attestation, headBlock: read.headBlock })
-          const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, identity)
-          const status = mergeMonotonic(pinned?.status, derived)
-
-          // mergeMonotonic only advances, so a changed status is a rank
-          // increase — pin it as the new session floor. UNAVAILABLE is not a
-          // verdict and would grow the slice by one inert entry per rendered row.
-          if (status !== pinned?.status && status !== CheckStatus.UNAVAILABLE) {
-            dispatch(pinVerdict({ ...identity, status, atBlock: read.headBlock, verification: attestation }))
+          const bound = bindAttestations(read, target)
+          const requests: RequestSnapshot[] = []
+          for (const request of bound.requests) {
+            requests.push(await snapshotRequest(reader, request, bound.candidates))
           }
-
-          const snapshot: SafenetCheckSnapshot = {
-            safeTxHash: read.safeTxHash,
-            chainId: read.chainId,
-            status,
-            requestId: read.requestId,
-            epoch: read.epoch,
-            oracle: read.oracle,
-            deadlineBlock: read.deadlineBlock,
-            headBlock: read.headBlock,
-            attestation,
-            attestedAtMs,
-            aimedAtMs,
-            windowCoverage: read.windowCoverage,
-            events,
-          }
-          return { data: snapshot }
+          return { data: assembleSnapshot({ read, events: bound.events, requests, aimedAtMs }) }
         } catch (error) {
           // Kept Redux-serializable; the hook only needs the failure signal.
           return { error: { message: error instanceof Error ? error.message : String(error) } }

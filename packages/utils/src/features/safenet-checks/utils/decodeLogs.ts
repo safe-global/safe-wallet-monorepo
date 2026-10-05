@@ -55,115 +55,111 @@ const decodeOne = (log: RawLog): NormalizedCheckEvent | null => {
   }
 }
 
-const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): NormalizedCheckEvent | null => {
-  const base: CheckEventBase = {
+type Normalizer = (args: Result, base: CheckEventBase) => NormalizedCheckEvent
+
+const frostSignature = (args: Result) => ({
+  r: { x: str(args.attestation.r.x), y: str(args.attestation.r.y) },
+  z: str(args.attestation.z),
+})
+
+/** One normalizer per event type; the dispatch table in `abi.ts` selects it. */
+const NORMALIZERS: Record<CheckEventType, Normalizer> = {
+  // The event has no top-level chainId/safe; the transaction tuple carries both.
+  [CheckEventType.ORACLE_PROPOSED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.ORACLE_PROPOSED,
+    safeTxHash: args.safeTxHash as Hex,
+    chainId: str(args.transaction.chainId),
+    safe: args.transaction.safe as string,
+    epoch: str(args.epoch),
+    oracle: args.oracle as string,
+    oracleDataHash: keccak256(args.oracleData as string) as Hex,
+  }),
+  // The attested event carries no transaction tuple; safeId packs chainId+safe.
+  [CheckEventType.ORACLE_ATTESTED]: (args, base) => {
+    const id = unpackSafeId(args.safeId as string)
+    return {
+      ...base,
+      type: CheckEventType.ORACLE_ATTESTED,
+      safeTxHash: args.safeTxHash as Hex,
+      chainId: id.chainId,
+      safe: id.safe,
+      epoch: str(args.epoch),
+      oracle: args.oracle as string,
+      signatureId: args.signatureId as Hex,
+      attestation: frostSignature(args),
+      oracleDataHash: args.oracleDataHash as Hex,
+    }
+  },
+  [CheckEventType.REQUEST_CREATED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.REQUEST_CREATED,
+    requestId: args.requestId as Hex,
+    proposer: args.sponsor as string,
+    fee: str(args.fee),
+    bondTarget: str(args.bondTarget),
+    deadlineBlock: str(args.revealDeadline),
+    commitDeadlineBlock: str(args.commitDeadline),
+  }),
+  [CheckEventType.SENTINEL_COMMITTED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.SENTINEL_COMMITTED,
+    requestId: args.requestId as Hex,
+    sentinel: args.sentinel as string,
+    bondAmount: str(args.bondAmount),
+  }),
+  [CheckEventType.SENTINEL_REVEALED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.SENTINEL_REVEALED,
+    requestId: args.requestId as Hex,
+    sentinel: args.sentinel as string,
+    approved: Boolean(args.approved),
+    bondAmount: str(args.bondAmount),
+    reason: args.reason as string,
+  }),
+  [CheckEventType.ORACLE_RESULT]: (args, base) => ({
+    ...base,
+    type: CheckEventType.ORACLE_RESULT,
+    requestId: args.requestId as Hex,
+    proposer: args.sponsor as string,
+    approved: Boolean(args.approved),
+    result: args.result as Hex,
+  }),
+  [CheckEventType.DISPUTE_TRIGGERED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.DISPUTE_TRIGGERED,
+    requestId: args.requestId as Hex,
+    arbitrationDeadlineBlock: str(args.deadline),
+  }),
+  [CheckEventType.DISPUTE_RESOLVED]: (args, base) => ({
+    ...base,
+    type: CheckEventType.DISPUTE_RESOLVED,
+    requestId: args.requestId as Hex,
+    outcome: Number(args.outcome),
+    slashed: str(args.slashed),
+    context: args.context as string,
+  }),
+  [CheckEventType.DISPUTE_OUT_OF_SCOPE]: (args, base) => ({
+    ...base,
+    type: CheckEventType.DISPUTE_OUT_OF_SCOPE,
+    requestId: args.requestId as Hex,
+    context: args.context as string,
+  }),
+  [CheckEventType.ARBITRATION_TIMED_OUT]: (args, base) => ({
+    ...base,
+    type: CheckEventType.ARBITRATION_TIMED_OUT,
+    requestId: args.requestId as Hex,
+  }),
+  [CheckEventType.REQUEST_TIMED_OUT]: (args, base) => ({
+    ...base,
+    type: CheckEventType.REQUEST_TIMED_OUT,
+    requestId: args.requestId as Hex,
+  }),
+}
+
+const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): NormalizedCheckEvent =>
+  NORMALIZERS[dispatch.type](args, {
     blockNumber: log.blockNumber,
     logIndex: log.logIndex,
     transactionHash: log.transactionHash,
-  }
-
-  switch (dispatch.type) {
-    case CheckEventType.ORACLE_PROPOSED:
-      // The event has no top-level chainId/safe; the transaction tuple carries both.
-      return {
-        ...base,
-        type: CheckEventType.ORACLE_PROPOSED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.transaction.chainId),
-        safe: args.transaction.safe as string,
-        epoch: str(args.epoch),
-        oracle: args.oracle as string,
-        oracleDataHash: keccak256(args.oracleData as string) as Hex,
-      }
-    case CheckEventType.ORACLE_ATTESTED: {
-      // The attested event carries no transaction tuple; safeId packs chainId+safe.
-      const id = unpackSafeId(args.safeId as string)
-      return {
-        ...base,
-        type: CheckEventType.ORACLE_ATTESTED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: id.chainId,
-        safe: id.safe,
-        epoch: str(args.epoch),
-        oracle: args.oracle as string,
-        signatureId: args.signatureId as Hex,
-        attestation: {
-          r: { x: str(args.attestation.r.x), y: str(args.attestation.r.y) },
-          z: str(args.attestation.z),
-        },
-        oracleDataHash: args.oracleDataHash as Hex,
-      }
-    }
-    case CheckEventType.PLAIN_PROPOSED:
-      return {
-        ...base,
-        type: CheckEventType.PLAIN_PROPOSED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
-        epoch: str(args.epoch),
-      }
-    case CheckEventType.PLAIN_ATTESTED:
-      return {
-        ...base,
-        type: CheckEventType.PLAIN_ATTESTED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
-        epoch: str(args.epoch),
-        signatureId: args.signatureId as Hex,
-        attestation: {
-          r: { x: str(args.attestation.r.x), y: str(args.attestation.r.y) },
-          z: str(args.attestation.z),
-        },
-      }
-    case CheckEventType.REQUEST_CREATED:
-      return {
-        ...base,
-        type: CheckEventType.REQUEST_CREATED,
-        requestId: args.requestId as Hex,
-        proposer: args.sponsor as string,
-        fee: str(args.fee),
-        bondTarget: str(args.bondTarget),
-        deadlineBlock: str(args.revealDeadline),
-        commitDeadlineBlock: str(args.commitDeadline),
-      }
-    case CheckEventType.SENTINEL_COMMITTED:
-      return {
-        ...base,
-        type: CheckEventType.SENTINEL_COMMITTED,
-        requestId: args.requestId as Hex,
-        sentinel: args.sentinel as string,
-        bondAmount: str(args.bondAmount),
-      }
-    case CheckEventType.SENTINEL_REVEALED:
-      return {
-        ...base,
-        type: CheckEventType.SENTINEL_REVEALED,
-        requestId: args.requestId as Hex,
-        sentinel: args.sentinel as string,
-        approved: Boolean(args.approved),
-        bondAmount: str(args.bondAmount),
-        reason: args.reason as string,
-      }
-    case CheckEventType.ORACLE_RESULT:
-      return {
-        ...base,
-        type: CheckEventType.ORACLE_RESULT,
-        requestId: args.requestId as Hex,
-        proposer: args.sponsor as string,
-        approved: Boolean(args.approved),
-        result: args.result as Hex,
-      }
-    case CheckEventType.DISPUTE_RESOLVED:
-      return {
-        ...base,
-        type: CheckEventType.DISPUTE_RESOLVED,
-        requestId: args.requestId as Hex,
-        outcome: Number(args.outcome),
-        slashed: str(args.slashed),
-      }
-    default:
-      return null
-  }
-}
+  })
