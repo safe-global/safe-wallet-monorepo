@@ -119,6 +119,22 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
   })
 
+  it('truncates a long name in the "Added by" cell instead of overflowing the column', () => {
+    const memberName = 'A very long space member name that cannot fit the attribution column'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    const name = screen.getByText(memberName)
+    expect(name).toHaveClass('truncate')
+    expect(name).toHaveClass('min-w-0')
+    expect(name.parentElement).toHaveClass('min-w-0')
+  })
+
   it('renders actions for non-local entries', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
 

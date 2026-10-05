@@ -25,9 +25,12 @@ export type AddressBookEntry = SpaceAddressBookItemDto & {
 function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
   if (memberName) {
     return (
-      <span className="inline-flex items-center gap-1.5">
+      <span className="inline-flex min-w-0 items-center gap-1.5">
         <InitialsAvatar name={memberName} size="xsmall" rounded />
-        <span className="min-w-0 truncate text-sm">{memberName}</span>
+        <Tooltip>
+          <TooltipTrigger render={<span className="min-w-0 truncate text-left text-sm" />}>{memberName}</TooltipTrigger>
+          <TooltipContent align="start">{memberName}</TooltipContent>
+        </Tooltip>
       </span>
     )
   }
@@ -38,7 +41,7 @@ function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: st
     )
   }
 
-  return <EmailInfo email={createdBy} size="xsmall" />
+  return <EmailInfo email={createdBy} size="xsmall" showTooltip />
 }
 
 type SpaceAddressBookTableProps = {
