@@ -2,6 +2,7 @@ import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useChainId from '@/hooks/useChainId'
@@ -26,7 +27,13 @@ import {
   validateUniqueToken,
 } from '../utils/validation'
 import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
-import { FREQUENCY_LABEL, LIMIT_AMOUNT_LABEL, LIMIT_AMOUNT_PLACEHOLDER, REMOVE_LIMIT_LABEL } from '../constants'
+import {
+  EXISTING_LIMIT_TOOLTIP,
+  FREQUENCY_LABEL,
+  LIMIT_AMOUNT_LABEL,
+  LIMIT_AMOUNT_PLACEHOLDER,
+  REMOVE_LIMIT_LABEL,
+} from '../constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -92,13 +99,10 @@ const TokenLimitCard = ({
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const siblingTokensKey = (watch(limitsPath(spenderIndex)) ?? []).map((limit) => limit?.tokenAddress ?? '').join(',')
 
-  /** Tokens the spender's other rows use, plus those the Safe already limits for this spender — hidden from this row. */
+  /** Tokens the spender's other rows use — hidden from this row. */
   const excludeAddresses = useMemo(
-    () => [
-      ...siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
-      ...existingTokens,
-    ],
-    [siblingTokensKey, limitIndex, existingTokens],
+    () => siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
+    [siblingTokensKey, limitIndex],
   )
   /** A token change on a sibling re-validates this row, so a duplicate shows on both. */
   const siblingTokenPaths = useMemo(
@@ -173,6 +177,8 @@ const TokenLimitCard = ({
                   value={field.value || undefined}
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
+                  disabledAddresses={existingTokens}
+                  disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}
                   error={!!tokenError}
                   helperText={
@@ -209,7 +215,12 @@ const TokenLimitCard = ({
                 </HelperLine>
               }
               data-testid="limit-amount-input"
-              {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
+              {...register(amountPath, {
+                // NumberField leaves at most one separator, the locale's; store it as a dot.
+                setValueAs: (value: unknown) =>
+                  typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
+                validate: (value) => validateLimitAmount(value, decimals),
+              })}
             />
           </div>
         </div>
