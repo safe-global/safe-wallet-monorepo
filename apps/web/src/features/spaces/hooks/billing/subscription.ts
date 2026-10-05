@@ -34,6 +34,10 @@ export const isPlanChangeable = isLivePlanStatus
 
 export const isSpaceDeletionBlocked = (status: PlanStatus): boolean => status !== 'none' && status !== 'canceled'
 
+/** The tracking plan's plan states: a trial is free access, anything not live is locked. */
+export const toPlanStatus = (status: PlanStatus): string =>
+  status === 'trialing' ? 'free_access' : status === 'active' || status === 'none' ? status : 'locked'
+
 export const getPlanStatus = (subscription: Subscription | undefined): PlanStatus => {
   if (!subscription) return 'none'
   if (subscription.status === 'trialing') return 'trialing'

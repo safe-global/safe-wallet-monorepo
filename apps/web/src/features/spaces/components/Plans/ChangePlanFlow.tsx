@@ -21,12 +21,15 @@ export default function ChangePlanFlow({
   spaceId,
   pick,
   currentPlan,
+  entry,
   onClose,
   onChanged,
 }: {
   spaceId: string
   pick: PlanPick
   currentPlan: CurrentPlan
+  /** Analytics: where plan selection started, carried onto the confirmation. */
+  entry: Record<string, unknown>
   /** The flow is over: dismissed at any step, or the confirmation acknowledged. */
   onClose: () => void
   /** The plan changed and the confirmation is up; a parent chooser can step aside. */
@@ -80,6 +83,7 @@ export default function ChangePlanFlow({
       spaceId={spaceId}
       pick={pick}
       currentPlan={currentPlan}
+      entry={entry}
       removed={removed}
       onClose={onClose}
       onChanged={() => {

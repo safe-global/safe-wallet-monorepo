@@ -45,6 +45,7 @@ export type CurrentPlan = {
   hasPaymentMethod?: boolean
   periodEndsAt: string | null
   daysLeft?: number | null
+  seats?: number
   /** "20 Safe accounts", when the seats quota is known. */
   seatsLabel?: string
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
@@ -10,6 +10,9 @@ import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeRef } from './types'
 import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
@@ -77,6 +80,24 @@ export default function SelectAccountsStep({
   const leaves = useMemo(() => leavesOf(allSafes), [allSafes])
   const removed = useMemo(() => leaves.filter((safe) => !selectedKeys.has(getSafeId(safe))), [leaves, selectedKeys])
   const removedNote = removedSafesNote(summarizeRemovedSafes(leaves, removed))
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (isLoading || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED, {
+      [MixpanelEventParams.ACCOUNTS_AVAILABLE]: seatCount,
+      [MixpanelEventParams.PLAN_LIMIT]: limit,
+    })
+  }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with the values of that moment
+
+  const submit = () => {
+    trackEvent(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_SUBMITTED, {
+      [MixpanelEventParams.SELECTED_COUNT]: seatCount,
+      [MixpanelEventParams.DESELECTED_COUNT]: removed.length,
+      [MixpanelEventParams.PLAN_LIMIT]: limit,
+    })
+    onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))
+  }
 
   return (
     <>
@@ -163,7 +184,7 @@ export default function SelectAccountsStep({
           accentIcon
           className="flex-1"
           disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
-          onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
+          onClick={submit}
         >
           {continueLabel}
           <ArrowRight />
