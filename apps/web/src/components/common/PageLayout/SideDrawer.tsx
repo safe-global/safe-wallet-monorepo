@@ -1,6 +1,6 @@
 import { SpacesEnhancedSidebar } from '@/features/spaces'
 import { useRouter } from 'next/router'
-import { useEffect, type ReactElement } from 'react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'
 
 import classnames from 'classnames'
@@ -36,6 +36,9 @@ const SideDrawer = ({
   // With a small delay to avoid flickering.
   const smDrawerHidden = useDebounce(!isSmallScreen, 300)
   const router = useRouter()
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => setHasMounted(true), [])
 
   useEffect(() => {
     const closeSidebar = isSmallScreen || isSafeAppRoute
@@ -77,7 +80,7 @@ const SideDrawer = ({
         // the effect above has collapsed the drawer. The Sheet's backdrop is a portal sibling of its
         // content, so it cannot be hidden with CSS the way the shared MUI Drawer was — keep the Sheet
         // closed for that window instead.
-        <Sheet open={isOpen && !smDrawerHidden} onOpenChange={onToggle}>
+        <Sheet open={isOpen && !smDrawerHidden && hasMounted} onOpenChange={onToggle}>
           <SheetContent
             side="left"
             showCloseButton={false}
