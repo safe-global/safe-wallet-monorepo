@@ -11,7 +11,10 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { flattenSafeItems } from '@/hooks/safes'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
 
@@ -87,6 +90,8 @@ export default function ChangePlanDialog({
   const errorMessage = error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined
   const isBusy = isChanging || isVerifying
   const canConfirm = Boolean(priceId && paymentLinkId) && (isTrialSwitch || (Boolean(preview) && !previewError))
+  const { allSafes } = useSpaceSafes()
+  const removedNote = removedSafesNote(summarizeRemovedSafes(flattenSafeItems(allSafes), removed))
 
   return (
     <Dialog open onOpenChange={(open) => !open && !isBusy && onClose()}>
@@ -163,10 +168,9 @@ export default function ChangePlanDialog({
             </>
           ) : null}
 
-          {removed.length > 0 && (
+          {removedNote && (
             <Typography color="muted" data-testid="change-plan-removed-note">
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
-              Workspace. They remain available in My accounts.
+              {removedNote}
             </Typography>
           )}
 

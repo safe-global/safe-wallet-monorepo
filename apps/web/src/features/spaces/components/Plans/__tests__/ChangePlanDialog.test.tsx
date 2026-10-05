@@ -18,6 +18,23 @@ jest.mock('../../../hooks/billing/useChangePlan', () => ({
   }),
 }))
 
+const leaf = (chainId: string, address: string) => ({
+  chainId,
+  address,
+  isReadOnly: false,
+  isPinned: false,
+  lastVisited: 0,
+  name: '',
+})
+
+let mockAllSafes: unknown[] = [
+  { address: '0xB', name: 'Payroll', isPinned: false, lastVisited: 0, safes: [leaf('1', '0xB'), leaf('10', '0xB')] },
+  leaf('1', '0xC'),
+]
+jest.mock('../../../hooks/useSpaceSafes', () => ({
+  useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
+}))
+
 const pick: PlanPick = {
   tier: {
     id: 'Starter-month',
@@ -113,7 +130,7 @@ describe('ChangePlanDialog', () => {
   it('sends the Safes left out with the change and says so in the summary', async () => {
     mockState = { preview }
     mockChangePlan.mockResolvedValue(true)
-    const removed = [{ chainId: '1', address: '0xB' }]
+    const removed = [{ chainId: '1', address: '0xC' }]
     render(
       <ChangePlanDialog
         spaceId="space-1"
@@ -126,13 +143,56 @@ describe('ChangePlanDialog', () => {
     )
 
     expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
-      '1 Safe account will be removed from the Workspace. They remain available in My accounts.',
+      '1 Safe account will be removed from the Workspace. It remains available in My accounts.',
     )
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
     await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', removed))
     expect(mockChangePlan).toHaveBeenCalledTimes(1)
+  })
+
+  it('counts a Safe left out on every chain as one account in the summary', () => {
+    mockState = { preview }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        removed={[
+          { chainId: '1', address: '0xB' },
+          { chainId: '10', address: '0xB' },
+          { chainId: '1', address: '0xC' },
+        ]}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '2 Safe accounts will be removed from the Workspace. They remain available in My accounts.',
+    )
+  })
+
+  it('says a Safe left out on some chains only keeps its seat', () => {
+    mockState = { preview }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        removed={[
+          { chainId: '10', address: '0xB' },
+          { chainId: '1', address: '0xC' },
+        ]}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '1 Safe account will be removed from the Workspace, and 1 more from 1 of its networks only. The removed account remains available in My accounts, the other keeps its seat.',
+    )
   })
 
   it('keeps the dialog open with the server message when the change fails after the Safes were removed', async () => {
