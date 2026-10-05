@@ -88,9 +88,9 @@ export type SafenetCheckSnapshot = {
   chainId: string
   status: CheckStatus
   /**
-   * Correlation for the latest allowlisted proposal, once known. Proposals are
-   * permissionless — do not render these as provenance or branch a verdict on
-   * them; use `status` for that.
+   * Correlation for the latest allowlisted proposal bound to the viewed Safe,
+   * once known. Proposals are permissionless — do not render these as
+   * provenance or branch a verdict on them; use `status` for that.
    */
   requestId: Hex | null
   epoch: string | null
@@ -99,7 +99,10 @@ export type SafenetCheckSnapshot = {
   deadlineBlock: string | null
   /** Chain head observed at snapshot time — the deadline is compared to this. */
   headBlock: string | null
-  /** Every allowlisted request this read discovered, in proposal order. */
+  /**
+   * Every target-bound allowlisted request in the read window, in proposal order. The cap fails the read
+   * instead of dropping one; `windowCoverage` says whether the window can have missed one.
+   */
   requests: RequestRead[]
   attestation: AttestationVerification
   /**

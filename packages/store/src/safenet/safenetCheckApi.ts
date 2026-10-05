@@ -80,9 +80,10 @@ export const safenetCheckApi = createApi({
           // Read at execution time, so every poll replays the best aim known
           // then — never the timestamp of whichever surface subscribed first.
           const aimedAtMs = resolveAim(identity)
-          const read = await reader.fetchCheckState(safeTxHash, { timestampMs: aimedAtMs })
+          const target = { chainId, safeAddress }
+          const read = await reader.fetchCheckState(safeTxHash, { target, timestampMs: aimedAtMs })
 
-          const { events, candidates } = bindAttestations(read.events, { chainId, safeAddress })
+          const { events, candidates } = bindAttestations(read.events, target)
           const selected = await selectAttestation(reader, candidates)
           // The header read only dates the audit step, and it is gated on an
           // attestation existing. Cost is one extra call per poll that observes

@@ -84,7 +84,8 @@ if (!RPC) {
     })
 
     it('derives the same requestId from the on-chain Proposed event (when in lookback range)', async () => {
-      const read = await makeReader().fetchCheckState(golden.safeTxHash)
+      const { chainId, safe } = goldenAttested()
+      const read = await makeReader().fetchCheckState(golden.safeTxHash, { target: { chainId, safeAddress: safe } })
       const proposed = read.events.find((event) => event.type === CheckEventType.ORACLE_PROPOSED)
       if (!proposed) {
         console.warn('[safenet integration] Proposed event outside the lookback window — skipping requestId equality')

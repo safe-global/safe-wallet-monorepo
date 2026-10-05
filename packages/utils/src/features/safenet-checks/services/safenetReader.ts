@@ -1,4 +1,4 @@
-import { Contract, isCallException, JsonRpcProvider, type Result } from 'ethers'
+import { Contract, isAddress, isCallException, JsonRpcProvider, type Result } from 'ethers'
 import { CONSENSUS_READ_ABI, CONSENSUS_TOPIC0S, COORDINATOR_READ_ABI, ORACLE_READ_ABI, SENTINEL_TOPIC0S } from '../abi'
 import {
   BLOCK_ESTIMATE_MAX_REFINEMENTS,
@@ -27,12 +27,19 @@ import {
   type RequestRef,
   type WindowCoverage,
 } from '../types'
+import { matchesCheckTarget, type CheckTarget } from '../utils/attestations'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import { deadlineBlockOf } from '../utils/deriveCheckState'
 import { isValidPoint, verifyAttestation as verifyFrostAttestation } from '../utils/frost'
 import { plainProposalHash, transactionProposalHash } from '../utils/proposalHash'
 import { buildRequestRead, type RequestFacts } from '../utils/requestRead'
-import { dedupeRequestRefs, refFromEvent, requestIdOf, type RequestDomain } from '../utils/requestRefs'
+import {
+  assertRequestCap,
+  dedupeRequestRefs,
+  refFromEvent,
+  requestIdOf,
+  type RequestDomain,
+} from '../utils/requestRefs'
 
 /**
  * Everything one poll reads off-chain for a single check. Numeric values are
@@ -46,21 +53,30 @@ export type CheckReadResult = {
   events: NormalizedCheckEvent[]
   headBlock: string
   /**
-   * Correlation metadata from the latest allowlisted proposal. Proposals are
-   * permissionless, so do not render these as provenance.
+   * Correlation metadata from the latest allowlisted proposal that is bound to
+   * the target. Proposals are permissionless, so do not render these as provenance.
    */
   requestId: Hex | null
   epoch: string | null
   oracle: string | null
   /** Block the check times out at (the request's reveal deadline). */
   deadlineBlock: string | null
-  /** Every capped allowlisted request, read at the head, in proposal order. */
+  /**
+   * Every target-bound allowlisted request in the read window, read at the head, in proposal order.
+   * The cap fails the read instead of dropping one; the window bounds discovery (`windowCoverage`).
+   */
   requests: RequestRead[]
   /**
    * Whether the block window this read used covers the check's whole possible
    * lifetime. An empty event set only proves the absence of a check when it does.
    */
   windowCoverage: WindowCoverage
+}
+
+export type FetchCheckStateOptions = {
+  /** The Safe and home chain the check is viewed for; requests naming any other are not its evidence. */
+  target: CheckTarget
+  timestampMs?: number | null
 }
 
 export type SafenetReaderConfig = {
@@ -79,33 +95,19 @@ const IS_DEV = process.env.NODE_ENV !== 'production'
 const isProposed = (event: NormalizedCheckEvent): event is OracleProposedEvent =>
   event.type === CheckEventType.ORACLE_PROPOSED
 
-/**
- * Cap on distinct requestIds per oracle in one sentinel getLogs filter — a
- * backstop against the OR-filter growing past RPC limits. Newest ids win.
- */
-const MAX_REQUEST_IDS_PER_ORACLE = 16
+const isTargetBound = (event: NormalizedCheckEvent, target: CheckTarget): boolean =>
+  (event.type !== CheckEventType.ORACLE_PROPOSED && event.type !== CheckEventType.ORACLE_ATTESTED) ||
+  matchesCheckTarget(event, target)
+
+const assertTarget = (target: CheckTarget): void => {
+  if (!target?.chainId || !isAddress(target.safeAddress)) throw new Error('Safenet reader: invalid check target')
+}
 
 /** Max concurrent `getRequest` calls in one read — equals the provider's batch size. */
 const READ_CONCURRENCY = PROVIDER_BATCH_MAX_COUNT
 
 /** Indexed by the ABI state ordinal; 0 is not a valid state. */
 const REQUEST_STATES = [undefined, 'PENDING', 'FROZEN', 'RESOLVED_APPROVED', 'RESOLVED_DENIED', 'TIMED_OUT'] as const
-
-/**
- * Deduplicate by request id, then keep the newest `MAX_REQUEST_IDS_PER_ORACLE`
- * ids of each oracle. A re-proposal of an id that fell out of the cap brings it back.
- */
-const cappedRequestRefs = (refs: ReadonlyArray<RequestRef>): RequestRef[] => {
-  const idsByOracle = new Map<string, Hex[]>()
-  for (const { oracle, requestId } of refs) {
-    // Keyed by the normalized address so one oracle cannot occupy two buckets.
-    const key = oracle.toLowerCase()
-    const ids = idsByOracle.get(key) ?? []
-    if (!ids.includes(requestId)) idsByOracle.set(key, [...ids, requestId].slice(-MAX_REQUEST_IDS_PER_ORACLE))
-  }
-  const kept = new Set([...idsByOracle.values()].flat())
-  return dedupeRequestRefs(refs).filter(({ requestId }) => kept.has(requestId))
-}
 
 /**
  * Run `fn` over `items` with at most `limit` in flight, keeping input order.
@@ -397,16 +399,17 @@ export class SafenetReader {
 
   /**
    * Read a check's full lifecycle: Consensus logs keyed by `safeTxHash`, then —
-   * for every proposal naming an allowlisted oracle — the sentinel logs keyed by
-   * the derived `requestId`s and each request's state at the head. FROST
-   * verification and the status machine live above this. `options.timestampMs`
-   * aims the read window (see readRange).
+   * for every proposal naming an allowlisted oracle and `options.target` — the
+   * sentinel logs keyed by the derived `requestId`s and each request's state at
+   * the head. FROST verification and the status machine live above this.
+   * `options.timestampMs` aims the read window (see readRange).
    */
-  async fetchCheckState(safeTxHash: string, options: { timestampMs?: number | null } = {}): Promise<CheckReadResult> {
-    // A malformed hash is a caller bug, not an endpoint failure.
+  async fetchCheckState(safeTxHash: string, options: FetchCheckStateOptions): Promise<CheckReadResult> {
+    // A malformed hash or target is a caller bug, not an endpoint failure.
     if (!/^0x[0-9a-f]{64}$/i.test(safeTxHash)) {
       throw new Error(`Safenet reader: invalid safeTxHash '${safeTxHash}'`)
     }
+    assertTarget(options.target)
     return this.withProvider(async (provider) => {
       await this.assertChainId(provider)
 
@@ -425,11 +428,13 @@ export class SafenetReader {
         fromBlock: range.fromBlock,
         toBlock: range.toBlock,
       })
-      // Sorted before the requestId cap below — eth_getLogs ordering is a node
-      // convention with no guarantee behind it.
-      const consensusEvents = decodeLogs(consensusLogs).sort(
-        (a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex,
-      )
+      // Bound to the target before the dedup and cap: a request id names neither
+      // home chain nor Safe, so a foreign proposal would shadow the target's own.
+      // The sort decides which reference dedup keeps and which proposal is the
+      // latest — eth_getLogs ordering is a node convention with no guarantee behind it.
+      const consensusEvents = decodeLogs(consensusLogs)
+        .filter((event) => isTargetBound(event, options.target))
+        .sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex)
 
       // Only proposals naming an allowlisted oracle may drive the oracle read:
       // `proposeOracleTransaction` is permissionless with a caller-chosen oracle
@@ -440,7 +445,8 @@ export class SafenetReader {
       )
 
       // The proposal hash IS the oracle requestId; oracleDataHash aims it.
-      const refs = cappedRequestRefs(proposals.map((proposal) => refFromEvent(this.domain, proposal)))
+      const refs = dedupeRequestRefs(proposals.map((proposal) => refFromEvent(this.domain, proposal)))
+      assertRequestCap(refs)
       const requestIdsByOracle = new Map<string, Hex[]>()
       for (const { oracle, requestId } of refs) {
         requestIdsByOracle.set(oracle, [...(requestIdsByOracle.get(oracle) ?? []), requestId])

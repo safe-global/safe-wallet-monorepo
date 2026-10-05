@@ -26,6 +26,10 @@ export type CheckTarget = {
   safeAddress: string
 }
 
+/** Whether something naming a Safe's home chain and address belongs to `target`: exact chain id, any address case. */
+export const matchesCheckTarget = (input: { chainId: string; safe: string }, target: CheckTarget): boolean =>
+  input.chainId === target.chainId && input.safe.toLowerCase() === target.safeAddress.toLowerCase()
+
 /**
  * Drop the attested events that are not bound to `target`, and order what
  * remains for verification.
@@ -40,10 +44,7 @@ export const bindAttestations = (
   events: ReadonlyArray<NormalizedCheckEvent>,
   target: CheckTarget,
 ): { events: NormalizedCheckEvent[]; candidates: AttestedCheckEvent[] } => {
-  const safeAddress = target.safeAddress.toLowerCase()
-  const bound = events.filter(
-    (event) => !isAttested(event) || (event.chainId === target.chainId && event.safe.toLowerCase() === safeAddress),
-  )
+  const bound = events.filter((event) => !isAttested(event) || matchesCheckTarget(event, target))
   return { events: bound, candidates: attestationCandidates(bound) }
 }
 

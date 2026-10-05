@@ -355,7 +355,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       const result = await runQuery(makeTestStore())
 
-      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: PROPOSED_AT })
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { target: TARGET, timestampMs: PROPOSED_AT })
       expect(result.data?.aimedAtMs).toBe(PROPOSED_AT)
     })
 
@@ -364,7 +364,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       const result = await runQuery(makeTestStore())
 
-      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { timestampMs: null })
+      expect(fakeReader.fetchCheckState).toHaveBeenCalledWith(HASH, { target: TARGET, timestampMs: null })
       expect(result.data?.aimedAtMs).toBeNull()
     })
 
@@ -389,12 +389,12 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       recordAim(IDENTITY, LATER_OFFER)
       await runQuery(store)
-      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { timestampMs: LATER_OFFER })
+      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { target: TARGET, timestampMs: LATER_OFFER })
 
       recordAim(IDENTITY, PROPOSED_AT)
       const reaimed = await runQuery(store)
 
-      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { timestampMs: PROPOSED_AT })
+      expect(fakeReader.fetchCheckState).toHaveBeenLastCalledWith(HASH, { target: TARGET, timestampMs: PROPOSED_AT })
       expect(reaimed.data?.aimedAtMs).toBe(PROPOSED_AT)
     })
 
@@ -410,7 +410,7 @@ describe('safenetCheckApi.getSafenetCheck', () => {
 
       expect(fakeReader.fetchCheckState).toHaveBeenCalledTimes(3)
       for (const call of fakeReader.fetchCheckState.mock.calls) {
-        expect(call[1]).toEqual({ timestampMs: PROPOSED_AT })
+        expect(call[1]).toEqual({ target: TARGET, timestampMs: PROPOSED_AT })
       }
     })
 

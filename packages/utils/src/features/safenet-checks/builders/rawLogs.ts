@@ -281,7 +281,14 @@ export const buildRequestTimedOutLog = (spec: { requestId?: string } = {}, meta:
 
 /** A full commit-reveal lifecycle: proposed → request → commit → reveal → result → attestation. */
 export const buildLifecycle = (
-  opts: { safeTxHash?: string; requestId?: string; oracle?: string; epoch?: bigint; revealDeadline?: bigint } = {},
+  opts: {
+    safeTxHash?: string
+    safe?: string
+    requestId?: string
+    oracle?: string
+    epoch?: bigint
+    revealDeadline?: bigint
+  } = {},
 ): RawLog[] => {
   const safeTxHash = opts.safeTxHash ?? hash()
   const requestId = opts.requestId ?? hash()
@@ -289,11 +296,11 @@ export const buildLifecycle = (
   const epoch = opts.epoch ?? 1n
 
   return [
-    buildOracleProposedLog({ safeTxHash, epoch, oracle }),
+    buildOracleProposedLog({ safeTxHash, safe: opts.safe, epoch, oracle }),
     buildNewRequestLog({ requestId, revealDeadline: opts.revealDeadline ?? 160n }),
     buildCommittedLog({ requestId }),
     buildRevealedLog({ requestId, approved: true }),
     buildOracleResultLog({ requestId, approved: true }),
-    buildOracleAttestedLog({ safeTxHash, epoch, oracle }),
+    buildOracleAttestedLog({ safeTxHash, safe: opts.safe, epoch, oracle }),
   ]
 }

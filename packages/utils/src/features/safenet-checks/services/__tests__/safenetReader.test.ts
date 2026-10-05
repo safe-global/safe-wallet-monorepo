@@ -26,6 +26,8 @@ const oracleCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
 const CONSENSUS = '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
 const ORACLE = '0x00000000000000000000000000000000000000AA'
 const CHAIN_ID = '100'
+const SAFE = '0x5afe5afe5afe5afe5afe5afe5afe5afe5afe5afe'
+const TARGET = { chainId: CHAIN_ID, safeAddress: SAFE }
 
 // Builders emit empty oracleData, so their requestId derives from its keccak.
 const requestIdFor = (epoch: string, oracle: string = ORACLE): Hex =>
@@ -72,7 +74,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(endpoint.methods).toContain('eth_getBlockByNumber')
     expect(result.headBlock).toBe('25000')
@@ -86,14 +88,14 @@ describe('SafenetReader.fetchCheckState', () => {
   it('decodes the oracle-path Consensus events too (proposed + attested)', async () => {
     resetLogCounter()
     const logs = [
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
-      buildOracleAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
+      buildOracleAttestedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(result.events.map((e) => e.type)).toEqual([CheckEventType.ORACLE_PROPOSED, CheckEventType.ORACLE_ATTESTED])
     // Only the Consensus address is read — sentinel-oracle correlation is the
@@ -108,7 +110,19 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await expect(makeReader().fetchCheckState('0xnot-a-hash')).rejects.toThrow('invalid safeTxHash')
+    await expect(makeReader().fetchCheckState('0xnot-a-hash', { target: TARGET })).rejects.toThrow('invalid safeTxHash')
+    expect(endpoint.methods).toHaveLength(0)
+  })
+
+  it.each([
+    ['an empty home chain id', { chainId: '', safeAddress: SAFE }],
+    ['a Safe address that is not an address', { chainId: CHAIN_ID, safeAddress: '0xnot-an-address' }],
+  ])('rejects %s before touching any endpoint', async (_label, target) => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs: [] })
+    server = setupServer(endpoint.handler)
+    server.listen()
+
+    await expect(makeReader().fetchCheckState(SAFE_TX_HASH, { target })).rejects.toThrow('invalid check target')
     expect(endpoint.methods).toHaveLength(0)
   })
 
@@ -117,7 +131,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH)
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(endpoint.getLogsCalls.map((c) => [c.fromBlock, c.toBlock])).toEqual([
       [0, 9999],
@@ -131,7 +145,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH)
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(endpoint.getLogsCalls[0].fromBlock).toBe(15_001)
     expect(endpoint.getLogsCalls).toHaveLength(3)
@@ -142,7 +156,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await expect(makeReader().fetchCheckState(SAFE_TX_HASH)).rejects.toBeDefined()
+    await expect(makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })).rejects.toBeDefined()
     // The endpoint was actually touched — the rejection is not a config error.
     expect(endpoint.methods.length).toBeGreaterThan(0)
   })
@@ -160,7 +174,7 @@ describe('SafenetReader.fetchCheckState', () => {
       coordinator: ORACLE,
       oracles: [],
     })
-    const result = await reader.fetchCheckState(SAFE_TX_HASH)
+    const result = await reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })
     expect(result.headBlock).toBe('25000')
     expect(up.methods.length).toBeGreaterThan(0)
   })
@@ -182,9 +196,9 @@ describe('SafenetReader.fetchCheckState', () => {
       oracles: [],
     })
     const results = await Promise.all([
-      reader.fetchCheckState(SAFE_TX_HASH),
-      reader.fetchCheckState(SAFE_TX_HASH),
-      reader.fetchCheckState(SAFE_TX_HASH),
+      reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET }),
+      reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET }),
+      reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET }),
     ])
     for (const result of results) expect(result.headBlock).toBe('25000')
   })
@@ -203,7 +217,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server.listen()
     const reader = makeReader()
 
-    const sibling = reader.fetchCheckState(SAFE_TX_HASH)
+    const sibling = reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })
     await endpoint.gate.logsArrived
     // A numeric header probe rejects, so this call rotates while the sibling's
     // getLogs is still on the wire.
@@ -220,9 +234,9 @@ describe('SafenetReader.fetchCheckState', () => {
     server.listen()
     const reader = makeReader({ rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'] })
 
-    await reader.fetchCheckState(SAFE_TX_HASH)
+    await reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })
     const attemptsOnDown = down.methods.length
-    await reader.fetchCheckState(SAFE_TX_HASH)
+    await reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(attemptsOnDown).toBeGreaterThan(0)
     expect(down.methods.length).toBe(attemptsOnDown)
@@ -231,12 +245,12 @@ describe('SafenetReader.fetchCheckState', () => {
   it('reads a full oracle lifecycle: sentinel logs and the request deadline', async () => {
     resetLogCounter()
     const requestId = requestIdFor('1')
-    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n, safe: SAFE })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(result.events.map((e) => e.type)).toEqual([
       CheckEventType.ORACLE_PROPOSED,
@@ -257,7 +271,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
     expect(result.requestId).toBeNull()
@@ -268,12 +282,12 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it('targets Proposed.oracle for the sentinel getLogs when the proposal names an allowlisted oracle', async () => {
     resetLogCounter()
-    const logs = [buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE })]
+    const logs = [buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE })]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     const orac = oracleCalls(endpoint.getLogsCalls)
     // Guard against a vacuous pass: the sentinel read must actually happen.
@@ -287,13 +301,14 @@ describe('SafenetReader.fetchCheckState', () => {
     // proposeOracleTransaction is permissionless, so the oracle address in the
     // event is attacker-chosen. An unlisted one must not be read from at all.
     resetLogCounter()
-    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n, safe: SAFE })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
     const result = await makeReader({ oracles: ['0x000000000000000000000000000000000000dEaD'] }).fetchCheckState(
       SAFE_TX_HASH,
+      { target: TARGET },
     )
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
@@ -303,12 +318,12 @@ describe('SafenetReader.fetchCheckState', () => {
 
   it("skips the oracle path entirely when the allowlist is empty (today's default)", async () => {
     resetLogCounter()
-    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, oracle: ORACLE, epoch: 1n, safe: SAFE })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(oracleCalls(endpoint.getLogsCalls)).toHaveLength(0)
     expect(result.requestId).toBeNull()
@@ -317,16 +332,16 @@ describe('SafenetReader.fetchCheckState', () => {
   it('reads sentinel logs for EVERY allowlisted proposal, deduplicated, keyed to the latest', async () => {
     resetLogCounter()
     const logs = [
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
       // Same (epoch, oracle) again — must NOT produce a second identical requestId.
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 2n, oracle: ORACLE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 2n, oracle: ORACLE, safe: SAFE }),
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     const ids = ['1', '2'].map((epoch) => requestIdFor(epoch))
     const orac = oracleCalls(endpoint.getLogsCalls)
@@ -344,15 +359,15 @@ describe('SafenetReader.fetchCheckState', () => {
     resetLogCounter()
     const ATTACKER = '0x000000000000000000000000000000000000BEEF'
     const logs = [
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ATTACKER }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ATTACKER, safe: SAFE }),
     ]
     // One chunk's worth of head, so the oracle read is exactly one getLogs.
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 5_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     const orac = oracleCalls(endpoint.getLogsCalls)
     expect(orac).toHaveLength(1)
@@ -369,14 +384,14 @@ describe('SafenetReader.fetchCheckState', () => {
     const ATTACKER = '0x000000000000000000000000000000000000BEEF'
     const requestId = requestIdFor('1')
     const logs = [
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
       { ...buildOracleResultLog({ requestId, approved: false }), address: ATTACKER },
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(result.requestId).toBe(requestId)
     expect(result.events.some((event) => event.type === CheckEventType.ORACLE_RESULT)).toBe(false)
@@ -386,14 +401,14 @@ describe('SafenetReader.fetchCheckState', () => {
     resetLogCounter()
     const OTHER = '0x00000000000000000000000000000000000000bb'
     const logs = [
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
-      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: OTHER }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE, safe: SAFE }),
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: OTHER, safe: SAFE }),
     ]
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader({ oracles: [ORACLE, OTHER] }).fetchCheckState(SAFE_TX_HASH)
+    await makeReader({ oracles: [ORACLE, OTHER] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     const byAddress = new Map(oracleCalls(endpoint.getLogsCalls).map((c) => [c.address?.toLowerCase(), c]))
     expect([...byAddress.keys()].sort()).toEqual([ORACLE.toLowerCase(), OTHER.toLowerCase()].sort())
@@ -404,34 +419,15 @@ describe('SafenetReader.fetchCheckState', () => {
     }
   })
 
-  it('caps the requestId OR-filter at 16, keeping the newest (active) id', async () => {
-    resetLogCounter()
-    const epochs = Array.from({ length: 20 }, (_, index) => BigInt(index + 1))
-    const logs = epochs.map((epoch) => buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch, oracle: ORACLE }))
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 5_000, logs })
-    server = setupServer(endpoint.handler)
-    server.listen()
-
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
-
-    const orac = oracleCalls(endpoint.getLogsCalls)
-    expect(orac).toHaveLength(1)
-    expect(orac[0].topics[1]).toHaveLength(16)
-    // The live re-proposal is the newest one, so its id must survive the cap.
-    expect(result.epoch).toBe('20')
-    expect(orac[0].topics[1]).toContain(result.requestId)
-    expect(result.requests.map((r) => r.requestId)).toEqual(epochs.slice(-16).map((e) => requestIdFor(String(e))))
-  })
-
   it('returns a Redux-serializable result — no bigints survive the read', async () => {
     resetLogCounter()
     const requestId = requestIdFor('1')
-    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n, safe: SAFE })
     const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs })
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(JSON.parse(JSON.stringify(result))).toEqual(result)
   })
@@ -444,7 +440,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 900_000 * 1000 })
 
     const call = consensusCalls(endpoint.getLogsCalls)[0]
     expect(call.fromBlock).toBe(979_000)
@@ -458,7 +454,7 @@ describe('SafenetReader.fetchCheckState', () => {
     server.listen()
 
     // A year-old transaction: the head-relative scan could never have reached it.
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: (HEAD_TS - 31_536_000) * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: (HEAD_TS - 31_536_000) * 1000 })
 
     expect(consensusCalls(endpoint.getLogsCalls)).toHaveLength(1)
   })
@@ -480,7 +476,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 900_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls).toHaveLength(1)
@@ -500,7 +496,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 5_000_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 5_000_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls.map((c) => [c.fromBlock, c.toBlock])).toEqual([
@@ -515,7 +511,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 1_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 1_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls[0].fromBlock).toBe(15_001)
@@ -530,7 +526,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 1_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 1_000 * 1000 })
 
     expect(result.headBlock).toBe('45000')
     expect(consensusCalls(endpoint.getLogsCalls)).toHaveLength(3)
@@ -555,7 +551,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 3_050_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 3_050_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls.map((c) => c.fromBlock)).toEqual([970_001, 980_001, 990_001])
@@ -568,7 +564,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
 
     // 30,000s in the future — caller clock skew, or a check read before its
     // block lands. The head IS the right aim, so this stays a single window.
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 1_030_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 1_030_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls).toHaveLength(1)
@@ -583,7 +579,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs })
 
     // No probe was issued at all — the guard runs before any estimate.
     expect(endpoint.methods.filter((method) => method === 'eth_getBlockByNumber')).toHaveLength(1)
@@ -597,7 +593,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
 
     // t=10,000s → block 2,000; centre − 1,000 = 1,000, so no clamp is needed at
     // 1,000 back, but the head clamp caps the forward reach at the chain tip.
-    await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 10_000 * 1000 })
+    await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 10_000 * 1000 })
 
     const calls = consensusCalls(endpoint.getLogsCalls)
     expect(calls).toHaveLength(1)
@@ -617,7 +613,7 @@ describe('SafenetReader block targeting — estimate convergence', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 900_000 * 1000 })
 
     expect(result.events.map((event) => event.blockNumber)).toEqual([centre, 988_999])
   })
@@ -635,7 +631,7 @@ describe('SafenetReader window coverage', () => {
 
     // 1,000s old: the window starts before the transaction and ends at the head,
     // so no block the check could live in went unread.
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 999_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 999_000 * 1000 })
 
     expect(consensusCalls(endpoint.getLogsCalls)[0].toBlock).toBe(1_000_000)
     expect(result.windowCoverage).toBe('proven')
@@ -648,7 +644,7 @@ describe('SafenetReader window coverage', () => {
 
     // 100,000s old: the window closes at block 988,999 and the 11,001 blocks up
     // to the head are never read, so a settlement could sit outside it.
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 900_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 900_000 * 1000 })
 
     expect(consensusCalls(endpoint.getLogsCalls)[0].toBlock).toBe(988_999)
     expect(result.windowCoverage).toBe('heuristic')
@@ -659,7 +655,7 @@ describe('SafenetReader window coverage', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH)
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(result.windowCoverage).toBe('heuristic')
   })
@@ -674,7 +670,7 @@ describe('SafenetReader window coverage', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 5_000_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 5_000_000 * 1000 })
 
     expect(result.windowCoverage).toBe('heuristic')
   })
@@ -684,7 +680,7 @@ describe('SafenetReader window coverage', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { timestampMs: 1_000 * 1000 })
+    const result = await makeReader().fetchCheckState(SAFE_TX_HASH, { target: TARGET, timestampMs: 1_000 * 1000 })
 
     expect(result.windowCoverage).toBe('heuristic')
   })
@@ -703,6 +699,7 @@ describe('SafenetReader window coverage', () => {
     server.listen()
 
     const result = await makeReader().fetchCheckState(SAFE_TX_HASH, {
+      target: TARGET,
       timestampMs: (1_000_000 + lagSeconds) * 1000,
     })
 
@@ -724,6 +721,7 @@ describe('SafenetReader window coverage', () => {
     server.listen()
 
     const result = await makeReader().fetchCheckState(SAFE_TX_HASH, {
+      target: TARGET,
       timestampMs: (1_000_000 - ageSeconds) * 1000,
     })
 
@@ -742,7 +740,7 @@ describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH)
+    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(spy).toHaveBeenCalledWith(expect.stringContaining('chain id mismatch'))
     spy.mockRestore()
@@ -754,7 +752,7 @@ describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
     server = setupServer(endpoint.handler)
     server.listen()
 
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH)
+    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
 
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()
