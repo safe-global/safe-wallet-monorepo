@@ -49,9 +49,9 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
 
         {isSafeProAnnouncementEnabled &&
           (showList ? (
-            <SafeProWorkspacesBanner className="mb-4" />
+            <SafeProWorkspacesBanner className="mb-4" location="my_accounts" />
           ) : (
-            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" />
+            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" location="my_accounts" />
           ))}
 
         {showGetStarted && <GetStartedCard />}

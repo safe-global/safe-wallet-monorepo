@@ -6,6 +6,10 @@ import Plans from '../index'
 import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const offer = (planName: string, paymentLinkId: string, price: number, billingCycle: 'month' | 'year') => ({
   paymentLinkId,
@@ -350,6 +354,36 @@ describe('Plans', () => {
     expect(onSubscribe).toHaveBeenCalledWith({
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
+    })
+  })
+
+  describe('tracking', () => {
+    beforeEach(() => jest.clearAllMocks())
+
+    it.each([
+      ['Add payment method', current('Business', 499, true), 'add_payment_method', 'business', true],
+      ['Switch to Starter', current('Business', 499, true), 'switch_plan', 'starter', false],
+    ])('counts the "%s" button as a plan pick', (name, currentPlan, cta, targetPlan, isCurrent) => {
+      render(
+        <Plans
+          plan={trialing(14)}
+          {...meters}
+          tiers={buildPlanTiers([STARTER], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+          onManage={jest.fn()}
+          onSubscribe={jest.fn()}
+          currentPlan={currentPlan}
+        />,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name }))
+      expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_CTA_CLICKED, {
+        'Target Plan': targetPlan,
+        Seats: isCurrent ? 20 : 2,
+        'Billing Period': 'monthly',
+        CTA: cta,
+        'Plan Is Current': isCurrent,
+        Location: 'plans_page',
+      })
     })
   })
 

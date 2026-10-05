@@ -124,6 +124,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
               {hasSafeProBanner && (
                 <SafeProSidebarBanner
                   className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
+                  isShown={showSafeProBanner}
                   onDismiss={dismissSafeProBanner}
                 />
               )}
