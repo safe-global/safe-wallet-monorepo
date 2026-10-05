@@ -116,10 +116,31 @@ describe('mapPendingPolicies', () => {
     expect(row.operation).toBe('update')
   })
 
-  it('should, when a spender is added to an active policy, render an update', () => {
+  it('should, when a new spender is added to an active policy, render a creation', () => {
     const [row] = mapPendingPolicies([mockPendingDto()], activeRows(), resolveKnownTokens)
 
-    expect(row.operation).toBe('update')
+    expect(row.operation).toBe('create')
+  })
+
+  it('should, when an existing spender gets a token it had no limit for, render a creation', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'add-delegate', delegate: MOCK_ADDRESSES.alice },
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: ZERO_ADDRESS,
+            amount: '100000000000000000',
+            resetPeriodMinutes: 0,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('create')
   })
 
   it('should, when the queued tx enables the module, render a creation even beside an active policy', () => {
