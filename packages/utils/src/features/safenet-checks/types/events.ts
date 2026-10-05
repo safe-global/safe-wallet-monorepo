@@ -13,10 +13,6 @@ export enum CheckEventType {
   ORACLE_PROPOSED = 'ORACLE_PROPOSED',
   /** Consensus `TransactionAttested` from the oracle pair — carries the FROST signature. */
   ORACLE_ATTESTED = 'ORACLE_ATTESTED',
-  /** Consensus `TransactionProposed` — the non-oracle path live beta uses. */
-  PLAIN_PROPOSED = 'PLAIN_PROPOSED',
-  /** Consensus `TransactionAttested` — the non-oracle attestation. */
-  PLAIN_ATTESTED = 'PLAIN_ATTESTED',
   /** Sentinel `NewRequest` — carries the per-check deadline block. */
   REQUEST_CREATED = 'REQUEST_CREATED',
   /** Sentinel `Committed` — a blind commitment; the verdict arrives with the reveal. */
@@ -67,24 +63,6 @@ export type OracleAttestedEvent = CheckEventBase & {
   attestation: FrostSignature
   /** The EIP-712 encoding of `oracleData`, needed for the attestation preimage. */
   oracleDataHash: Hex
-}
-
-export type PlainProposedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_PROPOSED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-}
-
-export type PlainAttestedEvent = CheckEventBase & {
-  type: CheckEventType.PLAIN_ATTESTED
-  safeTxHash: Hex
-  chainId: string
-  safe: string
-  epoch: string
-  signatureId: Hex
-  attestation: FrostSignature
 }
 
 export type RequestCreatedEvent = CheckEventBase & {
@@ -153,8 +131,6 @@ export type InconclusiveEvent = CheckEventBase & {
 export type NormalizedCheckEvent =
   | OracleProposedEvent
   | OracleAttestedEvent
-  | PlainProposedEvent
-  | PlainAttestedEvent
   | RequestCreatedEvent
   | SentinelCommittedEvent
   | SentinelRevealedEvent
@@ -162,6 +138,3 @@ export type NormalizedCheckEvent =
   | DisputeResolvedEvent
   | DisputeTriggeredEvent
   | InconclusiveEvent
-
-/** The two attesting events. Both carry the attested Safe's chain id and address. */
-export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent

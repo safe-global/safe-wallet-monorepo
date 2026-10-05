@@ -13,7 +13,7 @@ import {
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
-  type AttestedCheckEvent,
+  type OracleAttestedEvent,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
@@ -44,7 +44,7 @@ const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
   [AttestationVerificationStatus.UNVERIFIED]: 0,
 }
 
-type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+type SelectedAttestation = { event: OracleAttestedEvent; attestation: AttestationVerification }
 
 /**
  * Verify candidates in order and stop at the first signature that verifies. An
@@ -53,7 +53,7 @@ type SelectedAttestation = { event: AttestedCheckEvent; attestation: Attestation
  */
 const selectAttestation = async (
   reader: SafenetReader,
-  candidates: ReadonlyArray<AttestedCheckEvent>,
+  candidates: ReadonlyArray<OracleAttestedEvent>,
 ): Promise<SelectedAttestation | null> => {
   let best: SelectedAttestation | null = null
   for (const event of candidates) {
