@@ -28,6 +28,9 @@ export type PolicyTokenInfo = {
   logoUri?: string | null
 }
 
+/** How a queued edit changes an allowance the policy already holds. Unset on active rows and on a brand-new policy. */
+export type PendingAllowanceChange = 'added' | 'changed' | 'removed'
+
 export type PolicyAllowance = {
   /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
   token: PolicyTokenInfo
@@ -43,6 +46,7 @@ export type PolicyAllowance = {
   resetsAtMinute: number | null
   /** Unix SECONDS the allowance was set or re-set. Queued set-allowance changes omit it; queued resets and removals keep the active one's. */
   createdAt?: number
+  change?: PendingAllowanceChange
 }
 
 export type PolicySpender = {
