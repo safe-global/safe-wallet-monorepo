@@ -5,10 +5,16 @@ import {
   UNVERIFIED_ATTESTATION,
   bindAttestations,
   deriveCheckState,
+  derivePlainCheckState,
   getSafenetReader,
   mergeMonotonic,
+  type AttestationCandidate,
   type AttestationVerification,
   type AttestedCheckEvent,
+  type CheckReadResult,
+  type CheckTarget,
+  type RequestRead,
+  type RequestSnapshot,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
@@ -39,18 +45,18 @@ const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
   [AttestationVerificationStatus.UNVERIFIED]: 0,
 }
 
-type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+type SelectedAttestation<Event extends AttestedCheckEvent> = { event: Event; attestation: AttestationVerification }
 
 /**
  * Verify candidates in order and stop at the first signature that verifies. An
  * attestation that does not verify is only this check's verdict when no other
  * one does, so the strongest result wins rather than the earliest.
  */
-const selectAttestation = async (
+const selectAttestation = async <Event extends AttestedCheckEvent>(
   reader: SafenetReader,
-  candidates: ReadonlyArray<AttestedCheckEvent>,
-): Promise<SelectedAttestation | null> => {
-  let best: SelectedAttestation | null = null
+  candidates: ReadonlyArray<Event>,
+): Promise<SelectedAttestation<Event> | null> => {
+  let best: SelectedAttestation<Event> | null = null
   for (const event of candidates) {
     const attestation = await reader.verifyAttestation(event)
     if (best === null || VERIFICATION_RANK[attestation.status] > VERIFICATION_RANK[best.attestation.status]) {
@@ -60,6 +66,84 @@ const selectAttestation = async (
   }
   return best
 }
+
+/**
+ * Attach a request's own verification. Only its own attested logs count, and
+ * only while it is `APPROVED`: a disputed, ruled or timed-out request settles
+ * nothing by attestation. A failed header read keeps the date null without
+ * suppressing the signature evidence.
+ */
+const snapshotRequest = async (
+  reader: SafenetReader,
+  request: RequestRead,
+  candidates: ReadonlyArray<AttestationCandidate>,
+): Promise<RequestSnapshot> => {
+  const own = candidates
+    .filter((candidate) => candidate.requestId === request.requestId && request.outcome === 'APPROVED')
+    .map((candidate) => candidate.event)
+  const selected = await selectAttestation(reader, own)
+  if (!selected) return { ...request, attestation: UNVERIFIED_ATTESTATION, attestedEvent: null, attestedAtMs: null }
+  return {
+    ...request,
+    attestation: selected.attestation,
+    attestedEvent: selected.event,
+    attestedAtMs: await reader.blockTimeMs(selected.event.blockNumber),
+  }
+}
+
+type DecidingFields = Pick<SafenetCheckSnapshot, 'epoch' | 'oracle' | 'deadlineBlock' | 'attestation' | 'attestedAtMs'>
+
+const NO_DECIDING_REQUEST: DecidingFields = {
+  epoch: null,
+  oracle: null,
+  deadlineBlock: null,
+  attestation: UNVERIFIED_ATTESTATION,
+  attestedAtMs: null,
+}
+
+/** The snapshot fields that describe the deciding request. Its deadline is arbitration when disputed, else reveal. */
+const decidingFields = (request: RequestSnapshot | undefined): DecidingFields =>
+  request
+    ? {
+        epoch: request.epoch,
+        oracle: request.oracle,
+        deadlineBlock: request.outcome === 'DISPUTED' ? request.arbitrationDeadlineBlock : request.revealDeadlineBlock,
+        attestation: request.attestation,
+        attestedAtMs: request.attestedAtMs,
+      }
+    : NO_DECIDING_REQUEST
+
+/**
+ * The snapshot of a read that has requests: each request carries its own
+ * verification, every request-scoped field belongs to the one deciding request,
+ * and the status follows chain state — nothing is pinned or merged on top.
+ */
+const snapshotFromRequests = async (
+  reader: SafenetReader,
+  read: CheckReadResult,
+  target: CheckTarget,
+  aimedAtMs: number | null,
+): Promise<SafenetCheckSnapshot> => {
+  const requests: RequestSnapshot[] = []
+  for (const request of read.requests) requests.push(await snapshotRequest(reader, request, read.candidates))
+  const decision = deriveCheckState({ requests })
+  return {
+    safeTxHash: read.safeTxHash,
+    chainId: read.chainId,
+    status: decision.status,
+    outcome: decision.outcome,
+    requestId: decision.requestId,
+    ...decidingFields(requests.find((request) => request.requestId === decision.requestId)),
+    headBlock: read.headBlock,
+    aimedAtMs,
+    windowCoverage: read.windowCoverage,
+    requests,
+    events: bindAttestations(read.events, target).events,
+  }
+}
+
+/** Kept Redux-serializable; the hook only needs the failure signal. */
+const queryError = (error: unknown) => ({ error: { message: error instanceof Error ? error.message : String(error) } })
 
 /**
  * `chainId` and `safeAddress` are the Safe the check is being viewed for; an
@@ -82,6 +166,7 @@ export const safenetCheckApi = createApi({
           const aimedAtMs = resolveAim(identity)
           const target = { chainId, safeAddress }
           const read = await reader.fetchCheckState(safeTxHash, { target, timestampMs: aimedAtMs })
+          if (read.requests.length > 0) return { data: await snapshotFromRequests(reader, read, target, aimedAtMs) }
 
           const { events, candidates } = bindAttestations(read.events, target)
           const selected = await selectAttestation(reader, candidates)
@@ -93,7 +178,7 @@ export const safenetCheckApi = createApi({
             ? [selected.attestation, await reader.blockTimeMs(selected.event.blockNumber)]
             : [UNVERIFIED_ATTESTATION, null]
 
-          const derived = deriveCheckState({ events, attestation, headBlock: read.headBlock })
+          const derived = derivePlainCheckState({ events, attestation, headBlock: read.headBlock })
           const pinned = selectPinnedVerdict(getState() as SafenetCheckPartialState, identity)
           const status = mergeMonotonic(pinned?.status, derived)
 
@@ -108,12 +193,13 @@ export const safenetCheckApi = createApi({
             safeTxHash: read.safeTxHash,
             chainId: read.chainId,
             status,
+            outcome: null,
             requestId: read.requestId,
             epoch: read.epoch,
             oracle: read.oracle,
             deadlineBlock: read.deadlineBlock,
             headBlock: read.headBlock,
-            requests: read.requests,
+            requests: [],
             attestation,
             attestedAtMs,
             aimedAtMs,
@@ -122,8 +208,7 @@ export const safenetCheckApi = createApi({
           }
           return { data: snapshot }
         } catch (error) {
-          // Kept Redux-serializable; the hook only needs the failure signal.
-          return { error: { message: error instanceof Error ? error.message : String(error) } }
+          return queryError(error)
         }
       },
       // The check's identity is the Safe plus the hash, and `checkKey`

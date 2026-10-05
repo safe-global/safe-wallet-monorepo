@@ -1,4 +1,4 @@
-import type { OracleRequestState, RequestOutcome, RequestRead } from '../types'
+import type { CheckEventBase, OracleRequestState, RequestOutcome, RequestRead } from '../types'
 
 /**
  * Outcome per state: `[unanimous or open, contested]`. Contested means both vote
@@ -20,4 +20,14 @@ const OUTCOMES: Record<OracleRequestState, readonly [RequestOutcome, RequestOutc
 export const requestOutcome = (request: Pick<RequestRead, 'state' | 'approveCount' | 'denyCount'>): RequestOutcome => {
   const contested = request.approveCount > 0 && request.denyCount > 0
   return OUTCOMES[request.state][contested ? 1 : 0]
+}
+
+type Position = Pick<CheckEventBase, 'blockNumber' | 'logIndex'> | null
+
+export const lexical = (a: string, b: string): number => Number(a > b) - Number(a < b)
+
+/** Known positions sort before unknown ones; `direction` 1 is ascending, -1 descending. */
+export const comparePositions = (a: Position, b: Position, direction: 1 | -1): number => {
+  if (a === null || b === null) return Number(a === null) - Number(b === null)
+  return direction * (a.blockNumber - b.blockNumber || a.logIndex - b.logIndex)
 }

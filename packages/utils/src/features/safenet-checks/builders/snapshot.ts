@@ -14,6 +14,7 @@ export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): Safenet
   safeTxHash: hexHash(),
   chainId: '100',
   status: CheckStatus.SUBMITTED,
+  outcome: null,
   requestId: null,
   epoch: null,
   oracle: null,

@@ -17,6 +17,7 @@ import {
 import {
   AttestationVerificationStatus,
   CheckEventType,
+  type AttestationCandidate,
   type AttestationVerification,
   type Hex,
   type NormalizedCheckEvent,
@@ -66,6 +67,8 @@ export type CheckReadResult = {
    * The cap fails the read instead of dropping one; the window bounds discovery (`windowCoverage`).
    */
   requests: RequestRead[]
+  /** The target-bound attested logs of those requests, newest first, each bound to the request whose id it derives to. */
+  candidates: AttestationCandidate[]
   /**
    * Whether the block window this read used covers the check's whole possible
    * lifetime. An empty event set only proves the absence of a check when it does.
@@ -101,6 +104,20 @@ const isTargetBound = (event: NormalizedCheckEvent, target: CheckTarget): boolea
 
 const assertTarget = (target: CheckTarget): void => {
   if (!target?.chainId || !isAddress(target.safeAddress)) throw new Error('Safenet reader: invalid check target')
+}
+
+const attestationCandidates = (
+  domain: RequestDomain,
+  events: ReadonlyArray<NormalizedCheckEvent>,
+  requests: ReadonlyArray<RequestRead>,
+  safeTxHash: Hex,
+): AttestationCandidate[] => {
+  const retained = new Set(requests.map((request) => request.requestId))
+  return events
+    .filter((event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED)
+    .map((event) => ({ requestId: requestIdOf(domain, event, safeTxHash), event }))
+    .filter(({ requestId }) => retained.has(requestId))
+    .reverse()
 }
 
 /** Max concurrent `getRequest` calls in one read — equals the provider's batch size. */
@@ -480,6 +497,7 @@ export class SafenetReader {
       // latest deadline belongs to the request that can still resolve.
       const deadline = deadlineBlockOf(events)
       const requests = await this.readRequests(provider, refs, head, events)
+      const candidates = attestationCandidates(this.domain, consensusEvents, requests, safeTxHash as Hex)
 
       return {
         safeTxHash: safeTxHash as Hex,
@@ -489,6 +507,7 @@ export class SafenetReader {
         ...correlation,
         deadlineBlock: deadline === null ? null : deadline.toString(),
         requests,
+        candidates,
         windowCoverage: range.coverage,
       }
     })

@@ -1,5 +1,5 @@
 import type { AttestationVerification, CheckStatus } from './status'
-import type { CheckEventBase, Hex, NormalizedCheckEvent } from './events'
+import type { CheckEventBase, Hex, NormalizedCheckEvent, OracleAttestedEvent } from './events'
 
 /**
  * How much the block window a read used can prove. `proven`: the window was
@@ -77,25 +77,41 @@ export type RequestRead = RequestRef & {
   resolutionTxHash: string | null
 }
 
+/** An attested log bound to the request whose id it derives to. */
+export type AttestationCandidate = {
+  requestId: Hex
+  event: OracleAttestedEvent
+}
+
+/** A request with its own verification result — never shared with a sibling request. */
+export type RequestSnapshot = RequestRead & {
+  attestation: AttestationVerification
+  attestedEvent: OracleAttestedEvent | null
+  /** Null when the request has no attested log or the header read failed. */
+  attestedAtMs: number | null
+}
+
 /**
  * The full read-layer view of one check at one poll. Everything numeric is a
  * decimal string so the snapshot is safe to hold in Redux. Recomputed from
- * scratch each poll; the monotonic merge is applied on top separately.
+ * scratch each poll; only a read with no request is merged with the pinned verdict on top.
  */
 export type SafenetCheckSnapshot = {
   safeTxHash: Hex
   /** The Safenet chain the Consensus contract lives on (e.g. Gnosis '100'). */
   chainId: string
   status: CheckStatus
+  /** Exact lifecycle of the deciding request; null when the read has no request. */
+  outcome: RequestOutcome | null
   /**
-   * Correlation for the latest allowlisted proposal bound to the viewed Safe,
-   * once known. Proposals are permissionless — do not render these as
-   * provenance or branch a verdict on them; use `status` for that.
+   * The deciding request: with requests, `requestId`, `epoch`, `oracle`, `deadlineBlock`, `attestation` and
+   * `attestedAtMs` all describe it, not the latest proposal. Proposals are permissionless — do not render
+   * these as provenance or branch a verdict on them; use `status` for that.
    */
   requestId: Hex | null
   epoch: string | null
   oracle: string | null
-  /** Block the check times out at (the request's reveal deadline). */
+  /** The deciding request's arbitration deadline when disputed, else its reveal deadline. */
   deadlineBlock: string | null
   /** Chain head observed at snapshot time — the deadline is compared to this. */
   headBlock: string | null
@@ -103,7 +119,7 @@ export type SafenetCheckSnapshot = {
    * Every target-bound allowlisted request in the read window, in proposal order. The cap fails the read
    * instead of dropping one; `windowCoverage` says whether the window can have missed one.
    */
-  requests: RequestRead[]
+  requests: RequestSnapshot[]
   attestation: AttestationVerification
   /**
    * When the attestation landed on chain, in ms. Null until attested, and

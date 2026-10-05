@@ -1,20 +1,39 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { configureStore, type UnknownAction } from '@reduxjs/toolkit'
+import { setupServer, type SetupServerApi } from 'msw/node'
 import {
   AttestationVerificationStatus,
+  CheckEventType,
   CheckStatus,
   UNVERIFIED_ATTESTATION,
+  SafenetReader,
   getSafenetReader,
+  verdictAttestation,
   type CheckReadResult,
   type CheckTarget,
+  type Hex,
+  type SafenetCheckSnapshot,
+  type SafenetReaderConfig,
   type PlainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks'
 import {
+  EMPTY_ORACLE_DATA_HASH,
   attestedEvent,
+  buildOracleAttestedLog,
+  buildOracleProposedLog,
   oracleResultEvent,
   plainProposedEvent,
   plainAttestedEvent,
   requestCreatedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
+import {
+  encodeRequest,
+  makeEndpoint,
+  type RpcConfig,
+} from '@safe-global/utils/features/safenet-checks/services/__tests__/rpcEndpoint'
+import { decodeLogs, type RawLog } from '@safe-global/utils/features/safenet-checks/utils/decodeLogs'
+import { requestIdOf } from '@safe-global/utils/features/safenet-checks/utils/requestRefs'
 import { safenetCheckApi } from '../safenetCheckApi'
 import { forgetAim, recordAim, resolveAim } from '../safenetAimRegistry'
 import {
@@ -55,6 +74,7 @@ const baseRead = (over: Partial<CheckReadResult> = {}): CheckReadResult => ({
   oracle: null,
   deadlineBlock: null,
   requests: [],
+  candidates: [],
   windowCoverage: 'heuristic',
   ...over,
 })
@@ -598,6 +618,248 @@ describe('safenetCheckApi.getSafenetCheck', () => {
         CheckStatus.SUBMITTED,
       )
       expect(selectPinnedVerdict(state, { safeTxHash: HASH, ...TARGET })?.status).toBe(CheckStatus.BENIGN)
+    })
+  })
+})
+
+type Point = { x: string; y: string }
+
+type Capture = {
+  safeTxHash: Hex
+  homeChainId: string
+  safe: string
+  requestId: Hex
+  logs: RawLog[]
+  groupKey: Point | null
+  attestation: { signatureId: Hex; blockNumber: number }
+  requestState: { blockNumber: number; rawResult: string }
+}
+
+type Provenance = Pick<SafenetReaderConfig, 'chainId' | 'consensus' | 'coordinator'> & { oracle: string }
+
+const { provenance, captures }: { provenance: Provenance; captures: Capture[] } = JSON.parse(
+  readFileSync(join(__dirname, '../../../../utils/src/features/safenet-checks/__fixtures__/gnosis-aegis.json'), 'utf8'),
+)
+const [APPROVED, DISPUTED] = captures
+const HEAD = APPROVED.requestState.blockNumber
+const RPC_URL = 'http://rpc.safenet.test/gnosis'
+
+let server: SetupServerApi | undefined
+afterEach(() => server?.close())
+
+const serve = (source: Capture, over: Partial<RpcConfig> = {}): RpcConfig => {
+  const rpc: RpcConfig = {
+    url: RPC_URL,
+    head: source.requestState.blockNumber,
+    logs: source.logs,
+    requests: { [source.requestId]: source.requestState.rawResult },
+    groupKey: source.groupKey ?? undefined,
+    ...over,
+  }
+  server = setupServer(makeEndpoint(rpc).handler)
+  server.listen({ onUnhandledRequest: 'error' })
+  mockedGetReader.mockImplementation(
+    () => new SafenetReader({ ...provenance, rpcUrls: [RPC_URL], oracles: [provenance.oracle] }),
+  )
+  return rpc
+}
+
+const poll = async (store: ReturnType<typeof makeTestStore>, source: Capture): Promise<SafenetCheckSnapshot> => {
+  const identity = { safeTxHash: source.safeTxHash, chainId: source.homeChainId, safeAddress: source.safe }
+  const { data, error } = await store.dispatch(
+    safenetCheckApi.endpoints.getSafenetCheck.initiate(identity, { forceRefetch: true }),
+  )
+  if (!data) throw new Error(`poll failed: ${JSON.stringify(error)}`)
+  return data
+}
+
+const { signatureId, blockNumber } = APPROVED.attestation
+const verified = { status: AttestationVerificationStatus.VERIFIED, signatureId, message: APPROVED.requestId }
+const requestOf = (data: SafenetCheckSnapshot, id: Hex) => data.requests.find((request) => request.requestId === id)
+
+const forgeAttested = (over: { safe?: string; zDelta?: bigint; blockNumber: number }): RawLog => {
+  const event = decodeLogs(APPROVED.logs).find((entry) => entry.type === CheckEventType.ORACLE_ATTESTED)
+  if (!event || event.type !== CheckEventType.ORACLE_ATTESTED) throw new Error('capture has no oracle attestation')
+  return {
+    ...buildOracleAttestedLog(
+      {
+        safeTxHash: APPROVED.safeTxHash,
+        chainId: BigInt(APPROVED.homeChainId),
+        safe: over.safe ?? APPROVED.safe,
+        epoch: BigInt(event.epoch),
+        oracle: event.oracle,
+        oracleDataHash: event.oracleDataHash,
+        signatureId: event.signatureId,
+        r: { x: BigInt(event.attestation.r.x), y: BigInt(event.attestation.r.y) },
+        z: BigInt(event.attestation.z) + (over.zDelta ?? 0n),
+      },
+      { blockNumber: over.blockNumber, logIndex: 3, transactionHash: '0x' + '44'.repeat(32) },
+    ),
+    address: provenance.consensus,
+  }
+}
+
+describe('safenetCheckApi.getSafenetCheck — requests read from a real endpoint', () => {
+  it('derives BENIGN from the request, its own verified attestation and its attested log', async () => {
+    serve(APPROVED)
+
+    const data = await poll(makeTestStore(), APPROVED)
+
+    const attestedAtMs = (1_000_000 - (HEAD - blockNumber) * 5) * 1000
+    expect(data).toMatchObject({
+      status: CheckStatus.BENIGN,
+      outcome: 'APPROVED',
+      requestId: APPROVED.requestId,
+      deadlineBlock: '48597473',
+      attestation: verified,
+      attestedAtMs,
+    })
+    expect(data.requests).toHaveLength(1)
+    expect(data.requests[0]).toMatchObject({ attestation: verified, attestedEvent: { signatureId }, attestedAtMs })
+    expect(verdictAttestation(data)).toMatchObject({ signatureId })
+  })
+
+  it('reads a frozen dispute past its reveal deadline as IN_PROGRESS, on its arbitration deadline', async () => {
+    serve(DISPUTED)
+
+    const data = await poll(makeTestStore(), DISPUTED)
+
+    expect(data).toMatchObject({
+      status: CheckStatus.IN_PROGRESS,
+      outcome: 'DISPUTED',
+      requestId: DISPUTED.requestId,
+      deadlineBlock: '48643753',
+      attestation: UNVERIFIED_ATTESTATION,
+      attestedAtMs: null,
+    })
+    expect(verdictAttestation(data)).toBeUndefined()
+  })
+})
+
+describe('safenetCheckApi.getSafenetCheck — sibling requests', () => {
+  const SIBLING = { safeTxHash: APPROVED.safeTxHash, chainId: BigInt(APPROVED.homeChainId), safe: APPROVED.safe }
+  const SIBLING_ID = requestIdOf(
+    provenance,
+    { epoch: '999', oracle: provenance.oracle, oracleDataHash: EMPTY_ORACLE_DATA_HASH as Hex },
+    APPROVED.safeTxHash,
+  )
+  const proposal: RawLog = {
+    ...buildOracleProposedLog({ ...SIBLING, epoch: 999n, oracle: provenance.oracle }, { blockNumber: HEAD - 40 }),
+    address: provenance.consensus,
+  }
+  const serveSibling = (state: number) =>
+    serve(APPROVED, {
+      logs: [...APPROVED.logs, proposal],
+      requests: { [APPROVED.requestId]: APPROVED.requestState.rawResult, [SIBLING_ID]: encodeRequest(state) },
+    })
+
+  it('lets an open dispute outrank a verified sibling', async () => {
+    serveSibling(2)
+
+    const data = await poll(makeTestStore(), APPROVED)
+
+    expect(data).toMatchObject({
+      status: CheckStatus.IN_PROGRESS,
+      outcome: 'DISPUTED',
+      requestId: SIBLING_ID,
+      attestation: UNVERIFIED_ATTESTATION,
+    })
+    expect(requestOf(data, APPROVED.requestId)?.attestation).toEqual(verified)
+    expect(verdictAttestation(data)).toBeUndefined()
+  })
+
+  it('never verifies an approved sibling with the attestation of another request', async () => {
+    serveSibling(3)
+
+    const data = await poll(makeTestStore(), APPROVED)
+
+    expect(requestOf(data, SIBLING_ID)).toMatchObject({ outcome: 'APPROVED', attestation: UNVERIFIED_ATTESTATION })
+    expect(data).toMatchObject({
+      status: CheckStatus.BENIGN,
+      requestId: APPROVED.requestId,
+      epoch: '161991',
+      oracle: provenance.oracle,
+      attestation: verified,
+    })
+  })
+})
+
+describe('safenetCheckApi.getSafenetCheck — chain transitions', () => {
+  it('follows chain state without a floor: a request that turns TIMED_OUT is not held at BENIGN', async () => {
+    const rpc = serve(APPROVED)
+    const store = makeTestStore()
+    const first = await poll(store, APPROVED)
+
+    rpc.requests = { [APPROVED.requestId]: encodeRequest(5) }
+    const second = await poll(store, APPROVED)
+
+    expect(first.status).toBe(CheckStatus.BENIGN)
+    expect(second).toMatchObject({
+      status: CheckStatus.TIMED_OUT,
+      outcome: 'TIMED_OUT',
+      attestation: UNVERIFIED_ATTESTATION,
+      attestedAtMs: null,
+    })
+  })
+})
+
+describe('safenetCheckApi.getSafenetCheck — own attestation selection', () => {
+  it('ignores a valid signature logged for another Safe', async () => {
+    serve(APPROVED, {
+      logs: [
+        ...APPROVED.logs.filter((log) => log.blockNumber !== blockNumber),
+        forgeAttested({ safe: SAFE, blockNumber }),
+      ],
+    })
+    const data = await poll(makeTestStore(), APPROVED)
+    expect(data).toMatchObject({
+      status: CheckStatus.IN_PROGRESS,
+      attestation: UNVERIFIED_ATTESTATION,
+      attestedAtMs: null,
+    })
+    expect(data.requests[0]).toMatchObject({
+      attestation: UNVERIFIED_ATTESTATION,
+      attestedEvent: null,
+      attestedAtMs: null,
+    })
+    expect(verdictAttestation(data)).toBeUndefined()
+  })
+
+  it.each([
+    { label: 'an older valid log over a newer invalid log', zDelta: 1n, selectedBlock: blockNumber },
+    { label: 'the newest of two valid logs', zDelta: 0n, selectedBlock: blockNumber + 50 },
+  ])('selects $label with its exact event and date', async ({ zDelta, selectedBlock }) => {
+    serve(APPROVED, {
+      logs: [...APPROVED.logs, forgeAttested({ zDelta, blockNumber: blockNumber + 50 })],
+    })
+    const data = await poll(makeTestStore(), APPROVED)
+    const attestedAtMs = (1_000_000 - (HEAD - selectedBlock) * 5) * 1000
+    expect(data).toMatchObject({
+      status: CheckStatus.BENIGN,
+      attestation: verified,
+      attestedAtMs,
+    })
+    expect(data.requests[0]).toMatchObject({
+      attestation: verified,
+      attestedEvent: { blockNumber: selectedBlock, signatureId },
+      attestedAtMs,
+    })
+    expect(verdictAttestation(data)).toEqual(data.requests[0].attestedEvent)
+    expect(verdictAttestation(data)?.blockNumber).toBe(selectedBlock)
+  })
+
+  it('retains VERIFIED and BENIGN when the attested block header fails', async () => {
+    serve(APPROVED, { failBlockProbes: 'error' })
+    const data = await poll(makeTestStore(), APPROVED)
+    expect(data).toMatchObject({
+      status: CheckStatus.BENIGN,
+      attestation: verified,
+      attestedAtMs: null,
+    })
+    expect(data.requests[0]).toMatchObject({
+      attestation: verified,
+      attestedEvent: { blockNumber, signatureId },
+      attestedAtMs: null,
     })
   })
 })

@@ -49,12 +49,18 @@ export const bindAttestations = (
 }
 
 /**
- * The attested event whose signature produced the snapshot's verdict. Selection
- * skips attestations that do not verify, so the verdict's own event is the one
- * matching the verified signature id — not simply the first attestation read.
+ * The attested event whose signature produced the snapshot's verdict. With
+ * requests it is the deciding request's own event, and only when that event
+ * carries the verified signature id. Without, selection skips attestations
+ * that do not verify, so it is the event matching the verified signature id —
+ * not simply the first attestation read.
  */
 export const verdictAttestation = (snapshot: SafenetCheckSnapshot): AttestedCheckEvent | undefined => {
   const { signatureId } = snapshot.attestation
   if (signatureId === null) return undefined
+  if (snapshot.requests.length > 0) {
+    const decider = snapshot.requests.find((request) => request.requestId === snapshot.requestId)
+    return decider?.attestedEvent?.signatureId === signatureId ? decider.attestedEvent : undefined
+  }
   return attestationCandidates(snapshot.events).find((event) => event.signatureId === signatureId)
 }
