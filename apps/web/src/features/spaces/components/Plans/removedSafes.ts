@@ -43,22 +43,28 @@ export const summarizeRemovedSafes = (leaves: SafeRef[], removed: SafeRef[]): Re
 
 const count = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`
 
+const partialPhrase = (partialAccounts: number, partialNetworks: number): string =>
+  partialAccounts === 1 ? `${partialNetworks} of its networks only` : 'some of their networks only'
+
 /** The note under a plan's accounts step and its change summary; empty when nothing is removed. */
 export const removedSafesNote = ({ accounts, partialAccounts, partialNetworks }: RemovedSafesSummary): string => {
-  const networks = `${count(partialNetworks, 'network')} only`
+  const partial = partialPhrase(partialAccounts, partialNetworks)
 
   if (accounts > 0 && partialAccounts > 0) {
-    return `${count(accounts, 'Safe account')} will be removed from the Workspace, and ${partialAccounts} more will be removed on ${networks}. The removed accounts remain available in My accounts, the others keep their seats.`
+    const removed = accounts === 1 ? 'The removed account remains' : 'The removed accounts remain'
+    const kept = partialAccounts === 1 ? 'the other keeps its seat' : 'the others keep their seats'
+    return `${count(accounts, 'Safe account')} will be removed from the Workspace, and ${partialAccounts} more from ${partial}. ${removed} available in My accounts, ${kept}.`
   }
   if (partialAccounts > 0) {
-    const stays =
+    const kept =
       partialAccounts === 1
         ? 'It stays in the Workspace and keeps its seat.'
         : 'They stay in the Workspace and keep their seats.'
-    return `${count(partialAccounts, 'Safe account')} will be removed on ${networks}. ${stays}`
+    return `${count(partialAccounts, 'Safe account')} will be removed from ${partial}. ${kept}`
   }
   if (accounts > 0) {
-    return `${count(accounts, 'Safe account')} will be removed from the Workspace. They remain available in My accounts.`
+    const removed = accounts === 1 ? 'It remains' : 'They remain'
+    return `${count(accounts, 'Safe account')} will be removed from the Workspace. ${removed} available in My accounts.`
   }
   return ''
 }

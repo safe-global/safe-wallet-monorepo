@@ -172,7 +172,7 @@ describe('SelectAccountsStep', () => {
     expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2 selected')
     expect(
       screen.getByText(
-        '1 Safe account will be removed from the Workspace, and 1 more will be removed on 1 network only. The removed accounts remain available in My accounts, the others keep their seats.',
+        '1 Safe account will be removed from the Workspace, and 1 more from 1 of its networks only. The removed account remains available in My accounts, the other keeps its seat.',
       ),
     ).toBeInTheDocument()
 
