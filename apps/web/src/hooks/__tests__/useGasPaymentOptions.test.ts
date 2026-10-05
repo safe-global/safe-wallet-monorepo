@@ -22,7 +22,7 @@ jest.mock('@/features/no-fee-campaign', () => ({
   useGasTooHigh: () => mockUseGasTooHigh(),
 }))
 
-const freeSponsoredTxs: SafeSponsoredTxs = {
+const withoutPlanSponsoredTxs: SafeSponsoredTxs = {
   isEnabled: true,
   isPro: false,
   meter: null,
@@ -33,7 +33,7 @@ const freeSponsoredTxs: SafeSponsoredTxs = {
   isError: false,
 }
 
-const proSponsoredTxs: SafeSponsoredTxs = {
+const withPlanSponsoredTxs: SafeSponsoredTxs = {
   isEnabled: true,
   isPro: true,
   meter: { used: 10, quota: 50, resetsAt: null },
@@ -44,7 +44,7 @@ const proSponsoredTxs: SafeSponsoredTxs = {
   isError: false,
 }
 
-const proLoading: SafeSponsoredTxs = {
+const planLoading: SafeSponsoredTxs = {
   isEnabled: true,
   isPro: false,
   meter: null,
@@ -88,7 +88,7 @@ describe('useGasPaymentOptions', () => {
     mockCampaign()
     mockUseIsNoFeeCampaignEnabled.mockReturnValue(true)
     mockUseGasTooHigh.mockReturnValue(false)
-    mockUseSafeSponsoredTxs.mockReturnValue(freeSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withoutPlanSponsoredTxs)
     walletCanRelaySpy = jest.spyOn(useWalletCanRelay, 'default').mockReturnValue([true, undefined, false])
   })
 
@@ -106,11 +106,11 @@ describe('useGasPaymentOptions', () => {
   })
 
   it('offers a Safe on a plan only the plan, even with the campaign and daily relays available', () => {
-    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
 
-    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: proSponsoredTxs.spaceId })
+    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: withPlanSponsoredTxs.spaceId })
   })
 
   it('treats a campaign-eligible but blocked Safe as not eligible', () => {
@@ -127,7 +127,7 @@ describe('useGasPaymentOptions', () => {
     [
       'the plan',
       ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION'],
-      () => mockUseSafeSponsoredTxs.mockReturnValue(proLoading),
+      () => mockUseSafeSponsoredTxs.mockReturnValue(planLoading),
       true,
     ],
     ['an unlisted campaign', ['FREE_DAILY_LIMIT'], () => mockCampaign({ isLoading: true }), false],
@@ -136,14 +136,14 @@ describe('useGasPaymentOptions', () => {
       ['SUBSCRIPTION'],
       () => {
         mockRelays(undefined, true)
-        mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+        mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
       },
       false,
     ],
     [
       'an unlisted subscription',
       ['FREE_DAILY_LIMIT'],
-      () => mockUseSafeSponsoredTxs.mockReturnValue(proLoading),
+      () => mockUseSafeSponsoredTxs.mockReturnValue(planLoading),
       false,
     ],
   ])('holds the offer back while %s loads: %s', (_label, options, mockLoading, holdsBack) => {
@@ -158,31 +158,31 @@ describe('useGasPaymentOptions', () => {
   })
 
   it('holds the campaign and the daily limit back while the plan loads on a chain that lists it', () => {
-    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+    mockUseSafeSponsoredTxs.mockReturnValue(planLoading)
 
     const { result, rerender } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
     expect(result.current).toMatchObject({ offer: null, showsProUpsell: false })
 
-    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
     rerender()
     expect(result.current.offer?.option).toBe('SUBSCRIPTION')
   })
 
   it('offers the daily limit with the plan unknown until it loads', () => {
     mockChain(['FREE_DAILY_LIMIT'])
-    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+    mockUseSafeSponsoredTxs.mockReturnValue(planLoading)
 
     const { result, rerender } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
     expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: null })
 
-    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
     rerender()
     expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: true })
   })
 
   it('offers the daily limit with the plan unknown and no upsell after its lookup failed', () => {
     mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
-    mockUseSafeSponsoredTxs.mockReturnValue({ ...freeSponsoredTxs, isError: true })
+    mockUseSafeSponsoredTxs.mockReturnValue({ ...withoutPlanSponsoredTxs, isError: true })
 
     const { result, rerender } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
     expect(result.current.offer).toMatchObject({ option: 'FREE_DAILY_LIMIT', isPro: null })
@@ -195,7 +195,7 @@ describe('useGasPaymentOptions', () => {
   it('shows no Pro upsell while the plan loads with the daily relays spent', () => {
     mockChain(['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
     mockRelays({ remaining: 0, limit: 5 })
-    mockUseSafeSponsoredTxs.mockReturnValue(proLoading)
+    mockUseSafeSponsoredTxs.mockReturnValue(planLoading)
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
 
@@ -221,7 +221,7 @@ describe('useGasPaymentOptions', () => {
   })
 
   it('offers a Safe on a plan nothing once the plan is excluded', () => {
-    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx() }))
     expect(result.current.offer?.option).toBe('SUBSCRIPTION')
@@ -267,11 +267,11 @@ describe('useGasPaymentOptions', () => {
 
   it('offers a Safe on a plan the plan for a batch', () => {
     walletCanRelaySpy.mockReturnValue([undefined, undefined, false])
-    mockUseSafeSponsoredTxs.mockReturnValue(proSponsoredTxs)
+    mockUseSafeSponsoredTxs.mockReturnValue(withPlanSponsoredTxs)
 
     const { result } = renderHook(() => useGasPaymentOptions({ safeTx: safeTx(), isBatch: true }))
 
-    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: proSponsoredTxs.spaceId })
+    expect(result.current.offer).toMatchObject({ option: 'SUBSCRIPTION', spaceId: withPlanSponsoredTxs.spaceId })
   })
 
   it('offers nothing when the wallet cannot relay a single transaction', () => {
