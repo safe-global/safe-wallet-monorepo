@@ -40,9 +40,9 @@ export type TokenSelectorProps = {
   onChange: (address: string | undefined) => void
   /** Never hides `value` itself. Pass a stable reference — a new array each render recomputes the list. */
   excludeAddresses?: string[]
-  /** Listed and searchable but not selectable; hovering one shows `disabledReason`. */
+  /** Listed and searchable but not selectable; hovering one shows `disabledAddressReason`. */
   disabledAddresses?: string[]
-  disabledReason?: string
+  disabledAddressReason?: string
   disabled?: boolean
   label?: string
   placeholder?: string
@@ -79,7 +79,7 @@ const TokenSelector = ({
   onChange,
   excludeAddresses,
   disabledAddresses,
-  disabledReason,
+  disabledAddressReason,
   disabled = false,
   label = TOKEN_SELECTOR_LABEL,
   placeholder = TOKEN_SELECTOR_PLACEHOLDER,
@@ -197,7 +197,7 @@ const TokenSelector = ({
                 <ComboboxCollection>
                   {(option: TokenOption) =>
                     disabledAddresses?.some((address) => sameAddress(address, option.address)) ? (
-                      <DisabledTokenOption key={option.address} option={option} reason={disabledReason} />
+                      <DisabledTokenOption key={option.address} option={option} reason={disabledAddressReason} />
                     ) : (
                       <ComboboxItem key={option.address} value={option} data-testid="token-option">
                         <TokenOptionRow option={option} />

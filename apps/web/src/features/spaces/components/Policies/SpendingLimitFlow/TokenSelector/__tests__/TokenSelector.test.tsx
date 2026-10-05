@@ -313,7 +313,7 @@ describe('TokenSelector — disabledAddresses', () => {
     const { user } = renderSelector({
       onChange,
       disabledAddresses: [heldUsdc.address.toLowerCase()],
-      disabledReason: reason,
+      disabledAddressReason: reason,
     })
     await openSelector(user)
 
@@ -327,7 +327,7 @@ describe('TokenSelector — disabledAddresses', () => {
   })
 
   it('still finds a disabled token by its address instead of showing no results', async () => {
-    const { user } = renderSelector({ disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    const { user } = renderSelector({ disabledAddresses: [heldUsdc.address], disabledAddressReason: reason })
     const input = await openSelector(user)
 
     await user.type(input, heldUsdc.address)
@@ -339,7 +339,7 @@ describe('TokenSelector — disabledAddresses', () => {
 
   it('does not commit a disabled first match on Enter', async () => {
     const onChange = jest.fn()
-    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledAddressReason: reason })
     const input = await openSelector(user)
 
     await user.type(input, 'USDC')
@@ -350,7 +350,7 @@ describe('TokenSelector — disabledAddresses', () => {
 
   it('leaves the other tokens selectable', async () => {
     const onChange = jest.fn()
-    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledReason: reason })
+    const { user } = renderSelector({ onChange, disabledAddresses: [heldUsdc.address], disabledAddressReason: reason })
     await openSelector(user)
 
     await user.click(screen.getByRole('option', { name: /ETH/ }))

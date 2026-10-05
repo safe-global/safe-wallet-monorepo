@@ -178,7 +178,7 @@ const TokenLimitCard = ({
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
                   disabledAddresses={existingTokens}
-                  disabledReason={EXISTING_LIMIT_TOOLTIP}
+                  disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}
                   error={!!tokenError}
                   helperText={
