@@ -1,13 +1,18 @@
+import { AbiCoder } from 'ethers'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { decodeLogs, type RawLog } from '../decodeLogs'
 import {
+  buildArbitrationTimedOutLog,
   buildCommittedLog,
+  buildDisputeOutOfScopeLog,
   buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
   buildNewRequestLog,
   buildOracleAttestedLog,
   buildOracleProposedLog,
   buildOracleResultLog,
+  buildRequestTimedOutLog,
   buildRevealedLog,
   resetLogCounter,
 } from '../../builders/rawLogs'
@@ -151,6 +156,87 @@ describe('decodeLogs — totality (never throws)', () => {
       transactionHash: '0x',
     }
     expect(decodeLogs([good1, bad, good2])).toHaveLength(2)
+  })
+})
+
+describe('decodeLogs — dispute and timeout events', () => {
+  const REQUEST_ID = '0x3333333333333333333333333333333333333333333333333333333333333333'
+  const meta = { blockNumber: 10, logIndex: 2, transactionHash: `0x${'ab'.repeat(32)}` }
+  const base = { requestId: REQUEST_ID, ...meta }
+
+  it('decodes DisputeTriggered with the arbitration deadline as a decimal string', () => {
+    const logs = [buildDisputeTriggeredLog({ requestId: REQUEST_ID, deadline: 2n ** 40n }, meta)]
+    expect(decodeLogs(logs)).toEqual([
+      { type: CheckEventType.DISPUTE_TRIGGERED, ...base, arbitrationDeadlineBlock: '1099511627776' },
+    ])
+  })
+
+  it('decodes the timeout events by request id alone', () => {
+    const logs = [
+      buildArbitrationTimedOutLog({ requestId: REQUEST_ID }, meta),
+      buildRequestTimedOutLog({ requestId: REQUEST_ID }, meta),
+    ]
+    expect(decodeLogs(logs)).toEqual([
+      { type: CheckEventType.ARBITRATION_TIMED_OUT, ...base },
+      { type: CheckEventType.REQUEST_TIMED_OUT, ...base },
+    ])
+  })
+
+  it.each(['', ' Council: "no" ✓ '])('keeps the context %j verbatim', (context) => {
+    const logs = [
+      buildDisputeResolvedLog({ requestId: REQUEST_ID, outcome: 1, slashed: 7n, context }, meta),
+      buildDisputeOutOfScopeLog({ requestId: REQUEST_ID, context }, meta),
+    ]
+    expect(decodeLogs(logs)).toEqual([
+      { type: CheckEventType.DISPUTE_RESOLVED, ...base, outcome: 1, slashed: '7', context },
+      { type: CheckEventType.DISPUTE_OUT_OF_SCOPE, ...base, context },
+    ])
+  })
+
+  // Solidity does not validate UTF-8; ethers throws only when the string field is read.
+  it.each([
+    {
+      name: 'DisputeResolved',
+      log: buildDisputeResolvedLog({ requestId: REQUEST_ID }, meta),
+      types: ['uint8', 'uint128', 'bytes'],
+      values: [1, 7n, '0xc3'],
+      expected: { type: CheckEventType.DISPUTE_RESOLVED, ...base, outcome: 1, slashed: '7', context: null },
+    },
+    {
+      name: 'DisputeOutOfScope',
+      log: buildDisputeOutOfScopeLog({ requestId: REQUEST_ID }, meta),
+      types: ['bytes'],
+      values: ['0xc3'],
+      expected: { type: CheckEventType.DISPUTE_OUT_OF_SCOPE, ...base, context: null },
+    },
+  ])('keeps $name with a null context when the string is not valid UTF-8', ({ log, types, values, expected }) => {
+    const data = AbiCoder.defaultAbiCoder().encode(types, values)
+    expect(decodeLogs([{ ...log, data }])).toEqual([expected])
+  })
+
+  // Live Gnosis Oracle log, request 0xfc47e0c3…79e1 (capture `disputed-split`).
+  it('decodes a real DisputeTriggered log off the deployed Oracle', () => {
+    const real: RawLog = {
+      address: '0x544F12bAd6FF72564abBc7eA6494A2a4BdD0DDD0',
+      topics: [
+        '0x86e8b85731e4787f033d85108356db1e068dea243be32d422e6dc5681ff49cc1',
+        '0xfc47e0c375d455940f8173597b0ca5191b7d3949b2c2112593bf1b4ee9c179e1',
+      ],
+      data: '0x0000000000000000000000000000000000000000000000000000000002e63ea9',
+      blockNumber: 48593353,
+      logIndex: 135,
+      transactionHash: '0x19da9d45c5fb6a792d130840859f2f359b5fee3ea8a7f5965de2d6724278ada3',
+    }
+    expect(decodeLogs([real])).toEqual([
+      {
+        type: CheckEventType.DISPUTE_TRIGGERED,
+        requestId: '0xfc47e0c375d455940f8173597b0ca5191b7d3949b2c2112593bf1b4ee9c179e1',
+        arbitrationDeadlineBlock: '48643753',
+        blockNumber: 48593353,
+        logIndex: 135,
+        transactionHash: real.transactionHash,
+      },
+    ])
   })
 })
 

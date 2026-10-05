@@ -25,8 +25,16 @@ export enum CheckEventType {
   SENTINEL_REVEALED = 'SENTINEL_REVEALED',
   /** `OracleResult` — the oracle's final approved flag. */
   ORACLE_RESULT = 'ORACLE_RESULT',
-  /** `DisputeResolved` — a frozen/contested request was resolved. */
+  /** `DisputeTriggered` — the sentinels split; the request is frozen for arbitration. */
+  DISPUTE_TRIGGERED = 'DISPUTE_TRIGGERED',
+  /** `DisputeResolved` — the arbitration Council ruled on a frozen request. */
   DISPUTE_RESOLVED = 'DISPUTE_RESOLVED',
+  /** `DisputeOutOfScope` — arbitration declined the dispute. */
+  DISPUTE_OUT_OF_SCOPE = 'DISPUTE_OUT_OF_SCOPE',
+  /** `ArbitrationTimedOut` — the arbitration deadline passed without a ruling. */
+  ARBITRATION_TIMED_OUT = 'ARBITRATION_TIMED_OUT',
+  /** `RequestTimedOut` — the request closed without a reveal. */
+  REQUEST_TIMED_OUT = 'REQUEST_TIMED_OUT',
 }
 
 /** Fields present on every decoded event; used for ordering and de-duplication. */
@@ -119,11 +127,36 @@ export type OracleResultEvent = CheckEventBase & {
   result: Hex
 }
 
+export type DisputeTriggeredEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_TRIGGERED
+  requestId: Hex
+  arbitrationDeadlineBlock: string
+}
+
 export type DisputeResolvedEvent = CheckEventBase & {
   type: CheckEventType.DISPUTE_RESOLVED
   requestId: Hex
   outcome: number
   slashed: string
+  /** Opaque Council text. `''` is a real value; `null` means the bytes are not valid UTF-8. */
+  context: string | null
+}
+
+export type DisputeOutOfScopeEvent = CheckEventBase & {
+  type: CheckEventType.DISPUTE_OUT_OF_SCOPE
+  requestId: Hex
+  /** Opaque text, never parsed or translated. `''` is a real value; `null` means the bytes are not valid UTF-8. */
+  context: string | null
+}
+
+export type ArbitrationTimedOutEvent = CheckEventBase & {
+  type: CheckEventType.ARBITRATION_TIMED_OUT
+  requestId: Hex
+}
+
+export type RequestTimedOutEvent = CheckEventBase & {
+  type: CheckEventType.REQUEST_TIMED_OUT
+  requestId: Hex
 }
 
 export type NormalizedCheckEvent =
@@ -135,7 +168,11 @@ export type NormalizedCheckEvent =
   | SentinelCommittedEvent
   | SentinelRevealedEvent
   | OracleResultEvent
+  | DisputeTriggeredEvent
   | DisputeResolvedEvent
+  | DisputeOutOfScopeEvent
+  | ArbitrationTimedOutEvent
+  | RequestTimedOutEvent
 
 /** The two attesting events. Both carry the attested Safe's chain id and address. */
 export type AttestedCheckEvent = OracleAttestedEvent | PlainAttestedEvent

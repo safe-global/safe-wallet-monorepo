@@ -247,17 +247,35 @@ export const buildOracleResultLog = (
     ORACLE,
   )
 
+export const buildDisputeTriggeredLog = (
+  spec: { requestId?: string; deadline?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(sentinelInterface, 'DisputeTriggered', [spec.requestId ?? hash(), spec.deadline ?? 1000n], meta, ORACLE)
+
 export const buildDisputeResolvedLog = (
-  spec: { requestId?: string; outcome?: number; slashed?: bigint; reason?: string } = {},
+  spec: { requestId?: string; outcome?: number; slashed?: bigint; context?: string } = {},
   meta: LogMeta = {},
 ): RawLog =>
   encode(
     sentinelInterface,
     'DisputeResolved',
-    [spec.requestId ?? hash(), spec.outcome ?? 0, spec.slashed ?? 0n, spec.reason ?? ''],
+    [spec.requestId ?? hash(), spec.outcome ?? 0, spec.slashed ?? 0n, spec.context ?? ''],
     meta,
     ORACLE,
   )
+
+export const buildDisputeOutOfScopeLog = (
+  spec: { requestId?: string; context?: string } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(sentinelInterface, 'DisputeOutOfScope', [spec.requestId ?? hash(), spec.context ?? ''], meta, ORACLE)
+
+export const buildArbitrationTimedOutLog = (spec: { requestId?: string } = {}, meta: LogMeta = {}): RawLog =>
+  encode(sentinelInterface, 'ArbitrationTimedOut', [spec.requestId ?? hash()], meta, ORACLE)
+
+export const buildRequestTimedOutLog = (spec: { requestId?: string } = {}, meta: LogMeta = {}): RawLog =>
+  encode(sentinelInterface, 'RequestTimedOut', [spec.requestId ?? hash()], meta, ORACLE)
 
 // --- Lifecycle sequence -------------------------------------------------------
 
