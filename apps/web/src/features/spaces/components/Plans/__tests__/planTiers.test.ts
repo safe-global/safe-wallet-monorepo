@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { PLAN_FEATURES } from '../planCatalog'
+import { ENTERPRISE_TIER } from '../planCatalog'
 import {
   buildPlanTiers,
   claimTiers,
@@ -81,7 +81,7 @@ describe('planTiers', () => {
   it('splits a plan into one tier per cycle and prices the yearly option against twelve monthly payments', () => {
     const [monthly, yearly] = _offersToTiers([BUSINESS])
 
-    expect(monthly).toMatchObject({ id: 'Business-month', billingCycle: 'month', features: PLAN_FEATURES.Business })
+    expect(monthly).toMatchObject({ id: 'Business-month', billingCycle: 'month', features: [] })
     expect(monthly.options.map((option) => [option.paymentLinkId, option.label, option.price])).toEqual([
       ['b10m', '10 Safe accounts', 499],
       ['b50m', '50 Safe accounts', 999],
@@ -104,12 +104,13 @@ describe('planTiers', () => {
       name: 'Business',
       isCurrent: true,
       options: [{ paymentLinkId: null, priceId: 'price_b10m', label: '20 Safe accounts', price: 499 }],
-      features: PLAN_FEATURES.Business,
+      features: [],
     })
     expect(_subscriptionToTier(subscription({ features: ['Custom perk'] }), null)).toMatchObject({
       options: [expect.objectContaining({ label: 'Unlimited Safe accounts' })],
       features: ['Custom perk'],
     })
+    expect(_subscriptionToTier(subscription({ name: 'Enterprise' }), null).features).toEqual(ENTERPRISE_TIER.features)
     expect(_subscriptionToTier(subscription({ name: null }), undefined)).toMatchObject({
       name: 'Safe Pro',
       options: [expect.objectContaining({ label: 'Safe accounts' })],
@@ -253,11 +254,11 @@ describe('planTiers', () => {
     const [starter, business] = claimTiers([BUSINESS_TRIAL, STARTER_TRIAL])
 
     expect(starter.features[0]).toBe('2 Safe accounts')
-    expect(business.features).toEqual(['10 Safe accounts', ...PLAN_FEATURES.Business])
+    expect(business.features).toEqual(['10 Safe accounts'])
     expect(business.options[0].seats).toBe(10)
   })
 
-  it('prefers the selling points Stripe carries over the static copy, per offer and for the current plan', () => {
+  it('takes the selling points Stripe carries, per offer and for the current plan', () => {
     const stripeBusiness: PlanGroup = {
       name: 'Business',
       offers: [offer({ paymentLinkId: 'b10m', planName: 'Business', features: ['From Stripe', 'In order'] })],

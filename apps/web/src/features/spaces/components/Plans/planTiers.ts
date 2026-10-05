@@ -5,7 +5,7 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './planCatalog'
+import { ENTERPRISE_TIER, PLAN_ORDER } from './planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -110,9 +110,8 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   features: offer.features,
 })
 
-/** Stripe's own list when the offer carries one, else the static copy for that plan. */
-const featuresOf = (name: string, offers: Pick<PlanOffer, 'features'>[]): string[] =>
-  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? PLAN_FEATURES[name] ?? []
+const featuresOf = (offers: Pick<PlanOffer, 'features'>[]): string[] =>
+  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? []
 
 /** One tier per plan and billing cycle; a yearly option carries twelve monthly payments as its reference price. */
 export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
@@ -132,7 +131,7 @@ export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
           currency: offers[0].currency,
           billingCycle: cycle,
           options: offers.map((offer) => toOption(offer, monthlyBySeats.get(String(offer.seats)))),
-          features: featuresOf(plan.name, offers),
+          features: featuresOf(offers),
           trialPeriodDays: offers[0].trialPeriodDays,
         },
       ]
@@ -161,7 +160,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
         features,
       },
     ],
-    features: features.length > 0 ? features : (PLAN_FEATURES[name] ?? []),
+    features: features.length > 0 || name !== ENTERPRISE_TIER.name ? features : ENTERPRISE_TIER.features,
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }

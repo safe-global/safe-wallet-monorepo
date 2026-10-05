@@ -1,36 +1,9 @@
 import type { PlanTier } from './types'
 
-// TODO(safe-pro): plan copy lives here until the catalog exposes features (Plan.features / product.marketingFeatures).
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise']
 
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
-
-const SHARED_FEATURES = [
-  'Unlimited Workspace members',
-  'Advanced threat analysis',
-  'Transaction simulation',
-  'Shared address book',
-  'MFA Authentication',
-]
-
-export const PLAN_FEATURES: Record<string, string[]> = {
-  Starter: ['10 sponsored transactions per month', ...SHARED_FEATURES, 'Builder API access'],
-  Business: [
-    '50 sponsored transactions per month',
-    ...SHARED_FEATURES,
-    'Growth API access',
-    'Pay fees from Safe accounts',
-    'Policy engine',
-  ],
-  Enterprise: [
-    'Unlimited sponsored transactions',
-    ...SHARED_FEATURES,
-    'Scale API access',
-    'Pay fees from Safe accounts',
-    'Policy engine',
-  ],
-}
 
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
 export const ENTERPRISE_TIER: PlanTier = {
@@ -39,5 +12,19 @@ export const ENTERPRISE_TIER: PlanTier = {
   currency: 'eur',
   billingCycle: null,
   options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
-  features: PLAN_FEATURES.Enterprise,
+  features: [
+    'Unlimited sponsored transactions',
+    'Shared address book',
+    'Activity log',
+    'Advanced threat analysis',
+    'Transaction simulation',
+    'MFA authentication',
+    'Policy engine',
+    'Transaction proposers',
+    'Pay gas fees from Safe account',
+    'Custom Safe capacity',
+    'Multiple workspaces',
+    'Tailored contract & billing terms',
+    'Tailored support + customized onboarding',
+  ],
 }
