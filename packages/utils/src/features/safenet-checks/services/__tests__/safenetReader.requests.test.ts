@@ -26,7 +26,11 @@ const { provenance, captures }: { provenance: Provenance; captures: Capture[] } 
   readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'),
 )
 
-const ARBITRATION_DEADLINE: Record<string, string | null> = { 'approved-first': null, 'disputed-split': '48643753' }
+const ARBITRATION_DEADLINE: Record<string, string | null> = {
+  'approved-first': null,
+  'approved-second': null,
+  'disputed-split': '48643753',
+}
 
 const RPC_URL = 'http://rpc.test/1'
 // The fixed addresses the raw-log builders encode (see builders/rawLogs.ts).
@@ -130,6 +134,20 @@ const VOTES: Record<string, SentinelVote[]> = {
       { approved: true, reason: '' },
       '0x6cc066e1ad41f53f0d6caa172f3f6d3d205972bb25187289cddf39a198ff5734',
       '0x734150a6e54f4d5c150574caa5dffe2f3ab0c410a433f563bc62e845a726909d',
+    ),
+  ],
+  'approved-second': [
+    vote(
+      '0x0637ccF4B63Df46265CF4afCd7b0c9d06B98c3ca',
+      { approved: true, reason: '' },
+      '0xe5cf7d8c12ea9d4be1b5c40554997cf8301554d72ca46f6f7ce37df33524b32f',
+      '0x8c94c73d94f2dfe60e7d1408c77bd93a1c972f5de4fba8a6dba4bd99e2d07790',
+    ),
+    vote(
+      SENTINEL_2,
+      { approved: true, reason: '' },
+      '0x17abb663e89082aa02711ff8f8e1db5e507f8c4290d10294bf96102c08d172e0',
+      '0x31b6996f1314d11424700998fa34bb14c67a1277577a99a252da4d06674e505a',
     ),
   ],
   'disputed-split': [

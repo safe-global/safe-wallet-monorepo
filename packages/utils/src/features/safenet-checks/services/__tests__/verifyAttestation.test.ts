@@ -23,10 +23,24 @@ type Golden = {
   z: string
 }
 
-/** Real oracle-path attestation captured live from the relaunched Sepolia deployment. */
-const relaunch: Golden = JSON.parse(
-  readFileSync(join(__dirname, '../../__fixtures__/sepolia-relaunch-attestation.golden.json'), 'utf8'),
-)
+type Capture = Pick<Golden, 'epoch' | 'safeTxHash' | 'requestId' | 'oracleDataHash' | 'groupKey'> & {
+  label: string
+  homeChainId: string
+  attestation: Pick<Golden, 'signatureId' | 'r' | 'z'>
+}
+
+const fixture: { provenance: Pick<Golden, 'chainId' | 'consensus' | 'coordinator' | 'oracle'>; captures: Capture[] } =
+  JSON.parse(readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'))
+
+const approvedFirst = fixture.captures.find(({ label }) => label === 'approved-first')!
+
+/** Real oracle-path attestation of the `approved-first` Gnosis capture, its group key served under a fixed group id. */
+const approved: Golden = {
+  ...fixture.provenance,
+  ...approvedFirst,
+  ...approvedFirst.attestation,
+  groupId: `0x${'11'.repeat(32)}`,
+}
 
 /** Real non-oracle attestation captured from Gnosis mainnet beta — the only path live beta emits. */
 const gnosis: Golden = JSON.parse(
@@ -56,30 +70,31 @@ const readerForGolden = (golden: Golden, over: Partial<RpcConfig> = {}) => {
   return { reader, endpoint }
 }
 
-const relaunchAttested = () =>
+const approvedAttested = () =>
   attestedEvent({
-    safeTxHash: relaunch.safeTxHash,
-    epoch: relaunch.epoch,
-    oracle: relaunch.oracle,
-    signatureId: relaunch.signatureId,
-    oracleDataHash: relaunch.oracleDataHash,
-    attestation: { r: { x: relaunch.r.x, y: relaunch.r.y }, z: relaunch.z },
+    safeTxHash: approved.safeTxHash,
+    chainId: approvedFirst.homeChainId,
+    epoch: approved.epoch,
+    oracle: approved.oracle,
+    signatureId: approved.signatureId,
+    oracleDataHash: approved.oracleDataHash,
+    attestation: { r: { x: approved.r.x, y: approved.r.y }, z: approved.z },
   })
 
-describe('SafenetReader.verifyAttestation — oracle path (Sepolia relaunch golden)', () => {
-  it('resolves VERIFIED for the real relaunch attestation (getEpochGroupId → groupKey → FROST)', async () => {
-    const { reader } = readerForGolden(relaunch)
-    const result = await reader.verifyAttestation(relaunchAttested())
+describe('SafenetReader.verifyAttestation — oracle path (approved Gnosis capture)', () => {
+  it('resolves VERIFIED for the real attestation (getEpochGroupId → groupKey → FROST)', async () => {
+    const { reader } = readerForGolden(approved)
+    const result = await reader.verifyAttestation(approvedAttested())
     expect(result).toEqual({
       status: AttestationVerificationStatus.VERIFIED,
-      signatureId: relaunch.signatureId,
-      message: relaunch.requestId,
+      signatureId: approved.signatureId,
+      message: approved.requestId,
     })
   })
 
   it('resolves PENDING (retryable) when the group key cannot be fetched', async () => {
-    const { reader } = readerForGolden(relaunch, { failGroupKey: true })
-    const result = await reader.verifyAttestation(relaunchAttested())
+    const { reader } = readerForGolden(approved, { failGroupKey: true })
+    const result = await reader.verifyAttestation(approvedAttested())
     expect(result.status).toBe(AttestationVerificationStatus.PENDING)
   })
 
@@ -90,27 +105,27 @@ describe('SafenetReader.verifyAttestation — oracle path (Sepolia relaunch gold
     // data may short-circuit the rotation.
     const broken = makeEndpoint({
       url: 'http://rpc.test/broken',
-      chainId: relaunch.chainId,
-      epochGroupId: relaunch.groupId,
+      chainId: approved.chainId,
+      epochGroupId: approved.groupId,
       failGroupKey: true,
     })
     const healthy = makeEndpoint({
       url: 'http://rpc.test/healthy',
-      chainId: relaunch.chainId,
-      epochGroupId: relaunch.groupId,
-      groupKey: relaunch.groupKey,
+      chainId: approved.chainId,
+      epochGroupId: approved.groupId,
+      groupKey: approved.groupKey,
     })
     server = setupServer(broken.handler, healthy.handler)
     server.listen()
     const reader = new SafenetReader({
       rpcUrls: ['http://rpc.test/broken', 'http://rpc.test/healthy'],
-      chainId: relaunch.chainId,
-      consensus: relaunch.consensus,
-      coordinator: relaunch.coordinator,
-      oracles: relaunch.oracle ? [relaunch.oracle] : [],
+      chainId: approved.chainId,
+      consensus: approved.consensus,
+      coordinator: approved.coordinator,
+      oracles: approved.oracle ? [approved.oracle] : [],
     })
 
-    const result = await reader.verifyAttestation(relaunchAttested())
+    const result = await reader.verifyAttestation(approvedAttested())
 
     expect(result.status).toBe(AttestationVerificationStatus.VERIFIED)
     expect(healthy.methods.filter((method) => method === 'eth_call').length).toBeGreaterThan(0)
@@ -119,17 +134,17 @@ describe('SafenetReader.verifyAttestation — oracle path (Sepolia relaunch gold
   it('resolves INVALID (terminal) when the signature does not verify against the group key', async () => {
     // A wrong-but-VALID curve point (another epoch's real key) — an off-curve
     // tamper would be rejected as PENDING by the on-curve gate instead.
-    const { reader } = readerForGolden(relaunch, { groupKey: gnosis.groupKey })
-    const result = await reader.verifyAttestation(relaunchAttested())
+    const { reader } = readerForGolden(approved, { groupKey: gnosis.groupKey })
+    const result = await reader.verifyAttestation(approvedAttested())
     expect(result.status).toBe(AttestationVerificationStatus.INVALID)
   })
 
   it('caches the group key by epoch — a second verify does no further eth_call', async () => {
-    const { reader, endpoint } = readerForGolden(relaunch)
-    await reader.verifyAttestation(relaunchAttested())
+    const { reader, endpoint } = readerForGolden(approved)
+    await reader.verifyAttestation(approvedAttested())
     const callsAfterFirst = endpoint.methods.filter((m) => m === 'eth_call').length
     expect(callsAfterFirst).toBeGreaterThan(0)
-    await reader.verifyAttestation(relaunchAttested())
+    await reader.verifyAttestation(approvedAttested())
     const callsAfterSecond = endpoint.methods.filter((m) => m === 'eth_call').length
     expect(callsAfterSecond).toBe(callsAfterFirst)
   })
@@ -137,19 +152,19 @@ describe('SafenetReader.verifyAttestation — oracle path (Sepolia relaunch gold
   it('keys the cache by EPOCH — a different epoch triggers its own fetch', async () => {
     // A single-slot cache (ignoring the key) would serve epoch N's key for
     // epoch N+1 and terminalize valid attestations after a key rotation.
-    const { reader, endpoint } = readerForGolden(relaunch)
-    await reader.verifyAttestation(relaunchAttested())
+    const { reader, endpoint } = readerForGolden(approved)
+    await reader.verifyAttestation(approvedAttested())
     const callsAfterFirst = endpoint.methods.filter((m) => m === 'eth_call').length
-    await reader.verifyAttestation(attestedEvent({ ...relaunchAttested(), epoch: '999' }))
+    await reader.verifyAttestation(attestedEvent({ ...approvedAttested(), epoch: '999' }))
     const callsAfterOtherEpoch = endpoint.methods.filter((m) => m === 'eth_call').length
     expect(callsAfterOtherEpoch).toBeGreaterThan(callsAfterFirst)
   })
 
   it('does not cache a failed group-key fetch — a later verify retries the chain', async () => {
-    const { reader, endpoint } = readerForGolden(relaunch, { failGroupKey: true })
-    await reader.verifyAttestation(relaunchAttested())
+    const { reader, endpoint } = readerForGolden(approved, { failGroupKey: true })
+    await reader.verifyAttestation(approvedAttested())
     const callsAfterFailure = endpoint.methods.filter((m) => m === 'eth_call').length
-    await reader.verifyAttestation(relaunchAttested())
+    await reader.verifyAttestation(approvedAttested())
     const callsAfterRetry = endpoint.methods.filter((m) => m === 'eth_call').length
     expect(callsAfterRetry).toBeGreaterThan(callsAfterFailure)
   })
@@ -157,11 +172,11 @@ describe('SafenetReader.verifyAttestation — oracle path (Sepolia relaunch gold
   it('treats an off-curve group key as retryable PENDING — never terminal, never cached', async () => {
     // A corrupt-but-decodable eth_call response must not become a cached key
     // that terminalizes every attestation in the epoch as INVALID.
-    const { reader, endpoint } = readerForGolden(relaunch, { groupKey: { x: '1', y: '1' } })
-    const first = await reader.verifyAttestation(relaunchAttested())
+    const { reader, endpoint } = readerForGolden(approved, { groupKey: { x: '1', y: '1' } })
+    const first = await reader.verifyAttestation(approvedAttested())
     expect(first.status).toBe(AttestationVerificationStatus.PENDING)
     const callsAfterFirst = endpoint.methods.filter((m) => m === 'eth_call').length
-    const second = await reader.verifyAttestation(relaunchAttested())
+    const second = await reader.verifyAttestation(approvedAttested())
     expect(second.status).toBe(AttestationVerificationStatus.PENDING)
     expect(endpoint.methods.filter((m) => m === 'eth_call').length).toBeGreaterThan(callsAfterFirst)
   })

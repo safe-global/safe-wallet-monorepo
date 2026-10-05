@@ -4,10 +4,11 @@ import { secp256k1 } from '@noble/curves/secp256k1'
 import { concatBytes } from '@noble/hashes/utils'
 import { getBytes, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
 import { h2, verifyAttestation, type AttestationInput } from '../frost'
-import { plainProposalHash, transactionProposalHash } from '../proposalHash'
+import { plainProposalHash, transactionProposalHash, type TransactionProposal } from '../proposalHash'
 import type { Hex } from '../../types'
 
 const N = secp256k1.Point.Fn.ORDER
+const P = secp256k1.Point.Fp.ORDER
 
 /**
  * Both vectors are live captures — validators that never saw this code produced
@@ -16,24 +17,44 @@ const N = secp256k1.Point.Fn.ORDER
  *
  * Two vectors because the paths sign different preimages AND live on different
  * contracts: the Gnosis beta Consensus emits only the plain pair, so the
- * oracle vector comes from the relaunched Sepolia deployment.
+ * oracle vector comes from the Gnosis test deployment.
  */
+type Point = { x: string; y: string }
+
 type Vector = {
   chainId: string
   consensus: string
   epoch: string
   safeTxHash: Hex
-  groupKey: { x: string; y: string }
-  r: { x: string; y: string }
+  groupKey: Point
+  r: Point
   z: string
 }
+
+type Capture = {
+  label: string
+  safeTxHash: Hex
+  homeChainId: string
+  epoch: string
+  requestId: Hex
+  oracleDataHash: Hex
+  attestation: { r: Point; z: string } | null
+  groupKey: Point | null
+}
+
+type Approved = Capture & { attestation: NonNullable<Capture['attestation']>; groupKey: Point }
 
 const load = <T extends Vector>(name: string): T =>
   JSON.parse(readFileSync(join(__dirname, '../../__fixtures__', name), 'utf8'))
 
 const gnosis = load<Vector & { safeChainId: string }>('gnosis-plain-attestation.golden.json')
-const relaunch = load<Vector & { oracle: string; oracleDataHash: Hex; signatureId: Hex }>(
-  'sepolia-relaunch-attestation.golden.json',
+
+const fixture: { provenance: { chainId: string; consensus: string; oracle: string }; captures: Capture[] } = JSON.parse(
+  readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'),
+)
+
+const approved = fixture.captures.filter(
+  (capture): capture is Approved => capture.attestation !== null && capture.groupKey !== null,
 )
 
 const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
@@ -42,25 +63,49 @@ const inputFor = (vector: Vector, message: Hex): AttestationInput => ({
   message,
 })
 
+const captureInput = (capture: Approved, message: Hex = capture.requestId): AttestationInput => ({
+  groupKey: { ...capture.groupKey },
+  attestation: { r: { ...capture.attestation.r }, z: capture.attestation.z },
+  message,
+})
+
+const withZ = (capture: Approved, z: string): AttestationInput => {
+  const input = captureInput(capture)
+  return { ...input, attestation: { ...input.attestation, z } }
+}
+
 const plainMessage = (chainId: string): Hex =>
   plainProposalHash({ chainId, consensus: gnosis.consensus, epoch: gnosis.epoch, safeTxHash: gnosis.safeTxHash })
 
-const relaunchMessage: Hex = transactionProposalHash({
-  chainId: relaunch.chainId,
-  consensus: relaunch.consensus,
-  epoch: relaunch.epoch,
-  oracle: relaunch.oracle,
-  oracleDataHash: relaunch.oracleDataHash,
-  safeTxHash: relaunch.safeTxHash,
-})
+const preimageFor = (capture: Approved, override: Partial<TransactionProposal> = {}): Hex =>
+  transactionProposalHash({
+    chainId: fixture.provenance.chainId,
+    consensus: fixture.provenance.consensus,
+    epoch: capture.epoch,
+    oracle: fixture.provenance.oracle,
+    oracleDataHash: capture.oracleDataHash,
+    safeTxHash: capture.safeTxHash,
+    ...override,
+  })
+
+const OTHER_ADDRESS = `0x${'11'.repeat(20)}`
+
+const pointOf = (scalar: bigint): Point => {
+  const { x, y } = secp256k1.Point.BASE.multiply(scalar).toAffine()
+  return { x: x.toString(), y: y.toString() }
+}
 
 describe('verifyAttestation — live golden vectors', () => {
   it('verifies the Gnosis beta non-oracle attestation against the derived plain preimage', () => {
     expect(verifyAttestation(inputFor(gnosis, plainMessage(gnosis.chainId)))).toBe(true)
   })
 
-  it('verifies the Sepolia relaunch oracle attestation against the derived unified preimage', () => {
-    expect(verifyAttestation(inputFor(relaunch, relaunchMessage))).toBe(true)
+  it.each(approved)('verifies $label against its epoch group key with its requestId as message', (capture) => {
+    expect(verifyAttestation(captureInput(capture))).toBe(true)
+  })
+
+  it.each(approved)('verifies $label against the message re-derived on the Gnosis domain', (capture) => {
+    expect(verifyAttestation(captureInput(capture, preimageFor(capture)))).toBe(true)
   })
 
   it('h2 matches the RFC-9591 known-answer vector from the protocol repo', () => {
@@ -90,35 +135,79 @@ describe('verifyAttestation — the preimage must match the path and the domain'
     expect(verifyAttestation(inputFor(gnosis, crossed))).toBe(false)
   })
 
-  it('rejects the plain preimage for an oracle attestation (paths never cross)', () => {
-    const crossed = plainProposalHash({
-      chainId: relaunch.chainId,
-      consensus: relaunch.consensus,
-      epoch: relaunch.epoch,
-      safeTxHash: relaunch.safeTxHash,
-    })
-    expect(verifyAttestation(inputFor(relaunch, crossed))).toBe(false)
+  it.each(approved)(
+    'rejects the plain preimage for the oracle attestation of $label (paths never cross)',
+    (capture) => {
+      const crossed = plainProposalHash({
+        chainId: fixture.provenance.chainId,
+        consensus: fixture.provenance.consensus,
+        epoch: capture.epoch,
+        safeTxHash: capture.safeTxHash,
+      })
+      expect(verifyAttestation(captureInput(capture, crossed))).toBe(false)
+    },
+  )
+})
+
+describe.each(approved)('verifyAttestation — $label must never verify', (capture) => {
+  const mutations: Array<{ field: string; override: Partial<TransactionProposal> }> = [
+    { field: 'EIP-712 chain id (the Safe home chain instead of Gnosis)', override: { chainId: capture.homeChainId } },
+    { field: 'Consensus address', override: { consensus: OTHER_ADDRESS } },
+    { field: 'epoch', override: { epoch: (BigInt(capture.epoch) + 1n).toString() } },
+    { field: 'oracle', override: { oracle: OTHER_ADDRESS } },
+    { field: 'oracleDataHash', override: { oracleDataHash: keccak256('0x1234') as Hex } },
+    { field: 'safeTxHash', override: { safeTxHash: keccak256('0x5678') as Hex } },
+  ]
+
+  it.each(mutations)('against a message whose preimage has another $field', ({ override }) => {
+    expect(verifyAttestation(captureInput(capture, preimageFor(capture, override)))).toBe(false)
+  })
+
+  it("against another capture's requestId", () => {
+    const other = fixture.captures.find((candidate) => candidate.requestId !== capture.requestId)!
+    expect(verifyAttestation(captureInput(capture, other.requestId))).toBe(false)
+  })
+
+  it.each([
+    ['z + 1', (z: bigint) => z + 1n],
+    ['z + N (out of range, malleable)', (z: bigint) => z + N],
+    ['z negated', (z: bigint) => N - z],
+  ])('with a mutated scalar: %s', (_name, mutate) => {
+    expect(verifyAttestation(withZ(capture, mutate(BigInt(capture.attestation.z)).toString()))).toBe(false)
+  })
+
+  it.each([
+    ['an independent valid point', () => pointOf(scalarAt('wrong-commitment', 1))],
+    ['its own negation', () => ({ x: capture.attestation.r.x, y: (P - BigInt(capture.attestation.r.y)).toString() })],
+  ])('with the commitment R replaced by %s', (_name, replacement) => {
+    const input = captureInput(capture)
+    expect(verifyAttestation({ ...input, attestation: { ...input.attestation, r: replacement() } })).toBe(false)
+  })
+
+  it('against an independently generated group key', () => {
+    expect(verifyAttestation({ ...captureInput(capture), groupKey: pointOf(scalarAt('wrong-group-key', 1)) })).toBe(
+      false,
+    )
   })
 })
 
 describe('verifyAttestation — total over malformed input', () => {
+  const [capture] = approved
+
   // These document the contract (bad input is `false`, never an exception) so a
   // poll loop can't be killed by one bad attestation. Note that `z` out of range
   // and off-curve points are also rejected by @noble/curves before our own
   // guards see them, so passing here does not prove those guards work.
   it.each([
-    ['z = N', inputFor({ ...relaunch, z: N.toString() }, relaunchMessage)],
-    ['z = 0', inputFor({ ...relaunch, z: '0' }, relaunchMessage)],
-    ['z negative', inputFor({ ...relaunch, z: '-1' }, relaunchMessage)],
-    ['z not a number', inputFor({ ...relaunch, z: 'not-a-number' }, relaunchMessage)],
+    ['z = N', withZ(capture, N.toString())],
+    ['z = 0', withZ(capture, '0')],
+    ['z negative', withZ(capture, '-1')],
+    ['z not a number', withZ(capture, 'not-a-number')],
     [
       'off-curve points',
-      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: relaunchMessage },
+      { groupKey: { x: '1', y: '1' }, attestation: { r: { x: '2', y: '2' }, z: '3' }, message: capture.requestId },
     ],
-    [
-      'identity group key',
-      { groupKey: { x: '0', y: '0' }, attestation: { r: { ...relaunch.r }, z: relaunch.z }, message: relaunchMessage },
-    ],
+    ['identity group key', { ...captureInput(capture), groupKey: { x: '0', y: '0' } }],
   ] as Array<[string, AttestationInput]>)('returns false without throwing for %s', (_name, input) => {
     expect(verifyAttestation(input)).toBe(false)
   })
@@ -182,10 +271,7 @@ describe('verifyAttestation — round-trip properties', () => {
    * the verification equation runs — that path is covered above, and testing it
    * here would look like coverage without being any.
    */
-  const otherPoint = (index: number) => {
-    const { x, y } = secp256k1.Point.BASE.multiply(scalarAt('other', index)).toAffine()
-    return { x: x.toString(), y: y.toString() }
-  }
+  const otherPoint = (index: number): Point => pointOf(scalarAt('other', index))
 
   it.each([
     ['scalar z', (i: AttestationInput) => ({ ...i, attestation: { ...i.attestation, z: inc(i.attestation.z) } })],
