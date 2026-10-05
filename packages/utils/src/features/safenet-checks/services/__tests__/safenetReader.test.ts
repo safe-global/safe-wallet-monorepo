@@ -733,28 +733,35 @@ describe('SafenetReader window coverage', () => {
   })
 })
 
-describe('SafenetReader chain-id assertion (dev-only, one-shot)', () => {
-  it('logs a loud error when the RPC chain id disagrees with SAFENET_CHAIN_ID', async () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', chainId: '31337', head: 10, logs: [] })
+describe('SafenetReader deployment validation', () => {
+  it.each([
+    ['wrong chain', { chainId: '31337' }, 'RPC serves chain'],
+    ['wrong coordinator', { coordinator: SAFE }, 'Consensus coordinator'],
+    ['wrong proposer', { consensus: SAFE }, 'not proposed by'],
+  ])('rejects %s before reading logs or group keys', async (_label, config, message) => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', ...config, head: 10 })
     server = setupServer(endpoint.handler)
     server.listen()
+    const reader = makeReader({ oracles: [ORACLE] })
 
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
-
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('chain id mismatch'))
-    spy.mockRestore()
+    await expect(reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })).rejects.toThrow(message)
+    await expect(reader.loadGroupKey('1')).rejects.toThrow(message)
+    expect(endpoint.getLogsCalls).toEqual([])
   })
 
-  it('stays silent when the RPC chain id matches', async () => {
-    const spy = jest.spyOn(console, 'error').mockImplementation(() => {})
-    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', chainId: '100', head: 10, logs: [] })
-    server = setupServer(endpoint.handler)
+  it('validates the replacement endpoint after a wrong-chain endpoint fails', async () => {
+    const wrong = makeEndpoint({ url: 'http://rpc.test/1', chainId: '31337' })
+    const healthy = makeEndpoint({ url: 'http://rpc.test/2', head: 10 })
+    server = setupServer(wrong.handler, healthy.handler)
     server.listen()
+    const reader = makeReader({ rpcUrls: ['http://rpc.test/1', 'http://rpc.test/2'] })
 
-    await makeReader({ chainId: '100' }).fetchCheckState(SAFE_TX_HASH, { target: TARGET })
+    expect((await reader.fetchCheckState(SAFE_TX_HASH, { target: TARGET })).headBlock).toBe('10')
+    expect(wrong.getLogsCalls).toEqual([])
+    expect(healthy.methods).toContain('eth_chainId')
+  })
 
-    expect(spy).not.toHaveBeenCalled()
-    spy.mockRestore()
+  it('rejects a non-Gnosis explicit configuration', () => {
+    expect(() => makeReader({ chainId: '11155111' })).toThrow('only Gnosis Chain')
   })
 })

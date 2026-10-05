@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import { id } from 'ethers'
 import {
   CONSENSUS_EVENT_FRAGMENTS,
@@ -9,6 +11,12 @@ import {
   TOPICS,
   topicHashOf,
 } from '../abi'
+
+const {
+  provenance: { consensus },
+  captures,
+}: { provenance: { consensus: string }; captures: Array<{ logs: Array<{ address: string; topics: string[] }> }> } =
+  JSON.parse(readFileSync(join(__dirname, '../__fixtures__/gnosis-aegis.json'), 'utf8'))
 
 describe('safenet-checks abi', () => {
   it('assigns a unique topic0 to every dispatched event (no collisions)', () => {
@@ -37,16 +45,13 @@ describe('safenet-checks abi', () => {
     )
   })
 
-  // Same guard for the relaunched (2026-08) Sepolia Consensus: both topic0s
-  // were read off live logs (proposal tx 0x94b9f9b3…30b1, attestation tx
-  // 0x9ae86704…4ff4b).
-  it('matches the topic0s observed on the relaunched Sepolia Consensus', () => {
-    expect(consensusInterface.getEvent('TransactionProposed')!.topicHash).toBe(
-      '0x47d867ce4d91d0487fa4d2ac80b13e7466ce53dd018a8eef564fc60c92b53d03',
-    )
-    expect(consensusInterface.getEvent('TransactionAttested')!.topicHash).toBe(
-      '0x1980afd018b6bb99a313d3b7a88274259621396f9b8acaa712ef114872977357',
-    )
+  // Same guard for the unified Consensus: both topic0s as the Gnosis test deployment emitted them.
+  it('matches the topic0s observed on the deployed Gnosis test Consensus', () => {
+    const consensusLogs = captures[0].logs.filter((log) => log.address.toLowerCase() === consensus.toLowerCase())
+    expect(consensusLogs.map((log) => log.topics[0])).toEqual([
+      consensusInterface.getEvent('TransactionProposed')!.topicHash,
+      consensusInterface.getEvent('TransactionAttested')!.topicHash,
+    ])
   })
 
   // Freeze EVERY fragment's topic0 as a literal. This is the drift guard that

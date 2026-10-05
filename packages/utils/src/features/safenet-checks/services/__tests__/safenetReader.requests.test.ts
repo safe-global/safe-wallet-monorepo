@@ -170,7 +170,12 @@ describe('fetchCheckState: request state', () => {
   it.each(captures)('$label: reads the state at the head and the votes from the logs', async (c) => {
     const { rawResult, blockNumber } = c.requestState
     const { state, outcome, committedCount, revealedCount, approveCount, denyCount } = c.expected
-    const endpoint = serve({ head: blockNumber, logs: c.logs, requests: { [c.requestId]: rawResult } })
+    const endpoint = serve({
+      ...provenance,
+      head: blockNumber,
+      logs: c.logs,
+      requests: { [c.requestId]: rawResult },
+    })
 
     const result = await makeReader({ ...provenance, oracles: [provenance.oracle] }).fetchCheckState(c.safeTxHash, {
       target: { chainId: c.homeChainId, safeAddress: c.safe },

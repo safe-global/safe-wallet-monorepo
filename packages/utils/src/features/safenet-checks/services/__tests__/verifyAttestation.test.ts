@@ -54,6 +54,8 @@ const readerForGolden = (golden: Golden, over: Partial<RpcConfig> = {}) => {
   const endpoint = makeEndpoint({
     url: 'http://rpc.test/g',
     chainId: golden.chainId,
+    consensus: golden.consensus,
+    coordinator: golden.coordinator,
     epochGroupId: golden.groupId,
     groupKey: golden.groupKey,
     ...over,
@@ -106,12 +108,16 @@ describe('SafenetReader.verifyAttestation — oracle path (approved Gnosis captu
     const broken = makeEndpoint({
       url: 'http://rpc.test/broken',
       chainId: approved.chainId,
+      consensus: approved.consensus,
+      coordinator: approved.coordinator,
       epochGroupId: approved.groupId,
       failGroupKey: true,
     })
     const healthy = makeEndpoint({
       url: 'http://rpc.test/healthy',
       chainId: approved.chainId,
+      consensus: approved.consensus,
+      coordinator: approved.coordinator,
       epochGroupId: approved.groupId,
       groupKey: approved.groupKey,
     })

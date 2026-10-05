@@ -49,13 +49,17 @@ export const SENTINEL_EVENT_FRAGMENTS = [
 ] as const
 
 /** Read (view) functions the reader calls, from the protocol explorer's ABIs. */
-export const CONSENSUS_READ_ABI = ['function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)'] as const
+export const CONSENSUS_READ_ABI = [
+  'function getEpochGroupId(uint64 epoch) view returns (bytes32 groupId)',
+  'function getCoordinator() view returns (address coordinator)',
+] as const
 
 export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
 ] as const
 
 export const ORACLE_READ_ABI = [
+  'function PROPOSER() view returns (address proposer)',
   `function getRequest(bytes32 requestId) view returns (${REQUEST_TUPLE} request)`,
 ] as const
 

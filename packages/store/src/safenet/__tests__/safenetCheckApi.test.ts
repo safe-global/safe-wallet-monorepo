@@ -649,6 +649,7 @@ afterEach(() => server?.close())
 
 const serve = (source: Capture, over: Partial<RpcConfig> = {}): RpcConfig => {
   const rpc: RpcConfig = {
+    ...provenance,
     url: RPC_URL,
     head: source.requestState.blockNumber,
     logs: source.logs,

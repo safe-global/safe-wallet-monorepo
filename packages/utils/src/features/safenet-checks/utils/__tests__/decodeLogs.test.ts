@@ -1,6 +1,7 @@
-import { AbiCoder } from 'ethers'
+import { AbiCoder, Interface, keccak256, toUtf8Bytes } from 'ethers'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { ORACLE_READ_ABI } from '../../abi'
 import { decodeLogs, type RawLog } from '../decodeLogs'
 import {
   buildArbitrationTimedOutLog,
@@ -255,94 +256,58 @@ describe('decodeLogs — dispute and timeout events', () => {
   })
 })
 
-describe('decodeLogs — live-captured Sepolia relaunch lifecycle', () => {
-  const fixture = JSON.parse(
-    readFileSync(join(__dirname, '../../__fixtures__', 'sepolia-relaunch-lifecycle.json'), 'utf8'),
-  ) as { logs: RawLog[]; safeTxHash: string; requestId: string; chainId: string; epoch: string }
-  const events = decodeLogs(fixture.logs)
-
-  it('decodes the full lifecycle, skipping unknown topics (Claimed)', () => {
-    // 12 raw logs: 1 proposal + 8 decodable oracle events + 3 Claimed (unknown).
-    expect(events).toHaveLength(9)
-  })
-
-  it('reads chainId and safe from the transaction tuple on the proposal', () => {
-    const [proposed] = byType(events, CheckEventType.ORACLE_PROPOSED)
-    expect(proposed.safeTxHash).toBe(fixture.safeTxHash)
-    // The Safe's HOME chain from the transaction tuple — a mainnet Safe
-    // checked by the Sepolia consensus.
-    expect(proposed.chainId).toBe('1')
-    expect(proposed.safe.toLowerCase()).toBe('0x888614448eb7c766864fafb1dd20ff0b47988a87')
-    expect(proposed.epoch).toBe(fixture.epoch)
-    // keccak256 of the empty oracleData — derives the requestId.
-    expect(proposed.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
-  })
-
-  it('maps sponsor to proposer and both deadlines on NewRequest', () => {
-    const [request] = byType(events, CheckEventType.REQUEST_CREATED)
-    expect(request.requestId).toBe(fixture.requestId)
-    expect(request.proposer.toLowerCase()).toBe('0x1ff07880982708b139c8efb87f4f43d15f312127')
-    expect(request.fee).toBe('400000000000000000')
-    expect(request.commitDeadlineBlock).toBe('11528811')
-    expect(request.deadlineBlock).toBe('11528814')
-  })
-
-  it('keeps commits blind and carries the verdict on reveals', () => {
-    const commits = byType(events, CheckEventType.SENTINEL_COMMITTED)
-    expect(commits).toHaveLength(3)
-    const reveals = byType(events, CheckEventType.SENTINEL_REVEALED)
-    expect(reveals).toHaveLength(3)
-    expect(reveals.every((reveal) => reveal.approved)).toBe(true)
-  })
-
-  it('decodes the OracleResult for the request', () => {
-    const [result] = byType(events, CheckEventType.ORACLE_RESULT)
-    expect(result.requestId).toBe(fixture.requestId)
-    expect(result.approved).toBe(true)
-  })
-})
-
-describe('decodeLogs — live-captured Sepolia relaunch attestation', () => {
-  const golden = JSON.parse(
-    readFileSync(join(__dirname, '../../__fixtures__', 'sepolia-relaunch-attestation.golden.json'), 'utf8'),
-  ) as { logs: RawLog[]; safeTxHash: string; epoch: string; oracleDataHash: string }
-  const events = decodeLogs(golden.logs)
-
-  it('decodes the real proposed + attested pair', () => {
-    expect(byType(events, CheckEventType.ORACLE_PROPOSED)).toHaveLength(1)
-    expect(byType(events, CheckEventType.ORACLE_ATTESTED)).toHaveLength(1)
-  })
-
-  it('unpacks safeId and carries oracleDataHash on the attested event', () => {
-    const [attested] = byType(events, CheckEventType.ORACLE_ATTESTED)
-    expect(attested.safeTxHash).toBe(golden.safeTxHash)
-    // This check is cross-chain: a mainnet Safe (chainId 1) checked by the
-    // Sepolia consensus. The tuple field is the Safe's HOME chain.
-    expect(attested.chainId).toBe('1')
-    expect(attested.safe.toLowerCase()).toBe('0x888614448eb7c766864fafb1dd20ff0b47988a87')
-    expect(attested.epoch).toBe(golden.epoch)
-    expect(attested.oracleDataHash).toBe(golden.oracleDataHash)
-    expect(BigInt(attested.attestation.r.x)).toBeGreaterThan(0n)
-    expect(BigInt(attested.attestation.z)).toBeGreaterThan(0n)
-  })
-
-  it('derives the same chainId/safe from the tuple (proposed) and from safeId (attested)', () => {
-    const [proposed] = byType(events, CheckEventType.ORACLE_PROPOSED)
-    const [attested] = byType(events, CheckEventType.ORACLE_ATTESTED)
-    expect(attested.chainId).toBe(proposed.chainId)
-    expect(attested.safe.toLowerCase()).toBe(proposed.safe.toLowerCase())
-  })
-})
-
-describe('decodeLogs — real Gnosis attestation', () => {
+describe('decodeLogs — real Gnosis captures', () => {
   type Attestation = { signatureId: string; r: { x: string; y: string }; z: string }
-  type Capture = { label: string; logs: RawLog[]; safeTxHash: string; oracleDataHash: string }
+  type Capture = {
+    label: string
+    kind: 'attested' | 'disputed'
+    logs: RawLog[]
+    safeTxHash: string
+    requestId: string
+    oracleDataHash: string
+    requestState: { rawResult: string }
+    expected: { committedCount: number; revealedCount: number }
+  }
   const { captures }: { captures: Array<Capture & { attestation: Attestation | null }> } = JSON.parse(
     readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'),
   )
   const attestedCaptures = captures.flatMap(({ attestation, ...capture }) =>
     attestation ? [{ ...capture, attestation }] : [],
   )
+  // Emitted by the deployed Oracle but absent from our fragments (sentinel payout); the decoder must skip it.
+  const CLAIMED_TOPIC0 = keccak256(toUtf8Bytes('Claimed(bytes32,address,uint96,uint96)'))
+  const oracleRead = new Interface([...ORACLE_READ_ABI])
+
+  it.each(captures)('decodes the lifecycle of $label in order and skips the undeclared Claimed logs', (capture) => {
+    const { committedCount, revealedCount } = capture.expected
+    const closing =
+      capture.kind === 'attested'
+        ? [CheckEventType.ORACLE_RESULT, CheckEventType.ORACLE_ATTESTED]
+        : [CheckEventType.DISPUTE_TRIGGERED]
+    const claimed = capture.logs.filter((log) => log.topics[0] === CLAIMED_TOPIC0)
+    const events = decodeLogs(capture.logs)
+
+    expect(events.map((event) => event.type)).toEqual([
+      CheckEventType.ORACLE_PROPOSED,
+      CheckEventType.REQUEST_CREATED,
+      ...Array<CheckEventType>(committedCount).fill(CheckEventType.SENTINEL_COMMITTED),
+      ...Array<CheckEventType>(revealedCount).fill(CheckEventType.SENTINEL_REVEALED),
+      ...closing,
+    ])
+    expect(events).toHaveLength(capture.logs.length - claimed.length)
+    expect(decodeLogs(claimed)).toEqual([])
+  })
+
+  it.each(captures)('reports the request terms of $label the Oracle holds in state', (capture) => {
+    const [opened] = byType(decodeLogs(capture.logs), CheckEventType.REQUEST_CREATED)
+    const { terms } = oracleRead.decodeFunctionResult('getRequest', capture.requestState.rawResult)[0]
+
+    expect(opened.proposer.toLowerCase()).toBe(terms.sponsor.toLowerCase())
+    expect(opened.fee).toBe('400000000000000000')
+    expect(opened.bondTarget).toBe(terms.bondTarget.toString())
+    expect(opened.commitDeadlineBlock).toBe(terms.commitDeadline.toString())
+    expect(opened.deadlineBlock).toBe(terms.revealDeadline.toString())
+  })
 
   it.each(attestedCaptures)('decodes the FROST signature of $label with its exact coordinates', (capture) => {
     const [attested] = byType(decodeLogs(capture.logs), CheckEventType.ORACLE_ATTESTED)
@@ -354,5 +319,20 @@ describe('decodeLogs — real Gnosis attestation', () => {
       oracleDataHash: capture.oracleDataHash,
       safeTxHash: capture.safeTxHash,
     })
+  })
+
+  it.each(attestedCaptures)('decodes the approving OracleResult of $label for its request', (capture) => {
+    const [result] = byType(decodeLogs(capture.logs), CheckEventType.ORACLE_RESULT)
+
+    expect(result).toMatchObject({ requestId: capture.requestId, approved: true })
+  })
+
+  it.each(attestedCaptures)('unpacks the safeId of $label into the home chain and Safe of its proposal', (capture) => {
+    const events = decodeLogs(capture.logs)
+    const [proposed] = byType(events, CheckEventType.ORACLE_PROPOSED)
+    const [attested] = byType(events, CheckEventType.ORACLE_ATTESTED)
+
+    expect(attested).toMatchObject({ chainId: proposed.chainId, epoch: proposed.epoch })
+    expect(attested.safe.toLowerCase()).toBe(proposed.safe.toLowerCase())
   })
 })

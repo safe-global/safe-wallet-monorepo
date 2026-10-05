@@ -16,6 +16,8 @@ export type GetLogsFilter = { address?: string; topics: unknown[]; fromBlock: nu
 export type RpcConfig = {
   url: string
   chainId?: string
+  consensus?: string
+  coordinator?: string
   head?: number
   headTimestamp?: number
   /** Seconds between consecutive blocks (default 5, the nominal Gnosis cadence). */
@@ -176,6 +178,20 @@ export const makeEndpoint = (config: RpcConfig) => {
       case 'eth_call': {
         const call = req.params[0] as { to: string; data: string }
         const selector = call.data.slice(0, 10)
+        if (selector === consensusRead.getFunction('getCoordinator')!.selector) {
+          return ok(
+            consensusRead.encodeFunctionResult('getCoordinator', [
+              config.coordinator ?? '0x00000000000000000000000000000000000000AA',
+            ]),
+          )
+        }
+        if (selector === oracleRead.getFunction('PROPOSER')!.selector) {
+          return ok(
+            oracleRead.encodeFunctionResult('PROPOSER', [
+              config.consensus ?? '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9',
+            ]),
+          )
+        }
         if (selector === consensusRead.getFunction('getEpochGroupId')!.selector) {
           return ok(
             consensusRead.encodeFunctionResult('getEpochGroupId', [config.epochGroupId ?? '0x' + '00'.repeat(32)]),

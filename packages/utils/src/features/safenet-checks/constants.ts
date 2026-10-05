@@ -13,48 +13,49 @@ const parseCsv = (value: string | undefined): string[] =>
         .filter(Boolean)
     : []
 
-/**
- * The Safenet chain id — feeds both the provider network and the EIP-712 domain
- * attestations are verified against. A wrong value makes every attestation
- * verify as INVALID, so the reader asserts it against `eth_chainId` in
- * development.
- */
-export const SAFENET_CHAIN_ID =
-  process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || '100'
+/** Team-confirmed Safenet deployment on Gnosis Chain. */
+export const SAFENET_DEPLOYMENT = {
+  chainId: '100',
+  consensus: '0x98810887769db19A0Df9bf2f44E4998856fcb390',
+  coordinator: '0x2f88C123f34cB3c45482C5b04A0Faf00C6571F44',
+  oracles: ['0x544F12bAd6FF72564abBc7eA6494A2a4BdD0DDD0'],
+} as const
+
+/** Protocol chain and EIP-712 domain; the singleton rejects stale settings. */
+export const SAFENET_CHAIN_ID: string =
+  process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || SAFENET_DEPLOYMENT.chainId
 
 /** Pinned RPC endpoints for the read layer (csv). Rotated on failure. */
 export const SAFENET_RPC_URLS = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_RPC_URLS || process.env.EXPO_PUBLIC_SAFENET_RPC_URLS || 'https://rpc.gnosischain.com',
 )
 
-/** Safenet Consensus contract. Default: Gnosis beta deployment. */
-export const SAFENET_CONSENSUS_ADDRESS =
-  process.env.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
-  process.env.EXPO_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
-  '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
+/** Safenet Consensus contract. Blank settings use the pinned deployment. */
+export const SAFENET_CONSENSUS_ADDRESS: string =
+  process.env.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS?.trim() ||
+  process.env.EXPO_PUBLIC_SAFENET_CONSENSUS_ADDRESS?.trim() ||
+  SAFENET_DEPLOYMENT.consensus
 
-/** FROSTCoordinator the epoch group keys are read from. Default: Gnosis beta. */
-export const SAFENET_COORDINATOR_ADDRESS =
-  process.env.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
-  process.env.EXPO_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
-  '0xaE27021CEB45316f1efe69D8E362aC07ED3Bd7E4'
+/** FROSTCoordinator the epoch group keys are read from. */
+export const SAFENET_COORDINATOR_ADDRESS: string =
+  process.env.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS?.trim() ||
+  process.env.EXPO_PUBLIC_SAFENET_COORDINATOR_ADDRESS?.trim() ||
+  SAFENET_DEPLOYMENT.coordinator
 
-/**
- * Sentinel-oracle allowlist (csv). `proposeOracleTransaction` is permissionless
- * with a caller-chosen oracle address, so reading verdicts from an unlisted
- * address would let anyone mark any Safe transaction MALICIOUS with a fabricated
- * `OracleResult`. Empty (the default) skips the oracle path entirely, matching
- * live beta where no sentinel oracle is deployed.
- */
-export const SAFENET_ORACLE_ADDRESSES = parseCsv(
+const configuredOracles = parseCsv(
   process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES || process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES,
 )
+
+/** Permissionless proposals require a trusted Oracle allowlist. Blank settings use the pinned Oracle. */
+export const SAFENET_ORACLE_ADDRESSES: string[] = configuredOracles.length
+  ? configuredOracles
+  : [...SAFENET_DEPLOYMENT.oracles]
 
 /** Safenet explorer base URL — display-only deep links to a check's attestation. */
 export const SAFENET_EXPLORER_URL = (
   process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
   process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
-  'https://explorer.safenet-beta.eth.limo'
+  'https://www.safe.dev/safenet'
 ).replace(/\/$/, '')
 
 // --- Lookback tuning ------------------------------------------------------

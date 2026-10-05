@@ -1,97 +1,143 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { SafenetReader } from '../safenetReader'
-import { decodeLogs, type RawLog } from '../../utils/decodeLogs'
-import { AttestationVerificationStatus, CheckEventType, type Hex, type OracleAttestedEvent } from '../../types'
+import { Contract, JsonRpcProvider } from 'ethers'
+import { ORACLE_READ_ABI } from '../../abi'
+import { SafenetReader, type CheckReadResult } from '../safenetReader'
+import {
+  AttestationVerificationStatus,
+  CheckEventType,
+  type CheckEventBase,
+  type Hex,
+  type OracleAttestedEvent,
+  type OracleRequestState,
+  type RequestRead,
+} from '../../types'
 
 /**
- * Opt-in integration spec — runs only under `yarn test:integration` against a
- * live Safenet network. Defaults target the redeployed (2026-08-20) Sepolia
- * contracts the golden vector was captured from:
+ * Opt-in live suite for `yarn test:integration`: reads the checks captured in `gnosis-aegis.json`
+ * back from the Gnosis test deployment. Skipped unless SAFENET_IT_RPC names a Gnosis Chain RPC; once
+ * set, an RPC failure or an absent historical request fails the run.
  *
- *   SAFENET_IT_RPC=https://ethereum-sepolia-rpc.publicnode.com \
- *     SAFENET_IT_CHAIN_ID=11155111 \
- *     yarn workspace @safe-global/utils test:integration
- *
- * Consensus / coordinator addresses and the single-entry oracle allowlist
- * default to the checked-in golden vector but can be overridden with
- * SAFENET_CONSENSUS / SAFENET_COORDINATOR / SAFENET_ORACLE.
+ *   SAFENET_IT_RPC=https://rpc.gnosischain.com yarn workspace @safe-global/utils test:integration
  */
-type Golden = {
-  chainId: string
-  consensus: string
-  coordinator: string
-  oracle: string
-  epoch: string
+
+type Capture = Pick<RequestRead, 'requestId' | 'epoch' | 'safe'> & {
+  label: string
   safeTxHash: Hex
-  requestId: Hex
-  signatureId: Hex
-  oracleDataHash: Hex
-  groupKey: { x: string; y: string }
-  r: { x: string; y: string }
-  z: string
-  logs: RawLog[]
+  homeChainId: string
+  timestampMs: number
+  proposal: CheckEventBase
+  attestation: { signatureId: Hex } | null
+  groupKey: { x: string; y: string } | null
+  expected: Pick<RequestRead, 'state' | 'outcome' | 'committedCount' | 'revealedCount' | 'approveCount' | 'denyCount'>
 }
 
-const golden: Golden = JSON.parse(
-  readFileSync(join(__dirname, '../../__fixtures__/sepolia-relaunch-attestation.golden.json'), 'utf8'),
+const { provenance, captures }: { provenance: Record<string, string>; captures: Capture[] } = JSON.parse(
+  readFileSync(join(__dirname, '../../__fixtures__/gnosis-aegis.json'), 'utf8'),
 )
 
-// `|| undefined` so an empty string (a common way to "unset" in CI) still skips.
-const RPC = process.env.SAFENET_IT_RPC || undefined
+const approved = captures.filter((capture) => capture.attestation)
 
-/** The captured `TransactionAttested` log, decoded by the production path. */
-const goldenAttested = (): OracleAttestedEvent => {
-  const attested = decodeLogs(golden.logs).find(
-    (event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED,
-  )
-  if (!attested) throw new Error('golden fixture carries no decodable TransactionAttested log')
-  return attested
+// `|| ''` so an empty string (a common way to "unset" in CI) still skips.
+const RPC = process.env.SAFENET_IT_RPC || ''
+const CHAIN_ID = process.env.SAFENET_IT_CHAIN_ID ?? provenance.chainId
+const describeLive = RPC ? describe : describe.skip
+
+jest.setTimeout(60_000)
+
+const reader = new SafenetReader({
+  rpcUrls: [RPC],
+  chainId: CHAIN_ID,
+  consensus: provenance.consensus,
+  coordinator: provenance.coordinator,
+  oracles: [provenance.oracle],
+})
+
+const reads = new Map<string, Promise<CheckReadResult>>()
+
+const liveRead = (capture: Capture): Promise<CheckReadResult> => {
+  const cached = reads.get(capture.label)
+  if (cached) return cached
+  const pending = reader.fetchCheckState(capture.safeTxHash, {
+    target: { chainId: capture.homeChainId, safeAddress: capture.safe },
+    timestampMs: capture.timestampMs,
+  })
+  reads.set(capture.label, pending)
+  return pending
 }
 
-const makeReader = () =>
-  new SafenetReader({
-    rpcUrls: [RPC as string],
-    chainId: process.env.SAFENET_IT_CHAIN_ID ?? golden.chainId,
-    consensus: process.env.SAFENET_CONSENSUS ?? golden.consensus,
-    coordinator: process.env.SAFENET_COORDINATOR ?? golden.coordinator,
-    oracles: [process.env.SAFENET_ORACLE ?? golden.oracle],
-  })
-
-if (!RPC) {
-  describe('SafenetReader integration (skipped)', () => {
-    it('requires SAFENET_IT_RPC — set it to run against a live network', () => {
-      console.warn(
-        '[safenet integration] SAFENET_IT_RPC unset — skipping live checks. Run:\n' +
-          '  SAFENET_IT_RPC=http://127.0.0.1:8547 SAFENET_IT_CHAIN_ID=31337 ' +
-          'yarn workspace @safe-global/utils test:integration',
-      )
-      expect(RPC).toBeUndefined()
-    })
-  })
-} else {
-  describe('SafenetReader integration — live network', () => {
-    jest.setTimeout(30_000)
-
-    it('loads the epoch group public key live and matches the golden vector', async () => {
-      const key = await makeReader().loadGroupKey(golden.epoch)
-      expect(key).toEqual(golden.groupKey)
-    })
-
-    it('verifies the real FROST attestation against the live group key (VERIFIED)', async () => {
-      const result = await makeReader().verifyAttestation(goldenAttested())
-      expect(result.status).toBe(AttestationVerificationStatus.VERIFIED)
-    })
-
-    it('derives the same requestId from the on-chain Proposed event (when in lookback range)', async () => {
-      const { chainId, safe } = goldenAttested()
-      const read = await makeReader().fetchCheckState(golden.safeTxHash, { target: { chainId, safeAddress: safe } })
-      const proposed = read.events.find((event) => event.type === CheckEventType.ORACLE_PROPOSED)
-      if (!proposed) {
-        console.warn('[safenet integration] Proposed event outside the lookback window — skipping requestId equality')
-        return
-      }
-      expect(read.requestId).toBe(golden.requestId)
-    })
-  })
+const liveRequest = async (capture: Capture): Promise<RequestRead> => {
+  const request = (await liveRead(capture)).requests.find(({ requestId }) => requestId === capture.requestId)
+  if (!request) throw new Error(`live read of ${capture.label} returned no request ${capture.requestId}`)
+  return request
 }
+
+/** Indexed by the ABI state ordinal minus one. */
+const ORACLE_STATES: OracleRequestState[] = ['PENDING', 'FROZEN', 'RESOLVED_APPROVED', 'RESOLVED_DENIED', 'TIMED_OUT']
+
+const readDirect = async (requestId: Hex, blockTag: number) => {
+  const provider = new JsonRpcProvider(RPC, Number(CHAIN_ID), { staticNetwork: true })
+  try {
+    const oracle = new Contract(provenance.oracle, [...ORACLE_READ_ABI], provider)
+    const { terms, progress } = await oracle.getRequest(requestId, { blockTag })
+    return {
+      state: ORACLE_STATES[Number(progress.state) - 1],
+      commitDeadlineBlock: terms.commitDeadline.toString(),
+      revealDeadlineBlock: terms.revealDeadline.toString(),
+      arbitrationDeadlineBlock: progress.arbitrationDeadline === 0n ? null : progress.arbitrationDeadline.toString(),
+      committedCount: Number(progress.committedCount),
+      revealedCount: Number(progress.revealedCount),
+      approveCount: Number(progress.approveSentinelCount),
+      denyCount: Number(progress.denySentinelCount),
+    }
+  } finally {
+    provider.destroy()
+  }
+}
+
+describeLive('SafenetReader integration — Gnosis test deployment', () => {
+  it.each(approved)('loads the live epoch group key of $label, equal to the captured key', async (capture) => {
+    expect(await reader.loadGroupKey(capture.epoch)).toEqual(capture.groupKey)
+  })
+
+  it.each(approved)('reads $label as the settled request with the captured state and counts', async (capture) => {
+    const { state, outcome, committedCount, revealedCount, approveCount, denyCount } = capture.expected
+
+    expect(await liveRequest(capture)).toMatchObject({
+      proposedAt: capture.proposal,
+      state,
+      outcome,
+      committedCount,
+      revealedCount,
+      approveCount,
+      denyCount,
+    })
+  })
+
+  it.each(captures)('reads $label exactly as the Oracle getter does at the same head', async (capture) => {
+    const direct = await readDirect(capture.requestId, Number((await liveRead(capture)).headBlock))
+
+    expect(await liveRequest(capture)).toMatchObject({ ...direct, proposedAt: capture.proposal })
+  })
+
+  it.each(captures)('derives the votes of $label from the live Oracle logs', async (capture) => {
+    const { votes } = await liveRequest(capture)
+    const { committedCount, approveCount, denyCount } = capture.expected
+
+    expect(votes).toHaveLength(committedCount)
+    expect(votes.filter(({ approved }) => approved === true)).toHaveLength(approveCount)
+    expect(votes.filter(({ approved }) => approved === false)).toHaveLength(denyCount)
+  })
+
+  it.each(approved)('verifies the live attestation of $label against the live group key', async (capture) => {
+    const { events } = await liveRead(capture)
+    const attested = events.find((event): event is OracleAttestedEvent => event.type === CheckEventType.ORACLE_ATTESTED)
+
+    expect(attested?.signatureId).toBe(capture.attestation?.signatureId)
+    expect(await reader.verifyAttestation(attested as OracleAttestedEvent)).toEqual({
+      status: AttestationVerificationStatus.VERIFIED,
+      signatureId: capture.attestation?.signatureId,
+      message: capture.requestId,
+    })
+  })
+})

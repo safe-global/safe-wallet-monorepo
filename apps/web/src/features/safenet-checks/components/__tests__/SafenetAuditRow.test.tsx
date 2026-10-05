@@ -3,6 +3,7 @@ import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import { SAFENET_EXPLORER_URL } from '@safe-global/utils/features/safenet-checks/constants'
 import {
   buildBenignSnapshot,
   buildCheckView,
@@ -112,7 +113,7 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
       'href',
-      `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${HASH}`,
+      `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=1&safeTxHash=${HASH}`,
     )
   })
 

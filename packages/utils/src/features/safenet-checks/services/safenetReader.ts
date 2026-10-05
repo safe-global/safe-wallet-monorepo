@@ -10,6 +10,7 @@ import {
   SAFENET_CHAIN_ID,
   SAFENET_CONSENSUS_ADDRESS,
   SAFENET_COORDINATOR_ADDRESS,
+  SAFENET_DEPLOYMENT,
   SAFENET_ORACLE_ADDRESSES,
   SAFENET_RPC_URLS,
   TARGETED_WINDOW_BACK_BLOCKS,
@@ -93,8 +94,6 @@ export type SafenetReaderConfig = {
   oracles: string[]
 }
 
-const IS_DEV = process.env.NODE_ENV !== 'production'
-
 const isProposed = (event: NormalizedCheckEvent): event is OracleProposedEvent =>
   event.type === CheckEventType.ORACLE_PROPOSED
 
@@ -174,6 +173,22 @@ const chunkRanges = (from: number, to: number, size: number): Array<[number, num
   return ranges
 }
 
+const sameAddress = (a: string, b: string): boolean => a.toLowerCase() === b.toLowerCase()
+
+const assertPinnedDeployment = (config: Omit<SafenetReaderConfig, 'rpcUrls'>): void => {
+  const pinned = SAFENET_DEPLOYMENT
+  const oracles = config.oracles.map((address) => address.toLowerCase()).sort()
+  const matches =
+    config.chainId === pinned.chainId &&
+    sameAddress(config.consensus, pinned.consensus) &&
+    sameAddress(config.coordinator, pinned.coordinator) &&
+    oracles.length === pinned.oracles.length &&
+    pinned.oracles.every((address, index) => address.toLowerCase() === oracles[index])
+  if (!matches) {
+    throw new Error('Safenet reader: deployment configuration does not match the latest Gnosis deployment')
+  }
+}
+
 /**
  * Chain reader for a check's Safenet lifecycle. Owns a pinned-endpoint provider
  * (rotated on failure) and a per-epoch FROST group-key cache.
@@ -188,11 +203,14 @@ export class SafenetReader {
 
   private urlIndex = 0
   private currentProvider: JsonRpcProvider | null = null
-  private chainIdChecked = false
+  private readonly deployments = new WeakMap<JsonRpcProvider, Promise<void>>()
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
   private readonly holds = new Map<JsonRpcProvider, number>()
 
   constructor(config: SafenetReaderConfig) {
+    if (config.chainId !== SAFENET_DEPLOYMENT.chainId) {
+      throw new Error(`Safenet reader: only Gnosis Chain (${SAFENET_DEPLOYMENT.chainId}) is supported`)
+    }
     this.rpcUrls = config.rpcUrls
     this.chainId = config.chainId
     this.consensus = config.consensus
@@ -270,24 +288,37 @@ export class SafenetReader {
     throw lastError
   }
 
-  /** Dev-only, one-shot: warn if the RPC's chain id disagrees with config. */
-  private async assertChainId(provider: JsonRpcProvider): Promise<void> {
-    if (this.chainIdChecked || !IS_DEV) return
-    try {
-      const actual = Number(await provider.send('eth_chainId', []))
-      // Consume the one shot only after a successful probe.
-      this.chainIdChecked = true
-      if (actual !== Number(this.chainId)) {
-        console.error(
-          `[safenet-reader] chain id mismatch: SAFENET_CHAIN_ID=${this.chainId} but the RPC ` +
-            `reports ${actual}. It feeds the EIP-712 domain every attestation is verified ` +
-            `against, so attestations will verify as INVALID and every check will read as ` +
-            `failed. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
-        )
-      }
-    } catch {
-      // A development aid, never a hard gate on the read path.
+  /** Share deployment validation per provider; failures remain retryable. */
+  private assertDeployment(provider: JsonRpcProvider): Promise<void> {
+    const cached = this.deployments.get(provider)
+    if (cached) return cached
+    const validation = this.validateDeployment(provider)
+    this.deployments.set(provider, validation)
+    validation.catch(() => {
+      if (this.deployments.get(provider) === validation) this.deployments.delete(provider)
+    })
+    return validation
+  }
+
+  private async validateDeployment(provider: JsonRpcProvider): Promise<void> {
+    // A static provider network does not prove the node's actual chain.
+    const served = BigInt(await provider.send('eth_chainId', []))
+    if (served !== BigInt(this.chainId)) {
+      throw new Error(`Safenet reader: RPC serves chain ${served}, expected Gnosis Chain (${this.chainId})`)
     }
+    const consensus = new Contract(this.consensus, [...CONSENSUS_READ_ABI], provider)
+    const [coordinator, proposers] = await Promise.all([
+      consensus.getCoordinator() as Promise<string>,
+      Promise.all(this.oracles.map((oracle) => new Contract(oracle, [...ORACLE_READ_ABI], provider).PROPOSER())),
+    ])
+    if (!sameAddress(coordinator, this.coordinator)) {
+      throw new Error('Safenet reader: Consensus coordinator does not match the configured deployment')
+    }
+    proposers.forEach((proposer: string, index) => {
+      if (!sameAddress(proposer, this.consensus)) {
+        throw new Error(`Safenet reader: Oracle ${this.oracles[index]} is not proposed by the configured Consensus`)
+      }
+    })
   }
 
   private async getLogsChunked(
@@ -428,7 +459,7 @@ export class SafenetReader {
     }
     assertTarget(options.target)
     return this.withProvider(async (provider) => {
-      await this.assertChainId(provider)
+      await this.assertDeployment(provider)
 
       const latest = await provider.getBlock('latest')
       if (!latest) throw new Error('Safenet reader: could not read the chain head')
@@ -521,12 +552,13 @@ export class SafenetReader {
    * terminalize every attestation in the epoch as INVALID.
    */
   async loadGroupKey(epoch: string): Promise<{ x: string; y: string }> {
-    const cached = this.groupKeyCache.get(epoch)
-    if (cached) return cached
     // Derived outside the provider op: a malformed epoch is a caller bug.
     const epochValue = BigInt(epoch)
 
     return this.withProvider(async (provider) => {
+      await this.assertDeployment(provider)
+      const cached = this.groupKeyCache.get(epoch)
+      if (cached) return cached
       const consensus = new Contract(this.consensus, [...CONSENSUS_READ_ABI], provider)
       const groupId: string = await consensus.getEpochGroupId(epochValue)
       const coordinator = new Contract(this.coordinator, [...COORDINATOR_READ_ABI], provider)
@@ -603,12 +635,18 @@ export class SafenetReader {
 
 let defaultReader: SafenetReader | null = null
 
-/** The process-wide reader singleton, built from the env constants. */
-export const getSafenetReader = (): SafenetReader =>
-  (defaultReader ??= new SafenetReader({
-    rpcUrls: SAFENET_RPC_URLS,
-    chainId: SAFENET_CHAIN_ID,
-    consensus: SAFENET_CONSENSUS_ADDRESS,
-    coordinator: SAFENET_COORDINATOR_ADDRESS,
-    oracles: SAFENET_ORACLE_ADDRESSES,
-  }))
+/** The process-wide reader singleton, restricted to the pinned deployment. */
+export const getSafenetReader = (): SafenetReader => {
+  if (!defaultReader) {
+    const config: SafenetReaderConfig = {
+      rpcUrls: SAFENET_RPC_URLS,
+      chainId: SAFENET_CHAIN_ID,
+      consensus: SAFENET_CONSENSUS_ADDRESS,
+      coordinator: SAFENET_COORDINATOR_ADDRESS,
+      oracles: SAFENET_ORACLE_ADDRESSES,
+    }
+    assertPinnedDeployment(config)
+    defaultReader = new SafenetReader(config)
+  }
+  return defaultReader
+}
