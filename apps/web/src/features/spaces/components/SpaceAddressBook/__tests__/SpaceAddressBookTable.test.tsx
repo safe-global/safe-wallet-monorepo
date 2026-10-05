@@ -3,6 +3,7 @@ import SpaceAddressBookTable from '../SpaceAddressBookTable'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
 import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
@@ -133,6 +134,20 @@ describe('SpaceAddressBookTable', () => {
     expect(name).toHaveClass('truncate')
     expect(name).toHaveClass('min-w-0')
     expect(name.parentElement).toHaveClass('min-w-0')
+  })
+
+  it('shortens an "Added by" member name that is a wallet address', () => {
+    const address = '0x1234567890abcdef1234567890abcdef12345678'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? address : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    expect(screen.getByText(shortenAddress(address))).toBeInTheDocument()
+    expect(screen.queryByText(address)).not.toBeInTheDocument()
   })
 
   it('renders actions for non-local entries', () => {

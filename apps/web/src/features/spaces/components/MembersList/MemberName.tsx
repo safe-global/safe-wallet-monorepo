@@ -1,6 +1,8 @@
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
@@ -13,6 +15,7 @@ const MemberName = ({ member, isCompact = false }: { member: MemberDto; isCompac
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
   const isCurrentUser = member.user.id === user?.id
   const displayName = getMemberDisplayName(member)
+  const label = isAddress(displayName) ? shortenAddress(displayName) : displayName
 
   return (
     <div className="flex min-w-0 flex-row items-center gap-2" key={member.id}>
@@ -23,7 +26,7 @@ const MemberName = ({ member, isCompact = false }: { member: MemberDto; isCompac
             <Typography variant="paragraph-small" className={cn('min-w-0 text-left', !isCompact && 'truncate')} />
           }
         >
-          {displayName}
+          {label}
         </TooltipTrigger>
         <TooltipContent align="start" data-testid="member-name-tooltip">
           {displayName}

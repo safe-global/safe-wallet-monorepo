@@ -1,9 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { memberBuilder, memberUserBuilder } from '@/tests/builders/member'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import MemberName from './MemberName'
 
 const LONG_NAME = '1234567891O1112131415161718192O2122O32425262728293O31'
+const WALLET_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678'
 
 const mockCurrentUserId = jest.fn<number | undefined, []>(() => undefined)
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
@@ -55,6 +57,16 @@ describe('MemberName', () => {
     expect(suffix).toHaveClass('shrink-0')
     expect(suffix).not.toBe(screen.getByText(LONG_NAME))
     expect(screen.getByText(LONG_NAME)).not.toContainElement(suffix)
+  })
+
+  it('shortens a name that is a wallet address', () => {
+    const addressMember = memberBuilder()
+      .with({ name: WALLET_ADDRESS, user: memberUserBuilder().with({ id: 11 }).build() })
+      .build()
+    render(<MemberName member={addressMember} />)
+
+    expect(screen.getByText(shortenAddress(WALLET_ADDRESS))).toBeInTheDocument()
+    expect(screen.queryByText(WALLET_ADDRESS)).not.toBeInTheDocument()
   })
 
   it('omits the "You" suffix for other members', () => {
