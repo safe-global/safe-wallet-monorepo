@@ -70,6 +70,23 @@ describe('getPlanCtaV2', () => {
     ).toMatchObject({ kind: 'change', label: 'Upgrade to Business' })
   })
 
+  it('words a move to the other billing cycle at the same Safe count by the cycle', () => {
+    const yearly = tier({
+      id: 'Business-year',
+      billingCycle: 'year',
+      options: [option({ priceId: 'price_b20y', price: 17_990 })],
+    })
+    const inForce = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
+
+    expect(getPlanCtaV2({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
+      kind: 'change',
+      label: 'Switch to yearly',
+    })
+    expect(
+      getPlanCtaV2({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
+    ).toMatchObject({ kind: 'change', label: 'Switch to 5 Safe accounts' })
+  })
+
   it('sends Enterprise to sales, or to the account team once it is the plan in force', () => {
     expect(getPlanCtaV2({ tier: ENTERPRISE_TIER, option: ENTERPRISE_TIER.options[0] }, currentPlan())).toEqual({
       kind: 'sales',

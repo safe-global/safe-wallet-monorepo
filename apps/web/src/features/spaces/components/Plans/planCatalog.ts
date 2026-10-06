@@ -103,7 +103,6 @@ export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
   isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
 
 export const PLAN_CARD_COPY_V2 = {
-  switchToYearly: 'Switch to yearly to save',
   savedVsMonthly: (amount: string, percent: string) => `Save ${amount} (${percent}) vs monthly`,
   saveWithYearly: (amount: string, percent: string) => `Save ${amount} (${percent}) with yearly`,
   termsApply: 'Terms apply:',
@@ -113,6 +112,8 @@ export const PLAN_CARD_COPY_V2 = {
   monthly: 'Monthly',
   yearly: 'Yearly',
   currentPlan: 'Current plan',
+  switchToYearly: 'Switch to yearly',
+  switchToMonthly: 'Switch to monthly',
   current: 'Current',
   accountTeam: 'Change via your account team',
   talkToSales: 'Talk to sales',
@@ -137,7 +138,12 @@ export type CompareRowV2 = {
   values: Record<PlanNameV2, CompareValueV2>
 }
 
-export type CompareSectionV2 = { title: string; rows: CompareRowV2[] }
+export type CompareSectionV2 = {
+  title: string
+  /** Shown next to the title while the compare card is hovered. */
+  hoverEmoji?: string
+  rows: CompareRowV2[]
+}
 
 const every = (value: CompareValueV2): Record<PlanNameV2, CompareValueV2> => ({
   Starter: value,
@@ -162,6 +168,7 @@ export const COMPARE_COPY_V2 = {
 export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   {
     title: 'Coming soon',
+    hoverEmoji: '👀',
     rows: [
       { feature: SAFENET_CHECKS, values: fromBusiness, isComingSoon: true },
       { feature: 'More policies', values: fromBusiness, isComingSoon: true },

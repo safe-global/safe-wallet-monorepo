@@ -88,6 +88,11 @@ describe('PlanCardV2', () => {
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
+  it('names the support level at the bottom of the card', () => {
+    render(<PlanCardV2 tier={BUSINESS} />)
+
+    expect(screen.getByTestId('plan-support-level')).toHaveTextContent('Priority support')
+  })
   it('heads the feature list with the plan support level', () => {
     render(<PlanCardV2 tier={BUSINESS} />)
 

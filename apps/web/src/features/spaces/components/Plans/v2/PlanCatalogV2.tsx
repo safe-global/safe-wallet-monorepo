@@ -29,31 +29,17 @@ export default function PlanCatalogV2({
 } & PlanCardV2Actions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const [seatsByPlan, setSeatsByPlan] = useState<Record<string, string>>({})
-  const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
   const visible = getVisibleTiers(getTiersV2(tiers), cycle)
 
   const catalog = (
     <div className="@container flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-            <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
-              <TabsTrigger value="month">{PLAN_CARD_COPY_V2.monthly}</TabsTrigger>
-              <TabsTrigger value="year">{PLAN_CARD_COPY_V2.yearly}</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          {hasYearly && cycle === 'month' && (
-            <Link
-              render={<button type="button" />}
-              variant="muted"
-              className="whitespace-nowrap"
-              data-testid="yearly-savings"
-              onClick={() => setCycle('year')}
-            >
-              {PLAN_CARD_COPY_V2.switchToYearly}
-            </Link>
-          )}
-        </div>
+        <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
+          <TabsList aria-label={PLAN_CARD_COPY_V2.billingCycleLabel}>
+            <TabsTrigger value="month">{PLAN_CARD_COPY_V2.monthly}</TabsTrigger>
+            <TabsTrigger value="year">{PLAN_CARD_COPY_V2.yearly}</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
         {!embedded && (
           <Link

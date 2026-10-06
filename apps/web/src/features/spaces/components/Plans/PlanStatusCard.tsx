@@ -141,7 +141,8 @@ export default function PlanStatusCard({
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
   const isV2 = appearance === 'v2'
-  const badge = getCurrentBadge(plan, isV2 ? TRIAL_ENDING_SOON_DAYS : undefined)
+  // v2 shows days left for the whole free access, not just the last week.
+  const badge = getCurrentBadge(plan, isV2 ? Number.POSITIVE_INFINITY : undefined)
   const isEndingSoon = badge?.variant === 'warning'
   const badgeVariant = isV2 ? 'subtle' : badge?.variant
   const text = statusText(plan, endDate, safeAccounts !== null && _remaining(safeAccounts) === 0, isV2)

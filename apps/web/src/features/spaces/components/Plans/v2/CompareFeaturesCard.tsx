@@ -213,6 +213,14 @@ const CompareSection = ({
           className="h-auto px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
         >
           {section.title}
+          {section.hoverEmoji && (
+            <span
+              aria-hidden
+              className="ml-1.5 inline-block opacity-0 transition-opacity duration-200 group-hover/compare:opacity-100 motion-reduce:transition-none"
+            >
+              {section.hoverEmoji}
+            </span>
+          )}
         </TableHead>
       </TableRow>
       {section.rows.map((row, rowIndex) => (
@@ -257,7 +265,7 @@ export default function CompareFeaturesCard({
       className="scroll-mt-6 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       data-testid="compare-features"
     >
-      <Card radius="xl" size="none" className="overflow-clip">
+      <Card radius="xl" size="none" className="group/compare overflow-clip">
         <div className="flex flex-col gap-2 p-2">
           <button
             type="button"

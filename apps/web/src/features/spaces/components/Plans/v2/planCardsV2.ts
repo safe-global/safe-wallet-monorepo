@@ -13,8 +13,23 @@ export const getPlanCtaV2 = (pick: PlanPick, current: CurrentPlan | undefined): 
     return { kind: 'account-team', label: PLAN_CARD_COPY_V2.accountTeam }
   }
   const cta = getPlanCta(pick, current)
-  return cta.kind === 'manage' ? { kind: 'current', label: PLAN_CARD_COPY_V2.currentPlan } : cta
+  if (cta.kind === 'manage') return { kind: 'current', label: PLAN_CARD_COPY_V2.currentPlan }
+  if (cta.kind === 'change' && isCycleSwitch(pick, current)) {
+    return {
+      ...cta,
+      label: pick.tier.billingCycle === 'year' ? PLAN_CARD_COPY_V2.switchToYearly : PLAN_CARD_COPY_V2.switchToMonthly,
+    }
+  }
+  return cta
 }
+
+/** Same plan and Safe count, other billing cycle: the only thing that changes is how often it's billed. */
+const isCycleSwitch = (pick: PlanPick, current: CurrentPlan | undefined): boolean =>
+  current !== undefined &&
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle !== null &&
+  pick.tier.billingCycle !== current.billingCycle &&
+  pick.option.label === current.seatsLabel
 
 /** Show "Manage plan" in the status panel, including trials with a card on file. */
 export const canManageV2 = (canManage: boolean | undefined, currentPlan: CurrentPlan | undefined): boolean =>
