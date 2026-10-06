@@ -7,6 +7,7 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import PolicyRule from './components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
 import PolicyStatusChip from '../components/PolicyStatusChip'
@@ -128,7 +129,16 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       cellTestId: 'policy-cell-network',
       cell: (policy) => (
         <div className="flex justify-center">
-          <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+            </TooltipTrigger>
+            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
+              <span data-testid="policy-network-tooltip">
+                <ChainIndicator chainId={policy.safe.chainId} showUnknown />
+              </span>
+            </TooltipContent>
+          </Tooltip>
         </div>
       ),
     },
