@@ -22,14 +22,26 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import css from './SafeShieldBadge.module.css'
+
+const shieldLogoTransition =
+  'cursor-pointer [&_.shield-bg]:transition-[fill] [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] duration-500'
 
 const shieldLogoOnHover = [
-  'cursor-pointer',
-  '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
+  shieldLogoTransition,
   'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
   'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
   'hover:[&_.shield-lines]:fill-[var(--color-static-main)]',
   'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
+].join(' ')
+
+/** The hover colors, held once every check has finished. */
+const shieldLogoDone = [
+  shieldLogoTransition,
+  '[&_.shield-bg]:fill-[var(--color-background-secondary)]',
+  '[&_.shield-img]:fill-[var(--color-static-text-brand)]',
+  '[&_.shield-lines]:fill-[var(--color-static-main)]',
+  '[&_.shield-text]:fill-[var(--color-text-primary)]',
 ].join(' ')
 
 export const SafeShieldDisplay = ({
@@ -117,6 +129,10 @@ export const SafeShieldDisplay = ({
 
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
+  const isAnalysing = [recipient, contract, threat, deadlock].some((result) => result?.[2])
+  const hasResults = [recipientResults, contractResults, threatResults, deadlockResults].some(Boolean)
+  const isDone = !isAnalysing && hasResults
+
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
       {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
@@ -151,7 +167,15 @@ export const SafeShieldDisplay = ({
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
+          {/* Remounts when the checks finish, so the shimmer plays once per result. */}
+          <span key={isDone ? 'done' : 'running'} className={css.badge} data-done={isDone}>
+            <SafeShieldLogo
+              data-testid="safe-shield-logo"
+              width={104}
+              height={24}
+              className={isDone ? shieldLogoDone : shieldLogoOnHover}
+            />
+          </span>
         </ExternalLink>
       </div>
     </div>

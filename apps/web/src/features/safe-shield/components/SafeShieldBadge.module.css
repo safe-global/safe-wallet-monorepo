@@ -1,0 +1,35 @@
+.badge {
+  position: relative;
+  display: inline-flex;
+  overflow: hidden;
+  border-radius: 9999px;
+}
+
+/* One sweep of light across the badge when the checks finish. */
+.badge[data-done='true']::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in srgb, var(--color-static-main) 35%, transparent) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.2s ease-out 0.15s 1 forwards;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge[data-done='true']::after {
+    animation: none;
+    display: none;
+  }
+}

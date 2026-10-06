@@ -449,4 +449,45 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
     })
   })
+
+  describe('Safe Shield badge', () => {
+    it('stays gray while any check is still running', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={[undefined, undefined, true]}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('turns full color once every check has finished', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+    })
+
+    it('stays gray before any check has produced a result', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={[undefined, undefined, false]}
+          contract={[undefined, undefined, false]}
+          threat={emptyThreat}
+          deadlock={[undefined, undefined, false]}
+        />,
+      )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+  })
 })
