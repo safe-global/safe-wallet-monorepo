@@ -52,7 +52,8 @@
 }
 
 .gridContainer .type,
-.gridContainer .date {
+.gridContainer .date,
+.gridContainer .safenet {
   overflow: hidden;
   text-overflow: ellipsis;
 }

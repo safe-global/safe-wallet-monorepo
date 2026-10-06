@@ -1,7 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import { buildCheckView, buildSnapshot } from '@safe-global/utils/features/safenet-checks/builders'
+import {
+  buildCheckView,
+  buildSnapshot,
+  sentinelRevealedEvent,
+} from '@safe-global/utils/features/safenet-checks/builders'
 import { SafenetQueueStatus } from '../SafenetQueueStatus'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
@@ -52,5 +56,43 @@ describe('SafenetQueueStatus', () => {
     const cell = screen.getByTestId('safenet-queue-status')
     expect(cell).toHaveAttribute('data-status', status)
     expect(cell).toHaveTextContent(label)
+  })
+
+  const renderStatus = (status: Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, over = {}, variant?: 'chip') => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status, ...over })
+    mockUseSafenetCheck.mockReturnValue(buildCheckView({ snapshot, status, publicStatus: status }))
+    render(<SafenetQueueStatus safeTxHash={HASH} timestampMs={TS} variant={variant} />)
+    return screen.getByTestId('safenet-queue-status')
+  }
+
+  it('gives screen readers the full sentence, not just the label', () => {
+    const cell = renderStatus(CheckStatus.BENIGN)
+
+    expect(cell).toHaveAttribute('aria-live', 'polite')
+    expect(cell).toHaveTextContent('Safenet: Safenet found no issues.')
+  })
+
+  it('renders the prominent chip variant for queue rows', () => {
+    const cell = renderStatus(CheckStatus.MALICIOUS, {}, 'chip')
+
+    expect(cell).toHaveAttribute('data-variant', 'chip')
+    expect(cell.querySelector('[data-slot="chip"]')).toHaveTextContent('Risk detected')
+  })
+
+  it('summarises the flagged rule and the sentinel count', () => {
+    const cell = renderStatus(CheckStatus.MALICIOUS, {
+      events: [
+        sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.1' }),
+        sentinelRevealedEvent({ sentinel: '0x2', approved: false, reason: 'R-4.1' }),
+      ],
+    })
+
+    expect(cell).toHaveTextContent('Safe account settings change. 2 of 2 sentinels flagged this.')
+  })
+
+  it('shows the time left while simulating', () => {
+    const cell = renderStatus(CheckStatus.IN_PROGRESS, { headBlock: '1000', deadlineBlock: '1024' })
+
+    expect(cell).toHaveTextContent('Simulating · up to ~2 min')
   })
 })
