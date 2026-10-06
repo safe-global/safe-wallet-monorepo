@@ -1,6 +1,8 @@
 import { useContext, type ReactElement, type ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
 import { Progress } from '@/components/ui/progress'
+import { Link } from '@/components/ui/link'
+import { ArrowUpRight } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
@@ -45,9 +47,19 @@ const Note = ({ children, testId }: { children: ReactNode; testId?: string }): R
 )
 
 const LearnMore = (): ReactElement => (
-  <ExternalLink data-testid="safenet-about-link" href={SAFENET_DOCS_URL}>
-    Learn more
-  </ExternalLink>
+  <Link
+    variant="muted"
+    href={SAFENET_DOCS_URL}
+    target="_blank"
+    rel="noreferrer noopener"
+    className="underline decoration-muted-foreground/40"
+    data-testid="safenet-about-link"
+  >
+    <span className="inline-flex items-center gap-0.5">
+      Learn more
+      <ArrowUpRight className="size-3.5" aria-hidden />
+    </span>
+  </Link>
 )
 
 const SectionShell = ({
@@ -69,7 +81,7 @@ const SectionShell = ({
     aria-live="polite"
     className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-3 p-4 duration-300"
   >
-    <SafenetLogo role="img" aria-label="Safenet" className="h-4 w-auto self-start text-foreground" />
+    <SafenetLogo role="img" aria-label="Safenet" className="h-3.5 w-auto self-start text-foreground" />
     {children}
   </div>
 )
