@@ -1,6 +1,5 @@
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import type { SerializedError, ThunkAction, UnknownAction } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
@@ -155,10 +154,9 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
   // zero while the first request is still open. The query then keeps the response
   // it gets, which may have been produced before the write. Invalidating again
   // once nothing is in flight fetches every affected query with the written data.
-  // Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates one of these tags, directly or via the seats listener; refetching the others is harmless.
+  // Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates one of these two tags; refetching the other is harmless.
   dispatch(cgwApi.util.invalidateTags(['spaces']))
   dispatch(billingApi.util.invalidateTags(['billing']))
-  dispatch(entitlementsApi.util.invalidateTags(['entitlements']))
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(
