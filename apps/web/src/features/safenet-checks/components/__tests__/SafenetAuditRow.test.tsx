@@ -8,6 +8,7 @@ import {
   buildCheckView,
   buildSnapshot,
   attestedEvent,
+  sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
@@ -176,5 +177,57 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('Risk detected')).toBeInTheDocument()
     expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+  })
+
+  it('links a MALICIOUS step to the Safenet explorer and names a single rule', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.MALICIOUS,
+      events: [sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.6' })],
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Risk detected: Blocklisted address')).toBeInTheDocument()
+    const link = screen.getByTestId('safenet-explorer-link')
+    expect(link).toHaveAccessibleName('View on Safenet explorer')
+    expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
+  })
+
+  it('keeps the generic label when several rules were cited', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.MALICIOUS,
+      events: [
+        sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.2' }),
+        sentinelRevealedEvent({ sentinel: '0x2', approved: false, reason: 'R-4.1' }),
+      ],
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Risk detected')).toBeInTheDocument()
+  })
+
+  it('shows the time left while simulating', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.IN_PROGRESS,
+      headBlock: '1000',
+      deadlineBlock: '1024',
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.IN_PROGRESS, publicStatus: CheckStatus.IN_PROGRESS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Simulating · up to ~2 min')).toBeInTheDocument()
   })
 })

@@ -2,18 +2,21 @@ import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
 import ExternalLink from '@/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useChain } from '@/hooks/useChains'
 import {
   CheckStatus,
-  SAFENET_EXPLORER_URL,
-  verdictAttestation,
   type PublicCheckStatus,
+  type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
-import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { summariseRejection } from '../summariseRejection'
+import { formatSimulatingLabel } from '../checkTiming'
+import { useCheckTiming } from '../useCheckTiming'
+import { useSafenetLinks } from '../useSafenetLinks'
 
-const STEP_ICON: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, ActionType> = {
+type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
+
+const STEP_ICON: Record<VerdictStatus, ActionType> = {
   [CheckStatus.SUBMITTED]: 'pending',
   [CheckStatus.IN_PROGRESS]: 'pending',
   [CheckStatus.BENIGN]: 'confirmed',
@@ -22,7 +25,7 @@ const STEP_ICON: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, Act
 }
 
 // Dark mode only — in light mode every status follows the sibling rows' default color.
-const DARK_STEP_COLOR: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
+const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.SUBMITTED]: 'var(--color-text-secondary)',
   [CheckStatus.IN_PROGRESS]: 'var(--color-info-main)',
   [CheckStatus.BENIGN]: 'var(--color-primary-main)',
@@ -39,14 +42,72 @@ export type SafenetAuditRowProps = {
   isLast?: boolean
 }
 
-/**
- * Safenet step in the transaction audit log: "Simulating / No issues found /
- * Risk detected · By Safenet", where "Safenet" links the attestation
- * transaction once the check is verified. Renders nothing until a check has
- * been observed — most transactions never had one. Dated from the attested
- * block on the Safenet chain; the row stays in lifecycle position, so its
- * date may read later than Executed below it.
- */
+export type SafenetAuditRowViewProps = {
+  publicStatus: VerdictStatus
+  snapshot: SafenetCheckSnapshot
+  safeTxHash: string
+  chainId: string
+  timestampMs?: number | null
+  isLast?: boolean
+}
+
+const useStepLabel = (
+  publicStatus: VerdictStatus,
+  snapshot: SafenetCheckSnapshot,
+  timestampMs: number | null | undefined,
+): string => {
+  const timing = useCheckTiming(snapshot, timestampMs)
+  if (publicStatus === CheckStatus.IN_PROGRESS) return formatSimulatingLabel(timing)
+  if (publicStatus === CheckStatus.MALICIOUS) {
+    const { rules } = summariseRejection(snapshot.events)
+    if (rules.length === 1) return `${STATUS_PRESENTATION.MALICIOUS.label}: ${rules[0].label}`
+  }
+  return STATUS_PRESENTATION[publicStatus].label
+}
+
+/** Safenet audit-log step. Dated from the attested block, so it can read later than Executed below it. */
+export const SafenetAuditRowView = ({
+  publicStatus,
+  snapshot,
+  safeTxHash,
+  chainId,
+  timestampMs,
+  isLast,
+}: SafenetAuditRowViewProps): ReactElement => {
+  const isDarkMode = useDarkMode()
+  const label = useStepLabel(publicStatus, snapshot, timestampMs)
+  const { attestationHref, explorerHref } = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
+
+  const actor = attestationHref ? (
+    <ExternalLink data-testid="safenet-attestation-link" href={attestationHref} aria-label="View attestation" noIcon>
+      Safenet
+    </ExternalLink>
+  ) : publicStatus === CheckStatus.MALICIOUS ? (
+    <ExternalLink data-testid="safenet-explorer-link" href={explorerHref} aria-label="View on Safenet explorer" noIcon>
+      Safenet
+    </ExternalLink>
+  ) : (
+    'Safenet'
+  )
+
+  return (
+    // The row appears only once the chain read resolves; the entrance
+    // animation softens the late insert instead of popping it in one frame.
+    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
+      <AuditRow
+        label={label}
+        actionType={STEP_ICON[publicStatus]}
+        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
+        actor={actor}
+        isLast={isLast}
+        // Null while running or when the header read failed — column stays empty.
+        timestamp={snapshot.attestedAtMs ?? null}
+      />
+    </div>
+  )
+}
+
+/** Renders nothing until a check has been observed — most transactions never had one. */
 export const SafenetAuditRow = ({
   safeTxHash,
   chainId,
@@ -54,49 +115,17 @@ export const SafenetAuditRow = ({
   isLast,
 }: SafenetAuditRowProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
-  // The Safenet chain (the chain the attestation landed on), not the Safe's.
-  const safenetChain = useChain(display?.snapshot.chainId ?? '')
-  const isDarkMode = useDarkMode()
-
   if (!safeTxHash || !display) return null
-  const { publicStatus, snapshot } = display
-
-  // Point at the transaction that carried the attestation this verdict came
-  // from, on the Safenet chain's block explorer. The Safenet explorer's hash
-  // route is the fallback when the chain config is unavailable.
-  const attested = verdictAttestation(snapshot)
-  const attestationTxLink =
-    attested && safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
-  const href = attestationTxLink?.href ?? `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
-
-  // A session-pinned BENIGN outlives the read that earned it, so the snapshot
-  // beside it may carry no attestation. Present the proof link only when the
-  // snapshot still carries one; the generic explorer route is not the proof.
-  const isVerified = publicStatus === CheckStatus.BENIGN && attested !== undefined
 
   return (
-    // The row appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
-      <AuditRow
-        label={STATUS_PRESENTATION[publicStatus].label}
-        actionType={STEP_ICON[publicStatus]}
-        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
-        actor={
-          // Theme-default link color, matching the sibling rows.
-          isVerified ? (
-            <ExternalLink data-testid="safenet-attestation-link" href={href} noIcon>
-              Safenet
-            </ExternalLink>
-          ) : (
-            'Safenet'
-          )
-        }
-        isLast={isLast}
-        // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot.attestedAtMs ?? null}
-      />
-    </div>
+    <SafenetAuditRowView
+      publicStatus={display.publicStatus}
+      snapshot={display.snapshot}
+      safeTxHash={safeTxHash}
+      chainId={chainId}
+      timestampMs={timestampMs}
+      isLast={isLast}
+    />
   )
 }
 
