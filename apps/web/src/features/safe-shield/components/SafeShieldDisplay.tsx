@@ -23,6 +23,7 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 import css from './SafeShieldBadge.module.css'
+import { useIsSafenetCheckRunning, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 
 const shieldLogoTransition =
   'cursor-pointer [&_.shield-bg]:transition-[fill] [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] duration-500'
@@ -129,9 +130,13 @@ export const SafeShieldDisplay = ({
 
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
+  // Safenet only renders in the Pro section, so only a Pro widget waits for its verdict.
+  const isSafenetShown = useIsSafenetChecksEnabled() && isSafePro && hasProFeatures && !isOffchainMessage
+  const isSafenetRunning = useIsSafenetCheckRunning(isSafenetShown)
+
   const isAnalysing = [recipient, contract, threat, deadlock].some((result) => result?.[2])
   const hasResults = [recipientResults, contractResults, threatResults, deadlockResults].some(Boolean)
-  const isDone = !isAnalysing && hasResults
+  const isDone = !isAnalysing && hasResults && !isSafenetRunning
 
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">

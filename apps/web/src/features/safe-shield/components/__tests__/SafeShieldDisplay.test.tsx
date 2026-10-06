@@ -16,6 +16,13 @@ import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthSt
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
 
+let mockSafenetRunning = false
+jest.mock('@/features/safenet-checks', () => ({
+  ...jest.requireActual('@/features/safenet-checks'),
+  useIsSafenetChecksEnabled: () => true,
+  useIsSafenetCheckRunning: (enabled: boolean) => enabled && mockSafenetRunning,
+}))
+
 // Default empty AsyncResult values
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
 const emptyContract: AsyncResult<ContractAnalysisResults> = [{}, undefined, false]
@@ -473,6 +480,37 @@ describe('SafeShieldDisplay', () => {
           deadlock={emptyDeadlock}
         />,
       )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+    })
+
+    it('waits for a running Safenet check before turning full color', () => {
+      mockSafenetRunning = true
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+      mockSafenetRunning = false
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('ignores Safenet for a Safe without Pro features', () => {
+      mockSafenetRunning = true
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+          hasProFeatures={false}
+        />,
+      )
+      mockSafenetRunning = false
 
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
     })

@@ -9,9 +9,8 @@ import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 // eslint-disable-next-line no-restricted-imports -- same lazy-chunk reason as SeverityIcon
 import { AnalysisGroupCardItem } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardItem'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { useSafenetCheck, type SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
+import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 import { CheckStatus, type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
 import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -249,18 +248,9 @@ export const SafenetChecksSectionView = ({
 
 /** Reads once a proposed transaction's submission time is known; a new transaction gets the pre-check note. */
 export const SafenetChecksSection = (): ReactElement | null => {
-  const { txId, txDetails, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
-  const safeTxHash = txId ? getSafeTxHashFromTxId(txId) : undefined
-  const submittedAt =
-    txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
-      ? txDetails.detailedExecutionInfo.submittedAt
-      : undefined
-
-  const { safe, safeAddress } = useSafeInfo()
-  const check = useSafenetCheck(submittedAt !== undefined ? safeTxHash : undefined, submittedAt, {
-    chainId: safe.chainId,
-    safeAddress,
-  })
+  const { txId, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
+  const { safe } = useSafeInfo()
+  const { safeTxHash, submittedAt, check } = useFlowSafenetCheck()
 
   const isNewTransaction = !txId && !!isCreation && !isProposing && !txLayoutProps?.isMessage
   const preCheck: PreCheckKind | undefined = !isNewTransaction
