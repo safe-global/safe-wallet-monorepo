@@ -1,5 +1,6 @@
 import { useContext, type ReactElement, type ReactNode } from 'react'
 import { Typography } from '@/components/ui/typography'
+import { Progress } from '@/components/ui/progress'
 import ExternalLink from '@/components/common/ExternalLink'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
@@ -17,11 +18,12 @@ import {
   MULTIPLE_RULES_TITLE,
   PRE_CHECK_COPY,
   resolvePresentation,
+  SAFENET_ABOUT,
   SAFENET_DOCS_URL,
   STALE_NOTE,
 } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection, type RejectionSummary } from '../summariseRejection'
-import { formatTimingSentence } from '../checkTiming'
+import { formatTimingSentence, getCheckProgress } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
 
@@ -42,6 +44,36 @@ const Note = ({ children, testId }: { children: ReactNode; testId?: string }): R
   </Typography>
 )
 
+const LearnMore = (): ReactElement => (
+  <ExternalLink data-testid="safenet-about-link" href={SAFENET_DOCS_URL}>
+    Learn more
+  </ExternalLink>
+)
+
+const SectionShell = ({
+  status,
+  reason,
+  children,
+}: {
+  status?: string
+  reason?: string
+  children: ReactNode
+}): ReactElement => (
+  // The section appears only once the chain read resolves; the entrance
+  // animation softens the late insert instead of popping it in one frame.
+  <div
+    data-testid="safenet-checks-section"
+    data-status={status}
+    data-reason={reason}
+    role="status"
+    aria-live="polite"
+    className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-3 p-4 duration-300"
+  >
+    <SafenetLogo role="img" aria-label="Safenet" className="h-4 w-auto self-start text-foreground" />
+    {children}
+  </div>
+)
+
 const SectionLayout = ({
   severity,
   muted,
@@ -57,17 +89,7 @@ const SectionLayout = ({
   reason?: string
   children: ReactNode
 }): ReactElement => (
-  // The section appears only once the chain read resolves; the entrance
-  // animation softens the late insert instead of popping it in one frame.
-  <div
-    data-testid="safenet-checks-section"
-    data-status={status}
-    data-reason={reason}
-    role="status"
-    aria-live="polite"
-    className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-3 p-4 duration-300"
-  >
-    <SafenetLogo role="img" aria-label="Safenet" className="h-5 w-auto self-start text-foreground" />
+  <SectionShell status={status} reason={reason}>
     <div className="flex items-start gap-2">
       <SeverityIcon severity={severity} muted={muted} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -76,19 +98,19 @@ const SectionLayout = ({
         </Typography>
         {children}
         <Note>
-          <ExternalLink data-testid="safenet-about-link" href={SAFENET_DOCS_URL}>
-            What is Safenet?
-          </ExternalLink>
+          <LearnMore />
         </Note>
       </div>
     </div>
-  </div>
+  </SectionShell>
 )
 
 const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
-  <SectionLayout severity={Severity.INFO} muted title={PRE_CHECK_COPY.label} status="PRE_CHECK" reason={kind}>
-    <Note>{PRE_CHECK_COPY[kind]}</Note>
-  </SectionLayout>
+  <SectionShell status="PRE_CHECK" reason={kind}>
+    <Note>
+      {SAFENET_ABOUT} {PRE_CHECK_COPY[kind]} <LearnMore />
+    </Note>
+  </SectionShell>
 )
 
 const RejectionReasons = ({ summary }: { summary: RejectionSummary }): ReactElement | null => {
@@ -134,7 +156,21 @@ const InFlightTiming = ({
   submittedAt?: number
 }): ReactElement | null => {
   const sentence = formatTimingSentence(useCheckTiming(snapshot, submittedAt))
-  return sentence ? <Note testId="safenet-check-timing">{sentence}</Note> : null
+  const progress = getCheckProgress(snapshot)
+
+  return (
+    <>
+      {progress !== null && (
+        <Progress
+          value={progress}
+          aria-label="Safenet check progress"
+          className="my-1"
+          data-testid="safenet-check-progress"
+        />
+      )}
+      {sentence && <Note testId="safenet-check-timing">{sentence}</Note>}
+    </>
+  )
 }
 
 /** Safenet section in the Safe Shield widget, rendered from builders in stories and tests. */

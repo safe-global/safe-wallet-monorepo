@@ -72,11 +72,14 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
 }
 
 /** Shown before the first signature, while no check exists yet. */
+export const SAFENET_ABOUT =
+  "Independent sentinels simulate this transaction and check it against Safenet's security rules."
+
 export const PRE_CHECK_COPY = {
-  label: 'Checks after you sign',
-  multisig: 'Takes about a minute. The next signer will see the result.',
-  single: "Takes about a minute. Execute from the queue once it's in.",
-  executeNow: 'Takes about a minute. Choose "No, later" to see it before executing.',
+  multisig: 'The check starts after you sign and takes about a minute. The next signer will see the result.',
+  single: "The check starts after you sign and takes about a minute. Execute from the queue once it's in.",
+  executeNow:
+    'The check starts after you sign and takes about a minute. Choose "No, later" to see the result before executing.',
 }
 
 /** Compact queue-chip labels; the full state name stays in the tooltip and screen-reader copy. */

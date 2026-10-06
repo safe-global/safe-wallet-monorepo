@@ -1,5 +1,6 @@
 import { BLOCK_TIME_SECONDS } from '@safe-global/utils/features/safenet-checks/constants'
-import { formatSimulatingLabel, formatTimingSentence, getCheckTiming } from '../checkTiming'
+import { requestCreatedEvent } from '@safe-global/utils/features/safenet-checks/builders'
+import { formatSimulatingLabel, formatTimingSentence, getCheckProgress, getCheckTiming } from '../checkTiming'
 
 const NOW = 1_770_000_000_000
 const HEAD = '40000000'
@@ -70,5 +71,24 @@ describe('formatSimulatingLabel', () => {
     [{ kind: 'elapsed', minutes: 3 }, 'Simulating for 3 min'],
   ] as const)('formats %j as %j', (timing, expected) => {
     expect(formatSimulatingLabel(timing)).toBe(expected)
+  })
+})
+
+describe('getCheckProgress', () => {
+  const events = [requestCreatedEvent({ blockNumber: 1000, deadlineBlock: '1048' })]
+
+  it('measures how far the reveal window has run', () => {
+    expect(getCheckProgress({ events, deadlineBlock: '1048', headBlock: '1024' })).toBe(50)
+  })
+
+  it('clamps to 0 and 100', () => {
+    expect(getCheckProgress({ events, deadlineBlock: '1048', headBlock: '990' })).toBe(0)
+    expect(getCheckProgress({ events, deadlineBlock: '1048', headBlock: '2000' })).toBe(100)
+  })
+
+  it('returns null without the request event or a block', () => {
+    expect(getCheckProgress({ events: [], deadlineBlock: '1048', headBlock: '1024' })).toBeNull()
+    expect(getCheckProgress({ events, deadlineBlock: null, headBlock: '1024' })).toBeNull()
+    expect(getCheckProgress({ events, deadlineBlock: '1048', headBlock: null })).toBeNull()
   })
 })

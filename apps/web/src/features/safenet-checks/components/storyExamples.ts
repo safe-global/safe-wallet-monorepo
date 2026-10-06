@@ -8,6 +8,7 @@ import {
   attestedEvent,
   buildBenignSnapshot,
   buildSnapshot,
+  requestCreatedEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 
@@ -64,7 +65,11 @@ export const rejectedSnapshot = (votes: Vote[], status = CheckStatus.MALICIOUS):
 
 /** 24 blocks of 5s before the reveal deadline: "up to about 2 min". */
 export const inProgressWithDeadline = (): SafenetCheckSnapshot =>
-  exampleSnapshot(CheckStatus.IN_PROGRESS, { headBlock: '48600000', deadlineBlock: '48600024' })
+  exampleSnapshot(CheckStatus.IN_PROGRESS, {
+    headBlock: '48600000',
+    deadlineBlock: '48600024',
+    events: [requestCreatedEvent({ blockNumber: 48_599_976, deadlineBlock: '48600024' })],
+  })
 
 /** No blocks known, started 3 min before the story renders: the elapsed fallback. */
 export const inProgressElapsed = (): SafenetCheckSnapshot =>

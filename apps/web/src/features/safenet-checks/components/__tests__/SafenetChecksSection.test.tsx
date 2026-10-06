@@ -172,7 +172,7 @@ describe('SafenetChecksSection', () => {
     expect(section).toHaveAttribute('data-status', status)
     expect(screen.getByRole('img', { name: 'Safenet' })).toBeInTheDocument()
     expect(section).toHaveTextContent(copy)
-    expect(screen.getByTestId('safenet-about-link')).toHaveTextContent('What is Safenet?')
+    expect(screen.getByTestId('safenet-about-link')).toHaveTextContent('Learn more')
   })
 
   it('announces status changes politely', () => {
@@ -283,9 +283,15 @@ describe('SafenetChecksSection', () => {
 
       const section = screen.getByTestId('safenet-checks-section')
       expect(section).toHaveAttribute('data-status', 'PRE_CHECK')
-      expect(section).toHaveTextContent('Checks after you sign')
-      expect(section).toHaveTextContent('Takes about a minute. The next signer will see the result.')
-      expect(screen.getByRole('link', { name: /What is Safenet\?/ })).toBeInTheDocument()
+      expect(section).toHaveTextContent(
+        "Independent sentinels simulate this transaction and check it against Safenet's",
+      )
+      expect(section).toHaveTextContent('The check starts after you sign and takes about a minute.')
+      expect(section).toHaveTextContent('The next signer will see the result.')
+      expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+        'href',
+        'https://docs.safefoundation.org/safenet',
+      )
     })
 
     it('tells a signer who executes in the same click how to see the result first', () => {
@@ -295,7 +301,7 @@ describe('SafenetChecksSection', () => {
 
       const section = screen.getByTestId('safenet-checks-section')
       expect(section).toHaveAttribute('data-reason', 'executeNow')
-      expect(section).toHaveTextContent('Choose "No, later" to see it before executing.')
+      expect(section).toHaveTextContent('Choose "No, later" to see the result before executing.')
     })
 
     it.each([
