@@ -9,8 +9,8 @@ import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
 import ExternalLink from '../ExternalLink'
 import { Link } from '@/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
-import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
+import { HELP_CENTER_URL, PRIVACY_URL } from '@safe-global/utils/config/constants'
+import { IS_PRODUCTION, COMMIT_HASH, LEGAL_URL } from '@/config/constants'
 import type { FooterProps } from './footer.type'
 
 const footerPages = [
@@ -56,8 +56,8 @@ const Footer: React.FC<FooterProps> = ({
               <Typography variant="paragraph-mini">&copy;{copyrightYear} Safe Labs GmbH</Typography>
             </li>
             <li>
-              <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-                Terms
+              <ExternalLink href={LEGAL_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+                Legal
               </ExternalLink>
             </li>
             <li>
