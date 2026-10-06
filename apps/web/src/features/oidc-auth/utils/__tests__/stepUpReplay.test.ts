@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as entitlementsApi } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
@@ -232,6 +233,53 @@ describe('replayStepUpAction', () => {
     expect(selectNotifications(store.getState())).toEqual([
       expect.objectContaining({ message: 'Safe account added', variant: 'success' }),
     ])
+  })
+
+  it('should, when the entitlements query is still in flight with two subscribers while the replay completes, fetch it again so the seat meter counts the added Safe', async () => {
+    const spaceId = faker.string.uuid()
+    const seats = (used: number) => ({
+      plan: null,
+      entitlements: [{ feature: 'safe_seats', enabled: true, type: 'metered', quota: 20, used, resetsAt: null }],
+    })
+    const entitlementsRequests: string[] = []
+    let releaseFirstEntitlements: () => void = () => {}
+    const firstEntitlementsReleased = new Promise<void>((resolve) => (releaseFirstEntitlements = resolve))
+    let mutationReceived: () => void = () => {}
+    const mutationArrived = new Promise<void>((resolve) => (mutationReceived = resolve))
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/entitlements`, async () => {
+        entitlementsRequests.push('GET')
+        if (entitlementsRequests.length === 1) {
+          await firstEntitlementsReleased
+          return HttpResponse.json(seats(1))
+        }
+        return HttpResponse.json(seats(2))
+      }),
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => {
+        mutationReceived()
+        return HttpResponse.json({}, { status: 201 })
+      }),
+    )
+
+    const store = makeStore()
+    store.dispatch(entitlementsApi.endpoints.entitlementsGetEntitlementsV1.initiate({ spaceId }))
+    store.dispatch(entitlementsApi.endpoints.entitlementsGetEntitlementsV1.initiate({ spaceId }))
+
+    const replay = replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+    await mutationArrived
+    await Promise.all(store.dispatch(cgwApi.util.getRunningMutationsThunk()))
+    releaseFirstEntitlements()
+    await replay
+
+    expect(entitlementsRequests).toHaveLength(2)
+    const entitlements = await store.dispatch(
+      entitlementsApi.endpoints.entitlementsGetEntitlementsV1.initiate({ spaceId }),
+    )
+    expect(entitlements.data).toEqual(seats(2))
   })
 
   it('should, when no query is in flight while the replay completes, fetch the list after the mutation and once more before the toast', async () => {
