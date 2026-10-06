@@ -38,8 +38,8 @@ jest.mock('@/components/ui/select', () => ({
       {children}
     </div>
   ),
-  SelectItem: ({ children, value }: { children?: React.ReactNode; value?: string }) => (
-    <div data-testid="select-item" data-value={value}>
+  SelectItem: ({ children, value, hidden }: { children?: React.ReactNode; value?: string; hidden?: boolean }) => (
+    <div data-testid="select-item" data-value={value} hidden={hidden}>
       {children}
     </div>
   ),
@@ -71,7 +71,11 @@ jest.mock('../SafeItem', () => ({
 
 jest.mock('../MultiChainSafeItemRow', () => ({
   __esModule: true,
-  default: ({ item }: { item: SafeItemData }) => <div data-testid="multi-chain-row">{item.name}</div>,
+  default: ({ item, hidden }: { item: SafeItemData; hidden?: boolean }) => (
+    <div data-testid="multi-chain-row" hidden={hidden}>
+      {item.name}
+    </div>
+  ),
 }))
 
 // Redux-backed; stubbed here so the container test doesn't need a store.
@@ -134,7 +138,7 @@ describe('SafeDropdownContainer', () => {
           items={[]}
           onItemSelect={jest.fn()}
           closeDropdown={jest.fn()}
-          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a Workspace</div>}
         />,
       )
 
@@ -148,7 +152,7 @@ describe('SafeDropdownContainer', () => {
           items={[]}
           onItemSelect={jest.fn()}
           closeDropdown={jest.fn()}
-          emptyStateOverride={<div data-testid="custom-empty">Sign in to a workspace</div>}
+          emptyStateOverride={<div data-testid="custom-empty">Sign in to a Workspace</div>}
           searchValue="treasury"
           onSearchValueChange={jest.fn()}
         />,
@@ -285,7 +289,7 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'alpha')
 
       expect(screen.getByText('Alpha Treasury')).toBeInTheDocument()
-      expect(screen.queryByText('Beta Ops')).not.toBeInTheDocument()
+      expect(screen.getByText('Beta Ops')).not.toBeVisible()
     })
 
     it('filters by address', async () => {
@@ -293,7 +297,7 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), '0xbbbb')
 
       expect(screen.getByText('Beta Ops')).toBeInTheDocument()
-      expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
+      expect(screen.getByText('Alpha Treasury')).not.toBeVisible()
     })
 
     it('filters by chain name', async () => {
@@ -301,7 +305,7 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'polygon')
 
       expect(screen.getByText('Beta Ops')).toBeInTheDocument()
-      expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
+      expect(screen.getByText('Alpha Treasury')).not.toBeVisible()
     })
 
     it('filters by chain short name', async () => {
@@ -309,7 +313,7 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'matic')
 
       expect(screen.getByText('Beta Ops')).toBeInTheDocument()
-      expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
+      expect(screen.getByText('Alpha Treasury')).not.toBeVisible()
     })
 
     it('filters by the address-book name when the safe itself is unnamed', async () => {
@@ -325,8 +329,8 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'cold')
 
       // The unnamed safe (resolved via address book) survives; the named one is filtered out.
-      expect(screen.queryByText('Alpha Treasury')).not.toBeInTheDocument()
-      expect(screen.getByTestId('safe-item')).toBeInTheDocument()
+      expect(screen.getByText('Alpha Treasury')).not.toBeVisible()
+      expect(screen.getAllByTestId('select-item').filter((row) => !row.hidden)).toHaveLength(1)
     })
 
     it('shows an empty state when nothing matches', async () => {
@@ -334,7 +338,7 @@ describe('SafeDropdownContainer', () => {
       await userEvent.type(screen.getByTestId('safe-dropdown-search-input'), 'nonexistent')
 
       expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes match your search')
-      expect(screen.queryByTestId('safe-item')).not.toBeInTheDocument()
+      for (const row of screen.getAllByTestId('safe-item')) expect(row).not.toBeVisible()
     })
 
     it('filters with a controlled searchValue and reports typing via onSearchValueChange', () => {
@@ -350,10 +354,24 @@ describe('SafeDropdownContainer', () => {
       )
 
       expect(screen.getByText('Alpha Treasury')).toBeInTheDocument()
-      expect(screen.queryByText('Beta Ops')).not.toBeInTheDocument()
+      expect(screen.getByText('Beta Ops')).not.toBeVisible()
 
       fireEvent.change(screen.getByTestId('safe-dropdown-search-input'), { target: { value: 'beta' } })
       expect(onSearchValueChange).toHaveBeenCalledWith('beta')
+    })
+
+    it('keeps filtered-out rows mounted, so a search round-trip never remounts a Select row', async () => {
+      renderWithSearch()
+      const alphaRow = screen.getByText('Alpha Treasury').closest('[data-testid="select-item"]')
+      const input = screen.getByTestId('safe-dropdown-search-input')
+
+      await userEvent.type(input, 'beta')
+      expect(alphaRow).toBeInTheDocument()
+      expect(alphaRow).not.toBeVisible()
+
+      await userEvent.clear(input)
+      expect(screen.getByText('Alpha Treasury').closest('[data-testid="select-item"]')).toBe(alphaRow)
+      expect(alphaRow).toBeVisible()
     })
 
     it('keeps a controlled search visible even when the active list is empty (query spans both tabs)', () => {
@@ -439,14 +457,14 @@ describe('SafeDropdownContainer', () => {
 
       const scrollArea = screen.getByTestId('dropdown-scroll-area')
       expect(scrollArea).toHaveClass('overflow-x-auto')
-      expect(scrollArea.firstElementChild).toHaveClass('min-w-[527px]')
+      expect(scrollArea.firstElementChild).toHaveClass('max-[575px]:min-w-[527px]')
     })
 
     it('does not constrain the empty state to the row min-width', () => {
       render(<SafeDropdownContainer items={[]} onItemSelect={jest.fn()} closeDropdown={jest.fn()} />)
 
       const scrollArea = screen.getByTestId('dropdown-scroll-area')
-      expect(scrollArea.firstElementChild).not.toHaveClass('min-w-[527px]')
+      expect(scrollArea.firstElementChild).not.toHaveClass('max-[575px]:min-w-[527px]')
     })
   })
 
@@ -477,7 +495,7 @@ describe('SafeDropdownContainer', () => {
       expect(screen.getAllByTestId('select-item')).toHaveLength(2)
     })
 
-    it('falls back to the normal list while a search is active (never persists a partial order)', () => {
+    it('keeps the reorder list mounted while searching but disables dragging (no partial-order drop)', () => {
       render(
         <SafeDropdownContainer
           items={[itemA, itemB]}
@@ -489,8 +507,68 @@ describe('SafeDropdownContainer', () => {
         />,
       )
 
-      expect(screen.queryByTestId('safe-selector-reorder-list')).not.toBeInTheDocument()
-      expect(screen.getByTestId('select-item')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+      expect(screen.getByText('Alpha')).toBeVisible()
+      expect(screen.getByText('Beta')).not.toBeVisible()
+      expect(screen.queryByTestId('safe-drag-handle')).not.toBeInTheDocument()
+    })
+
+    it('does not swap the list component when a search transitions from empty to non-empty', () => {
+      const { rerender } = render(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue=""
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.getAllByTestId('safe-drag-handle')).toHaveLength(2)
+
+      rerender(
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue="alpha"
+          onSearchValueChange={jest.fn()}
+        />,
+      )
+
+      // Same list component, just filtered + grips hidden — never the plain Select-item fallback.
+      expect(screen.getByTestId('safe-selector-reorder-list')).toBeInTheDocument()
+      expect(screen.queryByTestId('select-item')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('safe-drag-handle')).not.toBeInTheDocument()
+    })
+
+    it('keeps the reorder rows mounted through a zero-result search and back', () => {
+      const renderWithQuery = (searchValue: string) => (
+        <SafeDropdownContainer
+          items={[itemA, itemB]}
+          onItemSelect={jest.fn()}
+          closeDropdown={jest.fn()}
+          onReorder={jest.fn()}
+          searchValue={searchValue}
+          onSearchValueChange={jest.fn()}
+        />
+      )
+      const { rerender } = render(renderWithQuery('alpha'))
+      const rows = screen.getAllByTestId('reorder-safe-row')
+
+      rerender(renderWithQuery('nonexistent'))
+      expect(screen.getByTestId('dropdown-empty')).toHaveTextContent('No safes match your search')
+      screen.getAllByTestId('reorder-safe-row').forEach((row, i) => expect(row).toBe(rows[i]))
+      for (const row of rows) expect(row).not.toBeVisible()
+
+      rerender(renderWithQuery('alph'))
+      expect(screen.queryByTestId('dropdown-empty')).not.toBeInTheDocument()
+      screen.getAllByTestId('reorder-safe-row').forEach((row, i) => expect(row).toBe(rows[i]))
+      expect(screen.getByText('Alpha')).toBeVisible()
     })
 
     it('navigates and closes the dropdown when a reorder row is clicked', () => {

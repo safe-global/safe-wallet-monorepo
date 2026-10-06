@@ -2,6 +2,7 @@ import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/ty
 import type { SecurityGrade } from '@/features/security/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { AppRoutes } from '@/config/routes'
+import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
 import { DASH } from './constants'
 import type { SpaceSafeEntry } from '../../types'
 
@@ -20,11 +21,8 @@ export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
 export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
-/** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
-export type GetSafeSecurityHref = (
-  address: string,
-  chainId: string,
-) => { pathname: string; query: { safe: string } } | undefined
+/** Builder returning a Safe's security settings URL for a given (address, chainId), or undefined if the chain has no short name. */
+export type GetSafeSecurityHref = (address: string, chainId: string) => SafeHref | undefined
 
 /**
  * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.
@@ -36,11 +34,8 @@ export const buildSafeSecurityHref = (
   chainShortNames: Record<string, string>,
   address: string,
   chainId: string,
-): { pathname: string; query: { safe: string } } | undefined => {
-  const shortName = chainShortNames[chainId]
-  if (!shortName) return undefined
-  return { pathname: AppRoutes.settings.security, query: { safe: `${shortName}:${address}` } }
-}
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address, spaceId)
 
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same

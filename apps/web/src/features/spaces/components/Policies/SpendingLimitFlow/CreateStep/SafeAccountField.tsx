@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
 import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
 import SafeAccountSelector from '../../SafeAccountSelector'
+import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../../SafeAccountSelector/constants'
 import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormValues } from '../types'
 
@@ -13,6 +14,7 @@ export type SafeAccountFieldProps = {
   hasWallet: boolean
   /** The picked `${chainId}:${address}`, already split. */
   onSafeChange: (chainId: string, address: string) => void
+  readOnly?: boolean
 }
 
 const SafeAccountField = ({
@@ -22,6 +24,7 @@ const SafeAccountField = ({
   onRetry,
   hasWallet,
   onSafeChange,
+  readOnly = false,
 }: SafeAccountFieldProps): ReactElement => {
   const { control } = useFormContext<SpendingLimitPolicyFormValues>()
 
@@ -43,6 +46,8 @@ const SafeAccountField = ({
           isError={isError}
           onRetry={onRetry}
           hasWallet={hasWallet}
+          readOnly={readOnly}
+          notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('spending limits') }}
           name={field.name}
           id="spending-limit-safe-account"
         />

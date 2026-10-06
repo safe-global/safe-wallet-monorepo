@@ -3,7 +3,8 @@ import { useForm, useWatch } from 'react-hook-form'
 import OnboardingFooter from '@/components/common/OnboardingFooter'
 import { Input } from '@/components/ui/input'
 import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
@@ -19,6 +20,11 @@ import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
+import ClaimTrialModal from '../Plans/ClaimTrialModal'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
+import { useStepUpReturnUrl } from '@/features/oidc-auth'
+import { AppRoutes } from '@/config/routes'
+import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
@@ -26,6 +32,7 @@ const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
+  const router = useRouter()
   const totalSteps = useOnboardingStepCount()
   const isCheckingAccess = useIsCheckingAccess() ?? true
 
@@ -40,7 +47,20 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
   const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
-  const { error, isSubmitting, onSubmit } = useSpaceSubmit(handleSubmit, spaceId, isEditMode)
+  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes, selectSafesUrl } = useSpaceSubmit(
+    handleSubmit,
+    spaceId,
+    isEditMode,
+  )
+  // The new Workspace is offered its trial right here; without an offer the wizard moves on to the Safes step.
+  const trialLock = useWorkspaceLock(createdSpaceId ?? null)
+  const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
+  const isTrialCheckFailed = Boolean(createdSpaceId) && trialLock.isError
+  // The page reloads after a step-up and loses the created Workspace, so the challenge returns to its Safes step.
+  useStepUpReturnUrl(offersTrial ? selectSafesUrl : undefined)
+  useEffect(() => {
+    if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) goToSelectSafes(createdSpaceId)
+  }, [createdSpaceId, trialLock.isResolving, trialLock.isError, offersTrial, goToSelectSafes])
   const watchedName = useWatch({ control, name: 'name' }) ?? ''
 
   // Tracks whether the user has typed in the input at least once. We can't use
@@ -58,14 +78,14 @@ const CreateSpaceOnboarding = (): ReactElement => {
     },
   })
 
-  const isInputDisabled = isCheckingAccess || isSpaceLoading
+  const isInputDisabled = isCheckingAccess || isSpaceLoading || Boolean(createdSpaceId)
   useEffect(() => {
     if (!isEditMode && !isInputDisabled) {
       setFocus('name')
     }
   }, [isEditMode, isInputDisabled, setFocus])
 
-  // spaceId gate avoids leaking lastUsedSpace's safes into a fresh "create" landing.
+  // spaceId gate avoids leaking landingSpaceHint's safes into a fresh "create" landing.
   const { allSafes } = useSpaceSafes()
   const nameLookup = useSafeNameLookup()
   const sidePanelAccounts = useMemo(
@@ -80,6 +100,14 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const main = (
     <>
+      {offersTrial && createdSpaceId && (
+        <ClaimTrialModal
+          spaceId={createdSpaceId}
+          variant="new"
+          returnPathname={AppRoutes.welcome.selectSafes}
+          onBack={() => router.push(AppRoutes.welcome.accounts)}
+        />
+      )}
       <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
 
       <div className="flex flex-col gap-2">
@@ -127,6 +155,20 @@ const CreateSpaceOnboarding = (): ReactElement => {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+
+        {isTrialCheckFailed && (
+          <Alert variant="destructive" data-testid="trial-check-error">
+            <AlertSeverityIcon variant="destructive" />
+            <AlertDescription>
+              We couldn&apos;t check your Workspace&apos;s free access. Please try again.
+            </AlertDescription>
+            <AlertAction>
+              <Button type="button" variant="outline" size="sm" onClick={trialLock.retry}>
+                Try again
+              </Button>
+            </AlertAction>
+          </Alert>
+        )}
       </form>
     </>
   )
@@ -138,8 +180,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
       continueLabel="Next"
       continueType="submit"
       continueForm={FORM_ID}
-      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading}
-      continueLoading={isSubmitting}
+      continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading || Boolean(createdSpaceId)}
+      continueLoading={isSubmitting || (Boolean(createdSpaceId) && trialLock.isResolving)}
       continueTestId="create-space-onboarding-continue-button"
     />
   )

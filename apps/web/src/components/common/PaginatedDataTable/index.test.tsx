@@ -67,6 +67,20 @@ describe('PaginatedDataTable', () => {
     })
   })
 
+  it('pins a fit column to its minWidth and leaves unsized columns to share the rest', () => {
+    const sizedColumns: DataTableColumn<string>[] = [
+      { id: 'fit', header: 'Fit', width: 'fit', minWidth: 140, cell: (row) => row },
+      { id: 'fill', header: 'Fill', minWidth: 200, cell: (row) => row },
+    ]
+
+    render(<PaginatedDataTable columns={sizedColumns} rows={['a']} getRowKey={(row) => row} />)
+
+    const fitHeader = screen.getByRole('columnheader', { name: 'Fit' })
+    expect(fitHeader).toHaveClass('md:w-[var(--col-min-w)]')
+    expect(fitHeader.style.getPropertyValue('--col-min-w')).toBe('140px')
+    expect(screen.getByRole('columnheader', { name: 'Fill' }).className).not.toMatch(/md:w-/)
+  })
+
   it('renders every row and no pagination when below the page size', () => {
     render(tableElement(['a', 'b', 'c']))
 
@@ -294,6 +308,71 @@ describe('PaginatedDataTable', () => {
 
       // The pair renders as [row a, detail a, row b] — only the detail row closes it.
       expect(suppressed(container)).toEqual([true, false, false])
+    })
+  })
+
+  describe('clickable rows', () => {
+    const clickableTable = (onRowClick: (row: string) => void) => (
+      <PaginatedDataTable
+        columns={[
+          { id: 'value', header: 'Value', cell: (row) => row },
+          { id: 'open', header: '', cell: (row) => <button onClick={() => onRowClick(row)}>Open {row}</button> },
+        ]}
+        rows={['a', 'b']}
+        getRowKey={(row) => row}
+        onRowClick={onRowClick}
+      />
+    )
+
+    it('should, when no click handler is given, leave the rows as plain table rows', () => {
+      render(tableElement(['a']))
+
+      expect(screen.getAllByRole('row')[1]).not.toHaveClass('cursor-pointer')
+    })
+
+    it('should, when a cell is clicked, report that row', () => {
+      const onRowClick = jest.fn()
+
+      render(clickableTable(onRowClick))
+      fireEvent.click(screen.getByText('b'))
+
+      expect(onRowClick).toHaveBeenCalledTimes(1)
+      expect(onRowClick).toHaveBeenCalledWith('b')
+    })
+
+    it('should, when a control inside the row is clicked, leave the click to that control', () => {
+      const onRowClick = jest.fn()
+
+      render(clickableTable(onRowClick))
+      fireEvent.click(screen.getByRole('button', { name: 'Open a' }))
+
+      expect(onRowClick).toHaveBeenCalledTimes(1)
+    })
+
+    it('should, when rows are clickable, keep them table rows rather than buttons', () => {
+      render(clickableTable(jest.fn()))
+
+      expect(screen.getAllByRole('row')[1]).not.toHaveAttribute('role', 'button')
+      expect(screen.getAllByRole('row')[1]).toHaveClass('cursor-pointer')
+    })
+
+    it('should, when the mobile detail toggle is used, expand the row without reporting a click', () => {
+      mockUseIsMobile.mockReturnValue(true)
+      const onRowClick = jest.fn()
+
+      render(
+        <PaginatedDataTable
+          columns={columns}
+          rows={['a']}
+          getRowKey={(row) => row}
+          renderRowDetail={(row) => <span>{`detail-${row}`}</span>}
+          onRowClick={onRowClick}
+        />,
+      )
+      fireEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+      expect(screen.getByText('detail-a')).toBeInTheDocument()
+      expect(onRowClick).not.toHaveBeenCalled()
     })
   })
 })

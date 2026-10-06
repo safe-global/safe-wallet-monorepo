@@ -1,7 +1,8 @@
-import { useEffect, useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useChainId from '@/hooks/useChainId'
@@ -13,16 +14,24 @@ import { Card } from '@/components/ui/card'
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
+import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
-import { validateLimitAmount, validateUniqueToken } from '../utils/validation'
-import { limitPath, limitsPath, type SpendingLimitPolicyFormValues } from '../types'
 import {
+  existingTokensForSpender,
+  validateLimitAmount,
+  validateNoExistingLimit,
+  validateUniqueToken,
+} from '../utils/validation'
+import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
+import {
+  EXISTING_LIMIT_TOOLTIP,
   FREQUENCY_LABEL,
   LIMIT_AMOUNT_LABEL,
   LIMIT_AMOUNT_PLACEHOLDER,
-  PRICE_UNAVAILABLE_TEXT,
   REMOVE_LIMIT_LABEL,
 } from '../constants'
 
@@ -38,14 +47,12 @@ export type TokenLimitCardProps = {
   onRemove: () => void
 }
 
-const hasPrice = (token: TokenOption): boolean => !!token.fiatConversion && parseFloat(token.fiatConversion) > 0
+/** Holds one line even when empty, so the Frequency row does not move as the helpers come and go. */
+const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
+  <span className="block min-h-lh">{children}</span>
+)
 
-const FiatLine = ({ amount, token }: { amount: string; token: TokenOption | undefined }): ReactElement | null => {
-  if (!token) return null
-  if (!hasPrice(token)) return <span data-testid="amount-fiat">{PRICE_UNAVAILABLE_TEXT}</span>
-
-  // Nothing typed yet is not worth $0.00 — `computeFiatValue` returns null for that, and for anything
-  // else it cannot price, so say nothing rather than coercing it to a figure.
+const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): ReactElement | null => {
   const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
   if (fiat === null) return null
 
@@ -72,7 +79,16 @@ const TokenLimitCard = ({
     trigger,
     formState: { errors },
   } = useFormContext<SpendingLimitPolicyFormValues>()
-  const { options } = useSpendingLimitTokenOptions()
+  const extraTokens = useExistingLimitTokens()
+  const { options } = useSpendingLimitTokenOptions(extraTokens)
+  const { limits: existingLimits } = useExistingSpendingLimits()
+  // An edit describes the Safe's whole policy, so its own limits are the rows to change, not conflicts.
+  const isEditMode = useIsEditMode()
+  const spenderAddress = watch(spenderAddressPath(spenderIndex)) ?? ''
+  const existingTokens = useMemo(
+    () => (isEditMode ? [] : existingTokensForSpender(spenderAddress, existingLimits)),
+    [isEditMode, spenderAddress, existingLimits],
+  )
 
   const tokenPath = limitPath(spenderIndex, limitIndex, 'tokenAddress')
   const amountPath = limitPath(spenderIndex, limitIndex, 'amount')
@@ -83,7 +99,7 @@ const TokenLimitCard = ({
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const siblingTokensKey = (watch(limitsPath(spenderIndex)) ?? []).map((limit) => limit?.tokenAddress ?? '').join(',')
 
-  /** Tokens the spender's other rows already use — hidden from this row's list. */
+  /** Tokens the spender's other rows use — hidden from this row. */
   const excludeAddresses = useMemo(
     () => siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
     [siblingTokensKey, limitIndex],
@@ -105,6 +121,27 @@ const TokenLimitCard = ({
   useEffect(() => {
     if (getValues(amountPath)) trigger(amountPath)
   }, [decimals, amountPath, getValues, trigger])
+
+  // Keyed on the exclusions' values, not the array: every spender keystroke produces a new one, and re-validating
+  // on each would show this row's errors before it has been filled in.
+  const existingTokensKey = existingTokens.join(',')
+  useEffect(() => {
+    if (existingLimits !== undefined && getValues(tokenPath)) trigger(tokenPath)
+  }, [existingTokensKey, existingLimits, tokenPath, getValues, trigger])
+
+  // Read at validation time: a memo of the sibling rows would be one render behind.
+  const validateTokenChoice = (tokenAddress: string): string | undefined => {
+    const siblingTokens = (getValues(limitsPath(spenderIndex)) ?? [])
+      .map((limit) => limit.tokenAddress)
+      .filter((_, index) => index !== limitIndex)
+    const spender = getValues(spenderAddressPath(spenderIndex)) ?? ''
+
+    if (isEditMode) return validateUniqueToken(tokenAddress, siblingTokens)
+
+    return (
+      validateUniqueToken(tokenAddress, siblingTokens) ?? validateNoExistingLimit(tokenAddress, spender, existingLimits)
+    )
+  }
 
   const tokenError = get(errors, tokenPath)
   const amountError = get(errors, amountPath)
@@ -134,34 +171,27 @@ const TokenLimitCard = ({
             <Controller
               control={control}
               name={tokenPath}
-              rules={{
-                required: NO_TOKEN_SELECTED_ERROR,
-                deps: siblingTokenPaths,
-                // Read the siblings at validation time; a memo would be one render behind.
-                validate: (value) =>
-                  validateUniqueToken(
-                    value,
-                    (getValues(limitsPath(spenderIndex)) ?? [])
-                      .map((limit) => limit.tokenAddress)
-                      .filter((_, index) => index !== limitIndex),
-                  ),
-              }}
+              rules={{ required: NO_TOKEN_SELECTED_ERROR, deps: siblingTokenPaths, validate: validateTokenChoice }}
               render={({ field }) => (
                 <TokenSelector
                   value={field.value || undefined}
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
+                  disabledAddresses={existingTokens}
+                  disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}
                   error={!!tokenError}
                   helperText={
-                    tokenError?.message ? (
-                      <span data-testid="token-error">{String(tokenError.message)}</span>
-                    ) : selectedToken ? (
-                      <span data-testid="token-balance">
-                        {formatVisualAmount(selectedToken.balance ?? '0', selectedToken.decimals)}{' '}
-                        {tokenOptionLabel(selectedToken)}
-                      </span>
-                    ) : undefined
+                    <HelperLine>
+                      {tokenError?.message ? (
+                        <span data-testid="token-error">{String(tokenError.message)}</span>
+                      ) : selectedToken?.balance !== undefined ? (
+                        <span data-testid="token-balance">
+                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
+                          {tokenOptionLabel(selectedToken)}
+                        </span>
+                      ) : null}
+                    </HelperLine>
                   }
                   data-testid="limit-token-selector"
                 />
@@ -176,14 +206,21 @@ const TokenLimitCard = ({
               fullWidth
               error={!!amountError}
               helperText={
-                amountError?.message ? (
-                  String(amountError.message)
-                ) : selectedToken ? (
-                  <FiatLine amount={amount} token={selectedToken} />
-                ) : undefined
+                <HelperLine>
+                  {amountError?.message ? (
+                    String(amountError.message)
+                  ) : selectedToken ? (
+                    <FiatLine amount={amount} token={selectedToken} />
+                  ) : null}
+                </HelperLine>
               }
               data-testid="limit-amount-input"
-              {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
+              {...register(amountPath, {
+                // NumberField leaves at most one separator, the locale's; store it as a dot.
+                setValueAs: (value: unknown) =>
+                  typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
+                validate: (value) => validateLimitAmount(value, decimals),
+              })}
             />
           </div>
         </div>

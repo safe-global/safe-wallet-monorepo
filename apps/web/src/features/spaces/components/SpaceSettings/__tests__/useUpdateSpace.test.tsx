@@ -28,7 +28,7 @@ const mockSpace: GetSpaceResponse = {
 }
 
 const renderWithStore = (onSuccess?: () => void) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   return { store, ...renderHook(() => useUpdateSpace(mockSpace, onSuccess), { wrapper }) }
 }
@@ -67,7 +67,7 @@ describe('useUpdateSpace', () => {
     const notifications = store.getState().notifications
     expect(notifications.length).toBeGreaterThan(0)
     const last = notifications[notifications.length - 1]
-    expect(last.message).toBe('Updated workspace name')
+    expect(last.message).toBe('Updated Workspace name')
     expect(last.variant).toBe('success')
     expect(last.groupKey).toBe('space-update-name')
   })
@@ -134,7 +134,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('does nothing when space is undefined', async () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
     const { result } = renderHook(() => useUpdateSpace(undefined), { wrapper })
 

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
-import { NO_ELIGIBLE_ACCOUNTS_TEXT, NO_WALLET_TEXT } from '../constants'
+import { getEligibilityCopy, NO_WALLET_TEXT } from '../constants'
 import PopupMessage from '../../components/PopupMessage'
 
 /**
@@ -10,9 +10,11 @@ import PopupMessage from '../../components/PopupMessage'
 const NoEligibleAccounts = ({
   onSwitchWallet,
   hasWallet = true,
+  signersOnly = false,
 }: {
   onSwitchWallet: () => void
   hasWallet?: boolean
+  signersOnly?: boolean
 }) => (
   <PopupMessage
     data-testid="no-eligible-accounts"
@@ -23,7 +25,7 @@ const NoEligibleAccounts = ({
     }
   >
     <Typography variant="paragraph-small" color="muted" className="w-full">
-      {hasWallet ? NO_ELIGIBLE_ACCOUNTS_TEXT : NO_WALLET_TEXT}
+      {hasWallet ? getEligibilityCopy(signersOnly).noEligibleAccountsText : NO_WALLET_TEXT}
     </Typography>
   </PopupMessage>
 )

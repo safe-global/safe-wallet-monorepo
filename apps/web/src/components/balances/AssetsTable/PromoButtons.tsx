@@ -1,36 +1,33 @@
 import React, { type ReactElement } from 'react'
-import { TokenType } from '@safe-global/store/gateway/types'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { StakeFeature } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
 import { EarnButton, isEligibleEarnToken } from '@/features/earn'
-import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
+import { isSafeToken } from '@/utils/safe-token'
+import SafenetStakeButton from './SafenetStakeButton'
 
 interface PromoButtonsProps {
   tokenInfo: Balance['tokenInfo']
   chainId: string
-  isStakingPromoEnabled: boolean
+  isSafenetStakingEnabled: boolean
   isEarnPromoEnabled: boolean
 }
 
 export const PromoButtons = ({
   tokenInfo,
   chainId,
-  isStakingPromoEnabled,
+  isSafenetStakingEnabled,
   isEarnPromoEnabled,
 }: PromoButtonsProps): ReactElement | null => {
-  const stake = useLoadFeature(StakeFeature)
-  const showStakeButton = isStakingPromoEnabled && tokenInfo.type === TokenType.NATIVE_TOKEN
+  const showSafenetStakeButton = isSafenetStakingEnabled && isSafeToken(chainId, tokenInfo.address)
   const showEarnButton = isEarnPromoEnabled && isEligibleEarnToken(chainId, tokenInfo.address)
 
-  if (!showStakeButton && !showEarnButton) {
+  if (!showSafenetStakeButton && !showEarnButton) {
     return null
   }
 
   return (
     <>
-      {showStakeButton && <stake.StakeButton tokenInfo={tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />}
+      {showSafenetStakeButton && <SafenetStakeButton />}
       {showEarnButton && <EarnButton tokenInfo={tokenInfo} trackingLabel={EARN_LABELS.asset} onlyIcon />}
     </>
   )

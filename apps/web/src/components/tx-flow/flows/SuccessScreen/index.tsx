@@ -22,25 +22,30 @@ import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/eve
 import Track from '@/components/common/Track'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import type { ReactElement } from 'react'
+import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
+import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
-interface Props {
+interface ContentProps {
   /** The ID assigned to the transaction in the client-gateway */
   txId?: string
   /** For module transaction, pass the transaction hash while the `txId` is not yet available */
   txHash?: string
 }
 
-const SuccessScreen = ({ txId, txHash }: Props) => {
+const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
   const [localTxHash, setLocalTxHash] = useState<string | undefined>(txHash)
   const [error, setError] = useState<Error>()
   const hasSucceededRef = useRef(false)
   const { setTxFlow } = useContext(TxModalContext)
   const chain = useCurrentChain()
+  const spaceId = useUrlSpaceId()
   const pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
   const { safeAddress } = useSafeInfo()
   const status = !txId && txHash ? PendingStatus.INDEXING : pendingTx?.status
   const pendingTxHash = pendingTx && 'txHash' in pendingTx ? pendingTx.txHash : undefined
-  const txLink = chain && txId && getTxLink(txId, chain, safeAddress)
+  const txLink = chain && txId && getTxLink(txId, chain, safeAddress, spaceId)
   const [txDetails] = useTxDetails(txId)
   const isSwapOrder = txDetails && isSwapTransferOrderTxInfo(txDetails.txInfo)
   const [predictedSafeAddress] = usePredictSafeAddressFromTxDetails(txDetails)
@@ -153,7 +158,10 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
                 disabled={!isSuccess}
                 render={
                   <NextLink
-                    href={{ pathname: AppRoutes.home, query: { safe: `${chain?.shortName}:${predictedSafeAddress}` } }}
+                    href={{
+                      pathname: AppRoutes.home,
+                      query: withSpaceId({ safe: `${chain?.shortName}:${predictedSafeAddress}` }, spaceId),
+                    }}
                   />
                 }
               >
@@ -169,5 +177,19 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
     </div>
   )
 }
+
+type Props = ContentProps & {
+  /** Set by a Space-level flow: the flow's own SafeScope unmounts with it, so the screen re-mounts one. */
+  scope?: SafeScopeTarget
+}
+
+const SuccessScreen = ({ scope, ...props }: Props): ReactElement =>
+  scope ? (
+    <SafeScopeProvider initial={scope}>
+      <SuccessScreenContent {...props} />
+    </SafeScopeProvider>
+  ) : (
+    <SuccessScreenContent {...props} />
+  )
 
 export default SuccessScreen

@@ -16,24 +16,20 @@ jest.mock('next/navigation', () => ({
 describe('useChainId hook', () => {
   // Reset mocks before each test
   beforeEach(() => {
+    jest.restoreAllMocks()
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: undefined,
-    })
+    window.history.replaceState(null, '', '/')
   })
 
   it('should read location.search if useRouter query.safe is empty', () => {
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/balances',
-        search: '?safe=avax:0x0000000000000000000000000000000000000123&redirect=true',
-      },
-    })
+    window.history.replaceState(
+      null,
+      '',
+      '/balances?safe=avax:0x0000000000000000000000000000000000000123&redirect=true',
+    )
 
     const { result } = renderHook(() => useChainId())
 
@@ -43,13 +39,7 @@ describe('useChainId hook', () => {
   it('should read location.search if useRouter query.chain is empty', () => {
     ;(useParams as any).mockImplementation(() => ({}))
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        pathname: '/welcome',
-        search: '?chain=matic',
-      },
-    })
+    window.history.replaceState(null, '', '/welcome?chain=matic')
 
     const { result } = renderHook(() => useChainId())
 
@@ -79,6 +69,57 @@ describe('useChainId hook', () => {
     expect(result.current).toBe('137')
   })
 
+  it('should return an empty chainId for a shortName no config knows', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'rhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '4663', shortName: 'robinhood' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
+  it('should resolve a shortName only the runtime config knows', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'robinhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '4663', shortName: 'robinhood' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('4663')
+  })
+
+  it('should return an empty chainId while the chain config is still loading', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'robinhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({ configs: [] }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
+  it('should not fall back to the wallet chain for an unresolvable shortName', () => {
+    ;(useParams as any).mockImplementation(() => ({
+      safe: 'rhood:0x0000000000000000000000000000000000000000',
+    }))
+
+    jest.spyOn(useWalletHook, 'default').mockImplementation(() => ({ chainId: '1337' }) as ConnectedWallet)
+    jest.spyOn(useChains, 'default').mockImplementation(() => ({
+      configs: [{ chainId: '1337' } as Chain],
+    }))
+
+    const { result } = renderHook(() => useChainId())
+    expect(result.current).toBe('')
+  })
+
   it('should return the wallet chain id if no chain in the URL and no last chain id', () => {
     ;(useParams as any).mockImplementation(() => ({}))
 
@@ -101,10 +142,7 @@ describe('useChainId hook', () => {
 describe('useChainId under a SafeScope', () => {
   it('returns the scope chain even when the URL names another one', () => {
     ;(useParams as any).mockImplementation(() => ({}))
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { pathname: '/spaces/policies', search: '?safe=sep:0x0000000000000000000000000000000000000123' },
-    })
+    window.history.replaceState(null, '', '/spaces/policies?safe=sep:0x0000000000000000000000000000000000000123')
     const wrapper = ({ children }: { children: ReactNode }) => (
       <SafeScopeContext.Provider
         value={{

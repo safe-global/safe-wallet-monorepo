@@ -2,8 +2,10 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../../hooks/useSpendingLimitSafeAccounts'
-import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import { createDefaultFormValues, createEmptyLimit, type SpendingLimitPolicyFormValues } from '../../types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 import CreateSpendingLimitPolicy from '..'
 
@@ -12,6 +14,10 @@ const SPENDER = '0x1234567890123456789012345678901234567890'
 
 jest.mock('../../hooks/useSpendingLimitSafeAccounts', () => ({ useSpendingLimitSafeAccounts: jest.fn() }))
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 // The form has its own suite; here only the wiring between flow context, scope and form is under test.
 jest.mock('../SpendingLimitPolicyForm', () => ({
@@ -32,6 +38,20 @@ jest.mock('../SpendingLimitPolicyForm', () => ({
       </button>
       <button type="button" onClick={() => props.onSubmit({ ...props.defaultValues, safe: `1:${SAFE_A}` })}>
         submit
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          props.onSubmit({
+            safe: `137:${SAFE_A}`,
+            spenders: [
+              { address: SPENDER, limits: [createEmptyLimit(), createEmptyLimit()] },
+              { address: SAFE_A, limits: [createEmptyLimit()] },
+            ],
+          })
+        }
+      >
+        submit two spenders
       </button>
     </div>
   ),
@@ -70,11 +90,13 @@ const renderStep = ({ data, scopeKey }: { data?: SpendingLimitPolicyFormValues; 
 
 describe('CreateSpendingLimitPolicy', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     mockUseAccounts.mockReturnValue({
       accounts: [],
       isLoading: false,
       isError: false,
       hasWallet: true,
+      signersOnly: false,
       refetch: jest.fn(),
     })
   })
@@ -113,5 +135,18 @@ describe('CreateSpendingLimitPolicy', () => {
     fireEvent.click(screen.getByRole('button', { name: 'type spender' }))
 
     expect(mockPoisoning).toHaveBeenLastCalledWith([SPENDER])
+  })
+
+  it('tracks the set policy with its chain, spender count and limit count on Next', () => {
+    const { onNext } = renderStep()
+
+    fireEvent.click(screen.getByRole('button', { name: 'submit two spenders' }))
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.SPENDING_LIMIT_SET, {
+      [MixpanelEventParams.CHAIN_ID]: '137',
+      [MixpanelEventParams.SPENDER_COUNT]: 2,
+      [MixpanelEventParams.LIMIT_COUNT]: 3,
+    })
+    expect(onNext).toHaveBeenCalledTimes(1)
   })
 })

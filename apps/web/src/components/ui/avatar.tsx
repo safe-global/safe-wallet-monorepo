@@ -19,7 +19,7 @@
  * Key Props:
  * - Avatar: `size` ('default' | 'sm' | 'xs'), `className`
  * - AvatarImage: `src`, `alt`
- * - AvatarFallback: `className`
+ * - AvatarFallback: `surface` ('muted' | 'card'), `className`
  *
  * Figma: https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/?node-id=18:1398
  *
@@ -67,12 +67,19 @@ function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {
   )
 }
 
-function AvatarFallback({ className, ...props }: AvatarPrimitive.Fallback.Props) {
+function AvatarFallback({
+  className,
+  surface = 'muted',
+  ...props
+}: AvatarPrimitive.Fallback.Props & {
+  surface?: 'muted' | 'card'
+}) {
   return (
     <AvatarPrimitive.Fallback
       data-slot="avatar-fallback"
+      data-surface={surface}
       className={cn(
-        'bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs',
+        'bg-muted text-muted-foreground rounded-full flex size-full items-center justify-center text-sm group-data-[size=sm]/avatar:text-xs group-data-[size=xs]/avatar:text-xs data-[surface=card]:bg-card',
         className,
       )}
       {...props}

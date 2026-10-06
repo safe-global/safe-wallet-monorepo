@@ -1,21 +1,28 @@
+import uniqWith from 'lodash/uniqWith'
 import type { SpendingLimitState, NewSpendingLimitData, SpendingLimitTxParams } from '../types'
 import {
   getLatestSpendingLimitAddress,
   getDeployedSpendingLimitModuleAddress,
   getSpendingLimitContract,
 } from './spendingLimitContracts'
-import type { MetaTransactionData, TransactionOptions } from '@safe-global/types-kit'
+import { isSpendingLimitFor } from './spendingLimitMatching'
+import type { SpendingLimitEdit } from './spendingLimitEdit'
+import type { MetaTransactionData, SafeTransaction, TransactionOptions } from '@safe-global/types-kit'
 import {
   createAddDelegateTx,
+  createDeleteAllowanceTx,
   createEnableModuleTx,
+  createRemoveDelegateTx,
   createResetAllowanceTx,
   createSetAllowanceTx,
 } from './spendingLimitParams'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type Safe from '@safe-global/protocol-kit'
 import type { ContractTransactionResponse, Eip1193Provider } from 'ethers'
 import { parseUnits } from 'ethers'
 import { currentMinutes } from '@safe-global/utils/utils/date'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender/create'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { didRevert } from '@/utils/ethers-utils'
@@ -25,15 +32,232 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 export const NO_ALLOWANCE_MODULE_ERROR =
   'The spending limit module is not available on this network, so the transaction could not be created.'
+export const EMPTY_SPENDING_LIMITS_ERROR = 'The policy has no spender and token to set a limit for.'
+export const DUPLICATE_SPENDING_LIMIT_ERROR = 'The same spender and token appear twice in the policy.'
+export const UNKNOWN_TOKEN_DECIMALS_ERROR =
+  'The decimals of a selected token are unknown, so its limit cannot be encoded.'
+export const EMPTY_SPENDING_LIMIT_EDIT_ERROR = 'This edit changes nothing, so there is no transaction to sign.'
+export const MODULE_NOT_ENABLED_ERROR =
+  'The spending limit module is not enabled on this Safe account, so its limits cannot be edited.'
+
+/** A recurring period is anchored this far in the past so its first window is already running. */
+const RESET_BASE_OFFSET_MIN = 30
+
+/** One allowance as the flow wants it set, against `SpendingLimitState` as the chain holds it. `resetTime` is minutes as a string, `'0'` = one time. */
+export type DesiredAllowance = {
+  beneficiary: string
+  tokenAddress: string
+  /** Human-readable, as typed. */
+  amount: string
+  /** Required: an unknown token never falls back to 18. */
+  decimals: number
+  resetTime: string
+}
+
+const allowanceKey = (beneficiary: string, tokenAddress: string): string =>
+  `${beneficiary.toLowerCase()}:${tokenAddress.toLowerCase()}`
 
 /**
- * Builds the multiSend that enables the AllowanceModule (when needed) and sets the allowance.
+ * What every `setAllowance` needs to be safe to emit: parseable decimals, and one write per key, since
+ * the module stores an allowance per (delegate, token) and a second write to the same key silently wins.
+ * Whether an empty set is legal is the caller's to say — an edit that only removes limits writes nothing.
+ */
+const assertWritableAllowances = (desired: readonly DesiredAllowance[]): void => {
+  const seen = new Set<string>()
+  for (const allowance of desired) {
+    if (!Number.isInteger(allowance.decimals)) throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
+    const key = allowanceKey(allowance.beneficiary, allowance.tokenAddress)
+    if (seen.has(key)) throw new Error(DUPLICATE_SPENDING_LIMIT_ERROR)
+    seen.add(key)
+  }
+}
+
+const assertValidAllowances = (desired: readonly DesiredAllowance[]): void => {
+  if (desired.length === 0) throw new Error(EMPTY_SPENDING_LIMITS_ERROR)
+  assertWritableAllowances(desired)
+}
+
+const findExistingLimit = (
+  existing: readonly SpendingLimitState[],
+  allowance: DesiredAllowance,
+): SpendingLimitState | undefined =>
+  existing.find((limit) => isSpendingLimitFor(limit, allowance.beneficiary, allowance.tokenAddress))
+
+type AllowanceModule = { address: string; isEnabled: boolean }
+
+/** The module the batch talks to: the one the Safe already runs, else the newest one registered on the chain. */
+const resolveAllowanceModule = (
+  chainId: string,
+  safeModules: SafeState['modules'],
+  deployed: boolean,
+): AllowanceModule => {
+  const enabledAddress = deployed ? getDeployedSpendingLimitModuleAddress(chainId, safeModules) : undefined
+  if (enabledAddress) return { address: enabledAddress, isEnabled: true }
+
+  const latestAddress = getLatestSpendingLimitAddress(chainId)
+  if (!latestAddress) throw new Error(NO_ALLOWANCE_MODULE_ERROR)
+  return { address: latestAddress, isEnabled: false }
+}
+
+/** `enableModule` on the Safe; a counterfactual Safe has no contract to ask, so its call is encoded by hand. */
+const createEnableModuleMetaTx = async (
+  sdk: Safe,
+  chain: Chain,
+  deployed: boolean,
+  moduleAddress: string,
+): Promise<MetaTransactionData> => {
+  if (!deployed) {
+    const tx = await createEnableModuleTx(chain, await sdk.getAddress(), sdk.getContractVersion(), moduleAddress)
+    return { to: tx.to, value: '0', data: tx.data }
+  }
+  const { data } = await sdk.createEnableModuleTx(moduleAddress)
+  return { to: data.to, value: '0', data: data.data }
+}
+
+/** One `setAllowance`: the amount in the token's base units, the period in minutes, and when its first window starts. */
+const createSetAllowanceMetaTx = (allowance: DesiredAllowance, moduleAddress: string): MetaTransactionData => {
+  const isOneTime = allowance.resetTime === '0'
+  return createSetAllowanceTx(
+    allowance.beneficiary,
+    allowance.tokenAddress,
+    parseUnits(allowance.amount, allowance.decimals).toString(),
+    parseInt(allowance.resetTime, 10),
+    isOneTime ? 0 : currentMinutes() - RESET_BASE_OFFSET_MIN,
+    moduleAddress,
+  )
+}
+
+/**
+ * Builds one multiSend for a whole new policy.
+ *
+ * @param desired - Every row of the form, one entry per spender and token.
+ * @param existingSpendingLimits - What the Safe already holds, to tell a new spender from a known one.
+ * @param chainId - The Safe's chain, which decides the module deployment.
+ * @param chain - That chain's config, needed to build `enableModule`.
+ * @param safeModules - The Safe's enabled modules, to tell whether the AllowanceModule is on.
+ * @param deployed - Whether the Safe exists on chain; a counterfactual one enables the module too.
+ * @param scope - Which Safe to send as, when it is not the one in context.
+ * @returns A multiSend: `enableModule` if needed, `addDelegate` per new spender, then one
+ *   `setAllowance` per row with that row's own reset period.
+ * @throws On every unmet precondition — see the remark.
+ *
+ * @remarks
+ * The call order is the contract CGW relies on when decoding a queued policy (WA-3154).
  *
  * Never resolves `undefined`: the review step feeds the result straight into `setSafeTx`, so a
- * silent `undefined` leaves `ReviewTransaction` on its skeleton forever with no error and no chain
- * interaction (WA-2305 / CUS-132). Every unmet precondition therefore throws, matching the other
- * tx builders in `services/tx/tx-sender/create` and letting `setSafeTxError` surface it.
+ * silent `undefined` would leave `ReviewTransaction` on its skeleton forever, with no error and no
+ * chain interaction (WA-2305 / CUS-132).
  */
+export const createSpendingLimitsTx = async (
+  desired: readonly DesiredAllowance[],
+  existingSpendingLimits: readonly SpendingLimitState[],
+  chainId: string,
+  chain: Chain,
+  safeModules: SafeState['modules'],
+  deployed: boolean,
+  scope?: TxSenderScope,
+): Promise<SafeTransaction> => {
+  assertValidAllowances(desired)
+  const sdk = getAndValidateSafeSDK(scope)
+  const allowanceModule = resolveAllowanceModule(chainId, safeModules, deployed)
+
+  const txs: MetaTransactionData[] = []
+
+  if (!allowanceModule.isEnabled) {
+    txs.push(await createEnableModuleMetaTx(sdk, chain, deployed, allowanceModule.address))
+  }
+
+  for (const beneficiary of uniqWith(
+    desired.map((allowance) => allowance.beneficiary),
+    sameAddress,
+  )) {
+    const isDelegate = existingSpendingLimits.some((limit) => sameAddress(limit.beneficiary, beneficiary))
+    if (!isDelegate) txs.push(createAddDelegateTx(beneficiary, allowanceModule.address))
+  }
+
+  for (const allowance of desired) {
+    const existing = findExistingLimit(existingSpendingLimits, allowance)
+    // `setAllowance` keeps `spent`, so a used-up allowance is zeroed first or the new limit starts partly consumed.
+    if (existing && existing.spent !== '0') {
+      txs.push(createResetAllowanceTx(allowance.beneficiary, allowance.tokenAddress, allowanceModule.address))
+    }
+    txs.push(createSetAllowanceMetaTx(allowance, allowanceModule.address))
+  }
+
+  return createMultiSendCallOnlyTx(txs, scope)
+}
+
+const hasChanges = (edit: SpendingLimitEdit): boolean =>
+  edit.addedDelegates.length > 0 ||
+  edit.added.length > 0 ||
+  edit.modified.length > 0 ||
+  edit.removed.length > 0 ||
+  edit.removedDelegates.length > 0
+
+/**
+ * Builds one multiSend for an edit — the difference only, not the whole policy.
+ *
+ * @param edit - The difference from {@link buildSpendingLimitEdit}.
+ * @param existingSpendingLimits - What the Safe holds, to spot a limit already spent from.
+ * @param chainId - The Safe's chain, which decides the module deployment.
+ * @param safeModules - The Safe's enabled modules; an edit needs the module already on.
+ * @param deployed - Whether the Safe exists on chain.
+ * @param scope - Which Safe to send as, when it is not the one in context.
+ * @returns A multiSend in this order: `addDelegate` for every spender written to, `resetAllowance`
+ *   where the old limit had been spent from, `setAllowance`, `deleteAllowance`, `removeDelegate`.
+ * @throws If the edit changes nothing, if the module is not enabled, or if a write names unknown
+ *   decimals or the same (spender, token) twice.
+ *
+ * @remarks
+ * `addDelegate` goes to every spender written to, not only new ones: it returns silently for a known
+ * delegate, while `setAllowance` reverts for an unknown one, so one redundant call buys immunity to
+ * a baseline a queued transaction has already made stale. Clearing precedes unregistering because
+ * `removeDelegate` leaves the stored allowance behind, which re-adding the spender would resurrect.
+ */
+export const createSpendingLimitEditTx = async (
+  edit: SpendingLimitEdit,
+  existingSpendingLimits: readonly SpendingLimitState[],
+  chainId: string,
+  safeModules: SafeState['modules'],
+  deployed: boolean,
+  scope?: TxSenderScope,
+): Promise<SafeTransaction> => {
+  if (!hasChanges(edit)) throw new Error(EMPTY_SPENDING_LIMIT_EDIT_ERROR)
+  getAndValidateSafeSDK(scope)
+  const { address, isEnabled } = resolveAllowanceModule(chainId, safeModules, deployed)
+  if (!isEnabled) throw new Error(MODULE_NOT_ENABLED_ERROR)
+
+  const writes = [...edit.added, ...edit.modified]
+  assertWritableAllowances(writes)
+
+  // `addDelegate` returns silently for a delegate the module already knows, while `setAllowance`
+  // reverts for one it does not. Registering every spender written to therefore costs one call and
+  // survives a baseline that a transaction queued in the meantime has already made stale.
+  const txs: MetaTransactionData[] = uniqWith(
+    writes.map((allowance) => allowance.beneficiary),
+    sameAddress,
+  ).map((delegate) => createAddDelegateTx(delegate, address))
+
+  for (const allowance of writes) {
+    const existing = findExistingLimit(existingSpendingLimits, allowance)
+    if (existing && existing.spent !== '0') {
+      txs.push(createResetAllowanceTx(allowance.beneficiary, allowance.tokenAddress, address))
+    }
+    txs.push(createSetAllowanceMetaTx(allowance, address))
+  }
+
+  for (const limit of edit.removed) {
+    txs.push(createDeleteAllowanceTx(limit.beneficiary, limit.tokenAddress, address))
+  }
+
+  for (const delegate of edit.removedDelegates) {
+    txs.push(createRemoveDelegateTx(delegate, address))
+  }
+
+  return createMultiSendCallOnlyTx(txs, scope)
+}
+
+/** The Safe-level form's single allowance, through the same batch builder. */
 export const createNewSpendingLimitTx = async (
   data: NewSpendingLimitData,
   spendingLimits: SpendingLimitState[],
@@ -42,71 +266,18 @@ export const createNewSpendingLimitTx = async (
   safeModules: SafeState['modules'],
   deployed: boolean,
   tokenDecimals?: number | null,
-  existingSpendingLimit?: SpendingLimitState,
   scope?: TxSenderScope,
-) => {
-  const sdk = getAndValidateSafeSDK(scope)
+): Promise<SafeTransaction> => {
+  if (tokenDecimals == null) throw new Error(UNKNOWN_TOKEN_DECIMALS_ERROR)
 
-  let spendingLimitAddress = deployed && getDeployedSpendingLimitModuleAddress(chainId, safeModules)
-  const isModuleEnabled = !!spendingLimitAddress
-  if (!isModuleEnabled) {
-    spendingLimitAddress = getLatestSpendingLimitAddress(chainId)
+  const allowance: DesiredAllowance = {
+    beneficiary: data.beneficiary,
+    tokenAddress: data.tokenAddress,
+    amount: data.amount,
+    decimals: tokenDecimals,
+    resetTime: data.resetTime,
   }
-  if (!spendingLimitAddress) {
-    throw new Error(NO_ALLOWANCE_MODULE_ERROR)
-  }
-
-  const txs: MetaTransactionData[] = []
-
-  if (!deployed) {
-    const enableModuleTx = await createEnableModuleTx(
-      chain,
-      await sdk.getAddress(),
-      sdk.getContractVersion(),
-      spendingLimitAddress,
-    )
-
-    const tx = {
-      to: enableModuleTx.to,
-      value: '0',
-      data: enableModuleTx.data,
-    }
-
-    txs.push(tx)
-  } else {
-    if (!isModuleEnabled) {
-      const enableModuleTx = await sdk.createEnableModuleTx(spendingLimitAddress)
-
-      const tx = {
-        to: enableModuleTx.data.to,
-        value: '0',
-        data: enableModuleTx.data.data,
-      }
-      txs.push(tx)
-    }
-  }
-
-  const existingDelegate = spendingLimits.find((spendingLimit) => spendingLimit.beneficiary === data.beneficiary)
-  if (!existingDelegate) {
-    txs.push(createAddDelegateTx(data.beneficiary, spendingLimitAddress))
-  }
-
-  if (existingSpendingLimit && existingSpendingLimit.spent !== '0') {
-    txs.push(createResetAllowanceTx(data.beneficiary, data.tokenAddress, spendingLimitAddress))
-  }
-
-  const tx = createSetAllowanceTx(
-    data.beneficiary,
-    data.tokenAddress,
-    parseUnits(data.amount, tokenDecimals ?? undefined).toString(),
-    parseInt(data.resetTime),
-    data.resetTime !== '0' ? currentMinutes() - 30 : 0,
-    spendingLimitAddress,
-  )
-
-  txs.push(tx)
-
-  return createMultiSendCallOnlyTx(txs, scope)
+  return createSpendingLimitsTx([allowance], spendingLimits, chainId, chain, safeModules, deployed, scope)
 }
 
 export const dispatchSpendingLimitTxExecution = async (

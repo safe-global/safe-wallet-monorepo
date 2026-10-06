@@ -263,16 +263,20 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
   })
 })
 
-describe('MultiChainSafeItemRow hover highlight', () => {
-  it('takes focus when the summary is hovered so base-ui does not strand the highlight on the previous row', () => {
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+describe('MultiChainSafeItemRow hover', () => {
+  it('does not take focus on hover, so typing in the search input continues', () => {
+    render(
+      <>
+        <input data-testid="search" />
+        <MultiChainSafeItemRow item={createItem(['1', '137'])} />
+      </>,
+    )
+    const search = screen.getByTestId('search')
+    search.focus()
 
-    const trigger = screen.getByRole('button')
-    expect(trigger).not.toHaveFocus()
+    fireEvent.mouseEnter(screen.getByRole('button'))
 
-    fireEvent.mouseEnter(trigger)
-
-    expect(trigger).toHaveFocus()
+    expect(search).toHaveFocus()
   })
 })
 

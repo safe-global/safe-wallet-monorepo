@@ -1,6 +1,6 @@
 import { makeStore } from '@/store'
 import { Provider } from 'react-redux'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { StoryContext } from 'storybook/internal/csf'
 import { setDarkMode } from '@/store/settingsSlice'
 
@@ -11,7 +11,7 @@ type StoreDecoratorProps = {
 }
 
 export const StoreDecorator = ({ initialState, children, context }: StoreDecoratorProps) => {
-  const store = makeStore(initialState)
+  const [store] = useState(() => makeStore(initialState))
 
   useEffect(() => {
     // Set the dark mode based on the theme from the context

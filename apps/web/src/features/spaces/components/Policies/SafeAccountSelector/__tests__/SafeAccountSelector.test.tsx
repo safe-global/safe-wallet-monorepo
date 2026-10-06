@@ -1,14 +1,18 @@
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeAccountSelector, { type SafeAccountSelectorProps } from '..'
 import {
   ELIGIBILITY_HELPER_TEXT,
   ELIGIBILITY_RULE,
+  getNestedSafesNoticeText,
+  INELIGIBILITY_TEXT,
   LOAD_ERROR_TEXT,
+  NESTED_SAFES_NOTICE_TITLE,
   NO_ELIGIBLE_ACCOUNTS_TEXT,
   NO_WALLET_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
+  SIGNERS_ONLY_COPY,
 } from '../constants'
 import { buildSafeAccountId } from '../utils'
 import type { SafeAccountEntry, SafeAccountGroup, SafeAccountOption } from '../types'
@@ -70,6 +74,27 @@ describe('SafeAccountSelector', () => {
   it('states the same eligibility rule in the helper text and the empty state', () => {
     expect(ELIGIBILITY_HELPER_TEXT).toContain(ELIGIBILITY_RULE)
     expect(NO_ELIGIBLE_ACCOUNTS_TEXT).toContain(ELIGIBILITY_RULE)
+
+    expect(SIGNERS_ONLY_COPY.helperText).toContain(SIGNERS_ONLY_COPY.rule)
+    expect(SIGNERS_ONLY_COPY.noEligibleAccountsText).toContain(SIGNERS_ONLY_COPY.rule)
+  })
+
+  it('renders the signer-only helper text and empty state when signersOnly is set', async () => {
+    const { user } = renderSelector({ accounts: [], signersOnly: true })
+
+    expect(screen.getByText(SIGNERS_ONLY_COPY.helperText)).toBeInTheDocument()
+    expect(screen.queryByText(ELIGIBILITY_HELPER_TEXT)).not.toBeInTheDocument()
+
+    await openSelector(user)
+
+    expect(screen.getByText(SIGNERS_ONLY_COPY.noEligibleAccountsText)).toBeInTheDocument()
+  })
+
+  it('lets a custom helper text override the rule copy', () => {
+    render(<SafeAccountSelector accounts={[]} onChange={jest.fn()} signersOnly helperText="Custom hint" />)
+
+    expect(screen.getByText('Custom hint')).toBeInTheDocument()
+    expect(screen.queryByText(SIGNERS_ONLY_COPY.helperText)).not.toBeInTheDocument()
   })
 
   it('renders a custom label and helper text when provided', () => {
@@ -325,6 +350,302 @@ describe('SafeAccountSelector', () => {
     expect(screen.queryAllByRole('option')).toHaveLength(0)
   })
 
+  describe('counterfactual accounts', () => {
+    const notActivated = option('1', SAFE_B, { name: 'Marketing', ineligibleReason: 'not-activated' })
+
+    it('lists a not-activated account alongside the pickable ones', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows).toHaveLength(2)
+      expect(rows[1]).toHaveTextContent('Marketing')
+    })
+
+    it('marks the row disabled while leaving it in the accessibility tree', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('keeps the popup open after a not-activated row is clicked', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('does not select a not-activated row with the keyboard', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[notActivated, singleChainAccount]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      rows[0].focus()
+      await user.keyboard('{Enter}')
+
+      expect(onChange).not.toHaveBeenCalledWith(notActivated.id)
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-expanded', 'true')
+    })
+
+    it('flags a preselected not-activated value as invalid and explains why', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, notActivated]}
+          value={notActivated.id}
+          onChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['not-activated'])
+      expect(screen.queryByTestId('safe-account-helper-text')).not.toBeInTheDocument()
+    })
+
+    it('lets the form validation message win over the ineligibility text', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, notActivated]}
+          value={notActivated.id}
+          onChange={jest.fn()}
+          errorMessage="Required"
+        />,
+      )
+
+      expect(screen.getByRole('alert')).toHaveTextContent('Required')
+    })
+
+    it('does not call onChange when a not-activated row is clicked', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('still selects a pickable row when the list also holds not-activated ones', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[0])
+
+      expect(onChange).toHaveBeenCalledWith(singleChainAccount.id)
+    })
+
+    it('shows the not-activated icon in place of the balance', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(within(rows[1]).getByTestId('safe-account-not-activated-icon')).toBeInTheDocument()
+      expect(within(rows[0]).queryByTestId('safe-account-not-activated-icon')).not.toBeInTheDocument()
+    })
+
+    it('keeps the row message as the only tooltip on the icon', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(within(rows[1]).getByTestId('safe-account-not-activated-icon'))
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['not-activated'])).toBeInTheDocument()
+      expect(screen.queryByText('Inactive')).not.toBeInTheDocument()
+    })
+
+    it('explains why the row cannot be picked on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, notActivated]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['not-activated'])).toBeInTheDocument()
+    })
+
+    const groupWithNotActivatedChain: SafeAccountGroup = {
+      ...multiChainGroup,
+      accounts: [
+        option('1', SAFE_B),
+        option('137', SAFE_B, { ineligibleReason: 'not-activated' }),
+        option('11155111', SAFE_B),
+      ],
+    }
+
+    it('rejects a not-activated chain row inside a multi-chain group', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[groupWithNotActivatedChain]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[1])
+
+      expect(onChange).not.toHaveBeenCalled()
+    })
+
+    it('still selects an activated chain row of a group that holds a not-activated one', async () => {
+      const onChange = jest.fn()
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[groupWithNotActivatedChain]} onChange={onChange} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.click(rows[0])
+
+      expect(onChange).toHaveBeenCalledWith(groupWithNotActivatedChain.accounts[0].id)
+    })
+  })
+
+  describe('accounts on networks without spending limits', () => {
+    const unavailable = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'no-spending-limits' })
+
+    it('lists the account as a disabled row and explains the network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unavailable]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['no-spending-limits'])).toBeInTheDocument()
+    })
+  })
+
+  describe('unsupported-network accounts', () => {
+    const unsupported = option('137', SAFE_B, { name: 'Grants', ineligibleReason: 'unsupported-chain' })
+
+    it('lists an unsupported-network account as a disabled row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      expect(rows).toHaveLength(2)
+      expect(rows[1]).toHaveTextContent('Grants')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+    })
+
+    it('explains the unsupported network on hover', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector accounts={[singleChainAccount, unsupported]} onChange={jest.fn()} />,
+      )
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByRole('option')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
+    it('disables only the unsupported chain inside a multichain group', async () => {
+      const group: SafeAccountGroup = {
+        ...multiChainGroup,
+        accounts: [option('1', SAFE_B), option('137', SAFE_B, { ineligibleReason: 'unsupported-chain' })],
+      }
+      const { user } = renderWithUserEvent(<SafeAccountSelector accounts={[group]} onChange={jest.fn()} />)
+
+      await openSelector(user)
+
+      const rows = await screen.findAllByTestId('safe-account-chain-option')
+      expect(rows).toHaveLength(2)
+      expect(rows[0]).not.toHaveAttribute('aria-disabled', 'true')
+      expect(rows[1]).toHaveAttribute('aria-disabled', 'true')
+      await user.hover(rows[1])
+
+      expect(await screen.findByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
+    })
+
+    it('keeps the balance column on an unsupported-network row', async () => {
+      const { user } = renderWithUserEvent(
+        <SafeAccountSelector
+          accounts={[option('137', SAFE_B, { ineligibleReason: 'unsupported-chain', fiatTotal: '12' })]}
+          onChange={jest.fn()}
+        />,
+      )
+
+      await openSelector(user)
+
+      const [row] = await screen.findAllByRole('option')
+      expect(within(row).queryByTestId('safe-account-not-activated-icon')).not.toBeInTheDocument()
+      expect(row.querySelector('[data-testid="row-end-column"]')).toHaveTextContent('$')
+    })
+
+    it('flags a preselected unsupported-network value as invalid and explains why', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+        />,
+      )
+
+      expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+      expect(screen.getByRole('alert')).toHaveTextContent(INELIGIBILITY_TEXT['unsupported-chain'])
+    })
+
+    it('does not flag a read-only unsupported-network value', () => {
+      render(
+        <SafeAccountSelector
+          accounts={[singleChainAccount, unsupported]}
+          value={unsupported.id}
+          onChange={jest.fn()}
+          readOnly
+        />,
+      )
+
+      expect(screen.getByTestId('safe-account-readonly')).toBeInTheDocument()
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+      expect(screen.getByTestId('safe-account-helper-text')).toBeInTheDocument()
+    })
+  })
+
   it('replaces the helper text with the form validation message', () => {
     render(
       <SafeAccountSelector
@@ -337,6 +658,68 @@ describe('SafeAccountSelector', () => {
     expect(screen.getByText('Pick an account to continue')).toBeInTheDocument()
     expect(screen.queryByText(ELIGIBILITY_HELPER_TEXT)).not.toBeInTheDocument()
     expect(screen.getByRole('combobox')).toHaveAttribute('aria-invalid', 'true')
+  })
+
+  describe('notice', () => {
+    const notice = { title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }
+
+    it('renders nothing extra when no notice is given', async () => {
+      const { user } = renderSelector()
+
+      await openSelector(user)
+
+      expect(screen.queryByTestId('safe-account-selector-notice')).not.toBeInTheDocument()
+    })
+
+    it('shows the notice above the options once opened', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      expect(shown).toHaveTextContent(NESTED_SAFES_NOTICE_TITLE)
+      expect(shown).toHaveTextContent(getNestedSafesNoticeText('proposers'))
+    })
+
+    it('precedes every option in the popup', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      const firstOption = (await screen.findAllByRole('option'))[0]
+      expect(shown.compareDocumentPosition(firstOption)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+    })
+
+    it('is not selectable', async () => {
+      const { user } = renderSelector({ notice })
+
+      await openSelector(user)
+
+      const shown = await screen.findByTestId('safe-account-selector-notice')
+      expect(shown).not.toHaveAttribute('role', 'option')
+      expect(await screen.findAllByRole('option')).toHaveLength(4)
+    })
+
+    it('names the policy the flow manages', () => {
+      expect(getNestedSafesNoticeText('proposers')).toContain('proposers')
+      expect(getNestedSafesNoticeText('spending limits')).toContain('spending limits')
+    })
+
+    it('stays out of the trigger while the popup is closed', () => {
+      render(<SafeAccountSelector accounts={[singleChainAccount]} onChange={jest.fn()} notice={notice} />)
+
+      expect(screen.getByRole('combobox')).not.toHaveTextContent(NESTED_SAFES_NOTICE_TITLE)
+    })
+
+    it('shows alongside the empty state when no accounts are eligible', async () => {
+      const { user } = renderSelector({ accounts: [], notice, onSwitchWallet: jest.fn() })
+
+      await openSelector(user)
+
+      expect(await screen.findByTestId('safe-account-selector-notice')).toBeInTheDocument()
+      expect(screen.getByText(NO_ELIGIBLE_ACCOUNTS_TEXT)).toBeInTheDocument()
+    })
   })
 
   it('accepts a plain option list with no groups', async () => {

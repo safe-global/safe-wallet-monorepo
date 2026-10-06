@@ -53,7 +53,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^owners/],
     },
     '../src/gateway/AUTO_GENERATED/relay.ts': {
-      filterEndpoints: [/^relay/],
+      filterEndpoints: [/^(relay|spaceRelay)/],
     },
     '../src/gateway/AUTO_GENERATED/safe-apps.ts': {
       filterEndpoints: [/^safeApps/],
@@ -74,7 +74,9 @@ const config: ConfigFile = {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
-      filterEndpoints: [/^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|addressBook|userAddressBook)/],
+      filterEndpoints: [
+        /^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|spacePolicies|addressBook|userAddressBook)/,
+      ],
     },
     '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {
       filterEndpoints: [/^counterfactualSafes/],
@@ -89,7 +91,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^portfolio/],
     },
     '../src/gateway/AUTO_GENERATED/safe-shield.ts': {
-      filterEndpoints: [/^safeShield/],
+      filterEndpoints: [/^(safeShield|spaceSafeShield)/],
     },
     '../src/gateway/AUTO_GENERATED/billing.ts': {
       filterEndpoints: [/^billing/],

@@ -1,5 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './Drawer'
+import { Drawer } from './Drawer'
+import { DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './components'
 
 describe('Drawer', () => {
   it('renders the composed header, body and footer', () => {
@@ -101,18 +102,6 @@ describe('Drawer', () => {
     )
 
     expect(screen.getByText('Body content').parentElement?.nextElementSibling).not.toBeNull()
-  })
-
-  it('renders the title larger when asked', () => {
-    render(
-      <Drawer open onClose={jest.fn()}>
-        <DrawerHeader>
-          <DrawerTitle size="lg">Proposer role</DrawerTitle>
-        </DrawerHeader>
-      </Drawer>,
-    )
-
-    expect(screen.getByText('Proposer role')).toHaveAttribute('data-variant', 'paragraph-bold')
   })
 
   it('defaults to the md width and applies the lg width on request', () => {

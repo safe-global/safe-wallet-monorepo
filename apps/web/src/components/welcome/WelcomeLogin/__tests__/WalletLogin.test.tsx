@@ -71,6 +71,22 @@ describe('WalletLogin', () => {
     })
   })
 
+  it('shows the wallet icon in the brand green on the secondary style only', () => {
+    jest.spyOn(useWallet, 'default').mockReturnValue(null)
+    jest.spyOn(useConnectWallet, 'default').mockReturnValue(jest.fn())
+
+    const secondary = render(
+      <WalletLogin onLogin={jest.fn()} onContinue={jest.fn()} buttonStyle="walletBtnSecondary" />,
+    )
+    const button = secondary.getByTestId('connect-wallet-btn')
+    expect(button.querySelector('svg')).toBeInTheDocument()
+    expect(button).toHaveClass('[&_svg]:text-green-400')
+    secondary.unmount()
+
+    const primary = render(<WalletLogin onLogin={jest.fn()} onContinue={jest.fn()} />)
+    expect(primary.getByTestId('connect-wallet-btn')).not.toHaveClass('[&_svg]:text-green-400')
+  })
+
   it('should invoke the callback if user actively connects', async () => {
     const mockOnLogin = jest.fn()
     const mockOnContinue = jest.fn()

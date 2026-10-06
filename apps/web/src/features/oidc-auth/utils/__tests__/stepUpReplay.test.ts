@@ -7,7 +7,10 @@ import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
 import { stepUpReturning } from '../../store'
+import { navigateTo } from '@/utils/navigation'
 import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
+
+jest.mock('@/utils/navigation', () => ({ navigateTo: jest.fn() }))
 
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
   type: 'cgwClient/executeMutation/rejected',
@@ -33,6 +36,9 @@ describe('getReplayableAction', () => {
     expect(getReplayableAction(rejectedMutation('membersInviteUserV1', {}))?.endpoint).toBe('membersInviteUserV1')
     expect(getReplayableAction(rejectedMutation('membersUpdateRoleV1', {}))?.endpoint).toBe('membersUpdateRoleV1')
     expect(getReplayableAction(rejectedMutation('membersRemoveUserV1', {}))?.endpoint).toBe('membersRemoveUserV1')
+    expect(getReplayableAction(rejectedMutation('billingUpdateSubscriptionV1', {}))?.endpoint).toBe(
+      'billingUpdateSubscriptionV1',
+    )
     expect(getReplayableAction(rejectedMutation('addressBooksUpsertAddressBookItemsV1', {}))?.endpoint).toBe(
       'addressBooksUpsertAddressBookItemsV1',
     )
@@ -41,6 +47,9 @@ describe('getReplayableAction', () => {
     )
     expect(getReplayableAction(rejectedMutation('addressBookRequestsApproveRequestV1', {}))?.endpoint).toBe(
       'addressBookRequestsApproveRequestV1',
+    )
+    expect(getReplayableAction(rejectedMutation('billingGetCheckoutUrlV1', {}))?.endpoint).toBe(
+      'billingGetCheckoutUrlV1',
     )
   })
 
@@ -129,6 +138,52 @@ describe('step-up trip storage', () => {
 describe('replayStepUpAction', () => {
   beforeEach(() => {
     sessionStorage.clear()
+    jest.mocked(navigateTo).mockClear()
+  })
+
+  it('should, when the replayed request is the checkout URL, send the user to the checkout without a toast', async () => {
+    const spaceId = faker.string.uuid()
+    const paymentLinkId = faker.string.uuid()
+    const checkoutUrl = faker.internet.url()
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/payment-links/${paymentLinkId}/checkout-url`, () =>
+        HttpResponse.json({ url: checkoutUrl }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'billingGetCheckoutUrlV1',
+      args: { spaceId, paymentLinkId, returnUrl: faker.internet.url() },
+    })
+
+    expect(isLeavingPage).toBe(true)
+    expect(navigateTo).toHaveBeenCalledWith(checkoutUrl)
+    expect(selectNotifications(store.getState())).toEqual([])
+  })
+
+  it('should, when the replayed checkout URL request fails, show an error and stay on the page', async () => {
+    const spaceId = faker.string.uuid()
+    const paymentLinkId = faker.string.uuid()
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/payment-links/${paymentLinkId}/checkout-url`, () =>
+        HttpResponse.json({ message: 'Boom' }, { status: 500 }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'billingGetCheckoutUrlV1',
+      args: { spaceId, paymentLinkId, returnUrl: faker.internet.url() },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(navigateTo).not.toHaveBeenCalled()
+    expect(selectNotifications(store.getState())).toEqual([expect.objectContaining({ variant: 'error' })])
   })
 
   it('should, when the list query is still in flight with two subscribers while the replay completes, fetch the list again so it shows the added Safe', async () => {
@@ -156,7 +211,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
@@ -196,7 +251,7 @@ describe('replayStepUpAction', () => {
       http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({}, { status: 201 })),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     await store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
     await replayStepUpAction(store.dispatch, {
@@ -237,7 +292,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
       args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
@@ -276,7 +331,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
 
@@ -304,7 +359,7 @@ describe('replayStepUpAction', () => {
       ),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(stepUpReturning())
 
     await replayStepUpAction(store.dispatch, {

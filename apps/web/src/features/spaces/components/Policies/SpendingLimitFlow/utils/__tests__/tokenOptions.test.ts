@@ -1,3 +1,4 @@
+import { getAddress } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -31,6 +32,37 @@ describe('buildTokenOptions', () => {
     const options = buildTokenOptions({ balances: [heldNative, heldErc20], popular: [], showNative: false })
 
     expect(options.map((option) => option.address)).toEqual([heldErc20.tokenInfo.address])
+  })
+
+  it('keeps a token the lists never offered, so an existing limit on it still resolves', () => {
+    const held = balanceBuilder().with({ tokenInfo: erc20TokenBuilder().build() }).build()
+    const untrusted = {
+      address: getAddress('0x00000000000000000000000000000000000000e1'),
+      symbol: 'UNTRUSTED',
+      name: 'UNTRUSTED',
+      decimals: 18,
+      group: 'held' as const,
+    }
+
+    const options = buildTokenOptions({ balances: [held], popular: [], extra: [untrusted], showNative: false })
+
+    expect(options.map((option) => option.address)).toEqual([held.tokenInfo.address, untrusted.address])
+  })
+
+  it('does not list an extra token the balances already carry', () => {
+    const held = balanceBuilder().with({ tokenInfo: erc20TokenBuilder().build() }).build()
+    const duplicate = {
+      address: held.tokenInfo.address.toLowerCase(),
+      symbol: 'DUP',
+      name: 'DUP',
+      decimals: 18,
+      group: 'held' as const,
+    }
+
+    const options = buildTokenOptions({ balances: [held], popular: [], extra: [duplicate], showNative: false })
+
+    expect(options).toHaveLength(1)
+    expect(options[0].symbol).toBe(held.tokenInfo.symbol)
   })
 
   it('keeps zero-balance held tokens as held options', () => {
@@ -94,7 +126,7 @@ describe('buildTokenOptions', () => {
     expect(options).toEqual([expect.objectContaining({ address: popular.address, group: 'popular' })])
   })
 
-  it('sorts held by fiat balance descending, then popular alphabetically by symbol', () => {
+  it('sorts held by fiat balance descending and keeps popular in the given order', () => {
     const rich = balanceBuilder().with({ fiatBalance: '300' }).build()
     const poor = balanceBuilder().with({ fiatBalance: '5' }).build()
     const zero = balanceBuilder().with({ fiatBalance: '0', balance: '0' }).build()
@@ -107,9 +139,18 @@ describe('buildTokenOptions', () => {
       rich.tokenInfo.address,
       poor.tokenInfo.address,
       zero.tokenInfo.address,
-      alpha.address,
       zed.address,
+      alpha.address,
     ])
+  })
+
+  it('puts the native currency ahead of the popular table', () => {
+    const first = popularTokenBuilder({ symbol: 'AAA' })
+    const second = popularTokenBuilder({ symbol: 'BBB' })
+
+    const options = buildTokenOptions({ balances: [], popular: [first, second], native })
+
+    expect(options.map((option) => option.address)).toEqual([ZERO_ADDRESS, first.address, second.address])
   })
 
   it('carries the fiat conversion rate of a held token and none for a popular one', () => {

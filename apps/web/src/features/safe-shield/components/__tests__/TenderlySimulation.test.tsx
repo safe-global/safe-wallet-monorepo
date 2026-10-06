@@ -36,7 +36,15 @@ const status = (isFinished: boolean): SimulationStatus => ({
   isError: false,
 })
 
-const renderSimulation = ({ isNested, isFinished }: { isNested: boolean; isFinished: boolean }) => {
+const renderSimulation = ({
+  isNested,
+  isFinished,
+  autoRun = false,
+}: {
+  isNested: boolean
+  isFinished: boolean
+  autoRun?: boolean
+}) => {
   jest.spyOn(useNestedTransactionHook, 'useNestedTransaction').mockReturnValue({
     isNested,
     isNestedLoading: false,
@@ -52,7 +60,7 @@ const renderSimulation = ({ isNested, isFinished }: { isNested: boolean; isFinis
         nestedTx: { simulation: simulation('https://tenderly.example/nested'), status: status(isFinished) },
       }}
     >
-      <TenderlySimulation safeTx={safeTxBuilder().build()} />
+      <TenderlySimulation safeTx={safeTxBuilder().build()} autoRun={autoRun} />
     </TxInfoContext.Provider>,
   )
 }
@@ -78,6 +86,20 @@ describe('TenderlySimulation', () => {
 
     await user.keyboard(' ')
     expect(header).toHaveAttribute('aria-expanded', 'false')
+  })
+
+  it('keeps the finished nested header as a keyboard trigger under Safe Pro auto-run', async () => {
+    const { user } = renderSimulation({ isNested: true, isFinished: true, autoRun: true })
+
+    const header = await screen.findByRole('button', { name: /Transaction simulations/ })
+    expect(screen.queryByTestId('run-simulation-btn')).not.toBeInTheDocument()
+
+    await user.tab()
+    expect(header).toHaveFocus()
+
+    await user.keyboard('{Enter}')
+    expect(header).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByText('Nested transaction simulation successful.')).toBeVisible()
   })
 
   it('does not make the header a tab stop while the simulation can not expand', async () => {

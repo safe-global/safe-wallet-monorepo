@@ -10,7 +10,7 @@ faker.seed(123)
 // jsdom lacks the Pointer Events API that Base UI components (shadcn/ui) rely on.
 // Polyfill only what's missing so interaction tests (e.g. clicking a Base UI Checkbox)
 // don't throw "PointerEvent is not defined". Purely additive.
-if (typeof globalThis.PointerEvent === 'undefined') {
+if (typeof MouseEvent !== 'undefined' && typeof globalThis.PointerEvent === 'undefined') {
   class PointerEvent extends MouseEvent {
     constructor(type, params = {}) {
       super(type, params)
@@ -54,6 +54,14 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
     unobserve() {}
     disconnect() {}
   }
+}
+
+// jest-fixed-jsdom exposes Node's BroadcastChannel, whose open port (from makeStore) keeps Jest from exiting
+globalThis.BroadcastChannel = class BroadcastChannel {
+  postMessage() {}
+  addEventListener() {}
+  removeEventListener() {}
+  close() {}
 }
 
 // Set timezone to UTC for consistent date formatting across environments

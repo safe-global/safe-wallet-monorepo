@@ -7,11 +7,12 @@ import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
+  type AddressBookItem,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getChainIdsParam } from '../../../utils'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
@@ -20,10 +21,20 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
+import {
+  ADDRESS_BOOK_UNAVAILABLE,
+  usePrepareWorkspaceSafeNames,
+  type WorkspaceSafeName,
+} from '../../../hooks/useUpsertWorkspaceSafeName'
+import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
@@ -55,6 +66,7 @@ const useOnboardingSubmit = (
   spaceId: string | undefined,
   onSuccess: () => void,
   allSafes: AllSafeItems = EMPTY_ALL_SAFES,
+  nextStepUrl?: string,
 ) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -64,18 +76,24 @@ const useOnboardingSubmit = (
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
+  const prepareNames = usePrepareWorkspaceSafeNames()
+  const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
+  const isAddressBookReady = !isLoading && !isError
 
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [step, setStep] = useState<'select' | 'name'>('select')
+  const [safesToName, setSafesToName] = useState<AllSafeItems>([])
 
   const formMethods = useForm<AddAccountsFormValues>({
     mode: 'onChange',
     defaultValues: {
       selectedSafes: {},
+      names: {},
     },
   })
 
-  const { handleSubmit, watch, reset } = formMethods
+  const { handleSubmit, watch, reset, getValues, setValue } = formMethods
 
   const hasInitialized = useRef(false)
 
@@ -151,21 +169,26 @@ const useOnboardingSubmit = (
       .map(([key]) => parseSafeKey(key))
   }
 
-  const addNewSafes = async (safesToAdd: Array<{ chainId: string; address: string }>, spaceIdStr: string) => {
+  const addNewSafes = async (
+    safesToAdd: Array<{ chainId: string; address: string }>,
+    spaceIdStr: string,
+    addressBookItems: AddressBookItem[],
+  ) => {
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
       spaceId: spaceIdStr,
-      createSpaceSafesDto: { safes: safesToAdd },
+      createSpaceSafesDto: { safes: safesToAdd, addressBookItems },
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
-      throw new Error(getRtkQueryErrorMessage(result.error))
+      const seatLimit = getSeatLimitMessage(result.error)
+      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceIdStr)
+      throw new Error(seatLimit ?? getRtkQueryErrorMessage(result.error))
     }
   }
 
-  // Newly added Safes are added to the user's global Trusted list too, so a Safe the user
-  // discovered as "owned" and chose to add is trusted going forward. Already-trusted Safes are skipped.
+  // Added Safes join the user's global Trusted list too, unless already there.
   const trustAddedSafes = (safesToAdd: Array<{ chainId: string; address: string }>) => {
     for (const { chainId, address } of safesToAdd) {
       if (addedSafes[chainId]?.[address]) continue
@@ -183,16 +206,16 @@ const useOnboardingSubmit = (
     }
   }
 
-  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
-    const flatSpaceSafes = flattenSafeItems(spaceSafes)
-
-    const safesToRemove = flatSpaceSafes
+  const getSafesToRemove = (selectedSafes: AddAccountsFormValues['selectedSafes']) =>
+    flattenSafeItems(spaceSafes)
       .filter((s) => {
         const key = getSafeId(s)
         return selectedSafes[key] === false || !(key in selectedSafes)
       })
       .map((s) => ({ chainId: s.chainId, address: s.address }))
 
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+    const safesToRemove = getSafesToRemove(selectedSafes)
     if (safesToRemove.length === 0) return
 
     const result = await removeSafesFromSpace({
@@ -209,43 +232,90 @@ const useOnboardingSubmit = (
     safesToAdd: Array<{ chainId: string; address: string }>,
     selectedSafes: AddAccountsFormValues['selectedSafes'],
     spaceIdStr: string,
+    names: WorkspaceSafeName[],
   ) => {
-    await addNewSafes(safesToAdd, spaceIdStr)
+    const prepared = prepareNames(names)
+    if (prepared.error !== undefined) throw new Error(prepared.error)
+    // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
+    await addNewSafes(safesToAdd, spaceIdStr, prepared.items)
     trustAddedSafes(safesToAdd)
   }
 
-  const onSubmit = handleSubmit(async (data) => {
-    if (!spaceId) return
-
-    setError(undefined)
-    setIsSubmitting(true)
-
-    try {
-      const safesToAdd = getSafesToAdd(data.selectedSafes)
-      if (safesToAdd.length > 0) {
-        trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
-          [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
-          [MixpanelEventParams.SOURCE]: 'onboarding',
-          [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
-        })
+  const onSubmit = handleSubmit(
+    async (data) => {
+      if (!spaceId) {
+        setError('No Workspace is selected. Reload the page and try again.')
+        return
       }
-      await processSelectedSafes(safesToAdd, data.selectedSafes, spaceId)
 
-      onSuccess()
-    } catch (e) {
-      setIsSubmitting(false)
-      if (isElevationRequiredError(e)) return
-      setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
-    }
-  })
+      const safesToAdd = getSafesToAdd(data.selectedSafes)
+
+      const safesToWrite = step === 'select' ? getSafesToName(safesToAdd, allSafes, spaceAddressBook) : safesToName
+
+      if (step === 'name' && !hasAllNames(data.names, safesToWrite)) {
+        touchNames(getValues, setValue, safesToWrite)
+        return
+      }
+
+      if (step === 'select' && safesToWrite.length > 0) {
+        trackEvent(SPACE_EVENTS.NAME_ACCOUNTS_STEP, {
+          [MixpanelEventParams.ACCOUNT_COUNT]: safesToWrite.length,
+          [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+        })
+        setSafesToName(safesToWrite)
+        setStep('name')
+        return
+      }
+
+      setError(undefined)
+      setIsSubmitting(true)
+
+      // A removal is rejected first and only it is replayed, so only a plain add may move on to the next step.
+      const stepUpReturnUrl = nextStepUrl && getSafesToRemove(data.selectedSafes).length === 0 ? nextStepUrl : undefined
+      if (stepUpReturnUrl) dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+      let isStepUpPending = false
+
+      try {
+        if (safesToAdd.length > 0) {
+          trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
+            [MixpanelEventParams.ACCOUNT_COUNT]: safesToAdd.length,
+            [MixpanelEventParams.SOURCE]: SPACE_LABELS.onboarding,
+            [MixpanelEventParams.CHAIN_ID]: getChainIdsParam(safesToAdd),
+          })
+        }
+        await processSelectedSafes(
+          safesToAdd,
+          data.selectedSafes,
+          spaceId,
+          buildWorkspaceSafeNames(data.names, safesToWrite),
+        )
+
+        onSuccess()
+      } catch (e) {
+        if (isElevationRequiredError(e)) {
+          isStepUpPending = true
+          return
+        }
+        setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
+      } finally {
+        if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
+        setIsSubmitting(false)
+      }
+    },
+    () => touchNames(getValues, setValue, safesToName),
+  )
 
   return {
     formMethods,
     onSubmit,
     selectedSafesLength,
-    error,
+    error: error ?? (isError ? ADDRESS_BOOK_UNAVAILABLE : undefined),
     isSubmitting,
+    isAddressBookReady,
+    step,
+    safesToName,
+    showSelectStep: () => setStep('select'),
   }
 }
 

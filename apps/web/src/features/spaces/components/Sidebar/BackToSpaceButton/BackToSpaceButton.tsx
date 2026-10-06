@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { getDeterministicColor } from '@/utils/colors'
 import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
 import { icons } from '../config'
+import { cn } from '@/utils/cn'
 import css from '../styles.module.css'
 import type { SafeWorkspaceHeaderBackToSpace } from '../types'
 
@@ -18,7 +19,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
   return (
     <SidebarMenuButton
       size="lg"
-      tooltip="Back to workspace"
+      tooltip="Back to Workspace"
       data-testid="back-to-space-button"
       className={css.spaceSelector}
       onClick={handleBackToSpace}
@@ -33,7 +34,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
       </Avatar>
       <div className={css.spaceSelectorText}>
         <span className={css.spaceSelectorName}>{spaceName}</span>
-        <span className={css.spaceSelectorSubtitle}>Workspace</span>
+        <span className={cn(css.spaceSelectorSubtitle, 'text-muted-foreground')}>Workspace</span>
       </div>
       <icons.ChevronLeft className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
     </SidebarMenuButton>

@@ -2,6 +2,8 @@ import { useState as mockUseState } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
+import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { createDefaultFormValues } from '../types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from '../constants'
@@ -23,11 +25,20 @@ jest.mock('@/components/tx-flow/TxFlow', () => ({
     )
   }),
 }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: ({ children, initial }: { children: React.ReactNode; initial?: unknown }) => (
     <div data-testid="safe-scope" data-initial={initial === undefined ? 'none' : 'set'}>
       {children}
     </div>
+  ),
+}))
+jest.mock('../ExistingSpendingLimitsProvider', () => ({
+  ExistingSpendingLimitsProvider: ({ children }: { children: React.ReactNode }) => (
+    <div data-testid="existing-limits">{children}</div>
   ),
 }))
 jest.mock('../CreateStep', () => ({
@@ -59,11 +70,13 @@ describe('SpendingLimitFlow', () => {
 
     const scope = screen.getByTestId('safe-scope')
     expect(scope).toHaveAttribute('data-initial', 'none')
-    expect(scope.querySelector('[data-testid="tx-flow"]')).toBeInTheDocument()
+    const existing = scope.querySelector('[data-testid="existing-limits"]')
+    expect(existing).toBeInTheDocument()
+    expect(existing?.querySelector('[data-testid="tx-flow"]')).toBeInTheDocument()
     expect(screen.getByTestId('create-step')).toBeInTheDocument()
   })
 
-  it('hands TxFlow the spending limit chrome, the empty policy and the review placeholder', () => {
+  it('hands TxFlow the spending limit chrome, the empty policy, the review step and its analytics category', () => {
     render(<SpendingLimitFlow />)
 
     const props = mockTxFlow.mock.calls[0][0]
@@ -75,7 +88,7 @@ describe('SpendingLimitFlow', () => {
     )
     expect(props.ReviewTransactionComponent).toBe(ReviewSpendingLimitPolicy)
     expect(props.initialData).toEqual(createDefaultFormValues())
-    expect(props.eventCategory).toBeUndefined()
+    expect(props.eventCategory).toBe(TxFlowType.SETUP_SPACE_SPENDING_LIMIT)
   })
 
   it('keeps the callout dismissed across a trip to the next step and back', async () => {
@@ -101,5 +114,18 @@ describe('SpendingLimitFlow', () => {
       hideNonce?: boolean
     }>
     expect(step.props).toMatchObject({ title: CREATE_STEP_TITLE, hideNonce: true })
+  })
+
+  it.each([
+    [false, 'signed'],
+    [true, 'executed'],
+  ])('tracks the policy transaction once it is %s', (isExecuted) => {
+    render(<SpendingLimitFlow />)
+
+    mockTxFlow.mock.calls[0][0].onSubmit?.({ txId: 'tx', isExecuted })
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, {
+      [MixpanelEventParams.IS_EXECUTED]: isExecuted,
+    })
   })
 })

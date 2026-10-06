@@ -55,9 +55,17 @@ export {
   useCurrentSpaceSafeCount,
   useSpaceSafeCount,
 } from './hooks/useIsCurrentSpaceAtSafeLimit'
+export { useSpaceSafeLimit } from './hooks/useSpaceSafeLimit'
+export { useAddNewSafeToUrlSpace } from './hooks/useAddNewSafeToUrlSpace'
+export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
+export { useSafeProAccess } from './hooks/useSafeProAccess'
+export { usePlanGate } from './hooks/usePlanGate'
+export { trackPlanSelectionStarted } from './components/Plans/planSelection'
+export { useSpacePlanState } from './hooks/useSpacePlanState'
+export { useSpaceDeletionGuard } from './hooks/billing/useSpaceDeletionGuard'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
-export { default as useFeatureRedirect } from './hooks/useFeatureRedirect'
-export { default as useGetSpaceAddressBook } from './hooks/useGetSpaceAddressBook'
+export { default as useFeatureRedirect, useRedirectWhenOff } from './hooks/useFeatureRedirect'
+export { default as useGetSpaceAddressBook, useSpaceAddressBookState } from './hooks/useGetSpaceAddressBook'
 export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
 export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
@@ -66,9 +74,16 @@ export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmi
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'
 export { useInviteNotification } from './hooks/useInviteNotification'
+export { useSafeWorkspaceCheck } from './hooks/useSafeWorkspaceCheck'
+export { useLandingSpaceId } from './hooks/useLandingSpaceId'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
-export { useUpsertWorkspaceSafeName } from './hooks/useUpsertWorkspaceSafeName'
+export {
+  ADDRESS_BOOK_UNAVAILABLE,
+  usePrepareWorkspaceSafeNames,
+  useUpsertWorkspaceSafeName,
+  useUpsertWorkspaceSafeNames,
+} from './hooks/useUpsertWorkspaceSafeName'
 export { default as useTrackSpace } from './hooks/useTrackSpace'
 
 // Hooks from useSpaceMembers.tsx
@@ -91,6 +106,7 @@ export {
 
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
+export { useIsSafeInCurrentSpace } from './hooks/useIsSafeInCurrentSpace'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'

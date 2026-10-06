@@ -29,7 +29,7 @@ const SESSION_AHEAD_MS = 1_000_000
 
 const authState = (signedIn: boolean): RootState['auth'] => ({
   sessionExpiresAt: signedIn ? Date.now() + SESSION_AHEAD_MS : null,
-  lastUsedSpace: null,
+  landingSpaceHint: null,
   isStoreHydrated: true,
   cfSafeSynced: false,
   isOidcLoginPending: false,

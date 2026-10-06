@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import MemberName from './MemberName'
+import MemberIdentifier, { getMemberIdentifier } from './MemberIdentifier'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import RenewInviteButton from './RenewInviteButton'
 import MemberRowActionsMenu from './MemberRowActionsMenu'
@@ -159,11 +160,10 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
     const isDisabled = isAdmin && isLastAdmin && !isInvite
     // The last admin can't be removed, but may still open edit to rename themselves.
     const editDisabled = isDisabled && !isCurrentUser
-    const memberEmail = member.user.email
     // Contract: Email invites can always be renewed (resending the email);
     // wallet invites are only renewed once they have expired.
-    const canRenew = isPendingInvite && (Boolean(memberEmail) || isExpired)
-    return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew, memberEmail }
+    const canRenew = isPendingInvite && (Boolean(member.user.email) || isExpired)
+    return { isDeclined, isExpired, isInvite, isDisabled, editDisabled, canRenew }
   }
 
   // Widths must sum to 100% per configuration (variant × 2FA flag) — `table-fixed` overflows otherwise.
@@ -191,37 +191,37 @@ const MembersList = ({ members, variant = 'active' }: { members: MemberDto[]; va
       cellTestId: 'table-cell-name',
       sortValue: (m) => getMemberDisplayName(m),
       cell: (member, { isCompact }) => {
-        const { isDeclined, isExpired, memberEmail } = memberFlags(member)
+        const { isDeclined, isExpired } = memberFlags(member)
         return (
-          <div className="flex flex-col gap-0.5">
-            <div className="flex items-center gap-2">
-              <MemberName member={member} />
-              {isDeclined && <Badge variant="destructive">Declined</Badge>}
-              {isExpired && <Badge variant="warning">Expired</Badge>}
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <MemberName member={member} isCompact={isCompact} />
+              {isDeclined && (
+                <Badge variant="destructive" className="shrink-0">
+                  Declined
+                </Badge>
+              )}
+              {isExpired && (
+                <Badge variant="warning" className="shrink-0">
+                  Expired
+                </Badge>
+              )}
             </div>
-            {/* The email column is hidden in the compact layout — surface it under the name instead */}
-            {isCompact && memberEmail && (
-              <span className="text-muted-foreground truncate pl-9 text-xs">{memberEmail}</span>
-            )}
+            {/* The identifier column is hidden in the compact layout — surface it under the name instead */}
+            {isCompact && <MemberIdentifier member={member} className="text-muted-foreground pl-9 text-xs" />}
           </div>
         )
       },
     },
     {
       id: 'email',
-      header: 'Email',
+      header: 'Email or address',
       width: isCondensed ? '15%' : '20%',
       priority: 'secondary',
       minWidth: 180,
       cellTestId: 'table-cell-email',
-      sortValue: (m) => m.user.email,
-      cell: (member) =>
-        member.user.email ? (
-          <Tooltip>
-            <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{member.user.email}</TooltipTrigger>
-            <TooltipContent>{member.user.email}</TooltipContent>
-          </Tooltip>
-        ) : null,
+      sortValue: (m) => getMemberIdentifier(m)?.value ?? null,
+      cell: (member) => <MemberIdentifier member={member} />,
     },
     ...(isTwoFactorEnabled ? [twoFactorColumn] : []),
     {

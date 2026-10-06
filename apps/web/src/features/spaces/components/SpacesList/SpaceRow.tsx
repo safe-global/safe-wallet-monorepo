@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { EllipsisVertical } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
@@ -11,6 +12,11 @@ import { SpaceSummary } from '../SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
 import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
+import { useBillingSpaceId } from '../../hooks/billing/useBillingSpaceId'
+import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -30,6 +36,13 @@ const SpaceRow = ({
   showDivider?: boolean
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
+  const billingSpaceId = useBillingSpaceId(space.uuid)
+  // All rows share the one cached request of all Workspaces' entitlements
+  const { plan } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
+    ...SPACE_REFRESH_OPTIONS,
+    selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
+  })
+  const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   const handleOpenWorkspace = () => {
     trackEvent(
@@ -63,6 +76,14 @@ const SpaceRow = ({
               isCompact
             />
           </div>
+          {plan && (
+            <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
+              <span className="block h-4 w-6">
+                <ProChip className="size-full" />
+              </span>
+              {badgeLabel && `· ${badgeLabel}`}
+            </Badge>
+          )}
         </Link>
 
         <div className="absolute right-0 top-1/2 -translate-y-1/2">

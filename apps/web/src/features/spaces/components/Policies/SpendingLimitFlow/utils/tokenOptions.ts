@@ -57,6 +57,11 @@ export type BuildTokenOptionsInput = {
   native?: NativeCurrencyInfo
   /** False on `HIDE_NATIVE_TOKEN` chains, where the balances API still returns the native token. */
   showNative?: boolean
+  /**
+   * Tokens that must be selectable whether or not the lists above offer them — an existing spending
+   * limit's token, which may be untrusted or never held. Appended, so the held order does not move.
+   */
+  extra?: readonly TokenOption[]
 }
 
 const toHeldOption = (balance: Balance): TokenOption => ({
@@ -85,14 +90,13 @@ const byFiatDescThenSymbol = (a: TokenOption, b: TokenOption): number => {
   return fiatDiff !== 0 ? fiatDiff : a.symbol.localeCompare(b.symbol)
 }
 
-const bySymbol = (a: TokenOption, b: TokenOption): number => a.symbol.localeCompare(b.symbol)
-
 /** Zero balances are kept so a limit can be set before funding; held wins on a duplicate address. */
 export const buildTokenOptions = ({
   balances,
   popular,
   native,
   showNative = true,
+  extra = [],
 }: BuildTokenOptionsInput): TokenOption[] => {
   const held = (balances ?? [])
     .filter((balance) => balance.tokenInfo.type !== TokenType.ERC721)
@@ -102,12 +106,15 @@ export const buildTokenOptions = ({
 
   const candidates: PopularToken[] = [...(native ? [{ ...native, address: ZERO_ADDRESS }] : []), ...popular]
 
+  // Native first, then the popular table's own order — product-defined, so it is never sorted here.
   const popularOptions = candidates
     .filter((candidate) => !held.some((option) => sameAddress(option.address, candidate.address)))
     .map(toPopularOption)
-    .sort(bySymbol)
 
-  return [...held, ...popularOptions]
+  const listed = [...held, ...popularOptions]
+  const extras = extra.filter((token) => !listed.some((option) => sameAddress(option.address, token.address)))
+
+  return [...held, ...extras, ...popularOptions]
 }
 
 export const findTokenOption = (

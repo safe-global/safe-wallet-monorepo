@@ -375,7 +375,7 @@ export const Buttons: Story = {
             Cancel
           </Button>
         </Swatch>
-        <Swatch label="destructive" to="Pages/Spaces/Settings" toLabel="Delete workspace">
+        <Swatch label="destructive" to="Pages/Spaces/Settings" toLabel="Delete Workspace">
           <Button variant="destructive">Delete</Button>
         </Swatch>
         <Swatch label="ghost" to="Components/Settings/OwnerList" toLabel="Signers">

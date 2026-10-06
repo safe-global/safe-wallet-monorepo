@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { withMockProvider } from '@/storybook/preview'
 import SafeProBanner from './index'
 
 const meta = {
@@ -13,6 +14,7 @@ const meta = {
         </div>
       </div>
     ),
+    withMockProvider({ initialState: { settings: { theme: {} } } }),
   ],
 } satisfies Meta<typeof SafeProBanner>
 

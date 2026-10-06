@@ -23,10 +23,10 @@ Testing guide for the `apps/web/` workspace. Follow these conventions to write c
 yarn workspace @safe-global/web test
 
 # Run a specific test file
-yarn workspace @safe-global/web test -- --testPathPattern=src/features/earn/services/utils
+yarn workspace @safe-global/web test -- --testPathPatterns=src/features/earn/services/utils
 
 # Watch mode
-yarn workspace @safe-global/web test -- --watch --testPathPattern=src/features/earn
+yarn workspace @safe-global/web test -- --watch --testPathPatterns=src/features/earn
 
 # Coverage report
 yarn workspace @safe-global/web test:coverage
@@ -88,6 +88,7 @@ Available builders:
 - `@/tests/builders/balances` — `tokenInfoBuilder`, `balanceBuilder`, `balancesBuilder`
 - `@/tests/builders/transactionDetails` — `transactionDetailsBuilder`, `multisigExecutionDetailsBuilder`
 - `@/tests/builders/collectibles` — `collectibleBuilder`
+- `@/tests/builders/hypernativeAuthStatus` — `hypernativeAuthStatusBuilder`
 
 ## Mock conventions
 
@@ -171,6 +172,15 @@ jest.mock('@/services/analytics')
 ```
 
 No return value needed — this just prevents analytics side effects.
+
+### `window.location`
+
+jsdom makes `window.location` non-configurable, so `Object.defineProperty(window, 'location', …)` throws. Instead:
+
+- **Set the path/query:** `window.history.replaceState(null, '', '/spaces?spaceId=1')`
+- **Set the origin:** a `/** @jest-environment-options {"url": "https://app.safe.global/"} */` docblock at the top of the file
+- **Assert a redirect or reload:** production code calls `navigateTo` / `reloadPage` from `@/utils/navigation`; tests `jest.mock('@/utils/navigation')` and assert on those
+- **SSR (`typeof window === 'undefined'`):** a separate `*.ssr.test.ts` file with a `/** @jest-environment node */` docblock
 
 ## Templates
 

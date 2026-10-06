@@ -1,7 +1,9 @@
 import React from 'react'
-import { render } from '@testing-library/react-native'
+import { act, render } from '@/src/tests/test-utils'
 import { View, Text } from 'react-native'
+import type Safe from '@safe-global/protocol-kit'
 import { ConfirmTxForm } from './ConfirmTxForm'
+import { setSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { useDefinedActiveSafe } from '@/src/store/hooks/activeSafe'
 import { AlreadySigned } from '../confirmation-views/AlreadySigned'
 import { CanNotSign } from '../CanNotSign'
@@ -34,6 +36,7 @@ describe('ConfirmTxForm', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks()
+    setSafeSDK({} as Safe)
 
     // Mock the useDefinedActiveSafe hook
     ;(useDefinedActiveSafe as jest.Mock).mockReturnValue(mockActiveSafe)
@@ -133,5 +136,44 @@ describe('ConfirmTxForm', () => {
     const { getByText } = render(<ConfirmTxForm {...defaultProps} isExpired={true} />)
 
     expect(getByText('CanNotExecute')).toBeTruthy()
+  })
+
+  describe('while the Safe SDK is initializing', () => {
+    beforeEach(() => {
+      setSafeSDK(undefined)
+    })
+
+    it('shows the loader instead of SignForm', () => {
+      const { getByText, queryByText } = render(<ConfirmTxForm {...defaultProps} />)
+
+      expect(getByText('Initializing Safe SDK...')).toBeTruthy()
+      expect(queryByText('SignForm')).toBeNull()
+    })
+
+    it('shows the loader instead of ExecuteForm', () => {
+      const { getByText, queryByText } = render(<ConfirmTxForm {...defaultProps} hasEnoughConfirmations={true} />)
+
+      expect(getByText('Initializing Safe SDK...')).toBeTruthy()
+      expect(queryByText('ExecuteForm')).toBeNull()
+    })
+
+    it('still renders AlreadySigned', () => {
+      ;(useTransactionSigner as jest.Mock).mockReturnValue({
+        signerState: { ...mockSignerState, hasSigned: true },
+      })
+
+      const { getByText } = render(<ConfirmTxForm {...defaultProps} />)
+
+      expect(getByText('AlreadySigned')).toBeTruthy()
+    })
+
+    it('renders SignForm once the SDK is ready', () => {
+      const { getByText, queryByText } = render(<ConfirmTxForm {...defaultProps} />)
+
+      act(() => setSafeSDK({} as Safe))
+
+      expect(getByText('SignForm')).toBeTruthy()
+      expect(queryByText('Initializing Safe SDK...')).toBeNull()
+    })
   })
 })

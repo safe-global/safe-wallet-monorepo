@@ -295,8 +295,6 @@ export const addresBookContacts = {
   },
 }
 
-export const termsUrl = '/terms'
-export const privacyUrl = '/privacy'
 export const licensesUrl = '/licenses'
 export const imprintUrl = '/imprint'
 export const cookiePolicyUrl = '/cookie'

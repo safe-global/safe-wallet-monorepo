@@ -1,7 +1,9 @@
 import { useContext, useState, type ReactElement } from 'react'
-import { useSafeScope, useSafeScopeControls } from '@/components/tx-flow/safe-scope'
+import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
@@ -16,7 +18,7 @@ const CreateSpendingLimitPolicy = ({
   isCalloutDismissed,
   onDismissCallout,
 }: CreateSpendingLimitPolicyProps): ReactElement => {
-  const { data, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
+  const { data: formValues, onNext } = useContext<TxFlowContextType<SpendingLimitPolicyFormValues>>(TxFlowContext)
   const { accounts, isLoading, isError, refetch, hasWallet } = useSpendingLimitSafeAccounts()
   const { setScope } = useSafeScopeControls()
   const scopeKey = useSafeScope()?.scopeKey
@@ -25,10 +27,19 @@ const CreateSpendingLimitPolicy = ({
   const [spenderAddresses, setSpenderAddresses] = useState<string[]>([])
   useSafeShieldForAddressPoisoning(spenderAddresses)
 
+  const handleSubmit = (values: SpendingLimitPolicyFormValues) => {
+    trackEvent(POLICY_EVENTS.SPENDING_LIMIT_SET, {
+      [MixpanelEventParams.CHAIN_ID]: parseSafeScopeKey(values.safe)?.chainId,
+      [MixpanelEventParams.SPENDER_COUNT]: values.spenders.length,
+      [MixpanelEventParams.LIMIT_COUNT]: values.spenders.reduce((count, spender) => count + spender.limits.length, 0),
+    })
+    onNext(values)
+  }
+
   return (
     <SpendingLimitPolicyForm
-      defaultValues={data ?? createDefaultFormValues()}
-      onSubmit={onNext}
+      defaultValues={formValues ?? createDefaultFormValues()}
+      onSubmit={handleSubmit}
       accounts={accounts}
       isAccountsLoading={isLoading}
       isAccountsError={isError}

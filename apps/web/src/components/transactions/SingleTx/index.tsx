@@ -19,6 +19,7 @@ import TransactionDetailsError from './TransactionDetailsError'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useHnQueueAssessment } from '@/features/hypernative'
+import { reloadPage } from '@/utils/navigation'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: ModuleTransaction = makeTxFromDetails(txDetails)
@@ -81,7 +82,7 @@ const SingleTx = () => {
   }
 
   if (error) {
-    return <TransactionDetailsError onReload={() => window.location.reload()} />
+    return <TransactionDetailsError onReload={reloadPage} />
   }
 
   if (txDetails) {

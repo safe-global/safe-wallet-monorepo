@@ -21,6 +21,8 @@ jest.mock('../hooks', () => ({
   useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
+const mockUseSafeProAccess = jest.fn(() => ({ hasProFeatures: true, isLoading: false }))
+jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
 // Mock new dependencies for untrusted Safe check
 jest.mock('@/hooks/useIsTrustedSafe', () => ({
   __esModule: true,
@@ -58,6 +60,7 @@ const mockSafeTxContextValue = {
 }
 
 const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
+const mockUseRecipientAnalysis = jest.requireMock('../hooks').useRecipientAnalysis
 const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
 const mockUseRecipientAnalysisWithPoisoning = jest.requireMock('../hooks').useRecipientAnalysisWithPoisoning
 
@@ -99,6 +102,45 @@ describe('SafeShieldContext', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseRecipientAnalysisWithPoisoning.mockImplementation((recipient: unknown) => recipient)
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+  })
+
+  describe('Safe Pro gating', () => {
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={mockSafeTxContextValue}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    it('runs the recipient and counterparty analyses for a Workspace with Safe Pro', () => {
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+      const { result } = renderHook(() => useSafeShield(), { wrapper })
+      const tx = buildSafeTransaction('0x1234')
+      act(() => {
+        result.current.setSafeTx(tx)
+        result.current.setRecipientAddresses(['0x00000000000000000000000000000000000000aa'])
+      })
+
+      expect(result.current.hasProFeatures).toBe(true)
+      expect(mockUseRecipientAnalysis).toHaveBeenLastCalledWith(['0x00000000000000000000000000000000000000aa'])
+      expect(mockUseCounterpartyAnalysis).toHaveBeenLastCalledWith(tx, true)
+    })
+
+    it('keeps only the threat analysis without Safe Pro: no recipient addresses, counterparty disabled', () => {
+      mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))
+      const { result } = renderHook(() => useSafeShield(), { wrapper })
+      const tx = buildSafeTransaction('0x1234')
+      act(() => {
+        result.current.setSafeTx(tx)
+        result.current.setRecipientAddresses(['0x00000000000000000000000000000000000000aa'])
+      })
+
+      expect(result.current.hasProFeatures).toBe(false)
+      expect(mockUseRecipientAnalysis).toHaveBeenLastCalledWith(undefined)
+      expect(mockUseCounterpartyAnalysis).toHaveBeenLastCalledWith(tx, false)
+      expect(mockUseThreatAnalysis).toHaveBeenCalled()
+    })
   })
 
   it('should require risk confirmation for critical threats', async () => {

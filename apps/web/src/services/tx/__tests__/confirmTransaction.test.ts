@@ -13,29 +13,27 @@ describe('confirmTx', () => {
   const CONFIRMATIONS_URL = `${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_TX_HASH}/confirmations`
   const PROPOSE_URL = `${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`
 
-  const TX_ID = `multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`
-
   const mockResponse: TransactionDetails = {
-    txId: TX_ID,
+    txId: `multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`,
     safeAddress: SAFE_ADDRESS,
-    txHash: null,
+    txHash: undefined,
     txStatus: 'AWAITING_CONFIRMATIONS',
     txInfo: {
       type: 'Custom',
-      humanDescription: null,
-      to: { value: '0x123', name: null, logoUri: null },
+      humanDescription: undefined,
+      to: { value: '0x123', name: undefined, logoUri: undefined },
       dataSize: '100',
       value: '0',
       isCancellation: false,
-      methodName: null,
+      methodName: undefined,
     },
-    detailedExecutionInfo: null,
-    safeAppInfo: null,
-    note: null,
+    detailedExecutionInfo: undefined,
+    safeAppInfo: undefined,
+    note: undefined,
   }
 
   beforeAll(() => {
-    setStoreInstance(makeStore({}, { skipBroadcast: true }))
+    setStoreInstance(makeStore({}))
   })
 
   it('should return the updated transaction details', async () => {
@@ -44,7 +42,7 @@ describe('confirmTx', () => {
     const confirmedTx = await confirmTx(CHAIN_ID, SAFE_TX_HASH, SIGNATURE)
 
     expect(confirmedTx).toEqual(mockResponse)
-    expect(confirmedTx.txId).toBe(TX_ID)
+    expect(confirmedTx.txId).toBe(`multisig_${SAFE_ADDRESS}_${SAFE_TX_HASH}`)
   })
 
   it('should send only the signature as payload to the safeTxHash confirmations endpoint', async () => {

@@ -235,7 +235,7 @@ jobs:
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.AWS_ROLE }}
           aws-region: ${{ secrets.AWS_REGION }}
@@ -363,7 +363,7 @@ jobs:
         if: needs.tag.outputs.version && success()
         id: linear_complete
         continue-on-error: true
-        uses: linear/linear-release-action@53ad0f863963e7f8e270fba18426bbb55ef55384 # v0.17.2
+        uses: linear/linear-release-action@d4af10092984f9bc6d5efa075b242bdf01333463 # v0.18.0
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: complete

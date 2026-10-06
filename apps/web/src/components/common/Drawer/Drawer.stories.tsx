@@ -1,6 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { UserRoundPen } from 'lucide-react'
-import { Drawer, DrawerBody, DrawerFooter, DrawerHeader, DrawerSubtitle, DrawerTitle } from './Drawer'
+import { ShieldCheck, UserRoundPen } from 'lucide-react'
+import { Drawer } from './Drawer'
+import {
+  DrawerBody,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerList,
+  DrawerSection,
+  DrawerSubtitle,
+  DrawerTitle,
+} from './components'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { Badge, BadgeDot } from '@/components/ui/badge'
@@ -25,7 +34,7 @@ const Paragraphs = ({ count }: { count: number }) => (
   <>
     {Array.from({ length: count }, (_, i) => (
       <Typography key={i} variant="paragraph-small" className="mb-4">
-        Paragraph {i + 1} — the drawer body does not scroll on its own; the content decides.
+        Paragraph {i + 1} — the drawer body scrolls once the content outgrows the panel.
       </Typography>
     ))}
   </>
@@ -81,6 +90,64 @@ export const StatusHeader: Story = {
   },
 }
 
+/** Sections label the blocks inside a body; the trailing note is optional. */
+export const Sections: Story = {
+  args: {
+    ariaLabel: 'Sectioned drawer',
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle size="lg">Proposer role</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <div className="flex flex-col gap-4">
+            <DrawerSection title="Pending signatures" rightNode="Expires in 1h 33 min">
+              <div className="rounded-lg bg-muted p-3">
+                <Typography variant="paragraph-small">Section content</Typography>
+              </div>
+            </DrawerSection>
+            <DrawerSection title="Details">
+              <Typography variant="paragraph-small">A section with no trailing note.</Typography>
+            </DrawerSection>
+          </div>
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+/** Label/value rows for the facts a policy or transaction carries. */
+export const List: Story = {
+  args: {
+    ariaLabel: 'List drawer',
+    children: (
+      <>
+        <DrawerHeader>
+          <DrawerTitle size="lg">Proposer role</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
+          <DrawerList
+            items={[
+              { label: 'Proposer', content: 'Marc' },
+              { label: 'Applies to', content: 'Marketing' },
+              { label: 'Last updated', content: '06.24.26 03:35 AM UTC' },
+              {
+                label: 'Enforced by',
+                content: (
+                  <span className="inline-flex items-center gap-1">
+                    <ShieldCheck className="size-3.5" />
+                    <span className="underline">Safe module</span>
+                  </span>
+                ),
+              },
+            ]}
+          />
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
 export const OnlyTitle: Story = {
   args: {
     ariaLabel: 'Title only drawer',
@@ -117,9 +184,7 @@ export const LongContent: Story = {
           <DrawerTitle>Scrolling body</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            <Paragraphs count={30} />
-          </div>
+          <Paragraphs count={30} />
         </DrawerBody>
         <DrawerFooter>
           <Button className="w-full">Submit delegation</Button>

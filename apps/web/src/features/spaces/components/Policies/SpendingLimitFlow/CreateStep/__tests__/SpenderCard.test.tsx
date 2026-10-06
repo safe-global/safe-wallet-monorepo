@@ -1,8 +1,26 @@
+import { faker } from '@faker-js/faker'
 import { FormProvider, useForm, useFormContext } from 'react-hook-form'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import useSafeInfo from '@/hooks/useSafeInfo'
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
-import { ADD_TOKEN_LABEL, DUPLICATE_SPENDER_ERROR, REMOVE_SPENDER_LABEL, SPENDER_HELPER_TEXT } from '../../constants'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import {
+  ADD_TOKEN_LABEL,
+  DUPLICATE_SPENDER_ERROR,
+  REMOVE_SPENDER_LABEL,
+  SPENDER_HELPER_TEXT,
+  SPENDER_IS_SAFE_ERROR,
+  SPENDER_RESERVED_ERROR,
+} from '../../constants'
 import { createEmptySpender, type SpenderFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import SpenderCard from '../SpenderCard'
+
+jest.mock('@/hooks/useSafeInfo')
+const mockUseSafeInfo = jest.mocked(useSafeInfo)
 
 // The address book field has its own suite; a registered input keeps the card's validity about its own rules.
 jest.mock('@/components/common/AddressBookInput', () => {
@@ -11,12 +29,14 @@ jest.mock('@/components/common/AddressBookInput', () => {
     validate,
     deps,
     excludeAddresses = [],
+    disabled,
     'data-testid': testId,
   }: {
     name: string
     validate?: (value: string) => string | undefined | Promise<string | undefined>
     deps?: string[]
     excludeAddresses?: readonly string[]
+    disabled?: boolean
     'data-testid'?: string
   }) => {
     const {
@@ -33,6 +53,7 @@ jest.mock('@/components/common/AddressBookInput', () => {
         <input
           data-testid={testId}
           data-excluded={excludeAddresses.join(',')}
+          disabled={disabled}
           {...register(name, { required: true, validate, deps })}
         />
         {error?.message && <span>{error.message}</span>}
@@ -56,12 +77,26 @@ jest.mock('../TokenLimitCard', () => ({
   ),
 }))
 
+jest.mock('../../ExistingSpendingLimitsProvider', () => ({
+  useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
+}))
+
+const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
+
 const SPENDER = '0x1234567890123456789012345678901234567890'
 const OTHER_SPENDER = '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd'
 
-const Harness = ({ spenders, onRemove = jest.fn() }: { spenders: SpenderFormValues[]; onRemove?: () => void }) => {
+const Harness = ({
+  spenders,
+  onRemove = jest.fn(),
+  edit = false,
+}: {
+  spenders: SpenderFormValues[]
+  onRemove?: () => void
+  edit?: boolean
+}) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({ mode: 'onChange', defaultValues: { safe: '', spenders } })
-  return (
+  const cards = (
     <FormProvider {...methods}>
       {spenders.map((_, index) => (
         <SpenderCard
@@ -77,9 +112,23 @@ const Harness = ({ spenders, onRemove = jest.fn() }: { spenders: SpenderFormValu
       </button>
     </FormProvider>
   )
+
+  return edit ? <EditModeProvider>{cards}</EditModeProvider> : cards
 }
 
+const SAFE_ADDRESS = checksumAddress(faker.finance.ethereumAddress())
+
 describe('SpenderCard', () => {
+  beforeEach(() => {
+    mockUseSafeInfo.mockReturnValue({
+      safe: extendedSafeInfoBuilder().build(),
+      safeAddress: SAFE_ADDRESS,
+      safeLoaded: true,
+      safeLoading: false,
+      safeError: undefined,
+    })
+  })
+
   it('starts with one limit row and explains who the spender is', () => {
     renderWithUserEvent(<Harness spenders={[createEmptySpender()]} />)
 
@@ -97,6 +146,24 @@ describe('SpenderCard', () => {
     expect(screen.getAllByTestId('token-limit-card')).toHaveLength(1)
     expect(screen.getByTestId('token-limit-card')).toHaveTextContent('limit 0')
     expect(screen.queryByRole('button', { name: /remove row/ })).not.toBeInTheDocument()
+  })
+
+  it('rejects the zero address as a spender', async () => {
+    const { user } = renderWithUserEvent(<Harness spenders={[{ ...createEmptySpender(), address: ZERO_ADDRESS }]} />)
+
+    await user.click(screen.getByRole('button', { name: 'validate' }))
+
+    expect(await screen.findByText(SPENDER_RESERVED_ERROR)).toBeInTheDocument()
+  })
+
+  it('rejects the Safe account itself as a spender', async () => {
+    const { user } = renderWithUserEvent(
+      <Harness spenders={[{ ...createEmptySpender(), address: SAFE_ADDRESS.toLowerCase() }]} />,
+    )
+
+    await user.click(screen.getByRole('button', { name: 'validate' }))
+
+    expect(await screen.findByText(SPENDER_IS_SAFE_ERROR)).toBeInTheDocument()
   })
 
   it('rejects a spender that is already in the policy', async () => {
@@ -150,5 +217,26 @@ describe('SpenderCard', () => {
     unmount()
     renderWithUserEvent(<Harness spenders={[createEmptySpender()]} />)
     expect(screen.queryByRole('button', { name: REMOVE_SPENDER_LABEL })).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    const onChainSpender = spendingLimitStateBuilder().with({ beneficiary: SPENDER }).build()
+
+    it('keeps the same field for a spender the Safe already limits, only not editable', () => {
+      mockUseExisting.mockReturnValue({ limits: [onChainSpender], loading: false })
+
+      renderWithUserEvent(<Harness spenders={[{ ...createEmptySpender(), address: SPENDER }]} edit />)
+
+      expect(screen.getByTestId('spender-address-input')).toBeDisabled()
+      expect(screen.getByText(SPENDER_HELPER_TEXT)).toBeInTheDocument()
+    })
+
+    it('still lets a spender added during this edit be typed', () => {
+      mockUseExisting.mockReturnValue({ limits: [onChainSpender], loading: false })
+
+      renderWithUserEvent(<Harness spenders={[createEmptySpender()]} edit />)
+
+      expect(screen.getByTestId('spender-address-input')).toBeEnabled()
+    })
   })
 })

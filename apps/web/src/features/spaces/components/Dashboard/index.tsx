@@ -16,7 +16,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
-import { SafeProFeature, useIsSafeProEnabled, useSafeProAnnouncement } from '@/features/safe-pro-announcement'
+import { SafeProFeature, useSafeProAnnouncementModal } from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
@@ -24,6 +24,8 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 
 const EmptyStateAddAction = () => {
   return (
@@ -57,10 +59,10 @@ const SpaceDashboard = () => {
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
-  const isSafeProEnabled = useIsSafeProEnabled()
-  // Not shown over an invite preview: there is no Workspace of theirs to move yet.
-  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncement(
-    isSafeProEnabled && Boolean(spaceId) && !isInvited,
+  // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
+  const { isLocked, isResolving: isResolvingPlan } = useWorkspaceLock()
+  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncementModal(
+    !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
   )
 
   useEffect(() => {
@@ -117,9 +119,12 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
+  const checkoutModal = <CheckoutReturnModals />
+
   return (
     <>
-      {isSafeProEnabled && <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />}
+      <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />
+      {checkoutModal}
 
       {isInvited && <PreviewInvite />}
 

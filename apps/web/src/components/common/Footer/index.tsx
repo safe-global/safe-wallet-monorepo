@@ -9,16 +9,14 @@ import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
 import ExternalLink from '../ExternalLink'
 import { Link } from '@/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { IS_PRODUCTION, COMMIT_HASH } from '@/config/constants'
+import { HELP_CENTER_URL, PRIVACY_URL } from '@safe-global/utils/config/constants'
+import { IS_PRODUCTION, COMMIT_HASH, LEGAL_URL } from '@/config/constants'
 import type { FooterProps } from './footer.type'
 
 const footerPages = [
   AppRoutes.settings.index,
   AppRoutes.imprint,
-  AppRoutes.privacy,
   AppRoutes.cookie,
-  AppRoutes.terms,
   AppRoutes.licenses,
   AppRoutes.welcome.accounts,
   AppRoutes.welcome.spaces,
@@ -58,10 +56,14 @@ const Footer: React.FC<FooterProps> = ({
               <Typography variant="paragraph-mini">&copy;{copyrightYear} Safe Labs GmbH</Typography>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.terms)}>Terms</FooterLink>
+              <ExternalLink href={LEGAL_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+                Legal
+              </ExternalLink>
             </li>
             <li>
-              <FooterLink href={getHref(AppRoutes.privacy)}>Privacy</FooterLink>
+              <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+                Privacy
+              </ExternalLink>
             </li>
             <li>
               <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>

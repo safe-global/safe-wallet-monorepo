@@ -136,7 +136,7 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 ## Step 4: The Staged Programme
 
-Migration runs as **one stage per PR**, easiest feature area first. Do not open a PR that spans stages.
+Migration runs **one stage at a time**, easiest feature area first, and every stage lands as **two PRs**: a _migration PR_ that adds the Playwright specs, and a _deletion PR_ that removes the Cypress specs only after CI has run the new specs on `dev`. Do not open a PR that spans stages, and never delete Cypress specs in the PR that introduces their replacement.
 
 **Scope: 122 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
 
@@ -171,30 +171,37 @@ Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membershi
 
 ### The per-stage loop
 
-One stage = one PR. All eight steps, every time.
+One stage = two PRs. All eight steps, every time — steps 1–5 in the migration PR, steps 6–8 in the deletion PR.
+
+**PR A — migration.** Cypress keeps running; the row's Status becomes `migrated`.
 
 1. **Classify** every spec in the area against the 8 questions in Step 1 above. Write the verdict into `CYPRESS_PW_MIGRATION_STATUS.md` **before writing code**. Expect some specs to be deleted, some demoted to unit/component tests, some turned into `@api` tests.
    > A stage that migrates fewer specs than it started with is a success, not a shortfall. Migrate business value, not code.
 2. **Write** the Playwright specs per [AI_TEST_OUTPUT_FORMAT.md](./AI_TEST_OUTPUT_FORMAT.md). Tag `@migration` plus the category tag; the tag must match the directory.
 3. **Stability gate** — `--repeat-each=10` must be 10/10. This is the README's existing rule, not a new one.
 4. **No regression in already-migrated work** — the full Playwright suite must be green.
-5. **Prove the Cypress spec still passes** before deleting it. Never delete an already-broken spec: the diff would hide a real failure, and you would not know whether the new test is weaker.
-6. **Delete** the Cypress spec and any page-object functions it alone used. Update `CYPRESS_PW_MIGRATION_STATUS.md` to `deleted`.
-7. **Re-run the Cypress suite.** ← _the real hazard in this migration._ Page objects are shared across specs, including with the excluded `visual/` specs, so removing helpers can break tests you never touched. **Non-negotiable.**
-8. **Add unit/component tests** for whatever step 1 pushed down the pyramid, plus a unit guard for any new `data-testid` you add to app source (see Known hazards).
+5. **Add unit/component tests** for whatever step 1 pushed down the pyramid, plus a unit guard for any new `data-testid` you add to app source (see Known hazards). Set the rows to `migrated` and merge.
+
+**Wait for CI.** The new specs must have run green on `dev` through `web-pw-smoke.yml` (for `@smoke`/`@api`) or `web-pw-full-ondemand.yml` (for `@regression`) before the deletion PR is opened. A local 10/10 proves stability on one machine; the CI static build on :8080 is a different environment.
+
+**PR B — deletion.** Only after the wait above; the row's Status becomes `deleted`.
+
+6. **Prove the Cypress spec still passes** before deleting it. Never delete an already-broken spec: the diff would hide a real failure, and you would not know whether the new test is weaker.
+7. **Delete** the Cypress spec and any page-object functions it alone used. Update `CYPRESS_PW_MIGRATION_STATUS.md` to `deleted`.
+8. **Re-run the Cypress suite.** ← _the real hazard in this migration._ Page objects are shared across specs, including with the excluded `visual/` specs, so removing helpers can break tests you never touched. **Non-negotiable.**
 
 ```bash
 # From apps/web/, with the dev server on :3000
 unset ELECTRON_RUN_AS_NODE   # VSCode only (xtension host sets this); it breaks Cypress
 export CYPRESS_WALLET_CREDENTIALS=**provide the env variable**
 
-# 3. Stability gate
+# PR A, step 3. Stability gate
 npx playwright test --config=e2e/playwright.config.ts <new-specs> --repeat-each=10
 
-# 4. Whole Playwright suite
+# PR A, step 4. Whole Playwright suite
 npx playwright test --config=e2e/playwright.config.ts --reporter=list
 
-# 5 + 7. Cypress before and after deletion — the two runs must match
+# PR B, steps 6 + 8. Cypress before and after deletion — the two runs must match
 yarn cypress:run --browser chrome --spec 'cypress/e2e/<area>/*.cy.js' --config retries=0,video=false
 ```
 
@@ -215,7 +222,7 @@ Each of these actually happened in this repo. They are not hypotheticals.
 | A testid disappears after the locator is written          | `safe-header-info` lived in `sidebar/SidebarHeader/SafeHeaderInfo.tsx`; a dead-code cleanup deleted the component a month after the Playwright locator was added, and nothing caught it                                                                                                                                                                                                                                                                                         | Add a unit test asserting the testid renders, in the component's own test file                                                                                                                                                                                                                                                                                                            |
 | A spec references a testid the app never shipped          | `address-book-toggle` was referenced by a spec added in the "Improved address book dropdown" PR, but that PR only added `address-item` and `contact-group-header`                                                                                                                                                                                                                                                                                                               | Grep app source for the testid before trusting a spec that uses it                                                                                                                                                                                                                                                                                                                        |
 | A locator's DOM assumption silently breaks                | `getByTestId('private-key-input').locator('input')` was correct under MUI's `TextField` (testid on a wrapper) and wrong after the shadcn migration (testid on the bare `<input>`)                                                                                                                                                                                                                                                                                               | Prefer `getByRole`/`getByLabel`; when using a testid, do not assume wrapper-vs-element                                                                                                                                                                                                                                                                                                    |
-| Deleting shared page-object helpers                       | 25 Cypress page objects are shared across specs _and_ with the excluded `visual/` specs                                                                                                                                                                                                                                                                                                                                                                                         | Loop step 7                                                                                                                                                                                                                                                                                                                                                                               |
+| Deleting shared page-object helpers                       | 25 Cypress page objects are shared across specs _and_ with the excluded `visual/` specs                                                                                                                                                                                                                                                                                                                                                                                         | Loop step 8                                                                                                                                                                                                                                                                                                                                                                               |
 | Data-exact assertions against live Safes                  | The static test Safes are real on Sepolia; balances and tx history drift                                                                                                                                                                                                                                                                                                                                                                                                        | Derive expectations from `safeApiClient` instead of hard-coding values                                                                                                                                                                                                                                                                                                                    |
 | **The Beamer widget covers buttons** — known gap, unfixed | Cypress guards it twice: it seeds `_BEAMER_FIRST_VISIT_${PRODUCT_ID}` from the `BEAMER_DATA_E2E` secret, _and_ `main.page.js` has `blockBeamer()` to 204 the widget script because its popup "covers onboarding buttons". The Playwright fixture seeds those keys **without** the `PRODUCT_ID` suffix, so its suppression is almost certainly inert — and it sets `updates: true`, which is the consent that loads Beamer ([useBeamer.ts](../../src/hooks/Beamer/useBeamer.ts)) | **Bites from Stage 5 onward** (`sidebar.pages.js`, then `address_book.page.js`, `spaces.page.js`). Symptom is a click landing on an overlay, and it will not mention Beamer. Fix when you reach it: set `updates: false` in the fixture's `COOKIE_STATE` (simplest — Beamer never loads), or `page.route` the `getbeamer.com` script to mirror `blockBeamer()`. Stages 1–4 are unaffected |
 

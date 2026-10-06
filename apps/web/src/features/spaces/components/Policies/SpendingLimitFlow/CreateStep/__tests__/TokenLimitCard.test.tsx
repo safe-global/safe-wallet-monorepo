@@ -1,20 +1,25 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { DUPLICATE_TOKEN_ERROR, EXISTING_LIMIT_ERROR, ONE_TIME_HELPER_TEXT, REMOVE_LIMIT_LABEL } from '../../constants'
 import {
-  DUPLICATE_TOKEN_ERROR,
-  ONE_TIME_HELPER_TEXT,
-  PRICE_UNAVAILABLE_TEXT,
-  REMOVE_LIMIT_LABEL,
-} from '../../constants'
-import { createEmptyLimit, type LimitFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+  createEmptyLimit,
+  spenderAddressPath,
+  type LimitFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '../../types'
+import { EditModeProvider } from '../../EditFlow/EditModeContext'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const DAI = '0x6B175474E89094C44Da98b954EedeAC495271d0F'
+const SPENDER = '0x1234567890123456789012345678901234567890'
 
 const mockTokens = [
   tokenOptionBuilder()
@@ -40,7 +45,6 @@ const mockTokens = [
       fiatConversion: '1',
     })
     .build(),
-  // Popular-only: no balance and no price, so the row falls back to "Price unavailable".
   tokenOptionBuilder().with({ address: DAI, symbol: 'DAI', name: 'Dai Stablecoin' }).build(),
 ]
 
@@ -52,12 +56,14 @@ jest.mock('../../TokenSelector', () => ({
     value,
     onChange,
     excludeAddresses = [],
+    disabledAddresses = [],
     helperText,
     'data-testid': testId = 'limit-token-selector',
   }: {
     value?: string
     onChange: (next: string | undefined) => void
     excludeAddresses?: string[]
+    disabledAddresses?: string[]
     helperText?: React.ReactNode
     'data-testid'?: string
   }) => (
@@ -67,7 +73,7 @@ jest.mock('../../TokenSelector', () => ({
         {mockTokens
           .filter((token) => !excludeAddresses.includes(token.address))
           .map((token) => (
-            <option key={token.address} value={token.address}>
+            <option key={token.address} value={token.address} disabled={disabledAddresses.includes(token.address)}>
               {token.symbol}
             </option>
           ))}
@@ -77,17 +83,36 @@ jest.mock('../../TokenSelector', () => ({
   ),
 }))
 
+jest.mock('@safe-global/utils/utils/formatNumber', () => ({
+  ...jest.requireActual('@safe-global/utils/utils/formatNumber'),
+  getLocalDecimalSeparator: jest.fn(() => '.'),
+}))
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('../../ExistingSpendingLimitsProvider', () => ({
+  useExistingSpendingLimits: jest.fn(() => ({ loading: false })),
+}))
 
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
+const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
+const mockDecimalSeparator = jest.mocked(getLocalDecimalSeparator)
 
-const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; onRemove?: () => void }) => {
+const Harness = ({
+  limits,
+  spender = '',
+  onRemove = jest.fn(),
+  edit = false,
+}: {
+  limits: LimitFormValues[]
+  spender?: string
+  onRemove?: () => void
+  edit?: boolean
+}) => {
   const methods = useForm<SpendingLimitPolicyFormValues>({
     mode: 'onChange',
-    defaultValues: { safe: `1:${ZERO_ADDRESS}`, spenders: [{ address: '', limits }] },
+    defaultValues: { safe: `1:${ZERO_ADDRESS}`, spenders: [{ address: spender, limits }] },
   })
-  return (
+  const rows = (
     <FormProvider {...methods}>
       {limits.map((_, index) => (
         <TokenLimitCard
@@ -102,12 +127,21 @@ const Harness = ({ limits, onRemove = jest.fn() }: { limits: LimitFormValues[]; 
       <button type="button" onClick={() => methods.trigger()}>
         validate
       </button>
+      <button type="button" onClick={() => methods.setValue(spenderAddressPath(0), SPENDER, { shouldDirty: true })}>
+        set spender
+      </button>
     </FormProvider>
   )
+
+  return edit ? <EditModeProvider>{rows}</EditModeProvider> : rows
 }
 
-const renderRows = (limits: LimitFormValues[] = [createEmptyLimit()], onRemove?: () => void) =>
-  renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} />)
+const renderRows = (
+  limits: LimitFormValues[] = [createEmptyLimit()],
+  onRemove?: () => void,
+  spender?: string,
+  edit?: boolean,
+) => renderWithUserEvent(<Harness limits={limits} onRemove={onRemove} spender={spender} edit={edit} />)
 
 describe('TokenLimitCard', () => {
   beforeEach(() => {
@@ -121,6 +155,10 @@ describe('TokenLimitCard', () => {
       refetchPopular: jest.fn(),
       identityKey: `1:${ZERO_ADDRESS}`,
     })
+  })
+
+  afterEach(() => {
+    mockDecimalSeparator.mockReturnValue('.')
   })
 
   it("shows the Safe's balance of the selected token under the token field", async () => {
@@ -148,6 +186,18 @@ describe('TokenLimitCard', () => {
     expect(screen.getByTestId('amount-fiat')).toHaveTextContent(/4[,.]000/)
   })
 
+  it('stores an amount typed in a comma-decimal locale with a dot, as the send flow does', async () => {
+    mockDecimalSeparator.mockReturnValue(',')
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), ZERO_ADDRESS)
+    await user.type(screen.getByTestId('limit-amount-input'), '1.5')
+    await user.click(screen.getByRole('button', { name: 'validate' }))
+
+    expect(screen.getByTestId('limit-amount-input')).toHaveValue('1,5')
+    expect(await screen.findByTestId('amount-fiat')).toHaveTextContent(/3[,.]000/)
+  })
+
   it('stays quiet about fiat until an amount is entered, rather than claiming $0.00', async () => {
     const { user } = renderRows()
 
@@ -156,12 +206,21 @@ describe('TokenLimitCard', () => {
     expect(screen.queryByTestId('amount-fiat')).not.toBeInTheDocument()
   })
 
-  it('says so when the selected token has no price', async () => {
+  it('stays quiet about fiat for a token with no price', async () => {
+    const { user } = renderRows()
+
+    await user.selectOptions(screen.getByTestId('limit-token-selector'), DAI)
+    await user.type(screen.getByTestId('limit-amount-input'), '1')
+
+    expect(screen.queryByTestId('amount-fiat')).not.toBeInTheDocument()
+  })
+
+  it('shows no balance for a popular token rather than claiming the Safe holds none', async () => {
     const { user } = renderRows()
 
     await user.selectOptions(screen.getByTestId('limit-token-selector'), DAI)
 
-    expect(screen.getByTestId('amount-fiat')).toHaveTextContent(PRICE_UNAVAILABLE_TEXT)
+    expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
   })
 
   it('asks for a token before it judges the amount', async () => {
@@ -220,6 +279,59 @@ describe('TokenLimitCard', () => {
     expect(await screen.findAllByText(DUPLICATE_TOKEN_ERROR)).not.toHaveLength(0)
   })
 
+  describe('existing on-chain limits', () => {
+    const existingUsdc = spendingLimitStateBuilder()
+      .with({ beneficiary: SPENDER, token: { ...spendingLimitStateBuilder().build().token, address: USDC } })
+      .build()
+
+    afterEach(() => {
+      mockUseExisting.mockReturnValue({ loading: false })
+    })
+
+    it('lists a token the spender already has a limit for, but not as a choice', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER)
+
+      const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
+        (option) => option.textContent,
+      )
+      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI'])
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeDisabled()
+    })
+
+    it('keeps the token for a spender without a limit on it', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, '0xabcdefabcdefabcdefabcdefabcdefabcdefabcd')
+
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeEnabled()
+    })
+
+    it('flags a token picked before the limits loaded once they arrive', async () => {
+      // Same element type on rerender keeps the Harness instance, so the form state survives and only the hook changes.
+      const picked = [{ ...createEmptyLimit(), tokenAddress: USDC }]
+      mockUseExisting.mockReturnValue({ loading: true })
+      const { rerender } = renderRows(picked, undefined, SPENDER)
+      expect(screen.queryByTestId('token-error')).not.toBeInTheDocument()
+
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+      rerender(<Harness limits={picked} spender={SPENDER} />)
+
+      await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
+    })
+
+    it('flags a token once the spender typed later already has a limit for it', async () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+      const { user } = renderRows([{ ...createEmptyLimit(), tokenAddress: USDC }])
+      expect(screen.queryByTestId('token-error')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'set spender' }))
+
+      await waitFor(() => expect(screen.getByTestId('token-error')).toHaveTextContent(EXISTING_LIMIT_ERROR))
+    })
+  })
+
   it('offers to remove the row only when the spender has more than one', async () => {
     const onRemove = jest.fn()
     const { user, unmount } = renderRows([createEmptyLimit(), createEmptyLimit()], onRemove)
@@ -230,5 +342,41 @@ describe('TokenLimitCard', () => {
     unmount()
     renderRows([createEmptyLimit()])
     expect(screen.queryByRole('button', { name: REMOVE_LIMIT_LABEL })).not.toBeInTheDocument()
+  })
+
+  describe('in edit mode', () => {
+    const existingUsdc = spendingLimitStateBuilder()
+      .with({
+        beneficiary: SPENDER,
+        token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+      })
+      .build()
+
+    it('does not flag a token the spender already has a limit for', async () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      const { user } = renderRows([{ ...createEmptyLimit(), tokenAddress: USDC }], undefined, SPENDER, true)
+      await user.click(screen.getByRole('button', { name: 'validate' }))
+
+      await waitFor(() => expect(screen.queryByTestId('token-error')).not.toBeInTheDocument())
+    })
+
+    it('shows no balance for a limited token the balances endpoint did not return', () => {
+      const unlisted = tokenOptionBuilder().with({ group: 'held' }).build()
+      mockUseOptions.mockReturnValue({ ...mockUseOptions(), options: [...mockTokens, unlisted] })
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([{ ...createEmptyLimit(), tokenAddress: unlisted.address }], undefined, SPENDER, true)
+
+      expect(screen.queryByTestId('token-balance')).not.toBeInTheDocument()
+    })
+
+    it('keeps a token the spender already has in the selector so it can be edited', () => {
+      mockUseExisting.mockReturnValue({ limits: [existingUsdc], loading: false })
+
+      renderRows([createEmptyLimit()], undefined, SPENDER, true)
+
+      expect(screen.getByRole('option', { name: 'USDC' })).toBeInTheDocument()
+    })
   })
 })

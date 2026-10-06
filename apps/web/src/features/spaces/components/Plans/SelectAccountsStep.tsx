@@ -1,0 +1,195 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { ArrowRight } from 'lucide-react'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
+import { DialogTitle } from '@/components/ui/dialog'
+import { highlightSafePro } from '@/components/common/ProHighlight'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { SearchInput } from '@/components/ui/search-input'
+import { Typography } from '@/components/ui/typography'
+import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
+import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import type { SafeRef } from './types'
+import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
+import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
+import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import SelectedCounter from '../SelectedCounter'
+import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
+import { getMultiChainSafeId, getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+
+const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
+const NO_FLAGGED = new Set<string>()
+
+const leavesOf = (items: AllSafeItems): SafeItem[] =>
+  items.flatMap((item) => (isMultiChainSafeItem(item) ? item.safes : [item]))
+
+/** Every Safe starts selected (multi-chain parents included); the user deselects down to the plan's seats. */
+export const _initialSelection = (items: AllSafeItems): Record<string, boolean> => {
+  const selected: Record<string, boolean> = {}
+  for (const item of items) {
+    if (isMultiChainSafeItem(item)) {
+      selected[getMultiChainSafeId(item)] = true
+      for (const safe of item.safes) selected[getSafeId(safe)] = true
+    } else {
+      selected[getSafeId(item)] = true
+    }
+  }
+  return selected
+}
+
+export const seatsTooltip = (planName: string, limit: number): string =>
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available in My accounts. You can swap them in any time.`
+
+/** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
+export default function SelectAccountsStep({
+  limit,
+  planName,
+  continueLabel = 'Continue to checkout',
+  onBack,
+  onContinue,
+  isSubmitting,
+  error,
+}: {
+  limit: number
+  planName: string
+  /** Names where the step leads: Stripe for a new plan, the change summary for a live one. */
+  continueLabel?: string
+  onBack: () => void
+  onContinue: (removed: SafeRef[]) => void
+  isSubmitting?: boolean
+  error?: string
+}) {
+  const { allSafes, isLoading } = useSpaceSafes()
+  const [query, setQuery] = useState('')
+  const filtered = useSafesSearch(allSafes, query.trim())
+  const items = query.trim() ? filtered : allSafes
+  const { control, setValue } = useForm<AddAccountsFormValues>({
+    defaultValues: { selectedSafes: _initialSelection(allSafes) },
+  })
+  const { selectedKeys, seatCount, isAtLimit, isOverLimit, handleToggle } = useOnboardingSelection({
+    items: allSafes,
+    control,
+    setValue,
+    flaggedAddresses: NO_FLAGGED,
+    limit,
+  })
+  const leaves = useMemo(() => leavesOf(allSafes), [allSafes])
+  const removed = useMemo(() => leaves.filter((safe) => !selectedKeys.has(getSafeId(safe))), [leaves, selectedKeys])
+  const removedNote = removedSafesNote(summarizeRemovedSafes(leaves, removed))
+  const hasTrackedView = useRef(false)
+  useEffect(() => {
+    if (isLoading || hasTrackedView.current) return
+    hasTrackedView.current = true
+    trackEvent(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED, {
+      [MixpanelEventParams.ACCOUNTS_AVAILABLE]: seatCount,
+      [MixpanelEventParams.PLAN_LIMIT]: limit,
+    })
+  }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with the values of that moment
+
+  const submit = () => {
+    trackEvent(SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_SUBMITTED, {
+      [MixpanelEventParams.SELECTED_COUNT]: seatCount,
+      [MixpanelEventParams.DESELECTED_COUNT]: removed.length,
+      [MixpanelEventParams.PLAN_LIMIT]: limit,
+    })
+    onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))
+  }
+
+  return (
+    <>
+      <Typography variant="h3" as={DialogTitle}>
+        {highlightSafePro('Select Safe accounts for your Safe Pro plan')}
+      </Typography>
+
+      <Alert variant="info">
+        <AlertSeverityIcon variant="info" />
+        <AlertTitle className="font-semibold">
+          {planName} covers {limit} Safe accounts
+        </AlertTitle>
+        <AlertDescription>
+          At {limit}, deselect one to add another. Safe accounts you leave out remain available in My accounts.
+        </AlertDescription>
+      </Alert>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-3">
+          {/* Amber only while the selection still exceeds the plan; sitting exactly at the cap is the goal. */}
+          <SelectedCounter
+            count={seatCount}
+            limit={limit}
+            isAtLimit={isOverLimit}
+            tooltip={seatsTooltip(planName, limit)}
+          />
+          <SearchInput
+            className="flex-1"
+            placeholder="by name, address or network"
+            aria-label="Search Safe list"
+            autoComplete="off"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+
+        <ScrollArea className="h-91">
+          {!isLoading && items.length === 0 ? (
+            <Typography align="center" color="muted" className="py-8">
+              No Safe accounts match your search
+            </Typography>
+          ) : (
+            <SafeAccountsTable
+              items={items}
+              columns={COLUMNS}
+              embedded
+              selection={{ selectedKeys, onToggle: handleToggle, isAtLimit }}
+              data-testid="plan-safes-table"
+            />
+          )}
+        </ScrollArea>
+      </div>
+
+      {isOverLimit ? (
+        <Alert variant="warning">
+          <AlertSeverityIcon variant="warning" />
+          <AlertDescription>
+            Deselect {seatCount - limit === 1 ? '1 Safe account' : `${seatCount - limit} Safe accounts`} to fit the
+            plan.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        removedNote && (
+          <Alert variant="warning">
+            <AlertSeverityIcon variant="warning" />
+            <AlertDescription>{removedNote}</AlertDescription>
+          </Alert>
+        )
+      )}
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertSeverityIcon variant="destructive" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="flex gap-5">
+        <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isSubmitting}>
+          Back
+        </Button>
+        <Button
+          size="lg"
+          accentIcon
+          className="flex-1"
+          disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
+          onClick={submit}
+        >
+          {continueLabel}
+          <ArrowRight />
+        </Button>
+      </div>
+    </>
+  )
+}

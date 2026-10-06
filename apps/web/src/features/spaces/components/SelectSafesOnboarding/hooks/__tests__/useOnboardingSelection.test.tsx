@@ -2,12 +2,8 @@ import { renderHook, act } from '@testing-library/react'
 import { useForm } from 'react-hook-form'
 import type { AllSafeItems } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../../../hooks/addAccounts.types'
+import type { SafeLimit } from '@/utils/spaces'
 import useOnboardingSelection from '../useOnboardingSelection'
-
-jest.mock('@/features/spaces/constants', () => ({
-  ...jest.requireActual('@/features/spaces/constants'),
-  SAFE_ACCOUNTS_LIMIT: 3,
-}))
 
 // Minimal AccountLine shapes — the hook only reads key/variant/address/source.
 const singleLine = (chainId: string, address: string) =>
@@ -21,14 +17,19 @@ const groupLine = (address: string, chainIds: string[]) =>
     source: { address, safes: chainIds.map((chainId) => ({ chainId, address })) },
   }) as never
 
-const setup = (opts: { items?: AllSafeItems; flagged?: Set<string> } = {}) =>
+const setup = (
+  opts: { items?: AllSafeItems; flagged?: Set<string>; selected?: Record<string, boolean>; limit?: SafeLimit } = {},
+) =>
   renderHook(() => {
-    const { control, setValue } = useForm<AddAccountsFormValues>({ defaultValues: { selectedSafes: {} } })
+    const { control, setValue } = useForm<AddAccountsFormValues>({
+      defaultValues: { selectedSafes: opts.selected ?? {} },
+    })
     return useOnboardingSelection({
       items: opts.items ?? [],
       control,
       setValue,
       flaggedAddresses: opts.flagged ?? new Set<string>(),
+      limit: 'limit' in opts ? opts.limit : 3,
     })
   })
 
@@ -94,5 +95,54 @@ describe('useOnboardingSelection', () => {
 
     act(() => result.current.handleToggle(singleLine('1', '0xC'), true))
     expect(result.current.isAtLimit).toBe(true)
+  })
+
+  it('counts a Safe on several chains as one seat towards the cap', () => {
+    const multiChainSafe = {
+      address: '0xA',
+      safes: [
+        { chainId: '1', address: '0xA' },
+        { chainId: '10', address: '0xA' },
+      ],
+    }
+    const group = groupLine('0xA', ['1', '10'])
+    const { result } = setup({ items: [multiChainSafe] as unknown as AllSafeItems })
+
+    act(() => result.current.handleToggle(group, true))
+    expect(result.current.selectedKeys.size).toBe(2)
+    expect(result.current.seatCount).toBe(1)
+    expect(result.current.isAtLimit).toBe(false)
+
+    act(() => result.current.handleToggle(singleLine('1', '0xB'), true))
+    act(() => result.current.handleToggle(singleLine('1', '0xC'), true))
+    expect(result.current.seatCount).toBe(3)
+    expect(result.current.isAtLimit).toBe(true)
+    expect(result.current.isOverLimit).toBe(false)
+  })
+
+  it('reports a selection above the cap until the user deselects down to it', () => {
+    const { result } = setup({ selected: { '1:0xA': true, '1:0xB': true, '1:0xC': true, '1:0xD': true } })
+
+    expect(result.current.isOverLimit).toBe(true)
+    expect(result.current.isAtLimit).toBe(true)
+
+    act(() => result.current.handleToggle(singleLine('1', '0xD'), false))
+    expect(result.current.isOverLimit).toBe(false)
+    expect(result.current.isAtLimit).toBe(true)
+  })
+
+  it('locks further picks without flagging the cap while the limit is unknown', () => {
+    const { result } = setup({ limit: undefined, selected: { '1:0xA': true } })
+
+    expect(result.current.isSelectionLocked).toBe(true)
+    expect(result.current.isAtLimit).toBe(false)
+    expect(result.current.isOverLimit).toBe(false)
+  })
+
+  it('never locks an unlimited plan', () => {
+    const { result } = setup({ limit: null, selected: { '1:0xA': true, '1:0xB': true, '1:0xC': true, '1:0xD': true } })
+
+    expect(result.current.isSelectionLocked).toBe(false)
+    expect(result.current.isAtLimit).toBe(false)
   })
 })

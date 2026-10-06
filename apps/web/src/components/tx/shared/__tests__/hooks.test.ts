@@ -476,8 +476,8 @@ describe('SignOrExecute hooks', () => {
       const { signTx, executeTx } = result.current
 
       // Expect signTx to throw an error
-      await expect(signTx()).rejects.toThrowError('Transaction not provided')
-      await expect(executeTx({ gasPrice: 1 })).rejects.toThrowError('Transaction not provided')
+      await expect(signTx()).rejects.toThrow('Transaction not provided')
+      await expect(executeTx({ gasPrice: 1 })).rejects.toThrow('Transaction not provided')
     })
 
     it('should relay a tx execution', async () => {
@@ -627,7 +627,7 @@ describe('SignOrExecute hooks', () => {
       const { result } = renderHook(() => useTxActions())
       const { executeTx } = result.current
 
-      await expect(executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)).rejects.toThrowError(
+      await expect(executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)).rejects.toThrow(
         'Cannot relay an unsigned transaction from a smart contract wallet',
       )
 
@@ -846,6 +846,7 @@ describe('SignOrExecute hooks', () => {
             safeCreationSponsored: false,
             safeTransactionSponsored: false,
             enableTenderlySimulationBeforeRelay: false,
+            gasPaymentOptions: ['SUBSCRIPTION'],
           },
         })
         .build()

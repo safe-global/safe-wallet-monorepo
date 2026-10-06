@@ -27,7 +27,7 @@ const ONBOARDING_ROUTES = [
   AppRoutes.welcome.survey,
 ]
 
-const STATIC_PAGE_ROUTES = [AppRoutes.terms, AppRoutes.privacy, AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
+const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
 const NO_HEADER_ROUTES = [
   AppRoutes.welcome.index,
@@ -50,7 +50,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
-  const { SelectSafeModal } = useLoadFeature(SpacesFeature)
+  const { SelectSafeModal, SafeWorkspaceSignInDialog } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isOnboardingRoute = ONBOARDING_ROUTES.includes(pathname)
@@ -133,6 +133,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       </div>
 
       <SelectSafeModal />
+      <SafeWorkspaceSignInDialog />
     </>
   )
 }

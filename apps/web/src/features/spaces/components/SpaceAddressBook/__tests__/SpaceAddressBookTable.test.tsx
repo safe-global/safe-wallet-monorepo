@@ -3,6 +3,7 @@ import SpaceAddressBookTable from '../SpaceAddressBookTable'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
 import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
@@ -97,7 +98,7 @@ describe('SpaceAddressBookTable', () => {
       <SpaceAddressBookTable
         entries={[entryBuilder().build()]}
         showAddedBy={false}
-        renderExtraAction={() => <button>Add to workspace</button>}
+        renderExtraAction={() => <button>Add to Workspace</button>}
       />,
     )
     expect(lastHeader(withExtra.container).className).toContain('md:w-[35%]')
@@ -117,6 +118,36 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByText(memberName)).toBeInTheDocument()
     // Only the Address column renders EthHashInfo; the attribution shows the member name
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+  })
+
+  it('truncates a long name in the "Added by" cell instead of overflowing the column', () => {
+    const memberName = 'A very long space member name that cannot fit the attribution column'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    const name = screen.getByText(memberName)
+    expect(name).toHaveClass('truncate')
+    expect(name).toHaveClass('min-w-0')
+    expect(name.parentElement).toHaveClass('min-w-0')
+  })
+
+  it('shortens an "Added by" member name that is a wallet address', () => {
+    const address = '0x1234567890abcdef1234567890abcdef12345678'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? address : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    expect(screen.getByText(shortenAddress(address))).toBeInTheDocument()
+    expect(screen.queryByText(address)).not.toBeInTheDocument()
   })
 
   it('renders actions for non-local entries', () => {

@@ -78,7 +78,7 @@ async function mockSpacesSession(page: Page): Promise<void> {
         `${ns}auth`,
         JSON.stringify({
           sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-          lastUsedSpace: spaceId,
+          landingSpaceHint: spaceId,
           isStoreHydrated: false,
           cfSafeSynced: false,
           isOidcLoginPending: false,
@@ -100,7 +100,9 @@ async function mockSpacesSession(page: Page): Promise<void> {
     route.fulfill({ json: WORKSPACE_ADDRESS_BOOK }),
   )
   await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: SPACE.members }))
-  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
+  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
+    route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [SAFES.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
+  )
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
   await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
 }
@@ -117,7 +119,7 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
     const sendTokens = new SendTokensPage(safePage)
 
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(SAFES.SEP_OWNER_4_SAFE)
+    await home.goto(SAFES.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()

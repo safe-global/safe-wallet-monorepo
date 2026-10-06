@@ -1,9 +1,11 @@
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { SerializedError, ThunkAction, UnknownAction } from '@reduxjs/toolkit'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { AppDispatch, RootState } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { navigateTo } from '@/utils/navigation'
 import { isElevationRequiredError } from './elevation'
 
 const STEP_UP_KEY = 'oidc_step_up'
@@ -28,9 +30,14 @@ const REPLAYABLE_ENDPOINTS = {
   addressBooksUpsertAddressBookItemsV1: 'Address book updated',
   addressBooksDeleteByAddressV1: 'Address removed from the address book',
   addressBookRequestsApproveRequestV1: 'Address book request approved',
+  billingUpdateSubscriptionV1: 'Plan updated',
+  billingGetCheckoutUrlV1: 'Opening the checkout',
 } as const
 
 type ReplayableEndpoint = keyof typeof REPLAYABLE_ENDPOINTS
+
+/** Requested for the page they return: the replay sends the user there instead of confirming with a toast. */
+const REDIRECTING_ENDPOINTS: ReadonlyArray<ReplayableEndpoint> = ['billingGetCheckoutUrlV1']
 
 export type PendingStepUpAction = {
   endpoint: ReplayableEndpoint
@@ -42,6 +49,9 @@ const REPLAY_FAILED_MESSAGE = 'Verification succeeded, but the action could not 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null
 
 const isReplayableEndpoint = (value: string): value is ReplayableEndpoint => value in REPLAYABLE_ENDPOINTS
+
+const getRedirectUrl = (data: unknown): string | undefined =>
+  isRecord(data) && typeof data.url === 'string' ? data.url : undefined
 
 /** Checked field by field: the listener passes an `UnknownAction`, and RTK types `meta.arg` as `unknown`. */
 export const getReplayableAction = (action: UnknownAction): PendingStepUpAction | undefined => {
@@ -84,10 +94,10 @@ export const takeStepUpTrip = (): StepUpTrip | undefined => {
   }
 }
 
-/** Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates this tag and no other. */
-const REPLAY_INVALIDATED_TAGS = ['spaces'] as const
+// Built on demand: tests mock the generated modules partially, and a module-load spread would read `undefined`.
+const replayableEndpoints = () => ({ ...cgwApi.endpoints, ...billingApi.endpoints })
 
-type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
+type ReplayOutcome = { data?: unknown; error?: FetchBaseQueryError | SerializedError }
 
 /**
  * `cgwApi.endpoints[name].initiate` is a different signature per endpoint, so a
@@ -99,15 +109,16 @@ type ReplayOutcome = { error?: FetchBaseQueryError | SerializedError }
 type ReplayInitiator = (args: unknown) => ThunkAction<Promise<ReplayOutcome>, RootState, unknown, UnknownAction>
 
 const asReplayInitiator = (endpoint: ReplayableEndpoint): ReplayInitiator =>
-  cgwApi.endpoints[endpoint].initiate as unknown as ReplayInitiator
+  replayableEndpoints()[endpoint].initiate as unknown as ReplayInitiator
 
-export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<void> => {
+/** Resolves to `true` when the replay sends the browser to another page, so the caller keeps the splash up. */
+export const replayStepUpAction = async (dispatch: AppDispatch, pending: PendingStepUpAction): Promise<boolean> => {
   const result = await dispatch(asReplayInitiator(pending.endpoint)(pending.args))
 
   if (result.error) {
     // Rejected again means the user walked away from the challenge, which is a
     // cancellation and not something to report back to them.
-    if (isElevationRequiredError(result.error)) return
+    if (isElevationRequiredError(result.error)) return false
 
     dispatch(
       showNotification({
@@ -116,7 +127,17 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
         groupKey: 'step-up-replay-failed',
       }),
     )
-    return
+    return false
+  }
+
+  if (REDIRECTING_ENDPOINTS.includes(pending.endpoint)) {
+    const url = getRedirectUrl(result.data)
+    if (url) {
+      navigateTo(url)
+      return true
+    }
+    dispatch(showNotification({ message: REPLAY_FAILED_MESSAGE, variant: 'error', groupKey: 'step-up-replay-failed' }))
+    return false
   }
 
   // The success message must not appear while the lists still show the old data.
@@ -131,7 +152,9 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
   // zero while the first request is still open. The query then keeps the response
   // it gets, which may have been produced before the write. Invalidating again
   // once nothing is in flight fetches every affected query with the written data.
-  dispatch(cgwApi.util.invalidateTags([...REPLAY_INVALIDATED_TAGS]))
+  // Every endpoint in `REPLAYABLE_ENDPOINTS` invalidates one of these two tags; refetching the other is harmless.
+  dispatch(cgwApi.util.invalidateTags(['spaces']))
+  dispatch(billingApi.util.invalidateTags(['billing']))
   await Promise.all(dispatch(cgwApi.util.getRunningQueriesThunk()))
 
   dispatch(
@@ -141,4 +164,6 @@ export const replayStepUpAction = async (dispatch: AppDispatch, pending: Pending
       groupKey: 'step-up-replay-success',
     }),
   )
+
+  return false
 }

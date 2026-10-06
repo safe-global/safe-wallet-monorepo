@@ -6,6 +6,13 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      entitlementsGetAllEntitlementsV1: build.query<
+        EntitlementsGetAllEntitlementsV1ApiResponse,
+        EntitlementsGetAllEntitlementsV1ApiArg
+      >({
+        query: () => ({ url: `/v1/spaces/entitlements` }),
+        providesTags: ['entitlements'],
+      }),
       entitlementsGetEntitlementsV1: build.query<
         EntitlementsGetEntitlementsV1ApiResponse,
         EntitlementsGetEntitlementsV1ApiArg
@@ -17,19 +24,26 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type EntitlementsGetAllEntitlementsV1ApiResponse = /** status 200  */ {
+  [key: string]: EntitlementsResponse
+}
+export type EntitlementsGetAllEntitlementsV1ApiArg = void
 export type EntitlementsGetEntitlementsV1ApiResponse = /** status 200  */ EntitlementsResponse
 export type EntitlementsGetEntitlementsV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type EntitlementsPlanStatus = 'active' | 'trialing'
 export type EntitlementsPlan = {
   /** Plan identifier in the billing service */
   id: string
   name: string | null
   /** End of the current billing cycle */
   cycleEndsAt: string | null
+  /** Status of the subscription the plan comes from */
+  status: EntitlementsPlanStatus
 }
-export type FeatureKey = 'safe_seats' | 'sponsored_transactions'
+export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies'
 export type BinaryEntitlement = {
   /** Feature key from the entitlements catalog. */
   feature: FeatureKey
@@ -74,4 +88,9 @@ export type EntitlementsResponse = {
       } & MeteredEntitlement)
   )[]
 }
-export const { useEntitlementsGetEntitlementsV1Query, useLazyEntitlementsGetEntitlementsV1Query } = injectedRtkApi
+export const {
+  useEntitlementsGetAllEntitlementsV1Query,
+  useLazyEntitlementsGetAllEntitlementsV1Query,
+  useEntitlementsGetEntitlementsV1Query,
+  useLazyEntitlementsGetEntitlementsV1Query,
+} = injectedRtkApi

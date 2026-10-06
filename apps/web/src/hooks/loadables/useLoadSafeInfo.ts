@@ -19,7 +19,8 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const chainId = useChainId()
   const chain = useCurrentChain()
   const { safe } = useSafeInfo()
-  const isStoredSafeValid = safe.chainId === chainId && safe.address.value === address
+  // Without the emptiness checks this matches the blank `defaultSafeInfo` and serves it as loaded.
+  const isStoredSafeValid = !!chainId && !!address && safe.chainId === chainId && safe.address.value === address
   const cache = isStoredSafeValid ? safe : undefined
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, chainId, address))
   const isUserAuthenticated = useAppSelector(isAuthenticated)
