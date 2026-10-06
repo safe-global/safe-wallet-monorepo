@@ -515,6 +515,23 @@ describe('SafeShieldDisplay', () => {
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
     })
 
+    it('waits for a running Safenet check when Safe Pro is off', () => {
+      mockSafenetRunning = true
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+          isSafePro={false}
+          hasProFeatures={false}
+        />,
+      )
+      mockSafenetRunning = false
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
     it('stays gray before any check has produced a result', () => {
       const { container } = render(
         <SafeShieldDisplay

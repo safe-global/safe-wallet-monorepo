@@ -130,8 +130,8 @@ export const SafeShieldDisplay = ({
 
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
-  // Safenet only renders in the Pro section, so only a Pro widget waits for its verdict.
-  const isSafenetShown = useIsSafenetChecksEnabled() && isSafePro && hasProFeatures && !isOffchainMessage
+  // Safenet shows in the open list without SAFE_PRO, and in the Pro block only for Safes with Pro features.
+  const isSafenetShown = useIsSafenetChecksEnabled() && !isOffchainMessage && (!isSafePro || hasProFeatures)
   const isSafenetRunning = useIsSafenetCheckRunning(isSafenetShown)
 
   const isAnalysing = [recipient, contract, threat, deadlock].some((result) => result?.[2])

@@ -61,12 +61,25 @@ describe('SafeShieldContent Safenet section integration', () => {
     expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
   })
 
-  it('shows nothing outside Safe Pro', () => {
+  it('shows the check among the open checks when Safe Pro is off', async () => {
+    const mocked = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
+    mocked.mockReturnValue(
+      buildCheckView({
+        snapshot: buildBenignSnapshot({ safeTxHash: HASH as `0x${string}` }),
+        status: CheckStatus.BENIGN,
+        publicStatus: CheckStatus.BENIGN,
+      }),
+    )
+
     renderContent({ isSafePro: false })
 
+    await waitFor(() => expect(screen.getByTestId('safenet-checks-section')).toBeInTheDocument(), {
+      timeout: 10_000,
+    })
+    expect(screen.getByTestId('open-checks-list')).toContainElement(screen.getByTestId('safenet-checks-section'))
+    expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
     expect(screen.queryByTestId('safenet-checks-locked')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
-  })
+  }, 15_000)
 
   it('renders the check section through the lazy feature for a flow with a txId', async () => {
     const mocked = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>

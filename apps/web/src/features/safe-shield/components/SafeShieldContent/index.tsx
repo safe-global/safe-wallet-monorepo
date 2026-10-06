@@ -159,6 +159,9 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
+          {/* Without SAFE_PRO there is no Pro block, so Safenet joins the open checks like the counterparty ones. */}
+          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
+
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
