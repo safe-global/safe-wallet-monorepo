@@ -51,11 +51,11 @@ describe('resolvePresentation', () => {
     expect(resolvePresentation(CheckStatus.UNAVAILABLE, undefined, false)).toBeUndefined()
   })
 
-  it.each(VERDICT_STATUSES)('renders %s with its severity and the section heading', (status) => {
+  it.each(VERDICT_STATUSES)('renders %s with its severity and state name as the heading', (status) => {
     expect(resolvePresentation(status, undefined, true)).toEqual({
       severity: STATUS_PRESENTATION[status].severity,
       copy: STATUS_PRESENTATION[status].copy,
-      label: 'Safenet check',
+      label: STATUS_PRESENTATION[status].label,
       muted: false,
     })
   })

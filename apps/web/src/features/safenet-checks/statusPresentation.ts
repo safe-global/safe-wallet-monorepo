@@ -73,10 +73,24 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
 
 /** Shown before the first signature, while no check exists yet. */
 export const PRE_CHECK_COPY = {
-  label: 'Safenet check',
+  label: 'Checks after you sign',
   copy: 'Safenet checks this transaction after you sign. It takes about a minute.',
-  waiting: 'You can sign now and come back to execute. The result will be ready for the next signer.',
-  about: "Independent sentinels simulate the transaction and check it against Safenet's security rules.",
+  waitingMultisig: 'You can sign now and come back to execute. The result will be ready for the next signer.',
+  waitingSingle: 'You can sign now and execute from the queue once the result is in.',
+  executeNow:
+    'To see the result before it executes, choose "No, later" when asked to execute, then execute from the queue.',
+}
+
+export const SAFENET_ABOUT =
+  "Independent sentinels simulate the transaction and check it against Safenet's security rules."
+
+/** Compact queue-chip labels; the full state name stays in the tooltip and screen-reader copy. */
+export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
+  [CheckStatus.SUBMITTED]: 'Submitted',
+  [CheckStatus.IN_PROGRESS]: 'Simulating',
+  [CheckStatus.BENIGN]: 'No issues found',
+  [CheckStatus.MALICIOUS]: 'Risk detected',
+  [CheckStatus.TIMED_OUT]: 'Check failed',
 }
 
 export const IN_FLIGHT_NOTE = "You don't have to wait for the result to sign."
@@ -90,9 +104,6 @@ export const SAFENET_DOCS_URL = 'https://docs.safefoundation.org/safenet'
 /** The check's page on the Safenet explorer — per-sentinel detail, not proof of a verdict. */
 export const getSafenetExplorerUrl = (chainId: string, safeTxHash: string): string =>
   `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
-
-/** Section heading for every verdict: the state itself is in the copy. */
-const VERDICT_LABEL = 'Safenet check'
 
 export type ResolvedPresentation = SafenetStatusPresentation & {
   /** Render the icon neutral — set for the non-verdict UNAVAILABLE states. */
@@ -116,5 +127,5 @@ export const resolvePresentation = (
 
   if (!hasSnapshot) return undefined
 
-  return { ...STATUS_PRESENTATION[publicStatus], label: VERDICT_LABEL, muted: false }
+  return { ...STATUS_PRESENTATION[publicStatus], muted: false }
 }

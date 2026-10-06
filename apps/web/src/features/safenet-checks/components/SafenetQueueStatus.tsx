@@ -10,7 +10,7 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { MULTIPLE_RULES_TITLE, STATUS_PRESENTATION } from '../statusPresentation'
+import { CHIP_LABEL, MULTIPLE_RULES_TITLE, STATUS_PRESENTATION } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection } from '../summariseRejection'
 import { formatSimulatingLabel } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
@@ -69,7 +69,12 @@ export const SafenetQueueStatusView = ({
 }: SafenetQueueStatusViewProps): ReactElement => {
   const timing = useCheckTiming(snapshot, timestampMs)
   const { severity, label: stateLabel } = STATUS_PRESENTATION[publicStatus]
-  const label = publicStatus === CheckStatus.IN_PROGRESS ? formatSimulatingLabel(timing) : stateLabel
+  const label =
+    publicStatus === CheckStatus.IN_PROGRESS
+      ? formatSimulatingLabel(timing)
+      : variant === 'chip'
+        ? CHIP_LABEL[publicStatus]
+        : stateLabel
   const description = describeStatus(publicStatus, snapshot)
 
   const content =

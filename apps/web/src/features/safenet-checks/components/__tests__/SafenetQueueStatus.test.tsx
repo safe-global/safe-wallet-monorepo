@@ -79,6 +79,13 @@ describe('SafenetQueueStatus', () => {
     expect(cell.querySelector('[data-slot="chip"]')).toHaveTextContent('Risk detected')
   })
 
+  it('uses a short chip label so the row never truncates it', () => {
+    const cell = renderStatus(CheckStatus.TIMED_OUT, {}, 'chip')
+
+    expect(cell.querySelector('[data-slot="chip"]')).toHaveTextContent(/^Check failed$/)
+    expect(cell).toHaveTextContent("Safenet: Safenet couldn't reach a trusted result")
+  })
+
   it('summarises the flagged rule and the sentinel count', () => {
     const cell = renderStatus(CheckStatus.MALICIOUS, {
       events: [

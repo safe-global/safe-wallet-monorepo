@@ -11,7 +11,7 @@ import { CheckStatus, type UnavailableReason } from '@safe-global/utils/features
 import type { RawLog } from '@safe-global/utils/features/safenet-checks/utils/decodeLogs'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SafenetChecksSection, SafenetChecksSectionView } from './SafenetChecksSection'
+import { SafenetChecksSection, SafenetChecksSectionView, type PreCheckKind } from './SafenetChecksSection'
 import {
   SAFENET_EXAMPLE_VOTES,
   STORY_CHAIN_ID,
@@ -164,14 +164,14 @@ export const Submitted: Story = {
 
 type ViewCheck = Parameters<typeof SafenetChecksSectionView>[0]['check']
 
-const viewStory = (check: ViewCheck, story: string, isPreCheck = false): Story => ({
+const viewStory = (check: ViewCheck, story: string, preCheck?: PreCheckKind): Story => ({
   render: () => (
     <SafenetChecksSectionView
       check={check}
       safeTxHash={STORY_SAFE_TX_HASH}
       chainId={STORY_CHAIN_ID}
       submittedAt={STORY_SUBMITTED_AT}
-      isPreCheck={isPreCheck}
+      preCheck={preCheck}
     />
   ),
   parameters: { docs: { description: { story } } },
@@ -197,7 +197,17 @@ const unavailable = (reason: UnavailableReason): ViewCheck =>
 export const PreCheckFirstSigner = viewStory(
   buildCheckView(),
   'First signer of a new multisig transaction. No check exists until they sign.',
-  true,
+  'multisig',
+)
+export const PreCheckSingleSignerSignOnly = viewStory(
+  buildCheckView(),
+  '1/1 Safe that chose "No, later": signs now, executes from the queue once the result is in.',
+  'single',
+)
+export const PreCheckExecuteNow = viewStory(
+  buildCheckView(),
+  '1/1 Safe (or a last signer) executing in the same click: explains how to see the result first.',
+  'executeNow',
 )
 
 export const Loading = viewStory(

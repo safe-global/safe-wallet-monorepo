@@ -179,7 +179,7 @@ describe('SafenetAuditRow', () => {
     expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
   })
 
-  it('links a MALICIOUS step to the Safenet explorer and names a single rule', () => {
+  it('links a MALICIOUS step to the Safenet explorer', () => {
     const snapshot = buildSnapshot({
       safeTxHash: HASH as `0x${string}`,
       status: CheckStatus.MALICIOUS,
@@ -191,13 +191,13 @@ describe('SafenetAuditRow', () => {
 
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
-    expect(screen.getByText('Risk detected: Blocklisted address')).toBeInTheDocument()
+    expect(screen.getByText('Risk detected')).toBeInTheDocument()
     const link = screen.getByTestId('safenet-explorer-link')
     expect(link).toHaveAccessibleName('View on Safenet explorer')
     expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
   })
 
-  it('keeps the generic label when several rules were cited', () => {
+  it('keeps the short label when several rules were cited', () => {
     const snapshot = buildSnapshot({
       safeTxHash: HASH as `0x${string}`,
       status: CheckStatus.MALICIOUS,

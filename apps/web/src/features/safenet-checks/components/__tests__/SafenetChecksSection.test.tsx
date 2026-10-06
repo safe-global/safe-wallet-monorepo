@@ -170,8 +170,9 @@ describe('SafenetChecksSection', () => {
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-status', status)
-    expect(section).toHaveTextContent('Safenet check')
+    expect(screen.getByRole('img', { name: 'Safenet' })).toBeInTheDocument()
     expect(section).toHaveTextContent(copy)
+    expect(screen.getByTestId('safenet-about-link')).toHaveTextContent('What is Safenet?')
   })
 
   it('announces status changes politely', () => {
@@ -258,7 +259,7 @@ describe('SafenetChecksSection', () => {
     it('falls back to the generic copy for an unrecognised code', () => {
       const section = renderMalicious([reveal('0x1', 'R-9.9')])
 
-      expect(section).toHaveTextContent('Safenet check')
+      expect(section).toHaveTextContent('Risk detected')
       expect(section).toHaveTextContent('Safenet flagged this transaction as malicious.')
       expect(section).toHaveTextContent('1 of 1 sentinel flagged this.')
     })
@@ -290,9 +291,18 @@ describe('SafenetChecksSection', () => {
       expect(screen.getByRole('link', { name: /What is Safenet\?/ })).toBeInTheDocument()
     })
 
+    it('tells a signer who executes in the same click how to see the result first', () => {
+      mockUseSafenetCheck.mockReturnValue(buildCheckView())
+
+      renderInFlow({ ...creationFlow, willExecute: true })
+
+      const section = screen.getByTestId('safenet-checks-section')
+      expect(section).toHaveAttribute('data-reason', 'executeNow')
+      expect(section).toHaveTextContent('To see the result before it executes, choose "No, later"')
+    })
+
     it.each([
       ['a proposer', { isProposing: true }],
-      ['an immediate execution', { willExecute: true }],
       ['a message', { txLayoutProps: { isMessage: true } }],
     ])('stays hidden for %s', (_name, override) => {
       mockUseSafenetCheck.mockReturnValue(buildCheckView())

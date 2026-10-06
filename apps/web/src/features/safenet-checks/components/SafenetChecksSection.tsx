@@ -12,11 +12,13 @@ import { useSafenetCheck, type SafenetCheckView } from '@safe-global/utils/featu
 import { CheckStatus, type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
 import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import {
   IN_FLIGHT_NOTE,
   MULTIPLE_RULES_TITLE,
   PRE_CHECK_COPY,
   resolvePresentation,
+  SAFENET_ABOUT,
   SAFENET_DOCS_URL,
   STALE_NOTE,
 } from '../statusPresentation'
@@ -30,9 +32,11 @@ export type SafenetChecksSectionViewProps = {
   safeTxHash: string | undefined
   chainId: string
   submittedAt?: number
-  /** First signer of a new multisig transaction: no check exists until they sign. */
-  isPreCheck?: boolean
+  /** A new transaction, before any check exists. `executeNow`: it executes in the same click as the signature. */
+  preCheck?: PreCheckKind
 }
+
+export type PreCheckKind = 'multisig' | 'single' | 'executeNow'
 
 const Note = ({ children, testId }: { children: ReactNode; testId?: string }): ReactElement => (
   <Typography variant="paragraph-small" className="text-muted-foreground" data-testid={testId}>
@@ -46,6 +50,7 @@ const SectionLayout = ({
   title,
   status,
   reason,
+  showAbout = false,
   children,
 }: {
   severity: Severity
@@ -53,6 +58,7 @@ const SectionLayout = ({
   title: string
   status?: string
   reason?: string
+  showAbout?: boolean
   children: ReactNode
 }): ReactElement => (
   // The section appears only once the chain read resolves; the entrance
@@ -63,8 +69,9 @@ const SectionLayout = ({
     data-reason={reason}
     role="status"
     aria-live="polite"
-    className="animate-in fade-in slide-in-from-top-1 p-4 duration-300"
+    className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-3 p-4 duration-300"
   >
+    <SafenetLogo role="img" aria-label="Safenet" className="h-5 w-auto self-start text-foreground" />
     <div className="flex items-start gap-2">
       <SeverityIcon severity={severity} muted={muted} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -72,19 +79,27 @@ const SectionLayout = ({
           {title}
         </Typography>
         {children}
+        {showAbout && <Note>{SAFENET_ABOUT}</Note>}
+        <Note>
+          <ExternalLink data-testid="safenet-about-link" href={SAFENET_DOCS_URL}>
+            What is Safenet?
+          </ExternalLink>
+        </Note>
       </div>
     </div>
   </div>
 )
 
-const PreCheck = (): ReactElement => (
-  <SectionLayout severity={Severity.INFO} muted title={PRE_CHECK_COPY.label} status="PRE_CHECK">
+const PRE_CHECK_NEXT_STEP: Record<PreCheckKind, string> = {
+  multisig: PRE_CHECK_COPY.waitingMultisig,
+  single: PRE_CHECK_COPY.waitingSingle,
+  executeNow: PRE_CHECK_COPY.executeNow,
+}
+
+const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
+  <SectionLayout severity={Severity.INFO} muted title={PRE_CHECK_COPY.label} status="PRE_CHECK" reason={kind} showAbout>
     <Note>{PRE_CHECK_COPY.copy}</Note>
-    <Note>{PRE_CHECK_COPY.waiting}</Note>
-    <Note>{PRE_CHECK_COPY.about}</Note>
-    <Note>
-      <ExternalLink href={SAFENET_DOCS_URL}>What is Safenet?</ExternalLink>
-    </Note>
+    <Note>{PRE_CHECK_NEXT_STEP[kind]}</Note>
   </SectionLayout>
 )
 
@@ -140,12 +155,12 @@ export const SafenetChecksSectionView = ({
   safeTxHash,
   chainId,
   submittedAt,
-  isPreCheck = false,
+  preCheck,
 }: SafenetChecksSectionViewProps): ReactElement | null => {
   const { publicStatus, snapshot, unavailableReason, isStale } = check
   const links = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash ?? '')
 
-  if (isPreCheck) return <PreCheck />
+  if (preCheck) return <PreCheck kind={preCheck} />
 
   const content = resolvePresentation(publicStatus, unavailableReason, snapshot !== undefined)
   if (!content) return null
@@ -166,6 +181,7 @@ export const SafenetChecksSectionView = ({
       title={summary ? maliciousTitle(summary, content.label) : content.label}
       status={publicStatus}
       reason={unavailableReason}
+      showAbout={isInFlight}
     >
       {summary && summary.rules.length > 0 ? <RejectionReasons summary={summary} /> : <Note>{content.copy}</Note>}
 
@@ -199,7 +215,7 @@ export const SafenetChecksSectionView = ({
   )
 }
 
-/** Reads once a proposed transaction's submission time is known; a new multisig transaction gets the pre-check note. */
+/** Reads once a proposed transaction's submission time is known; a new transaction gets the pre-check note. */
 export const SafenetChecksSection = (): ReactElement | null => {
   const { txId, txDetails, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
   const safeTxHash = txId ? getSafeTxHashFromTxId(txId) : undefined
@@ -214,8 +230,14 @@ export const SafenetChecksSection = (): ReactElement | null => {
     safeAddress,
   })
 
-  const isPreCheck =
-    !txId && !!isCreation && !isProposing && !willExecute && !txLayoutProps?.isMessage && safe.threshold > 1
+  const isNewTransaction = !txId && !!isCreation && !isProposing && !txLayoutProps?.isMessage
+  const preCheck: PreCheckKind | undefined = !isNewTransaction
+    ? undefined
+    : willExecute
+      ? 'executeNow'
+      : safe.threshold > 1
+        ? 'multisig'
+        : 'single'
 
   return (
     <SafenetChecksSectionView
@@ -223,7 +245,7 @@ export const SafenetChecksSection = (): ReactElement | null => {
       safeTxHash={safeTxHash}
       chainId={safe.chainId}
       submittedAt={submittedAt}
-      isPreCheck={isPreCheck}
+      preCheck={preCheck}
     />
   )
 }

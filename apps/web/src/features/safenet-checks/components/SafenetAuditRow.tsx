@@ -9,7 +9,6 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
-import { summariseRejection } from '../summariseRejection'
 import { formatSimulatingLabel } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
@@ -58,10 +57,6 @@ const useStepLabel = (
 ): string => {
   const timing = useCheckTiming(snapshot, timestampMs)
   if (publicStatus === CheckStatus.IN_PROGRESS) return formatSimulatingLabel(timing)
-  if (publicStatus === CheckStatus.MALICIOUS) {
-    const { rules } = summariseRejection(snapshot.events)
-    if (rules.length === 1) return `${STATUS_PRESENTATION.MALICIOUS.label}: ${rules[0].label}`
-  }
   return STATUS_PRESENTATION[publicStatus].label
 }
 
