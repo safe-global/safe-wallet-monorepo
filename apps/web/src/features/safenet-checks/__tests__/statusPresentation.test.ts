@@ -17,9 +17,26 @@ describe('resolvePresentation', () => {
   it('claims an absent check only for the reason that proves one', () => {
     // A heuristic window found nothing where it looked. Saying "no check was
     // requested" there would assert a fact the read cannot support.
-    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN).toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED)
     expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN.copy).not.toContain('No Safenet check was requested')
+    expect(UNAVAILABLE_PRESENTATION.READ_FAILED.copy).not.toContain('No Safenet check was requested')
     expect(UNAVAILABLE_PRESENTATION.NO_CHECK.copy).toContain('No Safenet check was requested')
+  })
+
+  it('never reports an uncertain window as a failed read', () => {
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN).not.toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED)
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN.copy).not.toMatch(/couldn't reach/i)
+  })
+
+  it('tells the user they can continue whenever there is no verdict', () => {
+    expect(UNAVAILABLE_PRESENTATION.READ_FAILED.copy).toContain('You can still continue.')
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN.copy).toContain('You can still continue.')
+    expect(STATUS_PRESENTATION[CheckStatus.TIMED_OUT].copy).toContain('You can still continue.')
+  })
+
+  it('keeps the protocol timeout distinct from an unreadable status', () => {
+    const timedOut = STATUS_PRESENTATION[CheckStatus.TIMED_OUT].copy
+    expect(timedOut).not.toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED.copy)
+    expect(timedOut).not.toMatch(/unavailable/i)
   })
 
   it('keeps the neutral icon even when a snapshot says no check was requested', () => {
