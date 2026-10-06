@@ -10,7 +10,6 @@ import {
 } from '../paymentLinks'
 
 const link = (overrides: Partial<PaymentLink> & { id: string }): PaymentLink => ({
-  url: 'https://buy.stripe.com/x',
   active: true,
   metadata: {},
   ...overrides,
