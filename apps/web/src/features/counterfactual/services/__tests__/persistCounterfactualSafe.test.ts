@@ -436,7 +436,7 @@ describe('persistCounterfactualSafe', () => {
     expect(userDeleteInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit', message: backendMessage }),
     )
     expect(result.ok).toBe(true)
   })
@@ -461,7 +461,7 @@ describe('persistCounterfactualSafe', () => {
     })
     expect(replayImpl).not.toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit', message: backendMessage }),
     )
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
   })
@@ -567,7 +567,7 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
-  it('skips the space POST and shows an info toast when the space is already at the safe limit', async () => {
+  it('skips the space POST and shows a warning toast when the space is already at the safe limit', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
@@ -583,7 +583,7 @@ describe('persistCounterfactualSafe', () => {
     expect(userDeleteInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit' }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit' }),
     )
     expect(result.ok).toBe(true)
   })
@@ -620,7 +620,7 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
       expect.objectContaining({
-        variant: 'info',
+        variant: 'warning',
         groupKey: 'cf-safe-space-limit',
         message:
           "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",
@@ -722,7 +722,7 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
       expect.objectContaining({
-        variant: 'info',
+        variant: 'warning',
         groupKey: 'cf-safe-space-limit',
         message:
           "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",

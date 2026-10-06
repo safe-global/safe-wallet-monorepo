@@ -60,6 +60,67 @@ describe('getRtkQueryErrorMessage', () => {
     expect(getRtkQueryErrorMessage(error)).toBe('Signer address not authorized')
   })
 
+  it("replaces CGW's seat quota refusal with copy written for users", () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'safe_seats',
+        quota: 20,
+        used: 20,
+        resetsAt: null,
+        message: 'Quota exceeded for safe_seats: 20 of 20 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe(
+      'Your plan covers 20 Safe accounts and this Workspace already holds 20. Remove one to add another, or upgrade your plan.',
+    )
+  })
+
+  it("replaces CGW's sponsored transaction quota refusal with copy written for users", () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'sponsored_transactions',
+        quota: 50,
+        used: 50,
+        resetsAt: '2026-11-01T00:00:00.000Z',
+        message: 'Quota exceeded for sponsored_transactions: 50 of 50 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe(
+      'Your Workspace has used all 50 sponsored transactions of this cycle until Nov 1, 2026. Pay the gas with your connected wallet instead.',
+    )
+  })
+
+  it('surfaces the backend message for a quota refusal on a feature without copy', () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'address_book_entries',
+        quota: 100,
+        used: 100,
+        resetsAt: null,
+        message: 'Quota exceeded for address_book_entries: 100 of 100 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe('Quota exceeded for address_book_entries: 100 of 100 used.')
+  })
+
+  it('surfaces the backend message for a 402 that is not a quota refusal', () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'FEATURE_NOT_GRANTED',
+        feature: 'policies',
+        message: "Feature 'policies' is not available on the current plan.",
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe("Feature 'policies' is not available on the current plan.")
+  })
+
   it('returns a generic message with the status code for an HTTP error with no message', () => {
     const error: FetchBaseQueryError = { status: 400, data: {} }
     expect(getRtkQueryErrorMessage(error)).toBe(getGenericErrorWithStatus(400))

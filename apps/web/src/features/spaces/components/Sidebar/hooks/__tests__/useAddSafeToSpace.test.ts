@@ -80,7 +80,7 @@ describe('useAddSafeToSpace', () => {
     expect(success).toBe(true)
   })
 
-  it('refreshes the entitlements of all Workspaces when the seats of the plan are spent', async () => {
+  it('warns and refreshes the entitlements of all Workspaces when the seats of the plan are spent', async () => {
     mockAddSafeToSpace.mockResolvedValue({
       error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 3, used: 3 } },
     })
@@ -92,10 +92,19 @@ describe('useAddSafeToSpace', () => {
     })
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'cgwApi/invalidateTags', payload: ['entitlements'] })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/add',
+      payload: {
+        message:
+          'Failed to add Safe to Workspace. Your plan covers 3 Safe accounts and this Workspace already holds 3. Remove one to add another, or upgrade your plan.',
+        variant: 'warning',
+        groupKey: 'add-safe-to-workspace-error',
+      },
+    })
     expect(success).toBe(false)
   })
 
-  it('does not refresh the entitlements for an error that is not about seats', async () => {
+  it('does not refresh the entitlements for an error that is not a quota refusal', async () => {
     mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: { message: 'Server error' } } })
     const { result } = renderHook(() => useAddSafeToSpace())
 
