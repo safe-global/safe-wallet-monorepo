@@ -14,11 +14,9 @@ import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import {
-  IN_FLIGHT_NOTE,
   MULTIPLE_RULES_TITLE,
   PRE_CHECK_COPY,
   resolvePresentation,
-  SAFENET_ABOUT,
   SAFENET_DOCS_URL,
   STALE_NOTE,
 } from '../statusPresentation'
@@ -50,7 +48,6 @@ const SectionLayout = ({
   title,
   status,
   reason,
-  showAbout = false,
   children,
 }: {
   severity: Severity
@@ -58,7 +55,6 @@ const SectionLayout = ({
   title: string
   status?: string
   reason?: string
-  showAbout?: boolean
   children: ReactNode
 }): ReactElement => (
   // The section appears only once the chain read resolves; the entrance
@@ -79,7 +75,6 @@ const SectionLayout = ({
           {title}
         </Typography>
         {children}
-        {showAbout && <Note>{SAFENET_ABOUT}</Note>}
         <Note>
           <ExternalLink data-testid="safenet-about-link" href={SAFENET_DOCS_URL}>
             What is Safenet?
@@ -90,16 +85,9 @@ const SectionLayout = ({
   </div>
 )
 
-const PRE_CHECK_NEXT_STEP: Record<PreCheckKind, string> = {
-  multisig: PRE_CHECK_COPY.waitingMultisig,
-  single: PRE_CHECK_COPY.waitingSingle,
-  executeNow: PRE_CHECK_COPY.executeNow,
-}
-
 const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
-  <SectionLayout severity={Severity.INFO} muted title={PRE_CHECK_COPY.label} status="PRE_CHECK" reason={kind} showAbout>
-    <Note>{PRE_CHECK_COPY.copy}</Note>
-    <Note>{PRE_CHECK_NEXT_STEP[kind]}</Note>
+  <SectionLayout severity={Severity.INFO} muted title={PRE_CHECK_COPY.label} status="PRE_CHECK" reason={kind}>
+    <Note>{PRE_CHECK_COPY[kind]}</Note>
   </SectionLayout>
 )
 
@@ -181,15 +169,11 @@ export const SafenetChecksSectionView = ({
       title={summary ? maliciousTitle(summary, content.label) : content.label}
       status={publicStatus}
       reason={unavailableReason}
-      showAbout={isInFlight}
     >
       {summary && summary.rules.length > 0 ? <RejectionReasons summary={summary} /> : <Note>{content.copy}</Note>}
 
-      {isInFlight && snapshot && (
-        <>
-          {publicStatus === CheckStatus.IN_PROGRESS && <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />}
-          <Note>{IN_FLIGHT_NOTE}</Note>
-        </>
+      {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
+        <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
       )}
 
       {flaggedCount && <Note testId="safenet-flagged-count">{flaggedCount}</Note>}

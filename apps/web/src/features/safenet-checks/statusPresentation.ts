@@ -26,12 +26,12 @@ export const STATUS_PRESENTATION: Record<
   [CheckStatus.SUBMITTED]: {
     severity: Severity.INFO,
     label: 'Submitted',
-    copy: 'Check submitted to Safenet. It takes about a minute.',
+    copy: 'Submitted to Safenet. Takes about a minute.',
   },
   [CheckStatus.IN_PROGRESS]: {
     severity: Severity.INFO,
     label: 'Simulating',
-    copy: 'Safenet is simulating this transaction. It takes about a minute.',
+    copy: 'Safenet is simulating this transaction.',
   },
   [CheckStatus.BENIGN]: {
     severity: Severity.OK,
@@ -74,15 +74,10 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
 /** Shown before the first signature, while no check exists yet. */
 export const PRE_CHECK_COPY = {
   label: 'Checks after you sign',
-  copy: 'Safenet checks this transaction after you sign. It takes about a minute.',
-  waitingMultisig: 'You can sign now and come back to execute. The result will be ready for the next signer.',
-  waitingSingle: 'You can sign now and execute from the queue once the result is in.',
-  executeNow:
-    'To see the result before it executes, choose "No, later" when asked to execute, then execute from the queue.',
+  multisig: 'Takes about a minute. The next signer will see the result.',
+  single: "Takes about a minute. Execute from the queue once it's in.",
+  executeNow: 'Takes about a minute. Choose "No, later" to see it before executing.',
 }
-
-export const SAFENET_ABOUT =
-  "Independent sentinels simulate the transaction and check it against Safenet's security rules."
 
 /** Compact queue-chip labels; the full state name stays in the tooltip and screen-reader copy. */
 export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
@@ -92,8 +87,6 @@ export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILAB
   [CheckStatus.MALICIOUS]: 'Risk detected',
   [CheckStatus.TIMED_OUT]: 'Check failed',
 }
-
-export const IN_FLIGHT_NOTE = "You don't have to wait for the result to sign."
 
 export const STALE_NOTE = 'Status may be out of date.'
 

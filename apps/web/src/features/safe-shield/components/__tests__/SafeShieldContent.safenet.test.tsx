@@ -8,6 +8,7 @@ import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hook
 import { buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
 import * as useChainsModule from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { SafeTransaction } from '@safe-global/types-kit'
 
 // The real lazy feature chunk mounts inside the widget; only the chain read is mocked.
 // A missing feature.tsx registry member cannot be caught by the stubbed widget test.
@@ -20,6 +21,9 @@ const HASH = `0x${'ef'.repeat(32)}`
 const TX_ID = `multisig_0x0000000000000000000000000000000000000123_${HASH}`
 
 const emptyAnalysis: [undefined, undefined, boolean] = [undefined, undefined, false]
+const safeTx = {
+  data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0x', operation: 0 },
+} as unknown as SafeTransaction
 
 describe('SafeShieldContent Safenet section integration', () => {
   let hasFeatureSpy: jest.SpyInstance
@@ -32,6 +36,38 @@ describe('SafeShieldContent Safenet section integration', () => {
     hasFeatureSpy.mockRestore()
   })
 
+  const txDetails = {
+    detailedExecutionInfo: { type: DetailedExecutionInfoType.MULTISIG, submittedAt: 1_700_000_000_000 },
+  } as unknown as TransactionDetails
+
+  const renderContent = (props: { hasProFeatures?: boolean; isSafePro?: boolean } = {}) =>
+    render(
+      <TxFlowContext.Provider value={{ txId: TX_ID, txDetails } as TxFlowContextType}>
+        <SafeShieldContent
+          recipient={emptyAnalysis}
+          contract={emptyAnalysis}
+          threat={emptyAnalysis}
+          deadlock={emptyAnalysis}
+          safeTx={safeTx}
+          {...props}
+        />
+      </TxFlowContext.Provider>,
+    )
+
+  it('shows a locked Safenet row in the Pro section without Pro features', () => {
+    renderContent({ hasProFeatures: false })
+
+    expect(screen.getByTestId('pro-checks-section')).toContainElement(screen.getByTestId('safenet-checks-locked'))
+    expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
+  })
+
+  it('shows nothing outside Safe Pro', () => {
+    renderContent({ isSafePro: false })
+
+    expect(screen.queryByTestId('safenet-checks-locked')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
+  })
+
   it('renders the check section through the lazy feature for a flow with a txId', async () => {
     const mocked = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
     mocked.mockReturnValue(
@@ -41,25 +77,13 @@ describe('SafeShieldContent Safenet section integration', () => {
         publicStatus: CheckStatus.BENIGN,
       }),
     )
-    const txDetails = {
-      detailedExecutionInfo: { type: DetailedExecutionInfoType.MULTISIG, submittedAt: 1_700_000_000_000 },
-    } as unknown as TransactionDetails
-
-    render(
-      <TxFlowContext.Provider value={{ txId: TX_ID, txDetails } as TxFlowContextType}>
-        <SafeShieldContent
-          recipient={emptyAnalysis}
-          contract={emptyAnalysis}
-          threat={emptyAnalysis}
-          deadlock={emptyAnalysis}
-        />
-      </TxFlowContext.Provider>,
-    )
+    renderContent()
 
     // The testid alone distinguishes the real mount from the null stub. Cold
     // CI runners can take seconds to transform the chunk's module graph.
     await waitFor(() => expect(screen.getByTestId('safenet-checks-section')).toBeInTheDocument(), {
       timeout: 10_000,
     })
+    expect(screen.getByTestId('pro-checks-section')).toContainElement(screen.getByTestId('safenet-checks-section'))
   }, 15_000)
 })

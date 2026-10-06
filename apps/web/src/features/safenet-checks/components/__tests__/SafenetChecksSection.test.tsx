@@ -157,8 +157,8 @@ describe('SafenetChecksSection', () => {
   })
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([
-    [CheckStatus.SUBMITTED, 'Check submitted to Safenet. It takes about a minute.'],
-    [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction. It takes about a minute.'],
+    [CheckStatus.SUBMITTED, 'Submitted to Safenet. Takes about a minute.'],
+    [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction.'],
     [CheckStatus.BENIGN, 'Safenet found no issues.'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this transaction as malicious.'],
     [CheckStatus.TIMED_OUT, "Safenet couldn't reach a trusted result for this transaction. You can still continue."],
@@ -201,9 +201,6 @@ describe('SafenetChecksSection', () => {
     renderInFlow({ txId: TX_ID, txDetails })
 
     expect(screen.getByTestId('safenet-check-timing')).toHaveTextContent('Up to about 2 min left.')
-    expect(screen.getByTestId('safenet-checks-section')).toHaveTextContent(
-      "You don't have to wait for the result to sign.",
-    )
   })
 
   it('flags a stale in-flight status', () => {
@@ -279,15 +276,15 @@ describe('SafenetChecksSection', () => {
   describe('before the first signature', () => {
     const creationFlow = { isCreation: true, isProposing: false, willExecute: false, txLayoutProps: {} }
 
-    it('explains when the check runs and that signing need not wait', () => {
+    it('explains in one line when the check runs', () => {
       mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
       renderInFlow(creationFlow)
 
       const section = screen.getByTestId('safenet-checks-section')
       expect(section).toHaveAttribute('data-status', 'PRE_CHECK')
-      expect(section).toHaveTextContent('Safenet checks this transaction after you sign. It takes about a minute.')
-      expect(section).toHaveTextContent('You can sign now and come back to execute.')
+      expect(section).toHaveTextContent('Checks after you sign')
+      expect(section).toHaveTextContent('Takes about a minute. The next signer will see the result.')
       expect(screen.getByRole('link', { name: /What is Safenet\?/ })).toBeInTheDocument()
     })
 
@@ -298,7 +295,7 @@ describe('SafenetChecksSection', () => {
 
       const section = screen.getByTestId('safenet-checks-section')
       expect(section).toHaveAttribute('data-reason', 'executeNow')
-      expect(section).toHaveTextContent('To see the result before it executes, choose "No, later"')
+      expect(section).toHaveTextContent('Choose "No, later" to see it before executing.')
     })
 
     it.each([
