@@ -10,7 +10,6 @@ export const now = () => Math.floor(Date.now() / 1000)
 const link = (planName: string, seats: number, cents: number, interval: 'month' | 'year', trialPeriodDays?: number) =>
   ({
     id: `pl_${planName}_${seats}_${interval}${trialPeriodDays ? '_trial' : ''}`,
-    url: 'https://buy.stripe.com/x',
     active: true,
     metadata: { planName, FEATURE_SAFE_SEATS: String(seats) },
     lineItems: [
