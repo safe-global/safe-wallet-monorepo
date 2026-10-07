@@ -31,6 +31,7 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { toBeHex } from 'ethers'
+import { faker } from '@faker-js/faker'
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
@@ -155,6 +156,20 @@ describe('txSender', () => {
 
       expect(tx).toBeDefined()
       expect(tx.addSignature).toBeDefined()
+    })
+
+    it('should add a contract signature confirmation as a contract signature with only its data', async () => {
+      const owner = faker.finance.ethereumAddress()
+      const data = faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '' })
+      const word = (value: number) => value.toString(16).padStart(64, '0')
+      const signature = `0x${owner.slice(2).padStart(64, '0')}${word(65)}00${word(32)}${data}`
+      ;(extractTxInfo as jest.Mock).mockReturnValueOnce({ txParams: {}, signatures: { [owner]: signature } })
+
+      const tx = await createExistingTx('4', '0x345')
+
+      expect(tx.addSignature).toHaveBeenCalledWith(
+        expect.objectContaining({ signer: owner, data: `0x${data}`, isContractSignature: true }),
+      )
     })
   })
 
