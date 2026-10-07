@@ -1,20 +1,24 @@
 import type { ReactElement } from 'react'
+import { Check } from 'lucide-react'
 import { DrawerFooter } from '@/components/common/Drawer'
-import CopyButton from '@/components/common/CopyButton'
 import { Button } from '@/components/ui/button'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 export type CopyTransactionLinkProps = {
   transactionLink: string
 }
 
-const CopyTransactionLink = ({ transactionLink }: CopyTransactionLinkProps): ReactElement => (
-  <DrawerFooter>
-    <div className="flex *:w-full">
-      <CopyButton text={transactionLink} initialToolTipText="Copy transaction link">
-        <Button className="w-full">Copy transaction link</Button>
-      </CopyButton>
-    </div>
-  </DrawerFooter>
-)
+const CopyTransactionLink = ({ transactionLink }: CopyTransactionLinkProps): ReactElement => {
+  const { copied, copy } = useCopyToClipboard()
+
+  return (
+    <DrawerFooter>
+      <Button className="w-full" onClick={() => copy(transactionLink)}>
+        {copied && <Check data-icon="inline-start" className="text-green-600" />}
+        {copied ? 'Copied!' : 'Copy transaction link'}
+      </Button>
+    </DrawerFooter>
+  )
+}
 
 export default CopyTransactionLink

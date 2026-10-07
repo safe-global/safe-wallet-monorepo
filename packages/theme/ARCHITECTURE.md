@@ -180,28 +180,16 @@ export function generateCSSVars(): string {
   // Apply web-specific color overrides
   const webLightPalette: ColorPalette = {
     ...lightPalette,
-    success: {
-      /* web colors */
-    },
-    info: {
-      /* web colors */
-    },
-    warning: {
-      /* web colors */
-    },
+    success: {/* web colors */},
+    info: {/* web colors */},
+    warning: {/* web colors */},
   }
 
   const webDarkPalette: ColorPalette = {
     ...darkPalette,
-    success: {
-      /* web colors */
-    },
-    info: {
-      /* web colors */
-    },
-    warning: {
-      /* web colors */
-    },
+    success: {/* web colors */},
+    info: {/* web colors */},
+    warning: {/* web colors */},
   }
 
   // Generate CSS custom properties

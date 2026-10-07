@@ -64,6 +64,7 @@ describe('SignForm', () => {
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
       isSafePro: true,
+      isOffchainMessage: false,
     },
     options: [
       { id: 'sign', label: 'Sign' },

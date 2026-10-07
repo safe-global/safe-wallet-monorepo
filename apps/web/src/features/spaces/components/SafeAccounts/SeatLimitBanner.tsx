@@ -8,6 +8,20 @@ import { sessionItem } from '@/services/local-storage/session'
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import {
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics/mixpanel-events'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { trackPlanSelectionStarted } from '../Plans/planSelection'
+
+const PROMPT = {
+  [MixpanelEventParams.FEATURE]: UpgradeFeature.SAFE_ACCOUNTS_LIMIT,
+  [MixpanelEventParams.LOCATION]: UpgradeLocation.SAFE_ACCOUNTS_PAGE,
+}
 
 const dismissedBanners = sessionItem<Record<string, true>>('seatLimitBannerDismissed')
 
@@ -23,6 +37,7 @@ export default function SeatLimitBanner({
   const { tierName, limit, upgradePlanName, plansHref } = useSeatUpsell()
   const spaceId = useCurrentSpaceId()
   const [isDismissed, setIsDismissed] = useState(() => Boolean(spaceId && dismissedBanners.get()?.[spaceId]))
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, limit !== null && Boolean(upgradePlanName))
   if (limit === null) return null
 
   const title = `${tierName ? `The ${tierName} plan` : 'Your plan'} includes ${limit} Safe accounts`
@@ -40,6 +55,13 @@ export default function SeatLimitBanner({
         ) : (
           <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />
         )
+      }
+      onClick={() =>
+        upgradePlanName &&
+        trackPlanSelectionStarted({
+          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+          ...PROMPT,
+        })
       }
     >
       {upgradePlanName ? `Upgrade to ${upgradePlanName}` : 'Talk to sales'}
@@ -80,7 +102,17 @@ export default function SeatLimitBanner({
             <span className="text-muted-foreground">
               Remove one to add another, or{' '}
               {upgradePlanName ? (
-                <Link variant="inherit" className="font-medium underline" render={<NextLink href={plansHref} />}>
+                <Link
+                  variant="inherit"
+                  className="font-medium underline"
+                  render={<NextLink href={plansHref} />}
+                  onClick={() =>
+                    trackPlanSelectionStarted({
+                      [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+                      ...PROMPT,
+                    })
+                  }
+                >
                   upgrade to {upgradePlanName}.
                 </Link>
               ) : (

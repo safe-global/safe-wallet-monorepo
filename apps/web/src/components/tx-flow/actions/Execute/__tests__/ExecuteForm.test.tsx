@@ -123,6 +123,7 @@ describe('ExecuteForm', () => {
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
       isSafePro: true,
+      isOffchainMessage: false,
     },
     options: [
       { id: 'execute', label: 'Execute' },

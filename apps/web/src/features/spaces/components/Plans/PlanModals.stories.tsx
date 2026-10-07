@@ -99,6 +99,7 @@ export const ChangePlanDuringTrial: Story = {
       spaceId={SPACE_ID}
       pick={{ tier: starterTier, option: starterTier.options[0] }}
       currentPlan={trialPlan}
+      entry={{ 'Entry Point': 'sidebar' }}
       onClose={() => {}}
       onChanged={() => {}}
     />

@@ -60,6 +60,8 @@ export { useAddNewSafeToUrlSpace } from './hooks/useAddNewSafeToUrlSpace'
 export { useSafeSponsoredTxs, type SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
 export { useSafeProAccess } from './hooks/useSafeProAccess'
 export { usePlanGate } from './hooks/usePlanGate'
+export { trackPlanSelectionStarted } from './components/Plans/planSelection'
+export { useSpacePlanState } from './hooks/useSpacePlanState'
 export { useSpaceDeletionGuard } from './hooks/billing/useSpaceDeletionGuard'
 export { default as useFeatureFlagRedirect } from './hooks/useFeatureFlagRedirect'
 export { default as useFeatureRedirect, useRedirectWhenOff } from './hooks/useFeatureRedirect'
@@ -104,6 +106,7 @@ export {
 
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'
+export { useIsSafeInCurrentSpace } from './hooks/useIsSafeInCurrentSpace'
 
 // Hooks from useSpacePendingTransactions.ts
 export { useSpacePendingTransactions } from './hooks/useSpacePendingTransactions'

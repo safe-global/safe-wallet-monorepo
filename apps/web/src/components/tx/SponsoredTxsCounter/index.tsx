@@ -7,6 +7,15 @@ import { Typography } from '@/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+const PROMPT = {
+  [MixpanelEventParams.FEATURE]: UpgradeFeature.SPONSORED_TX,
+  [MixpanelEventParams.LOCATION]: UpgradeLocation.TX_FLOW_GAS,
+}
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
 export const _formatResetsAt = (iso: string | null): string | null => {
@@ -42,6 +51,7 @@ const SponsoredTxsCounter = ({
   isPro: boolean | null
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !isPro)
 
   return (
     <div className="flex items-center justify-between gap-3 bg-muted px-4 py-2" data-testid="sponsored-txs-counter">
@@ -86,19 +96,24 @@ const SponsoredTxsCounter = ({
           <ProChip className="size-full" />
         </span>
       ) : (
-        <Button
-          variant="outline"
-          size="xs"
+        <Track
+          {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+          mixpanelParams={{ [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT, ...PROMPT }}
           className="shrink-0"
-          render={<NextLink href={AppRoutes.welcome.spaces} />}
-          data-testid="sponsored-txs-upgrade"
         >
-          Upgrade to
-          <span className="block h-4 w-6" aria-label="Safe Pro">
-            <ProChip className="size-full" />
-          </span>
-          <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
-        </Button>
+          <Button
+            variant="outline"
+            size="xs"
+            render={<NextLink href={AppRoutes.welcome.spaces} />}
+            data-testid="sponsored-txs-upgrade"
+          >
+            Upgrade to
+            <span className="block h-4 w-6" aria-label="Safe Pro">
+              <ProChip className="size-full" />
+            </span>
+            <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
+          </Button>
+        </Track>
       )}
     </div>
   )

@@ -6,6 +6,10 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -62,6 +66,15 @@ const TrialEndingChooser = ({
   const endsAt = currentPlan.periodEndsAt
     ? formatDate(Date.parse(currentPlan.periodEndsAt))
     : 'the end of your free access'
+  const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.REMINDER_MODAL }
+  useTrackOnce(
+    SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED,
+    {
+      [MixpanelEventParams.LOCATION]: PlanLocation.REMINDER_MODAL,
+      [MixpanelEventParams.FREE_ACCESS_DAYS_LEFT]: currentPlan.daysLeft ?? undefined,
+    },
+    !isLoading,
+  )
 
   return (
     <>
@@ -97,6 +110,8 @@ const TrialEndingChooser = ({
                 onSubscribe={setPick}
                 isBusy={isRedirecting}
                 readOnly={!isAdmin}
+                location={PlanLocation.REMINDER_MODAL}
+                onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
               />
             )}
 
@@ -118,6 +133,7 @@ const TrialEndingChooser = ({
           spaceId={spaceId}
           pick={pick}
           currentPlan={currentPlan}
+          entry={entry}
           onClose={() => (isChanged ? onClose() : setPick(undefined))}
           onChanged={() => setIsChanged(true)}
         />

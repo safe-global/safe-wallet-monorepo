@@ -282,7 +282,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
     expect(screen.getByTestId('accounts-nav')).toBeInTheDocument()
   })
 
-  it('renders the No-spaces empty state with Create space CTA when the user is authenticated and has no spaces', () => {
+  it('renders the No-spaces empty state with Create space CTA when the user is authenticated and has no spaces', async () => {
     setAuth(true)
     mockUseSpacesGetV1Query.mockReturnValue({ currentData: [], isFetching: false, error: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: { id: 1 } })
@@ -292,6 +292,10 @@ describe('SpacesList — auth/expiry state rendering', () => {
     const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
     expect(cta).toHaveClass('[&_svg]:text-green-400')
+    await userEvent.click(cta)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
+      entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
+    })
 
     // Sign in card must NOT render in this branch.
     expect(screen.queryByTestId('sign-in-options')).not.toBeInTheDocument()

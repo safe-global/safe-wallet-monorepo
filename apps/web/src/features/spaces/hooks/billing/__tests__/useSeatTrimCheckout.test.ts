@@ -13,7 +13,8 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 jest.mock('../useStartCheckout', () => ({
   useStartCheckout: (spaceId: string, returnPathname?: string) => ({
-    startCheckout: (paymentLinkId: string) => mockStartCheckout(spaceId, returnPathname, paymentLinkId),
+    startCheckout: (paymentLinkId: string, props: unknown) =>
+      mockStartCheckout(spaceId, returnPathname, paymentLinkId, props),
     isRedirecting: false,
     isError: false,
     ...mockCheckoutState,
@@ -21,6 +22,7 @@ jest.mock('../useStartCheckout', () => ({
 }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
+const PROPS = { 'Entry Point': 'locked_modal' }
 
 describe('useSeatTrimCheckout', () => {
   beforeEach(() => {
@@ -52,7 +54,7 @@ describe('useSeatTrimCheckout', () => {
 
     let ok = false
     await act(async () => {
-      ok = await result.current.checkout('pl_starter', [{ chainId: '10', address: '0xC' }])
+      ok = await result.current.checkout('pl_starter', PROPS, [{ chainId: '10', address: '0xC' }])
     })
 
     expect(ok).toBe(true)
@@ -60,22 +62,22 @@ describe('useSeatTrimCheckout', () => {
       spaceId: SPACE_ID,
       deleteSpaceSafesDto: { safes: [{ chainId: '10', address: '0xC' }] },
     })
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_starter')
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_starter', PROPS)
   })
 
   it('goes straight to Stripe when nothing is removed, and stops when the removal fails', async () => {
     const { result } = renderHook(() => useSeatTrimCheckout(SPACE_ID))
 
     await act(async () => {
-      await result.current.checkout('pl_business')
+      await result.current.checkout('pl_business', PROPS)
     })
     expect(mockRemoveSafes).not.toHaveBeenCalled()
-    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business', PROPS)
 
     mockRemoveSafes.mockResolvedValue({ error: { status: 500 } })
     let ok = true
     await act(async () => {
-      ok = await result.current.checkout('pl_business', [{ chainId: '1', address: '0xA' }])
+      ok = await result.current.checkout('pl_business', PROPS, [{ chainId: '1', address: '0xA' }])
     })
     expect(ok).toBe(false)
     expect(mockStartCheckout).toHaveBeenCalledTimes(1)

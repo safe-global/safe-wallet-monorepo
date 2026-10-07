@@ -7315,7 +7315,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-002f9cb",
+    "version": "main-bb28731",
     "contact": {}
   },
   "tags": [],
@@ -7865,9 +7865,6 @@
           "id": {
             "type": "string"
           },
-          "url": {
-            "type": "string"
-          },
           "active": {
             "type": "boolean"
           },
@@ -7893,7 +7890,6 @@
         },
         "required": [
           "id",
-          "url",
           "active",
           "metadata"
         ]

@@ -11,11 +11,15 @@ import { cn } from '@/utils/cn'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from './planCatalog'
-import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
+import { claimTiers, formatPlanPrice, pickProps, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
 import type { PlanTier, SafeRef } from './types'
@@ -164,15 +168,25 @@ export default function ClaimTrialModal({
   const seats = option?.seats ?? null
   const copy = claimCopy(trialPeriodDays, variant)
   const availableUntil = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
+  const entry = {
+    [MixpanelEventParams.ENTRY_POINT]:
+      variant === 'new' ? FreeAccessEntryPoint.CREATE_WORKSPACE : FreeAccessEntryPoint.WORKSPACE_LOGIN,
+  }
+  useTrackOnce(
+    SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_VIEWED,
+    { ...entry, [MixpanelEventParams.FREE_ACCESS_LENGTH]: trialPeriodDays ?? undefined },
+    !isLoading,
+  )
 
   const claim = () => {
-    if (!option?.paymentLinkId) return
+    if (!tier || !option?.paymentLinkId) return
     if (needsTrim(seats)) setStep('accounts')
-    else void checkout(option.paymentLinkId)
+    else void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry })
   }
 
   const continueToCheckout = (removed: SafeRef[]) => {
-    if (option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
+    if (tier && option?.paymentLinkId)
+      void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry }, removed)
   }
 
   return (
@@ -249,19 +263,33 @@ export default function ClaimTrialModal({
               )}
 
               <div className="flex gap-4">
-                <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isBusy}>
-                  {copy.back}
-                </Button>
-                <Button
-                  size="lg"
-                  accentIcon
+                <Track
+                  {...SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED}
+                  mixpanelParams={{ ...entry, [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS }}
+                  as="div"
                   className="flex-1"
-                  disabled={!option?.paymentLinkId || isBusy}
-                  onClick={claim}
                 >
-                  {copy.claim}
-                  <ArrowRight />
-                </Button>
+                  <Button variant="secondary" size="lg" className="w-full" onClick={onBack} disabled={isBusy}>
+                    {copy.back}
+                  </Button>
+                </Track>
+                <Track
+                  {...SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED}
+                  mixpanelParams={entry}
+                  as="div"
+                  className="flex-1"
+                >
+                  <Button
+                    size="lg"
+                    accentIcon
+                    className="w-full"
+                    disabled={!option?.paymentLinkId || isBusy}
+                    onClick={claim}
+                  >
+                    {copy.claim}
+                    <ArrowRight />
+                  </Button>
+                </Track>
               </div>
             </>
           )}
