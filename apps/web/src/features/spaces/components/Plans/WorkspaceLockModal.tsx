@@ -1,10 +1,10 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { highlightSafePro } from '@/components/common/ProHighlight'
-import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { SafeProNoticeModal } from '../SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
@@ -58,12 +58,7 @@ const MemberLockedNotice = ({
   onBack: () => void
 }) => {
   const isPlanLock = reason !== 'trial-offered'
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (!isPlanLock || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
-  }, [isPlanLock])
+  useTrackOnce(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined, isPlanLock)
 
   return (
     <SafeProNoticeModal

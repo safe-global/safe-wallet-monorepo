@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Lock } from 'lucide-react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -14,7 +14,7 @@ import {
   UpgradeFeature,
   UpgradeLocation,
 } from '@/services/analytics/mixpanel-events'
-import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../Plans/planSelection'
 
@@ -37,12 +37,7 @@ export default function SeatLimitBanner({
   const { tierName, limit, upgradePlanName, plansHref } = useSeatUpsell()
   const spaceId = useCurrentSpaceId()
   const [isDismissed, setIsDismissed] = useState(() => Boolean(spaceId && dismissedBanners.get()?.[spaceId]))
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (limit === null || !upgradePlanName || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
-  }, [limit, upgradePlanName])
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, limit !== null && Boolean(upgradePlanName))
   if (limit === null) return null
 
   const title = `${tierName ? `The ${tierName} plan` : 'Your plan'} includes ${limit} Safe accounts`
