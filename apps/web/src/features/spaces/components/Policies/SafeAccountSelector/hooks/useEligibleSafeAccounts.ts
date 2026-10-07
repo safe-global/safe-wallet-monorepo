@@ -41,7 +41,7 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
   const { address: wallet = '' } = useWallet() || {}
   const currency = useAppSelector(selectCurrency)
   const undeployedSafes = useAppSelector(selectUndeployedSafes)
-  const { configs: chains } = useChains()
+  const { configs: chains, loading: isChainsLoading } = useChains()
 
   const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
 
@@ -52,9 +52,12 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
   )
 
   // One delegates request per distinct chain the Space actually uses, not one per Safe.
-  const chainIds = useMemo(() => Array.from(new Set(safeItems.map((item) => item.chainId))), [safeItems])
+  const proposerChains = useMemo(() => {
+    const spaceChainIds = new Set(safeItems.map((item) => item.chainId))
+    return chains.filter((chain) => spaceChainIds.has(chain.chainId))
+  }, [chains, safeItems])
   const proposerSafesQuery = useGetProposerSafesQuery(
-    wallet && !signersOnly && chainIds.length > 0 ? { chainIds, delegate: wallet } : skipToken,
+    wallet && !signersOnly && proposerChains.length > 0 ? { chains: proposerChains, delegate: wallet } : skipToken,
   )
 
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
@@ -65,11 +68,11 @@ export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAcc
   const proposerSafes = proposerSafesQuery.currentData
 
   const isOverviewsResolved = overviewSafes.length === 0 || overviews !== undefined || overviewsQuery.isError
+  // A skipped query only means "no proposer Safes" once the chain configs it is built from have loaded.
   const isProposerStatusResolved =
-    chainIds.length === 0 ||
-    proposerSafesQuery.isUninitialized ||
     proposerSafes !== undefined ||
-    proposerSafesQuery.isError
+    proposerSafesQuery.isError ||
+    (proposerSafesQuery.isUninitialized && (signersOnly || !isChainsLoading))
 
   // `isReadOnly` is fail-closed until the overviews land, so stay loading rather than flash an empty list.
   const isLoading = !!wallet && (isSafesLoading || (!isError && (!isOverviewsResolved || !isProposerStatusResolved)))
