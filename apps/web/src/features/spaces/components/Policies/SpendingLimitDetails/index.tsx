@@ -11,22 +11,35 @@ export type SpendingLimitDetailsProps = {
   onClose: () => void
   /** Active policies only, and absent while the viewer may not edit: the footer renders `Edit` disabled. */
   onEdit?: () => void
+  /** Active policies only: re-enables the module of an unenforced one. */
+  onEnableModule?: () => void
 }
 
 const ActiveSpendingLimitDetails = ({
   policy,
   onClose,
   onEdit,
+  onEnableModule,
 }: {
   policy: ActiveDrawerPolicy
   onClose: () => void
   onEdit?: () => void
+  onEnableModule?: () => void
 }) => {
   const content = useSpendingLimitDetails(policy)
   const { txFlow } = useContext(TxModalContext)
 
   // Hidden rather than unmounted while the edit flow is open, so cancelling lands back on the panel.
-  return <SpendingLimitDrawer open={!txFlow} onClose={onClose} policy={policy} {...content} onEdit={onEdit} />
+  return (
+    <SpendingLimitDrawer
+      open={!txFlow}
+      onClose={onClose}
+      policy={policy}
+      {...content}
+      onEdit={onEdit}
+      onEnableModule={onEnableModule}
+    />
+  )
 }
 
 const PendingSpendingLimitDetails = ({
@@ -46,9 +59,15 @@ const PendingSpendingLimitDetails = ({
 }
 
 /** Hooks cannot be conditional, so the queued-transaction reads live in their own component. */
-const SpendingLimitDetails = ({ policy, isUnlisted, onClose, onEdit }: SpendingLimitDetailsProps): ReactElement =>
+const SpendingLimitDetails = ({
+  policy,
+  isUnlisted,
+  onClose,
+  onEdit,
+  onEnableModule,
+}: SpendingLimitDetailsProps): ReactElement =>
   policy.status === 'active' ? (
-    <ActiveSpendingLimitDetails policy={policy} onClose={onClose} onEdit={onEdit} />
+    <ActiveSpendingLimitDetails policy={policy} onClose={onClose} onEdit={onEdit} onEnableModule={onEnableModule} />
   ) : (
     <PendingSpendingLimitDetails policy={policy} isUnlisted={isUnlisted} onClose={onClose} />
   )
