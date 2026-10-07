@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement, ReactNode } from 'react'
+import type * as ReactModule from 'react'
 import { AccountInfo } from '../AccountInfo'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
@@ -31,7 +32,7 @@ jest.mock('@/components/ui/popover', () => ({
 // TooltipTrigger composes the popover trigger through `render`; cloning it with the
 // children keeps the real trigger element (and its aria-label) in the tree.
 jest.mock('@/components/ui/tooltip', () => {
-  const { cloneElement } = jest.requireActual<typeof import('react')>('react')
+  const { cloneElement } = jest.requireActual<typeof ReactModule>('react')
   return {
     Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     TooltipTrigger: ({ children, render: trigger }: { children: ReactNode; render: ReactElement }) =>

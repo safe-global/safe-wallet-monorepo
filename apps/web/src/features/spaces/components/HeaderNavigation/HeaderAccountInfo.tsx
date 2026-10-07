@@ -13,20 +13,20 @@ import { AccountInfo } from '../SpacesList/AccountInfo'
 const HeaderAccountInfo = () => {
   const isSignedIn = useIsSignedIn()
   const wallet = useWallet()
-  const { membership, signerAddress, email } = useCurrentMemberProfile()
+  const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
 
   if (!isSignedIn) return null
 
   const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
-  const isSameWallet = sameAddress(wallet?.address, signerAddress)
+  const showConnectedWallet = Boolean(signerAddress) && !sameAddress(wallet?.address, signerAddress)
 
   return (
     <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
       <AccountInfo
         profileName={profileName}
-        displayName={displayName}
-        signerAddress={email ? undefined : signerAddress}
-        connectedWallet={isSameWallet ? undefined : wallet?.address}
+        displayName={isLoading ? '' : displayName}
+        signerAddress={signerAddress}
+        connectedWallet={showConnectedWallet ? wallet?.address : undefined}
       />
     </div>
   )

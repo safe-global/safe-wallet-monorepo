@@ -98,7 +98,43 @@ describe('HeaderAccountInfo', () => {
     expect(screen.getByTestId('account-info')).toHaveAttribute('data-signer', SIGNER)
   })
 
-  it('withholds the signer address for email sign-ins so no identicon is shown', () => {
+  it('withholds the connected wallet when no wallet is connected', () => {
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-connected', '')
+  })
+
+  it('withholds the display name and connected wallet while the session is loading', () => {
+    mockProfile.mockReturnValue({
+      membership: undefined,
+      signerAddress: undefined,
+      email: undefined,
+      isLoading: true,
+    })
+    mockUseWallet.mockReturnValue({ address: SIGNER })
+
+    render(<HeaderAccountInfo />)
+
+    const accountInfo = screen.getByTestId('account-info')
+    expect(accountInfo).toHaveAttribute('data-display', '')
+    expect(accountInfo).toHaveAttribute('data-connected', '')
+  })
+
+  it('withholds the connected wallet when neither a signer nor an email is known', () => {
+    mockProfile.mockReturnValue({
+      membership: undefined,
+      signerAddress: undefined,
+      email: undefined,
+      isLoading: false,
+    })
+    mockUseWallet.mockReturnValue({ address: OTHER_WALLET })
+
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-connected', '')
+  })
+
+  it('withholds the signer address and connected wallet for email sign-ins', () => {
     mockProfile.mockReturnValue({
       membership: undefined,
       signerAddress: undefined,
@@ -112,6 +148,6 @@ describe('HeaderAccountInfo', () => {
     const accountInfo = screen.getByTestId('account-info')
     expect(accountInfo).toHaveAttribute('data-signer', '')
     expect(accountInfo).toHaveAttribute('data-display', 'alice@safe.global')
-    expect(accountInfo).toHaveAttribute('data-connected', OTHER_WALLET)
+    expect(accountInfo).toHaveAttribute('data-connected', '')
   })
 })

@@ -30,7 +30,6 @@ export const AccountInfo = ({
   return (
     <Popover>
       <Tooltip>
-        {/* Mirrors the wallet chip in HeaderNavigation: neutral chip, 6px icon badge, 12px label. */}
         <TooltipTrigger
           render={
             <PopoverTrigger
@@ -39,12 +38,8 @@ export const AccountInfo = ({
             />
           }
         >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[rgba(18,255,128,0.16)]">
-            <User
-              className="size-3.5 text-green-700 dark:text-green-500"
-              strokeWidth={ICON_STROKE}
-              aria-hidden="true"
-            />
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-subtle text-success-strong">
+            <User className="size-3.5" strokeWidth={ICON_STROKE} aria-hidden="true" />
           </span>
 
           {displayName && (
