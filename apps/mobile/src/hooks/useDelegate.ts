@@ -6,7 +6,7 @@ import { selectAllChains } from '@/src/store/chains'
 import { addDelegate } from '@/src/store/delegatesSlice'
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import Logger from '@/src/utils/logger'
-import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, signDelegateTypedDataWithKey } from '@safe-global/utils/services/delegates'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getDelegateKeyId } from '@/src/utils/delegate'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -79,8 +79,7 @@ export const useDelegate = (): UseDelegateProps => {
 
             const typedData = getDelegateTypedData(chain, delegateWallet.address, safe)
 
-            // Sign the raw EIP-712 digest — ethers rejects the queue service's non-standard `safe` domain key
-            const signature = ownerWallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
+            const signature = signDelegateTypedDataWithKey(ownerWallet.signingKey, typedData)
 
             const registerDelegate = hasFeature(chain, FEATURES.QUEUE_SERVICE) ? registerDelegateV3 : registerDelegateV2
 

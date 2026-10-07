@@ -1,7 +1,7 @@
 import Logger from '@/src/utils/logger'
 import { type Address } from '@/src/types/address'
 import { Wallet } from 'ethers'
-import { getDelegateTypedData, hashDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { getDelegateTypedData, signDelegateTypedDataWithKey } from '@safe-global/utils/services/delegates'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type DeleteDelegateV3Dto } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { keyStorageService } from '@/src/services/key-storage'
@@ -138,8 +138,7 @@ export const removeDelegatesFromBackend = async (
             const result = await withGeneralRetry(async () => {
               const typedData = getDelegateTypedData(chain, delegateAddress, null, 'delete')
 
-              // Sign the raw EIP-712 digest — ethers rejects the queue service's non-standard `safe` domain key
-              const signature = ownerWallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
+              const signature = signDelegateTypedDataWithKey(ownerWallet.signingKey, typedData)
 
               await deleteDelegate(chain, delegateAddress, {
                 delegator: ownerAddress,

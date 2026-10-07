@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { TypedDataEncoder, Wallet, ZeroAddress, verifyTypedData } from 'ethers'
+import { TypedDataEncoder, Wallet, ZeroAddress, recoverAddress, verifyTypedData } from 'ethers'
 import { chainBuilder } from '../../../tests/builders/chains'
 import { FEATURES } from '../../../utils/chains'
 import {
@@ -7,6 +7,7 @@ import {
   hashDelegateTypedData,
   isQueueServiceDelegateTypedData,
   normalizeDelegateTypedData,
+  signDelegateTypedDataWithKey,
 } from '..'
 
 const withoutQueueService = () =>
@@ -96,15 +97,6 @@ describe('delegates', () => {
       )
     })
 
-    it('produces a digest that recovers the signer for the transaction service structure', () => {
-      const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
-      const typedData = getDelegateTypedData(transactionServiceChain(), faker.finance.ethereumAddress())
-
-      const signature = wallet.signingKey.sign(hashDelegateTypedData(typedData)).serialized
-
-      expect(verifyTypedData(typedData.domain, typedData.types, typedData.message, signature)).toBe(wallet.address)
-    })
-
     it('hashes the queue service domain including the safe field', () => {
       const chain = queueServiceChain()
       const delegateAddress = faker.finance.ethereumAddress()
@@ -113,6 +105,30 @@ describe('delegates', () => {
       const second = getDelegateTypedData(chain, delegateAddress, faker.finance.ethereumAddress())
 
       expect(hashDelegateTypedData(first)).not.toBe(hashDelegateTypedData(second))
+    })
+  })
+
+  describe('signDelegateTypedDataWithKey', () => {
+    it('produces a signature ethers verifies for the transaction service structure', () => {
+      const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+      const typedData = getDelegateTypedData(transactionServiceChain(), faker.finance.ethereumAddress())
+
+      const signature = signDelegateTypedDataWithKey(wallet.signingKey, typedData)
+
+      expect(verifyTypedData(typedData.domain, typedData.types, typedData.message, signature)).toBe(wallet.address)
+    })
+
+    it('signs the queue service digest so the signer is recoverable from it', () => {
+      const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+      const typedData = getDelegateTypedData(
+        queueServiceChain(),
+        faker.finance.ethereumAddress(),
+        faker.finance.ethereumAddress(),
+      )
+
+      const signature = signDelegateTypedDataWithKey(wallet.signingKey, typedData)
+
+      expect(recoverAddress(hashDelegateTypedData(typedData), signature)).toBe(wallet.address)
     })
   })
 

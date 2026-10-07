@@ -1,4 +1,5 @@
 import { TypedDataEncoder, ZeroAddress, concat, keccak256 } from 'ethers'
+import type { SigningKey } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
@@ -114,6 +115,10 @@ export const hashDelegateTypedData = (typedData: DelegateTypedData): string => {
   const structHash = TypedDataEncoder.hashStruct('Delegate', DELEGATE_MESSAGE_TYPES, typedData.message)
   return keccak256(concat(['0x1901', domainSeparator, structHash]))
 }
+
+// `Wallet.signTypedData` rejects the queue service's non-standard `safe` domain key, so the raw digest is signed instead.
+export const signDelegateTypedDataWithKey = (signingKey: SigningKey, typedData: DelegateTypedData): string =>
+  signingKey.sign(hashDelegateTypedData(typedData)).serialized
 
 /**
  * Returns a JSON-serializable payload in the shape produced by `TypedDataEncoder.getPayload`, with a numeric chainId.
