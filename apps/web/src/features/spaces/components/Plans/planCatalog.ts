@@ -120,7 +120,7 @@ export const PLAN_CARD_COPY_V2 = {
   custom: 'Custom',
   customSuffix: 'Annual term',
   support: 'support',
-  featuresHeading: (supportLevel: string) => `${supportLevel} support, plus:`,
+  featuresHeading: "What's included",
   seatsLabel: 'Safe accounts for',
 } as const
 

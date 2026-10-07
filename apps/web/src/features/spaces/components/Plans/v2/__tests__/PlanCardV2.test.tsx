@@ -93,9 +93,4 @@ describe('PlanCardV2', () => {
 
     expect(screen.getByTestId('plan-support-level')).toHaveTextContent('Priority support')
   })
-  it('heads the feature list with the plan support level', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
-
-    expect(screen.getByText('Priority support, plus:')).toBeInTheDocument()
-  })
 })

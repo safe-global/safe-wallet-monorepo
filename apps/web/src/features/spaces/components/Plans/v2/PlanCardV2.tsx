@@ -222,11 +222,7 @@ export const PlanCardV2 = ({
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
-            {content && (
-              <Typography variant="paragraph-small-bold">
-                {PLAN_CARD_COPY_V2.featuresHeading(content.support.level)}
-              </Typography>
-            )}
+            {content && <Typography variant="paragraph-small-bold">{PLAN_CARD_COPY_V2.featuresHeading}</Typography>}
             <List className="gap-3" data-testid="plan-features">
               {features.map((label) => (
                 <ListItem key={label} size="sm" className="items-start py-0">
