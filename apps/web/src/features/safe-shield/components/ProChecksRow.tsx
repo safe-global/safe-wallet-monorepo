@@ -1,16 +1,11 @@
-import { useEffect, useRef, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { trackPlanSelectionStarted, useSafeProAccess } from '@/features/spaces'
-import {
-  MixpanelEventParams,
-  PlanSelectionEntryPoint,
-  UpgradeFeature,
-  UpgradeLocation,
-  trackEvent,
-} from '@/services/analytics'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 
@@ -22,12 +17,7 @@ const PROMPT = {
 export const ProChecksRow = ({ hasProFeatures }: { hasProFeatures: boolean }): ReactElement => {
   const { spaceId } = useSafeProAccess()
   const href = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (hasProFeatures || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
-  }, [hasProFeatures])
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !hasProFeatures)
 
   return (
     <div className="flex min-h-11 items-center justify-between rounded-t-md bg-muted p-2" data-testid="pro-checks-row">

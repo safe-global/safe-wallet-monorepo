@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,8 @@ import { cn } from '@/utils/cn'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { DAY_MS } from '../../hooks/billing/subscription'
@@ -171,19 +172,14 @@ export default function ClaimTrialModal({
     [MixpanelEventParams.ENTRY_POINT]:
       variant === 'new' ? FreeAccessEntryPoint.CREATE_WORKSPACE : FreeAccessEntryPoint.WORKSPACE_LOGIN,
   }
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (isLoading || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_VIEWED, {
-      ...entry,
-      [MixpanelEventParams.FREE_ACCESS_LENGTH]: trialPeriodDays ?? undefined,
-    })
-  }, [isLoading]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with the values of that moment
+  useTrackOnce(
+    SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_VIEWED,
+    { ...entry, [MixpanelEventParams.FREE_ACCESS_LENGTH]: trialPeriodDays ?? undefined },
+    !isLoading,
+  )
 
   const claim = () => {
     if (!tier || !option?.paymentLinkId) return
-    trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED, entry)
     if (needsTrim(seats)) setStep('accounts')
     else void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry })
   }
@@ -191,14 +187,6 @@ export default function ClaimTrialModal({
   const continueToCheckout = (removed: SafeRef[]) => {
     if (tier && option?.paymentLinkId)
       void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry }, removed)
-  }
-
-  const dismiss = () => {
-    trackEvent(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED, {
-      ...entry,
-      [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS,
-    })
-    onBack()
   }
 
   return (
@@ -275,19 +263,33 @@ export default function ClaimTrialModal({
               )}
 
               <div className="flex gap-4">
-                <Button variant="secondary" size="lg" className="flex-1" onClick={dismiss} disabled={isBusy}>
-                  {copy.back}
-                </Button>
-                <Button
-                  size="lg"
-                  accentIcon
+                <Track
+                  {...SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED}
+                  mixpanelParams={{ ...entry, [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS }}
+                  as="div"
                   className="flex-1"
-                  disabled={!option?.paymentLinkId || isBusy}
-                  onClick={claim}
                 >
-                  {copy.claim}
-                  <ArrowRight />
-                </Button>
+                  <Button variant="secondary" size="lg" className="w-full" onClick={onBack} disabled={isBusy}>
+                    {copy.back}
+                  </Button>
+                </Track>
+                <Track
+                  {...SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED}
+                  mixpanelParams={entry}
+                  as="div"
+                  className="flex-1"
+                >
+                  <Button
+                    size="lg"
+                    accentIcon
+                    className="w-full"
+                    disabled={!option?.paymentLinkId || isBusy}
+                    onClick={claim}
+                  >
+                    {copy.claim}
+                    <ArrowRight />
+                  </Button>
+                </Track>
               </div>
             </>
           )}
