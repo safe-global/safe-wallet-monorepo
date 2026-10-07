@@ -30,7 +30,8 @@ describe('ProfilePopoverContent', () => {
     expect(screen.getByTestId('initials-avatar')).toHaveTextContent('Alice A')
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('ADMIN')).toBeInTheDocument()
-    expect(screen.getByText('Signed in as')).toBeInTheDocument()
+    expect(screen.getByText('Your account')).toBeInTheDocument()
+    expect(screen.getByText('Manages your Safe Pro subscription.')).toBeInTheDocument()
     expect(screen.getByTestId('sidebar-profile-sign-out')).toBeInTheDocument()
   })
 
@@ -64,7 +65,7 @@ describe('ProfilePopoverContent', () => {
     expect(screen.queryByTestId('identicon')).not.toBeInTheDocument()
   })
 
-  it('names the connected wallet in the hint when one is passed', () => {
+  it('shows the connected wallet as its own section when one is passed', () => {
     render(
       <ProfilePopoverContent
         avatarName="User"
@@ -75,13 +76,14 @@ describe('ProfilePopoverContent', () => {
       />,
     )
 
-    const hint = screen.getByTestId('sidebar-profile-wallet-hint')
-    expect(hint).toHaveTextContent('Your account and your connected wallet are separate.')
-    expect(hint).toHaveTextContent('0x481a...Fbc0')
+    const walletSection = screen.getByTestId('sidebar-profile-wallet-hint')
+    expect(walletSection).toHaveTextContent('Connected wallet')
+    expect(walletSection).toHaveTextContent('0x481a...Fbc0')
+    expect(walletSection).toHaveTextContent('Signs and executes transactions.')
     expect(screen.getAllByTestId('identicon').map((el) => el.getAttribute('data-address'))).toContain(CONNECTED)
   })
 
-  it('hides the wallet hint when no connected wallet is passed', () => {
+  it('hides the connected wallet section when no connected wallet is passed', () => {
     render(
       <ProfilePopoverContent
         avatarName="User"

@@ -38,7 +38,7 @@ export const AccountInfo = ({
             />
           }
         >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-subtle text-success-strong">
+          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-success-muted text-success-strong">
             <User className="size-3.5" strokeWidth={ICON_STROKE} aria-hidden="true" />
           </span>
 

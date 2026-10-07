@@ -8,24 +8,14 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 
 export interface ProfilePopoverContentProps {
-  /** Name used to render the avatar initials. */
   avatarName: string
-  /** Primary name/identifier shown in the popover. */
   displayName: string
-  /** Optional role line (e.g. "ADMIN"). */
   role?: string
-  /** Full signer address; renders its identicon beside the identity for wallet sign-ins. */
   signerAddress?: string
-  /** Connected wallet address; when set, explains how it relates to the signed-in account. */
   connectedWallet?: string
   onSignOut: () => void
 }
 
-/**
- * Body of the signed-in profile popover (header, name/role, sign out), rendered
- * by the top-bar account menu. Opens below the account icon and is right-aligned
- * so its trailing edge lines up with the icon.
- */
 export const ProfilePopoverContent = ({
   avatarName,
   displayName,
@@ -41,31 +31,40 @@ export const ProfilePopoverContent = ({
     className={css.profilePopover}
     data-testid="sidebar-profile-popover"
   >
-    <div className={css.profileHeader}>
-      {!signerAddress && <InitialsAvatar name={avatarName} size="medium" rounded />}
-      <span className={css.profileSignedIn}>Signed in as</span>
-    </div>
+    <div className={css.profileSection}>
+      <span className={css.profileSectionLabel}>Your account</span>
 
-    <div className={css.profileInfo}>
-      <span className={css.profileIdentity}>
-        {signerAddress && <Identicon address={signerAddress} size={20} />}
+      <div className={css.profileIdentity}>
+        {signerAddress ? (
+          <Identicon address={signerAddress} size={32} />
+        ) : (
+          <InitialsAvatar name={avatarName} size="medium" rounded />
+        )}
         <span className={css.profileName}>{displayName}</span>
-      </span>
+      </div>
+
+      <span className={css.profileSectionCaption}>Manages your Safe Pro subscription.</span>
       {role && <span className={css.profileRole}>{role}</span>}
     </div>
 
     {connectedWallet && (
-      <div className={css.profileWalletHint} data-testid="sidebar-profile-wallet-hint">
-        Your account and your connected wallet are separate. Wallet{' '}
-        <span className={css.profileWalletHintAddress}>
-          <Identicon address={connectedWallet} size={14} />
-          {shortenAddress(connectedWallet)}
-        </span>{' '}
-        is connected for signing transactions.
-      </div>
+      <>
+        <Separator className={css.profileDivider} />
+
+        <div className={css.profileSection} data-testid="sidebar-profile-wallet-hint">
+          <span className={css.profileSectionLabel}>Connected wallet</span>
+
+          <div className={css.profileIdentity}>
+            <Identicon address={connectedWallet} size={32} />
+            <span className={css.profileName}>{shortenAddress(connectedWallet)}</span>
+          </div>
+
+          <span className={css.profileSectionCaption}>Signs and executes transactions.</span>
+        </div>
+      </>
     )}
 
-    <Separator />
+    <Separator className={css.profileDivider} />
 
     <button
       type="button"
@@ -74,7 +73,7 @@ export const ProfilePopoverContent = ({
       data-testid="sidebar-profile-sign-out"
       aria-label="Sign out"
     >
-      <LogOut className="size-4" aria-hidden="true" />
+      <LogOut className="size-4" strokeWidth={2.5} aria-hidden="true" />
       <span>Sign out</span>
     </button>
   </PopoverContent>

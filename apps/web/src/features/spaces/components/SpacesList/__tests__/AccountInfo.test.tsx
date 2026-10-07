@@ -61,7 +61,7 @@ describe('AccountInfo', () => {
 
     expect(screen.getByRole('button', { name: 'Account menu, signed in as alice@safe.global' })).toBeInTheDocument()
     expect(screen.getAllByText('alice@safe.global').length).toBeGreaterThan(0)
-    expect(screen.getByText('Signed in as')).toBeInTheDocument()
+    expect(screen.getByText('Your account')).toBeInTheDocument()
   })
 
   it('shows the wallet address in the popover when signed in with SIWE', () => {
