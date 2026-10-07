@@ -149,18 +149,64 @@ describe('SpendingLimitActions', () => {
     expect(screen.queryByText('Upgrade to Business to edit spending limits.')).not.toBeInTheDocument()
   })
 
-  it('manage: keeps an unenforced policy out of the edit flow', () => {
-    setup({
-      kind: 'unenforced',
-      action: 'manage',
-      disabled: true,
-      helper: 'The allowance module is not enabled on this Safe account, so this limit is not enforced.',
-    })
+  it('enable: adds the module of an unenforced policy back', async () => {
+    const onEnableModule = jest.fn()
+    const { user } = renderWithUserEvent(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: false,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+        }}
+        onConnectWallet={jest.fn()}
+        onEnableModule={onEnableModule}
+      />,
+    )
 
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(
-      screen.getByText('The allowance module is not enabled on this Safe account, so this limit is not enforced.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Add module' }))
+
+    expect(onEnableModule).toHaveBeenCalledTimes(1)
+  })
+
+  it('enable: disables the action for a non-signer', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: true,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+          helper: 'Only signers of this Safe account can add the module.',
+        }}
+        onConnectWallet={jest.fn()}
+        onEnableModule={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+    expect(screen.getByText('Only signers of this Safe account can add the module.')).toBeInTheDocument()
+  })
+
+  it('enable: disables the action while no flow is supplied', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: false,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+        }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
   })
 
   it('manage: disables editing and points to the upgrade while no edit flow is supplied', () => {

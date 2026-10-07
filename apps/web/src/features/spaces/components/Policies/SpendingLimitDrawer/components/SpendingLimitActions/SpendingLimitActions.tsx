@@ -17,6 +17,7 @@ export type SpendingLimitActionsProps = {
   state: SpendingLimitDrawerState
   onConnectWallet: () => void
   onEdit?: () => void
+  onEnableModule?: () => void
   pending?: PendingSpendingLimitActions
 }
 
@@ -24,6 +25,7 @@ const SpendingLimitActions = ({
   state,
   onConnectWallet,
   onEdit,
+  onEnableModule,
   pending,
 }: SpendingLimitActionsProps): ReactElement | null => {
   switch (state.action) {
@@ -38,6 +40,16 @@ const SpendingLimitActions = ({
           onClick={onEdit}
           hint={state.helper ?? (onEdit ? undefined : EDIT_LOCKED_HELPER)}
           disabled={state.disabled || !onEdit}
+        />
+      )
+
+    case 'enable':
+      return (
+        <PolicyDrawerActions
+          actionLabel="Add module"
+          onClick={onEnableModule}
+          hint={state.helper}
+          disabled={state.disabled || !onEnableModule}
         />
       )
 
