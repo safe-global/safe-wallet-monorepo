@@ -96,7 +96,58 @@ describe('ProfilePopoverContent', () => {
     expect(screen.queryByTestId('sidebar-profile-wallet-hint')).not.toBeInTheDocument()
   })
 
-  it('calls onSignOut when the sign-out button is clicked', async () => {
+  it('renders both sections with distinct identicons when the wallets differ', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    const addresses = screen.getAllByTestId('identicon').map((el) => el.getAttribute('data-address'))
+    expect(addresses).toEqual([SIGNER, CONNECTED])
+  })
+
+  it('shows the connected wallet section for email sign-ins, with the initials avatar kept', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="alice@safe.global"
+        displayName="alice@safe.global"
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('initials-avatar')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-profile-wallet-hint')).toHaveTextContent('0x481a...Fbc0')
+    expect(screen.getAllByTestId('identicon')).toHaveLength(1)
+  })
+
+  it('renders the account section when no display name is known yet', () => {
+    render(<ProfilePopoverContent avatarName="" displayName="" onSignOut={jest.fn()} />)
+
+    expect(screen.getByText('Your account')).toBeInTheDocument()
+    expect(screen.getByTestId('sidebar-profile-sign-out')).toBeInTheDocument()
+  })
+
+  it('does not duplicate the Sign out button when the wallet section is shown', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.getAllByTestId('sidebar-profile-sign-out')).toHaveLength(1)
+  })
+
+  it('calls onSignOut once per click', async () => {
     const onSignOut = jest.fn()
 
     render(<ProfilePopoverContent avatarName="Alice" displayName="Alice" role="MEMBER" onSignOut={onSignOut} />)
