@@ -101,6 +101,10 @@ const buttonVariants = cva(
         // control tucked into a corner. `icon-xs` shares the box but keeps the square-ish radius
         // and a 12px glyph, which reads as a different control.
         'icon-circle': "size-6 rounded-full [&_svg:not([class*='size-'])]:size-4",
+        // Top-bar chip: a control that sits inside a shared pill container (header wallet,
+        // staking, account menu), where the container supplies the surrounding inset and the
+        // 16px padding of `sm`/`xs` would read as a gap between neighbouring chips.
+        chip: 'h-8 gap-1.5 px-2 text-xs in-data-[slot=button-group]:rounded-sm',
       },
       weight: {
         medium: '',

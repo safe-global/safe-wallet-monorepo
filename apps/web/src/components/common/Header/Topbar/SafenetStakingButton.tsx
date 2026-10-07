@@ -26,10 +26,10 @@ const SafenetStakingButton = () => {
           render={
             <Button
               variant="ghost"
-              size="sm"
+              size="chip"
               onClick={openSafenetStakingApp}
               disabled={isNavigating}
-              className="gap-1.5 m-1"
+              className="m-1"
               aria-label="Safenet staking"
             />
           }

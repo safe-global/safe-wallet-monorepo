@@ -161,9 +161,9 @@ export function HeaderNavigation({
         <div className="flex items-center rounded-lg bg-muted">
           <Button
             variant="ghost"
-            size="sm"
+            size="chip"
             onClick={onWalletClick}
-            className="gap-1.5 m-1"
+            className="m-1"
             aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
             data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
           >
