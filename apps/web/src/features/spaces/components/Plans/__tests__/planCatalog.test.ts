@@ -1,7 +1,13 @@
-import { getCardFeaturesV2 } from '../planCatalog'
+import { getCardFeaturesV2, POLICIES, WORKSPACE_2FA } from '../planCatalog'
 
-const SHARED = ['Shared address book', 'Activity log', 'Advanced threat analysis', 'Transaction simulation']
-const FROM_BUSINESS = ['MFA authentication', 'Policy engine', 'Transaction proposers']
+const SHARED = [
+  'Shared address book',
+  'Activity log',
+  'Advanced threat analysis',
+  'Transaction simulation',
+  WORKSPACE_2FA,
+]
+const FROM_BUSINESS = [POLICIES]
 
 describe('getCardFeaturesV2', () => {
   it('lists the Oct 6 feature list in the same order on every card', () => {

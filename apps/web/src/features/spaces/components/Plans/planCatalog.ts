@@ -40,7 +40,7 @@ export type PlanNameV2 = (typeof PLAN_ORDER)[number]
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
 export const NAMED_SUPPORT_CONTACT = 'Named support contact'
-export const POLICIES = 'Policies (spending limits, proposers)'
+export const POLICIES = 'Policies'
 export const PAY_GAS_FROM_SAFE = 'Pay gas fees from Safe account'
 
 export type PlanContentV2 = {
@@ -69,7 +69,7 @@ const isPlanNameV2 = (name: string): name is PlanNameV2 => PLAN_ORDER.some((plan
 
 type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, string> }
 
-/** Card lists, from the Oct 6 Plans tab feature list. `from` is the first plan that includes it. */
+/** Card lists, from the Oct 6 Plans tab feature list with the product's names. `from` is the first plan that includes it. */
 export const CARD_FEATURES_V2: CardFeatureV2[] = [
   {
     from: 'Starter',
@@ -83,9 +83,8 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
   { from: 'Starter', label: 'Activity log' },
   { from: 'Starter', label: 'Advanced threat analysis' },
   { from: 'Starter', label: 'Transaction simulation' },
-  { from: 'Business', label: 'MFA authentication' },
-  { from: 'Business', label: 'Policy engine' },
-  { from: 'Business', label: 'Transaction proposers' },
+  { from: 'Starter', label: WORKSPACE_2FA },
+  { from: 'Business', label: POLICIES },
   { from: 'Enterprise', label: 'Custom Safe capacity' },
   { from: 'Enterprise', label: 'Tailored contract & billing terms' },
 ]
