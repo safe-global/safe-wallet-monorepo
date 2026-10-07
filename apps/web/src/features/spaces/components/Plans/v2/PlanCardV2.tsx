@@ -32,16 +32,16 @@ export type PlanCardV2Actions = {
   readOnly?: boolean
 }
 
-/** Mint underline behind the support level that draws in while the card is hovered or focused. */
+/** Mint line behind the support level that draws in while the card is hovered or focused. */
 const SUPPORT_HIGHLIGHT_CLASSES = [
-  'absolute -inset-x-[0.08em] bottom-[calc(6px-0.06em)] -z-10 h-1 origin-left bg-mint dark:bg-mint/40',
+  'absolute -inset-x-[0.08em] bottom-[calc(2px-0.06em)] -z-10 h-1 origin-left bg-mint',
   'scale-x-0 transition-transform duration-[450ms] ease-soft motion-reduce:transition-none',
   'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
 ].join(' ')
 
-/** The current card is white until another plan card is hovered, so only one card is white at a time. */
-const CURRENT_YIELDS_TO_HOVER_CLASSES =
-  'transition-colors duration-200 motion-reduce:transition-none group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary'
+/** The current card goes grey while another card is hovered; like every card, it only gets a shadow on hover. */
+const CURRENT_PLAN_CLASSES =
+  'shadow-none transition-[background-color,box-shadow] duration-200 hover:shadow-lg focus-within:shadow-lg motion-reduce:transition-none group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary'
 
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
@@ -151,7 +151,7 @@ export const PlanCardV2 = ({
       radius="lg-xl"
       className={cn(
         'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
-        isCurrentPlan && CURRENT_YIELDS_TO_HOVER_CLASSES,
+        isCurrentPlan && CURRENT_PLAN_CLASSES,
       )}
       data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
       data-hover-plan={!isCurrentPlan || undefined}

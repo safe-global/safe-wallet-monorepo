@@ -29,7 +29,7 @@ import { cn } from '@/utils/cn'
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `bordered` (the standard `border-border` outline on top of any fill variant),
- *   `highlightOnHover` (switches to the card surface on hover and focus-within),
+ *   `highlightOnHover` (card surface, a 2px stroke and `shadow-lg` on hover and focus-within, matching `selected`),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -55,6 +55,7 @@ import { cn } from '@/utils/cn'
  * - 2026-09-28: Added `size="offer"` (28px top, 24px bottom) for the Plans v2 cards
  * - 2026-10-05: Added `bordered` (standard `border-border` outline that keeps the fill variant) for the Plans v2 cards
  * - 2026-10-05: Added `highlightOnHover` (card surface on hover and focus-within) for the Plans v2 cards
+ * - 2026-10-07: `highlightOnHover` adds a 2px stroke (border + inset ring, `foreground/25`, `/40` in dark) and `shadow-lg`, matching `selected` without shifting content
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -102,7 +103,12 @@ const cardVariants = cva(
         false: '',
       },
       highlightOnHover: {
-        true: 'transition-colors duration-200 hover:bg-card focus-within:bg-card motion-reduce:transition-none',
+        true: [
+          'transition-[background-color,border-color,box-shadow] duration-200 motion-reduce:transition-none',
+          'hover:bg-card hover:border-foreground/25 hover:ring-1 hover:ring-inset hover:ring-foreground/25 hover:shadow-lg',
+          'focus-within:bg-card focus-within:border-foreground/25 focus-within:ring-1 focus-within:ring-inset focus-within:ring-foreground/25 focus-within:shadow-lg',
+          'dark:hover:border-foreground/40 dark:hover:ring-foreground/40 dark:focus-within:border-foreground/40 dark:focus-within:ring-foreground/40',
+        ],
         false: '',
       },
     },
