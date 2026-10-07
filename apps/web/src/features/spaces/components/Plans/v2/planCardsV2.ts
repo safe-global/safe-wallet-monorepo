@@ -77,10 +77,7 @@ export const getYearlySavingV2 = (
   return { amount: formatPlanPrice(saved, currency), percent: percentFormat.format(saved / twelveMonthsPrice) }
 }
 
-/**
- * A card's yearly saving at the same Safe count. The CGW leaves the current plan's own price out of the offers, so a
- * yearly option can lack its monthly reference; the counterpart card, which carries the subscription, fills it in.
- */
+/** A card's yearly saving at the same Safe count; the counterpart card fills in the current plan's price, which the CGW leaves out. */
 export const getCardSavingV2 = (
   tier: PlanTier,
   option: PlanSeatOption | undefined,

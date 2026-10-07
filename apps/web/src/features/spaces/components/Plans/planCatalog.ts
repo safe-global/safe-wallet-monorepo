@@ -69,7 +69,7 @@ const isPlanNameV2 = (name: string): name is PlanNameV2 => PLAN_ORDER.some((plan
 
 type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, string> }
 
-/** Card lists, from the Oct 6 Plans tab feature list with the product's names. `from` is the first plan that includes it. */
+/** Card lists, per the Plans tab feature list. `from` is the first plan that includes it. */
 export const CARD_FEATURES_V2: CardFeatureV2[] = [
   {
     from: 'Starter',
@@ -113,7 +113,6 @@ export const PLAN_CARD_COPY_V2 = {
   currentPlan: 'Current plan',
   switchToYearly: 'Switch to yearly',
   switchToMonthly: 'Switch to monthly',
-  current: 'Current',
   accountTeam: 'Change via your account team',
   talkToSales: 'Talk to sales',
   custom: 'Custom',

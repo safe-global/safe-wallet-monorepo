@@ -12,7 +12,13 @@ import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@/utils/cn'
 import { Seats } from '../PlanCards'
-import { getCardFeaturesV2, getPlanContentV2, PLAN_CARD_COPY_V2, RECOMMENDED_PLAN } from '../planCatalog'
+import {
+  COMPARE_COPY_V2,
+  getCardFeaturesV2,
+  getPlanContentV2,
+  PLAN_CARD_COPY_V2,
+  RECOMMENDED_PLAN,
+} from '../planCatalog'
 import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from '../types'
 import { FeatureCheck } from './FeatureCheck'
 import { getCardSavingV2, getPlanCtaV2, getPlanPriceV2 } from './planCardsV2'
@@ -157,7 +163,7 @@ export const PlanCardV2 = ({
             <Typography variant="h4">{tier.name}</Typography>
             {isCurrentPlan && (
               <Badge variant="mint" size="status" shape="status" data-testid="plan-current-badge">
-                {PLAN_CARD_COPY_V2.current}
+                {COMPARE_COPY_V2.current}
               </Badge>
             )}
           </div>

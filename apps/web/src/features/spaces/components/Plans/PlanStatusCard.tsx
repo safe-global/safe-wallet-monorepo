@@ -135,7 +135,7 @@ export default function PlanStatusCard({
   isManaging?: boolean
   /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
-  /** v2 style: bordered tiles, a neutral badge with a status dot, and the countdown in the status line. */
+  /** v2 style: bordered tiles and a neutral badge with a status dot and the countdown. */
   appearance?: 'launch' | 'v2'
 }) {
   const isTrial = plan?.status === 'trialing'
