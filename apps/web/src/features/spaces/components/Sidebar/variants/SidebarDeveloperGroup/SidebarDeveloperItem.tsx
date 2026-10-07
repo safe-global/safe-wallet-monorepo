@@ -12,8 +12,9 @@ interface SidebarDeveloperItemProps {
  * Renders one developer entry. Each entry gets its own component so its `useItemState` hook runs at a
  * component's top level — that is what keeps entries independent instead of sharing one group-wide state.
  */
-export const SidebarDeveloperItem = ({ config, isLoading = false }: SidebarDeveloperItemProps): ReactElement => {
-  const { badge, onSelect, dialog } = config.useItemState()
+export const SidebarDeveloperItem = ({ config, isLoading = false }: SidebarDeveloperItemProps): ReactElement | null => {
+  const { badge, onSelect, dialog, hidden } = config.useItemState()
+  if (hidden) return null
 
   const item: ResolvedSidebarActionItem = {
     icon: config.icon,

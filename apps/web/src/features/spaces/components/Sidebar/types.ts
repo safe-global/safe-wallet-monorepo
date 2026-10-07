@@ -20,6 +20,8 @@ export interface SidebarGroupConfig {
 
 /** Everything a developer entry resolves for itself on each render. */
 export interface SidebarDeveloperItemState {
+  /** Leaves the entry out, e.g. while the feature it controls is off. */
+  hidden?: boolean
   badge?: number | string
   onSelect: () => void
   /** UI the entry owns, e.g. the dialog it opens. Hosted inside the entry's own list element. */

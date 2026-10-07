@@ -26,7 +26,13 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { CopyDeeplinkLabels } from '@/services/analytics'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
 import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import {
+  SafenetChecksFeature,
+  SafenetChecksPrototypeFeature,
+  useIsSafenetChecksEnabled,
+  useIsSafenetPrototypeEnabled,
+  useSafenetScenario,
+} from '@/features/safenet-checks'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import ExplorerButton from '@/components/common/ExplorerButton'
@@ -160,6 +166,9 @@ const TxSigners = ({
   const chain = useCurrentChain()
   const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
+  const isSafenetPrototype = useIsSafenetPrototypeEnabled()
+  const { scenario: safenetScenario } = useSafenetScenario()
 
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
   const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
@@ -167,14 +176,16 @@ const TxSigners = ({
   // Subscribed here as well as inside the row (same cache entry, one chain
   // read) so the sibling rows' isLast can account for the Safenet step. The
   // undefined hash skips the read entirely while the flag is off.
-  const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
+  const safenetHash =
+    isSafenetEnabled && !isSafenetPrototype && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
   const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null, {
     chainId: safe.chainId,
     safeAddress: safe.address.value,
   })
   // Must mirror SafenetAuditRow's own render gate, or the connector math drifts.
-  const showsSafenetRow =
-    !!safenetHash && !!safenetCheck.snapshot && safenetCheck.publicStatus !== CheckStatus.UNAVAILABLE
+  const showsSafenetRow = isSafenetPrototype
+    ? isMultisig && safenetScenario.enhancedExecution
+    : !!safenetHash && !!safenetCheck.snapshot && safenetCheck.publicStatus !== CheckStatus.UNAVAILABLE
 
   // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
   const readOnlyProvider = useWeb3ReadOnly()
@@ -299,12 +310,21 @@ const TxSigners = ({
       {/* Safenet check step (PRD: between the signatures and execution). The
           feature registry stubs this to null while the flag is off; the row
           itself renders nothing unless a check was observed for this hash. */}
-      <safenet.SafenetAuditRow
-        safeTxHash={multisigInfo.safeTxHash}
-        chainId={safe.chainId}
-        timestampMs={submittedAt}
-        isLast={!showExecutionRow}
-      />
+      {isSafenetPrototype ? (
+        <safenetPrototype.SafenetHistoryRow
+          safeTxHash={multisigInfo.safeTxHash}
+          chainId={safe.chainId}
+          isExecuted={!!txDetails.executedAt}
+          isLast={!showExecutionRow}
+        />
+      ) : (
+        <safenet.SafenetAuditRow
+          safeTxHash={multisigInfo.safeTxHash}
+          chainId={safe.chainId}
+          timestampMs={submittedAt}
+          isLast={!showExecutionRow}
+        />
+      )}
 
       {showExecutionRow && (
         <AuditRow

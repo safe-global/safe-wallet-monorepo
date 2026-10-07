@@ -36,6 +36,8 @@ import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { useLoadFeature } from '@/features/__core__'
+import { SafenetChecksPrototypeFeature } from '@/features/safenet-checks'
 
 export const ExecuteForm = ({
   safeTx,
@@ -70,6 +72,7 @@ export const ExecuteForm = ({
   const currentChain = useCurrentChain()
   const { executeTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
+  const safenetPrototype = useLoadFeature(SafenetChecksPrototypeFeature)
   const scope = useSafeScope()
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const {
@@ -266,6 +269,8 @@ export const ExecuteForm = ({
         <div className="pt-6">
           <Separator bleed="6" />
         </div>
+
+        <safenetPrototype.SafenetCardCaption />
 
         <TxCardActions>
           {/* Submit button */}

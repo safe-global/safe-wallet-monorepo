@@ -1,6 +1,7 @@
-import { FlaskConical } from 'lucide-react'
+import { FlaskConical, ShieldCheck } from 'lucide-react'
 import type { SidebarDeveloperGroupConfig } from '../types'
 import { useFeatureFlagsItem } from './useFeatureFlagsItem'
+import { useSafenetScenarioItem } from './useSafenetScenarioItem'
 
 /**
  * Dev-only entries that run an action instead of navigating. Each one names the hook resolving its own
@@ -18,6 +19,12 @@ export const sidebarDeveloperGroup: SidebarDeveloperGroupConfig = {
       label: 'Feature flags',
       id: 'feature-flags',
       useItemState: useFeatureFlagsItem,
+    },
+    {
+      icon: ShieldCheck,
+      label: 'Safenet scenarios',
+      id: 'safenet-scenarios',
+      useItemState: useSafenetScenarioItem,
     },
   ],
 }
