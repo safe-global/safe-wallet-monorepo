@@ -2,6 +2,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import {
   encodeEIP1271Signature,
+  getProposerSigningMethod,
+  isV1ProposerDelegation,
   signProposerData,
   signProposerTypedData,
   signProposerTypedDataForSafe,
@@ -16,7 +18,6 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { isEthSignWallet } from '@/utils/wallets'
 import {
   useDelegatesDeleteDelegateV1Mutation,
   type Delegate,
@@ -83,7 +84,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
     setIsLoading(true)
 
     try {
-      const shouldEthSign = isEthSignWallet(wallet)
+      const useV1Endpoint = isV1ProposerDelegation(chain, wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
       if (parentSafeAddress && isMultiSigRequired) {
@@ -131,11 +132,18 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
           },
         })
       } else {
-        signature = shouldEthSign
+        signature = useV1Endpoint
           ? await signProposerData(proposer.delegate, signer)
-          : await signProposerTypedData(chain, proposer.delegate, safeAddress, 'delete', signer)
+          : await signProposerTypedData(
+              chain,
+              proposer.delegate,
+              safeAddress,
+              'delete',
+              signer,
+              getProposerSigningMethod(wallet),
+            )
 
-        if (shouldEthSign) {
+        if (useV1Endpoint) {
           await deleteDelegateV1({
             chainId,
             delegateAddress: proposer.delegate,

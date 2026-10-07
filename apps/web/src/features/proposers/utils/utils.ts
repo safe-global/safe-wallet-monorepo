@@ -2,7 +2,7 @@ import { signTypedData } from '@safe-global/utils/utils/web3'
 import { EthSafeSignature, buildContractSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
-import { isError } from 'ethers'
+import { getBytes, isError } from 'ethers'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
@@ -12,7 +12,9 @@ import {
 } from '@safe-global/utils/services/delegates'
 import type { DelegateAction, DelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
-import { isSmartContractWallet } from '@/utils/wallets'
+import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
 type DelegateChain = Pick<Chain, 'chainId' | 'features'>
 
@@ -34,14 +36,29 @@ const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateT
   return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }
 
+export const getProposerSigningMethod = (wallet: ConnectedWallet) =>
+  isEthSignWallet(wallet) ? SigningMethod.ETH_SIGN : SigningMethod.ETH_SIGN_TYPED_DATA
+
+// The queue service verifies eth_sign over the delegate hash; only the transaction service needs the v1 message endpoints.
+export const isV1ProposerDelegation = (chain: DelegateChain, wallet: ConnectedWallet) =>
+  isEthSignWallet(wallet) && !hasFeature(chain, FEATURES.QUEUE_SERVICE)
+
 export const signProposerTypedData = async (
   chain: DelegateChain,
   proposerAddress: string,
   safeAddress: string,
   action: DelegateAction,
   signer: JsonRpcSigner,
+  signingMethod: SigningMethod = SigningMethod.ETH_SIGN_TYPED_DATA,
 ) => {
   const typedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
+
+  if (signingMethod === SigningMethod.ETH_SIGN) {
+    const hash = hashDelegateTypedData(typedData)
+    const signature = await signer.signMessage(getBytes(hash))
+    return adjustVInSignature(SigningMethod.ETH_SIGN, signature, hash, signer.address)
+  }
+
   return signDelegateTypedData(signer, typedData)
 }
 

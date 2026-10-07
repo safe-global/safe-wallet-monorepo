@@ -1,11 +1,15 @@
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
+  getProposerSigningMethod,
+  isV1ProposerDelegation,
   signProposerTypedData,
   signProposerTypedDataForSafe,
 } from './utils'
 import { faker } from '@faker-js/faker'
-import { BrowserProvider, JsonRpcSigner, getAddress, makeError } from 'ethers'
+import { BrowserProvider, JsonRpcSigner, Wallet, getAddress, getBytes, makeError, verifyMessage } from 'ethers'
+import { SigningMethod } from '@safe-global/types-kit'
+import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import type { JsonRpcProvider } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -14,9 +18,10 @@ import * as delegateUtils from '@safe-global/utils/services/delegates'
 
 jest.mock('@/utils/wallets', () => ({
   isSmartContractWallet: jest.fn(),
+  isEthSignWallet: jest.fn(),
 }))
 
-const { isSmartContractWallet } = jest.requireMock('@/utils/wallets')
+const { isSmartContractWallet, isEthSignWallet } = jest.requireMock('@/utils/wallets')
 
 describe('encodeEIP1271Signature', () => {
   const parentSafeAddress = getAddress(faker.finance.ethereumAddress())
@@ -218,6 +223,55 @@ describe('signProposerTypedData', () => {
 
     await expect(signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)).rejects.toBe(rejection)
     expect(send).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('signProposerTypedData with eth_sign', () => {
+  it('eth_signs the queue service delegate hash so it recovers to the signer, with v shifted by 4', async () => {
+    const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+    const signer = createSigner()
+    Object.defineProperty(signer, 'address', { value: wallet.address })
+    jest.spyOn(signer, 'signMessage').mockImplementation((message) => wallet.signMessage(message))
+    const chain = queueServiceChain()
+    const proposerAddress = getAddress(faker.finance.ethereumAddress())
+    const safeAddress = getAddress(faker.finance.ethereumAddress())
+
+    const signature = await signProposerTypedData(
+      chain,
+      proposerAddress,
+      safeAddress,
+      'add',
+      signer,
+      SigningMethod.ETH_SIGN,
+    )
+
+    const hash = delegateUtils.hashDelegateTypedData(
+      delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
+    )
+    const v = parseInt(signature.slice(-2), 16)
+    expect([31, 32]).toContain(v)
+    expect(verifyMessage(getBytes(hash), `${signature.slice(0, -2)}${(v - 4).toString(16)}`)).toBe(wallet.address)
+  })
+})
+
+describe('proposer signing method and endpoint', () => {
+  const wallet = connectedWalletBuilder().build()
+
+  it('signs with eth_sign only for eth_sign wallets', () => {
+    isEthSignWallet.mockReturnValue(true)
+    expect(getProposerSigningMethod(wallet)).toBe(SigningMethod.ETH_SIGN)
+
+    isEthSignWallet.mockReturnValue(false)
+    expect(getProposerSigningMethod(wallet)).toBe(SigningMethod.ETH_SIGN_TYPED_DATA)
+  })
+
+  it('keeps eth_sign wallets on the v1 endpoints only where there is no queue service', () => {
+    isEthSignWallet.mockReturnValue(true)
+    expect(isV1ProposerDelegation(transactionServiceChain(), wallet)).toBe(true)
+    expect(isV1ProposerDelegation(queueServiceChain(), wallet)).toBe(false)
+
+    isEthSignWallet.mockReturnValue(false)
+    expect(isV1ProposerDelegation(transactionServiceChain(), wallet)).toBe(false)
   })
 })
 

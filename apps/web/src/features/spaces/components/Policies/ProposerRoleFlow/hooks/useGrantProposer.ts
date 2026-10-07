@@ -9,7 +9,13 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
-import { addressIsNotSmartContract, signProposerData, signProposerTypedData } from '@/features/proposers/utils/utils'
+import {
+  addressIsNotSmartContract,
+  getProposerSigningMethod,
+  isV1ProposerDelegation,
+  signProposerData,
+  signProposerTypedData,
+} from '@/features/proposers/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
@@ -25,7 +31,6 @@ import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-send
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isEthSignWallet } from '@/utils/wallets'
 import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
 import { formatContactLabel } from '../../utils/policyLabel'
@@ -56,11 +61,11 @@ const signDelegation = async (
   // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
   const activeWallet = await assertWalletChain(onboard, chain.chainId)
 
-  const useV1Endpoint = isEthSignWallet(activeWallet)
+  const useV1Endpoint = isV1ProposerDelegation(chain, activeWallet)
   const signer = await getAssertedChainSigner(activeWallet.provider)
   const signature = useV1Endpoint
     ? await signProposerData(proposer, signer)
-    : await signProposerTypedData(chain, proposer, safeAddress, 'add', signer)
+    : await signProposerTypedData(chain, proposer, safeAddress, 'add', signer, getProposerSigningMethod(activeWallet))
 
   return { signature, useV1Endpoint, delegator: activeWallet.address }
 }

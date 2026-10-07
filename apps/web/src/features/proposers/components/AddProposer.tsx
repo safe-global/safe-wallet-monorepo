@@ -7,6 +7,8 @@ import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
+  getProposerSigningMethod,
+  isV1ProposerDelegation,
   signProposerData,
   signProposerTypedData,
   signProposerTypedDataForSafe,
@@ -32,7 +34,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
-import { isEthSignWallet } from '@/utils/wallets'
 import { XIcon } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
@@ -141,7 +142,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         return
       }
 
-      const shouldEthSign = isEthSignWallet(wallet)
+      const useV1Endpoint = isV1ProposerDelegation(chain, wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
       let signature: string
@@ -183,9 +184,16 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         delegator = parentSafeAddress
       } else {
         // Direct owner: sign delegate typed data directly
-        const eoaSignature = shouldEthSign
+        const eoaSignature = useV1Endpoint
           ? await signProposerData(data.address, signer)
-          : await signProposerTypedData(chain, data.address, safeAddress, 'add', signer)
+          : await signProposerTypedData(
+              chain,
+              data.address,
+              safeAddress,
+              'add',
+              signer,
+              getProposerSigningMethod(wallet),
+            )
         signature = eoaSignature
         delegator = wallet.address
       }
@@ -198,7 +206,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         safe: safeAddress,
       }
 
-      if (shouldEthSign && !parentSafeAddress) {
+      if (useV1Endpoint && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {
         await addDelegate({ chain, createDelegateDto })

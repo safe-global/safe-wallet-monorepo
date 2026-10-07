@@ -4,6 +4,7 @@ import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SigningMethod } from '@safe-global/types-kit'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
@@ -130,7 +131,14 @@ describe.each([
 
     expect(ok).toBe(true)
     expect(jest.mocked(useChainsModule.useChain)).toHaveBeenCalledWith(CHAIN_ID)
-    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(chain, PROPOSER, SAFE, 'add', signer)
+    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+      chain,
+      PROPOSER,
+      SAFE,
+      'add',
+      signer,
+      SigningMethod.ETH_SIGN_TYPED_DATA,
+    )
     expect(addDelegate.trigger).toHaveBeenCalledWith({
       chainId: CHAIN_ID,
       createDelegateDto: {
@@ -154,21 +162,45 @@ describe.each([
     expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(connected.address)
   })
 
-  it('uses eth_sign and the v1 endpoint for Trezor', async () => {
-    connect('Trezor')
+  if (isQueueService) {
+    it('eth_signs the delegate hash and posts it to the queue service for Trezor', async () => {
+      connect('Trezor')
 
-    const { ok } = await submit()
+      const { ok } = await submit()
 
-    expect(ok).toBe(true)
-    expect(proposerUtils.signProposerData).toHaveBeenCalledWith(PROPOSER, signer)
-    expect(addV1.trigger).toHaveBeenCalledWith({
-      chainId: CHAIN_ID,
-      createDelegateDto: expect.objectContaining({ signature: '0xethsign', safe: SAFE }),
+      expect(ok).toBe(true)
+      expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+        chain,
+        PROPOSER,
+        SAFE,
+        'add',
+        signer,
+        SigningMethod.ETH_SIGN,
+      )
+      expect(addDelegate.trigger).toHaveBeenCalledWith({
+        chainId: CHAIN_ID,
+        createDelegateDto: expect.objectContaining({ signature: '0xtyped', safe: SAFE }),
+      })
+      expect(addV1.trigger).not.toHaveBeenCalled()
+      expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
     })
-    expect(addDelegate.trigger).not.toHaveBeenCalled()
-    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
-    expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
-  })
+  } else {
+    it('uses eth_sign and the v1 endpoint for Trezor', async () => {
+      connect('Trezor')
+
+      const { ok } = await submit()
+
+      expect(ok).toBe(true)
+      expect(proposerUtils.signProposerData).toHaveBeenCalledWith(PROPOSER, signer)
+      expect(addV1.trigger).toHaveBeenCalledWith({
+        chainId: CHAIN_ID,
+        createDelegateDto: expect.objectContaining({ signature: '0xethsign', safe: SAFE }),
+      })
+      expect(addDelegate.trigger).not.toHaveBeenCalled()
+      expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
+      expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+    })
+  }
 
   it('checks the proposer against the scoped chain and provider before signing', async () => {
     await submit()

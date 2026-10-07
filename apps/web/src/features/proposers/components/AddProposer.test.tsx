@@ -17,6 +17,7 @@ import { MockEip1193Provider } from '@/tests/mocks/providers'
 import * as useChainsModule from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SigningMethod } from '@safe-global/types-kit'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getStoreInstance } from '@/store'
 
@@ -166,11 +167,64 @@ describe('AddProposer signing logic', () => {
         expect.any(String),
         'add',
         expect.anything(),
+        SigningMethod.ETH_SIGN_TYPED_DATA,
       )
       expect(addDelegate.mock.calls[0][0].createDelegateDto).toEqual(
         expect.objectContaining({ delegate: address, signature: '0xsignature' }),
       )
       expect(otherAddDelegate).not.toHaveBeenCalled()
+    })
+
+    it('routes an eth_sign wallet by the chain: queue service via eth_sign over the delegate hash, otherwise v1', async () => {
+      const addDelegateV1 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+      useDelegatesPostDelegateV1Mutation.mockReturnValue([addDelegateV1, {}])
+      jest.spyOn(proposerUtils, 'signProposerData').mockResolvedValue('0xethsign')
+      mockUseWallet.mockReturnValue({
+        address: fakerChecksummedAddress(),
+        chainId: '1',
+        label: 'Trezor',
+        provider: MockEip1193Provider,
+      })
+
+      const { getByLabelText, getByTestId } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+
+      const address = fakerChecksummedAddress()
+
+      act(() => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: address } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: faker.person.firstName() } })
+      })
+
+      await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(getByTestId('submit-proposer-btn'))
+      })
+
+      if (isQueueService) {
+        await waitFor(() => expect(addDelegate).toHaveBeenCalled())
+        expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+          chain,
+          address,
+          expect.any(String),
+          'add',
+          expect.anything(),
+          SigningMethod.ETH_SIGN,
+        )
+        expect(addDelegate.mock.calls[0][0].createDelegateDto).toEqual(
+          expect.objectContaining({ delegate: address, signature: '0xsignature' }),
+        )
+        expect(addDelegateV1).not.toHaveBeenCalled()
+        expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
+      } else {
+        await waitFor(() => expect(addDelegateV1).toHaveBeenCalled())
+        expect(proposerUtils.signProposerData).toHaveBeenCalledWith(address, expect.anything())
+        expect(addDelegateV1.mock.calls[0][0].createDelegateDto).toEqual(
+          expect.objectContaining({ delegate: address, signature: '0xethsign' }),
+        )
+        expect(addDelegate).not.toHaveBeenCalled()
+        expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+      }
     })
 
     it('sends a placeholder label to the delegate API, never the entered name', async () => {
