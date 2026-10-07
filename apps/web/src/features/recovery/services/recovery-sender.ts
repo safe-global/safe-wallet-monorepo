@@ -10,7 +10,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getUncheckedSigner } from '../../../services/tx/tx-sender/sdk'
 import { isSmartContractWallet } from '@/utils/wallets'
 
-async function getDelayModifierContract({
+export async function getDelayModifierContract({
   provider,
   chainId,
   delayModifierAddress,

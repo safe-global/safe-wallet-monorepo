@@ -3,6 +3,7 @@ import { useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
+import { useIsGnosisPaySafe } from '@/features/gnosispay'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
 
@@ -56,9 +57,10 @@ const Execute = ({
 
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [isGnosisPaySafe] = useIsGnosisPaySafe()
   const { canExecute, isProposing } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && canExecute && !isProposing
+  return !isCounterfactualSafe && !isGnosisPaySafe && canExecute && !isProposing
 }
 
 const ExecuteSlot = withSlot({

@@ -28,7 +28,7 @@ const SendButton = ({
   }
 
   return (
-    <CheckWallet allowSpendingLimit={!!spendingLimit}>
+    <CheckWallet allowSpendingLimit={!!spendingLimit} allowGnosisPaySafe>
       {(isOk) => (
         <Track {...ASSETS_EVENTS.SEND}>
           {onlyIcon ? (
