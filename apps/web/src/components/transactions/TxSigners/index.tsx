@@ -345,6 +345,14 @@ const TxSigners = ({
           <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
       )}
+
+      {/* Dev-only (null in production builds): propose a check from the connected wallet. */}
+      <safenet.SafenetDevPropose
+        txDetails={txDetails}
+        chainId={safe.chainId}
+        onProposed={safenetCheck.refetch}
+        snapshot={safenetCheck.snapshot}
+      />
     </AuditLog>
   )
 }

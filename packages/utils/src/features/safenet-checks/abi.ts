@@ -1,7 +1,7 @@
 import { Interface } from 'ethers'
 import { CheckEventType } from './types'
 
-const TX_TUPLE =
+export const TX_TUPLE =
   '(uint256 chainId, address safe, address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver, uint256 nonce)'
 const FROST_SIG_TUPLE = '((uint256 x, uint256 y) r, uint256 z)'
 
