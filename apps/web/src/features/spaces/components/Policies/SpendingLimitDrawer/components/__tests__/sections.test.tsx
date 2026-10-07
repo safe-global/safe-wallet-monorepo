@@ -114,4 +114,30 @@ describe('CopyTransactionLink', () => {
 
     await waitFor(() => expect(writeText).toHaveBeenCalledWith(TRANSACTION_LINK))
   })
+
+  it('confirms the copy on the button itself', async () => {
+    mockClipboard()
+    render(<CopyTransactionLink transactionLink={TRANSACTION_LINK} />)
+
+    expect(screen.queryByText('Copied!')).not.toBeInTheDocument()
+
+    act(() => {
+      screen.getByRole('button', { name: /Copy transaction link/ }).click()
+    })
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /Copied!/ })).toBeInTheDocument())
+  })
+
+  it('keeps the original label when the clipboard is unavailable', async () => {
+    const writeText = mockClipboard()
+    writeText.mockRejectedValueOnce(new Error('denied'))
+    render(<CopyTransactionLink transactionLink={TRANSACTION_LINK} />)
+
+    act(() => {
+      screen.getByRole('button', { name: /Copy transaction link/ }).click()
+    })
+
+    await waitFor(() => expect(writeText).toHaveBeenCalled())
+    expect(screen.queryByText('Copied!')).not.toBeInTheDocument()
+  })
 })
