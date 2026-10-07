@@ -16,6 +16,8 @@ import SpaceDashboard from '../index'
 const MOCK_SPACE_ID = '42'
 const MOCK_SAFE_ADDRESS = '0xaaaa567890abcdef1234567890abcdef12345678'
 const MOCK_TX_ID = 'multisig_0xbbbb_123'
+const PLAN_STATE = { status: 'free_access', tier: 'business', role: 'admin' }
+const PLAN_PARAMS = { 'Plan Status': 'free_access', 'Plan Tier': 'business' }
 
 // ---- Module mocks ----
 
@@ -51,6 +53,8 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   MixpanelEventParams: {
     SAFE_ADDRESS: 'Safe Address',
     TX_ID: 'TX ID',
+    PLAN_STATUS: 'Plan Status',
+    PLAN_TIER: 'Plan Tier',
   },
 }))
 
@@ -86,7 +90,9 @@ jest.mock('@/services/local-storage/useLocalStorage', () => jest.fn(() => [{}, j
 const mockUseSpacePlan = jest.fn()
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
+const mockUseSpacePlanState = jest.fn()
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockUseSpacePlan() }))
+jest.mock('../../../hooks/useSpacePlanState', () => ({ useSpacePlanState: () => mockUseSpacePlanState() }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockUseWorkspaceLock() }))
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({ useCheckoutReturn: () => mockUseCheckoutReturn() }))
 jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
@@ -172,6 +178,7 @@ const restoreDefaultMocks = () => {
   mockUseHasFeature.mockReturnValue(false)
   mockUseSafeProAnnouncementModal.mockReturnValue({ isOpen: false, setIsOpen: jest.fn() })
   mockUseSpacePlan.mockReturnValue({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() })
+  mockUseSpacePlanState.mockReturnValue(PLAN_STATE)
   mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
   mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
 }
@@ -209,6 +216,7 @@ describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
       pending_tx_count: 0,
       member_count: 0,
       safe_count: 1,
+      ...PLAN_PARAMS,
     })
   })
 
@@ -217,7 +225,7 @@ describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
 
     expect(trackEvent).toHaveBeenCalledWith(
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: MOCK_SPACE_ID },
-      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1 },
+      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1, ...PLAN_PARAMS },
     )
   })
 
@@ -228,6 +236,19 @@ describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
 
     const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
     expect(calls).toHaveLength(0)
+  })
+
+  it('waits for the plan before firing WORKSPACE_DASHBOARD_VIEWED', () => {
+    mockUseSpacePlanState.mockReturnValue(null)
+    const { rerender } = render(<SpaceDashboard />)
+    expect(getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)).toHaveLength(0)
+
+    mockUseSpacePlanState.mockReturnValue(PLAN_STATE)
+    rerender(<SpaceDashboard />)
+
+    const calls = getCallsForEvent(SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED.action)
+    expect(calls).toHaveLength(1)
+    expect(calls[0][1]).toMatchObject(PLAN_PARAMS)
   })
 
   it('does not fire WORKSPACE_DASHBOARD_VIEWED again on re-render with the same spaceId', () => {
@@ -249,11 +270,11 @@ describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
     expect(calls).toHaveLength(2)
     expect(calls[0]).toEqual([
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: MOCK_SPACE_ID },
-      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1 },
+      { workspace_id: MOCK_SPACE_ID, pending_tx_count: 0, member_count: 0, safe_count: 1, ...PLAN_PARAMS },
     ])
     expect(calls[1]).toEqual([
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: '99' },
-      { workspace_id: '99', pending_tx_count: 0, member_count: 0, safe_count: 1 },
+      { workspace_id: '99', pending_tx_count: 0, member_count: 0, safe_count: 1, ...PLAN_PARAMS },
     ])
   })
 })
