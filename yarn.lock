@@ -45893,19 +45893,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"valibot@npm:^1.1.0":
-  version: 1.2.0
-  resolution: "valibot@npm:1.2.0"
-  peerDependencies:
-    typescript: ">=5"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10/5f9c15e6f5a2b8eae75332a3317e46e995a1763efe1b91e57bc5064e36f0feba734367c88013d53255bdf09fb9204bf3598d2ca0c3f468c8726095b1c3551926
-  languageName: node
-  linkType: hard
-
-"valibot@npm:^1.4.0, valibot@npm:^1.4.2":
+"valibot@npm:^1.1.0, valibot@npm:^1.4.0, valibot@npm:^1.4.2":
   version: 1.5.0
   resolution: "valibot@npm:1.5.0"
   peerDependencies:
