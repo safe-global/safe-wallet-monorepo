@@ -13,6 +13,7 @@ import { makeStore } from '@/store'
 import * as messages from '@safe-global/utils/utils/safe-messages'
 import { faker } from '@faker-js/faker'
 import { Interface, concat, getAddress, keccak256, toBeHex } from 'ethers'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import {
   APPROVE_HASH_SELECTOR,
   type NestedTxEnvelope,
@@ -511,6 +512,62 @@ describe('useSafeWalletProvider', () => {
 
         expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(concat([APPROVE_HASH_SELECTOR, approvedHash]))
         expect(getFlowData(mockSetTxFlow).nestedChildTx).toEqual(childEnvelope)
+      })
+
+      describe('execTransaction', () => {
+        const execEnvelope: NestedTxEnvelope = { ...childEnvelope, safe: getAddress(SAFE_ADDRESS) }
+        const execCalldata = Safe__factory.createInterface().encodeFunctionData('execTransaction', [
+          execEnvelope.to,
+          execEnvelope.value,
+          execEnvelope.data,
+          execEnvelope.operation,
+          execEnvelope.safeTxGas,
+          execEnvelope.baseGas,
+          execEnvelope.gasPrice,
+          execEnvelope.gasToken,
+          execEnvelope.refundReceiver,
+          concat([toBeHex(SAFE_ADDRESS, 32), toBeHex(0, 32), '0x01']),
+        ])
+
+        it('passes plain execTransaction calldata through unchanged', () => {
+          const { send, mockSetTxFlow } = renderSendApi()
+
+          send(execCalldata)
+
+          expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(execCalldata)
+          expect(getFlowData(mockSetTxFlow).nestedChildTx).toBeUndefined()
+        })
+
+        it('rejects with an RPC error when the envelope does not match the executed tx', async () => {
+          const { send, mockSetTxFlow } = renderSendApi()
+          const data = concat([execCalldata, encodeNestedTxPayload([{ ...execEnvelope, value: '1' }])])
+
+          await expect(send(data)).rejects.toEqual({
+            code: RpcErrorCode.INVALID_PARAMS,
+            message: 'Nested transaction payload does not match the executed transaction',
+          })
+          expect(mockSetTxFlow).not.toHaveBeenCalled()
+        })
+
+        it('rejects when the envelope names a Safe other than the one called', async () => {
+          const { send } = renderSendApi()
+          const data = concat([execCalldata, encodeNestedTxPayload([childEnvelope])])
+
+          await expect(send(data)).rejects.toEqual({
+            code: RpcErrorCode.INVALID_PARAMS,
+            message: 'Nested transaction payload does not match the executed transaction',
+          })
+        })
+
+        it('strips a verified envelope and passes the child tx into the flow', () => {
+          const { send, mockSetTxFlow } = renderSendApi()
+          const data = concat([execCalldata, encodeNestedTxPayload([execEnvelope])])
+
+          send(data)
+
+          expect(getFlowData(mockSetTxFlow).txs[0].data).toBe(execCalldata)
+          expect(getFlowData(mockSetTxFlow).nestedChildTx).toEqual(execEnvelope)
+        })
       })
     })
 

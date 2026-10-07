@@ -8,6 +8,7 @@ import * as txSenderSdk from '@/services/tx/tx-sender/sdk'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import {
   APPROVE_HASH_SELECTOR,
   type NestedTxEnvelope,
@@ -143,6 +144,65 @@ describe('getNestedWallet send', () => {
       undefined,
       childEnvelope,
     )
+  })
+
+  describe('execTransaction envelope', () => {
+    const execCalldata = Safe__factory.createInterface().encodeFunctionData('execTransaction', [
+      childEnvelope.to,
+      childEnvelope.value,
+      childEnvelope.data,
+      childEnvelope.operation,
+      childEnvelope.safeTxGas,
+      childEnvelope.baseGas,
+      childEnvelope.gasPrice,
+      childEnvelope.gasToken,
+      childEnvelope.refundReceiver,
+      concat([toBeHex(PARENT_SAFE, 32), toBeHex(0, 32), '0x01']),
+    ])
+
+    it('passes plain execTransaction calldata through unchanged and proposes without a child tx', async () => {
+      const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+
+      await sendTransaction(execCalldata)
+
+      expect(getCreatedTxData()).toBe(execCalldata)
+      expect(proposeTxMock.mock.calls[0][6]).toBeUndefined()
+    })
+
+    it('throws when the envelope does not match the executed tx', async () => {
+      const data = concat([execCalldata, encodeNestedTxPayload([{ ...childEnvelope, value: '1' }])])
+
+      await expect(sendTransaction(data)).rejects.toThrow(
+        'Nested transaction payload does not match the executed transaction',
+      )
+      expect(mockCreateTransaction).not.toHaveBeenCalled()
+    })
+
+    it('throws when the envelope names a different Safe than the called one', async () => {
+      const data = concat([execCalldata, encodeNestedTxPayload([{ ...childEnvelope, safe: PARENT_SAFE }])])
+
+      await expect(sendTransaction(data)).rejects.toThrow(
+        'Nested transaction payload does not match the executed transaction',
+      )
+    })
+
+    it('strips a verified envelope and proposes the parent tx with the child tx attached', async () => {
+      const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+      const data = concat([execCalldata, encodeNestedTxPayload([childEnvelope])])
+
+      await sendTransaction(data)
+
+      expect(getCreatedTxData()).toBe(execCalldata)
+      expect(proposeTxMock).toHaveBeenCalledWith(
+        safeInfo.chainId,
+        PARENT_SAFE,
+        SIGNER,
+        expect.anything(),
+        expect.anything(),
+        undefined,
+        childEnvelope,
+      )
+    })
   })
 
   it('proposes the parent tx without a child tx when there is no envelope', async () => {

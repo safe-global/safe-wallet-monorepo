@@ -7,7 +7,7 @@
  * @module tx/shared/hooks
  */
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { assertTx, assertOnboard, assertChainInfo, assertProvider } from '@/utils/helpers'
+import { assertTx, assertOnboard, assertChainInfo, assertProvider, assertWallet } from '@/utils/helpers'
 import { useContext, useMemo } from 'react'
 import { type TransactionOptions, type SafeTransaction } from '@safe-global/types-kit'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -18,6 +18,7 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { isSmartContractWallet } from '@/utils/wallets'
 import {
   dispatchProposerTxSigning,
+  dispatchNestedTxCreation,
   dispatchOnChainSigning,
   dispatchTxConfirmation,
   dispatchTxExecution,
@@ -46,10 +47,9 @@ import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/n
 const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
 
 // Whether the signer executes the on-chain tx immediately (returning a real tx hash) rather than
-// queuing it in its own Safe (returning a safeTxHash). True for EOAs and non-Safe smart accounts;
-// among Safe signers, only the in-app nested signer at threshold 1 executes synchronously.
-const executesImmediately = (signer: SignerWallet): boolean =>
-  !isSafeSigner(signer) || (Boolean(signer.isSafe) && signer.threshold === 1)
+// queuing it in its own Safe (returning a safeTxHash). True for EOAs and non-Safe smart accounts,
+// and for a Safe signer at threshold 1 whether it is the in-app nested signer or connected directly.
+const executesImmediately = (signer: SignerWallet): boolean => !isSafeSigner(signer) || signer.threshold === 1
 
 // A smart-account signer creates an on-chain approveHash tx in its own Safe, so signing lands in
 // a "nested signing" state rather than adding an off-chain signature.
@@ -177,10 +177,30 @@ export const useTxActions = (): TxActions => {
         // A Safe signer skips the CGW proposal only when the child tx travels to the parent inside
         // the approveHash envelope, which then proposes it alongside the parent tx. The skip must
         // use the same predicate as appending the envelope (dispatchOnChainSigning) — if they
-        // diverged, the child tx data would be lost entirely. Envelope-less signers (older child
-        // Safes, non-Safe smart accounts) have to propose w/o signatures — otherwise the backend
-        // won't pick up the tx. The signature will be added once the on-chain signature is indexed.
+        // diverged, the child tx data would be lost entirely.
         const carriesEnvelope = viaSafe && supportsNestedTxEnvelope(safe.version)
+
+        // Without an envelope the child tx has to be proposed here, and the queue rejects unsigned
+        // proposals — so the in-app nested signer's own EOA signs the child hash first. A Safe
+        // connected via WalletConnect has no such EOA, and non-Safe smart accounts keep the plain
+        // flow: both propose w/o signatures and gain them once the on-chain signature is indexed.
+        if (signer.isSafe && !txId && !carriesEnvelope) {
+          assertWallet(wallet)
+          const nestedTxId = await dispatchNestedTxCreation({
+            safeTx,
+            wallet,
+            parentSafeAddress: signer.address,
+            parentProvider: signer.provider,
+            chainId,
+            safeAddress,
+            executed: executesImmediately(signer),
+            origin,
+            scope,
+            nestedTransaction: nestedChildTx,
+          })
+          return { txId: nestedTxId, isNestedSigning: true }
+        }
+
         const id = txId || (carriesEnvelope ? undefined : (await _propose(signer.address, safeTx, origin)).txId)
         const signedTxId = await dispatchOnChainSigning(
           safeTx,
@@ -258,16 +278,12 @@ export const useTxActions = (): TxActions => {
         txOptions = { ...txOptions, gasLimit: undefined }
       }
 
-      // Propose the tx if there's no id yet, or send the new signature to the already proposed tx.
-      // A non-relayed Safe executor never proposes the child tx to CGW — only the parent proposes:
-      // its execTransaction calldata carries the full child tx, which the service picks up once it
-      // executes on-chain. Relayed txs must be known to the service regardless of the signer type.
-      if ((!txId || rePropose) && (isRelayed || !viaSafe)) {
-        txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
-      }
-
-      // Relay or execute the tx via connected wallet
+      // Relayed txs must be known to the service, so propose them (or send the new signature to
+      // the already proposed tx) regardless of the signer type
       if (isRelayed) {
+        if (!txId || rePropose) {
+          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
+        }
         await dispatchTxRelay(
           safeTx,
           safe,
@@ -281,10 +297,16 @@ export const useTxActions = (): TxActions => {
         return { txId, isExecuted: true }
       }
 
-      // A Safe executor submits to its own Safe and gets back a safeTxHash, not an on-chain tx hash
-      // — UNLESS it's the in-app nested signer at threshold 1, which executes immediately and
-      // returns a real hash. EOAs and non-Safe smart accounts execute directly (real hash / their
-      // own semantics), so treat them as executed and keep the plain processing flow.
+      // Propose the tx if there's no id yet, or send the new signature to the already proposed tx.
+      // A Safe executor never proposes the child tx to CGW — only the parent proposes: the child tx
+      // travels in the execTransaction envelope and is proposed alongside the parent tx as
+      // `nestedTransaction`.
+      if (!viaSafe && (!txId || rePropose)) {
+        txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
+      }
+
+      // A Safe executor above threshold 1 only queues in its own Safe and gets back a safeTxHash;
+      // everyone else returns a real hash, so treat them as executed and keep the processing flow.
       const executed = executesImmediately(signer)
       const executedTxId = await dispatchTxExecution(
         safe.chainId,
@@ -296,6 +318,8 @@ export const useTxActions = (): TxActions => {
         safeAddress,
         isSmartAccount,
         executed,
+        viaSafe,
+        safe.version,
         scope,
       )
 

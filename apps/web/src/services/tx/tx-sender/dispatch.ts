@@ -186,6 +186,26 @@ export const dispatchProposerTxSigning = async (
 
 const ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT = 4_500_000
 
+// Resolves to the tx hash if the parent executed the approveHash immediately, otherwise to its safeTxHash
+const sendApproveHashTx = (
+  data: string,
+  provider: Eip1193Provider,
+  chainId: SafeState['chainId'],
+  signerAddress: string,
+  safeAddress: string,
+): Promise<string> =>
+  provider.request({
+    method: 'eth_sendTransaction',
+    params: [
+      {
+        from: signerAddress,
+        to: safeAddress,
+        data,
+        gas: chainId === chains.zksync || chainId === chains.lens ? ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT : undefined,
+      },
+    ],
+  })
+
 /**
  * On-Chain sign a transaction
  */
@@ -208,10 +228,6 @@ export const dispatchOnChainSigning = async (
   const id = txId ?? `multisig_${safeAddress}_${safeTxHash}`
   const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
 
-  const options =
-    chainId === chains.zksync || chainId === chains.lens
-      ? { gasLimit: ZK_SYNC_ON_CHAIN_SIGNATURE_GAS_LIMIT }
-      : undefined
   let txHashOrParentSafeTxHash: string
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
@@ -237,10 +253,13 @@ export const dispatchOnChainSigning = async (
     // Note: SafeWalletProvider returns transaction hash if it exists, otherwise the safeTxHash
     // If the parent immediately executes, this will be the transaction hash of the approveHash
     // otherwise the safeTxHash of it
-    txHashOrParentSafeTxHash = await provider.request({
-      method: 'eth_sendTransaction',
-      params: [{ from: signerAddress, to: safeAddress, data: encodedApproveHashTx, gas: options?.gasLimit }],
-    })
+    txHashOrParentSafeTxHash = await sendApproveHashTx(
+      encodedApproveHashTx,
+      provider,
+      chainId,
+      signerAddress,
+      safeAddress,
+    )
 
     txDispatch(TxEvent.ONCHAIN_SIGNATURE_REQUESTED, eventParams)
   } catch (err) {
@@ -265,6 +284,73 @@ export const dispatchOnChainSigning = async (
   // Until the on-chain signature is/has been executed, the safeTx is not
   // signed so we only return its id
   return id
+}
+
+/**
+ * First confirmation of a new tx by the in-app nested Safe signer when the child Safe is too old to
+ * carry a nested-tx envelope. The queue only accepts signed proposals (PLA-1897), so the parent
+ * owner's EOA signs the child hash; the child is proposed only after the parent approveHash tx is
+ * accepted, so a rejected parent signature leaves nothing queued.
+ */
+export const dispatchNestedTxCreation = async ({
+  safeTx,
+  wallet,
+  parentSafeAddress,
+  parentProvider,
+  chainId,
+  safeAddress,
+  executed,
+  origin,
+  scope,
+  nestedTransaction,
+}: {
+  safeTx: SafeTransaction
+  wallet: ConnectedWallet
+  parentSafeAddress: string
+  parentProvider: Eip1193Provider
+  chainId: SafeState['chainId']
+  safeAddress: string
+  executed: boolean
+  origin?: string
+  scope?: TxSenderScope
+  nestedTransaction?: NestedTxEnvelope
+}): Promise<string> => {
+  const sdk = await getSafeSDKWithSigner(parentProvider, scope)
+  const safeTxHash = await sdk.getTransactionHash(safeTx)
+
+  const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
+
+  const encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, parentProvider, scope)
+  const txHashOrParentSafeTxHash = await sendApproveHashTx(
+    encodedApproveHashTx,
+    parentProvider,
+    chainId,
+    parentSafeAddress,
+    safeAddress,
+  )
+
+  const { txId } = await dispatchTxProposal({
+    chainId,
+    safeAddress,
+    sender: wallet.address,
+    safeTx: signedTx,
+    origin,
+    scope,
+    nestedTransaction,
+  })
+
+  txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
+    txId,
+    nonce: safeTx.data.nonce,
+    chainId,
+    safeAddress,
+    txHashOrParentSafeTxHash,
+    parentSafeAddress,
+    executed,
+    method: 'approveHash',
+  })
+
+  return txId
 }
 
 export const dispatchSafeTxSpeedUp = async (
@@ -373,12 +459,15 @@ export const dispatchTxExecution = async (
   safeAddress: string,
   isSmartAccount: boolean,
   executed: boolean,
+  isSafeSigner = false,
+  safeVersion?: SafeState['version'],
   scope?: TxSenderScope,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   // A Safe executor's tx is never proposed to CGW, so no service-assigned id exists yet; derive
   // the deterministic id CGW will use once it learns about the tx
-  const id = txId ?? `multisig_${safeAddress}_${await sdk.getTransactionHash(safeTx)}`
+  const safeTxHash = await sdk.getTransactionHash(safeTx)
+  const id = txId ?? `multisig_${safeAddress}_${safeTxHash}`
   const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
 
   const signerNonce = txOptions.nonce ?? (await getUserNonce(signerAddress))
@@ -388,7 +477,21 @@ export const dispatchTxExecution = async (
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {
-      const encodedTx = await prepareTxExecution(safeTx, provider, scope)
+      let encodedTx = await prepareTxExecution(safeTx, provider, scope)
+
+      // A parent Safe executor queues this execTransaction in its own Safe; append the child tx
+      // envelope (same predicate as approveHash) so the parent proposes it as `nestedTransaction`
+      // and the child keeps seeing it in its queue until the parent executes.
+      if (isSafeSigner && supportsNestedTxEnvelope(safeVersion)) {
+        const payload = encodeNestedTxPayload([{ chainId, safe: safeAddress, ...safeTx.data }])
+        encodedTx = concat([encodedTx, payload])
+        console.info('[NestedTxEnvelope] appended child tx envelope to execTransaction calldata', {
+          childSafeTxHash: safeTxHash,
+          payloadBytes: dataLength(payload),
+          calldata: encodedTx,
+        })
+      }
+
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [{ from: signerAddress, to: safeAddress, data: encodedTx }],

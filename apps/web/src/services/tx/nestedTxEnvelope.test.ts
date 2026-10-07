@@ -1,14 +1,18 @@
 import { concat, dataSlice, getAddress, keccak256, toBeHex, toUtf8Bytes } from 'ethers'
+import { Safe__factory } from '@safe-global/utils/types/contracts'
 import {
   APPROVE_HASH_SELECTOR,
+  EXEC_TRANSACTION_SELECTOR,
   NESTED_TX_MAGIC,
   type NestedTxEnvelope,
   decodeNestedTxPayload,
   deriveEnvelopeSafeTxHash,
   encodeNestedTxPayload,
   splitApproveHashCalldata,
+  splitExecTransactionCalldata,
   supportsNestedTxEnvelope,
   verifyAndStripNestedTxCalldata,
+  verifyNestedExecTxPayload,
   verifyNestedTxPayload,
 } from './nestedTxEnvelope'
 
@@ -34,6 +38,25 @@ const childEnvelope: NestedTxEnvelope = {
 
 const buildApproveHashCalldata = (approvedHash: string, payload = '0x'): string =>
   concat([APPROVE_HASH_SELECTOR, approvedHash, payload])
+
+const SIGNATURES = concat([toBeHex(PARENT_SAFE, 32), toBeHex(0, 32), '0x01'])
+
+const buildExecTransactionCalldata = (env: NestedTxEnvelope, payload = '0x'): string =>
+  concat([
+    Safe__factory.createInterface().encodeFunctionData('execTransaction', [
+      env.to,
+      env.value,
+      env.data,
+      env.operation,
+      env.safeTxGas,
+      env.baseGas,
+      env.gasPrice,
+      env.gasToken,
+      env.refundReceiver,
+      SIGNATURES,
+    ]),
+    payload,
+  ])
 
 describe('nestedTxEnvelope', () => {
   it('magic constant equals bytes4(keccak256("SafeNestedChildTxV1"))', () => {
@@ -184,6 +207,132 @@ describe('nestedTxEnvelope', () => {
 
     it('fails for a malformed payload', () => {
       expect(verifyNestedTxPayload(keccak256('0x01'), '0x1234')).toBeNull()
+    })
+  })
+
+  describe('splitExecTransactionCalldata', () => {
+    it('decodes the args and returns payload 0x for canonical calldata', () => {
+      const data = buildExecTransactionCalldata(childEnvelope)
+
+      expect(splitExecTransactionCalldata(data)).toEqual({
+        execTx: {
+          to: RECIPIENT,
+          value: childEnvelope.value,
+          data: childEnvelope.data,
+          operation: 0,
+          safeTxGas: '0',
+          baseGas: '0',
+          gasPrice: '0',
+          gasToken: ZERO_ADDRESS,
+          refundReceiver: ZERO_ADDRESS,
+        },
+        canonicalData: data,
+        payload: '0x',
+      })
+    })
+
+    it('returns the trailing bytes as payload', () => {
+      const canonical = buildExecTransactionCalldata(childEnvelope)
+      const split = splitExecTransactionCalldata(concat([canonical, '0x001122']))
+
+      expect(split?.canonicalData).toBe(canonical)
+      expect(split?.payload).toBe('0x001122')
+    })
+
+    it('returns null for other selectors, truncated calldata, and non-hex data', () => {
+      expect(splitExecTransactionCalldata(buildApproveHashCalldata(keccak256('0x01')))).toBeNull()
+      expect(splitExecTransactionCalldata(concat([EXEC_TRANSACTION_SELECTOR, '0x1234']))).toBeNull()
+      expect(splitExecTransactionCalldata('not-hex')).toBeNull()
+    })
+  })
+
+  describe('verifyNestedExecTxPayload', () => {
+    const execTx = splitExecTransactionCalldata(buildExecTransactionCalldata(childEnvelope))!.execTx
+
+    it('verifies an envelope whose fields match the exec args', () => {
+      expect(verifyNestedExecTxPayload(execTx, encodeNestedTxPayload([childEnvelope]))).toEqual([childEnvelope])
+    })
+
+    it('verifies against the called Safe and chain when a context is given', () => {
+      const payload = encodeNestedTxPayload([childEnvelope])
+
+      expect(verifyNestedExecTxPayload(execTx, payload, { to: CHILD_SAFE, chainId: '1' })).toEqual([childEnvelope])
+      expect(verifyNestedExecTxPayload(execTx, payload, { to: PARENT_SAFE, chainId: '1' })).toBeNull()
+      expect(verifyNestedExecTxPayload(execTx, payload, { to: CHILD_SAFE, chainId: '5' })).toBeNull()
+    })
+
+    it('fails when the value is tampered by 1 wei', () => {
+      const tampered = { ...childEnvelope, value: '1000000000000000001' }
+
+      expect(verifyNestedExecTxPayload(execTx, encodeNestedTxPayload([tampered]))).toBeNull()
+    })
+
+    it('fails when the recipient or data is tampered', () => {
+      expect(
+        verifyNestedExecTxPayload(execTx, encodeNestedTxPayload([{ ...childEnvelope, to: PARENT_SAFE }])),
+      ).toBeNull()
+      expect(
+        verifyNestedExecTxPayload(execTx, encodeNestedTxPayload([{ ...childEnvelope, data: '0xabcdee' }])),
+      ).toBeNull()
+    })
+
+    it('verifies a 2-entry chain where E0.data approves derive(E1)', () => {
+      const inner: NestedTxEnvelope = { ...childEnvelope, safe: PARENT_SAFE, nonce: 3 }
+      const outer: NestedTxEnvelope = {
+        ...childEnvelope,
+        data: concat([APPROVE_HASH_SELECTOR, deriveEnvelopeSafeTxHash(inner)]),
+        value: '0',
+        to: PARENT_SAFE,
+      }
+      const outerExec = splitExecTransactionCalldata(buildExecTransactionCalldata(outer))!.execTx
+
+      expect(verifyNestedExecTxPayload(outerExec, encodeNestedTxPayload([outer, inner]))).toEqual([outer, inner])
+      expect(verifyNestedExecTxPayload(outerExec, encodeNestedTxPayload([outer, { ...inner, nonce: 4 }]))).toBeNull()
+    })
+
+    it('fails for a malformed payload', () => {
+      expect(verifyNestedExecTxPayload(execTx, '0x1234')).toBeNull()
+    })
+  })
+
+  describe('verifyAndStripNestedTxCalldata (execTransaction)', () => {
+    it('passes canonical execTransaction calldata through unchanged', () => {
+      const data = buildExecTransactionCalldata(childEnvelope)
+      expect(verifyAndStripNestedTxCalldata(data)).toEqual({ data })
+    })
+
+    it('passes execTransaction calldata with unknown trailing bytes through unchanged', () => {
+      const data = buildExecTransactionCalldata(childEnvelope, '0x001122')
+      expect(verifyAndStripNestedTxCalldata(data)).toEqual({ data })
+    })
+
+    it('throws when the payload decodes but does not match the exec args', () => {
+      const data = buildExecTransactionCalldata(
+        childEnvelope,
+        encodeNestedTxPayload([{ ...childEnvelope, value: '1' }]),
+      )
+
+      expect(() => verifyAndStripNestedTxCalldata(data)).toThrow(
+        'Nested transaction payload does not match the executed transaction',
+      )
+    })
+
+    it('throws when the envelope targets another Safe than the one called', () => {
+      const data = buildExecTransactionCalldata(childEnvelope, encodeNestedTxPayload([childEnvelope]))
+
+      expect(() => verifyAndStripNestedTxCalldata(data, { to: PARENT_SAFE, chainId: '1' })).toThrow(
+        'Nested transaction payload does not match the executed transaction',
+      )
+    })
+
+    it('strips a verified envelope and returns the child tx', () => {
+      const canonical = buildExecTransactionCalldata(childEnvelope)
+      const data = concat([canonical, encodeNestedTxPayload([childEnvelope])])
+
+      expect(verifyAndStripNestedTxCalldata(data, { to: CHILD_SAFE, chainId: '1' })).toEqual({
+        data: canonical,
+        childTx: childEnvelope,
+      })
     })
   })
 
