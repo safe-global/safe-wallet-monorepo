@@ -30,5 +30,5 @@ export const useSafenetLinks = (
   if (!attested) return { attestationHref: null, explorerHref }
 
   const txLink = safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
-  return { attestationHref: txLink?.href ?? explorerHref, explorerHref }
+  return { attestationHref: txLink?.href ?? null, explorerHref }
 }

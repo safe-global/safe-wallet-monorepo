@@ -1,9 +1,7 @@
-import { useContext, type ReactElement, type ReactNode } from 'react'
+import { useContext, useState, type ReactElement, type ReactNode } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Typography } from '@/components/ui/typography'
-import { Progress } from '@/components/ui/progress'
-import { Link } from '@/components/ui/link'
-import { ArrowUpRight } from 'lucide-react'
-import ExternalLink from '@/components/common/ExternalLink'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 // eslint-disable-next-line no-restricted-imports -- same lazy-chunk reason as SeverityIcon
@@ -14,19 +12,19 @@ import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 import { CheckStatus, type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
 import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import {
   MULTIPLE_RULES_TITLE,
   PRE_CHECK_COPY,
   resolvePresentation,
   SAFENET_ABOUT,
-  SAFENET_DOCS_URL,
+  SAFENET_BLURB,
   STALE_NOTE,
 } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection, type RejectionSummary } from '../summariseRejection'
-import { formatTimingSentence, getCheckProgress } from '../checkTiming'
+import { formatTimingSentence } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
+import { SafenetLearnMore, SafenetOutboundLink } from './SafenetLinks'
 
 export type SafenetChecksSectionViewProps = {
   check: Pick<SafenetCheckView, 'publicStatus' | 'snapshot' | 'unavailableReason' | 'isStale'>
@@ -45,113 +43,110 @@ const Note = ({ children, testId }: { children: ReactNode; testId?: string }): R
   </Typography>
 )
 
-const LearnMore = (): ReactElement => (
-  <Link
-    variant="muted"
-    href={SAFENET_DOCS_URL}
-    target="_blank"
-    rel="noreferrer noopener"
-    className="underline decoration-muted-foreground/40"
-    data-testid="safenet-about-link"
-  >
-    <span className="inline-flex items-center gap-0.5">
-      Learn more
-      <ArrowUpRight className="size-3.5" aria-hidden />
-    </span>
-  </Link>
+/** One gray block with a severity bar, like the other checks' expanded results. */
+const Block = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => (
+  <AnalysisGroupCardItem
+    severity={severity}
+    result={{ severity: severity ?? Severity.INFO, type: ThreatStatus.NO_THREAT, title: '', description: '' }}
+    description={children}
+  />
 )
 
-const SectionShell = ({
+/** Running check: a pulsing dot in the slot the severity icon takes once there's a result. */
+const PulsingIndicator = (): ReactElement => (
+  <span
+    className="relative flex size-4 shrink-0 items-center justify-center"
+    data-testid="safenet-check-pulse"
+    aria-hidden
+  >
+    <span className="absolute inline-flex size-3 animate-ping rounded-full bg-[var(--color-info-main)] opacity-50 motion-reduce:animate-none" />
+    <span className="relative inline-flex size-2 rounded-full bg-[var(--color-info-main)]" />
+  </span>
+)
+
+/** Same collapsible row as the other Copilot checks: icon and "Safenet", then the details on expand. */
+const SectionRow = ({
+  icon,
+  announcement,
   status,
   reason,
+  defaultOpen = false,
   children,
 }: {
+  icon: ReactNode
+  /** Read out once per state change; the row itself is not a live region. */
+  announcement: string
   status?: string
   reason?: string
+  defaultOpen?: boolean
   children: ReactNode
-}): ReactElement => (
-  // The section appears only once the chain read resolves; the entrance
-  // animation softens the late insert instead of popping it in one frame.
-  <div
-    data-testid="safenet-checks-section"
-    data-status={status}
-    data-reason={reason}
-    role="status"
-    aria-live="polite"
-    className="animate-in fade-in slide-in-from-top-1 flex flex-col gap-3 p-4 duration-300"
-  >
-    <SafenetLogo role="img" aria-label="Safenet" className="h-3.5 w-auto self-start text-foreground" />
-    {children}
-  </div>
-)
-
-const SectionLayout = ({
-  severity,
-  muted,
-  title,
-  status,
-  reason,
-  children,
-}: {
-  severity: Severity
-  muted: boolean
-  title: string
-  status?: string
-  reason?: string
-  children: ReactNode
-}): ReactElement => (
-  <SectionShell status={status} reason={reason}>
-    <div className="flex items-start gap-2">
-      <SeverityIcon severity={severity} muted={muted} />
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <Typography variant="paragraph-small" className="font-bold leading-4">
-          {title}
-        </Typography>
-        {children}
-        <Note>
-          <LearnMore />
-        </Note>
-      </div>
-    </div>
-  </SectionShell>
-)
-
-const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
-  <SectionShell status="PRE_CHECK" reason={kind}>
-    <Note>
-      {SAFENET_ABOUT} {PRE_CHECK_COPY[kind]} <LearnMore />
-    </Note>
-  </SectionShell>
-)
-
-const RejectionReasons = ({ summary }: { summary: RejectionSummary }): ReactElement | null => {
-  if (summary.rules.length === 1) return <Note>{summary.rules[0].description}</Note>
-  if (summary.rules.length === 0) return null
+}): ReactElement => {
+  const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <div className="mt-1 flex flex-col gap-2" data-testid="safenet-rejection-rules">
-      {summary.rules.map((rule) => (
-        <AnalysisGroupCardItem
-          key={rule.id}
-          severity={Severity.CRITICAL}
-          result={{
-            severity: Severity.CRITICAL,
-            type: ThreatStatus.MALICIOUS,
-            title: rule.label,
-            description: rule.description,
-          }}
-          description={
-            <>
-              <span className="font-bold">{rule.label}</span>
-              <br />
-              {rule.description}
-            </>
-          }
+    <Collapsible
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      data-testid="safenet-checks-section"
+      data-status={status}
+      data-reason={reason}
+      className="animate-in fade-in duration-300"
+    >
+      <span role="status" aria-live="polite" className="sr-only">
+        {announcement}
+      </span>
+
+      <CollapsibleTrigger
+        nativeButton={false}
+        render={<div className="flex cursor-pointer flex-row items-center justify-between gap-2 p-3" />}
+      >
+        <div className="flex flex-row items-center gap-2">
+          {icon}
+          <Typography
+            variant="paragraph-small"
+            className="text-[var(--color-primary-light)]"
+            data-testid="safenet-section-label"
+          >
+            Safenet
+          </Typography>
+        </div>
+        <ChevronDown
+          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
-      ))}
-    </div>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent keepMounted>
+        <div className="flex flex-col gap-2 px-3 pt-1 pb-4">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
+
+const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
+  <SectionRow
+    icon={<SeverityIcon severity={Severity.INFO} muted width={16} height={16} />}
+    announcement="Safenet checks this transaction after you sign"
+    status="PRE_CHECK"
+    reason={kind}
+    defaultOpen
+  >
+    <Block>
+      {SAFENET_ABOUT} {PRE_CHECK_COPY[kind]} <SafenetLearnMore />
+    </Block>
+  </SectionRow>
+)
+
+const RejectionReasons = ({ summary }: { summary: RejectionSummary }): ReactElement => (
+  <div className="flex flex-col gap-2" data-testid="safenet-rejection-rules">
+    {summary.rules.map((rule) => (
+      <Block key={rule.id} severity={Severity.CRITICAL}>
+        <span className="font-bold">{rule.label}</span>
+        <br />
+        {rule.description}
+      </Block>
+    ))}
+  </div>
+)
 
 const maliciousTitle = (summary: RejectionSummary, fallback: string): string => {
   if (summary.rules.length === 1) return summary.rules[0].label
@@ -167,21 +162,12 @@ const InFlightTiming = ({
   submittedAt?: number
 }): ReactElement | null => {
   const sentence = formatTimingSentence(useCheckTiming(snapshot, submittedAt))
-  const progress = getCheckProgress(snapshot)
-
-  return (
+  return sentence ? (
     <>
-      {progress !== null && (
-        <Progress
-          value={progress}
-          aria-label="Safenet check progress"
-          className="my-1"
-          data-testid="safenet-check-progress"
-        />
-      )}
-      {sentence && <Note testId="safenet-check-timing">{sentence}</Note>}
+      <br />
+      <span data-testid="safenet-check-timing">{sentence}</span>
     </>
-  )
+  ) : null
 }
 
 /** Safenet section in the Safe Shield widget, rendered from builders in stories and tests. */
@@ -201,48 +187,74 @@ export const SafenetChecksSectionView = ({
   if (!content) return null
 
   const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
-  const summary = publicStatus === CheckStatus.MALICIOUS && snapshot ? summariseRejection(snapshot.events) : null
+  const isRisk = publicStatus === CheckStatus.MALICIOUS
+  const summary = isRisk && snapshot ? summariseRejection(snapshot.events) : null
   const flaggedCount = summary ? formatFlaggedCount(summary) : null
+  const title = summary ? maliciousTitle(summary, content.label) : content.label
+  // The title already says the result here, so the block explains Safenet instead of repeating it.
+  const showBlurb = publicStatus === CheckStatus.BENIGN || publicStatus === CheckStatus.IN_PROGRESS
   const showsExplorerLink =
-    !!safeTxHash &&
-    (publicStatus === CheckStatus.MALICIOUS ||
-      unavailableReason === 'READ_FAILED' ||
-      unavailableReason === 'WINDOW_UNCERTAIN')
+    !!safeTxHash && (isRisk || unavailableReason === 'READ_FAILED' || unavailableReason === 'WINDOW_UNCERTAIN')
+  const blockSeverity = content.muted ? undefined : content.severity
 
   return (
-    <SectionLayout
-      severity={content.severity}
-      muted={content.muted}
-      title={summary ? maliciousTitle(summary, content.label) : content.label}
+    <SectionRow
+      // Remounts when a risk lands so the row opens even if it was already on screen.
+      key={isRisk ? 'risk' : 'other'}
+      icon={
+        isInFlight ? (
+          <PulsingIndicator />
+        ) : (
+          <SeverityIcon severity={content.severity} muted={content.muted} width={16} height={16} />
+        )
+      }
+      announcement={`Safenet: ${title}`}
       status={publicStatus}
       reason={unavailableReason}
+      defaultOpen={isRisk}
     >
-      {summary && summary.rules.length > 0 ? <RejectionReasons summary={summary} /> : <Note>{content.copy}</Note>}
-
-      {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
-        <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
+      {summary && summary.rules.length > 1 && (
+        <Typography variant="paragraph-small" className="font-bold">
+          {title}
+        </Typography>
+      )}
+      {summary && summary.rules.length > 0 ? (
+        <RejectionReasons summary={summary} />
+      ) : (
+        <Block severity={blockSeverity}>
+          <span className="font-bold">{title}</span>
+          <br />
+          {showBlurb ? SAFENET_BLURB : content.copy} <SafenetLearnMore />
+          {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
+            <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
+          )}
+          {isStale && isInFlight && (
+            <>
+              <br />
+              {STALE_NOTE}
+            </>
+          )}
+        </Block>
       )}
 
       {flaggedCount && <Note testId="safenet-flagged-count">{flaggedCount}</Note>}
 
-      {isStale && isInFlight && <Note>{STALE_NOTE}</Note>}
-
       {publicStatus === CheckStatus.BENIGN && links.attestationHref && (
-        <Note>
-          <ExternalLink data-testid="safenet-attestation-link" href={links.attestationHref}>
-            View attestation
-          </ExternalLink>
-        </Note>
+        <Block>
+          <SafenetOutboundLink href={links.attestationHref} testId="safenet-attestation-link">
+            View signed attestation
+          </SafenetOutboundLink>
+        </Block>
       )}
 
       {showsExplorerLink && (
-        <Note>
-          <ExternalLink data-testid="safenet-explorer-link" href={links.explorerHref}>
+        <Block>
+          <SafenetOutboundLink href={links.explorerHref} testId="safenet-explorer-link">
             View on Safenet explorer
-          </ExternalLink>
-        </Note>
+          </SafenetOutboundLink>
+        </Block>
       )}
-    </SectionLayout>
+    </SectionRow>
   )
 }
 

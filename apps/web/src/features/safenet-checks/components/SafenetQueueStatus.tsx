@@ -10,7 +10,7 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { CHIP_LABEL, MULTIPLE_RULES_TITLE, STATUS_PRESENTATION } from '../statusPresentation'
+import { CHIP_LABEL, CHIP_VARIANT, MULTIPLE_RULES_TITLE, STATUS_PRESENTATION } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection } from '../summariseRejection'
 import { formatSimulatingLabel } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
@@ -18,14 +18,6 @@ import { useCheckTiming } from '../useCheckTiming'
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
 export type SafenetQueueStatusVariant = 'inline' | 'chip'
-
-const CHIP_VARIANT = {
-  [CheckStatus.SUBMITTED]: 'info',
-  [CheckStatus.IN_PROGRESS]: 'info',
-  [CheckStatus.BENIGN]: 'positive',
-  [CheckStatus.MALICIOUS]: 'negative',
-  [CheckStatus.TIMED_OUT]: 'warning',
-} as const satisfies Record<VerdictStatus, string>
 
 export type SafenetQueueStatusProps = {
   safeTxHash: string
@@ -69,13 +61,11 @@ export const SafenetQueueStatusView = ({
 }: SafenetQueueStatusViewProps): ReactElement => {
   const timing = useCheckTiming(snapshot, timestampMs)
   const { severity, label: stateLabel } = STATUS_PRESENTATION[publicStatus]
-  const label =
-    publicStatus === CheckStatus.IN_PROGRESS
-      ? formatSimulatingLabel(timing)
-      : variant === 'chip'
-        ? CHIP_LABEL[publicStatus]
-        : stateLabel
-  const description = describeStatus(publicStatus, snapshot)
+  const timeLabel = publicStatus === CheckStatus.IN_PROGRESS ? formatSimulatingLabel(timing) : null
+  // The chip keeps a fixed short label so it never truncates; its tooltip carries the time left.
+  const label = variant === 'chip' ? CHIP_LABEL[publicStatus] : (timeLabel ?? stateLabel)
+  const statusSentence = describeStatus(publicStatus, snapshot)
+  const description = variant === 'chip' && timeLabel ? `${timeLabel}. ${statusSentence}` : statusSentence
 
   const content =
     variant === 'chip' ? (

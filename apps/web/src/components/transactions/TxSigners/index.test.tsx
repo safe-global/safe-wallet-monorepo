@@ -649,7 +649,10 @@ describe('TxSigners (Audit Log)', () => {
   })
 
   describe('Safenet audit step', () => {
-    const { useHasFeature } = jest.requireMock('@/hooks/useChains') as { useHasFeature: jest.Mock }
+    const { useHasFeature, useChain } = jest.requireMock('@/hooks/useChains') as {
+      useHasFeature: jest.Mock
+      useChain: jest.Mock
+    }
     const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
       useSafenetCheck: jest.Mock
     }
@@ -705,6 +708,14 @@ describe('TxSigners (Audit Log)', () => {
         isStale: false,
         refetch: jest.fn(),
       })
+      // The Safenet chain's explorer builds the attestation link.
+      useChain.mockReturnValue({
+        blockExplorerUriTemplate: {
+          txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+          address: 'https://gnosisscan.io/address/{{address}}',
+          api: '',
+        },
+      })
       const { txDetails, txSummary } = buildSafenetTx()
 
       render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
@@ -723,7 +734,7 @@ describe('TxSigners (Audit Log)', () => {
       )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
-        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
+        `https://gnosisscan.io/tx/${attested.transactionHash}`,
       )
     }, 15_000)
 

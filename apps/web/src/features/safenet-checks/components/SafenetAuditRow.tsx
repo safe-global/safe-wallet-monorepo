@@ -77,7 +77,7 @@ export const SafenetAuditRowView = ({
     <ExternalLink data-testid="safenet-attestation-link" href={attestationHref} aria-label="View attestation" noIcon>
       Safenet
     </ExternalLink>
-  ) : publicStatus === CheckStatus.MALICIOUS ? (
+  ) : publicStatus === CheckStatus.MALICIOUS || publicStatus === CheckStatus.BENIGN ? (
     <ExternalLink data-testid="safenet-explorer-link" href={explorerHref} aria-label="View on Safenet explorer" noIcon>
       Safenet
     </ExternalLink>

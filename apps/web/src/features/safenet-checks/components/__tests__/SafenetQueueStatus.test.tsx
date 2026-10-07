@@ -102,4 +102,11 @@ describe('SafenetQueueStatus', () => {
 
     expect(cell).toHaveTextContent('Simulating · up to ~2 min')
   })
+
+  it('keeps the chip label short while simulating and moves the time left to the description', () => {
+    const cell = renderStatus(CheckStatus.IN_PROGRESS, { headBlock: '1000', deadlineBlock: '1024' }, 'chip')
+
+    expect(cell.querySelector('.truncate')).toHaveTextContent(/^Simulating$/)
+    expect(cell.querySelector('.sr-only')).toHaveTextContent('Simulating · up to ~2 min.')
+  })
 })

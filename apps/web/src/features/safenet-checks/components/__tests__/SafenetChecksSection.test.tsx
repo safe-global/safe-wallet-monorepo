@@ -158,8 +158,8 @@ describe('SafenetChecksSection', () => {
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([
     [CheckStatus.SUBMITTED, 'Submitted to Safenet. Takes about a minute.'],
-    [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction.'],
-    [CheckStatus.BENIGN, 'Safenet found no issues.'],
+    [CheckStatus.IN_PROGRESS, 'Independent sentinels simulate each transaction and check it for known risks.'],
+    [CheckStatus.BENIGN, 'Independent sentinels simulate each transaction and check it for known risks.'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this transaction as malicious.'],
     [CheckStatus.TIMED_OUT, "Safenet couldn't reach a trusted result for this transaction. You can still continue."],
   ])('renders %s copy', (status, copy) => {
@@ -170,7 +170,7 @@ describe('SafenetChecksSection', () => {
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-status', status)
-    expect(screen.getByRole('img', { name: 'Safenet' })).toBeInTheDocument()
+    expect(screen.getByTestId('safenet-section-label')).toHaveTextContent('Safenet')
     expect(section).toHaveTextContent(copy)
     expect(screen.getByTestId('safenet-about-link')).toHaveTextContent('Learn more')
   })
@@ -246,7 +246,8 @@ describe('SafenetChecksSection', () => {
     it('lists several rules under one title, most-cited first', () => {
       renderMalicious([reveal('0x1', 'R-4.4'), reveal('0x2', 'R-4.5'), reveal('0x3', 'R-4.5')])
 
-      expect(screen.getByText('Malicious threats detected')).toBeInTheDocument()
+      // The shared title is announced; each rule gets its own block.
+      expect(screen.getByRole('status')).toHaveTextContent('Safenet: Malicious threats detected')
       const rules = screen.getByTestId('safenet-rejection-rules')
       expect(rules.textContent?.indexOf('Excessive approval')).toBeLessThan(
         rules.textContent?.indexOf('Lookalike spender') ?? -1,
@@ -314,5 +315,16 @@ describe('SafenetChecksSection', () => {
 
       expect(container).toBeEmptyDOMElement()
     })
+  })
+
+  it('pulses instead of showing a severity icon while the check runs', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.IN_PROGRESS })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.IN_PROGRESS, publicStatus: CheckStatus.IN_PROGRESS }),
+    )
+
+    renderInFlow({ txId: TX_ID, txDetails })
+
+    expect(screen.getByTestId('safenet-check-pulse')).toBeInTheDocument()
   })
 })

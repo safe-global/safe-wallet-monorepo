@@ -17,7 +17,7 @@ export const SAFENET_RULES: Record<SafenetRuleId, SafenetRuleCopy> = {
   'R-4.2': {
     label: 'Unknown delegate call',
     description:
-      "This transaction uses delegate call to a contract Safenet doesn't recognise. That contract could change your Safe account's setup.",
+      "This transaction uses delegate call to a contract Safenet doesn't recognize. That contract could change your Safe account's setup.",
   },
   'R-4.3': {
     label: 'Lookalike recipient',

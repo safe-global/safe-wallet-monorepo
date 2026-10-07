@@ -71,6 +71,9 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
   },
 }
 
+/** One line on what Safenet is, for states whose title already says the result. */
+export const SAFENET_BLURB = 'Independent sentinels simulate each transaction and check it for known risks.'
+
 /** Shown before the first signature, while no check exists yet. */
 export const SAFENET_ABOUT =
   "Independent sentinels simulate this transaction and check it against Safenet's security rules."
@@ -90,6 +93,15 @@ export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILAB
   [CheckStatus.MALICIOUS]: 'Risk detected',
   [CheckStatus.TIMED_OUT]: 'Check failed',
 }
+
+/** Chip colour per state, shared by the queue row and the details card. */
+export const CHIP_VARIANT = {
+  [CheckStatus.SUBMITTED]: 'info',
+  [CheckStatus.IN_PROGRESS]: 'info',
+  [CheckStatus.BENIGN]: 'positive',
+  [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.TIMED_OUT]: 'warning',
+} as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
 
 export const STALE_NOTE = 'Status may be out of date.'
 
