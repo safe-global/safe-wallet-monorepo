@@ -1,5 +1,4 @@
 import { BLOCK_TIME_SECONDS } from '@safe-global/utils/features/safenet-checks/constants'
-import { CheckEventType, type NormalizedCheckEvent } from '@safe-global/utils/features/safenet-checks'
 
 /** `remaining` is an upper bound (blocks to the reveal deadline); `elapsed` is the fallback. */
 export type CheckTiming = { kind: 'remaining'; minutes: number } | { kind: 'elapsed'; minutes: number }
@@ -44,23 +43,4 @@ export const formatSimulatingLabel = (timing: CheckTiming | null): string => {
     return timing.minutes <= 1 ? 'Simulating · under 1 min' : `Simulating · up to ~${timing.minutes} min`
   }
   return timing.minutes < 1 ? 'Simulating' : `Simulating for ${timing.minutes} min`
-}
-
-/** Share of the reveal window (request block to deadline) already elapsed, 0–100; null without both ends. */
-export const getCheckProgress = ({
-  events,
-  deadlineBlock,
-  headBlock,
-}: {
-  events: ReadonlyArray<NormalizedCheckEvent>
-  deadlineBlock: string | null
-  headBlock: string | null
-}): number | null => {
-  const request = events.find((event) => event.type === CheckEventType.REQUEST_CREATED)
-  if (!request || deadlineBlock === null || headBlock === null) return null
-
-  const window = Number(BigInt(deadlineBlock) - BigInt(request.blockNumber))
-  if (window <= 0) return null
-  const elapsed = Number(BigInt(headBlock) - BigInt(request.blockNumber))
-  return Math.min(100, Math.max(0, Math.round((elapsed / window) * 100)))
 }
