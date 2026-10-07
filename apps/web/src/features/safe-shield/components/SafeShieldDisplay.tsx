@@ -1,4 +1,4 @@
-import { useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -11,6 +11,7 @@ import type {
   DeadlockAnalysisResults,
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -23,7 +24,8 @@ import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 import css from './SafeShieldBadge.module.css'
-import { useIsSafenetCheckRunning, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { panelSettledDelay } from '../hooks/useDelayedLoading'
+import { useIsSafenetCheckBenign, useIsSafenetCheckRunning, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 
 const shieldLogoTransition =
   'cursor-pointer [&_.shield-bg]:transition-[fill] [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] duration-500'
@@ -133,10 +135,27 @@ export const SafeShieldDisplay = ({
   // Safenet shows in the open list without SAFE_PRO, and in the Pro block only for Safes with Pro features.
   const isSafenetShown = useIsSafenetChecksEnabled() && !isOffchainMessage && (!isSafePro || hasProFeatures)
   const isSafenetRunning = useIsSafenetCheckRunning(isSafenetShown)
+  const isSafenetBenign = useIsSafenetCheckBenign(isSafenetShown)
 
   const isAnalysing = [recipient, contract, threat, deadlock].some((result) => result?.[2])
   const hasResults = [recipientResults, contractResults, threatResults, deadlockResults].some(Boolean)
   const isDone = !isAnalysing && hasResults && !isSafenetRunning
+
+  // The badge waits for the panel to finish expanding, so its colour change lands after the last card.
+  const [isSettled, setIsSettled] = useState(false)
+  useEffect(() => {
+    if (!isDone) {
+      setIsSettled(false)
+      return
+    }
+    const timer = setTimeout(() => setIsSettled(true), panelSettledDelay)
+    return () => clearTimeout(timer)
+  }, [isDone])
+
+  // The shimmer is Safenet's sign-off, so it plays only when Safenet and every other check came back clean.
+  const isAllClear =
+    !overallStatus || overallStatus.severity === Severity.OK || overallStatus.severity === Severity.INFO
+  const isConfirmed = isSettled && isSafenetBenign && isAllClear
 
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
@@ -172,13 +191,18 @@ export const SafeShieldDisplay = ({
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          {/* Remounts when the checks finish, so the shimmer plays once per result. */}
-          <span key={isDone ? 'done' : 'running'} className={css.badge} data-done={isDone}>
+          {/* Remounts on each change, so the shimmer plays once when Safenet confirms. */}
+          <span
+            key={isConfirmed ? 'confirmed' : isSettled ? 'done' : 'running'}
+            className={css.badge}
+            data-done={isSettled}
+            data-shimmer={isConfirmed}
+          >
             <SafeShieldLogo
               data-testid="safe-shield-logo"
               width={104}
               height={24}
-              className={isDone ? shieldLogoDone : shieldLogoOnHover}
+              className={isSettled ? shieldLogoDone : shieldLogoOnHover}
             />
           </span>
         </ExternalLink>

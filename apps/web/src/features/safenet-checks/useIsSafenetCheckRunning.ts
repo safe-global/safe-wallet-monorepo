@@ -6,3 +6,9 @@ export const useIsSafenetCheckRunning = (enabled: boolean): boolean => {
   const { publicStatus } = useFlowSafenetCheck(enabled).check
   return enabled && (publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS)
 }
+
+/** Safenet confirmed the open transaction: no issues found. */
+export const useIsSafenetCheckBenign = (enabled: boolean): boolean => {
+  const { publicStatus } = useFlowSafenetCheck(enabled).check
+  return enabled && publicStatus === CheckStatus.BENIGN
+}

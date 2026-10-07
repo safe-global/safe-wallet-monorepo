@@ -5,30 +5,33 @@
   border-radius: 9999px;
 }
 
-/* One sweep of light across the badge when the checks finish. */
-.badge[data-done='true']::after {
+/* One soft glint once Safenet confirms no issues, as the badge turns full colour. */
+.badge[data-shimmer='true']::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    transparent 20%,
-    color-mix(in srgb, var(--color-static-main) 35%, transparent) 50%,
-    transparent 80%
-  );
-  transform: translateX(-100%);
-  animation: shimmer 1.2s ease-out 0.15s 1 forwards;
+  background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, white 45%, transparent) 50%, transparent 65%);
+  transform: translateX(-110%);
+  opacity: 0;
+  animation: shimmer 1.6s cubic-bezier(0.45, 0, 0.25, 1) 0.1s 1 forwards;
   pointer-events: none;
 }
 
 @keyframes shimmer {
+  20% {
+    opacity: 0.7;
+  }
+  80% {
+    opacity: 0.7;
+  }
   to {
-    transform: translateX(100%);
+    opacity: 0;
+    transform: translateX(110%);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .badge[data-done='true']::after {
+  .badge[data-shimmer='true']::after {
     animation: none;
     display: none;
   }

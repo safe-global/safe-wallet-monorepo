@@ -1,5 +1,6 @@
-import { render, screen } from '@/tests/test-utils'
+import { act, render, screen } from '@/tests/test-utils'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
+import { panelSettledDelay } from '../../hooks/useDelayedLoading'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
@@ -17,10 +18,12 @@ import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthSt
 jest.mock('../../hooks/useCheckSimulation')
 
 let mockSafenetRunning = false
+let mockSafenetBenign = false
 jest.mock('@/features/safenet-checks', () => ({
   ...jest.requireActual('@/features/safenet-checks'),
   useIsSafenetChecksEnabled: () => true,
   useIsSafenetCheckRunning: (enabled: boolean) => enabled && mockSafenetRunning,
+  useIsSafenetCheckBenign: (enabled: boolean) => enabled && mockSafenetBenign,
 }))
 
 // Default empty AsyncResult values
@@ -458,6 +461,13 @@ describe('SafeShieldDisplay', () => {
   })
 
   describe('Safe Shield badge', () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => {
+      jest.useRealTimers()
+      mockSafenetBenign = false
+    })
+
+    const settle = () => act(() => jest.advanceTimersByTime(panelSettledDelay))
     it('stays gray while any check is still running', () => {
       const { container } = render(
         <SafeShieldDisplay
@@ -468,6 +478,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
     })
 
@@ -481,6 +492,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
     })
 
@@ -496,6 +508,7 @@ describe('SafeShieldDisplay', () => {
       )
       mockSafenetRunning = false
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
     })
 
@@ -512,6 +525,7 @@ describe('SafeShieldDisplay', () => {
       )
       mockSafenetRunning = false
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
     })
 
@@ -529,7 +543,73 @@ describe('SafeShieldDisplay', () => {
       )
       mockSafenetRunning = false
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('turns full color without the shimmer until Safenet confirms', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'false')
+    })
+
+    it('shimmers once Safenet finds no issues', () => {
+      mockSafenetBenign = true
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      // Stays benign through settle(), since the settled re-render reads it again.
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'true')
+    })
+
+    it.each([
+      ['critical', () => mockCriticalRecipient],
+      ['warning', () => mockWarningRecipient],
+    ])('never shimmers when the overall result is %s, even if Safenet finds no issues', (_name, recipient) => {
+      mockSafenetBenign = true
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={recipient()}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'false')
+    })
+
+    it('waits for the panel to finish expanding before turning full color', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
     })
 
     it('stays gray before any check has produced a result', () => {
@@ -542,6 +622,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
+      settle()
       expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
     })
   })
