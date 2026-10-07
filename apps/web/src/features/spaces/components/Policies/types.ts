@@ -41,6 +41,8 @@ export type PolicyAllowance = {
   resetPeriodMinutes: number
   /** Unix MINUTES; null when one-time. */
   resetsAtMinute: number | null
+  /** Unix SECONDS the allowance was set or re-set. Queued set-allowance changes omit it; queued resets and removals keep the active one's. */
+  createdAt?: number
 }
 
 export type PolicySpender = {

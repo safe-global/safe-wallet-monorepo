@@ -101,6 +101,19 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: () => false,
 }))
 
+let mockOffersTrial = false
+jest.mock('../hooks/useOffersTrial', () => ({
+  __esModule: true,
+  default: () => mockOffersTrial,
+}))
+
+jest.mock('../../Plans/ClaimTrialModal', () => ({
+  __esModule: true,
+  default: ({ spaceId, returnPathname }: { spaceId: string; returnPathname?: string }) => (
+    <div data-testid="claim-trial-modal" data-space-id={spaceId} data-return-pathname={returnPathname} />
+  ),
+}))
+
 jest.mock('../../Plans/CheckoutReturnModals', () => ({
   __esModule: true,
   default: ({ trialCtaLabel }: { trialCtaLabel?: string }) => (
@@ -130,6 +143,34 @@ describe('SelectSafesOnboarding — Stripe return', () => {
     render(<SelectSafesOnboarding />)
 
     expect(screen.getByTestId('checkout-return-modals')).toHaveTextContent('Get started')
+  })
+})
+
+describe('SelectSafesOnboarding — trial offer', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockTrustedSafes = [makeSafe('1', '0xA')] as AllSafeItems
+    mockOwnedSafes = []
+    mockFlagged = new Set<string>()
+    mockWalletValue = { address: '0xWallet' }
+  })
+
+  afterEach(() => {
+    mockOffersTrial = false
+  })
+
+  it('offers the trial again when the Workspace comes back without a plan', () => {
+    mockOffersTrial = true
+
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.getByTestId('claim-trial-modal')).toHaveAttribute('data-return-pathname', '/welcome/select-safes')
+  })
+
+  it('does not offer the trial when the Workspace has a plan', () => {
+    render(<SelectSafesOnboarding />)
+
+    expect(screen.queryByTestId('claim-trial-modal')).not.toBeInTheDocument()
   })
 })
 

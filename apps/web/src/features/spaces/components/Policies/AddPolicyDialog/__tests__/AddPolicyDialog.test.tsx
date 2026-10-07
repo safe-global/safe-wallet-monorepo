@@ -1,11 +1,22 @@
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import AddPolicyDialog from '../index'
 import { ADD_POLICY_OPTIONS, RECOVERY_POLICY_OPTION, type AddPolicyOption } from '../options'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const renderDialog = (props: Partial<React.ComponentProps<typeof AddPolicyDialog>> = {}) =>
   renderWithUserEvent(<AddPolicyDialog open onOpenChange={jest.fn()} {...props} />)
 
 describe('AddPolicyDialog', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
   it('lists every policy a user can set up', () => {
     renderDialog()
 
@@ -70,5 +81,41 @@ describe('AddPolicyDialog', () => {
     renderWithUserEvent(<AddPolicyDialog open={false} onOpenChange={jest.fn()} />)
 
     expect(screen.queryByTestId('add-policy-dialog')).not.toBeInTheDocument()
+  })
+
+  it('tracks the picked policy', async () => {
+    const { user } = renderDialog()
+
+    await user.click(screen.getByTestId('add-policy-option-spending-limit'))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...POLICY_EVENTS.ADD_POLICY_DIALOG_CLOSED, label: 'spending-limit' },
+      { [MixpanelEventParams.RESULT]: 'selected', [MixpanelEventParams.POLICY_TYPE]: 'spending-limit' },
+    )
+  })
+
+  it('tracks a dismissal and still closes the dialog', async () => {
+    const onOpenChange = jest.fn()
+    const { user } = renderDialog({ onOpenChange })
+
+    await user.keyboard('{Escape}')
+
+    expect(onOpenChange).toHaveBeenCalledWith(false)
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...POLICY_EVENTS.ADD_POLICY_DIALOG_CLOSED, label: 'dismissed' },
+      { [MixpanelEventParams.RESULT]: 'dismissed' },
+    )
+  })
+
+  it('does not track a click on a disabled policy', async () => {
+    const options = ADD_POLICY_OPTIONS.map((option) =>
+      option.id === 'proposer' ? { ...option, disabled: true } : option,
+    )
+    const { user } = renderDialog({ options })
+
+    await user.click(screen.getByTestId('add-policy-option-proposer'))
+
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 })

@@ -17,6 +17,15 @@ describe('PolicyDrawerActions', () => {
     expect(onClick).toHaveBeenCalledTimes(1)
   })
 
+  it('renders the action as a link when given an href', () => {
+    render(<PolicyDrawerActions actionLabel="Review transaction" href="/transactions/tx?id=0x9f3c" />)
+
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toHaveAttribute(
+      'href',
+      '/transactions/tx?id=0x9f3c',
+    )
+  })
+
   it('shows no hint unless one is given', () => {
     render(<PolicyDrawerActions actionLabel="Submit delegation" onClick={jest.fn()} />)
 

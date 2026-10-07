@@ -141,8 +141,8 @@ export const Filled: Story = {
   args: { initialSafe: efSafeTarget, defaultValues: filledValues },
 }
 
-/** USDT is popular but not held, so it has no price and the fiat line says so. */
-export const PriceUnavailable: Story = {
+/** USDT is popular but not held, so neither its balance nor its price is known and both helper lines stay empty. */
+export const PopularToken: Story = {
   args: {
     initialSafe: efSafeTarget,
     defaultValues: {
@@ -154,6 +154,18 @@ export const PriceUnavailable: Story = {
 
 export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
+}
+
+export const UnsupportedNetwork: Story = {
+  args: {
+    accounts: [
+      account('1', EF_SAFE, { name: 'Treasury' }),
+      ...groupSafeAccounts([
+        account('1', OPS_SAFE, { name: 'Team operations' }),
+        account('137', OPS_SAFE, { name: 'Team operations', ineligibleReason: 'unsupported-chain' }),
+      ]),
+    ],
+  },
 }
 
 export const AccountsLoading: Story = {

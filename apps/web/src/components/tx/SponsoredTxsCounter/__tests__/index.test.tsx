@@ -10,17 +10,19 @@ describe('SponsoredTxsCounter', () => {
   })
 
   it('counts the plan allowance with the PRO chip on a Safe Pro Safe', () => {
-    render(<SponsoredTxsCounter left={30} quota={50} resetsAt="2026-11-01T00:00:00.000Z" isPro />)
+    render(<SponsoredTxsCounter left={30} quota={50} resetsAt="2026-11-01T00:00:00.000Z" isSubscription isPro />)
 
     expect(screen.getByTestId('sponsored-txs-counter')).toHaveTextContent(
-      '30 of 50 sponsored transactions left· Resets Nov 1, 00:00 UTC',
+      '30/50 sponsored transactions left· Resets Nov 1, 00:00 UTC',
     )
     expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
     expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
   })
 
   it('shows the free daily allowance with its per-day limit in a tooltip otherwise', async () => {
-    const { user } = renderWithUserEvent(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isPro={false} />)
+    const { user } = renderWithUserEvent(
+      <SponsoredTxsCounter left={3} quota={5} resetsAt={null} isSubscription={false} isPro={false} />,
+    )
 
     expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('3 free transactions left today')
     expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
@@ -31,8 +33,17 @@ describe('SponsoredTxsCounter', () => {
     ).toBeInTheDocument()
   })
 
+  it('keeps the daily copy with the PRO chip on a Safe Pro Safe sponsored by the free daily limit', () => {
+    render(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isSubscription={false} isPro />)
+
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('3 free transactions left today')
+    expect(screen.queryByText(/sponsored transactions left/)).not.toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+  })
+
   it('keeps the upgrade nudge and drops the tooltip when the free daily limit is unknown', () => {
-    render(<SponsoredTxsCounter left={0} quota={null} resetsAt={null} isPro={false} />)
+    render(<SponsoredTxsCounter left={0} quota={null} resetsAt={null} isSubscription={false} isPro={false} />)
 
     expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('0 free transactions left today')
     expect(screen.queryByTestId('sponsored-txs-info')).not.toBeInTheDocument()
@@ -40,8 +51,16 @@ describe('SponsoredTxsCounter', () => {
     expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveTextContent('Upgrade to')
   })
 
+  it('shows neither the PRO chip nor the upgrade nudge while the plan is unknown', () => {
+    render(<SponsoredTxsCounter left={3} quota={5} resetsAt={null} isSubscription={false} isPro={null} />)
+
+    expect(screen.getByTestId('sponsored-txs-left')).toHaveTextContent('3 free transactions left today')
+    expect(screen.queryByRole('img', { name: 'Safe Pro' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('sponsored-txs-upgrade')).not.toBeInTheDocument()
+  })
+
   it('reads an uncapped plan as unlimited', () => {
-    render(<SponsoredTxsCounter left={null} quota={null} resetsAt={null} isPro />)
+    render(<SponsoredTxsCounter left={null} quota={null} resetsAt={null} isSubscription isPro />)
 
     expect(screen.getByText('Unlimited sponsored transactions')).toBeInTheDocument()
   })

@@ -157,7 +157,7 @@ describe('AddAccountsChooser', () => {
 
     openChooser()
 
-    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 40 Safe accounts')
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('The Business plan includes 40 Safe accounts')
     expect(screen.getByText('Manage accounts')).toBeInTheDocument()
     expect(screen.getByText('Swap one out to add another · 40 of 40')).toBeInTheDocument()
     expect(screen.getByText('Create new')).toBeInTheDocument()

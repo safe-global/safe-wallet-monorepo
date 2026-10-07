@@ -93,7 +93,7 @@ const member: MemberDto = {
   invitedBy: null,
   createdAt: '',
   updatedAt: '',
-  user: { id: 1, status: 'ACTIVE', email: null },
+  user: { id: 1, status: 'ACTIVE', email: null, address: null },
 }
 
 const submit = async () => {

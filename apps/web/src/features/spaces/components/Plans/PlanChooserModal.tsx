@@ -85,7 +85,6 @@ export default function PlanChooserModal({
         <div className="flex flex-col gap-6 pt-5">
           {trimming ? (
             <SelectAccountsStep
-              title="Choose Safe accounts for your plan"
               limit={trimming.option.seats as number}
               planName={trimming.tier.name}
               onBack={() => setPick(undefined)}

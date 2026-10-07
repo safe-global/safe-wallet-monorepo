@@ -1,5 +1,6 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
 import { FormProvider, useForm, useWatch, type Validate } from 'react-hook-form'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DialogActions from '@/components/common/DialogActions'
@@ -11,7 +12,9 @@ import { Typography } from '@/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
+import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from '../components/ParentSafeWalletNotice'
 import SafeAccountSelector from '../SafeAccountSelector'
+import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
@@ -37,6 +40,7 @@ export type ProposerRoleFormProps = {
   defaultValues?: Partial<ProposerRoleFormValues>
   isSubmitting?: boolean
   errorMessage?: ReactNode
+  parentSafeWallet?: ParentSafeWalletNoticeProps
 }
 
 const ProposerRoleForm = ({
@@ -48,6 +52,7 @@ const ProposerRoleForm = ({
   defaultValues,
   isSubmitting = false,
   errorMessage,
+  parentSafeWallet,
 }: ProposerRoleFormProps) => {
   const methods = useForm<ProposerRoleFormValues>({
     defaultValues: { proposer: '', name: '', ...defaultValues },
@@ -77,7 +82,16 @@ const ProposerRoleForm = ({
 
   const selectedSafe = findSafeAccount(safeAccounts.accounts, safeAccount)
   const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
-  const canSubmit = !isSafeBlocked && formState.isValid
+  const canSubmit = !isSafeBlocked && !parentSafeWallet && formState.isValid
+
+  // The picked Safe stays even when typed as its own proposer, so the field keeps it and validation explains why.
+  const accountOptions = useMemo(
+    () =>
+      proposer && !sameAddress(proposer, selectedSafe?.address)
+        ? safeAccounts.accounts.filter((entry) => !sameAddress(entry.address, proposer))
+        : safeAccounts.accounts,
+    [safeAccounts.accounts, proposer, selectedSafe?.address],
+  )
 
   return (
     <FormProvider {...methods}>
@@ -91,7 +105,7 @@ const ProposerRoleForm = ({
             </Alert>
 
             <SafeAccountSelector
-              accounts={safeAccounts.accounts}
+              accounts={accountOptions}
               signersOnly={safeAccounts.signersOnly}
               value={safeAccount}
               onChange={onSafeAccountChange}
@@ -99,10 +113,20 @@ const ProposerRoleForm = ({
               isError={safeAccounts.isError}
               onRetry={safeAccounts.refetch}
               hasWallet={safeAccounts.hasWallet}
+              notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
             />
 
+            {parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
+
             <div className="flex flex-col gap-1">
-              <AddressBookInput name="proposer" label="Proposer" required focused={false} validate={validateProposer} />
+              <AddressBookInput
+                name="proposer"
+                label="Proposer"
+                required
+                focused={false}
+                validate={validateProposer}
+                excludeAddresses={selectedSafe ? [selectedSafe.address] : undefined}
+              />
 
               <Typography variant="paragraph-mini" color="muted">
                 {PROPOSER_FIELD_HELPER}

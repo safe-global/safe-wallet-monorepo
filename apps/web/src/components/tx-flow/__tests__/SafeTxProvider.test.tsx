@@ -1,10 +1,16 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, type ReactNode } from 'react'
+import type Safe from '@safe-global/protocol-kit'
+import type { SafeTransaction } from '@safe-global/types-kit'
 import { act, render, screen, waitFor } from '@/tests/test-utils'
 import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
 import { getTxOrigin } from '@/utils/transactions'
 import { gtfPaymentSourcePreferenceSlice } from '@/features/gtf/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
+import { SafeScopeContext } from '../safe-scope/context'
+import type { SafeScope } from '../safe-scope/types'
+import { createMockSafeTransaction } from '@/tests/transactions'
+import { createTx } from '@/services/tx/tx-sender'
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -13,8 +19,16 @@ jest.mock('@/services/exceptions', () => ({
 
 const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
+jest.mock('@/services/tx/tx-sender', () => {
+  const actual = jest.requireActual('@/services/tx/tx-sender')
+  return { ...actual, createTx: jest.fn(actual.createTx) }
+})
+
+const mockedCreateTx = createTx as jest.MockedFunction<typeof createTx>
+
+const mockUseRecommendedNonce = jest.fn<number | undefined, []>(() => undefined)
 jest.mock('@/components/tx/shared/hooks', () => ({
-  useRecommendedNonce: () => undefined,
+  useRecommendedNonce: () => mockUseRecommendedNonce(),
   useSafeTxGas: () => undefined,
 }))
 
@@ -51,10 +65,92 @@ const FailingFlow = ({ error }: { error: Error }) => {
   return null
 }
 
+const SCOPED_SAFE = '0x1111111111111111111111111111111111111111'
+
+const buildScope = (sdk?: Safe): SafeScope => ({
+  chainId: '11155111',
+  safeAddress: SCOPED_SAFE,
+  scopeKey: `11155111:${SCOPED_SAFE}`,
+  safeLoaded: true,
+  safeLoading: false,
+  sdk,
+})
+
+const ScopeWrapper = ({ scope, children }: { scope: SafeScope; children: ReactNode }) => (
+  <SafeScopeContext.Provider value={{ scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+    {children}
+  </SafeScopeContext.Provider>
+)
+
+/** Hands the provider a built transaction once, as a Space-level review step does. */
+const BuiltFlow = ({ tx }: { tx: SafeTransaction }) => {
+  const { setSafeTx, safeTxError } = useContext(SafeTxContext)
+  useEffect(() => {
+    setSafeTx(tx)
+  }, [tx, setSafeTx])
+  return <div data-testid="safe-tx-error">{safeTxError?.message ?? 'none'}</div>
+}
+
 describe('SafeTxProvider', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue(null)
+    mockUseRecommendedNonce.mockReturnValue(undefined)
     mockedLogError.mockClear()
+    mockedCreateTx.mockClear()
+  })
+
+  describe('Space-level scope', () => {
+    // The scoped SDK is briefly absent whenever its provider is recreated, while a built tx is still in context.
+    it('does not rebuild the transaction for the nonce while the scoped SDK is absent', async () => {
+      mockUseRecommendedNonce.mockReturnValue(5)
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+
+      render(
+        <ScopeWrapper scope={buildScope(undefined)}>
+          <SafeTxProvider>
+            <BuiltFlow tx={tx} />
+          </SafeTxProvider>
+        </ScopeWrapper>,
+      )
+
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(mockedCreateTx).not.toHaveBeenCalled()
+      expect(screen.getByTestId('safe-tx-error')).toHaveTextContent('none')
+      expect(mockedLogError).not.toHaveBeenCalled()
+    })
+
+    it('rebuilds the transaction for the nonce once the scoped SDK arrives', async () => {
+      mockUseRecommendedNonce.mockReturnValue(5)
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+      const rebuilt = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+      rebuilt.data.nonce = 5
+      const createTransaction = jest.fn().mockResolvedValue(rebuilt)
+      const sdk = { createTransaction } as unknown as Safe
+      const renderWithScope = (scope: SafeScope) => (
+        <ScopeWrapper scope={scope}>
+          <SafeTxProvider>
+            <BuiltFlow tx={tx} />
+          </SafeTxProvider>
+        </ScopeWrapper>
+      )
+
+      const { rerender } = render(renderWithScope(buildScope(undefined)))
+      await act(async () => {
+        await Promise.resolve()
+      })
+      expect(createTransaction).not.toHaveBeenCalled()
+
+      rerender(renderWithScope(buildScope(sdk)))
+
+      await waitFor(() => expect(createTransaction).toHaveBeenCalledTimes(1))
+      expect(createTransaction).toHaveBeenCalledWith({
+        transactions: [expect.objectContaining({ nonce: 5 })],
+      })
+      expect(screen.getByTestId('safe-tx-error')).toHaveTextContent('none')
+    })
   })
 
   describe('error reporting', () => {

@@ -34,6 +34,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import type { GasPayer } from '@/utils/gasPayment'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -79,6 +80,9 @@ export type TxFlowContextType<T extends unknown = any> = {
   isRejectedByUser: boolean
   setIsRejectedByUser: Dispatch<SetStateAction<boolean>>
 
+  gasPaymentOption?: GasPayer
+  setGasPaymentOption: Dispatch<SetStateAction<GasPayer | undefined>>
+
   willExecuteThroughRole: boolean
   canExecuteThroughRole: boolean
   txDetails?: TransactionDetails
@@ -119,6 +123,9 @@ export const initialContext: TxFlowContextType = {
   setSubmitError: () => {},
   isRejectedByUser: false,
   setIsRejectedByUser: () => {},
+
+  gasPaymentOption: undefined,
+  setGasPaymentOption: () => {},
 
   willExecuteThroughRole: false,
   canExecuteThroughRole: false,
@@ -174,6 +181,7 @@ const TxFlowProvider = <T extends unknown>({
   const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
+  const [gasPaymentOption, setGasPaymentOption] = useState<GasPayer | undefined>(initialContext.gasPaymentOption)
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
@@ -241,9 +249,10 @@ const TxFlowProvider = <T extends unknown>({
         isMassPayout,
         safe.threshold,
         gasPaymentSource,
+        isExecuted ? gasPaymentOption : undefined,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, isGtfChain],
+    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, isGtfChain, gasPaymentOption],
   )
 
   const value = {
@@ -279,6 +288,9 @@ const TxFlowProvider = <T extends unknown>({
     setSubmitError,
     isRejectedByUser,
     setIsRejectedByUser,
+
+    gasPaymentOption,
+    setGasPaymentOption,
 
     willExecuteThroughRole,
     canExecuteThroughRole,

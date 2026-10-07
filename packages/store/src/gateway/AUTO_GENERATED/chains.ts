@@ -154,8 +154,11 @@ export type Theme = {
 export type Relayer = {
   type: ('GTF' | 'RELAY_FEE' | 'DAILY_LIMIT' | 'NO_FEE_CAMPAIGN') | null
   safeCreationSponsored: boolean
+  /** Use gasPaymentOptions instead. */
   safeTransactionSponsored: boolean
   enableTenderlySimulationBeforeRelay: boolean
+  /** Who may pay for a relayed transaction on this chain. */
+  gasPaymentOptions: ('FREE_DAILY_LIMIT' | 'SUBSCRIPTION' | 'PAY_FROM_SAFE' | 'NO_FEE_CAMPAIGN')[]
 }
 export type Chain = {
   chainId: string

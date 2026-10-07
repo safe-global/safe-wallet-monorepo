@@ -7,6 +7,7 @@ import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
+  type AddressBookItem,
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -23,7 +24,7 @@ import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
 import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
-  useUpsertWorkspaceSafeNames,
+  usePrepareWorkspaceSafeNames,
   type WorkspaceSafeName,
 } from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
@@ -31,6 +32,7 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getSeatLimitMessage } from '../../../utils/seatLimitError'
 
@@ -64,6 +66,7 @@ const useOnboardingSubmit = (
   spaceId: string | undefined,
   onSuccess: () => void,
   allSafes: AllSafeItems = EMPTY_ALL_SAFES,
+  nextStepUrl?: string,
 ) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -73,7 +76,7 @@ const useOnboardingSubmit = (
   const addedSafes = useAppSelector(selectAllAddedSafes)
   const [addSafesToSpace] = useSpaceSafesCreateV1Mutation()
   const [removeSafesFromSpace] = useSpaceSafesDeleteV1Mutation()
-  const upsertWorkspaceNames = useUpsertWorkspaceSafeNames()
+  const prepareNames = usePrepareWorkspaceSafeNames()
   const { items: spaceAddressBook, isLoading, isError } = useSpaceAddressBookState()
   const isAddressBookReady = !isLoading && !isError
 
@@ -166,12 +169,16 @@ const useOnboardingSubmit = (
       .map(([key]) => parseSafeKey(key))
   }
 
-  const addNewSafes = async (safesToAdd: Array<{ chainId: string; address: string }>, spaceIdStr: string) => {
+  const addNewSafes = async (
+    safesToAdd: Array<{ chainId: string; address: string }>,
+    spaceIdStr: string,
+    addressBookItems: AddressBookItem[],
+  ) => {
     if (safesToAdd.length === 0) return
 
     const result = await addSafesToSpace({
       spaceId: spaceIdStr,
-      createSpaceSafesDto: { safes: safesToAdd },
+      createSpaceSafesDto: { safes: safesToAdd, addressBookItems },
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
@@ -199,16 +206,16 @@ const useOnboardingSubmit = (
     }
   }
 
-  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
-    const flatSpaceSafes = flattenSafeItems(spaceSafes)
-
-    const safesToRemove = flatSpaceSafes
+  const getSafesToRemove = (selectedSafes: AddAccountsFormValues['selectedSafes']) =>
+    flattenSafeItems(spaceSafes)
       .filter((s) => {
         const key = getSafeId(s)
         return selectedSafes[key] === false || !(key in selectedSafes)
       })
       .map((s) => ({ chainId: s.chainId, address: s.address }))
 
+  const removeUnselectedSafes = async (selectedSafes: AddAccountsFormValues['selectedSafes'], spaceIdStr: string) => {
+    const safesToRemove = getSafesToRemove(selectedSafes)
     if (safesToRemove.length === 0) return
 
     const result = await removeSafesFromSpace({
@@ -227,14 +234,12 @@ const useOnboardingSubmit = (
     spaceIdStr: string,
     names: WorkspaceSafeName[],
   ) => {
+    const prepared = prepareNames(names)
+    if (prepared.error !== undefined) throw new Error(prepared.error)
     // Free the seats first: a swap at the plan limit would otherwise 402 on the add.
     await removeUnselectedSafes(selectedSafes, spaceIdStr)
-    await addNewSafes(safesToAdd, spaceIdStr)
+    await addNewSafes(safesToAdd, spaceIdStr, prepared.items)
     trustAddedSafes(safesToAdd)
-    const namesResult = await upsertWorkspaceNames(names)
-    if (namesResult.error) {
-      throw new Error(namesResult.error)
-    }
   }
 
   const onSubmit = handleSubmit(
@@ -266,6 +271,11 @@ const useOnboardingSubmit = (
       setError(undefined)
       setIsSubmitting(true)
 
+      // A removal is rejected first and only it is replayed, so only a plain add may move on to the next step.
+      const stepUpReturnUrl = nextStepUrl && getSafesToRemove(data.selectedSafes).length === 0 ? nextStepUrl : undefined
+      if (stepUpReturnUrl) dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+      let isStepUpPending = false
+
       try {
         if (safesToAdd.length > 0) {
           trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
@@ -283,9 +293,13 @@ const useOnboardingSubmit = (
 
         onSuccess()
       } catch (e) {
-        if (isElevationRequiredError(e)) return
+        if (isElevationRequiredError(e)) {
+          isStepUpPending = true
+          return
+        }
         setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       } finally {
+        if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
         setIsSubmitting(false)
       }
     },

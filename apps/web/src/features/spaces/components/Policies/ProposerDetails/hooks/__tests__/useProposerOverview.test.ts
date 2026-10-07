@@ -40,6 +40,7 @@ describe('useProposerOverview', () => {
         href: { pathname: '/settings/setup', query: { safe: `eth:${MOCK_SAFES.treasury.address}` } },
       },
       initiatedBy: { address: MOCK_ADDRESSES.alice, name: 'Alice' },
+      chainId: MOCK_SAFES.treasury.chainId,
       lastUpdated: 'Not available',
       enforcedBy: 'Safe{Wallet}',
     })

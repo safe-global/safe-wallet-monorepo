@@ -24,7 +24,7 @@ describe('PolicyCatalogue', () => {
 
     expect(buttons).toHaveLength(3)
     expect(buttons[0]).toHaveAccessibleName('Set policy: Spending limit')
-    expect(buttons[1]).toHaveAccessibleName('Set policy: Proposer')
+    expect(buttons[1]).toHaveAccessibleName('Set policy: Proposer role')
     expect(buttons[2]).toHaveAccessibleName('Give feedback: Something missing?')
   })
 
@@ -47,7 +47,7 @@ describe('PolicyCatalogue', () => {
   it('tracks a click on a tile', async () => {
     const { user } = renderWithUserEvent(<PolicyCatalogue />)
 
-    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(
       { ...POLICY_EVENTS.POLICY_CATALOGUE_TILE_CLICKED, label: 'proposer' },
@@ -59,7 +59,7 @@ describe('PolicyCatalogue', () => {
     const onSelect = jest.fn()
     const { user } = renderWithUserEvent(<PolicyCatalogue onSelect={onSelect} />)
 
-    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer' }))
+    await user.click(screen.getByRole('button', { name: 'Set policy: Proposer role' }))
 
     expect(onSelect).toHaveBeenCalledWith('proposer')
   })
@@ -78,7 +78,7 @@ describe('PolicyCatalogue', () => {
 
     expect(screen.getAllByTestId('policy-account-count')).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Set policy: Spending limit' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Set policy: Proposer' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Set policy: Proposer role' })).toBeInTheDocument()
   })
 
   it('should, when locked, render no Something missing? tile', () => {

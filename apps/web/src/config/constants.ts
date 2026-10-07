@@ -152,6 +152,7 @@ export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/articles/9317165368-d
 export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
 
 export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
+export const SAFE_PRO_PRICING_URL = `${SAFE_GLOBAL_DOMAIN}/pricing`
 
 export const SAFE_PRO_USER_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-user-terms`
 export const SAFE_PRO_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-terms`

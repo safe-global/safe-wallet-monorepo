@@ -99,6 +99,7 @@ jest.mock('../../../hooks/useSeatUpsell', () => ({
 let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: string[] }> = []
 let mockAddressBookError = false
 const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
+const mockPrepareNames = jest.fn<{ items?: unknown[]; error?: string }, [unknown[]]>((items) => ({ items }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => mockIsAdmin,
@@ -106,6 +107,7 @@ jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: () => false,
   useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false, isError: mockAddressBookError }),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
+  usePrepareWorkspaceSafeNames: () => mockPrepareNames,
   getChainIdsParam: () => '',
 }))
 
@@ -212,7 +214,7 @@ describe('AddAccounts — Safe account limit', () => {
     fireEvent.click(screen.getByTestId('safe-accounts-table'))
 
     expect(screen.getByTestId('selected-count')).toHaveTextContent('1 of 40 selected')
-    expect(screen.getByTestId('add-accounts-button')).toHaveTextContent('Add accounts (1)')
+    expect(screen.getByTestId('add-accounts-button')).toHaveTextContent('Save')
   })
 
   it('counts against a known limit and leaves picking open below it', () => {
@@ -408,7 +410,7 @@ describe('AddAccounts — naming step', () => {
     expect(mockAddSafesToSpace).not.toHaveBeenCalled()
   })
 
-  it('adds the Safes and then writes the names on submit from the naming view', async () => {
+  it('sends the names with the Safes on submit from the naming view', async () => {
     const form = selectTrusted()
     fireEvent.click(screen.getByTestId('safe-accounts-table'))
     fireEvent.submit(form)
@@ -416,14 +418,29 @@ describe('AddAccounts — naming step', () => {
 
     fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
 
-    await waitFor(() => expect(mockUpsertWorkspaceNames).toHaveBeenCalled())
-    expect(mockAddSafesToSpace).toHaveBeenCalledWith({
-      spaceId: '1',
-      createSpaceSafesDto: { safes: [{ chainId: '1', address: TRUSTED_ADDRESS }] },
-    })
-    expect(mockUpsertWorkspaceNames).toHaveBeenCalledWith([
-      { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
-    ])
+    await waitFor(() =>
+      expect(mockAddSafesToSpace).toHaveBeenCalledWith({
+        spaceId: '1',
+        createSpaceSafesDto: {
+          safes: [{ chainId: '1', address: TRUSTED_ADDRESS }],
+          addressBookItems: [{ address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] }],
+        },
+      }),
+    )
+    expect(mockUpsertWorkspaceNames).not.toHaveBeenCalled()
+  })
+
+  it('sends nothing when the names cannot be written', async () => {
+    mockPrepareNames.mockReturnValueOnce({ error: 'Unavailable' })
+    const form = selectTrusted()
+    fireEvent.click(screen.getByTestId('safe-accounts-table'))
+    fireEvent.submit(form)
+    await screen.findByText('Name your Safe accounts')
+
+    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
+
+    expect(await screen.findByText('Unavailable')).toBeInTheDocument()
+    expect(mockAddSafesToSpace).not.toHaveBeenCalled()
   })
 
   it('submits directly when the workspace already names the selected Safe', async () => {
@@ -436,8 +453,8 @@ describe('AddAccounts — naming step', () => {
     expect(screen.queryByText('Name your Safe accounts')).not.toBeInTheDocument()
   })
 
-  it('surfaces a failed name write and keeps the dialog on the naming view', async () => {
-    mockUpsertWorkspaceNames.mockResolvedValue({ error: 'Forbidden' })
+  it('surfaces a failed write and keeps the dialog on the naming view', async () => {
+    mockAddSafesToSpace.mockResolvedValue({ error: { status: 500, data: { message: 'Forbidden' } } })
     const form = selectTrusted()
     fireEvent.click(screen.getByTestId('safe-accounts-table'))
     fireEvent.submit(form)
@@ -447,45 +464,6 @@ describe('AddAccounts — naming step', () => {
 
     expect(await screen.findByText('Forbidden')).toBeInTheDocument()
     expect(screen.getByTestId('name-accounts-region')).toBeInTheDocument()
-  })
-
-  it('still writes the names when a retry finds the Safes already added', async () => {
-    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
-    const form = selectTrusted()
-    fireEvent.click(screen.getByTestId('safe-accounts-table'))
-    fireEvent.submit(form)
-    await screen.findByText('Name your Safe accounts')
-
-    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
-    await screen.findByText('Forbidden')
-
-    // The add succeeded, so the retry has nothing left to add.
-    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
-    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
-
-    await waitFor(() => expect(mockUpsertWorkspaceNames).toHaveBeenCalledTimes(2))
-    expect(mockUpsertWorkspaceNames).toHaveBeenLastCalledWith([
-      { address: TRUSTED_ADDRESS, name: 'Treasury', chainIds: ['1'] },
-    ])
-  })
-
-  it('keeps the naming step submittable after the Safes are already added', async () => {
-    mockUpsertWorkspaceNames.mockResolvedValueOnce({ error: 'Forbidden' })
-    const { rerender } = render(<AddAccounts externalOpen onExternalClose={() => {}} />, withTrusted)
-    const form = screen.getByTestId('add-accounts-button').closest('form')!
-    fireEvent.click(screen.getByTestId('safe-accounts-table'))
-    fireEvent.submit(form)
-    await screen.findByText('Name your Safe accounts')
-
-    fireEvent.submit(screen.getByTestId('add-accounts-button').closest('form')!)
-    await screen.findByText('Forbidden')
-
-    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
-
-    mockSpaceSafes = [{ chainId: '1', address: TRUSTED_ADDRESS }]
-    rerender(<AddAccounts externalOpen onExternalClose={() => {}} />)
-
-    expect(screen.getByTestId('add-accounts-button')).not.toBeDisabled()
   })
 
   it('returns to the picker from the naming view', async () => {

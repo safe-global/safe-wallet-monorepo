@@ -9,6 +9,9 @@ export const SafeScopeContext = createContext<SafeScopeContextValue | undefined>
  */
 export const useSafeScope = (): SafeScope | undefined => useContext(SafeScopeContext)?.scope
 
+/** The provider itself, which a Space flow mounts before its first step picks a Safe. */
+export const useSafeScopeContext = (): SafeScopeContextValue | undefined => useContext(SafeScopeContext)
+
 export const useSafeScopeControls = (): SafeScopeControls => {
   const context = useContext(SafeScopeContext)
   if (!context) {

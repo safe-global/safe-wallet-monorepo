@@ -263,29 +263,6 @@ describe('SafeSidebarContent', () => {
     })
   })
 
-  describe('onSpaceAdded propagation', () => {
-    it('passes onSpaceAdded into the addToWorkspace workspaceHeader when no space is selected', () => {
-      const onSpaceAdded = jest.fn()
-      render(
-        <GeoblockingContext.Provider value={false}>
-          <SafeSidebarContent
-            spaces={[{ uuid: 'uuid-1', name: 'My Space', safeCount: 0 }]}
-            onSpaceAdded={onSpaceAdded}
-          />
-        </GeoblockingContext.Provider>,
-      )
-
-      expect(mockSafeSidebarVariant).toHaveBeenCalledWith(
-        expect.objectContaining({
-          workspaceHeader: expect.objectContaining({
-            variant: 'addToWorkspace',
-            onSpaceAdded,
-          }),
-        }),
-      )
-    })
-  })
-
   describe('getLink', () => {
     it('routes Transactions entry to Queue when the queue is non-empty', () => {
       mockUseQueuedTxsLength.mockReturnValue('3')

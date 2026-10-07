@@ -66,7 +66,7 @@ describe('Plans', () => {
   })
 
   it('adapts the seats tooltip to the tier and quota', () => {
-    expect(seatsTooltip('Business', 10)).toMatch(/^Business covers 10 Safe accounts/)
+    expect(seatsTooltip('Business', 10)).toMatch(/^Your Business plan covers 10 Safe accounts/)
     expect(seatsTooltip(undefined, null)).toMatch(/^Your plan covers unlimited Safe accounts/)
   })
 
@@ -111,7 +111,9 @@ describe('Plans', () => {
     )
 
     expect(screen.getAllByText('Free access · 14 days left')).toHaveLength(2)
-    expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Your free access is active until Dec 6, 2026\. Add a payment method before then/),
+    ).toBeInTheDocument()
     expect(screen.getByTestId('trial-disclaimer')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
@@ -169,6 +171,20 @@ describe('Plans', () => {
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 7 days left')
   })
 
+  it('tells a paid plan at its seat limit where the Safe accounts above it went', () => {
+    render(
+      <Plans
+        plan={{ ...active, name: 'Starter' }}
+        safeAccounts={{ used: 2, quota: 2 }}
+        sponsoredTxs={meters.sponsoredTxs}
+        tiers={buildPlanTiers([BUSINESS], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
+        currentPlan={current('Starter', 149, false)}
+      />,
+    )
+
+    expect(screen.getByText('Safe accounts above the limit remain available in My accounts.')).toBeInTheDocument()
+  })
+
   it('renders a paid plan with Manage plan in the header and on its card, and Upgrade to Business on offer', () => {
     const onManage = jest.fn()
     render(
@@ -183,9 +199,7 @@ describe('Plans', () => {
     )
 
     expect(screen.getAllByText('Active')).toHaveLength(2)
-    expect(
-      screen.getByText('Safe accounts above the limit remain available outside the Workspace.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByText(/Safe accounts above the limit/)).not.toBeInTheDocument()
     expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Upgrade to Business' })).toBeInTheDocument()
 

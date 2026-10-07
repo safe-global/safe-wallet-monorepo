@@ -1,5 +1,9 @@
 import { act } from 'react'
+import type { ReactNode } from 'react'
+import type Safe from '@safe-global/protocol-kit'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import type { SafeScope } from '@/components/tx-flow/safe-scope/types'
 
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
@@ -226,5 +230,57 @@ describe('useSimulation()', () => {
     })
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  it('builds the payload for the scoped Safe inside a Space-level flow', async () => {
+    const scope: SafeScope = {
+      chainId: '11155111',
+      safeAddress: '0x0000000000000000000000000000000000000456',
+      scopeKey: '11155111:0x0000000000000000000000000000000000000456',
+      safeLoaded: true,
+      safeLoading: false,
+      sdk: {} as Safe,
+    }
+    const getSimulationPayloadSpy = jest
+      .spyOn(utils, 'getSimulationPayload')
+      .mockRejectedValue(new Error('stop after the payload'))
+
+    const { result } = renderHook(() => useSimulation(), {
+      wrapper: ({ children }: { children: ReactNode }) => (
+        <SafeScopeContext.Provider value={{ scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+          {children}
+        </SafeScopeContext.Provider>
+      ),
+    })
+
+    await act(async () =>
+      result.current.simulateTransaction({
+        transactions: [],
+        safe: { address: { value: scope.safeAddress }, chainId: scope.chainId } as SafeState,
+        executionOwner: scope.safeAddress,
+      }),
+    )
+
+    await waitFor(() => expect(getSimulationPayloadSpy).toHaveBeenCalledWith(expect.anything(), scope))
+    expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.ERROR)
+  })
+
+  it('builds the payload without a scope outside a Space-level flow', async () => {
+    const getSimulationPayloadSpy = jest
+      .spyOn(utils, 'getSimulationPayload')
+      .mockRejectedValue(new Error('stop after the payload'))
+
+    const { result } = renderHook(() => useSimulation())
+
+    await act(async () =>
+      result.current.simulateTransaction({
+        transactions: [],
+        safe: { address: { value: '0x0000000000000000000000000000000000000456' }, chainId: '4' } as SafeState,
+        executionOwner: '0x0000000000000000000000000000000000000456',
+      }),
+    )
+
+    await waitFor(() => expect(getSimulationPayloadSpy).toHaveBeenCalledWith(expect.anything(), undefined))
+    expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.ERROR)
   })
 })

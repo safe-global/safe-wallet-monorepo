@@ -15,6 +15,7 @@ import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { useLoadFeature } from '@/features/__core__'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
@@ -363,13 +364,23 @@ describe('ReviewSpendingLimitPolicy', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'continue' }))
 
-    expect(trackEvent).toHaveBeenCalledTimes(2)
+    expect(trackEvent).toHaveBeenCalledTimes(3)
     expect(trackEvent).toHaveBeenCalledWith({
       ...POLICY_EVENTS.SPENDING_LIMIT_RESET_PERIOD,
       label: 'One-time spending limit',
     })
     expect(trackEvent).toHaveBeenCalledWith({ ...POLICY_EVENTS.SPENDING_LIMIT_RESET_PERIOD, label: '1 week' })
     expect(onSubmit).toHaveBeenCalledTimes(1)
+  })
+
+  it('tracks the confirmed policy on Continue', () => {
+    renderReview({ safeTx: builtTx })
+
+    fireEvent.click(screen.getByRole('button', { name: 'continue' }))
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.SPENDING_LIMIT_TX_CONFIRMED, {
+      [MixpanelEventParams.CHAIN_ID]: '1',
+    })
   })
 
   it('shows the shared review when the build failed, so it can display the error', () => {

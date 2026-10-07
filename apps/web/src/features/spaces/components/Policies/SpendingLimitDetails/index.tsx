@@ -42,7 +42,6 @@ const PendingSpendingLimitDetails = ({
   const pendingActions = usePendingSpendingLimitActions(policy, content.viewer, isUnlisted)
   const { txFlow } = useContext(TxModalContext)
 
-  // The drawer's overlay sits above the tx modal, so it hides while the flow is open and stays mounted to catch the result.
   return <SpendingLimitDrawer open={!txFlow} onClose={onClose} {...content} {...pendingActions} />
 }
 

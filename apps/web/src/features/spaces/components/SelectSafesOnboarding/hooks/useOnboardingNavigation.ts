@@ -26,11 +26,17 @@ const useOnboardingNavigation = () => {
     router.push({ pathname: AppRoutes.welcome.inviteMembers, query: { spaceId, ...(next ? { next } : {}) } })
   }, [router, spaceId, next])
 
+  const nextStepUrl = `${AppRoutes.welcome.inviteMembers}?${new URLSearchParams({
+    spaceId: spaceId ?? '',
+    ...(next ? { next } : {}),
+  })}`
+
   return {
     spaceId,
     handleBack,
     handleSkip,
     redirectToNextStep,
+    nextStepUrl,
   }
 }
 

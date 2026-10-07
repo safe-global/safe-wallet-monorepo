@@ -14,7 +14,7 @@ const baseMember: MemberDto = {
   invitedBy: null,
   createdAt: faker.date.past().toISOString(),
   updatedAt: faker.date.recent().toISOString(),
-  user: { id: 42, status: 'PENDING', email: 'bob@example.com' },
+  user: { id: 42, status: 'PENDING', email: 'bob@example.com', address: null },
 }
 
 const defaultSetup = createMockStory({

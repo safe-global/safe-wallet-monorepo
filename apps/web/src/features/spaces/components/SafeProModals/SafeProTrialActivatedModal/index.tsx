@@ -33,7 +33,7 @@ const SafeProTrialActivatedModal = ({
       <Typography variant="paragraph-small" color="muted">
         {hasPaymentMethod
           ? 'All Pro features are unlocked for your Workspace. Your subscription starts on its own when your free access ends — nothing is charged before.'
-          : 'All Pro features are unlocked for your Workspace. We’ll remind you to add a payment method before your free access ends — nothing is charged until you do.'}
+          : 'All Safe Pro features are unlocked for your Workspace. We’ll remind you to add a payment method before the free access period ends — nothing is charged until you do.'}
       </Typography>
     </div>
 

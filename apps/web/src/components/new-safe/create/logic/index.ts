@@ -7,6 +7,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getStoreInstance } from '@/store'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
+import { withSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import { SAFE_APPS_EVENTS, trackEvent } from '@/services/analytics'
 import Safe from '@safe-global/protocol-kit'
 import type { PredictedSafeProps } from '@safe-global/protocol-kit'
@@ -178,9 +179,11 @@ export const pollSafeInfo = async (chainId: string, safeAddress: string): Promis
   )
 }
 
+/** The page after a Safe is deployed, in the Workspace `spaceId` (null: outside any Workspace). */
 export const getRedirect = (
   chainPrefix: string,
   safeAddress: string,
+  spaceId: string | null,
   redirectQuery?: string | string[],
 ): UrlObject | string => {
   const redirectUrl = Array.isArray(redirectQuery) ? redirectQuery[0] : redirectQuery
@@ -191,8 +194,7 @@ export const getRedirect = (
 
   // Go to the dashboard if no specific redirect is provided
   if (!redirectUrl || !redirectUrl.startsWith(AppRoutes.apps.index)) {
-    // eslint-disable-next-line no-restricted-syntax -- Only Pay later adds a new Safe to the Workspace (persistCounterfactualSafe)
-    return { pathname: AppRoutes.home, query: { safe: address } }
+    return { pathname: AppRoutes.home, query: withSpaceId({ safe: address }, spaceId) }
   }
 
   // Otherwise, redirect to the provided URL (e.g. from a Safe App)
@@ -205,7 +207,7 @@ export const getRedirect = (
   // TODO: Check if we can accomplish this with URLSearchParams or URL instead
   const hasQueryParams = redirectUrl.includes('?')
   const appendChar = hasQueryParams ? '&' : '?'
-  return redirectUrl + `${appendChar}safe=${address}`
+  return withSpaceIdInUrl(redirectUrl + `${appendChar}safe=${address}`, spaceId)
 }
 
 export const relaySafeCreation = async (chain: Chain, undeployedSafeProps: UndeployedSafeProps) => {

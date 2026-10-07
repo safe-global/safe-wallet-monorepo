@@ -8,7 +8,7 @@ jest.mock('@safe-global/utils/utils/web3', () => ({
 }))
 
 describe('signTxServiceMessage', () => {
-  it('signs a DeleteRequest for the Safe Queue Service domain', async () => {
+  it('signs a DeleteRequest for the Safe Transaction Service domain', async () => {
     const signature = faker.string.hexadecimal({ length: 130 })
     jest.mocked(signTypedData).mockResolvedValue(signature)
     const signer = {} as JsonRpcSigner
@@ -28,7 +28,7 @@ describe('signTxServiceMessage', () => {
         ],
       },
       domain: {
-        name: 'Safe Queue Service',
+        name: 'Safe Transaction Service',
         version: '1.0',
         chainId: 11155111,
         verifyingContract: safeAddress,

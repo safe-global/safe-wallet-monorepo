@@ -24,7 +24,6 @@ export const EnhancedSidebar = ({
   spaceInitial,
   selectedSpace,
   spaces,
-  onSpaceAdded,
   isLoading = false,
   contained = false,
 }: SidebarProps): ReactElement => {
@@ -42,13 +41,7 @@ export const EnhancedSidebar = ({
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant
-        spaceInitial={spaceInitial}
-        selectedSpace={selectedSpace}
-        spaces={spaces}
-        onSpaceAdded={onSpaceAdded}
-        isLoading={isLoading}
-      />
+      <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} isLoading={isLoading} />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )

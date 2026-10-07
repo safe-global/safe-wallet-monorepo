@@ -61,8 +61,8 @@ jest.mock('@/features/safe-pro-announcement', () => ({
 
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 
-jest.mock('../../../hooks/billing/useSpaceSubscription', () => ({
-  useSpaceSubscription: () => ({ subscription: undefined, status: 'none' }),
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
+  useEntitlementsGetAllEntitlementsV1Query: () => ({ plan: undefined }),
 }))
 
 jest.mock('@/features/spaces', () => ({

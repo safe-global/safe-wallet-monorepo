@@ -16,16 +16,20 @@ import { ENTERPRISE_TIER } from './planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
+import { InfoTip } from './PlanStatusCard'
 import type { CurrentPlan, PlanPick } from './types'
 
 export const _endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
 
+const TRIAL_REMINDER_TOOLTIP =
+  'Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
+
 /** What the reminder asks of the viewer: an admin can act, a member is told who can. */
 export const reminderSubtitle = (endsAt: string, isAdmin: boolean, spaceName?: string): string =>
   isAdmin
     ? `If you don't select a plan and add a payment method by ${endsAt}, your Workspace will be locked.`
-    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method.`
+    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method.\nYour Safe accounts remain available in My accounts.`
 
 const TrialEndingChooser = ({
   spaceId,
@@ -68,7 +72,10 @@ const TrialEndingChooser = ({
               <Typography variant="h3" as={DialogTitle}>
                 Your free access will end {_endsIn(currentPlan.daysLeft ?? null)}
               </Typography>
-              <Typography color="muted">{reminderSubtitle(endsAt, isAdmin, spaceName)}</Typography>
+              <Typography color="muted" className="flex items-center gap-1 whitespace-pre-line">
+                {reminderSubtitle(endsAt, isAdmin, spaceName)}
+                {isAdmin && <InfoTip text={TRIAL_REMINDER_TOOLTIP} data-testid="trial-reminder-tooltip" />}
+              </Typography>
             </div>
 
             {isLoading ? (

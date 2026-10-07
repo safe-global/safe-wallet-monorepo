@@ -12,6 +12,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
+jest.mock('@/components/common/ChainIndicator', () => {
+  const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
+  Mock.displayName = 'ChainIndicator'
+  return { __esModule: true, default: Mock }
+})
+
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
 const OVERVIEW = {
@@ -41,7 +47,7 @@ const setup = (
         {...shared}
         policy={policy}
         transactionLink={TRANSACTION_LINK}
-        onReviewTransaction={jest.fn()}
+        reviewTransactionHref="/transactions/tx?id=0x9f3c"
         outcome={outcome}
       />
     ) : (
@@ -125,7 +131,7 @@ describe('SpendingLimitDrawer', () => {
       screen.getByText('The spending limit is not active as the transaction is not yet executed.'),
     ).toBeInTheDocument()
     expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
@@ -152,11 +158,11 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  it('disables editing until an edit flow is supplied', () => {
+  it('disables editing and points to the upgrade while no edit flow is supplied', () => {
     setup(mockActiveSpendingLimit(), MOCK_VIEWERS.signer, {})
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   it('leaves out the last updated row while the payload carries no timestamp', () => {
@@ -199,6 +205,14 @@ describe('SpendingLimitDrawer', () => {
       'href',
       `/settings/setup?safe=eth%3A${SAFE_ADDRESS}`,
     )
+  })
+
+  it("shows the policy Safe's network in the overview", () => {
+    const policy = mockActiveSpendingLimit()
+
+    setup(policy)
+
+    expect(screen.getByAltText(`chain-${policy.safe.chainId}`)).toBeInTheDocument()
   })
 
   it('leaves the Safe account unlinked when its chain is unknown', () => {

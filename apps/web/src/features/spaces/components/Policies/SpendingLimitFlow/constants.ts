@@ -17,7 +17,6 @@ export const LIMIT_AMOUNT_LABEL = 'Limit amount'
 export const LIMIT_AMOUNT_PLACEHOLDER = '0.0'
 export const FREQUENCY_LABEL = 'Frequency'
 export const ONE_TIME_HELPER_TEXT = 'One-time limit, it does not reset'
-export const PRICE_UNAVAILABLE_TEXT = 'Price unavailable'
 
 export const ADD_TOKEN_LABEL = 'Add token'
 export const ADD_SPENDER_LABEL = 'Add spender'
@@ -29,6 +28,10 @@ export const DISCARD_CHANGES_LABEL = 'Discard all changes'
 export const DUPLICATE_SPENDER_ERROR = 'This spender is already in the policy. Add the token to their existing card.'
 export const DUPLICATE_TOKEN_ERROR = 'This token already has a limit for this spender'
 export const EXISTING_LIMIT_ERROR = 'This spender already has a spending limit for this token'
+export const EXISTING_LIMIT_TOOLTIP =
+  'This spender already has a spending limit for this token. Edit the policy to change it.'
+export const SPENDER_RESERVED_ERROR = 'This spender address is not valid'
+export const SPENDER_IS_SAFE_ERROR = 'Cannot add the Safe account itself as spender'
 export const EXISTING_LIMITS_LOAD_ERROR =
   "The Safe's current spending limits could not be loaded. Close this window and try again."
 export const EXISTING_LIMIT_IN_POLICY_ERROR =

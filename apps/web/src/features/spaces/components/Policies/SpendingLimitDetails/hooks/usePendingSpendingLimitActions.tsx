@@ -1,11 +1,9 @@
-import { useContext, useMemo } from 'react'
+import type { LinkProps } from 'next/link'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { TxModalContext } from '@/components/tx-flow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
-import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import useOrigin from '@/hooks/useOrigin'
+import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import type { Viewer } from '../../SpendingLimitDrawer/resolveState'
 import type { PendingSpendingLimitPolicy, QueuedSpendingLimitPolicy } from '../../types'
@@ -17,7 +15,7 @@ export type PendingSpendingLimitActions = {
   viewer: Viewer
   /** Undefined until the chain configs have loaded. */
   transactionLink?: string
-  onReviewTransaction?: () => void
+  reviewTransactionHref?: LinkProps['href']
   onRetry?: () => void
   outcome?: PendingTxOutcome
 }
@@ -30,7 +28,7 @@ export const usePendingSpendingLimitActions = (
   const { chainId, address: safeAddress } = policy.safe
   const origin = useOrigin()
   const chain = useChain(chainId)
-  const { setTxFlow } = useContext(TxModalContext)
+  const spaceId = useUrlSpaceId()
   const { txSummary, confirmedBy, confirmationsSubmitted, outcome, onRetry } = usePendingPolicyTransaction(
     policy,
     isUnlisted,
@@ -38,23 +36,10 @@ export const usePendingSpendingLimitActions = (
   const txId = getPendingTxId(policy)
   // An activating row was already seen executed, before its transaction has loaded.
   const resolvedOutcome = outcome ?? (policy.status === 'activating' ? 'executed' : undefined)
-  // The summary may be stale until the refetch says why the row left.
-  const reviewable = isUnlisted && !resolvedOutcome ? undefined : txSummary
 
-  const onReviewTransaction = useMemo(
-    () =>
-      reviewable
-        ? () =>
-            setTxFlow(
-              <SafeScopeProvider initial={{ chainId, safeAddress }}>
-                <ConfirmTxFlow txSummary={reviewable} />
-              </SafeScopeProvider>,
-              undefined,
-              false,
-            )
-        : undefined,
-    [reviewable, setTxFlow, chainId, safeAddress],
-  )
+  const txPath = chain ? `${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}` : undefined
+  // Held until the transaction loads, so a signer who already signed is never offered Review.
+  const reviewTransactionHref = txPath && txSummary && !isUnlisted ? withSpaceIdInUrl(txPath, spaceId) : undefined
 
   const hasSigned = txSummary ? confirmedBy.some((signer) => sameAddress(signer, viewer.address)) : undefined
 
@@ -65,10 +50,9 @@ export const usePendingSpendingLimitActions = (
       confirmationsSubmitted: confirmationsSubmitted ?? policy.confirmationsSubmitted,
     },
     viewer: { ...viewer, hasSigned },
-    transactionLink: chain
-      ? `${origin}${AppRoutes.transactions.tx}?safe=${chain.shortName}:${safeAddress}&id=${txId}`
-      : undefined,
-    onReviewTransaction,
+    // Shared links leave the Space out on purpose: their recipient may not be a member of it.
+    transactionLink: txPath ? `${origin}${txPath}` : undefined,
+    reviewTransactionHref,
     onRetry,
     outcome: resolvedOutcome,
   }

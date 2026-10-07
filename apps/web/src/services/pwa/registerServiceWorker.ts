@@ -1,5 +1,6 @@
 import type {} from '@ducanh2912/next-pwa/workbox'
 import { logger } from '@/services/observability'
+import { IS_DEV } from '@/config/constants'
 
 let hasAttemptedRegistration = false
 
@@ -13,6 +14,9 @@ let hasAttemptedRegistration = false
 export const registerServiceWorker = async (): Promise<void> => {
   if (hasAttemptedRegistration) return
   hasAttemptedRegistration = true
+
+  // next-pwa is disabled under `next dev`, so there is no worker to register.
+  if (IS_DEV) return
 
   if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
   if (typeof window === 'undefined') return

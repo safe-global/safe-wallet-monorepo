@@ -22,6 +22,7 @@ import useSpaceSubmit from './hooks/useSpaceSubmit'
 import useOnboardingExit from './hooks/useOnboardingExit'
 import ClaimTrialModal from '../Plans/ClaimTrialModal'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
+import { useStepUpReturnUrl } from '@/features/oidc-auth'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
@@ -46,7 +47,7 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
   const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
-  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes } = useSpaceSubmit(
+  const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes, selectSafesUrl } = useSpaceSubmit(
     handleSubmit,
     spaceId,
     isEditMode,
@@ -55,6 +56,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const trialLock = useWorkspaceLock(createdSpaceId ?? null)
   const offersTrial = Boolean(createdSpaceId) && trialLock.isLocked && trialLock.reason === 'trial-offered'
   const isTrialCheckFailed = Boolean(createdSpaceId) && trialLock.isError
+  // The page reloads after a step-up and loses the created Workspace, so the challenge returns to its Safes step.
+  useStepUpReturnUrl(offersTrial ? selectSafesUrl : undefined)
   useEffect(() => {
     if (createdSpaceId && !trialLock.isResolving && !trialLock.isError && !offersTrial) goToSelectSafes(createdSpaceId)
   }, [createdSpaceId, trialLock.isResolving, trialLock.isError, offersTrial, goToSelectSafes])

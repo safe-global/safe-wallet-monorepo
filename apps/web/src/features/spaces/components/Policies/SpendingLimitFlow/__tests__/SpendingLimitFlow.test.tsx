@@ -2,7 +2,8 @@ import { useState as mockUseState } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
-import { TxFlowType } from '@/services/analytics'
+import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
+import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { createDefaultFormValues } from '../types'
 import { CREATE_STEP_TITLE, FLOW_HELP_LABEL, FLOW_SUBTITLE } from '../constants'
@@ -23,6 +24,10 @@ jest.mock('@/components/tx-flow/TxFlow', () => ({
       </div>
     )
   }),
+}))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
 }))
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: ({ children, initial }: { children: React.ReactNode; initial?: unknown }) => (
@@ -109,5 +114,18 @@ describe('SpendingLimitFlow', () => {
       hideNonce?: boolean
     }>
     expect(step.props).toMatchObject({ title: CREATE_STEP_TITLE, hideNonce: true })
+  })
+
+  it.each([
+    [false, 'signed'],
+    [true, 'executed'],
+  ])('tracks the policy transaction once it is %s', (isExecuted) => {
+    render(<SpendingLimitFlow />)
+
+    mockTxFlow.mock.calls[0][0].onSubmit?.({ txId: 'tx', isExecuted })
+
+    expect(trackEvent).toHaveBeenCalledWith(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, {
+      [MixpanelEventParams.IS_EXECUTED]: isExecuted,
+    })
   })
 })
