@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
@@ -7,7 +7,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
@@ -69,11 +69,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   )
   const [entry] = useState(takePlansEntry)
   const isReady = isSafePro && !isPlanLoading && !isOffersLoading && !isUninitialized
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (!isReady || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED, {
+  useTrackOnce(
+    SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED,
+    {
       ...entry,
       [MixpanelEventParams.DEFAULT_SEATS]: defaultSeats(tiers),
       [MixpanelEventParams.DEFAULT_BILLING_PERIOD]: BillingPeriod.MONTHLY,
@@ -81,8 +79,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
       [MixpanelEventParams.SPONSORED_REMAINING]:
         sponsoredTxs?.quota != null ? sponsoredTxs.quota - sponsoredTxs.used : undefined,
       [MixpanelEventParams.SPONSORED_QUOTA]: sponsoredTxs?.quota ?? undefined,
-    })
-  }, [isReady]) // eslint-disable-line react-hooks/exhaustive-deps -- once, with what the page showed
+    },
+    isReady,
+  )
 
   return (
     <AuthState spaceId={spaceId}>

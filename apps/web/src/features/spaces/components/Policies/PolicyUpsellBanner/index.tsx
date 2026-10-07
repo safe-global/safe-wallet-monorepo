@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react'
 import { ArrowRight, Lock } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +11,7 @@ import {
   UpgradeFeature,
   UpgradeLocation,
 } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../../Plans/planSelection'
@@ -26,12 +26,7 @@ const PROMPT = {
 }
 
 const PolicyUpsellBanner = ({ planName, workspaceName, onUpgrade }: PolicyUpsellBannerProps) => {
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
-  }, [])
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
 
   return (
     <Card radius="xl" data-testid="policy-upsell-banner">
