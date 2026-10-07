@@ -39,7 +39,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
+import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -126,6 +126,7 @@ const SafeScopedSubscriptions = (): null => {
   useCounterfactualSafeSync()
   useInviteNotification()
   useSafeWorkspaceCheck()
+  useSafeWorkspaceAttach()
   return null
 }
 
