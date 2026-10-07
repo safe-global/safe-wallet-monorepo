@@ -8,7 +8,7 @@ import {
   type DeleteDelegateV3Dto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, hasFeature } from '../utils/chains'
 
 type DelegateChain = Pick<Chain, 'chainId' | 'features'>
 

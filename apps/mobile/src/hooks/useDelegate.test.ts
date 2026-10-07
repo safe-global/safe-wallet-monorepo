@@ -6,6 +6,7 @@ import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import Logger from '@/src/utils/logger'
 
 const TEST_PRIVATE_KEY = '0xdd503e13625fa99fdea1e1dfb180dd3de94ee4d16c858bb04128b46225f92f84'
 // The address corresponding to the test private key
@@ -16,8 +17,7 @@ const TEST_SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
 const mockDispatch = jest.fn()
 const mockUseAppSelector = jest.fn()
 const mockStorePrivateKey = jest.fn()
-const mockRegisterDelegateV2 = jest.fn()
-const mockRegisterDelegateV3 = jest.fn()
+const mockRegisterDelegate = jest.fn()
 const mockGetDelegateTypedData = jest.mocked(getDelegateTypedData)
 
 const withoutQueueService = () =>
@@ -97,11 +97,8 @@ jest.mock('@safe-global/utils/services/delegates', () => {
 })
 
 // Import the real addDelegate, no need to mock it
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
-  cgwApi: {
-    useDelegatesPostDelegateV2Mutation: () => [mockRegisterDelegateV2],
-    useDelegatesPostDelegateV3Mutation: () => [mockRegisterDelegateV3],
-  },
+jest.mock('@safe-global/utils/hooks/useDelegateMutations', () => ({
+  useDelegateMutations: () => ({ addDelegate: mockRegisterDelegate }),
 }))
 
 jest.mock('./useSign/useSign', () => ({
@@ -137,8 +134,7 @@ describe('useDelegate', () => {
     mockStorePrivateKey.mockResolvedValue(true)
 
     // Mock successful delegate registration
-    mockRegisterDelegateV2.mockResolvedValue({ data: 'success' })
-    mockRegisterDelegateV3.mockResolvedValue({ data: 'success' })
+    mockRegisterDelegate.mockResolvedValue(undefined)
 
     // Mock setTimeout to execute immediately in tests
     jest.useFakeTimers()
@@ -185,10 +181,9 @@ describe('useDelegate', () => {
     })
 
     // Verify the delegate was registered on all chains
-    expect(mockRegisterDelegateV3).toHaveBeenCalledTimes(1)
-    expect(mockRegisterDelegateV3).toHaveBeenCalledWith(expect.objectContaining({ chainId: mockChains[0].chainId }))
-    expect(mockRegisterDelegateV2).toHaveBeenCalledTimes(1)
-    expect(mockRegisterDelegateV2).toHaveBeenCalledWith(expect.objectContaining({ chainId: mockChains[1].chainId }))
+    expect(mockRegisterDelegate).toHaveBeenCalledTimes(2)
+    expect(mockRegisterDelegate).toHaveBeenCalledWith(expect.objectContaining({ chain: mockChains[0] }))
+    expect(mockRegisterDelegate).toHaveBeenCalledWith(expect.objectContaining({ chain: mockChains[1] }))
 
     // Verify the delegate was added to the Redux store
     expect(mockDispatch).toHaveBeenCalled()
@@ -221,8 +216,7 @@ describe('useDelegate', () => {
     expect(delegateResult.error).toBe('Failed to securely store delegate key')
 
     // Check that delegate registration was not attempted
-    expect(mockRegisterDelegateV2).not.toHaveBeenCalled()
-    expect(mockRegisterDelegateV3).not.toHaveBeenCalled()
+    expect(mockRegisterDelegate).not.toHaveBeenCalled()
 
     // Check that the hook's state was updated correctly
     expect(result.current.isLoading).toBe(false)
@@ -252,18 +246,11 @@ describe('useDelegate', () => {
     expect(delegateResult.delegateAddress).toBeTruthy()
 
     // Verify the delegate was registered with the safe address
-    expect(mockRegisterDelegateV3).toHaveBeenCalledWith(
-      expect.objectContaining({
-        createDelegateDto: expect.objectContaining({
-          safe: TEST_SAFE_ADDRESS,
-        }),
-      }),
-    )
-    expect(mockRegisterDelegateV2).toHaveBeenCalledWith(
-      expect.objectContaining({
-        createDelegateDto: expect.objectContaining({
-          safe: TEST_SAFE_ADDRESS,
-        }),
+    expect(mockRegisterDelegate).toHaveBeenCalledTimes(mockChains.length)
+    mockChains.forEach((chain) =>
+      expect(mockRegisterDelegate).toHaveBeenCalledWith({
+        chain,
+        createDelegateDto: expect.objectContaining({ safe: TEST_SAFE_ADDRESS }),
       }),
     )
 
@@ -271,7 +258,30 @@ describe('useDelegate', () => {
     expect(mockDispatch.mock.calls[0][0].payload.delegateInfo.safe).toBe(TEST_SAFE_ADDRESS)
   })
 
-  it('should register via the v3 endpoint with queue service typed data on chains with QUEUE_SERVICE', async () => {
+  it('should log and still create the delegate when registration fails on a chain', async () => {
+    const error = new Error(faker.lorem.sentence())
+    mockRegisterDelegate.mockRejectedValue(error)
+
+    const { result } = renderHook(() => useDelegate())
+
+    let delegateResult: { success: boolean } = { success: false }
+
+    await act(async () => {
+      delegateResult = await result.current.createDelegate(TEST_PRIVATE_KEY)
+    })
+
+    await act(async () => {
+      await jest.runAllTimersAsync()
+    })
+
+    expect(delegateResult.success).toBe(true)
+    expect(mockDispatch).toHaveBeenCalled()
+    mockChains.forEach((chain) =>
+      expect(Logger.error).toHaveBeenCalledWith(`Failed to register delegate for chain ${chain.chainId}`, error),
+    )
+  })
+
+  it('should register queue service typed data on chains with QUEUE_SERVICE', async () => {
     const chain = queueServiceChain()
     mockChains = [chain]
     const safe = faker.finance.ethereumAddress()
@@ -291,8 +301,8 @@ describe('useDelegate', () => {
       message: { delegateAddress, totp: expect.any(Number), action: 'add' },
       primaryType: 'Delegate',
     })
-    expect(mockRegisterDelegateV3).toHaveBeenCalledWith({
-      chainId: chain.chainId,
+    expect(mockRegisterDelegate).toHaveBeenCalledWith({
+      chain,
       createDelegateDto: {
         safe,
         delegate: delegateAddress,
@@ -301,10 +311,9 @@ describe('useDelegate', () => {
         label: 'Mobile App Delegate',
       },
     })
-    expect(mockRegisterDelegateV2).not.toHaveBeenCalled()
   })
 
-  it('should register via the v2 endpoint with transaction service typed data on chains without QUEUE_SERVICE', async () => {
+  it('should register transaction service typed data on chains without QUEUE_SERVICE', async () => {
     const chain = transactionServiceChain()
     mockChains = [chain]
     const safe = faker.finance.ethereumAddress()
@@ -324,8 +333,8 @@ describe('useDelegate', () => {
       message: { delegateAddress, totp: expect.any(Number) },
       primaryType: 'Delegate',
     })
-    expect(mockRegisterDelegateV2).toHaveBeenCalledWith({
-      chainId: chain.chainId,
+    expect(mockRegisterDelegate).toHaveBeenCalledWith({
+      chain,
       createDelegateDto: {
         safe,
         delegate: delegateAddress,
@@ -334,6 +343,5 @@ describe('useDelegate', () => {
         label: 'Mobile App Delegate',
       },
     })
-    expect(mockRegisterDelegateV3).not.toHaveBeenCalled()
   })
 })

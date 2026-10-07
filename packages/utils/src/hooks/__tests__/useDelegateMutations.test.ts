@@ -1,8 +1,8 @@
 import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { chainBuilder } from '@/tests/builders/chains'
+import { FEATURES } from '../../utils/chains'
+import { checksumAddress } from '../../utils/addresses'
+import { chainBuilder } from '../../tests/builders/chains'
 import { useDelegateMutations } from '../useDelegateMutations'
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({

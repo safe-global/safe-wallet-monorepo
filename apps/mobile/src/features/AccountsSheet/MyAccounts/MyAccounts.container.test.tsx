@@ -68,11 +68,8 @@ jest.mock('@/src/hooks/useNotificationCleanup', () => ({
   }),
 }))
 
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
-  cgwApi: {
-    useDelegatesDeleteDelegateV2Mutation: () => [jest.fn(), { isLoading: false }],
-    useDelegatesDeleteDelegateV3Mutation: () => [jest.fn(), { isLoading: false }],
-  },
+jest.mock('@safe-global/utils/hooks/useDelegateMutations', () => ({
+  useDelegateMutations: () => ({ addDelegate: jest.fn(), deleteDelegate: jest.fn() }),
 }))
 
 describe('MyAccountsContainer', () => {

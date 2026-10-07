@@ -3,17 +3,13 @@ import { renderHook } from '@/src/tests/test-utils'
 import { useDelegateCleanup } from './useDelegateCleanup'
 import { DelegateCleanupService } from '@/src/services/delegate-cleanup'
 import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { type Address } from '@/src/types/address'
+import Logger from '@/src/utils/logger'
 
-const mockDeleteDelegateV2 = jest.fn()
-const mockDeleteDelegateV3 = jest.fn()
+const mockDeleteDelegate = jest.fn()
 
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/delegates', () => ({
-  cgwApi: {
-    useDelegatesDeleteDelegateV2Mutation: () => [mockDeleteDelegateV2],
-    useDelegatesDeleteDelegateV3Mutation: () => [mockDeleteDelegateV3],
-  },
+jest.mock('@safe-global/utils/hooks/useDelegateMutations', () => ({
+  useDelegateMutations: () => ({ deleteDelegate: mockDeleteDelegate }),
 }))
 
 jest.mock('@/src/hooks/useNotificationCleanup', () => ({
@@ -27,12 +23,14 @@ jest.mock('@/src/services/delegate-cleanup', () => ({
   DelegateCleanupService: jest.fn(),
 }))
 
+jest.mock('@/src/utils/logger', () => ({
+  __esModule: true,
+  default: { warn: jest.fn() },
+}))
+
 const mockDelegateCleanupService = jest.mocked(DelegateCleanupService)
 
 const randomAddress = (): Address => `0x${faker.string.hexadecimal({ length: 40, prefix: '' })}`
-
-const withoutQueueService = () =>
-  faker.helpers.arrayElements(Object.values(FEATURES).filter((feature) => feature !== FEATURES.QUEUE_SERVICE))
 
 const getDeleteDelegate = () => {
   renderHook(() => useDelegateCleanup())
@@ -44,37 +42,29 @@ describe('useDelegateCleanup', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockDeleteDelegateV2.mockResolvedValue({})
-    mockDeleteDelegateV3.mockResolvedValue({})
+    mockDeleteDelegate.mockResolvedValue(undefined)
   })
 
-  it('deletes via the v3 endpoint on chains with QUEUE_SERVICE', async () => {
-    const chain = chainBuilder()
-      .with({ features: [...withoutQueueService(), FEATURES.QUEUE_SERVICE] })
-      .build()
+  it('deletes the delegate through the shared delegate mutations', async () => {
+    const chain = chainBuilder().build()
     const delegateAddress = randomAddress()
 
     await getDeleteDelegate()(chain, delegateAddress, deleteDelegateDto)
 
-    expect(mockDeleteDelegateV3).toHaveBeenCalledWith({
-      chainId: chain.chainId,
-      delegateAddress,
-      deleteDelegateV3Dto: deleteDelegateDto,
-    })
-    expect(mockDeleteDelegateV2).not.toHaveBeenCalled()
+    expect(mockDeleteDelegate).toHaveBeenCalledWith({ chain, delegateAddress, deleteDelegateDto })
   })
 
-  it('deletes via the v2 endpoint on chains without QUEUE_SERVICE', async () => {
-    const chain = chainBuilder().with({ features: withoutQueueService() }).build()
+  it('resolves and logs when the backend delete fails so key removal is not blocked', async () => {
+    const chain = chainBuilder().build()
     const delegateAddress = randomAddress()
+    const error = new Error(faker.lorem.sentence())
+    mockDeleteDelegate.mockRejectedValue(error)
 
-    await getDeleteDelegate()(chain, delegateAddress, deleteDelegateDto)
+    await expect(getDeleteDelegate()(chain, delegateAddress, deleteDelegateDto)).resolves.toBeUndefined()
 
-    expect(mockDeleteDelegateV2).toHaveBeenCalledWith({
-      chainId: chain.chainId,
-      delegateAddress,
-      deleteDelegateV2Dto: deleteDelegateDto,
-    })
-    expect(mockDeleteDelegateV3).not.toHaveBeenCalled()
+    expect(Logger.warn).toHaveBeenCalledWith(
+      `Failed to delete delegate ${delegateAddress} on chain ${chain.chainId}`,
+      error,
+    )
   })
 })

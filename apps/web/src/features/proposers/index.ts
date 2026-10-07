@@ -6,4 +6,3 @@ export { default as TxProposalChip } from './components/TxProposalChip'
 
 export { useParentSafeThreshold } from './hooks/useParentSafeThreshold'
 export { useMigrateProposerLabels } from './hooks/useMigrateProposerLabels'
-export { useDelegateMutations } from './hooks/useDelegateMutations'

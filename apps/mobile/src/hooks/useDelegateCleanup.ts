@@ -2,7 +2,6 @@ import { useCallback, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '@/src/store/hooks'
 import { selectAllChains } from '@/src/store/chains'
 import { selectDelegates } from '@/src/store/delegatesSlice'
-import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { useNotificationCleanup } from '@/src/hooks/useNotificationCleanup'
 import { type Address } from '@/src/types/address'
 import {
@@ -13,7 +12,8 @@ import {
   DelegateCleanupErrorType,
 } from '@/src/services/delegate-cleanup'
 import { StandardErrorResult, ErrorType } from '@/src/utils/errors'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
+import Logger from '@/src/utils/logger'
 import { type DeleteDelegate } from '@/src/hooks/useDelegateCleanup/utils'
 
 // Re-export types for backward compatibility
@@ -59,15 +59,15 @@ export const useDelegateCleanup = (): UseDelegateCleanupProps => {
 
   const { cleanupNotificationsForDelegate } = useNotificationCleanup()
 
-  const [deleteDelegateV2] = cgwApi.useDelegatesDeleteDelegateV2Mutation()
-  const [deleteDelegateV3] = cgwApi.useDelegatesDeleteDelegateV3Mutation()
+  const { deleteDelegate: deleteDelegateMutation } = useDelegateMutations()
 
+  // A failed backend delete must not block removing the private key
   const deleteDelegate = useCallback<DeleteDelegate>(
     (chain, delegateAddress, deleteDelegateDto) =>
-      hasFeature(chain, FEATURES.QUEUE_SERVICE)
-        ? deleteDelegateV3({ chainId: chain.chainId, delegateAddress, deleteDelegateV3Dto: deleteDelegateDto })
-        : deleteDelegateV2({ chainId: chain.chainId, delegateAddress, deleteDelegateV2Dto: deleteDelegateDto }),
-    [deleteDelegateV2, deleteDelegateV3],
+      deleteDelegateMutation({ chain, delegateAddress, deleteDelegateDto }).catch((error) =>
+        Logger.warn(`Failed to delete delegate ${delegateAddress} on chain ${chain.chainId}`, error),
+      ),
+    [deleteDelegateMutation],
   )
 
   const cleanupService = useMemo(() => {
