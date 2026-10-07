@@ -192,7 +192,7 @@ describe('SpendingLimitActions', () => {
     expect(screen.getByText('Only signers of this Safe account can add the module.')).toBeInTheDocument()
   })
 
-  it('enable: disables the action while no flow is supplied', () => {
+  it('enable: disables the action and points to the upgrade while no flow is supplied', () => {
     render(
       <SpendingLimitActions
         state={{
@@ -207,6 +207,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+    expect(screen.getByText('Upgrade to Business to add the module.')).toBeInTheDocument()
   })
 
   it('manage: disables editing and points to the upgrade while no edit flow is supplied', () => {

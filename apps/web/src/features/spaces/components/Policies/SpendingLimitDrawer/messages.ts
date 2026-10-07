@@ -38,8 +38,10 @@ export const UNENFORCED_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account
 
 export const TX_LOAD_FAILED_HELPER = "The transaction couldn't be loaded."
 
-/** The page withholds `onEdit` only when the Workspace's plan does not include policies. */
+/** The page withholds `onEdit` and `onEnableModule` only when the Workspace's plan does not include policies. */
 export const EDIT_LOCKED_HELPER = 'Upgrade to Business to edit spending limits.'
+
+export const ENABLE_LOCKED_HELPER = 'Upgrade to Business to add the module.'
 
 /** The trailing full stop lives here, not at the call site, so the sentence is punctuated in one place. */
 export const signedAndWaitingLine = (missing: number): string => `You've signed. ${formatAwaitingSignatures(missing)}.`

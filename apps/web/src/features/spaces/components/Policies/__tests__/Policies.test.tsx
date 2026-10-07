@@ -15,6 +15,7 @@ import {
   mockPendingPolicy,
   mockPolicies,
   mockProposerPolicy,
+  mockUnenforcedPolicy,
 } from '../mocks/policies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
@@ -744,6 +745,24 @@ describe('Policies', () => {
 
       expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
       expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
+    })
+
+    it('keeps Add module disabled and points to the upgrade while the plan locks spending limits', async () => {
+      const policy = asActivePolicy(mockUnenforcedPolicy())
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+      expect(screen.getByText('Upgrade to Business to add the module.')).toBeInTheDocument()
       expect(setTxFlow).not.toHaveBeenCalled()
     })
 

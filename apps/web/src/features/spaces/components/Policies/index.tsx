@@ -96,6 +96,7 @@ const Policies = ({
     [policies, openPolicy],
   )
   const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
+  const isSpendingLimitLocked = locked?.lockedPolicies.includes('spending-limit')
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
@@ -275,10 +276,8 @@ const Policies = ({
           policy={openedPolicy}
           isUnlisted={!listedPolicy}
           onClose={closeDetails}
-          onEdit={
-            locked?.lockedPolicies.includes('spending-limit') ? undefined : () => editSpendingLimit(openedPolicy.safe)
-          }
-          onEnableModule={() => enableSpendingLimitModule(openedPolicy)}
+          onEdit={isSpendingLimitLocked ? undefined : () => editSpendingLimit(openedPolicy.safe)}
+          onEnableModule={isSpendingLimitLocked ? undefined : () => enableSpendingLimitModule(openedPolicy)}
         />
       )}
     </div>
