@@ -14,6 +14,7 @@ import { CHIP_LABEL, CHIP_VARIANT, MULTIPLE_RULES_TITLE, STATUS_PRESENTATION } f
 import { formatFlaggedCount, summariseRejection } from '../summariseRejection'
 import { formatSimulatingLabel } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
+import { SafenetPulse } from './SafenetBlocks'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -64,13 +65,14 @@ export const SafenetQueueStatusView = ({
   const timeLabel = publicStatus === CheckStatus.IN_PROGRESS ? formatSimulatingLabel(timing) : null
   // The chip keeps a fixed short label so it never truncates; its tooltip carries the time left.
   const label = variant === 'chip' ? CHIP_LABEL[publicStatus] : (timeLabel ?? stateLabel)
+  const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
   const statusSentence = describeStatus(publicStatus, snapshot)
   const description = variant === 'chip' && timeLabel ? `${timeLabel}. ${statusSentence}` : statusSentence
 
   const content =
     variant === 'chip' ? (
       <Chip variant={CHIP_VARIANT[publicStatus]} className="max-w-full">
-        <SeverityIcon severity={severity} width={12} height={12} />
+        {isInFlight ? <SafenetPulse size={12} /> : <SeverityIcon severity={severity} width={12} height={12} />}
         <span className="truncate">{label}</span>
       </Chip>
     ) : (

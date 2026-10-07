@@ -4,13 +4,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Typography } from '@/components/ui/typography'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-// eslint-disable-next-line no-restricted-imports -- same lazy-chunk reason as SeverityIcon
-import { AnalysisGroupCardItem } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardItem'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 import { CheckStatus, type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
-import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   MULTIPLE_RULES_TITLE,
@@ -25,6 +23,7 @@ import { formatTimingSentence } from '../checkTiming'
 import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
 import { SafenetLearnMore, SafenetOutboundLink } from './SafenetLinks'
+import { SafenetBlock, SafenetPulse } from './SafenetBlocks'
 
 export type SafenetChecksSectionViewProps = {
   check: Pick<SafenetCheckView, 'publicStatus' | 'snapshot' | 'unavailableReason' | 'isStale'>
@@ -36,33 +35,6 @@ export type SafenetChecksSectionViewProps = {
 }
 
 export type PreCheckKind = 'multisig' | 'single' | 'executeNow'
-
-const Note = ({ children, testId }: { children: ReactNode; testId?: string }): ReactElement => (
-  <Typography variant="paragraph-small" className="text-muted-foreground" data-testid={testId}>
-    {children}
-  </Typography>
-)
-
-/** One gray block with a severity bar, like the other checks' expanded results. */
-const Block = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => (
-  <AnalysisGroupCardItem
-    severity={severity}
-    result={{ severity: severity ?? Severity.INFO, type: ThreatStatus.NO_THREAT, title: '', description: '' }}
-    description={children}
-  />
-)
-
-/** Running check: a pulsing dot in the slot the severity icon takes once there's a result. */
-const PulsingIndicator = (): ReactElement => (
-  <span
-    className="relative flex size-4 shrink-0 items-center justify-center"
-    data-testid="safenet-check-pulse"
-    aria-hidden
-  >
-    <span className="absolute inline-flex size-3 animate-ping rounded-full bg-[var(--color-info-main)] opacity-50 motion-reduce:animate-none" />
-    <span className="relative inline-flex size-2 rounded-full bg-[var(--color-info-main)]" />
-  </span>
-)
 
 /** Same collapsible row as the other Copilot checks: icon and "Safenet", then the details on expand. */
 const SectionRow = ({
@@ -130,20 +102,20 @@ const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
     reason={kind}
     defaultOpen
   >
-    <Block>
+    <SafenetBlock>
       {SAFENET_ABOUT} {PRE_CHECK_COPY[kind]} <SafenetLearnMore />
-    </Block>
+    </SafenetBlock>
   </SectionRow>
 )
 
 const RejectionReasons = ({ summary }: { summary: RejectionSummary }): ReactElement => (
   <div className="flex flex-col gap-2" data-testid="safenet-rejection-rules">
     {summary.rules.map((rule) => (
-      <Block key={rule.id} severity={Severity.CRITICAL}>
+      <SafenetBlock key={rule.id} severity={Severity.CRITICAL}>
         <span className="font-bold">{rule.label}</span>
         <br />
         {rule.description}
-      </Block>
+      </SafenetBlock>
     ))}
   </div>
 )
@@ -203,7 +175,7 @@ export const SafenetChecksSectionView = ({
       key={isRisk ? 'risk' : 'other'}
       icon={
         isInFlight ? (
-          <PulsingIndicator />
+          <SafenetPulse />
         ) : (
           <SeverityIcon severity={content.severity} muted={content.muted} width={16} height={16} />
         )
@@ -213,46 +185,50 @@ export const SafenetChecksSectionView = ({
       reason={unavailableReason}
       defaultOpen={isRisk}
     >
-      {summary && summary.rules.length > 1 && (
-        <Typography variant="paragraph-small" className="font-bold">
-          {title}
-        </Typography>
-      )}
-      {summary && summary.rules.length > 0 ? (
-        <RejectionReasons summary={summary} />
-      ) : (
-        <Block severity={blockSeverity}>
-          <span className="font-bold">{title}</span>
-          <br />
-          {showBlurb ? SAFENET_BLURB : content.copy} <SafenetLearnMore />
-          {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
-            <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
-          )}
-          {isStale && isInFlight && (
-            <>
-              <br />
-              {STALE_NOTE}
-            </>
-          )}
-        </Block>
-      )}
+      <SafenetBlock severity={blockSeverity}>
+        <span className="font-bold">{title}</span>
+        {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
+          <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
+        )}
+        <br />
+        {flaggedCount && summary && summary.rules.length > 0 ? (
+          <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+        ) : (
+          <>
+            {showBlurb ? SAFENET_BLURB : content.copy}
+            {flaggedCount && (
+              <>
+                {' '}
+                <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+              </>
+            )}
+          </>
+        )}{' '}
+        <SafenetLearnMore />
+        {isStale && isInFlight && (
+          <>
+            <br />
+            {STALE_NOTE}
+          </>
+        )}
+      </SafenetBlock>
 
-      {flaggedCount && <Note testId="safenet-flagged-count">{flaggedCount}</Note>}
+      {summary && summary.rules.length > 0 && <RejectionReasons summary={summary} />}
 
       {publicStatus === CheckStatus.BENIGN && links.attestationHref && (
-        <Block>
+        <SafenetBlock>
           <SafenetOutboundLink href={links.attestationHref} testId="safenet-attestation-link">
             View signed attestation
           </SafenetOutboundLink>
-        </Block>
+        </SafenetBlock>
       )}
 
       {showsExplorerLink && (
-        <Block>
+        <SafenetBlock>
           <SafenetOutboundLink href={links.explorerHref} testId="safenet-explorer-link">
             View on Safenet explorer
           </SafenetOutboundLink>
-        </Block>
+        </SafenetBlock>
       )}
     </SectionRow>
   )
