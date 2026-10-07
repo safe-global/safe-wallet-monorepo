@@ -1,4 +1,5 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
+import { Interface } from 'ethers'
 import type { Chain, IndexingStatus } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
@@ -115,6 +116,55 @@ export function txDetailsHandlers(safeData: SafeState): RequestHandler[] {
   ]
 }
 
+const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
+const MOCK_RECIPIENT = '0x1234567890123456789012345678901234567890'
+const NEW_OWNER = '0x9876543210987654321098765432109876543210'
+const mockTxInterface = new Interface([
+  'function transfer(address to, uint256 value)',
+  'function addOwnerWithThreshold(address owner, uint256 _threshold)',
+])
+
+/** `txData` for the mock transactions, so the "Transaction details" block renders like a CGW response. */
+function createMockTxData(safeData: SafeState, kind: 'settings' | 'erc20' | 'native') {
+  const base = { operation: 0, trustedDelegateCallTarget: null, addressInfoIndex: null }
+  if (kind === 'native') {
+    return {
+      ...base,
+      hexData: null,
+      dataDecoded: null,
+      to: { value: MOCK_RECIPIENT, name: 'vitalik.eth', logoUri: null },
+      value: '1000000000000000',
+    }
+  }
+  const [method, to, args, params] =
+    kind === 'erc20'
+      ? ([
+          'transfer',
+          USDC_ADDRESS,
+          [MOCK_RECIPIENT, 4018860000n],
+          [
+            ['to', 'address', MOCK_RECIPIENT],
+            ['value', 'uint256', '4018860000'],
+          ],
+        ] as const)
+      : ([
+          'addOwnerWithThreshold',
+          safeData.address.value,
+          [NEW_OWNER, 2n],
+          [
+            ['owner', 'address', NEW_OWNER],
+            ['_threshold', 'uint256', '2'],
+          ],
+        ] as const)
+  return {
+    ...base,
+    hexData: mockTxInterface.encodeFunctionData(method, [...args]),
+    dataDecoded: { method, parameters: params.map(([name, type, value]) => ({ name, type, value })) },
+    to: { value: to, name: kind === 'erc20' ? 'USD Coin' : null, logoUri: null },
+    value: '0',
+  }
+}
+
 /**
  * Create mock transaction details for a given transaction ID
  * Uses real CGW fixture data as a base, customized for the story context
@@ -202,7 +252,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
           threshold: 2,
         },
       },
-      txData: null,
+      txData: createMockTxData(safeData, 'settings'),
       detailedExecutionInfo,
     }
   }
@@ -238,7 +288,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
             value: '1000000000000000',
           },
     },
-    txData: null,
+    txData: createMockTxData(safeData, isERC20 ? 'erc20' : 'native'),
     detailedExecutionInfo,
   }
 }
@@ -867,6 +917,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
+    safenetChecks: features.safenetChecks ?? false,
   }
 
   // Build handlers array
