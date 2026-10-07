@@ -69,8 +69,7 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
     const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
     const onSearchValueChange = props.onSearchValueChange as ((value: string) => void) | undefined
     const onItemRename = props.onItemRename as
-      | ((target: { address: string; name: string; chainIds: string[] }) => void)
-      | undefined
+      ((target: { address: string; name: string; chainIds: string[] }) => void) | undefined
     return (
       <div
         data-testid="safe-selector-dropdown"

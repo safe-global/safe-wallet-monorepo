@@ -8,10 +8,7 @@ import type {
 import { mapVisibleAnalysisResults, SEVERITY_PRIORITY } from '@safe-global/utils/features/safe-shield/utils'
 
 type AnalysisData =
-  | RecipientAnalysisResults
-  | ContractAnalysisResults
-  | ThreatAnalysisResults
-  | Record<string, GroupedAnalysisResults>
+  RecipientAnalysisResults | ContractAnalysisResults | ThreatAnalysisResults | Record<string, GroupedAnalysisResults>
 
 export const getPrimaryAnalysisResult = (data: AnalysisData | undefined): AnalysisResult | undefined => {
   if (!data || Object.keys(data).length === 0) {
