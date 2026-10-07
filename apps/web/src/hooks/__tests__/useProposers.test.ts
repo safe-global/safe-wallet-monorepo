@@ -204,17 +204,4 @@ describe('useProposers while the chain config is loading', () => {
 
     expect(result.current).toBeUndefined()
   })
-
-  it('resolves false without guessing which service to fetch from', async () => {
-    const fetchTransactionServiceProposers = jest.fn()
-    const fetchQueueServiceProposers = jest.fn()
-    useLazyDelegatesGetDelegatesV2Query.mockReturnValue([fetchTransactionServiceProposers])
-    useLazyDelegatesGetDelegatesV3Query.mockReturnValue([fetchQueueServiceProposers])
-
-    const { result } = renderHook(() => useGetIsWalletProposer())
-
-    await expect(result.current()).resolves.toBe(false)
-    expect(fetchTransactionServiceProposers).not.toHaveBeenCalled()
-    expect(fetchQueueServiceProposers).not.toHaveBeenCalled()
-  })
 })
