@@ -15,6 +15,7 @@ import { Execute } from '@/components/tx-flow/actions/Execute'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import useChainId from '@/hooks/useChainId'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { createExistingTx } from '@/services/tx/tx-sender'
 
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
@@ -30,6 +31,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   const { txId, onPrev } = useContext(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const [txPreview] = useTxPreview(safeTx?.data)
   const [isReloaded, setIsReloaded] = useState(false)
 
@@ -45,7 +47,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
 
   const executeLater = () => {
     setTxFlow(undefined)
-    router.push({ pathname: AppRoutes.transactions.queue, query: { safe: router.query.safe } })
+    router.push({ pathname: AppRoutes.transactions.queue, query: safeLinkQuery })
   }
 
   return (

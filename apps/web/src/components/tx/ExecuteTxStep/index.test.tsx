@@ -33,7 +33,7 @@ describe('ExecuteTxStep', () => {
   const unsignedTx = createMockSafeTransaction({ to: faker.finance.ethereumAddress(), data: '0x' })
   const reloadedTx = createMockSafeTransaction({ to: unsignedTx.data.to, data: '0x' })
 
-  const renderStep = ({ afterSigning }: { afterSigning?: boolean } = {}) => {
+  const renderStep = ({ afterSigning, spaceId }: { afterSigning?: boolean; spaceId?: string } = {}) => {
     const setSafeTx = jest.fn()
     const setTxFlow = jest.fn()
     const onPrev = jest.fn()
@@ -50,7 +50,7 @@ describe('ExecuteTxStep', () => {
           </TxFlowContext.Provider>
         </SafeTxContext.Provider>
       </TxModalContext.Provider>,
-      { routerProps: { push, query: { safe: safeQuery } } },
+      { routerProps: { push, query: spaceId ? { safe: safeQuery, spaceId } : { safe: safeQuery } } },
     )
 
     return { setSafeTx, setTxFlow, onPrev, push, safeQuery, updateTxLayoutProps }
@@ -144,6 +144,17 @@ describe('ExecuteTxStep', () => {
 
     expect(setTxFlow).toHaveBeenCalledWith(undefined)
     expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.transactions.queue, query: { safe: safeQuery } })
+  })
+
+  it('keeps the Workspace when executing later from a Workspace Safe', async () => {
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+    const spaceId = faker.string.uuid()
+
+    const { push, safeQuery } = renderStep({ afterSigning: true, spaceId })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.transactions.queue, query: { safe: safeQuery, spaceId } })
   })
 
   it('keeps the loading state when the reload fails', async () => {
