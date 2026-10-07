@@ -55,14 +55,14 @@ export const ProfilePopoverContent = ({
     </div>
 
     {connectedWallet && (
-      <p className={css.profileWalletHint} data-testid="sidebar-profile-wallet-hint">
+      <div className={css.profileWalletHint} data-testid="sidebar-profile-wallet-hint">
         Your account and your connected wallet are separate. Wallet{' '}
         <span className={css.profileWalletHintAddress}>
           <Identicon address={connectedWallet} size={14} />
           {shortenAddress(connectedWallet)}
         </span>{' '}
         is connected for signing transactions.
-      </p>
+      </div>
     )}
 
     <Separator />
