@@ -1,5 +1,6 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import useWallet from '@/hooks/wallets/useWallet'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { getSidebarProfileInfo } from './getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
@@ -17,6 +18,7 @@ const HeaderAccountInfo = () => {
   if (!isSignedIn) return null
 
   const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
+  const isSameWallet = sameAddress(wallet?.address, signerAddress)
 
   return (
     <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
@@ -24,7 +26,7 @@ const HeaderAccountInfo = () => {
         profileName={profileName}
         displayName={displayName}
         signerAddress={email ? undefined : signerAddress}
-        connectedWallet={wallet?.address}
+        connectedWallet={isSameWallet ? undefined : wallet?.address}
       />
     </div>
   )
