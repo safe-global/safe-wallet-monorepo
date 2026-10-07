@@ -36,30 +36,69 @@ const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateT
   return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }
 
-export const getProposerSigningMethod = (wallet: ConnectedWallet) =>
-  isEthSignWallet(wallet) ? SigningMethod.ETH_SIGN : SigningMethod.ETH_SIGN_TYPED_DATA
-
-// The queue service verifies eth_sign over the delegate hash; only the transaction service needs the v1 message endpoints.
-export const isV1ProposerDelegation = (chain: DelegateChain, wallet: ConnectedWallet) =>
+// v1 only writes to the transaction service, so eth_sign wallets use it only on chains without QUEUE_SERVICE; the queue service (v3) accepts their eth_sign signature directly.
+export const usesV1DelegateEndpoint = (chain: DelegateChain, wallet: ConnectedWallet) =>
   isEthSignWallet(wallet) && !hasFeature(chain, FEATURES.QUEUE_SERVICE)
 
-export const signProposerTypedData = async (
+const signProposerTypedData = async (
   chain: DelegateChain,
   proposerAddress: string,
   safeAddress: string,
   action: DelegateAction,
   signer: JsonRpcSigner,
-  signingMethod: SigningMethod = SigningMethod.ETH_SIGN_TYPED_DATA,
 ) => {
   const typedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
-
-  if (signingMethod === SigningMethod.ETH_SIGN) {
-    const hash = hashDelegateTypedData(typedData)
-    const signature = await signer.signMessage(getBytes(hash))
-    return adjustVInSignature(SigningMethod.ETH_SIGN, signature, hash, signer.address)
-  }
-
   return signDelegateTypedData(signer, typedData)
+}
+
+// For wallets that cannot sign typed data: eth_sign over the delegate EIP-712 hash, v shifted by 4 as for Safe eth_sign signatures.
+const ethSignProposerTypedDataHash = async (
+  chain: DelegateChain,
+  proposerAddress: string,
+  safeAddress: string,
+  action: DelegateAction,
+  signer: JsonRpcSigner,
+) => {
+  const hash = hashDelegateTypedData(getDelegateTypedData(chain, proposerAddress, safeAddress, action))
+  const signature = await signer.signMessage(getBytes(hash))
+  return adjustVInSignature(SigningMethod.ETH_SIGN, signature, hash, signer.address)
+}
+
+const getProposerDataV1 = (proposerAddress: string) => {
+  const totp = Math.floor(Date.now() / 1000 / TOTP_INTERVAL_SECONDS)
+
+  return `${proposerAddress}${totp}`
+}
+
+const signProposerData = async (proposerAddress: string, signer: JsonRpcSigner) => {
+  const data = getProposerDataV1(proposerAddress)
+
+  const signature = await signer.signMessage(data)
+
+  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
+}
+
+type ProposerDelegation = {
+  chain: DelegateChain
+  wallet: ConnectedWallet
+  proposerAddress: string
+  safeAddress: string
+  action: DelegateAction
+  signer: JsonRpcSigner
+}
+
+/** The v1 message on transaction-service chains for eth_sign wallets, eth_sign over the delegate hash on queue-service chains, typed data otherwise. */
+export const signProposerDelegation = ({
+  chain,
+  wallet,
+  proposerAddress,
+  safeAddress,
+  action,
+  signer,
+}: ProposerDelegation): Promise<string> => {
+  if (usesV1DelegateEndpoint(chain, wallet)) return signProposerData(proposerAddress, signer)
+  if (isEthSignWallet(wallet)) return ethSignProposerTypedDataHash(chain, proposerAddress, safeAddress, action, signer)
+  return signProposerTypedData(chain, proposerAddress, safeAddress, action, signer)
 }
 
 /**
@@ -103,20 +142,6 @@ export const signProposerTypedDataForSafe = async (
 
   // Step 3: Sign the SafeMessage typed data with the EOA
   return signTypedData(signer, safeMessageTypedData)
-}
-
-const getProposerDataV1 = (proposerAddress: string) => {
-  const totp = Math.floor(Date.now() / 1000 / TOTP_INTERVAL_SECONDS)
-
-  return `${proposerAddress}${totp}`
-}
-
-export const signProposerData = async (proposerAddress: string, signer: JsonRpcSigner) => {
-  const data = getProposerDataV1(proposerAddress)
-
-  const signature = await signer.signMessage(data)
-
-  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }
 
 /**

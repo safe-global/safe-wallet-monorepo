@@ -2,10 +2,8 @@ import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import {
   encodeEIP1271Signature,
-  getProposerSigningMethod,
-  isV1ProposerDelegation,
-  signProposerData,
-  signProposerTypedData,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
 import { useParentSafeThreshold } from '../hooks/useParentSafeThreshold'
@@ -84,7 +82,7 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
     setIsLoading(true)
 
     try {
-      const useV1Endpoint = isV1ProposerDelegation(chain, wallet)
+      const useV1Endpoint = usesV1DelegateEndpoint(chain, wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
       if (parentSafeAddress && isMultiSigRequired) {
@@ -132,16 +130,14 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
           },
         })
       } else {
-        signature = useV1Endpoint
-          ? await signProposerData(proposer.delegate, signer)
-          : await signProposerTypedData(
-              chain,
-              proposer.delegate,
-              safeAddress,
-              'delete',
-              signer,
-              getProposerSigningMethod(wallet),
-            )
+        signature = await signProposerDelegation({
+          chain,
+          wallet,
+          proposerAddress: proposer.delegate,
+          safeAddress,
+          action: 'delete',
+          signer,
+        })
 
         if (useV1Endpoint) {
           await deleteDelegateV1({

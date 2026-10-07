@@ -17,7 +17,6 @@ import { MockEip1193Provider } from '@/tests/mocks/providers'
 import * as useChainsModule from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { SigningMethod } from '@safe-global/types-kit'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getStoreInstance } from '@/store'
 
@@ -97,10 +96,10 @@ describe('AddProposer signing logic', () => {
     })
   })
 
-  describe('signProposerTypedData', () => {
+  describe('signProposerDelegation', () => {
     it('should be exported and callable', () => {
-      expect(proposerUtils.signProposerTypedData).toBeDefined()
-      expect(typeof proposerUtils.signProposerTypedData).toBe('function')
+      expect(proposerUtils.signProposerDelegation).toBeDefined()
+      expect(typeof proposerUtils.signProposerDelegation).toBe('function')
     })
   })
 
@@ -136,7 +135,7 @@ describe('AddProposer signing logic', () => {
 
       mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
-      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
+      jest.spyOn(proposerUtils, 'signProposerDelegation').mockResolvedValue('0xsignature')
 
       useDelegatesPostDelegateV2Mutation.mockReturnValue([addDelegateV2, {}])
       useDelegatesPostDelegateV3Mutation.mockReturnValue([addDelegateV3, {}])
@@ -161,24 +160,23 @@ describe('AddProposer signing logic', () => {
 
       await waitFor(() => expect(addDelegate).toHaveBeenCalled())
 
-      expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+      expect(proposerUtils.signProposerDelegation).toHaveBeenCalledWith({
         chain,
-        address,
-        expect.any(String),
-        'add',
-        expect.anything(),
-        SigningMethod.ETH_SIGN_TYPED_DATA,
-      )
+        wallet: expect.objectContaining({ label: 'MetaMask' }),
+        proposerAddress: address,
+        safeAddress: expect.any(String),
+        action: 'add',
+        signer: expect.anything(),
+      })
       expect(addDelegate.mock.calls[0][0].createDelegateDto).toEqual(
         expect.objectContaining({ delegate: address, signature: '0xsignature' }),
       )
       expect(otherAddDelegate).not.toHaveBeenCalled()
     })
 
-    it('routes an eth_sign wallet by the chain: queue service via eth_sign over the delegate hash, otherwise v1', async () => {
+    it('posts an eth_sign wallet to the queue service on QUEUE_SERVICE chains and to v1 otherwise', async () => {
       const addDelegateV1 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
       useDelegatesPostDelegateV1Mutation.mockReturnValue([addDelegateV1, {}])
-      jest.spyOn(proposerUtils, 'signProposerData').mockResolvedValue('0xethsign')
       mockUseWallet.mockReturnValue({
         address: fakerChecksummedAddress(),
         chainId: '1',
@@ -201,30 +199,19 @@ describe('AddProposer signing logic', () => {
         fireEvent.click(getByTestId('submit-proposer-btn'))
       })
 
-      if (isQueueService) {
-        await waitFor(() => expect(addDelegate).toHaveBeenCalled())
-        expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+      const [submitted, notSubmitted] = isQueueService ? [addDelegate, addDelegateV1] : [addDelegateV1, addDelegate]
+      await waitFor(() => expect(submitted).toHaveBeenCalled())
+      expect(proposerUtils.signProposerDelegation).toHaveBeenCalledWith(
+        expect.objectContaining({
           chain,
-          address,
-          expect.any(String),
-          'add',
-          expect.anything(),
-          SigningMethod.ETH_SIGN,
-        )
-        expect(addDelegate.mock.calls[0][0].createDelegateDto).toEqual(
-          expect.objectContaining({ delegate: address, signature: '0xsignature' }),
-        )
-        expect(addDelegateV1).not.toHaveBeenCalled()
-        expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
-      } else {
-        await waitFor(() => expect(addDelegateV1).toHaveBeenCalled())
-        expect(proposerUtils.signProposerData).toHaveBeenCalledWith(address, expect.anything())
-        expect(addDelegateV1.mock.calls[0][0].createDelegateDto).toEqual(
-          expect.objectContaining({ delegate: address, signature: '0xethsign' }),
-        )
-        expect(addDelegate).not.toHaveBeenCalled()
-        expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
-      }
+          wallet: expect.objectContaining({ label: 'Trezor' }),
+          proposerAddress: address,
+        }),
+      )
+      expect(submitted.mock.calls[0][0].createDelegateDto).toEqual(
+        expect.objectContaining({ delegate: address, signature: '0xsignature' }),
+      )
+      expect(notSubmitted).not.toHaveBeenCalled()
     })
 
     it('sends a placeholder label to the delegate API, never the entered name', async () => {
@@ -318,7 +305,7 @@ describe('AddProposer signing logic', () => {
       mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
 
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
-      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
+      jest.spyOn(proposerUtils, 'signProposerDelegation').mockResolvedValue('0xsignature')
 
       useDelegatesPostDelegateV2Mutation.mockReturnValue([addDelegateV2, {}])
       useDelegatesPostDelegateV3Mutation.mockReturnValue([addDelegateV3, {}])
@@ -341,7 +328,7 @@ describe('AddProposer signing logic', () => {
       })
 
       expect(getAssertedChainSigner).not.toHaveBeenCalled()
-      expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+      expect(proposerUtils.signProposerDelegation).not.toHaveBeenCalled()
       expect(addDelegateV2).not.toHaveBeenCalled()
       expect(addDelegateV3).not.toHaveBeenCalled()
       expect(onSuccess).not.toHaveBeenCalled()
@@ -494,7 +481,7 @@ describe('AddProposer signing logic', () => {
 
       mockGetSigner.mockResolvedValue({} as Awaited<ReturnType<typeof getAssertedChainSigner>>)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
-      jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xsignature')
+      jest.spyOn(proposerUtils, 'signProposerDelegation').mockResolvedValue('0xsignature')
 
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
     })
@@ -517,7 +504,7 @@ describe('AddProposer signing logic', () => {
 
     it('shows the rejected-signature copy when the wallet rejects', async () => {
       jest
-        .spyOn(proposerUtils, 'signProposerTypedData')
+        .spyOn(proposerUtils, 'signProposerDelegation')
         .mockRejectedValue(Object.assign(new Error('denied'), { code: 'ACTION_REJECTED' }))
 
       const { findByText } = await submitProposer(jest.fn())

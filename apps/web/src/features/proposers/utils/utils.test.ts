@@ -1,14 +1,12 @@
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
-  getProposerSigningMethod,
-  isV1ProposerDelegation,
-  signProposerTypedData,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
   signProposerTypedDataForSafe,
 } from './utils'
 import { faker } from '@faker-js/faker'
 import { BrowserProvider, JsonRpcSigner, Wallet, getAddress, getBytes, makeError, verifyMessage } from 'ethers'
-import { SigningMethod } from '@safe-global/types-kit'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import type { JsonRpcProvider } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -155,123 +153,136 @@ const transactionServiceChain = () => chainBuilder().with({ features: [] }).buil
 const createSigner = () =>
   new JsonRpcSigner(new BrowserProvider({ request: jest.fn() }), faker.finance.ethereumAddress())
 
-describe('signProposerTypedData', () => {
+describe('signProposerDelegation', () => {
+  const wallet = connectedWalletBuilder().build()
   const proposerAddress = getAddress(faker.finance.ethereumAddress())
   const safeAddress = getAddress(faker.finance.ethereumAddress())
   const signatureRs = faker.string.hexadecimal({ length: 128, casing: 'lower' })
+
+  const sign = (chain: ReturnType<typeof queueServiceChain>, signer: JsonRpcSigner, action: 'add' | 'delete' = 'add') =>
+    signProposerDelegation({ chain, wallet, proposerAddress, safeAddress, action, signer })
 
   afterEach(() => {
     jest.restoreAllMocks()
   })
 
-  it('signs the transaction service typed data through ethers on a chain without QUEUE_SERVICE', async () => {
-    const chain = transactionServiceChain()
-    const signer = createSigner()
-    const signature = `${signatureRs}1b`
-    jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(signature)
-    const send = jest.spyOn(signer.provider, 'send')
+  describe('with a typed-data wallet', () => {
+    beforeEach(() => {
+      isEthSignWallet.mockReturnValue(false)
+    })
 
-    const result = await signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)
+    it('signs the transaction service typed data through ethers on a chain without QUEUE_SERVICE', async () => {
+      const chain = transactionServiceChain()
+      const signer = createSigner()
+      const signature = `${signatureRs}1b`
+      jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(signature)
+      const send = jest.spyOn(signer.provider, 'send')
 
-    expect(web3Utils.signTypedData).toHaveBeenCalledWith(
-      signer,
-      delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
-    )
-    expect(web3Utils.signTypedData).toHaveBeenCalledWith(
-      signer,
-      expect.objectContaining({ domain: expect.objectContaining({ name: 'Safe Transaction Service' }) }),
-    )
-    expect(send).not.toHaveBeenCalled()
-    expect(result).toBe(signature)
+      const result = await sign(chain, signer)
+
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        signer,
+        delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
+      )
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        signer,
+        expect.objectContaining({ domain: expect.objectContaining({ name: 'Safe Transaction Service' }) }),
+      )
+      expect(send).not.toHaveBeenCalled()
+      expect(result).toBe(signature)
+    })
+
+    it('signs the queue service typed data with raw eth_signTypedData_v4 on a chain with QUEUE_SERVICE', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      jest.spyOn(web3Utils, 'signTypedData')
+      const send = jest.spyOn(signer.provider, 'send').mockResolvedValue(`${signatureRs}00`)
+
+      const result = await sign(chain, signer, 'delete')
+
+      const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'delete')
+      expect(typedData.domain.name).toBe('Safe Queue Service')
+      expect(send).toHaveBeenCalledWith('eth_signTypedData_v4', [
+        signer.address.toLowerCase(),
+        JSON.stringify(typedData),
+      ])
+      expect(web3Utils.signTypedData).not.toHaveBeenCalled()
+      expect(result).toBe(`${signatureRs}1b`)
+    })
+
+    it('falls back to eth_signTypedData when the wallet does not support eth_signTypedData_v4', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      const send = jest
+        .spyOn(signer.provider, 'send')
+        .mockRejectedValueOnce(makeError('unsupported operation', 'UNSUPPORTED_OPERATION'))
+        .mockResolvedValueOnce(`${signatureRs}01`)
+
+      const result = await sign(chain, signer)
+
+      const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add')
+      expect(send).toHaveBeenLastCalledWith('eth_signTypedData', [signer.address.toLowerCase(), typedData])
+      expect(result).toBe(`${signatureRs}1c`)
+    })
+
+    it('does not fall back when the wallet rejects the signature request', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      const rejection = makeError('user rejected action', 'ACTION_REJECTED')
+      const send = jest.spyOn(signer.provider, 'send').mockRejectedValue(rejection)
+
+      await expect(sign(chain, signer)).rejects.toBe(rejection)
+      expect(send).toHaveBeenCalledTimes(1)
+    })
   })
 
-  it('signs the queue service typed data with raw eth_signTypedData_v4 on a chain with QUEUE_SERVICE', async () => {
-    const chain = queueServiceChain()
-    const signer = createSigner()
-    jest.spyOn(web3Utils, 'signTypedData')
-    const send = jest.spyOn(signer.provider, 'send').mockResolvedValue(`${signatureRs}00`)
+  describe('with an eth_sign wallet', () => {
+    const owner = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
 
-    const result = await signProposerTypedData(chain, proposerAddress, safeAddress, 'delete', signer)
+    const ownerSigner = () => {
+      const signer = createSigner()
+      Object.defineProperty(signer, 'address', { value: owner.address })
+      jest.spyOn(signer, 'signMessage').mockImplementation((message) => owner.signMessage(message))
+      return signer
+    }
 
-    const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'delete')
-    expect(typedData.domain.name).toBe('Safe Queue Service')
-    expect(send).toHaveBeenCalledWith('eth_signTypedData_v4', [signer.address.toLowerCase(), JSON.stringify(typedData)])
-    expect(web3Utils.signTypedData).not.toHaveBeenCalled()
-    expect(result).toBe(`${signatureRs}1b`)
-  })
+    beforeEach(() => {
+      isEthSignWallet.mockReturnValue(true)
+    })
 
-  it('falls back to eth_signTypedData when the wallet does not support eth_signTypedData_v4', async () => {
-    const chain = queueServiceChain()
-    const signer = createSigner()
-    const send = jest
-      .spyOn(signer.provider, 'send')
-      .mockRejectedValueOnce(makeError('unsupported operation', 'UNSUPPORTED_OPERATION'))
-      .mockResolvedValueOnce(`${signatureRs}01`)
+    it('eth_signs the queue service delegate hash so it recovers to the signer, with v shifted by 4', async () => {
+      const chain = queueServiceChain()
 
-    const result = await signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)
+      const signature = await sign(chain, ownerSigner())
 
-    const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add')
-    expect(send).toHaveBeenLastCalledWith('eth_signTypedData', [signer.address.toLowerCase(), typedData])
-    expect(result).toBe(`${signatureRs}1c`)
-  })
+      const hash = delegateUtils.hashDelegateTypedData(
+        delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
+      )
+      const v = parseInt(signature.slice(-2), 16)
+      expect([31, 32]).toContain(v)
+      expect(verifyMessage(getBytes(hash), `${signature.slice(0, -2)}${(v - 4).toString(16)}`)).toBe(owner.address)
+    })
 
-  it('does not fall back when the wallet rejects the signature request', async () => {
-    const chain = queueServiceChain()
-    const signer = createSigner()
-    const rejection = makeError('user rejected action', 'ACTION_REJECTED')
-    const send = jest.spyOn(signer.provider, 'send').mockRejectedValue(rejection)
+    it('signs the v1 proposer message on a chain without QUEUE_SERVICE', async () => {
+      const signer = ownerSigner()
 
-    await expect(signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)).rejects.toBe(rejection)
-    expect(send).toHaveBeenCalledTimes(1)
+      await sign(transactionServiceChain(), signer)
+
+      expect(signer.signMessage).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`^${proposerAddress}\\d+$`)))
+    })
   })
 })
 
-describe('signProposerTypedData with eth_sign', () => {
-  it('eth_signs the queue service delegate hash so it recovers to the signer, with v shifted by 4', async () => {
-    const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
-    const signer = createSigner()
-    Object.defineProperty(signer, 'address', { value: wallet.address })
-    jest.spyOn(signer, 'signMessage').mockImplementation((message) => wallet.signMessage(message))
-    const chain = queueServiceChain()
-    const proposerAddress = getAddress(faker.finance.ethereumAddress())
-    const safeAddress = getAddress(faker.finance.ethereumAddress())
-
-    const signature = await signProposerTypedData(
-      chain,
-      proposerAddress,
-      safeAddress,
-      'add',
-      signer,
-      SigningMethod.ETH_SIGN,
-    )
-
-    const hash = delegateUtils.hashDelegateTypedData(
-      delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
-    )
-    const v = parseInt(signature.slice(-2), 16)
-    expect([31, 32]).toContain(v)
-    expect(verifyMessage(getBytes(hash), `${signature.slice(0, -2)}${(v - 4).toString(16)}`)).toBe(wallet.address)
-  })
-})
-
-describe('proposer signing method and endpoint', () => {
+describe('usesV1DelegateEndpoint', () => {
   const wallet = connectedWalletBuilder().build()
-
-  it('signs with eth_sign only for eth_sign wallets', () => {
-    isEthSignWallet.mockReturnValue(true)
-    expect(getProposerSigningMethod(wallet)).toBe(SigningMethod.ETH_SIGN)
-
-    isEthSignWallet.mockReturnValue(false)
-    expect(getProposerSigningMethod(wallet)).toBe(SigningMethod.ETH_SIGN_TYPED_DATA)
-  })
 
   it('keeps eth_sign wallets on the v1 endpoints only where there is no queue service', () => {
     isEthSignWallet.mockReturnValue(true)
-    expect(isV1ProposerDelegation(transactionServiceChain(), wallet)).toBe(true)
-    expect(isV1ProposerDelegation(queueServiceChain(), wallet)).toBe(false)
+    expect(usesV1DelegateEndpoint(transactionServiceChain(), wallet)).toBe(true)
+    expect(usesV1DelegateEndpoint(queueServiceChain(), wallet)).toBe(false)
 
     isEthSignWallet.mockReturnValue(false)
-    expect(isV1ProposerDelegation(transactionServiceChain(), wallet)).toBe(false)
+    expect(usesV1DelegateEndpoint(transactionServiceChain(), wallet)).toBe(false)
   })
 })
 

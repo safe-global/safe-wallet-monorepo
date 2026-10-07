@@ -11,10 +11,8 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import {
   addressIsNotSmartContract,
-  getProposerSigningMethod,
-  isV1ProposerDelegation,
-  signProposerData,
-  signProposerTypedData,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
 } from '@/features/proposers/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
@@ -61,11 +59,16 @@ const signDelegation = async (
   // The Safe comes from a dropdown, not the URL, so the wallet may sit on any chain at submit time.
   const activeWallet = await assertWalletChain(onboard, chain.chainId)
 
-  const useV1Endpoint = isV1ProposerDelegation(chain, activeWallet)
+  const useV1Endpoint = usesV1DelegateEndpoint(chain, activeWallet)
   const signer = await getAssertedChainSigner(activeWallet.provider)
-  const signature = useV1Endpoint
-    ? await signProposerData(proposer, signer)
-    : await signProposerTypedData(chain, proposer, safeAddress, 'add', signer, getProposerSigningMethod(activeWallet))
+  const signature = await signProposerDelegation({
+    chain,
+    wallet: activeWallet,
+    proposerAddress: proposer,
+    safeAddress,
+    action: 'add',
+    signer,
+  })
 
   return { signature, useV1Endpoint, delegator: activeWallet.address }
 }

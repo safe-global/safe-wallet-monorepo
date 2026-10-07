@@ -7,10 +7,8 @@ import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
-  getProposerSigningMethod,
-  isV1ProposerDelegation,
-  signProposerData,
-  signProposerTypedData,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
 import {
@@ -142,7 +140,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         return
       }
 
-      const useV1Endpoint = isV1ProposerDelegation(chain, wallet)
+      const useV1Endpoint = usesV1DelegateEndpoint(chain, wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
       let signature: string
@@ -183,18 +181,14 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
         delegator = parentSafeAddress
       } else {
-        // Direct owner: sign delegate typed data directly
-        const eoaSignature = useV1Endpoint
-          ? await signProposerData(data.address, signer)
-          : await signProposerTypedData(
-              chain,
-              data.address,
-              safeAddress,
-              'add',
-              signer,
-              getProposerSigningMethod(wallet),
-            )
-        signature = eoaSignature
+        signature = await signProposerDelegation({
+          chain,
+          wallet,
+          proposerAddress: data.address,
+          safeAddress,
+          action: 'add',
+          signer,
+        })
         delegator = wallet.address
       }
 

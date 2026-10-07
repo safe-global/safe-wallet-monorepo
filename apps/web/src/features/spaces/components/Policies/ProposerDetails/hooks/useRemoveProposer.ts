@@ -3,12 +3,7 @@ import { useDelegatesDeleteDelegateV1Mutation } from '@safe-global/store/gateway
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '@/features/spaces/constants'
-import {
-  getProposerSigningMethod,
-  isV1ProposerDelegation,
-  signProposerData,
-  signProposerTypedData,
-} from '@/features/proposers/utils/utils'
+import { usesV1DelegateEndpoint, signProposerDelegation } from '@/features/proposers/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
@@ -64,24 +59,22 @@ export const useRemoveProposer = (ref: ProposerRef, onRemoved: () => void) => {
 
       const signer = await getAssertedChainSigner(wallet.provider)
 
-      if (isV1ProposerDelegation(chain, wallet)) {
-        const signature = await signProposerData(delegateAddress, signer)
+      const signature = await signProposerDelegation({
+        chain,
+        wallet,
+        proposerAddress: delegateAddress,
+        safeAddress,
+        action: 'delete',
+        signer,
+      })
 
+      if (usesV1DelegateEndpoint(chain, wallet)) {
         await deleteDelegateV1({
           chainId,
           delegateAddress,
           deleteDelegateDto: { delegate: delegateAddress, delegator, signature },
         }).unwrap()
       } else {
-        const signature = await signProposerTypedData(
-          chain,
-          delegateAddress,
-          safeAddress,
-          'delete',
-          signer,
-          getProposerSigningMethod(wallet),
-        )
-
         await deleteDelegate({
           chain,
           delegateAddress,

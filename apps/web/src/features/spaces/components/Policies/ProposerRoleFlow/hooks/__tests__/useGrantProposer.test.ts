@@ -4,7 +4,6 @@ import type { OnboardAPI } from '@web3-onboard/core'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { SigningMethod } from '@safe-global/types-kit'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import * as proposerUtils from '@/features/proposers/utils/utils'
@@ -109,8 +108,7 @@ describe.each([
     jest.spyOn(web3ReadOnlyModule, 'useWeb3ReadOnly').mockReturnValue(provider)
     jest.spyOn(sdk, 'getAssertedChainSigner').mockResolvedValue(signer)
     jest.spyOn(proposerUtils, 'addressIsNotSmartContract').mockReturnValue(async () => undefined)
-    jest.spyOn(proposerUtils, 'signProposerTypedData').mockResolvedValue('0xtyped')
-    jest.spyOn(proposerUtils, 'signProposerData').mockResolvedValue('0xethsign')
+    jest.spyOn(proposerUtils, 'signProposerDelegation').mockResolvedValue('0xsigned')
   })
 
   afterEach(() => {
@@ -126,32 +124,33 @@ describe.each([
     return { ok, result: rendered.result }
   }
 
-  it(`signs typed data for the selected Safe and posts it to the ${service} endpoint`, async () => {
+  it(`signs the delegation for the selected Safe and posts it to the ${service} endpoint`, async () => {
+    const connected = connect('MetaMask')
+
     const { ok } = await submit()
 
     expect(ok).toBe(true)
     expect(jest.mocked(useChainsModule.useChain)).toHaveBeenCalledWith(CHAIN_ID)
-    expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
+    expect(proposerUtils.signProposerDelegation).toHaveBeenCalledWith({
       chain,
-      PROPOSER,
-      SAFE,
-      'add',
+      wallet: connected,
+      proposerAddress: PROPOSER,
+      safeAddress: SAFE,
+      action: 'add',
       signer,
-      SigningMethod.ETH_SIGN_TYPED_DATA,
-    )
+    })
     expect(addDelegate.trigger).toHaveBeenCalledWith({
       chainId: CHAIN_ID,
       createDelegateDto: {
         delegate: PROPOSER,
         delegator: expect.any(String),
         label: PROPOSER_LABEL_PLACEHOLDER,
-        signature: '0xtyped',
+        signature: '0xsigned',
         safe: SAFE,
       },
     })
     expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
     expect(addV1.trigger).not.toHaveBeenCalled()
-    expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
   })
 
   it('uses the connected wallet as the delegator', async () => {
@@ -162,45 +161,21 @@ describe.each([
     expect(addDelegate.trigger.mock.calls[0][0].createDelegateDto.delegator).toBe(connected.address)
   })
 
-  if (isQueueService) {
-    it('eth_signs the delegate hash and posts it to the queue service for Trezor', async () => {
-      connect('Trezor')
+  it(`posts a Trezor delegation to the ${isQueueService ? service : 'v1'} endpoint`, async () => {
+    const connected = connect('Trezor')
+    const [submitted, notSubmitted] = isQueueService ? [addDelegate, addV1] : [addV1, addDelegate]
 
-      const { ok } = await submit()
+    const { ok } = await submit()
 
-      expect(ok).toBe(true)
-      expect(proposerUtils.signProposerTypedData).toHaveBeenCalledWith(
-        chain,
-        PROPOSER,
-        SAFE,
-        'add',
-        signer,
-        SigningMethod.ETH_SIGN,
-      )
-      expect(addDelegate.trigger).toHaveBeenCalledWith({
-        chainId: CHAIN_ID,
-        createDelegateDto: expect.objectContaining({ signature: '0xtyped', safe: SAFE }),
-      })
-      expect(addV1.trigger).not.toHaveBeenCalled()
-      expect(proposerUtils.signProposerData).not.toHaveBeenCalled()
+    expect(ok).toBe(true)
+    expect(proposerUtils.signProposerDelegation).toHaveBeenCalledWith(expect.objectContaining({ wallet: connected }))
+    expect(submitted.trigger).toHaveBeenCalledWith({
+      chainId: CHAIN_ID,
+      createDelegateDto: expect.objectContaining({ signature: '0xsigned', safe: SAFE }),
     })
-  } else {
-    it('uses eth_sign and the v1 endpoint for Trezor', async () => {
-      connect('Trezor')
-
-      const { ok } = await submit()
-
-      expect(ok).toBe(true)
-      expect(proposerUtils.signProposerData).toHaveBeenCalledWith(PROPOSER, signer)
-      expect(addV1.trigger).toHaveBeenCalledWith({
-        chainId: CHAIN_ID,
-        createDelegateDto: expect.objectContaining({ signature: '0xethsign', safe: SAFE }),
-      })
-      expect(addDelegate.trigger).not.toHaveBeenCalled()
-      expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
-      expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
-    })
-  }
+    expect(notSubmitted.trigger).not.toHaveBeenCalled()
+    expect(otherAddDelegate.trigger).not.toHaveBeenCalled()
+  })
 
   it('checks the proposer against the scoped chain and provider before signing', async () => {
     await submit()
@@ -278,7 +253,7 @@ describe.each([
 
     expect(sdk.assertWalletChain).toHaveBeenCalledWith(onboard, CHAIN_ID)
     const switchOrder = jest.mocked(sdk.assertWalletChain).mock.invocationCallOrder[0]
-    expect(jest.mocked(proposerUtils.signProposerTypedData).mock.invocationCallOrder[0]).toBeGreaterThan(switchOrder)
+    expect(jest.mocked(proposerUtils.signProposerDelegation).mock.invocationCallOrder[0]).toBeGreaterThan(switchOrder)
   })
 
   it('signs as the wallet returned by the chain switch, not the pre-switch one', async () => {
@@ -297,7 +272,7 @@ describe.each([
 
     expect(ok).toBe(false)
     expect(result.current.error?.message).toBe('Wallet connected to wrong chain.')
-    expect(proposerUtils.signProposerTypedData).not.toHaveBeenCalled()
+    expect(proposerUtils.signProposerDelegation).not.toHaveBeenCalled()
     expect(addDelegate.trigger).not.toHaveBeenCalled()
     expect(addOrRequestContact).not.toHaveBeenCalled()
   })
@@ -333,7 +308,7 @@ describe.each([
   })
 
   it('surfaces a rejected signature as an error without posting or saving the name', async () => {
-    jest.spyOn(proposerUtils, 'signProposerTypedData').mockRejectedValue(new Error('User rejected'))
+    jest.spyOn(proposerUtils, 'signProposerDelegation').mockRejectedValue(new Error('User rejected'))
 
     const { ok, result } = await submit()
 
