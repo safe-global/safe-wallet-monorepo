@@ -54,14 +54,15 @@ export const useGetIsWalletProposer = (): (() => Promise<boolean>) => {
 
   return useCallback(async () => {
     if (isProposer !== undefined) return isProposer
-    if (!walletAddress || !chainId || !safeAddress) return false
+    // Until the chain config says which service holds the delegates, there is nothing to ask
+    if (!walletAddress || !chainId || !safeAddress || isQueueService === undefined) return false
 
     try {
       return hasDelegate(await fetchProposers({ chainId, safe: safeAddress }, true).unwrap(), walletAddress)
     } catch {
       return false
     }
-  }, [isProposer, walletAddress, chainId, safeAddress, fetchProposers])
+  }, [isProposer, walletAddress, chainId, safeAddress, isQueueService, fetchProposers])
 }
 
 export const useIsWalletProposer = () => {
