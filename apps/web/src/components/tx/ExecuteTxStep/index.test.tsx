@@ -72,7 +72,7 @@ describe('ExecuteTxStep', () => {
       expect(setSafeTx).toHaveBeenCalledWith(reloadedTx)
       expect(screen.getByTestId('execute-action')).toBeInTheDocument()
     })
-    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, undefined)
+    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId)
     expect(screen.getByTestId('receipt')).toBeInTheDocument()
   })
 

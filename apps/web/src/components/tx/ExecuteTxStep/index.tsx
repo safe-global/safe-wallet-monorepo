@@ -11,7 +11,6 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
 import { Execute } from '@/components/tx-flow/actions/Execute'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
 import useTxPreview from '../confirmation-views/useTxPreview'
@@ -27,7 +26,6 @@ const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
  */
 export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
   const chainId = useChainId()
-  const scope = useSafeScope()
   const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { txId, onPrev } = useContext(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
@@ -37,13 +35,13 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
 
   useEffect(() => {
     if (!txId) return
-    createExistingTx(chainId, txId, undefined, scope)
+    createExistingTx(chainId, txId)
       .then((signedTx) => {
         setSafeTx(signedTx)
         setIsReloaded(true)
       })
       .catch(setSafeTxError)
-  }, [txId, chainId, scope, setSafeTx, setSafeTxError])
+  }, [txId, chainId, setSafeTx, setSafeTxError])
 
   const executeLater = () => {
     setTxFlow(undefined)
