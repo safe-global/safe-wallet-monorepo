@@ -9,10 +9,16 @@ import { getStoreInstance } from '@/store'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { txSubscribe, TxEvent } from '@/services/tx/txEvents'
+import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import { useDraftBatch, useUpdateBatch } from './useDraftBatch'
 import { selectBatchBySafe } from '../store/batchSlice'
 
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const safeInfo = extendedSafeInfoBuilder().build()
@@ -29,6 +35,7 @@ const selectBatch = (chainId: string) =>
 
 describe('useUpdateBatch', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     localStorage.clear()
     mockUseSafeInfo.mockReturnValue({
       safe: safeInfo,
@@ -82,5 +89,15 @@ describe('useUpdateBatch', () => {
     unsubscribe()
 
     expect(onBatchAdd).toHaveBeenCalledWith({ nonce: safeTx.data.nonce })
+  })
+
+  it('tracks the appended transaction with its type as the label', async () => {
+    const txType = faker.helpers.enumValue(TransactionInfoType)
+    const safeTx = createMockSafeTransaction({ to: faker.finance.ethereumAddress(), data: '0x' })
+
+    const { result } = renderBatchHooks()
+    await result.current.addToBatch(safeTx, txType)
+
+    expect(trackEvent).toHaveBeenCalledWith({ ...BATCH_EVENTS.BATCH_TX_APPENDED, label: txType })
   })
 })

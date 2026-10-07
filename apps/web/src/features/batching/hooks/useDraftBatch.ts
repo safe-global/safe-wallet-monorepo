@@ -10,6 +10,7 @@ import { shallowEqual } from 'react-redux'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 const getCallOnlyTxs = (safeTx: SafeTransaction): CallOnlyTxData[] => {
   const { to, value, data } = safeTx.data
@@ -27,14 +28,14 @@ export const useUpdateBatch = () => {
   const dispatch = useAppDispatch()
 
   const onAdd = useCallback(
-    async (safeTx: SafeTransaction): Promise<void> => {
+    async (safeTx: SafeTransaction, txType?: TransactionPreview['txInfo']['type']): Promise<void> => {
       getCallOnlyTxs(safeTx).forEach((txData) => {
         dispatch(addTx({ chainId, safeAddress, txData }))
       })
 
       txDispatch(TxEvent.BATCH_ADD, { nonce: safeTx.data.nonce })
 
-      trackEvent(BATCH_EVENTS.BATCH_TX_APPENDED)
+      trackEvent({ ...BATCH_EVENTS.BATCH_TX_APPENDED, label: txType })
     },
     [dispatch, chainId, safeAddress],
   )

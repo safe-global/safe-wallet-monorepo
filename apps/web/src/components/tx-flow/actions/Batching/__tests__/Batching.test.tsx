@@ -11,8 +11,15 @@ import { Batching } from '..'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxModalContext } from '@/components/tx-flow'
+import { txDataBuilder, txInfoBuilder } from '@/tests/builders/safeTx'
+import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 jest.mock('@/hooks/useSafeInfo')
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const safeInfo = extendedSafeInfoBuilder().build()
@@ -37,7 +44,11 @@ const safeTxContext: Omit<SafeTxContextParams, 'safeTx'> = {
   setGtfSelectedGasToken: jest.fn(),
 }
 
-const render = (safeTx: SafeTxContextParams['safeTx'], txFlowContext: Partial<TxFlowContextType> = {}) =>
+const render = (
+  safeTx: SafeTxContextParams['safeTx'],
+  txFlowContext: Partial<TxFlowContextType> = {},
+  txPreview?: TransactionPreview,
+) =>
   renderTestUtils(
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
       <TxFlowContext.Provider value={{ ...initialContext, setSubmitError, setIsSubmitLoading, ...txFlowContext }}>
@@ -48,6 +59,7 @@ const render = (safeTx: SafeTxContextParams['safeTx'], txFlowContext: Partial<Tx
             onChange={jest.fn()}
             options={[{ id: 'batching', label: 'Add to batch' }]}
             slotId="batching"
+            txPreview={txPreview}
           />
         </SafeTxContext.Provider>
       </TxFlowContext.Provider>
@@ -85,6 +97,18 @@ describe('Batching action', () => {
     ])
     expect(onSubmitSuccess).toHaveBeenCalledWith({ isExecuted: false })
     expect(setSubmitError).not.toHaveBeenCalledWith(expect.any(Error))
+  })
+
+  it('labels the batch tracking event with the previewed transaction type', async () => {
+    const txPreview: TransactionPreview = { txInfo: txInfoBuilder().build(), txData: txDataBuilder().build() }
+    const safeTx = createMockSafeTransaction({ to: faker.finance.ethereumAddress(), data: '0x' })
+
+    const { getByTestId } = render(safeTx, {}, txPreview)
+    fireEvent.click(getByTestId('combo-submit-batching'))
+
+    await waitFor(() => {
+      expect(trackEvent).toHaveBeenCalledWith({ ...BATCH_EVENTS.BATCH_TX_APPENDED, label: txPreview.txInfo.type })
+    })
   })
 
   it('shows a submit error when the transaction cannot be decoded', async () => {

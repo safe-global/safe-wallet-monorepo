@@ -33,6 +33,7 @@ import React, {
   type PropsWithChildren,
 } from 'react'
 import type { SubmitCallback } from '../TxFlow'
+import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 /**
  * Available slot names for action registration
@@ -49,6 +50,7 @@ type SlotComponentPropsMap = {
   [SlotName.Submit]: PropsWithChildren<{
     onSubmit?: () => void
     onSubmitSuccess?: SubmitCallback
+    txPreview?: TransactionPreview
   }>
   [SlotName.ComboSubmit]: PropsWithChildren<{
     onSubmit?: () => void
@@ -56,6 +58,7 @@ type SlotComponentPropsMap = {
     options: { label: string; id: string }[]
     onChange: (option: string) => void
     disabled?: boolean
+    txPreview?: TransactionPreview
   }>
 }
 

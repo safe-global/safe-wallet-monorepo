@@ -25,6 +25,7 @@ export const Batching = ({
   onChange,
   disabled = false,
   slotId,
+  txPreview,
 }: SlotComponentProps<SlotName.ComboSubmit>) => {
   const { setTxFlow } = useContext(TxModalContext)
   const [addToBatch] = useUpdateBatch()
@@ -46,7 +47,7 @@ export const Batching = ({
     setSubmitError(undefined)
 
     try {
-      await addToBatch(safeTx)
+      await addToBatch(safeTx, txPreview?.txInfo.type)
     } catch (_err) {
       const err = asError(_err)
       logError(Errors._819, err)
