@@ -11,7 +11,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { TOOLTIP_TITLES } from '../../common/constants'
 import type { UpsertRecoveryFlowProps } from '.'
-import { formatRecoveryPeriod } from './utils'
+import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -75,7 +75,7 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
           </>
         }
       >
-        {formatRecoveryPeriod(Number(delay))}
+        {getDetailedPeriod(Number(delay))}
       </TxDataRow>
 
       {expirySeconds !== 0 && (
@@ -92,7 +92,7 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
             </>
           }
         >
-          {formatRecoveryPeriod(expirySeconds)}
+          {getDetailedPeriod(expirySeconds)}
         </TxDataRow>
       )}
 
