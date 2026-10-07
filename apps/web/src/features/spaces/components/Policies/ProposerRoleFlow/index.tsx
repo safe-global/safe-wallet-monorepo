@@ -5,8 +5,11 @@ import { parseSafeScopeKey, useSafeScopeControls } from '@/components/tx-flow/sa
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
+import { useParentSafeWalletNotice } from '../hooks/useParentSafeWalletNotice'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { CREATE_POLICY_TITLE } from './constants'
+import { findSafeAccount } from '../SafeAccountSelector/utils'
+import { formatContactLabel } from '../utils/policyLabel'
+import { CREATE_POLICY_TITLE, PARENT_SAFE_WALLET_COPY } from './constants'
 import { useGrantProposer } from './hooks/useGrantProposer'
 import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm, { type ProposerRoleFormValues } from './ProposerRoleForm'
@@ -21,6 +24,9 @@ const ProposerRoleFlowContent = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const { grantProposerRole, isSubmitting, error, blockedReason, reset } = useGrantProposer()
 
+  const account = findSafeAccount(safeAccounts.accounts, safeAccount)
+  const parentSafeWallet = useParentSafeWalletNotice(account, PARENT_SAFE_WALLET_COPY)
+
   const onSafeAccountChange = useCallback(
     (value: string) => {
       reset()
@@ -34,9 +40,10 @@ const ProposerRoleFlowContent = (): ReactElement => {
 
   const onSubmit = useCallback(
     async (values: ProposerRoleFormValues) => {
-      if (await grantProposerRole(values)) setTxFlow(undefined)
+      const safeLabel = account && formatContactLabel(account.address, account.name)
+      if (await grantProposerRole(values, safeLabel)) setTxFlow(undefined)
     },
-    [grantProposerRole, setTxFlow],
+    [grantProposerRole, setTxFlow, account],
   )
 
   const errorMessage = error ? (
@@ -66,6 +73,7 @@ const ProposerRoleFlowContent = (): ReactElement => {
           validateProposer={validateProposer}
           isSubmitting={isSubmitting}
           errorMessage={errorMessage}
+          parentSafeWallet={parentSafeWallet}
         />
       </TxLayoutBase>
     </div>

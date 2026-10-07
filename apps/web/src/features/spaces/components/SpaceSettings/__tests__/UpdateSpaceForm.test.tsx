@@ -22,7 +22,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 
 // Helper to render with a specific store instance for notification assertions
 const renderWithStore = (ui: React.ReactElement) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const result = rtlRender(ui, {
     wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>,
   })

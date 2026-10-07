@@ -28,6 +28,9 @@ export type PolicyTokenInfo = {
   logoUri?: string | null
 }
 
+/** How a queued edit changes an allowance the policy already holds. Unset on active rows and on a brand-new policy. */
+export type PendingAllowanceChange = 'added' | 'changed' | 'removed'
+
 export type PolicyAllowance = {
   /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
   token: PolicyTokenInfo
@@ -41,6 +44,9 @@ export type PolicyAllowance = {
   resetPeriodMinutes: number
   /** Unix MINUTES; null when one-time. */
   resetsAtMinute: number | null
+  /** Unix SECONDS the allowance was set or re-set. Queued set-allowance changes omit it; queued resets and removals keep the active one's. */
+  createdAt?: number
+  change?: PendingAllowanceChange
 }
 
 export type PolicySpender = {
@@ -121,6 +127,9 @@ export type PendingSpendingLimitPolicy = PendingPolicyBase & { type: 'spending-l
 export type PendingRecoveryPolicy = PendingPolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type PendingPolicy = PendingSpendingLimitPolicy | PendingRecoveryPolicy
 
+/** Still in the queue, as opposed to executed and waiting for the indexer. */
+export type QueuedSpendingLimitPolicy = PendingSpendingLimitPolicy & { status: 'pending' }
+
 export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated'
 
 /** One table row: an active or a pending policy. */
@@ -131,9 +140,6 @@ export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
 
 export const isSpendingLimitPolicy = (policy: Policy): policy is Extract<Policy, { type: 'spending-limit' }> =>
   policy.type === 'spending-limit'
-
-export const isActiveSpendingLimitPolicy = (policy: Policy): policy is SpendingLimitPolicy & { status: 'active' } =>
-  policy.type === 'spending-limit' && policy.status === 'active'
 
 export const isProposerPolicy = (policy: Policy): policy is ProposerPolicy & { status: 'active' } =>
   policy.type === 'proposer'

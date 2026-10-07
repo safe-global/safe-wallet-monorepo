@@ -57,4 +57,96 @@ describe('LimitSummaryRow', () => {
 
     expect(screen.getByTestId('spending-limit-summary-frequency')).toHaveTextContent('1 hour')
   })
+
+  describe('when the row describes a change', () => {
+    const usdc = () => limitSummaryTokenBuilder().with({ symbol: 'USDC', decimals: 6 }).build()
+
+    it('says nothing about a change in the create flow', () => {
+      render(<LimitSummaryRow limit={limitSummaryBuilder().build()} chainId="1" />)
+
+      expect(screen.queryByTestId('limit-change-unchanged')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('limit-change-changed')).not.toBeInTheDocument()
+    })
+
+    it('shows both sides of a changed amount', () => {
+      const limit = limitSummaryBuilder()
+        .with({
+          token: usdc(),
+          amount: '80',
+          resetTimeMin: '1440',
+          change: 'changed',
+          previous: { amount: '100', resetTimeMin: '1440' },
+        })
+        .build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      const row = screen.getByTestId('spending-limit-summary-limit')
+      expect(row).toHaveTextContent(`${formatVisualAmount('100000000', 6)} USDC`)
+      expect(row).toHaveTextContent(`${formatVisualAmount('80000000', 6)} USDC`)
+      expect(screen.getByTestId('limit-change-changed')).toBeInTheDocument()
+    })
+
+    it('shows both sides of a changed reset period', () => {
+      const limit = limitSummaryBuilder()
+        .with({
+          token: usdc(),
+          amount: '100',
+          resetTimeMin: '43200',
+          change: 'changed',
+          previous: { amount: '100', resetTimeMin: '1440' },
+        })
+        .build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      const frequency = screen.getByTestId('spending-limit-summary-frequency')
+      expect(frequency).toHaveTextContent('Daily')
+      expect(frequency).toHaveTextContent('Monthly')
+    })
+
+    it('marks a removed row', () => {
+      const limit = limitSummaryBuilder().with({ token: usdc(), change: 'removed' }).build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      expect(screen.getByTestId('limit-change-removed')).toBeInTheDocument()
+    })
+
+    it('marks an added row', () => {
+      const limit = limitSummaryBuilder().with({ token: usdc(), change: 'added' }).build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      expect(screen.getByTestId('limit-change-added')).toBeInTheDocument()
+    })
+
+    it('warns that a partly used limit hands the whole new amount back at once', () => {
+      const limit = limitSummaryBuilder()
+        .with({
+          token: usdc(),
+          amount: '80',
+          resetTimeMin: '1440',
+          change: 'changed',
+          previous: { amount: '100', resetTimeMin: '1440' },
+          spent: '50000000',
+        })
+        .build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      expect(screen.getByTestId('spend-reset-warning')).toHaveTextContent('50 USDC already spent')
+      expect(screen.getByTestId('spend-reset-warning')).toHaveTextContent('full 80 USDC')
+    })
+
+    it('does not warn about a spend when nothing was spent', () => {
+      const limit = limitSummaryBuilder()
+        .with({ token: usdc(), change: 'changed', previous: { amount: '100', resetTimeMin: '1440' } })
+        .build()
+
+      render(<LimitSummaryRow limit={limit} chainId="1" />)
+
+      expect(screen.queryByTestId('spend-reset-warning')).not.toBeInTheDocument()
+    })
+  })
 })

@@ -13,7 +13,7 @@ const member = (id: number, email: string | null): MemberDto => ({
   invitedBy: null,
   createdAt: '2026-04-22T00:00:00.000Z',
   updatedAt: '2026-04-22T00:00:00.000Z',
-  user: { id, status: 'ACTIVE', email },
+  user: { id, status: 'ACTIVE', email, address: null },
 })
 
 const defaultSetup = createMockStory({

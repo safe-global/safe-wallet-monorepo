@@ -139,7 +139,7 @@ describe('AddAccountsChooser', () => {
     expect(screen.getByTestId(ADD_ROW)).not.toHaveAttribute('title')
   })
 
-  it('navigates to /new-safe/create with the originating page as `next` when "Create new Safe" is clicked', () => {
+  it('navigates to /new-safe/create with the Workspace and the originating page as `next` when "Create new Safe" is clicked', () => {
     render(<AddAccountsChooser entryPoint="dashboard" />)
 
     openChooser()
@@ -147,7 +147,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
@@ -157,7 +157,7 @@ describe('AddAccountsChooser', () => {
 
     openChooser()
 
-    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('Business includes 40 Safe accounts')
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('The Business plan includes 40 Safe accounts')
     expect(screen.getByText('Manage accounts')).toBeInTheDocument()
     expect(screen.getByText('Swap one out to add another · 40 of 40')).toBeInTheDocument()
     expect(screen.getByText('Create new')).toBeInTheDocument()
@@ -193,7 +193,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 
@@ -206,7 +206,7 @@ describe('AddAccountsChooser', () => {
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/new-safe/create',
-      query: { next: '/spaces?spaceId=1' },
+      query: { next: '/spaces?spaceId=1', spaceId: '1' },
     })
   })
 

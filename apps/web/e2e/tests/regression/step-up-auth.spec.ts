@@ -32,7 +32,7 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
         `${ns}auth`,
         JSON.stringify({
           sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-          lastUsedSpace: spaceId,
+          landingSpaceHint: spaceId,
           isStoreHydrated: false,
           cfSafeSynced: false,
           isOidcLoginPending: false,

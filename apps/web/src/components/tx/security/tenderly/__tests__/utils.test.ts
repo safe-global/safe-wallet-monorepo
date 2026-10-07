@@ -1,4 +1,7 @@
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
+import type { JsonRpcProvider } from 'ethers'
+import type Safe from '@safe-global/protocol-kit'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { zeroPadValue, Interface, toBeHex } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -323,6 +326,115 @@ describe('simulation utils', () => {
       expect(decodedTxData[0]).toBeDefined()
 
       expect(tenderlyPayload.state_objects).toBeUndefined()
+    })
+  })
+
+  describe('getSimulationPayload under a SafeScope', () => {
+    beforeEach(() => {
+      jest.clearAllMocks()
+    })
+
+    const scope: TxSenderScope = {
+      chainId: '11155111',
+      safeAddress: zeroPadValue('0x0123', 20),
+      sdk: {} as Safe,
+      web3ReadOnly: {
+        getBlock: () => Promise.resolve({ gasLimit: BigInt(17_000_000) }),
+      } as unknown as JsonRpcProvider,
+    }
+    const mockSafeInfo: Partial<SafeState> = {
+      threshold: 1,
+      nonce: 0,
+      chainId: '11155111',
+      version: '1.3.0',
+      address: { value: zeroPadValue('0x0123', 20) },
+    }
+    const mockTx: SafeTransaction = new EthSafeTransaction({
+      to: ZERO_ADDRESS,
+      value: '0x0',
+      data: '0x',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: ZERO_ADDRESS,
+      nonce: 0,
+      operation: 0,
+      refundReceiver: ZERO_ADDRESS,
+      safeTxGas: '0',
+    })
+
+    it('resolves the Safe contract through the scope', async () => {
+      await getSimulationPayload(
+        {
+          executionOwner: zeroPadValue('0x01', 20),
+          gasLimit: 50_000,
+          safe: mockSafeInfo as SafeState,
+          transactions: mockTx,
+        },
+        scope,
+      )
+
+      expect(safeContracts.getReadOnlyCurrentGnosisSafeContract).toHaveBeenCalledWith(mockSafeInfo, scope)
+    })
+
+    it('resolves the multiSend contract through the scope', async () => {
+      await getSimulationPayload(
+        {
+          executionOwner: zeroPadValue('0x01', 20),
+          gasLimit: 50_000,
+          safe: mockSafeInfo as SafeState,
+          transactions: [{ data: '0x', to: ZERO_ADDRESS, value: '0', operation: 0 }],
+        },
+        scope,
+      )
+
+      expect(safeContracts.getReadOnlyMultiSendCallOnlyContract).toHaveBeenCalledWith(
+        '1.3.0',
+        '11155111',
+        undefined,
+        scope,
+      )
+    })
+
+    it('throws instead of falling back to the app-wide provider when the scope has none yet', async () => {
+      const scopeWithoutProvider: TxSenderScope = { ...scope, web3ReadOnly: undefined }
+
+      await expect(
+        getSimulationPayload(
+          {
+            executionOwner: zeroPadValue('0x01', 20),
+            safe: mockSafeInfo as SafeState,
+            transactions: mockTx,
+          },
+          scopeWithoutProvider,
+        ),
+      ).rejects.toThrow('The provider for the selected Safe account is not initialized yet.')
+
+      expect(Web3.getWeb3ReadOnly).not.toHaveBeenCalled()
+    })
+
+    it('reads the block gas limit from the app-wide provider without a scope', async () => {
+      const tenderlyPayload = await getSimulationPayload({
+        executionOwner: zeroPadValue('0x01', 20),
+        safe: mockSafeInfo as SafeState,
+        transactions: mockTx,
+      })
+
+      expect(tenderlyPayload.gas).toEqual(30_000_000)
+      expect(Web3.getWeb3ReadOnly).toHaveBeenCalled()
+    })
+
+    it('reads the block gas limit from the scoped provider', async () => {
+      const tenderlyPayload = await getSimulationPayload(
+        {
+          executionOwner: zeroPadValue('0x01', 20),
+          safe: mockSafeInfo as SafeState,
+          transactions: mockTx,
+        },
+        scope,
+      )
+
+      expect(tenderlyPayload.gas).toEqual(17_000_000)
+      expect(Web3.getWeb3ReadOnly).not.toHaveBeenCalled()
     })
   })
 })

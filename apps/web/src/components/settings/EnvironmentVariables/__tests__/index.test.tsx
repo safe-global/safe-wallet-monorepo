@@ -40,7 +40,7 @@ jest.mock('@/services/analytics', () => ({
 
 // Helper function to render with store access
 const renderWithStore = (ui: React.ReactElement, initialReduxState?: Partial<RootState>) => {
-  const store = makeStore(initialReduxState, { skipBroadcast: true })
+  const store = makeStore(initialReduxState)
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   const result = rtlRender(ui, { wrapper })
   return { ...result, store }

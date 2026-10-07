@@ -109,7 +109,6 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
     triggerVariant?: 'default' | 'addToWorkspace'
     selectedSpace?: unknown
     spaces?: unknown
-    onSpaceAdded?: () => void
   }) => {
     spaceSelectorDropdownMock(props)
     return props.triggerVariant === 'addToWorkspace' ? (
@@ -278,14 +277,11 @@ describe('SafeSidebarWorkspaceHeader', () => {
 
     it('renders SpaceSelectorDropdown when at least one space exists', () => {
       const spaces = [{ id: 1, uuid: 'uuid-1', name: 'My Space', safeCount: 1, members: adminMembers }]
-      const onSpaceAdded = jest.fn()
-
       render(
         <SafeSidebarWorkspaceHeader
           workspaceHeader={createAddHeader({
             spaces,
             selectedSpace: spaces[0],
-            onSpaceAdded,
           })}
         />,
       )
@@ -297,7 +293,6 @@ describe('SafeSidebarWorkspaceHeader', () => {
           triggerVariant: 'addToWorkspace',
           selectedSpace: spaces[0],
           spaces,
-          onSpaceAdded,
         }),
       )
     })

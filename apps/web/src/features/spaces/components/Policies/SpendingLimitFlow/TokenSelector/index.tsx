@@ -17,9 +17,11 @@ import {
 } from '@/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
 import { matchesTokenQuery } from '../utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
+import DisabledTokenOption from './DisabledTokenOption'
 import { TokenGroupError, TokenGroupLoading } from './TokenGroupState'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -38,6 +40,9 @@ export type TokenSelectorProps = {
   onChange: (address: string | undefined) => void
   /** Never hides `value` itself. Pass a stable reference — a new array each render recomputes the list. */
   excludeAddresses?: string[]
+  /** Listed and searchable but not selectable; hovering one shows `disabledAddressReason`. */
+  disabledAddresses?: string[]
+  disabledAddressReason?: string
   disabled?: boolean
   label?: string
   placeholder?: string
@@ -73,6 +78,8 @@ const TokenSelector = ({
   value,
   onChange,
   excludeAddresses,
+  disabledAddresses,
+  disabledAddressReason,
   disabled = false,
   label = TOKEN_SELECTOR_LABEL,
   placeholder = TOKEN_SELECTOR_PLACEHOLDER,
@@ -86,8 +93,9 @@ const TokenSelector = ({
   const fieldId = id ?? generatedId
   // Base UI anchors the popup to the <input>; anchoring to the InputGroup makes it match the visible field.
   const fieldAnchor = useComboboxAnchor()
+  const extraTokens = useExistingLimitTokens()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
-    useSpendingLimitTokenOptions()
+    useSpendingLimitTokenOptions(extraTokens)
 
   const visibleOptions = useMemo(
     () =>
@@ -187,11 +195,15 @@ const TokenSelector = ({
               <ComboboxGroup key={group.value} items={group.items}>
                 <ComboboxLabel>{GROUP_LABELS[group.value]}</ComboboxLabel>
                 <ComboboxCollection>
-                  {(option: TokenOption) => (
-                    <ComboboxItem key={option.address} value={option} data-testid="token-option">
-                      <TokenOptionRow option={option} />
-                    </ComboboxItem>
-                  )}
+                  {(option: TokenOption) =>
+                    disabledAddresses?.some((address) => sameAddress(address, option.address)) ? (
+                      <DisabledTokenOption key={option.address} option={option} reason={disabledAddressReason} />
+                    ) : (
+                      <ComboboxItem key={option.address} value={option} data-testid="token-option">
+                        <TokenOptionRow option={option} />
+                      </ComboboxItem>
+                    )
+                  }
                 </ComboboxCollection>
               </ComboboxGroup>
             )}

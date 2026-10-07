@@ -23,7 +23,7 @@ export const POLICY_CATALOGUE: PolicyCatalogueEntry[] = [
   },
   {
     id: 'proposer',
-    title: 'Proposer',
+    title: 'Proposer role',
     description: 'Let teammates without signing rights propose transactions.',
     Icon: UserRoundPen,
     action: 'Set policy',

@@ -1,5 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import ChangePlanDialog from '../ChangePlanDialog'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 import type { PlanPick } from '../types'
 
 const mockPreviewChange = jest.fn()
@@ -17,10 +21,22 @@ jest.mock('../../../hooks/billing/useChangePlan', () => ({
     ...mockState,
   }),
 }))
-const mockTrim = jest.fn()
-let mockTrimState: Record<string, unknown> = {}
-jest.mock('../../../hooks/billing/useSeatTrim', () => ({
-  useSeatTrim: () => ({ trim: mockTrim, isTrimming: false, error: undefined, ...mockTrimState }),
+
+const leaf = (chainId: string, address: string) => ({
+  chainId,
+  address,
+  isReadOnly: false,
+  isPinned: false,
+  lastVisited: 0,
+  name: '',
+})
+
+let mockAllSafes: unknown[] = [
+  { address: '0xB', name: 'Payroll', isPinned: false, lastVisited: 0, safes: [leaf('1', '0xB'), leaf('10', '0xB')] },
+  leaf('1', '0xC'),
+]
+jest.mock('../../../hooks/useSpaceSafes', () => ({
+  useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
 }))
 
 const pick: PlanPick = {
@@ -36,6 +52,7 @@ const pick: PlanPick = {
     paymentLinkId: 'pl_starter',
     priceId: 'price_starter',
     label: '2 Safe accounts',
+    seats: 2,
     price: 189,
     originalPrice: null,
   },
@@ -47,8 +64,11 @@ const currentPlan = {
   billingCycle: 'month' as const,
   isTrialing: false,
   periodEndsAt: '2026-12-06T00:00:00Z',
+  seats: 20,
   seatsLabel: '20 Safe accounts',
 }
+const ENTRY = { 'Entry Point': 'sidebar' }
+const CHANGE = { 'From Plan': 'business', 'To Plan': 'starter', 'From Seats': 20, 'To Seats': 2 }
 const preview = {
   amountDue: -31000,
   currency: 'eur',
@@ -63,14 +83,13 @@ describe('ChangePlanDialog', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockState = {}
-    mockTrimState = {}
-    mockTrim.mockResolvedValue(true)
   })
 
   it('previews the picked price on open and shows a skeleton until it arrives', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}
@@ -91,6 +110,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={onClose}
@@ -114,16 +134,22 @@ describe('ChangePlanDialog', () => {
 
     await waitFor(() => expect(onChanged).toHaveBeenCalled())
     expect(onClose).not.toHaveBeenCalled()
-    expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter')
+    expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', [])
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.PLAN_CHANGE_CONFIRMED, {
+      ...CHANGE,
+      'Amount Due': -310,
+      ...ENTRY,
+    })
   })
 
-  it('removes the Safes left out before the change and says so in the summary', async () => {
+  it('sends the Safes left out with the change and says so in the summary', async () => {
     mockState = { preview }
     mockChangePlan.mockResolvedValue(true)
-    const removed = [{ chainId: '1', address: '0xB' }]
+    const removed = [{ chainId: '1', address: '0xC' }]
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         removed={removed}
@@ -133,24 +159,69 @@ describe('ChangePlanDialog', () => {
     )
 
     expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
-      '1 Safe account will be removed from the Workspace. They remain available in My accounts.',
+      '1 Safe account will be removed from the Workspace. It remains available in My accounts.',
     )
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
-    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
-    expect(mockTrim).toHaveBeenCalledWith(removed)
-    expect(mockTrim.mock.invocationCallOrder[0]).toBeLessThan(mockChangePlan.mock.invocationCallOrder[0])
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', removed))
+    expect(mockChangePlan).toHaveBeenCalledTimes(1)
   })
 
-  it('stops before the change when the removal fails and shows why', async () => {
+  it('counts a Safe left out on every chain as one account in the summary', () => {
     mockState = { preview }
-    mockTrim.mockResolvedValue(false)
-    mockTrimState = { error: 'We couldn’t update the Workspace. Please try again.' }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        entry={ENTRY}
+        removed={[
+          { chainId: '1', address: '0xB' },
+          { chainId: '10', address: '0xB' },
+          { chainId: '1', address: '0xC' },
+        ]}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '2 Safe accounts will be removed from the Workspace. They remain available in My accounts.',
+    )
+  })
+
+  it('says a Safe left out on some chains only keeps its seat', () => {
+    mockState = { preview }
+    render(
+      <ChangePlanDialog
+        spaceId="space-1"
+        pick={pick}
+        currentPlan={currentPlan}
+        entry={ENTRY}
+        removed={[
+          { chainId: '10', address: '0xB' },
+          { chainId: '1', address: '0xC' },
+        ]}
+        onClose={jest.fn()}
+        onChanged={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByTestId('change-plan-removed-note')).toHaveTextContent(
+      '1 Safe account will be removed from the Workspace, and 1 more from 1 of its networks only. The removed account remains available in My accounts, the other keeps its seat.',
+    )
+  })
+
+  it('keeps the dialog open with the server message when the change fails after the Safes were removed', async () => {
+    const message = 'Your Safes were removed, but the plan change failed. Please try again.'
+    mockState = { preview, changeError: { status: 502, data: { message } } }
+    mockChangePlan.mockResolvedValue(false)
     const onClose = jest.fn()
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         removed={[{ chainId: '1', address: '0xB' }]}
@@ -161,11 +232,10 @@ describe('ChangePlanDialog', () => {
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
 
-    await waitFor(() => expect(mockTrim).toHaveBeenCalled())
-    expect(mockChangePlan).not.toHaveBeenCalled()
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalled())
     expect(onClose).not.toHaveBeenCalled()
-    expect(screen.getByText('We couldn’t update the Workspace. Please try again.')).toBeInTheDocument()
-    expect(screen.queryByTestId('change-plan-removed-note')).toBeInTheDocument()
+    expect(screen.getByText(message)).toBeInTheDocument()
+    expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
   })
 
   it('keeps the dialog open and shows the error when the change is rejected', async () => {
@@ -175,6 +245,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={onClose}
@@ -194,6 +265,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={{ ...currentPlan, price: 49 }}
         onClose={jest.fn()}
@@ -211,6 +283,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={{ ...currentPlan, isTrialing: true }}
         onClose={jest.fn()}
@@ -226,7 +299,7 @@ describe('ChangePlanDialog', () => {
     expect(screen.getByTestId('change-plan-confirm')).toBeEnabled()
 
     fireEvent.click(screen.getByTestId('change-plan-confirm'))
-    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter'))
+    await waitFor(() => expect(mockChangePlan).toHaveBeenCalledWith('price_starter', 'pl_starter', []))
   })
 
   it('surfaces a preview error instead of the breakdown', () => {
@@ -234,6 +307,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}
@@ -251,6 +325,7 @@ describe('ChangePlanDialog', () => {
     render(
       <ChangePlanDialog
         spaceId="space-1"
+        entry={ENTRY}
         pick={pick}
         currentPlan={currentPlan}
         onClose={jest.fn()}

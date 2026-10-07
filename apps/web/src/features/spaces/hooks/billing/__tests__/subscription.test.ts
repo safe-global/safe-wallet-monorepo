@@ -8,6 +8,7 @@ import {
   getSubscriptionSeats,
   trialLabel,
   isPlanChangeable,
+  isSpaceDeletionBlocked,
   selectCurrentSubscription,
   selectLatestSubscription,
 } from '../subscription'
@@ -34,6 +35,17 @@ describe('subscription', () => {
 
   it.each(['active', 'trialing'] as const)('can change plan while %s', (status) => {
     expect(isPlanChangeable(status)).toBe(true)
+  })
+
+  it.each(['trialing', 'active', 'payment_failed', 'pending'] as const)(
+    'blocks deleting the Workspace while %s',
+    (status) => {
+      expect(isSpaceDeletionBlocked(status)).toBe(true)
+    },
+  )
+
+  it.each(['none', 'canceled'] as const)('allows deleting the Workspace while %s', (status) => {
+    expect(isSpaceDeletionBlocked(status)).toBe(false)
   })
 
   it.each([

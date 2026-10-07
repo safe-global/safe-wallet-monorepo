@@ -8,7 +8,9 @@ import type {
   RpcUri,
   Theme,
   Chain,
+  Relayer,
 } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import type { GasPaymentOption } from '@safe-global/utils/utils/gasPaymentOptions'
 
 import { Builder } from '@/tests/Builder'
 import { generateRandomArray } from './utils'
@@ -98,3 +100,12 @@ export const chainBuilder = (): IBuilder<Chain> => {
     recommendedMasterCopyVersion: faker.system.semver(),
   })
 }
+
+export const gasPaymentRelayer = (options: GasPaymentOption[], overrides?: Partial<Relayer>): Relayer => ({
+  type: null,
+  safeCreationSponsored: false,
+  safeTransactionSponsored: false,
+  enableTenderlySimulationBeforeRelay: false,
+  ...overrides,
+  gasPaymentOptions: options,
+})

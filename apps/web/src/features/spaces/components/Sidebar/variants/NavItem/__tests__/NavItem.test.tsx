@@ -12,6 +12,11 @@ jest.mock('@/services/analytics', () => ({
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 
+const mockTrackPlanSelectionStarted = jest.fn()
+jest.mock('../../../../Plans/planSelection', () => ({
+  trackPlanSelectionStarted: (p: unknown) => mockTrackPlanSelectionStarted(p),
+}))
+
 jest.mock('@/services/analytics/ga-mixpanel-mapping', () => ({
   GA_LABEL_TO_MIXPANEL_PROPERTY: { sidebar: 'Sidebar' },
 }))
@@ -382,6 +387,12 @@ describe('NavItem', () => {
         expect.objectContaining({ action: 'Open Stake', label: 'sidebar' }),
         undefined,
       )
+    })
+
+    it('starts plan selection from the sidebar when clicking the Plans nav item', () => {
+      render(<NavItem item={{ ...baseItem, href: '/spaces/plans', link: { pathname: '/spaces/plans', query: {} } }} />)
+      fireEvent.click(screen.getByRole('link'))
+      expect(mockTrackPlanSelectionStarted).toHaveBeenCalledWith({ entryPoint: 'sidebar' })
     })
 
     it('fires OPEN_EARN_PAGE and SIDEBAR_CLICKED when clicking the Earn nav item', () => {

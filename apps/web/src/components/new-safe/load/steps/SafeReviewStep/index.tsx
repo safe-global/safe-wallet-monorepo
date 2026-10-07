@@ -83,6 +83,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
 
     router.push({
       pathname: AppRoutes.home,
+      // eslint-disable-next-line no-restricted-syntax -- A loaded Safe goes to My accounts, not to a Workspace
       query: { safe: `${chain?.shortName}:${safeAddress}` },
     })
   }

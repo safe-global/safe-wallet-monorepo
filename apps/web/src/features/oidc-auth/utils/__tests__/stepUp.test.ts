@@ -37,6 +37,13 @@ describe('startStepUp', () => {
     expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/settings?spaceId=7')
   })
 
+  it('should, when the redirect is a path, return to that path on the current origin', () => {
+    startStepUp('/welcome/select-safes?spaceId=7')
+
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/select-safes?spaceId=7')
+  })
+
   it('should, when the current URL carries stale error params, strip them from the return URL', () => {
     window.history.replaceState(null, '', '/spaces/members?spaceId=42&error=access_denied&error_description=nope')
 

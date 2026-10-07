@@ -11,7 +11,7 @@ import {
 } from '../../mocks/policies'
 import type { PolicyTokenInfo } from '../../types'
 import { mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
-import { isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
+import { getPendingTxId, isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 
 const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
 
@@ -95,6 +95,64 @@ describe('mapPendingPolicies', () => {
     })
   })
 
+  it('should, when an edit of an active policy re-adds its delegate, render an update rather than a creation', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'add-delegate', delegate: MOCK_ADDRESSES.alice },
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: MOCK_TOKENS.usdc.address,
+            amount: '2000000000',
+            resetPeriodMinutes: 43_200,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('update')
+  })
+
+  it('should, when a new spender is added to an active policy, render a creation', () => {
+    const [row] = mapPendingPolicies([mockPendingDto()], activeRows(), resolveKnownTokens)
+
+    expect(row.operation).toBe('create')
+  })
+
+  it('should, when an existing spender gets a token it had no limit for, render a creation', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'add-delegate', delegate: MOCK_ADDRESSES.alice },
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: ZERO_ADDRESS,
+            amount: '100000000000000000',
+            resetPeriodMinutes: 0,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('create')
+  })
+
+  it('should, when the queued tx enables the module, render a creation even beside an active policy', () => {
+    const [row] = mapPendingPolicies(
+      [withChanges([{ kind: 'enable-module' }, ...mockPendingDto().data.changes])],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('create')
+  })
+
   it('should, when a used limit is edited as a reset then a set, render one allowance with nothing spent', () => {
     const [row] = mapPendingPolicies(
       [
@@ -173,6 +231,23 @@ describe('mapPendingPolicies', () => {
     expect(row.data.spenders[0].allowances).toHaveLength(1)
   })
 
+  it('should, when an edit deletes the allowances and then the spender, list each allowance once', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'delete-allowance', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+          { kind: 'remove-delegate', delegate: MOCK_ADDRESSES.alice, removeAllowances: false },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.operation).toBe('remove')
+    expect(row.data.spenders).toHaveLength(1)
+    expect(row.data.spenders[0].allowances).toHaveLength(1)
+  })
+
   it('should, when an allowance is reset, show it with nothing spent', () => {
     const [row] = mapPendingPolicies(
       [
@@ -190,6 +265,66 @@ describe('mapPendingPolicies', () => {
 
     expect(row.operation).toBe('update')
     expect(row.data.spenders[0].allowances[0]).toMatchObject({ spent: '0', remaining: '1500000000' })
+  })
+
+  it('should, when an edit removes one limit and adds another, mark which is which', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          { kind: 'delete-allowance', delegate: MOCK_ADDRESSES.alice, token: MOCK_TOKENS.usdc.address },
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: ZERO_ADDRESS,
+            amount: '100000000000000000',
+            resetPeriodMinutes: 0,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.data.spenders[0].allowances.map(({ token, change }) => [token.symbol, change])).toEqual([
+      ['USDC', 'removed'],
+      ['ETH', 'added'],
+    ])
+  })
+
+  it('should, when an edit changes an existing limit, mark it changed', () => {
+    const [row] = mapPendingPolicies(
+      [
+        withChanges([
+          {
+            kind: 'set-allowance',
+            delegate: MOCK_ADDRESSES.alice,
+            token: MOCK_TOKENS.usdc.address,
+            amount: '2000000000',
+            resetPeriodMinutes: 43_200,
+          },
+        ]),
+      ],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.data.spenders[0].allowances[0].change).toBe('changed')
+  })
+
+  it('should, when a delegate is removed, mark each of its limits removed', () => {
+    const [row] = mapPendingPolicies(
+      [withChanges([{ kind: 'remove-delegate', delegate: MOCK_ADDRESSES.alice, removeAllowances: true }])],
+      activeRows(),
+      resolveKnownTokens,
+    )
+
+    expect(row.data.spenders[0].allowances.every(({ change }) => change === 'removed')).toBe(true)
+  })
+
+  it('should, when the queued tx creates a policy with nothing active, mark no limit', () => {
+    const [row] = mapPendingPolicies([mockPendingDto()], [], resolveKnownTokens)
+
+    expect(row.data.spenders[0].allowances[0]).not.toHaveProperty('change')
   })
 
   it('should, when a token is unknown, fall back to base units and a short address', () => {
@@ -252,7 +387,37 @@ describe('isPendingChangeIndexed', () => {
     expect(isPendingChangeIndexed(removal, active({ data: { spenders: [] } }))).toBe(true)
   })
 
+  it('should, for an edit that also removes a limit, report it indexed only once that limit is gone', () => {
+    const [usdc, usdt] = alice.allowances
+    const edit = {
+      ...queued,
+      data: { spenders: [{ ...alice, allowances: [usdc, { ...usdt, change: 'removed' as const }] }] },
+    }
+    const withoutUsdt = { spenders: [{ ...alice, allowances: [usdc] }] }
+
+    expect(isPendingChangeIndexed(edit, active())).toBe(false)
+    expect(isPendingChangeIndexed(edit, active({ data: withoutUsdt }))).toBe(true)
+  })
+
+  it('should, for an edit that removes a whole spender, not wait for that spender to appear', () => {
+    const leaving = {
+      spender: MOCK_ADDRESSES.bob,
+      allowances: [{ ...alice.allowances[0], change: 'removed' as const }],
+    }
+    const edit = { ...queued, data: { spenders: [alice, leaving] } }
+
+    expect(isPendingChangeIndexed(edit, active())).toBe(true)
+  })
+
   it('should not match an active policy on another Safe', () => {
     expect(isPendingChangeIndexed({ ...queued, safe: { ...queued.safe, chainId: '137' } }, active())).toBe(false)
+  })
+})
+
+describe('getPendingTxId', () => {
+  it('builds the CGW multisig id from the Safe and the safeTxHash', () => {
+    const policy = mockPendingPolicy()
+
+    expect(getPendingTxId(policy)).toBe(`multisig_${policy.safe.address}_${policy.safeTxHash}`)
   })
 })

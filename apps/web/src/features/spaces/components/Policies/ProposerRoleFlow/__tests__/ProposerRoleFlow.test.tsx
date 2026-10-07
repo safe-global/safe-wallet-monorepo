@@ -9,11 +9,13 @@ import { SIGNERS_ONLY_COPY } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
+import { useParentSafeWallet } from '../../hooks/useParentSafeWallet'
 import ProposerRoleFlow from '../index'
 
 jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
+jest.mock('../../hooks/useParentSafeWallet', () => ({ useParentSafeWallet: jest.fn() }))
 jest.mock('@/features/safe-shield', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,
@@ -60,6 +62,7 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => {
 
 const mockUseEligibleSafeAccounts = jest.mocked(useEligibleSafeAccounts)
 const mockUseGrantProposer = jest.mocked(useGrantProposer)
+const mockUseParentSafeWallet = jest.mocked(useParentSafeWallet)
 
 const PROPOSER = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
@@ -82,9 +85,9 @@ const renderFlow = () => {
   return { ...rendered, setTxFlow }
 }
 
-const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user']) => {
+const fillAndSubmit = async (user: ReturnType<typeof renderFlow>['user'], safeOption: RegExp = /Treasury/) => {
   await user.click(screen.getByTestId('safe-account-selector'))
-  await user.click(await screen.findByRole('option', { name: /Treasury/ }))
+  await user.click(await screen.findByRole('option', { name: safeOption }))
   await user.click(screen.getByRole('combobox', { name: 'Proposer' }))
   await user.paste(PROPOSER)
   await user.click(screen.getByRole('textbox', { name: 'Proposer name' }))
@@ -123,6 +126,7 @@ describe('ProposerRoleFlow', () => {
       refetch: jest.fn(),
     })
     mockUseGrantProposer.mockReturnValue(grantState())
+    mockUseParentSafeWallet.mockReturnValue(undefined)
   })
 
   it('renders the page title and the policy header', () => {
@@ -199,16 +203,73 @@ describe('ProposerRoleFlow', () => {
     expect(refetch).toHaveBeenCalled()
   })
 
+  describe('parent Safe wallet', () => {
+    const PARENT = '0x2222222222222222222222222222222222222222'
+
+    it('checks the wallet against the picked chain and names the parent from the address book', async () => {
+      mockUseParentSafeWallet.mockReturnValue(PARENT)
+      const setTxFlow = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <ProposerRoleFlow />
+        </TxModalContext.Provider>,
+        { initialReduxState: { addressBook: { '137': { [PARENT]: 'Ops' } } }, routerProps: { push } },
+      )
+
+      expect(screen.queryByTestId('parent-safe-wallet-notice')).not.toBeInTheDocument()
+
+      await user.click(screen.getByTestId('safe-account-selector'))
+      await user.click(await screen.findByRole('option', { name: /Treasury/ }))
+
+      expect(mockUseParentSafeWallet).toHaveBeenLastCalledWith('137')
+      expect(await screen.findByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+        'Your connected wallet, Ops, is a parent Safe account of Treasury.',
+      )
+      expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+        'href',
+        expect.stringContaining(`safe=matic%3A${SAFE}`),
+      )
+      expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
+
+      await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
+
+      expect(setTxFlow).toHaveBeenCalledWith(undefined, undefined, false)
+      expect(push).toHaveBeenCalledWith({
+        pathname: '/settings/setup',
+        query: { safe: `matic:${SAFE}` },
+      })
+    })
+  })
+
   describe('submitting', () => {
-    it('grants the proposer and closes the flow on success', async () => {
+    it('grants the proposer, labelled with the picked Safe, and closes the flow on success', async () => {
       const grantProposerRole = jest.fn().mockResolvedValue(true)
       mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
       const { user, setTxFlow } = renderFlow()
 
       await fillAndSubmit(user)
 
-      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' })
+      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, 'Treasury (0xAAAA...AAaA)')
       await waitFor(() => expect(setTxFlow).toHaveBeenCalledWith(undefined))
+    })
+
+    it('labels the Safe by address alone when it has no name', async () => {
+      const grantProposerRole = jest.fn().mockResolvedValue(true)
+      mockUseGrantProposer.mockReturnValue(grantState({ grantProposerRole }))
+      mockUseEligibleSafeAccounts.mockReturnValue({
+        accounts: [{ ...treasury, name: undefined }],
+        isLoading: false,
+        isError: false,
+        hasWallet: true,
+        signersOnly: true,
+        refetch: jest.fn(),
+      })
+      const { user } = renderFlow()
+
+      await fillAndSubmit(user, /0xAAAA/)
+
+      expect(grantProposerRole).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Nicole' }, '0xAAAA...AAaA')
     })
 
     it('clears a previous error when another Safe account is picked', async () => {

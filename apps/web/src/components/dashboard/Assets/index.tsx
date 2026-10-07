@@ -9,7 +9,6 @@ import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
 import { WidgetCard } from '../styled'
 import css from './styles.module.css'
-import { useRouter } from 'next/router'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { useVisibleAssets } from '@/components/balances/AssetsTable/useHideAssets'
 import SendButton from '@/components/balances/AssetsTable/SendButton'
@@ -25,6 +24,7 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { StakeFeature } from '@/features/stake'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const MAX_ASSETS = 4
 
@@ -141,8 +141,7 @@ const AssetList = ({ items }: { items: Balances['items'] }) => {
 export const isNonZeroBalance = (item: Balances['items'][number]) => item.balance !== '0'
 
 const AssetsWidget = () => {
-  const router = useRouter()
-  const { safe } = router.query
+  const safeLinkQuery = useSafeLinkQuery()
   const { loading, balances } = useBalances()
   const visibleAssets = useVisibleAssets()
 
@@ -153,9 +152,9 @@ const AssetsWidget = () => {
   const viewAllUrl = useMemo(
     () => ({
       pathname: AppRoutes.balances.index,
-      query: { safe },
+      query: safeLinkQuery,
     }),
-    [safe],
+    [safeLinkQuery],
   )
 
   const isLoading = loading || !balances.fiatTotal

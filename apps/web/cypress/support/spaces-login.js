@@ -13,16 +13,3 @@ export function signInToSpaces(signer = spacesOwner) {
   space.clickOnSignInBtn()
   space.waitForSpacesWelcomeReady()
 }
-
-export const plans = {
-  business: 'Business',
-  starter: 'Starter',
-}
-
-/** Stubs the Workspace's plan with the given entitlements. Register before signing in. */
-export function stubWorkspacePlan(plan, entitlements) {
-  cy.intercept('GET', constants.spacesEntitlementsEndpoint, {
-    plan: { id: plan.toLowerCase(), name: plan, cycleEndsAt: '2099-01-01T00:00:00Z' },
-    entitlements,
-  }).as('getEntitlements')
-}

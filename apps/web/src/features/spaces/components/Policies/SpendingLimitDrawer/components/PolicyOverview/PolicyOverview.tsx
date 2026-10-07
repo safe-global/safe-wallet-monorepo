@@ -1,11 +1,13 @@
 import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
+import ChainIndicator from '@/components/common/ChainIndicator'
 import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
 import { Link } from '@/components/ui/link'
 import { AccountIdentity, type AccountIdentityProps } from '../../../components/AccountIdentity'
 
 export type PolicyOverviewProps = {
   appliesTo: AccountIdentityProps
+  chainId: string
   /** Omitted for spending limits — CGW returns no initiator for them. */
   initiatedBy?: AccountIdentityProps
   lastUpdated?: string
@@ -16,15 +18,19 @@ export type PolicyOverviewProps = {
 
 const PolicyOverview = ({
   appliesTo,
+  chainId,
   initiatedBy,
   lastUpdated,
   enforcedBy,
   enforcedByHref,
 }: PolicyOverviewProps): ReactElement => {
-  const items: DrawerListItem[] = [{ label: 'Safe account', content: <AccountIdentity {...appliesTo} /> }]
+  const items: DrawerListItem[] = [
+    { label: 'Safe account', content: <AccountIdentity {...appliesTo} showCopyButton /> },
+    { label: 'Network', content: <ChainIndicator chainId={chainId} inline className="min-w-0! justify-end!" /> },
+  ]
 
   if (initiatedBy) {
-    items.push({ label: 'Initiated by', content: <AccountIdentity {...initiatedBy} /> })
+    items.push({ label: 'Initiated by', content: <AccountIdentity {...initiatedBy} showCopyButton /> })
   }
 
   if (lastUpdated) {

@@ -1,5 +1,7 @@
 import { useId, useMemo, type ReactNode } from 'react'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { cn } from '@/utils/cn'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -33,6 +35,8 @@ export type SafeAccountSelectorProps = {
   isError?: boolean
   onRetry?: () => void
   disabled?: boolean
+  /** Dimmed, but not the `Select`'s `disabled`, which would swallow the pointer events the copy button needs. */
+  readOnly?: boolean
   label?: string
   /** Must match the rule `accounts` was filtered by. */
   signersOnly?: boolean
@@ -43,6 +47,8 @@ export type SafeAccountSelectorProps = {
   hasWallet?: boolean
   /** Replaces the helper text when set. */
   errorMessage?: string
+  /** Pinned above the options, so it is read before a Safe is picked. */
+  notice?: { title: ReactNode; description: ReactNode }
   name?: string
   id?: string
 }
@@ -62,12 +68,14 @@ const SafeAccountSelector = ({
   isError = false,
   onRetry,
   disabled = false,
+  readOnly = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
   signersOnly = false,
   helperText = getEligibilityCopy(signersOnly).helperText,
   onSwitchWallet,
   hasWallet = true,
   errorMessage,
+  notice,
   name,
   id,
 }: SafeAccountSelectorProps) => {
@@ -78,7 +86,8 @@ const SafeAccountSelector = ({
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
   const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
-  const ineligibilityText = selectedAccount?.ineligibleReason && INELIGIBILITY_TEXT[selectedAccount.ineligibleReason]
+  const ineligibilityText =
+    !readOnly && selectedAccount?.ineligibleReason ? INELIGIBILITY_TEXT[selectedAccount.ineligibleReason] : undefined
   const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {
@@ -111,6 +120,41 @@ const SafeAccountSelector = ({
       ) : (
         <SafeAccountRow key={entry.id} account={entry} />
       ),
+    )
+  }
+
+  const helper = shownError ? (
+    <Typography variant="paragraph-mini" role="alert" className="text-destructive">
+      {shownError}
+    </Typography>
+  ) : (
+    <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
+      {helperText}
+    </Typography>
+  )
+
+  if (readOnly && selectedAccount) {
+    return (
+      <div className="flex w-full flex-col gap-1.5">
+        <Label htmlFor={fieldId}>{label}</Label>
+
+        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control — and so
+            carries no `aria-disabled`, which Chrome propagates onto the copy button and would kill it. */}
+        <div
+          id={fieldId}
+          data-testid="safe-account-readonly"
+          className="border-border bg-input flex min-h-9 w-full cursor-not-allowed items-center gap-2 rounded-md border px-3 py-1.5 shadow-xs"
+        >
+          {/* The summary brings its own tooltip with the whole address, which is what gets checked before signing. */}
+          <span className="flex min-w-0 flex-1 opacity-50">
+            <SafeAccountSummary account={selectedAccount} />
+          </span>
+
+          <CopyAddressIconButton address={selectedAccount.address} />
+        </div>
+
+        {helper}
+      </div>
     )
   }
 
@@ -162,19 +206,23 @@ const SafeAccountSelector = ({
         </SelectTrigger>
 
         <SelectContent className="max-h-80" alignItemWithTrigger={false}>
+          {notice && (
+            <Alert
+              variant="info"
+              className="mx-1 mb-1 w-auto px-4 py-3 *:data-[slot=alert-description]:text-muted-foreground"
+              data-testid="safe-account-selector-notice"
+            >
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle className="text-sm font-normal">{notice.title}</AlertTitle>
+              <AlertDescription>{notice.description}</AlertDescription>
+            </Alert>
+          )}
+
           {renderPopupContent()}
         </SelectContent>
       </Select>
 
-      {shownError ? (
-        <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {shownError}
-        </Typography>
-      ) : (
-        <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
-          {helperText}
-        </Typography>
-      )}
+      {helper}
     </div>
   )
 }

@@ -1,0 +1,186 @@
+import { act, renderHook } from '@testing-library/react'
+import {
+  useTransactionsGetTransactionByIdV1Query,
+  type TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { POLLING_INTERVAL } from '@/config/constants'
+import { TxEvent, txDispatch } from '@/services/tx/txEvents'
+import {
+  multisigConfirmationBuilder,
+  multisigExecutionDetailsBuilder,
+  transactionDetailsBuilder,
+} from '@/tests/builders/transactionDetails'
+import { mockPendingPolicy } from '../../../mocks/policies'
+import { getPendingTxId } from '../../../utils/mapPendingPolicies'
+import { usePendingPolicyTransaction } from '../usePendingPolicyTransaction'
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
+  useTransactionsGetTransactionByIdV1Query: jest.fn(),
+}))
+
+const mockUseQuery = useTransactionsGetTransactionByIdV1Query as jest.Mock
+
+const OWNER_A = '0x00000000000000000000000000000000000000A1'
+const OWNER_B = '0x00000000000000000000000000000000000000B2'
+
+const policy = mockPendingPolicy()
+
+const details = ({
+  txStatus = 'AWAITING_CONFIRMATIONS',
+  confirmedBy = [OWNER_A],
+}: {
+  txStatus?: TransactionDetails['txStatus']
+  confirmedBy?: string[]
+} = {}): TransactionDetails =>
+  transactionDetailsBuilder()
+    .with({
+      txId: getPendingTxId(policy),
+      txStatus,
+      detailedExecutionInfo: multisigExecutionDetailsBuilder()
+        .with({
+          confirmationsRequired: 2,
+          confirmations: confirmedBy.map((value) => multisigConfirmationBuilder().with({ signer: { value } }).build()),
+        })
+        .build(),
+    })
+    .build()
+
+const mockQuery = ({
+  currentData,
+  error,
+  refetch = jest.fn(),
+}: {
+  currentData?: TransactionDetails
+  error?: unknown
+  refetch?: jest.Mock
+}) => mockUseQuery.mockReturnValue({ currentData, error, refetch })
+
+describe('usePendingPolicyTransaction', () => {
+  it('asks CGW for the queued transaction on the policy chain', () => {
+    mockQuery({})
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      { chainId: policy.safe.chainId, id: getPendingTxId(policy) },
+      expect.anything(),
+    )
+  })
+
+  // No tx event reaches this tab when another signer executes, deletes or replaces the transaction.
+  it('polls while the panel is open and the tab is focused', () => {
+    mockQuery({})
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(mockUseQuery).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
+    )
+  })
+
+  it('lists who confirmed, with the fresh count and the summary the review flow needs', () => {
+    mockQuery({ currentData: details({ confirmedBy: [OWNER_A, OWNER_B] }) })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.confirmedBy).toEqual([OWNER_A, OWNER_B])
+    expect(result.current.confirmationsSubmitted).toBe(2)
+    expect(result.current.txSummary?.id).toBe(getPendingTxId(policy))
+    expect(result.current.outcome).toBeUndefined()
+  })
+
+  it.each([
+    ['SUCCESS', 'executed'],
+    ['FAILED', 'failed'],
+    ['CANCELLED', 'replaced'],
+  ] as const)('reads a %s transaction as %s', (txStatus, outcome) => {
+    mockQuery({ currentData: details({ txStatus }) })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.outcome).toBe(outcome)
+  })
+
+  it('reads a 404 as deleted once the row has left the pending list', () => {
+    mockQuery({ error: { status: 404, data: {} } })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy, true))
+
+    expect(result.current.outcome).toBe('deleted')
+  })
+
+  it('treats a 404 for a row still listed as a failed load, and keeps polling', () => {
+    mockQuery({ error: { status: 404, data: {} } })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.outcome).toBeUndefined()
+    expect(result.current.onRetry).toBeDefined()
+    expect(mockUseQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+    )
+  })
+
+  it('does not call a transaction gone when the request merely failed, and offers a retry', () => {
+    const refetch = jest.fn()
+    mockQuery({ error: { status: 500, data: {} }, refetch })
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.outcome).toBeUndefined()
+    expect(result.current.txSummary).toBeUndefined()
+    expect(result.current.confirmedBy).toEqual([])
+    result.current.onRetry?.()
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('offers no retry while the transaction is still loading', () => {
+    mockQuery({})
+    const { result } = renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(result.current.onRetry).toBeUndefined()
+  })
+
+  it('stops polling and listening for tx events once the transaction has left the queue', () => {
+    const refetch = jest.fn()
+    mockQuery({ currentData: details({ txStatus: 'SUCCESS' }), refetch })
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    expect(mockUseQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0, refetchOnFocus: false }),
+    )
+    act(() => {
+      txDispatch(TxEvent.SIGNATURE_PROPOSED, { txId: getPendingTxId(policy) } as never)
+    })
+    expect(refetch).not.toHaveBeenCalled()
+  })
+
+  it('refetches at once when its row leaves the pending list', () => {
+    const refetch = jest.fn()
+    mockQuery({ currentData: details(), refetch })
+    const { rerender } = renderHook(({ isUnlisted }) => usePendingPolicyTransaction(policy, isUnlisted), {
+      initialProps: { isUnlisted: false },
+    })
+    expect(refetch).not.toHaveBeenCalled()
+
+    rerender({ isUnlisted: true })
+
+    expect(refetch).toHaveBeenCalledTimes(1)
+  })
+
+  it.each([
+    TxEvent.SIGNATURE_PROPOSED,
+    TxEvent.ONCHAIN_SIGNATURE_SUCCESS,
+    TxEvent.PROCESSED,
+    TxEvent.SUCCESS,
+    TxEvent.DELETED,
+  ])('refetches on %s', (event) => {
+    const refetch = jest.fn()
+    mockQuery({ currentData: details(), refetch })
+    renderHook(() => usePendingPolicyTransaction(policy))
+
+    act(() => {
+      // Only the subscription matters here, so the payload is not shaped per event.
+      txDispatch(event, { txId: getPendingTxId(policy) } as never)
+    })
+
+    expect(refetch).toHaveBeenCalled()
+  })
+})

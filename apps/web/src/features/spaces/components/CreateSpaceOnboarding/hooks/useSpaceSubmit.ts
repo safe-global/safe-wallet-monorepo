@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useAppDispatch } from '@/store'
-import { setLastUsedSpace } from '@/store/authSlice'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
@@ -24,22 +22,29 @@ const useSpaceSubmit = (
   // Under Safe Pro a freshly created Workspace is offered its trial before the wizard moves on.
   const [createdSpaceId, setCreatedSpaceId] = useState<string>()
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const safe = useSafeQueryParam() || undefined
   const isSafePro = useIsSafeProEnabled()
   const [createSpaceWithUser] = useSpacesCreateV1Mutation()
   const [updateSpace] = useSpacesUpdateV1Mutation()
 
+  const getSelectSafesQuery = useCallback(
+    (targetSpaceId: string): Record<string, string> => {
+      const next = sanitizeNextUrl(router.query.next)
+      return { spaceId: targetSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) }
+    },
+    [router.query.next, safe],
+  )
+
   const goToSelectSafes = useCallback(
     (targetSpaceId: string) => {
-      const next = sanitizeNextUrl(router.query.next)
-      router.push({
-        pathname: AppRoutes.welcome.selectSafes,
-        query: { spaceId: targetSpaceId, ...(safe ? { safe } : {}), ...(next ? { next } : {}) },
-      })
+      router.push({ pathname: AppRoutes.welcome.selectSafes, query: getSelectSafesQuery(targetSpaceId) })
     },
-    [router, safe],
+    [router, getSelectSafesQuery],
   )
+
+  const selectSafesUrl = createdSpaceId
+    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
+    : undefined
 
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
@@ -58,8 +63,6 @@ const useSpaceSubmit = (
     if (response.data) {
       const newSpaceId = response.data.uuid
       trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
-
-      dispatch(setLastUsedSpace(newSpaceId))
 
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)
@@ -104,6 +107,7 @@ const useSpaceSubmit = (
     onSubmit,
     createdSpaceId,
     goToSelectSafes,
+    selectSafesUrl,
   }
 }
 

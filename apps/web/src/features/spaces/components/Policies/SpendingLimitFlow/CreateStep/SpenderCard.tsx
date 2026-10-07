@@ -1,9 +1,15 @@
 import { useCallback, useMemo, type ReactElement } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
+import { useIsEditMode } from '../EditFlow/EditModeContext'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { cn } from '@/utils/cn'
 import { FieldDescription } from '@/components/ui/field'
 import TokenLimitCard from './TokenLimitCard'
 import { validateUniqueSpender } from '../utils/validation'
@@ -12,8 +18,10 @@ import {
   ADD_TOKEN_LABEL,
   REMOVE_SPENDER_LABEL,
   SPENDER_HELPER_TEXT,
+  SPENDER_IS_SAFE_ERROR,
   SPENDER_LABEL,
   SPENDER_PLACEHOLDER,
+  SPENDER_RESERVED_ERROR,
 } from '../constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
@@ -30,6 +38,12 @@ export type SpenderCardProps = {
 const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: SpenderCardProps): ReactElement => {
   const { control, getValues, watch } = useFormContext<SpendingLimitPolicyFormValues>()
   const { fields, append, remove } = useFieldArray({ control, name: limitsPath(spenderIndex) })
+  const isEditMode = useIsEditMode()
+  const { safeAddress } = useSafeInfo()
+  const { limits: existingLimits } = useExistingSpendingLimits()
+  const address = watch(spenderAddressPath(spenderIndex)) ?? ''
+  // On chain there is no renaming a delegate: changing who it is means removing one and adding another.
+  const isFixed = isEditMode && (existingLimits ?? []).some((limit) => sameAddress(limit.beneficiary, address))
 
   const otherSpenderPaths = useMemo(
     () =>
@@ -42,11 +56,13 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
   // Read the other spenders at validation time, not from a memo one render behind.
   const validateSpender = useCallback(
     (address: string) =>
+      addressIsNotReserved(SPENDER_RESERVED_ERROR)(address) ??
+      addressIsNotCurrentSafe(safeAddress, SPENDER_IS_SAFE_ERROR)(address) ??
       validateUniqueSpender(
         address,
         (getValues('spenders') ?? []).map((spender) => spender.address).filter((_, index) => index !== spenderIndex),
       ),
-    [getValues, spenderIndex],
+    [getValues, spenderIndex, safeAddress],
   )
 
   // Hide the spenders already in the policy, as a limit row hides its siblings' tokens. RHF returns
@@ -76,7 +92,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
           </Button>
         )}
 
-        <div className="flex flex-col gap-1">
+        <div className={cn('flex flex-col gap-1', isFixed && 'cursor-not-allowed opacity-50')}>
           <AddressBookInput
             name={spenderAddressPath(spenderIndex)}
             label={SPENDER_LABEL}
@@ -84,6 +100,7 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
             validate={validateSpender}
             deps={otherSpenderPaths}
             excludeAddresses={excludeAddresses}
+            disabled={isFixed}
             data-testid="spender-address-input"
           />
           <FieldDescription>{SPENDER_HELPER_TEXT}</FieldDescription>

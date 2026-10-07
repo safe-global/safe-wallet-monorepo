@@ -8,7 +8,7 @@ export const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
 
 type AuthPayload = {
   sessionExpiresAt: number | null
-  lastUsedSpace: string | null
+  landingSpaceHint: string | null
   isStoreHydrated: boolean
   cfSafeSynced: boolean
   isOidcLoginPending: boolean
@@ -17,7 +17,7 @@ type AuthPayload = {
 
 const initialState: AuthPayload = {
   sessionExpiresAt: null,
-  lastUsedSpace: null,
+  landingSpaceHint: null,
   isStoreHydrated: false,
   cfSafeSynced: false,
   isOidcLoginPending: false,
@@ -40,8 +40,8 @@ export const authSlice = createSlice({
       state.isSessionCheckPending = false
     },
 
-    setLastUsedSpace: (state, { payload }: PayloadAction<AuthPayload['lastUsedSpace']>) => {
-      state.lastUsedSpace = payload
+    setLandingSpaceHint: (state, { payload }: PayloadAction<AuthPayload['landingSpaceHint']>) => {
+      state.landingSpaceHint = payload
     },
 
     setCfSafeSynced: (state, { payload }: PayloadAction<boolean>) => {
@@ -61,7 +61,7 @@ export const authSlice = createSlice({
 export const {
   setAuthenticated,
   setUnauthenticated,
-  setLastUsedSpace,
+  setLandingSpaceHint,
   setCfSafeSynced,
   setIsOidcLoginPending,
   setSessionCheckPending,
@@ -71,8 +71,13 @@ export const isAuthenticated = (state: RootState): boolean => {
   return !!state.auth.sessionExpiresAt && state.auth.sessionExpiresAt > Date.now()
 }
 
-export const lastUsedSpace = (state: RootState) => {
-  return state.auth.lastUsedSpace
+/**
+ * The Workspace id last seen in a URL, for the `/spaces` redirect without an id only
+ * (useLandingSpaceId). All browser tabs share it, so it cannot tell which Workspace a page is in.
+ */
+export const selectLandingSpaceHint = (state: RootState): string | null => {
+  // State persisted before the rename has no such key
+  return state.auth.landingSpaceHint ?? null
 }
 
 export const selectIsStoreHydrated = (state: RootState): boolean => {

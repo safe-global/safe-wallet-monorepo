@@ -57,6 +57,11 @@ export type BuildTokenOptionsInput = {
   native?: NativeCurrencyInfo
   /** False on `HIDE_NATIVE_TOKEN` chains, where the balances API still returns the native token. */
   showNative?: boolean
+  /**
+   * Tokens that must be selectable whether or not the lists above offer them — an existing spending
+   * limit's token, which may be untrusted or never held. Appended, so the held order does not move.
+   */
+  extra?: readonly TokenOption[]
 }
 
 const toHeldOption = (balance: Balance): TokenOption => ({
@@ -91,6 +96,7 @@ export const buildTokenOptions = ({
   popular,
   native,
   showNative = true,
+  extra = [],
 }: BuildTokenOptionsInput): TokenOption[] => {
   const held = (balances ?? [])
     .filter((balance) => balance.tokenInfo.type !== TokenType.ERC721)
@@ -105,7 +111,10 @@ export const buildTokenOptions = ({
     .filter((candidate) => !held.some((option) => sameAddress(option.address, candidate.address)))
     .map(toPopularOption)
 
-  return [...held, ...popularOptions]
+  const listed = [...held, ...popularOptions]
+  const extras = extra.filter((token) => !listed.some((option) => sameAddress(option.address, token.address)))
+
+  return [...held, ...extras, ...popularOptions]
 }
 
 export const findTokenOption = (

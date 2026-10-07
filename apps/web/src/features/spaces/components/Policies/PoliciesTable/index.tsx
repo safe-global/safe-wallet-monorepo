@@ -7,12 +7,14 @@ import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import PolicyRule from './components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
 import PolicyStatusChip from '../components/PolicyStatusChip'
 import { getPolicyLabel } from '../utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
 
 export type PoliciesTableProps = {
@@ -35,6 +37,7 @@ const getOpenPolicyLabel = (policy: Policy): string =>
 const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTableProps) => {
   const resolveSafeName = useSafeNameResolver()
   const { configs } = useChains()
+  const spaceId = useUrlSpaceId()
   const getShortName = (chainId: string) => configs.find((chain) => chain.chainId === chainId)?.shortName
 
   const columns: DataTableColumn<Policy>[] = [
@@ -64,7 +67,12 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
           showAddressTooltip
           boldLabel
           avatarSize={24}
-          href={buildSafeHref(AppRoutes.settings.setup, getShortName(policy.safe.chainId), policy.safe.address)}
+          href={buildSafeHref(
+            AppRoutes.settings.setup,
+            getShortName(policy.safe.chainId),
+            policy.safe.address,
+            spaceId,
+          )}
         />
       ),
     },
@@ -121,7 +129,16 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       cellTestId: 'policy-cell-network',
       cell: (policy) => (
         <div className="flex justify-center">
-          <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <ChainIndicator chainId={policy.safe.chainId} onlyLogo showUnknown imageSize={24} />
+            </TooltipTrigger>
+            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
+              <span data-testid="policy-network-tooltip">
+                <ChainIndicator chainId={policy.safe.chainId} showUnknown />
+              </span>
+            </TooltipContent>
+          </Tooltip>
         </div>
       ),
     },

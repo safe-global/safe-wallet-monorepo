@@ -61,7 +61,7 @@ describe('create/logic', () => {
 
       // Initialize store for tests that need it (e.g., relaySafeCreation)
       const { makeStore, setStoreInstance } = require('@/store')
-      const testStore = makeStore({}, { skipBroadcast: true })
+      const testStore = makeStore({})
       setStoreInstance(testStore)
     })
 
@@ -188,17 +188,35 @@ describe('create/logic', () => {
           safe: 'sep:0x1234',
         },
       }
-      expect(getRedirect('sep', '0x1234', 'https://google.com')).toEqual(expected)
-      expect(getRedirect('sep', '0x1234', '/queue')).toEqual(expected)
+      expect(getRedirect('sep', '0x1234', null, 'https://google.com')).toEqual(expected)
+      expect(getRedirect('sep', '0x1234', null, '/queue')).toEqual(expected)
+      expect(getRedirect('sep', '0x1234', null)).toEqual(expected)
     })
 
     it('should redirect to an app if an app URL is passed', () => {
-      expect(getRedirect('sep', '0x1234', '/apps?appUrl=https://safe-eth.everstake.one/?chain=eth')).toEqual(
+      expect(getRedirect('sep', '0x1234', null, '/apps?appUrl=https://safe-eth.everstake.one/?chain=eth')).toEqual(
         '/apps?appUrl=https://safe-eth.everstake.one/?chain=eth&safe=sep:0x1234',
       )
 
-      expect(getRedirect('sep', '0x1234', '/apps?appUrl=https://safe-eth.everstake.one')).toEqual(
+      expect(getRedirect('sep', '0x1234', null, '/apps?appUrl=https://safe-eth.everstake.one')).toEqual(
         '/apps?appUrl=https://safe-eth.everstake.one&safe=sep:0x1234',
+      )
+    })
+
+    it('should keep the Workspace in the home redirect', () => {
+      const spaceId = faker.string.uuid()
+
+      expect(getRedirect('sep', '0x1234', spaceId)).toEqual({
+        pathname: '/home',
+        query: { safe: 'sep:0x1234', spaceId },
+      })
+    })
+
+    it('should keep the Workspace in an app redirect', () => {
+      const spaceId = faker.string.uuid()
+
+      expect(getRedirect('sep', '0x1234', spaceId, '/apps?appUrl=https://safe-eth.everstake.one')).toEqual(
+        `/apps?appUrl=https://safe-eth.everstake.one&safe=sep:0x1234&spaceId=${spaceId}`,
       )
     })
   })

@@ -21,6 +21,7 @@ const WcPage: NextPage = () => {
       lastSafe
         ? {
             pathname: AppRoutes.home,
+            // eslint-disable-next-line no-restricted-syntax -- A WalletConnect link has no Workspace; it opens the last Safe used
             query: {
               safe: lastSafe,
               [WC_URI_SEARCH_PARAM]: uri,

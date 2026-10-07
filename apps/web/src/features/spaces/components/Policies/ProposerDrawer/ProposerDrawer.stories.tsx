@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
+import { createMockStory } from '@/stories/mocks'
 import ProposerDrawer from './ProposerDrawer'
 import { ProposerStatus } from './variants/types'
 
@@ -13,6 +14,7 @@ const OVERVIEW = {
   proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Treasury' },
   appliesTo: { address: '0x86753FE4b8E29Ce8A38cDf9559D80E05b00cdBA0', name: 'Treasury' },
   initiatedBy: { address: '0xA77De01c5B6f829Cbe4604cF71dDc8C4d608b000', name: 'Treasury' },
+  chainId: '1',
   lastUpdated: '06.24.26 03:35 AM UTC',
   enforcedBy: 'Safe module',
 }
@@ -36,13 +38,15 @@ const UNNAMED_OVERVIEW = {
 const PENDING_DESCRIPTION =
   'Marketing is a nested Safe account. The parent Safe account, Ops, needs to execute the transaction before the proposer role activates.'
 
+// The Network row reads chain config, so the stories need a store and the chains endpoint.
+const setup = createMockStory({ layout: 'none' })
+
 const meta = {
   title: 'Features/Spaces/Policies/ProposerDrawer',
   component: ProposerDrawer,
   tags: ['autodocs', 'skip-visual-test'],
-  parameters: {
-    layout: 'fullscreen',
-  },
+  parameters: { ...setup.parameters, layout: 'fullscreen' },
+  decorators: [setup.decorator],
   // Only the chrome props live here: the content and action props differ per status, and a union
   // member cannot be assembled from `meta.args` plus a story's args.
   args: {

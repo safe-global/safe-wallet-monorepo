@@ -64,11 +64,23 @@ export type RelayGetRelaysRemainingV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
-  /** Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains. */
+  /** Safe transaction hash (0x prefixed hex string). Ignored; kept so existing clients do not break. */
   safeTxHash?: string
 }
 export type Relay = {
   taskId: string
+}
+export type GasPaymentOptionUnavailableResponse = {
+  code: 'GAS_PAYMENT_OPTION_UNAVAILABLE'
+  /** Human-readable description of the error. Informational only; do not parse. */
+  message: string
+  statusCode: number
+  /** The gas payment option the request needed. */
+  requested: 'FREE_DAILY_LIMIT' | 'SUBSCRIPTION' | 'PAY_FROM_SAFE' | 'NO_FEE_CAMPAIGN'
+  /** NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0). */
+  reason: 'NOT_LISTED' | 'NO_RELAYER' | 'NOT_A_WORKSPACE_SAFE' | 'REFUNDING_TRANSACTION'
+  /** The options the chain lists; empty without a relayer. */
+  available: ('FREE_DAILY_LIMIT' | 'SUBSCRIPTION' | 'PAY_FROM_SAFE' | 'NO_FEE_CAMPAIGN')[]
 }
 export type SpaceRelayDto = {
   version: string

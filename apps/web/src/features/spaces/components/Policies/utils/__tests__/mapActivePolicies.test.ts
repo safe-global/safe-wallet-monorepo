@@ -27,6 +27,7 @@ describe('mapActivePolicies', () => {
     expect(allowance.remaining).toBe('500000000')
     expect(allowance.resetPeriodMinutes).toBe(43_200)
     expect(allowance.resetsAtMinute).toBe(29_846_880)
+    expect(allowance.createdAt).toBe(1_790_000_000)
   })
 
   it('should, when the allowance never resets, leave the reset time empty', () => {
@@ -122,6 +123,22 @@ describe('mapActivePolicies', () => {
     const mismatched = mockProposerDto({ type: 'spending-limit', enforcement: { via: 'module', moduleAddress: '0x1' } })
 
     expect(mapActivePolicies([mismatched], resolveKnownTokens)).toEqual([])
+  })
+
+  it('leaves out a spending limit whose allowances have all been removed', () => {
+    const dto = mockSpendingLimitDto()
+    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    dto.data.spenders = []
+
+    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
+  })
+
+  it('leaves out a spending limit whose spender has no allowance left', () => {
+    const dto = mockSpendingLimitDto()
+    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
+
+    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
   })
 })
 

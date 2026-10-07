@@ -14,6 +14,8 @@ import { BRIDGE_EVENTS, BRIDGE_LABELS } from '@/services/analytics/events/bridge
 import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { AppRoutes } from '@/config/routes'
+import { PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
+import { trackPlanSelectionStarted } from '../../../Plans/planSelection'
 
 const customNavEvents: Record<
   string,
@@ -82,6 +84,9 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, chil
       const customEvent = customNavEvents[item.href]
       if (customEvent) {
         trackEvent({ ...customEvent.event, label: customEvent.label }, customEvent.mixpanelParams)
+      }
+      if (item.href === AppRoutes.spaces.plans) {
+        trackPlanSelectionStarted({ [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.SIDEBAR })
       }
     }
 

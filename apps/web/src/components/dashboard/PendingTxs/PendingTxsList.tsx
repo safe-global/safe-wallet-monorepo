@@ -18,6 +18,7 @@ import { useRecoveryQueue } from '@/features/recovery'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { RecoveryQueueItem } from '@/features/recovery'
 import { PanelCounter } from '@/components/dashboard/PanelCounter'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const PendingRecoveryListItem = dynamic(() => import('./PendingRecoveryListItem'))
 
@@ -101,13 +102,14 @@ const PendingTxsList = (): ReactElement | null => {
   const isLoading = loading || safeLoading || isInitialState
 
   const safeQueryParam = useSafeQueryParam()
+  const spaceId = useUrlSpaceId()
 
   const queueUrl = useMemo(
     () => ({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: safeQueryParam },
+      query: withSpaceId({ safe: safeQueryParam }, spaceId),
     }),
-    [safeQueryParam],
+    [safeQueryParam, spaceId],
   )
 
   if (isLoading) return <PendingTxsSkeleton />

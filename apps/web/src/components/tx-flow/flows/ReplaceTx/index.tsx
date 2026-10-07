@@ -26,6 +26,7 @@ import Track from '@/components/common/Track'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
 import { useRecommendedNonce } from '@/components/tx/shared/hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MaybeTooltip = ({ title, children }: { title: string; children: ReactNode }) => {
   if (!title) {
@@ -44,7 +45,7 @@ const goToQueue = (router: NextRouter) => {
   if (router.pathname === AppRoutes.transactions.tx) {
     router.push({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: router.query.safe },
+      query: withSpaceId({ safe: router.query.safe }, router.query.spaceId),
     })
   }
 }

@@ -15,6 +15,7 @@ import { MoreVertical } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { DashboardHeader } from './DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const AggregatedBalance = ({
   safeItems,
@@ -25,6 +26,7 @@ const AggregatedBalance = ({
 }) => {
   const currency = useAppSelector(selectCurrency)
   const router = useRouter()
+  const spaceId = useUrlSpaceId()
   const { link: txBuilderLink } = useTxBuilderApp()
   const { setTxFlow } = useContext(TxModalContext)
   const firstSafe = safeItems[0]
@@ -63,7 +65,7 @@ const AggregatedBalance = ({
 
   const handleSwap = () => {
     if (!safeQueryParam) return
-    router.push({ pathname: AppRoutes.swap, query: { safe: safeQueryParam } })
+    router.push({ pathname: AppRoutes.swap, query: withSpaceId({ safe: safeQueryParam }, spaceId) })
   }
 
   const handleBuildTransaction = () => {

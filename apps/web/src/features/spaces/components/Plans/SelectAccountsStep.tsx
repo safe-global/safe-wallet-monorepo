@@ -4,12 +4,18 @@ import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { DialogTitle } from '@/components/ui/dialog'
+import { highlightSafePro } from '@/components/common/ProHighlight'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { SearchInput } from '@/components/ui/search-input'
 import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeRef } from './types'
+import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import SelectedCounter from '../SelectedCounter'
@@ -37,11 +43,10 @@ export const _initialSelection = (items: AllSafeItems): Record<string, boolean> 
 }
 
 export const seatsTooltip = (planName: string, limit: number): string =>
-  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available outside the Workspace. You can swap them in any time.`
+  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available in My accounts. You can swap them in any time.`
 
 /** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
-  title = 'Select Safe accounts for your plan',
   limit,
   planName,
   continueLabel = 'Continue to checkout',
@@ -50,7 +55,6 @@ export default function SelectAccountsStep({
   isSubmitting,
   error,
 }: {
-  title?: string
   limit: number
   planName: string
   /** Names where the step leads: Stripe for a new plan, the change summary for a live one. */
@@ -74,15 +78,19 @@ export default function SelectAccountsStep({
     flaggedAddresses: NO_FLAGGED,
     limit,
   })
-  const removed = useMemo(
-    () => leavesOf(allSafes).filter((safe) => !selectedKeys.has(getSafeId(safe))),
-    [allSafes, selectedKeys],
+  const leaves = useMemo(() => leavesOf(allSafes), [allSafes])
+  const removed = useMemo(() => leaves.filter((safe) => !selectedKeys.has(getSafeId(safe))), [leaves, selectedKeys])
+  const removedNote = removedSafesNote(summarizeRemovedSafes(leaves, removed))
+  useTrackOnce(
+    SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED,
+    { [MixpanelEventParams.ACCOUNTS_AVAILABLE]: seatCount, [MixpanelEventParams.PLAN_LIMIT]: limit },
+    !isLoading,
   )
 
   return (
     <>
       <Typography variant="h3" as={DialogTitle}>
-        {title}
+        {highlightSafePro('Select Safe accounts for your Safe Pro plan')}
       </Typography>
 
       <Alert variant="info">
@@ -91,7 +99,7 @@ export default function SelectAccountsStep({
           {planName} covers {limit} Safe accounts
         </AlertTitle>
         <AlertDescription>
-          Safe accounts you leave out remain available in My accounts. You can swap them in any time.
+          At {limit}, deselect one to add another. Safe accounts you leave out remain available in My accounts.
         </AlertDescription>
       </Alert>
 
@@ -140,13 +148,10 @@ export default function SelectAccountsStep({
           </AlertDescription>
         </Alert>
       ) : (
-        removed.length > 0 && (
+        removedNote && (
           <Alert variant="warning">
             <AlertSeverityIcon variant="warning" />
-            <AlertDescription>
-              {removed.length === 1 ? '1 Safe account' : `${removed.length} Safe accounts`} will be removed from the
-              Workspace. They remain available in My accounts.
-            </AlertDescription>
+            <AlertDescription>{removedNote}</AlertDescription>
           </Alert>
         )
       )}
@@ -162,16 +167,27 @@ export default function SelectAccountsStep({
         <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isSubmitting}>
           Back
         </Button>
-        <Button
-          size="lg"
-          accentIcon
+        <Track
+          {...SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_SUBMITTED}
+          mixpanelParams={{
+            [MixpanelEventParams.SELECTED_COUNT]: seatCount,
+            [MixpanelEventParams.DESELECTED_COUNT]: removed.length,
+            [MixpanelEventParams.PLAN_LIMIT]: limit,
+          }}
+          as="div"
           className="flex-1"
-          disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
-          onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
         >
-          {continueLabel}
-          <ArrowRight />
-        </Button>
+          <Button
+            size="lg"
+            accentIcon
+            className="w-full"
+            disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
+            onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
+          >
+            {continueLabel}
+            <ArrowRight />
+          </Button>
+        </Track>
       </div>
     </>
   )

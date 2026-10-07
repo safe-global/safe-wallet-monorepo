@@ -2,8 +2,7 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { useLeastRemainingRelays, useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChains from '@/hooks/useChains'
-import { chainBuilder } from '@/tests/builders/chains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder, gasPaymentRelayer } from '@/tests/builders/chains'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -11,13 +10,16 @@ import { GATEWAY_URL } from '@/config/gateway'
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
 
 describe('fetch remaining relays hooks', () => {
-  const mockChain = chainBuilder()
-    .with({ features: [FEATURES.RELAYING], chainId: '1' })
+  const dailyChain = chainBuilder()
+    .with({ chainId: '1', relayer: gasPaymentRelayer(['FREE_DAILY_LIMIT']) })
+    .build()
+  const creationChain = chainBuilder()
+    .with({ chainId: '1', relayer: gasPaymentRelayer([], { safeCreationSponsored: true }) })
     .build()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(mockChain)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(dailyChain)
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safe: {
         txHistoryTag: '0',
@@ -27,8 +29,16 @@ describe('fetch remaining relays hooks', () => {
   })
 
   describe('useRelaysBySafe hook', () => {
-    it('should not do a network request if chain does not support relay', async () => {
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ features: [] }).build())
+    it.each([
+      ['has no relayer', chainBuilder().with({ relayer: null }).build()],
+      [
+        'only lists the subscription',
+        chainBuilder()
+          .with({ relayer: gasPaymentRelayer(['SUBSCRIPTION']) })
+          .build(),
+      ],
+    ])('should not do a network request if the chain %s', async (_, chain) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chain)
 
       const { result } = renderHook(() => useRelaysBySafe())
 
@@ -79,6 +89,10 @@ describe('fetch remaining relays hooks', () => {
 
   describe('useLeastRemainingRelays hook', () => {
     const ownerAddresses = ['0x00', '0x01', '0x02']
+
+    beforeEach(() => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(creationChain)
+    })
 
     it('should return the minimum number of relays among owners', async () => {
       // MSW will use the default handler which returns remaining: 5 for all addresses
@@ -149,8 +163,16 @@ describe('fetch remaining relays hooks', () => {
       expect(result.current[0]).toEqual({ remaining: 0, limit: 5 })
     })
 
-    it('should not do a network request if chain does not support relay', async () => {
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ features: [] }).build())
+    it.each([
+      ['has no relayer', chainBuilder().with({ relayer: null }).build()],
+      [
+        'does not sponsor Safe creation',
+        chainBuilder()
+          .with({ relayer: gasPaymentRelayer(['FREE_DAILY_LIMIT'], { safeCreationSponsored: false }) })
+          .build(),
+      ],
+    ])('should not do a network request if the chain %s', async (_, chain) => {
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chain)
 
       const { result } = renderHook(() => useLeastRemainingRelays(ownerAddresses))
 

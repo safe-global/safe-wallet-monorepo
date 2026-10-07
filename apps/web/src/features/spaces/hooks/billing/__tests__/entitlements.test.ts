@@ -2,7 +2,7 @@ import type { EntitlementsResponse } from '@safe-global/store/gateway/AUTO_GENER
 import { getSeatsMeter, getSponsoredTxsMeter, isEntitled } from '../entitlements'
 
 const response = (entitlements: EntitlementsResponse['entitlements']): EntitlementsResponse => ({
-  plan: { id: 'plan', name: 'Business', cycleEndsAt: '2026-12-06T00:00:00Z' },
+  plan: { id: 'plan', name: 'Business', cycleEndsAt: '2026-12-06T00:00:00Z', status: 'active' },
   entitlements,
 })
 

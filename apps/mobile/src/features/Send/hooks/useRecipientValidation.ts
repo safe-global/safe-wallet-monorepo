@@ -11,14 +11,7 @@ import { selectAllSafes } from '@/src/store/safesSlice'
 import { useSuspiciousAddressDetection, type SuspiciousAddressMatch } from './useSuspiciousAddressDetection'
 
 export type RecipientValidationState =
-  | 'empty'
-  | 'typing'
-  | 'known'
-  | 'unknown'
-  | 'invalid'
-  | 'self-send'
-  | 'suspicious'
-  | 'known-other-chain'
+  'empty' | 'typing' | 'known' | 'unknown' | 'invalid' | 'self-send' | 'suspicious' | 'known-other-chain'
 
 export interface RecipientValidationResult {
   state: RecipientValidationState

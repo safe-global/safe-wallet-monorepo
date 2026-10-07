@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react'
+import Link, { type LinkProps } from 'next/link'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -7,6 +8,8 @@ import { Typography } from '@/components/ui/typography'
 export type PolicyDrawerActionsProps = {
   actionLabel: string
   onClick?: () => void
+  /** Renders the action as a link, so it can also open in a new tab. */
+  href?: LinkProps['href']
   hint?: string
   variant?: 'default' | 'secondary'
   disabled?: boolean
@@ -15,6 +18,7 @@ export type PolicyDrawerActionsProps = {
 const PolicyDrawerActions = ({
   actionLabel,
   onClick,
+  href,
   hint,
   variant = 'default',
   disabled = false,
@@ -27,7 +31,13 @@ const PolicyDrawerActions = ({
         </Typography>
       )}
 
-      <Button variant={variant} className="w-full" onClick={onClick} disabled={disabled}>
+      <Button
+        variant={variant}
+        className="w-full"
+        onClick={onClick}
+        disabled={disabled}
+        render={href && !disabled ? <Link href={href} /> : undefined}
+      >
         {actionLabel}
       </Button>
     </div>

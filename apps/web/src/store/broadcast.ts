@@ -26,6 +26,7 @@ export const broadcastState = <K extends keyof RootState>(sliceNames: K[]): Midd
 }
 
 export const listenToBroadcast = (store: Store<RootState>) => {
+  broadcast?.close()
   broadcast = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(BC_NAME) : undefined
 
   broadcast?.addEventListener('message', ({ data }) => {

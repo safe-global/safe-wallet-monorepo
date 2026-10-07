@@ -17,7 +17,7 @@ const SpenderCard = ({ spender, label, name, showUsage }: SpenderCardProps): Rea
     <div className="flex flex-col gap-4 p-3">
       <div className="flex items-center justify-between gap-2">
         <Typography variant="paragraph-small-medium">{label}</Typography>
-        <AccountIdentity address={spender.spender} name={name} />
+        <AccountIdentity address={spender.spender} name={name} showCopyButton />
       </div>
 
       <div className="flex flex-col gap-3">

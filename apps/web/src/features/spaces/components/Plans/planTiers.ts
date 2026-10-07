@@ -1,11 +1,12 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
 import {
   getSubscriptionFeatures,
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_FEATURES, PLAN_ORDER } from './planCatalog'
+import { ENTERPRISE_TIER, PLAN_ORDER } from './planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -25,6 +26,18 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
+
+/** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
+export const pickProps = (pick: PlanPick) => ({
+  [MixpanelEventParams.TARGET_PLAN]: pick.tier.name.toLowerCase(),
+  [MixpanelEventParams.SEATS]: pick.option.seats ?? undefined,
+  [MixpanelEventParams.BILLING_PERIOD]:
+    pick.tier.billingCycle === 'year'
+      ? BillingPeriod.YEARLY
+      : pick.tier.billingCycle === 'month'
+        ? BillingPeriod.MONTHLY
+        : undefined,
+})
 
 /** The subscription's own seats tag wins: the entitlements quota lags until the billing webhook lands. */
 const currentSeats = (
@@ -51,6 +64,7 @@ export const toCurrentPlan = (
     hasPaymentMethod: subscription.hasPaymentMethod === true,
     periodEndsAt: plan.periodEndsAt,
     daysLeft: plan.daysLeft,
+    seats: typeof seats === 'number' ? seats : undefined,
     seatsLabel: seats === undefined ? undefined : seatsLabel(seats),
   }
 }
@@ -110,9 +124,8 @@ const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOpt
   features: offer.features,
 })
 
-/** Stripe's own list when the offer carries one, else the static copy for that plan. */
-const featuresOf = (name: string, offers: Pick<PlanOffer, 'features'>[]): string[] =>
-  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? PLAN_FEATURES[name] ?? []
+const featuresOf = (offers: Pick<PlanOffer, 'features'>[]): string[] =>
+  offers.find((offer) => offer.features && offer.features.length > 0)?.features ?? []
 
 /** One tier per plan and billing cycle; a yearly option carries twelve monthly payments as its reference price. */
 export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
@@ -132,7 +145,7 @@ export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
           currency: offers[0].currency,
           billingCycle: cycle,
           options: offers.map((offer) => toOption(offer, monthlyBySeats.get(String(offer.seats)))),
-          features: featuresOf(plan.name, offers),
+          features: featuresOf(offers),
           trialPeriodDays: offers[0].trialPeriodDays,
         },
       ]
@@ -161,7 +174,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
         features,
       },
     ],
-    features: features.length > 0 ? features : (PLAN_FEATURES[name] ?? []),
+    features: features.length > 0 || name !== ENTERPRISE_TIER.name ? features : ENTERPRISE_TIER.features,
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }

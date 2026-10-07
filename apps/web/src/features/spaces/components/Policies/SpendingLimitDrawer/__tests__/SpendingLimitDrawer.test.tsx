@@ -9,8 +9,14 @@ import {
 } from '../../mocks/policies'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import type { DrawerPolicy, Viewer } from '../resolveState'
+import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
+
+jest.mock('@/components/common/ChainIndicator', () => {
+  const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />
+  Mock.displayName = 'ChainIndicator'
+  return { __esModule: true, default: Mock }
+})
 
 const SAFE_ADDRESS = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
@@ -24,7 +30,7 @@ const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
 const setup = (
   policy: DrawerPolicy = mockActiveSpendingLimit(),
   viewer: Viewer = MOCK_VIEWERS.signer,
-  { onEdit }: { onEdit?: () => void } = { onEdit: jest.fn() },
+  { onEdit, outcome }: { onEdit?: () => void; outcome?: PendingTxOutcome } = { onEdit: jest.fn() },
 ) => {
   const shared = {
     open: true,
@@ -41,7 +47,8 @@ const setup = (
         {...shared}
         policy={policy}
         transactionLink={TRANSACTION_LINK}
-        onReviewTransaction={jest.fn()}
+        reviewTransactionHref="/transactions/tx?id=0x9f3c"
+        outcome={outcome}
       />
     ) : (
       <SpendingLimitDrawer {...shared} policy={policy} onEdit={onEdit} />
@@ -52,6 +59,32 @@ const setup = (
 describe('SpendingLimitDrawer', () => {
   afterEach(() => {
     jest.restoreAllMocks()
+  })
+
+  it('calls an executed transaction activating in the header, not pending', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'executed' })
+
+    expect(screen.getByText('Activating')).toBeInTheDocument()
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+  })
+
+  it('shows no status chip for a transaction that will never execute', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'deleted' })
+
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('policy-status-skeleton')).not.toBeInTheDocument()
+  })
+
+  it('drops the signatures and the footer once the transaction has left the queue', () => {
+    setup(mockPendingPolicy(), MOCK_VIEWERS.signer, { outcome: 'replaced' })
+
+    expect(
+      screen.getByText('Another transaction used this nonce, so this one can no longer be executed.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /review transaction|copy transaction link|connect wallet/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('titles itself from the policy type rather than a stored name', () => {
@@ -98,7 +131,7 @@ describe('SpendingLimitDrawer', () => {
       screen.getByText('The spending limit is not active as the transaction is not yet executed.'),
     ).toBeInTheDocument()
     expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Review transaction' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Review transaction' })).toBeInTheDocument()
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
@@ -125,11 +158,11 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  it('disables editing until an edit flow is supplied', () => {
+  it('disables editing and points to the upgrade while no edit flow is supplied', () => {
     setup(mockActiveSpendingLimit(), MOCK_VIEWERS.signer, {})
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   it('leaves out the last updated row while the payload carries no timestamp', () => {
@@ -149,6 +182,20 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
   })
 
+  it('offers to copy every spender and the Safe account', () => {
+    const policy = mockActiveSpendingLimit()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 1)
+  })
+
+  it('offers to copy the Safe account in the signatures section of a pending policy too', () => {
+    const policy = mockPendingPolicy()
+    setup(policy)
+
+    expect(screen.getAllByTestId('copy-btn-icon')).toHaveLength(policy.data.spenders.length + 2)
+  })
+
   it("links the Safe account to that Safe's settings page", () => {
     jest.spyOn(useChains, 'useChain').mockReturnValue(chainBuilder().with({ chainId: '1', shortName: 'eth' }).build())
 
@@ -158,6 +205,14 @@ describe('SpendingLimitDrawer', () => {
       'href',
       `/settings/setup?safe=eth%3A${SAFE_ADDRESS}`,
     )
+  })
+
+  it("shows the policy Safe's network in the overview", () => {
+    const policy = mockActiveSpendingLimit()
+
+    setup(policy)
+
+    expect(screen.getByAltText(`chain-${policy.safe.chainId}`)).toBeInTheDocument()
   })
 
   it('leaves the Safe account unlinked when its chain is unknown', () => {

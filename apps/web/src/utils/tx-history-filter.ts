@@ -10,6 +10,7 @@ import { startOfDay, endOfDay, isValid } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
 import { getModuleTransactions, getIncomingTransfers, getMultisigTransactions } from '@/utils/transactions'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 // Filter types using snake_case for backward compatibility with forms
 // These correspond to the query parameters (excluding chainId/safeAddress) from the RTK Query API
@@ -126,13 +127,14 @@ export const txFilter = {
 
 export const useTxFilter = (): [TxFilter | null, (filter: TxFilter | null) => void] => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const filter = useMemo(() => txFilter.parseUrlQuery(router.query), [router.query])
 
   const setQuery = (filter: TxFilter | null) => {
     router.push({
       pathname: router.pathname,
       query: {
-        safe: router.query.safe,
+        ...safeLinkQuery,
         ...(filter && txFilter.formatUrlQuery(filter)),
       },
     })

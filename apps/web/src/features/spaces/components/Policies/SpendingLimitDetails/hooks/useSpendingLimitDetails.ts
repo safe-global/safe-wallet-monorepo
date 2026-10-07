@@ -6,6 +6,8 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import type { ActiveDrawerPolicy } from '../../SpendingLimitDrawer'
+import { formatLastUpdated } from '../../SpendingLimitDrawer/format'
+import type { PendingSpendingLimitPolicy } from '../../types'
 
 const ENFORCED_BY = 'Safe allowance module'
 
@@ -18,7 +20,9 @@ export type SpendingLimitDetailsContent = {
 }
 
 /** Ownership comes from the Space's own safes, already loaded, so opening a panel costs no request. */
-export const useSpendingLimitDetails = (policy: ActiveDrawerPolicy): SpendingLimitDetailsContent => {
+export const useSpendingLimitDetails = (
+  policy: ActiveDrawerPolicy | PendingSpendingLimitPolicy,
+): SpendingLimitDetailsContent => {
   const { chainId, address: safeAddress } = policy.safe
   const addressBook = useMergedAddressBooks(chainId)
   const wallet = useWallet()
@@ -46,11 +50,12 @@ export const useSpendingLimitDetails = (policy: ActiveDrawerPolicy): SpendingLim
     return Object.fromEntries(named)
   }, [policy.data.spenders, addressBook, chainId])
 
+  const lastUpdated = policy.status === 'active' ? formatLastUpdated(policy.data.spenders) : undefined
+
   return {
     viewer: { address: wallet?.address, isSigner },
     safe: { address: safeAddress, name: addressBook.get(safeAddress, chainId)?.name },
-    // TODO(WA-3630): pass `lastUpdated` once the policy payload carries a timestamp.
-    overview: { enforcedBy: ENFORCED_BY },
+    overview: { enforcedBy: ENFORCED_BY, lastUpdated },
     names,
     onConnectWallet,
   }

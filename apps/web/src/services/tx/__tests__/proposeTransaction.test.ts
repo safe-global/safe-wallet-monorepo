@@ -14,7 +14,7 @@ describe('proposeTx', () => {
   const SAFE_TX_HASH = '0x1234567890'
 
   beforeAll(() => {
-    const testStore = makeStore({}, { skipBroadcast: true })
+    const testStore = makeStore({})
     setStoreInstance(testStore)
   })
 

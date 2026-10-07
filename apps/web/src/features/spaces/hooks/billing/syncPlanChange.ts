@@ -1,5 +1,6 @@
 import { cgwApi as billingApi } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import type { AppDispatch } from '@/store'
+import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit'
+import type { RootState } from '@/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 export const PLAN_SYNC_INTERVAL_MS = 3_000
@@ -9,7 +10,7 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 
 /** The CGW updates entitlements and offers only on the billing webhook, so poll until they name the new plan. */
 export const syncPlanChange = async (
-  dispatch: AppDispatch,
+  dispatch: ThunkDispatch<RootState, unknown, UnknownAction>,
   spaceId: string,
   planId: string,
   { intervalMs = PLAN_SYNC_INTERVAL_MS, timeoutMs = PLAN_SYNC_TIMEOUT_MS } = {},

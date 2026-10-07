@@ -28,7 +28,7 @@ describe('safeMsgSender', () => {
     jest.clearAllMocks()
 
     // Initialize the store for imperative usage
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     setStoreInstance(store)
 
     jest.spyOn(utils, 'generateSafeMessageHash').mockImplementation(() => '0x0123')

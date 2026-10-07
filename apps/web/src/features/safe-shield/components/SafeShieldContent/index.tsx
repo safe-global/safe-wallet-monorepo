@@ -42,6 +42,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
+  isOffchainMessage = false,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -58,6 +59,7 @@ export const SafeShieldContent = ({
   hasProFeatures?: boolean
   /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
+  isOffchainMessage?: boolean
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
@@ -83,6 +85,8 @@ export const SafeShieldContent = ({
     calculateAnalysisDelays(recipientEmpty, contractEmpty, deadlockEmpty)
 
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
+
+  const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
 
   // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
   const contractCard = (
@@ -165,7 +169,7 @@ export const SafeShieldContent = ({
           )}
         </div>
 
-        {isSafePro && shouldShowContent && (!hasProFeatures || hasProContent) && (
+        {showProSection && (
           <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
             <ProChecksRow hasProFeatures={hasProFeatures} />
             <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">

@@ -6,7 +6,7 @@ import { NoSpendingLimits } from './NoSpendingLimits'
 import { SpendingLimitsTable } from './SpendingLimitsTable'
 import { useHasFeature } from '@/hooks/useChains'
 import { NewSpendingLimitFlow } from '@/components/tx-flow/flows'
-import { SETTINGS_EVENTS } from '@/services/analytics'
+import { SETTINGS_EVENTS, UpgradeFeature } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import SafeProLock from '@/components/common/SafeProLock'
 import Track from '@/components/common/Track'
@@ -65,7 +65,11 @@ const SpendingLimitsSettings = () => {
               {isSupported ? (
                 mustUpgradeToSafePro ? (
                   <div className="my-4">
-                    <SafeProLock title="Adding spending limits requires Safe Pro" href={upgradeHref} />
+                    <SafeProLock
+                      title="Adding spending limits requires Safe Pro"
+                      href={upgradeHref}
+                      feature={UpgradeFeature.SPENDING_LIMITS}
+                    />
                   </div>
                 ) : (
                   !isPlanLoading && renderNewSpendingLimitButton

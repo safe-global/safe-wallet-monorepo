@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { SPACE_REFRESH_OPTIONS } from '../../../../hooks/refreshOptions'
 import { mockProposerDto, mockSpendingLimitDto, mockUsdcMetadata } from '../../mocks/activePolicies'
@@ -184,7 +185,29 @@ describe('useSpacePolicies', () => {
 
     expect(mockPendingQuery).toHaveBeenCalledWith(
       { spaceId: SPACE_ID, types: PENDING_POLICY_TYPES },
-      { skip: false, ...SPACE_REFRESH_OPTIONS },
+      { skip: false, ...SPACE_REFRESH_OPTIONS, pollingInterval: 0, skipPollingIfUnfocused: true },
+    )
+  })
+
+  it('should, while a queued change has all its signatures, poll for it leaving the queue', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto({ confirmations: 2 })] })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }),
+    )
+  })
+
+  it('should, while every queued change still needs signatures, not poll', () => {
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockPendingDto({ confirmations: 1 })] })
+
+    renderHook(() => useSpacePolicies())
+
+    expect(mockPendingQuery).toHaveBeenLastCalledWith(
+      expect.anything(),
+      expect.objectContaining({ pollingInterval: 0 }),
     )
   })
 
@@ -283,6 +306,33 @@ describe('useSpacePolicies', () => {
     renderHook(() => useSpacePolicies())
 
     txDispatch(TxEvent.PROPOSED, { txId: 'multisig_0x1_0xabc', nonce: 1, chainId: '1', safeAddress: '0x1' })
+
+    expect(refetchPending).toHaveBeenCalled()
+  })
+
+  it('should, when a signature is submitted onchain, refetch the pending rows', () => {
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+
+    txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, { txId: 'multisig_0x1_0xabc', nonce: 1 })
+
+    expect(refetchPending).toHaveBeenCalled()
+  })
+
+  // TxEvent.SUCCESS comes from the Safe-level history slice, which a Space route does not load.
+  it('should, when a transaction is executed from the page, refetch the pending rows', () => {
+    const refetchPending = jest.fn()
+    mockPendingQuery.mockReturnValue({ ...idle, currentData: [], refetch: refetchPending })
+    renderHook(() => useSpacePolicies())
+
+    txDispatch(TxEvent.PROCESSED, {
+      txId: 'multisig_0x1_0xabc',
+      nonce: 1,
+      chainId: '1',
+      safeAddress: '0x1',
+      txHash: '0xhash',
+    })
 
     expect(refetchPending).toHaveBeenCalled()
   })

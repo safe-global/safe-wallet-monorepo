@@ -9,12 +9,22 @@ import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
-import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
+import { MixpanelEventParams } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 
-const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
+const SafeProWorkspacesBanner = ({
+  className,
+  location = 'workspaces_list',
+}: {
+  className?: string
+  location?: SafeProBannerLocation
+}) => {
   const isDarkMode = useDarkMode()
   const isLive = useIsSafeProEnabled()
+  useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
 
   return (
     <ShadcnProvider dark={isDarkMode} className={className}>
@@ -35,7 +45,7 @@ const SafeProWorkspacesBanner = ({ className }: { className?: string }) => {
             <Button
               render={
                 <a
-                  onClick={() => trackSafeProBannerClick('workspaces_list')}
+                  onClick={() => trackSafeProBannerClick(location)}
                   href={SAFE_PRO_ANNOUNCEMENT_URL}
                   target="_blank"
                   rel="noopener noreferrer"

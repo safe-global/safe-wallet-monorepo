@@ -4,12 +4,7 @@ import { isUnauthorized } from '@/features/spaces/utils'
 import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
-import {
-  isAuthenticated,
-  selectIsOidcLoginPending,
-  selectIsSessionCheckPending,
-  setLastUsedSpace,
-} from '@/store/authSlice'
+import { isAuthenticated, selectIsOidcLoginPending, selectIsSessionCheckPending } from '@/store/authSlice'
 import { setLastUsedSpaceOrigin } from '@/features/spaces/store'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -43,7 +38,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   const isInactiveMember = isUserSignedIn && !isLoadingState && hasMembershipLoaded && !isCurrentUserActive
 
   useEffect(() => {
-    dispatch(setLastUsedSpace(spaceId))
     dispatch(setLastUsedSpaceOrigin({ path: router.pathname, spaceId }))
   }, [dispatch, spaceId, router.pathname])
 

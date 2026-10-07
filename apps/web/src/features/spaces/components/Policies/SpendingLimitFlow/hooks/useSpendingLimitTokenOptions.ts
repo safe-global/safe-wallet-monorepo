@@ -32,8 +32,15 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 
 const noop = (): void => {}
 
-/** Held tokens use the Transaction Service balances endpoint, not the portfolio one: only it returns zero balances. */
-const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
+/**
+ * @param extraTokens - Tokens to keep selectable whichever lists the queries return. See
+ *   {@link useExistingLimitTokens}; pass nothing outside the edit flow.
+ *
+ * @remarks
+ * Held tokens come from the Transaction Service balances endpoint, not the portfolio one: only it
+ * returns zero balances.
+ */
+const useSpendingLimitTokenOptions = (extraTokens: readonly TokenOption[] = []): TokenOptionsResult => {
   const chainId = useChainId()
   const { safe, safeAddress } = useSafeInfo()
   const chain = useChain(chainId)
@@ -75,9 +82,12 @@ const useSpendingLimitTokenOptions = (): TokenOptionsResult => {
     [popularData],
   )
 
+  // A new array every render at the call sites, so key on the addresses rather than the reference.
+  const extraKey = extraTokens.map((token) => token.address).join(',')
   const options = useMemo(
-    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative }),
-    [currentData, popular, native, showNative],
+    () => buildTokenOptions({ balances: currentData?.items, popular, native, showNative, extra: extraTokens }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentData, popular, native, showNative, extraKey],
   )
 
   return {

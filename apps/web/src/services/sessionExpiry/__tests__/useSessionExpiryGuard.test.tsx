@@ -27,7 +27,7 @@ const buildState = (sessionExpiresAt: number | null, isStoreHydrated = true): Pa
   ({
     auth: {
       sessionExpiresAt,
-      lastUsedSpace: null,
+      landingSpaceHint: null,
       isStoreHydrated,
       isOidcLoginPending: false,
       isSessionCheckPending: false,

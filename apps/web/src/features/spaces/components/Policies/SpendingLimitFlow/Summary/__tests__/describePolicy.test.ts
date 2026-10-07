@@ -1,7 +1,8 @@
 import chains from '@safe-global/utils/config/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { describePolicy, joinNames, spenderDisplayName } from '../describePolicy'
-import { CALLOUT_DESCRIPTION_PLURAL, CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
+import { describeEdit, describePolicy, isEditSummary, joinNames, spenderDisplayName } from '../describePolicy'
+import { CALLOUT_DESCRIPTION_PLURAL, CALLOUT_DESCRIPTION_SINGULAR, EDIT_CALLOUT_NO_CHANGES } from '../constants'
+import type { LimitSummary, SpendingLimitSummaryModel } from '../types'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,
@@ -107,5 +108,32 @@ describe('describePolicy', () => {
       title: 'You are giving spending limits.',
       description: CALLOUT_DESCRIPTION_PLURAL,
     })
+  })
+})
+
+describe('describeEdit', () => {
+  const policy = (changes: Array<LimitSummary['change']>): SpendingLimitSummaryModel =>
+    ({
+      safe: { id: '1:0x1', chainId: '1', address: '0x1', eligibility: 'signer' },
+      spenders: [{ address: '0xa', limits: changes.map((change) => limitSummaryBuilder().with({ change }).build()) }],
+    }) as SpendingLimitSummaryModel
+
+  it('is used only once a row carries a verdict', () => {
+    expect(isEditSummary(policy([undefined]))).toBe(false)
+    expect(isEditSummary(policy(['unchanged']))).toBe(true)
+  })
+
+  it('counts what the edit does, leaving the untouched rows out', () => {
+    expect(describeEdit(policy(['added', 'changed', 'removed', 'removed', 'unchanged'])).title).toBe(
+      '1 added, 1 changed and 2 removed — 4 spending limits in all.',
+    )
+  })
+
+  it('speaks of a single change in the singular', () => {
+    expect(describeEdit(policy(['changed', 'unchanged'])).title).toBe('1 changed — 1 spending limit in all.')
+  })
+
+  it('says so when an edit touches nothing', () => {
+    expect(describeEdit(policy(['unchanged', 'unchanged'])).title).toBe(EDIT_CALLOUT_NO_CHANGES)
   })
 })

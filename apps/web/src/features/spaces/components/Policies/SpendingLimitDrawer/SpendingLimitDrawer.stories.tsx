@@ -8,7 +8,9 @@ import {
   mockFullySignedPending,
   mockMissingMetadataPolicy,
   mockMultiSpenderPolicy,
+  mockPendingEdit,
   mockPendingPolicy,
+  mockPendingRemoval,
   mockPendingUpdate,
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
@@ -21,7 +23,7 @@ const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c&safe=eth:0x8675'
 
-const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, onReviewTransaction: fn() }
+const PENDING_ARGS = { transactionLink: TRANSACTION_LINK, reviewTransactionHref: '/transactions/tx?id=0x9f3c' }
 
 const OVERVIEW = {
   lastUpdated: 'Sep 22, 2026 · 03:35 UTC',
@@ -89,6 +91,31 @@ export const PendingFullySigned: Story = {
 /** A queued edit: the current limits still apply until it executes. */
 export const PendingUpdate: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** A queued edit that adds, changes and removes limits: each row says which, and a removed one is struck through. */
+export const PendingEdit: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingEdit(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** A queued removal: the limit is still enforced until it executes. */
+export const PendingRemoval: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingRemoval(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** Executed while the panel was open; the indexer has not caught up yet, so nothing is left to do. */
+export const PendingExecuted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'executed' },
+}
+
+/** Another transaction took its nonce, so this one can never execute. */
+export const PendingReplaced: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'replaced' },
+}
+
+/** Deleted by its proposer while the panel was open. */
+export const PendingDeleted: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingPolicy(), viewer: MOCK_VIEWERS.signer, outcome: 'deleted' },
 }
 
 /** The module is configured but not enabled, so the limit governs nothing and cannot be managed. */

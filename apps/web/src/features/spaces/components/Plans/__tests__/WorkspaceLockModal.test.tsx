@@ -1,5 +1,9 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceLockModal'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -152,21 +156,28 @@ describe('WorkspaceLockModal', () => {
     mockUseIsAdmin.mockReturnValue(false)
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent('Your Workspace moved to Safe Pro')
     expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
-      'Your Workspace moved to Safe Pro on Oct 6, 2026',
-    )
-    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
-      'Acme Inc is locked until an admin starts the free access.',
+      'Acme Inc is locked until an admin claims free access.',
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('counts a member seeing a Workspace whose plan ended', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined)
   })
 
   it('words the member explanation by lock reason', () => {
     expect(_memberCopy('lapsed', null, ENDED_AT, 'Acme Inc')).toEqual({
-      title: 'Your Safe Pro free access ended on Dec 5, 2026',
-      body: 'An admin needs to choose a plan to unlock it. Your Safe accounts remain available outside the Workspace.',
+      title: 'Your free access ended on Dec 5, 2026',
+      body: 'An admin needs to choose a plan to unlock your Workspace.\nYour Safe accounts remain available in My accounts.',
     })
     expect(_memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
     expect(_memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free access to Safe Pro')

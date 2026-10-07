@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import NetworkSelector from './index'
+import type { NextRouter } from 'next/router'
+import NetworkSelector, { buildChainSwitchHref } from './index'
 
 const mockChain = (chainId: string, chainName: string, isTestnet = false) =>
   ({
@@ -264,5 +265,49 @@ describe('NetworkSelector', () => {
     fireEvent.keyDown(search, { key: 'ArrowDown' })
 
     expect(document.activeElement).toBe(search)
+  })
+})
+
+describe('buildChainSwitchHref', () => {
+  const SPACE_ID = '5175f041-ccaa-43de-a3c0-fc711e353699'
+  const SAFE_ADDRESS = '0x749b0f1dA5bB39CBF40ABc9ff1ea197863eD9305'
+  const polygon = { chainId: '137', shortName: 'matic' }
+  const routerAt = (pathname: string, query: NextRouter['query']) => ({ pathname, query })
+
+  it('should keep the Workspace and the return URL of the create flow', () => {
+    const next = `/spaces/safe-accounts?spaceId=${SPACE_ID}`
+    const router = routerAt('/new-safe/create', { next, spaceId: SPACE_ID })
+
+    expect(buildChainSwitchHref(router, '', polygon)).toEqual({
+      pathname: '/new-safe/create',
+      query: { chain: 'matic', next, spaceId: SPACE_ID },
+    })
+  })
+
+  it('should keep the Workspace of a Safe page', () => {
+    const router = routerAt('/home', { safe: `eth:${SAFE_ADDRESS}`, spaceId: SPACE_ID })
+
+    expect(buildChainSwitchHref(router, SAFE_ADDRESS, polygon).query).toEqual({
+      safe: `matic:${SAFE_ADDRESS}`,
+      spaceId: SPACE_ID,
+    })
+  })
+
+  it('should add no Workspace outside a Workspace', () => {
+    const router = routerAt('/new-safe/create', {})
+
+    expect(buildChainSwitchHref(router, '', polygon).query).toEqual({ chain: 'matic' })
+  })
+
+  it('should drop a repeated param instead of joining its values', () => {
+    const router = routerAt('/new-safe/create', { next: ['/a', '/b'] })
+
+    expect(buildChainSwitchHref(router, '', polygon).query).toEqual({ chain: 'matic' })
+  })
+
+  it('should drop a malformed Workspace id', () => {
+    const router = routerAt('/new-safe/create', { spaceId: 'not-a-workspace' })
+
+    expect(buildChainSwitchHref(router, '', polygon).query).toEqual({ chain: 'matic' })
   })
 })

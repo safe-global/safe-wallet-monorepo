@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { PENDING_BANNER_TITLE, signAndExecuteLine } from '../../copy'
+import { PENDING_BANNER_TITLE, signAndExecuteLine } from '../../messages'
 import SpendingLimitActions from './SpendingLimitActions'
 
 const meta = {
@@ -8,7 +8,10 @@ const meta = {
   component: SpendingLimitActions,
   parameters: { layout: 'centered' },
   args: {
-    pending: { transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c', onReviewTransaction: fn() },
+    pending: {
+      transactionLink: 'https://app.safe.global/transactions/tx?id=0x9f3c',
+      reviewTransactionHref: '/transactions/tx?id=0x9f3c',
+    },
     onEdit: fn(),
     onConnectWallet: fn(),
   },

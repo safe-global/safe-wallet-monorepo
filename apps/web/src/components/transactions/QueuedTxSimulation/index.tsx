@@ -26,7 +26,7 @@ import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeProAccess } from '@/features/spaces'
 import NextLink from 'next/link'
-import { useRouter } from 'next/router'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { selectHasOwnTenderly } from '@/store/settingsSlice'
@@ -70,14 +70,14 @@ const CompactSimulationButton = ({
 }
 
 const SimulationSetupLink = () => {
-  const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
 
   return (
     <Tooltip>
       <TooltipTrigger
         render={
           <NextLink
-            href={{ pathname: AppRoutes.settings.environmentVariables, query: { safe: router.query.safe } }}
+            href={{ pathname: AppRoutes.settings.environmentVariables, query: safeLinkQuery }}
             data-testid="queued-tx-simulation-setup"
             className="flex flex-row items-center gap-1 rounded-lg bg-[var(--color-background-main)] px-2 py-1 no-underline"
           >

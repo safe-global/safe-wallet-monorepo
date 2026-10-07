@@ -2,7 +2,6 @@ import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { setLastUsedSpace } from '@/store/authSlice'
 import SpaceCreationModal from './index'
 
 const mockPush = jest.fn()
@@ -95,7 +94,7 @@ describe('SpaceCreationModal tracking', () => {
     })
   })
 
-  it('persists the new space uuid as lastUsedSpace after successful creation', async () => {
+  it('opens the new Workspace after successful creation', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({
       data: { id: 99, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
     })
@@ -111,11 +110,14 @@ describe('SpaceCreationModal tracking', () => {
     fireEvent.click(submitButton)
 
     await waitFor(() => {
-      expect(mockDispatch).toHaveBeenCalledWith(setLastUsedSpace('11111111-1111-1111-1111-111111111111'))
+      expect(mockPush).toHaveBeenCalledWith({
+        pathname: '/spaces',
+        query: { spaceId: '11111111-1111-1111-1111-111111111111' },
+      })
     })
   })
 
-  it('does not persist lastUsedSpace when the API returns an error', async () => {
+  it('does not open a Workspace when the API returns an error', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({ error: { status: 500 } })
 
     render(<SpaceCreationModal onClose={jest.fn()} />)
@@ -131,7 +133,7 @@ describe('SpaceCreationModal tracking', () => {
     await waitFor(() => {
       expect(mockCreateSpaceWithUser).toHaveBeenCalled()
     })
-    expect(mockDispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: setLastUsedSpace.type }))
+    expect(mockPush).not.toHaveBeenCalled()
   })
 
   it('surfaces the backend error message when creation fails', async () => {

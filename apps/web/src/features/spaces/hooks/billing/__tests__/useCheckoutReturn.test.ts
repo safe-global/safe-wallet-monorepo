@@ -1,6 +1,10 @@
 import { renderHook, act } from '@testing-library/react'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { _resetCheckoutDeadlines, useCheckoutReturn } from '../useCheckoutReturn'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockReplace = jest.fn()
 let mockQuery: Record<string, string> = {}
@@ -162,6 +166,22 @@ describe('useCheckoutReturn', () => {
     expect(first.result.current.status).toBe('activating')
     expect(second.result.current.status).toBe('activating')
     jest.useRealTimers()
+  })
+
+  it('tracks the outcome once per session, however many instances see it', () => {
+    mockSessionQuery.mockReturnValue(session('paid'))
+    mockSubscriptionsQuery.mockReturnValue(active('active'))
+    const { rerender } = renderHook(() => useCheckoutReturn())
+    renderHook(() => useCheckoutReturn())
+    rerender()
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.CHECKOUT_RETURNED, { Outcome: 'success' })
+
+    mockQuery = { spaceId: SPACE_ID, sessionId: 'cs_other' }
+    mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
+    mockSubscriptionsQuery.mockReturnValue({ data: undefined })
+    renderHook(() => useCheckoutReturn())
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.CHECKOUT_RETURNED, { Outcome: 'cancelled' })
   })
 
   describe('abandoned checkout (Back from Stripe)', () => {

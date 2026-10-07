@@ -1,12 +1,16 @@
 import type { ReactElement } from 'react'
+import type { LinkProps } from 'next/link'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
-import { EDIT_UNAVAILABLE_HELPER } from '../../copy'
+import { EDIT_LOCKED_HELPER, TX_LOAD_FAILED_HELPER } from '../../messages'
 import type { SpendingLimitDrawerState } from '../../resolveState'
 import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
-  transactionLink: string
-  onReviewTransaction: () => void
+  transactionLink?: string
+  /** Absent until the transaction and chain configs have loaded, or once the row has left the list. */
+  reviewTransactionHref?: LinkProps['href']
+  /** Set when the queued transaction failed to load. */
+  onRetry?: () => void
 }
 
 export type SpendingLimitActionsProps = {
@@ -32,18 +36,29 @@ const SpendingLimitActions = ({
         <PolicyDrawerActions
           actionLabel="Edit"
           onClick={onEdit}
-          hint={state.helper ?? (onEdit ? undefined : EDIT_UNAVAILABLE_HELPER)}
+          hint={state.helper ?? (onEdit ? undefined : EDIT_LOCKED_HELPER)}
           disabled={state.disabled || !onEdit}
         />
       )
 
     case 'review':
+      if (pending?.onRetry) {
+        return <PolicyDrawerActions actionLabel="Try again" onClick={pending.onRetry} hint={TX_LOAD_FAILED_HELPER} />
+      }
+
       return pending ? (
-        <PolicyDrawerActions actionLabel="Review transaction" onClick={pending.onReviewTransaction} />
+        <PolicyDrawerActions
+          actionLabel="Review transaction"
+          href={pending.reviewTransactionHref}
+          disabled={!pending.reviewTransactionHref}
+        />
       ) : null
 
     case 'copy-link':
-      return pending ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
+      return pending?.transactionLink ? <CopyTransactionLink transactionLink={pending.transactionLink} /> : null
+
+    case 'none':
+      return null
 
     // A new action must pick a branch above rather than silently rendering nothing.
     default: {

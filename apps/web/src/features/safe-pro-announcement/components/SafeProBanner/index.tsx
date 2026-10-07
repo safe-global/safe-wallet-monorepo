@@ -6,18 +6,28 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
+import { MixpanelEventParams } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
 import { safeProMoveHeadline } from '../../utils/safeProMoveHeadline'
 
-const SafeProBanner = ({ className }: { className?: string }) => {
+const SafeProBanner = ({
+  className,
+  location = 'workspaces_sign_in',
+}: {
+  className?: string
+  location?: SafeProBannerLocation
+}) => {
   const isLive = useIsSafeProEnabled()
+  useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
 
   return (
     <Card
       as="a"
       href={SAFE_PRO_ANNOUNCEMENT_URL}
-      onClick={() => trackSafeProBannerClick('workspaces_sign_in')}
+      onClick={() => trackSafeProBannerClick(location)}
       target="_blank"
       rel="noopener noreferrer"
       size="none"

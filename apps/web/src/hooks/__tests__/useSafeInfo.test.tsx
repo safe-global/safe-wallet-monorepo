@@ -265,7 +265,7 @@ describe('useSafeInfo hook under a SafeScope', () => {
       safeError: state.error,
       safeLoading: state.loading,
     })
-    const store = makeStore(initialReduxState, { skipBroadcast: true })
+    const store = makeStore(initialReduxState)
     const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
     expect(result.current).toEqual(legacy(selectSafeInfo(store.getState())))
   })

@@ -28,7 +28,7 @@ const mockSpace: GetSpaceResponse = {
 }
 
 const renderWithStore = (onSuccess?: () => void) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
   return { store, ...renderHook(() => useUpdateSpace(mockSpace, onSuccess), { wrapper }) }
 }
@@ -134,7 +134,7 @@ describe('useUpdateSpace', () => {
   })
 
   it('does nothing when space is undefined', async () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const wrapper = ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>
     const { result } = renderHook(() => useUpdateSpace(undefined), { wrapper })
 

@@ -30,7 +30,7 @@ const mockSpace: GetSpaceResponse = {
 }
 
 const renderDialog = (space = mockSpace, onClose = jest.fn()) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   return {
     store,
     onClose,
@@ -51,6 +51,11 @@ describe('DeleteSpaceDialog', () => {
   it('renders the dialog with space name in the confirmation label', () => {
     renderDialog()
     expect(screen.getByText(/My Workspace/)).toBeInTheDocument()
+  })
+
+  it('should, when rendered, label the confirmation input with the prompt that contains the space name', () => {
+    renderDialog()
+    expect(screen.getByLabelText('Type My Workspace to confirm')).toBe(screen.getByTestId('space-confirm-name-input'))
   })
 
   it('confirm button is disabled when the input is empty', () => {

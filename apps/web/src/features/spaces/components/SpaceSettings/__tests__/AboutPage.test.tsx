@@ -50,7 +50,7 @@ const setSupportFeature = ({ disabled, isOfficialHost }: { disabled: boolean; is
 }
 
 const renderWithStore = () => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   return {
     store,
     ...render(

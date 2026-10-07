@@ -67,6 +67,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
     if (!canEdit) return
     if (!safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
+    // A Space-level scope drops its SDK while it is recreated; building without it fails.
+    if (scope && !scope.sdk) return
 
     setSafeTxError(undefined)
 

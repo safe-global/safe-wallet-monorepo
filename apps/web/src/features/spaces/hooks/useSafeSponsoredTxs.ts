@@ -1,6 +1,10 @@
+import { useMemo } from 'react'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { safeSpaceKey, useSafeSpaces } from '@/hooks/useSafeSpaces'
 import type { SponsoredTxsMeter } from './billing/types'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
@@ -17,19 +21,30 @@ export type SafeSponsoredTxs = {
   spaceId: string | null
   canSponsor: boolean
   isLoading: boolean
+  /** The lookup failed for good, so `isPro` cannot be trusted. */
+  isError: boolean
 }
 
 /** The sponsored-transactions allowance of the Workspace the current Safe belongs to, if it belongs to one. */
 export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
   const isEnabled = useIsSafeProEnabled()
+  const isSignedIn = useAppSelector(isAuthenticated)
   const { safe, safeAddress } = useSafeInfo()
-  const { safeSpaces, isLoading: isSpacesLoading } = useSafeSpaces(!isEnabled)
   const currentSpaceId = useCurrentSpaceId()
-  // Only the current Workspace counts, whatever other Workspaces hold the Safe.
-  const holders =
-    isEnabled && safeAddress && safe.chainId ? (safeSpaces[safeSpaceKey(safe.chainId, safeAddress)] ?? []) : []
-  const spaceId = currentSpaceId && holders.some((space) => space.uuid === currentSpaceId) ? currentSpaceId : null
-  const { plan, sponsoredTxs, isLoading: isPlanLoading } = useSpacePlan(spaceId)
+  // Only the current Workspace counts, whatever other Workspaces hold the Safe: one lookup, not one per Workspace.
+  const shouldLookup = isEnabled && isSignedIn && Boolean(currentSpaceId && safeAddress && safe.chainId)
+  const {
+    currentData: spaceSafes,
+    isFetching: isSafesFetching,
+    isError: isSafesError,
+  } = useSpaceSafesGetV1Query({ spaceId: currentSpaceId ?? '' }, { skip: !shouldLookup })
+  const isSafesLoading = shouldLookup && isSafesFetching && !spaceSafes
+  const isSafeInSpace = useMemo(
+    () => (spaceSafes?.safes[safe.chainId] ?? []).some((address) => sameAddress(address, safeAddress)),
+    [spaceSafes, safe.chainId, safeAddress],
+  )
+  const spaceId = shouldLookup && isSafeInSpace ? currentSpaceId : null
+  const { plan, sponsoredTxs, isLoading: isPlanLoading, isError: isPlanError } = useSpacePlan(spaceId)
 
   const isPro = isEnabled && spaceId !== null && plan !== null && sponsoredTxs !== null
   const left = isPro && sponsoredTxs.quota !== null ? Math.max(sponsoredTxs.quota - sponsoredTxs.used, 0) : null
@@ -41,6 +56,7 @@ export const useSafeSponsoredTxs = (): SafeSponsoredTxs => {
     left,
     spaceId: isPro ? spaceId : null,
     canSponsor: isPro && (left === null || left > 0),
-    isLoading: isEnabled && (isSpacesLoading || (spaceId !== null && isPlanLoading)),
+    isLoading: isEnabled && (isSafesLoading || (spaceId !== null && isPlanLoading)),
+    isError: isEnabled && ((shouldLookup && isSafesError) || (spaceId !== null && isPlanError)),
   }
 }

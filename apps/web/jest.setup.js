@@ -56,6 +56,14 @@ if (typeof globalThis.ResizeObserver === 'undefined') {
   }
 }
 
+// jest-fixed-jsdom exposes Node's BroadcastChannel, whose open port (from makeStore) keeps Jest from exiting
+globalThis.BroadcastChannel = class BroadcastChannel {
+  postMessage() {}
+  addEventListener() {}
+  removeEventListener() {}
+  close() {}
+}
+
 // Set timezone to UTC for consistent date formatting across environments
 process.env.TZ = 'UTC'
 

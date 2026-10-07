@@ -47,7 +47,7 @@ const AddAccountsChooser = ({
     setChooserOpen(false)
     router.push({
       pathname: AppRoutes.newSafe.create,
-      query: { next: buildCurrentNextUrl(router.pathname, router.query) },
+      query: { next: buildCurrentNextUrl(router.pathname, router.query), ...(spaceId && { spaceId }) },
     })
   }
 

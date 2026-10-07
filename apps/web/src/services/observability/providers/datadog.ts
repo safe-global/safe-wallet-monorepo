@@ -29,12 +29,7 @@ import {
 } from '@/config/constants'
 
 type DatadogSite =
-  | 'datadoghq.com'
-  | 'datadoghq.eu'
-  | 'us3.datadoghq.com'
-  | 'us5.datadoghq.com'
-  | 'ddog-gov.com'
-  | 'ap1.datadoghq.com'
+  'datadoghq.com' | 'datadoghq.eu' | 'us3.datadoghq.com' | 'us5.datadoghq.com' | 'ddog-gov.com' | 'ap1.datadoghq.com'
 
 export const isDatadogEnabled = Boolean(DATADOG_RUM_APPLICATION_ID) && Boolean(DATADOG_RUM_CLIENT_TOKEN) && !IS_TEST_E2E
 

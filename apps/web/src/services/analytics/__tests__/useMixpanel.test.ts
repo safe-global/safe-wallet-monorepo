@@ -62,6 +62,13 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 
+const mockUseSpacePlanState = jest.fn<{ status: string; tier: string; role: string } | null, [string | null]>(
+  () => null,
+)
+jest.mock('@/features/spaces/hooks/useSpacePlanState', () => ({
+  useSpacePlanState: (id: string | null) => mockUseSpacePlanState(id),
+}))
+
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/auth', () => ({
   useAuthGetMeV1Query: jest.fn(() => ({ data: undefined })),
 }))
@@ -281,5 +288,19 @@ describe('useMixpanel', () => {
 
     // Should only be called for wallet properties, not user properties
     expect(mixpanelModule.mixpanelSetUserProperties).toHaveBeenCalledTimes(1)
+  })
+
+  it('stamps the plan state of the Workspace on every event, and clears it outside one', () => {
+    jest.spyOn(mixpanelModule, 'mixpanelSetPlanState')
+    jest.spyOn(useIsSpaceRouteHook, 'useIsSpaceRoute').mockReturnValue(true)
+    mockUseSpacePlanState.mockReturnValue({ status: 'free_access', tier: 'business', role: 'admin' })
+
+    renderHook(() => useMixpanel(), { initialReduxState: getDefaultInitialReduxState() })
+    expect(mockUseSpacePlanState).toHaveBeenCalledWith('42')
+    expect(mixpanelModule.mixpanelSetPlanState).toHaveBeenCalledWith('free_access', 'business', 'admin')
+
+    mockUseSpacePlanState.mockReturnValue(null)
+    renderHook(() => useMixpanel(), { initialReduxState: getDefaultInitialReduxState() })
+    expect(mixpanelModule.mixpanelSetPlanState).toHaveBeenLastCalledWith('', '', '')
   })
 })

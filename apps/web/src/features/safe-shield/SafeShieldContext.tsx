@@ -50,6 +50,7 @@ type SafeShieldContextType = {
   /** Recipient/counterparty analysis and simulation are Safe Pro features; threat analysis (Blockaid) always runs. */
   hasProFeatures: boolean
   isSafePro: boolean
+  isOffchainMessage: boolean
 }
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
@@ -87,6 +88,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   )
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
+  const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
 
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
@@ -137,6 +139,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         addToTrustedList,
         hasProFeatures,
         isSafePro,
+        isOffchainMessage,
       }}
     >
       {children}

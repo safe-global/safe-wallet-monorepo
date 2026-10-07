@@ -2,9 +2,15 @@ import type { ReactNode } from 'react'
 import { act, fireEvent, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
+import * as useChainIdHook from '@/hooks/useChainId'
+import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
+import { getNestedSafesNoticeText } from '../../SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '../constants'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {
@@ -17,6 +23,19 @@ jest.mock('@/components/common/ChainIndicator', () => {
 jest.mock('@/components/common/CheckWallet', () => ({
   __esModule: true,
   default: ({ children }: { children: (ok: boolean) => ReactNode }) => <>{children(true)}</>,
+}))
+
+const NO_WORKSPACE_CONTACTS: SpaceAddressBookItemDto[] = []
+
+jest.mock('../../../../hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../../hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: jest.fn(() => NO_WORKSPACE_CONTACTS),
+}))
+
+jest.mock('../../../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(() => false),
 }))
 
 const CHAIN_ID = '1'
@@ -44,9 +63,10 @@ const eligible = {
   refetch: jest.fn(),
 }
 
-const renderForm = (props: Partial<ProposerRoleFormProps> = {}) =>
+const renderForm = (props: Partial<ProposerRoleFormProps> = {}, addressBook = {}) =>
   renderWithUserEvent(
     <ProposerRoleForm onSubmit={jest.fn()} safeAccounts={eligible} onSafeAccountChange={jest.fn()} {...props} />,
+    { initialReduxState: { addressBook } },
   )
 
 const submitButton = () => screen.getByRole('button', { name: 'Submit' })
@@ -70,13 +90,21 @@ describe('ProposerRoleForm', () => {
     ).toBeInTheDocument()
   })
 
-  it('says the proposer address is public and the name is not', () => {
+  it('points at the proposer settings in the nested Safes notice', async () => {
+    const { user } = renderForm()
+
+    await openAccountField(user)
+
+    expect(await screen.findByTestId('safe-account-selector-notice')).toHaveTextContent(
+      getNestedSafesNoticeText('proposers'),
+    )
+  })
+
+  it('explains the proposer field and where a member name goes', () => {
     renderForm()
 
-    expect(
-      screen.getByText('The beneficiary that will have the ability to propose transactions, publicly visible'),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Only you can see this name. Everyone else sees the address.')).toBeInTheDocument()
+    expect(screen.getByText('The beneficiary that will have the ability to propose transactions.')).toBeInTheDocument()
+    expect(screen.getByText('Sent to an admin to add to the Workspace address book.')).toBeInTheDocument()
   })
 
   describe('submit gating', () => {
@@ -113,6 +141,73 @@ describe('ProposerRoleForm', () => {
 
       await screen.findByText('You need to activate this Safe before transacting')
       expect(submitButton()).toBeDisabled()
+    })
+
+    it('shows the parent Safe notice with a settings link and blocks submit when the wallet is a parent Safe', async () => {
+      renderForm({
+        safeAccount: treasury.id,
+        defaultValues: { proposer: PROPOSER },
+        parentSafeWallet: {
+          ...PARENT_SAFE_WALLET_COPY,
+          safeName: 'Treasury',
+          parentSafeName: 'Ops',
+          settingsHref: { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } },
+        },
+      })
+
+      expect(screen.getByText('Add this proposer on the Safe account level')).toBeInTheDocument()
+      expect(screen.getByTestId('parent-safe-wallet-notice')).toHaveTextContent(
+        'Your connected wallet, Ops, is a parent Safe account of Treasury. To grant this role on its behalf, open the settings of Treasury with a signer of Ops.',
+      )
+      expect(screen.getByRole('link', { name: 'Go to Safe settings' })).toHaveAttribute(
+        'href',
+        expect.stringContaining('/settings/setup?safe='),
+      )
+      await waitFor(() => expect(screen.getByRole('combobox', { name: 'Proposer' })).toHaveValue(PROPOSER))
+      expect(submitButton()).toBeDisabled()
+    })
+
+    it('closes the flow and pushes the settings route itself when the link is clicked', async () => {
+      const onNavigate = jest.fn()
+      const push = jest.fn().mockResolvedValue(true)
+      const settingsHref = { pathname: '/settings/setup', query: { safe: `eth:${SAFE}` } }
+      const { user } = renderWithUserEvent(
+        <ProposerRoleForm
+          onSubmit={jest.fn()}
+          safeAccounts={eligible}
+          onSafeAccountChange={jest.fn()}
+          safeAccount={treasury.id}
+          parentSafeWallet={{
+            ...PARENT_SAFE_WALLET_COPY,
+            safeName: 'Treasury',
+            parentSafeName: 'Ops',
+            settingsHref,
+            onNavigate,
+          }}
+        />,
+        { routerProps: { push } },
+      )
+
+      await user.click(screen.getByRole('link', { name: 'Go to Safe settings' }))
+
+      expect(onNavigate).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledTimes(1)
+      expect(push).toHaveBeenCalledWith(settingsHref)
+    })
+
+    it('keeps the settings link mousedown from the document-level navigation guard', () => {
+      const guard = jest.fn()
+      document.addEventListener('mousedown', guard)
+      renderForm({
+        safeAccount: treasury.id,
+        parentSafeWallet: { ...PARENT_SAFE_WALLET_COPY, safeName: 'Treasury', parentSafeName: 'Ops', settingsHref: {} },
+      })
+
+      fireEvent.mouseDown(screen.getByRole('link', { name: 'Go to Safe settings' }))
+      fireEvent.mouseDown(screen.getByTestId('parent-safe-wallet-notice'))
+
+      expect(guard).toHaveBeenCalledTimes(1)
+      document.removeEventListener('mousedown', guard)
     })
 
     it('keeps submit disabled while the picked Safe account is missing from the resolved accounts', async () => {
@@ -250,8 +345,142 @@ describe('ProposerRoleForm', () => {
     })
   })
 
+  describe('proposer name', () => {
+    const nameField = () => screen.getByRole('textbox', { name: 'Proposer name' })
+    const queryNameField = () => screen.queryByRole('textbox', { name: 'Proposer name' })
+    const localContact = { [CHAIN_ID]: { [PROPOSER]: 'Alice' } }
+    const workspaceContact: SpaceAddressBookItemDto = {
+      name: 'Workspace Alice',
+      address: PROPOSER,
+      chainIds: [CHAIN_ID],
+      createdBy: '',
+      createdByUserId: 0,
+      lastUpdatedBy: '',
+      lastUpdatedByUserId: 0,
+      createdAt: '',
+      updatedAt: '',
+    }
+    const workspaceContacts = [workspaceContact]
+
+    beforeEach(() => jest.spyOn(useChainIdHook, 'default').mockReturnValue(CHAIN_ID))
+    afterEach(() => {
+      jest.restoreAllMocks()
+      jest.mocked(useIsAdmin).mockReturnValue(false)
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(NO_WORKSPACE_CONTACTS)
+    })
+
+    it('fills in the local address book name and lets a member change it', async () => {
+      const { user } = renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+      expect(nameField()).toHaveValue('Bob')
+    })
+
+    it('fills in the local address book name, lets an admin change it and says it goes to the Workspace', async () => {
+      jest.mocked(useIsAdmin).mockReturnValue(true)
+      const { user } = renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+      expect(nameField()).toHaveValue('Bob')
+      expect(screen.getByText('Saved to the Workspace address book, visible to all members.')).toBeInTheDocument()
+    })
+
+    it.each([
+      ['an admin', true],
+      ['a member', false],
+    ])('hides the name field from %s when the proposer is in the Workspace address book', async (_, isAdmin) => {
+      jest.mocked(useIsAdmin).mockReturnValue(isAdmin)
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      renderForm({ defaultValues: { proposer: PROPOSER } })
+
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+    })
+
+    it('hides the name field when the proposer is in both the Workspace and the local address book', async () => {
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      renderForm({ defaultValues: { proposer: PROPOSER } }, localContact)
+
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+    })
+
+    it('submits the Workspace address book name while the name field is hidden', async () => {
+      jest.mocked(useGetSpaceAddressBook).mockReturnValue(workspaceContacts)
+      const onSubmit = jest.fn()
+      const { user } = renderForm({ safeAccount: treasury.id, defaultValues: { proposer: PROPOSER }, onSubmit })
+
+      await waitFor(() => expect(submitButton()).toBeEnabled())
+      await user.click(submitButton())
+
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({ proposer: PROPOSER, name: 'Workspace Alice' }, expect.anything()),
+      )
+    })
+
+    it('restores the Workspace name when switching from an edited local contact to a Workspace contact with the same name', async () => {
+      const otherContact = '0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed'
+      jest
+        .mocked(useGetSpaceAddressBook)
+        .mockReturnValue([{ ...workspaceContact, name: 'Alice', address: otherContact }])
+      const onSubmit = jest.fn()
+      const { user } = renderForm({ safeAccount: treasury.id, onSubmit }, localContact)
+      const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
+
+      await user.type(proposerField(), PROPOSER)
+      await waitFor(() => expect(nameField()).toHaveValue('Alice'))
+      await user.clear(nameField())
+      await user.type(nameField(), 'Bob')
+
+      // Picked from the suggestions, so the proposer jumps straight from one contact to the other
+      await user.click(screen.getByTestId('address-book-recipient'))
+      const workspaceOption = (await screen.findAllByTestId('address-item')).find((option) =>
+        option.textContent?.toLowerCase().includes(otherContact.slice(-4).toLowerCase()),
+      )
+      await user.click(workspaceOption!)
+      await waitFor(() => expect(queryNameField()).not.toBeInTheDocument())
+
+      await user.click(submitButton())
+      await waitFor(() =>
+        expect(onSubmit).toHaveBeenCalledWith({ proposer: otherContact, name: 'Alice' }, expect.anything()),
+      )
+    })
+
+    it('shows an empty name field when the proposer is in neither address book', () => {
+      renderForm({ defaultValues: { proposer: PROPOSER } })
+
+      expect(nameField()).toHaveValue('')
+    })
+
+    it('flags a local address book name the Workspace would reject so the admin can fix it', async () => {
+      jest.mocked(useIsAdmin).mockReturnValue(true)
+      renderForm({ defaultValues: { proposer: PROPOSER } }, { [CHAIN_ID]: { [PROPOSER]: 'Al' } })
+
+      await waitFor(() => expect(nameField()).toHaveValue('Al'))
+      expect(screen.getByText('Names must be at least 3 character(s) long')).toBeInTheDocument()
+    })
+  })
+
   describe('proposer field', () => {
     const proposerField = () => screen.getByRole('combobox', { name: 'Proposer' })
+
+    afterEach(() => jest.restoreAllMocks())
+
+    it('does not suggest the picked Safe account as proposer', async () => {
+      jest.spyOn(useChainIdHook, 'default').mockReturnValue(CHAIN_ID)
+      const { user } = renderForm(
+        { safeAccount: treasury.id },
+        { [CHAIN_ID]: { [SAFE]: 'Treasury', [PROPOSER]: 'Alice' } },
+      )
+
+      await user.click(screen.getByTestId('address-book-toggle'))
+      const options = await screen.findAllByTestId('address-item')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Alice')
+    })
 
     it('does not take focus when the form opens', () => {
       renderForm({ safeAccount: treasury.id })
@@ -302,6 +531,31 @@ describe('ProposerRoleForm', () => {
       await user.click(await screen.findByRole('option'))
 
       expect(onSafeAccountChange).toHaveBeenCalledWith(treasury.id)
+    })
+
+    it('does not offer the Safe account entered as proposer', async () => {
+      const ops: SafeAccountOption = {
+        ...treasury,
+        id: buildSafeAccountId(CHAIN_ID, PROPOSER),
+        address: PROPOSER,
+        name: 'Ops',
+      }
+      const { user } = renderForm({
+        safeAccounts: { ...eligible, accounts: [treasury, ops] },
+        defaultValues: { proposer: PROPOSER },
+      })
+
+      await openAccountField(user)
+      const options = await screen.findAllByRole('option')
+
+      expect(options).toHaveLength(1)
+      expect(options[0]).toHaveTextContent('Treasury')
+    })
+
+    it('keeps the picked Safe account when it is entered as its own proposer', () => {
+      renderForm({ safeAccount: treasury.id, defaultValues: { proposer: SAFE } })
+
+      expect(accountField()).toHaveTextContent('Treasury')
     })
 
     it('passes the loading state through to the account field', () => {
