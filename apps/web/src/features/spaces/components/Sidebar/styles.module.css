@@ -424,6 +424,7 @@
 }
 
 .profileSignedIn {
+  margin-left: auto;
   font-size: 12px;
   line-height: 16px;
   font-weight: 400;
@@ -441,6 +442,30 @@
   line-height: 16px;
   font-weight: 400;
   text-transform: capitalize;
+  color: var(--color-text-secondary, #737373);
+}
+
+.profileIdentity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.profileWalletHintAddress {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  vertical-align: text-bottom;
+  color: var(--color-text-primary, #171717);
+  white-space: nowrap;
+}
+
+.profileWalletHint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
   color: var(--color-text-secondary, #737373);
 }
 

@@ -1,4 +1,5 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
+import useWallet from '@/hooks/wallets/useWallet'
 import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { getSidebarProfileInfo } from './getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
@@ -10,6 +11,7 @@ import { AccountInfo } from '../SpacesList/AccountInfo'
  */
 const HeaderAccountInfo = () => {
   const isSignedIn = useIsSignedIn()
+  const wallet = useWallet()
   const { membership, signerAddress, email } = useCurrentMemberProfile()
 
   if (!isSignedIn) return null
@@ -17,8 +19,13 @@ const HeaderAccountInfo = () => {
   const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
 
   return (
-    <div className="flex items-center rounded-lg bg-accent" data-testid="header-account-info">
-      <AccountInfo profileName={profileName} displayName={displayName} />
+    <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
+      <AccountInfo
+        profileName={profileName}
+        displayName={displayName}
+        signerAddress={email ? undefined : signerAddress}
+        connectedWallet={wallet?.address}
+      />
     </div>
   )
 }

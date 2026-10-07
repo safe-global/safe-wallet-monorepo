@@ -3,6 +3,8 @@ import { PopoverContent } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import Identicon from '@/components/common/Identicon'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 
 export interface ProfilePopoverContentProps {
@@ -12,6 +14,10 @@ export interface ProfilePopoverContentProps {
   displayName: string
   /** Optional role line (e.g. "ADMIN"). */
   role?: string
+  /** Full signer address; renders its identicon beside the identity for wallet sign-ins. */
+  signerAddress?: string
+  /** Connected wallet address; when set, explains how it relates to the signed-in account. */
+  connectedWallet?: string
   onSignOut: () => void
 }
 
@@ -24,6 +30,8 @@ export const ProfilePopoverContent = ({
   avatarName,
   displayName,
   role,
+  signerAddress,
+  connectedWallet,
   onSignOut,
 }: ProfilePopoverContentProps): ReactElement => (
   <PopoverContent
@@ -34,14 +42,28 @@ export const ProfilePopoverContent = ({
     data-testid="sidebar-profile-popover"
   >
     <div className={css.profileHeader}>
-      <InitialsAvatar name={avatarName} size="medium" rounded />
-      <span className={css.profileSignedIn}>Signed in</span>
+      {!signerAddress && <InitialsAvatar name={avatarName} size="medium" rounded />}
+      <span className={css.profileSignedIn}>Signed in as</span>
     </div>
 
     <div className={css.profileInfo}>
-      <span className={css.profileName}>{displayName}</span>
+      <span className={css.profileIdentity}>
+        {signerAddress && <Identicon address={signerAddress} size={20} />}
+        <span className={css.profileName}>{displayName}</span>
+      </span>
       {role && <span className={css.profileRole}>{role}</span>}
     </div>
+
+    {connectedWallet && (
+      <p className={css.profileWalletHint} data-testid="sidebar-profile-wallet-hint">
+        Your account and your connected wallet are separate. Wallet{' '}
+        <span className={css.profileWalletHintAddress}>
+          <Identicon address={connectedWallet} size={14} />
+          {shortenAddress(connectedWallet)}
+        </span>{' '}
+        is connected for signing transactions.
+      </p>
+    )}
 
     <Separator />
 
