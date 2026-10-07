@@ -10,6 +10,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 interface MembershipProps {
   profileName?: string
   displayName?: string
+  shortDisplayName?: string
   signerAddress?: string
   connectedWallet?: string
 }
@@ -17,6 +18,7 @@ interface MembershipProps {
 export const AccountInfo = ({
   profileName = '',
   displayName = '',
+  shortDisplayName,
   signerAddress,
   connectedWallet,
 }: MembershipProps) => {
@@ -43,8 +45,8 @@ export const AccountInfo = ({
           </span>
 
           {displayName && (
-            <span className="hidden max-w-[10rem] min-w-0 truncate text-xs font-normal text-muted-foreground sm:block">
-              {displayName}
+            <span className="hidden max-w-[8rem] min-w-0 truncate text-xs font-normal text-muted-foreground sm:block">
+              {shortDisplayName || displayName}
             </span>
           )}
         </TooltipTrigger>
