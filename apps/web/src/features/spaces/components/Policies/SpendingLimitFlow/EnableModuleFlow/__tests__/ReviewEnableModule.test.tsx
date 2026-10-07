@@ -47,6 +47,7 @@ const createEnableModuleTx = jest.fn()
 const setSafeTx = jest.fn()
 const setSafeTxError = jest.fn()
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
+const sdk = { createEnableModuleTx } as unknown as Safe
 
 const scopeWith = (modules: string[] = [OTHER_MODULE]) => ({
   chainId: '1',
@@ -57,7 +58,7 @@ const scopeWith = (modules: string[] = [OTHER_MODULE]) => ({
   safe: extendedSafeInfoBuilder()
     .with({ chainId: '1', address: { value: SAFE }, modules: modules.map((value) => ({ value })) })
     .build(),
-  sdk: { createEnableModuleTx } as unknown as Safe,
+  sdk,
 })
 
 const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxContextParams => ({
@@ -80,13 +81,16 @@ const renderReview = (moduleAddress = MODULE, safeTxOverrides: Partial<SafeTxCon
   const policy = mockUnenforcedPolicy()
   const data: EnableModuleFlowData = { safe: policy.safe, moduleAddress, spenders: policy.data.spenders }
 
-  return render(
+  const tree = () => (
     <TxFlowContext.Provider value={{ ...initialContext, data } as TxFlowContextType}>
       <SafeTxContext.Provider value={safeTxContext(safeTxOverrides)}>
         <ReviewEnableModule onSubmit={jest.fn()} />
       </SafeTxContext.Provider>
-    </TxFlowContext.Provider>,
+    </TxFlowContext.Provider>
   )
+  const utils = render(tree())
+
+  return { ...utils, rerenderReview: () => utils.rerender(tree()) }
 }
 
 describe('ReviewEnableModule', () => {
@@ -118,6 +122,17 @@ describe('ReviewEnableModule', () => {
 
     expect(createEnableModuleTx).not.toHaveBeenCalled()
     expect(setSafeTxError).toHaveBeenLastCalledWith(new Error(MODULE_ALREADY_ENABLED_ERROR))
+  })
+
+  it('re-checks when another module is swapped for the policy module while the flow is open', async () => {
+    const { rerenderReview } = renderReview()
+    await waitFor(() => expect(setSafeTx).toHaveBeenCalledWith(builtTx))
+
+    mockUseSafeScope.mockReturnValue(scopeWith([MODULE]))
+    rerenderReview()
+
+    expect(setSafeTxError).toHaveBeenLastCalledWith(new Error(MODULE_ALREADY_ENABLED_ERROR))
+    expect(createEnableModuleTx).toHaveBeenCalledTimes(1)
   })
 
   it('reports a failed build', async () => {

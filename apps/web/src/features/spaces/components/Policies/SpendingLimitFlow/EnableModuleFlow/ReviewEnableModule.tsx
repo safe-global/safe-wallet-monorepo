@@ -33,6 +33,7 @@ const ReviewEnableModule = ({ onSubmit, children }: ReviewTransactionProps): Rea
   const sdk = scope?.sdk
   const modules = scope?.safe?.modules
   const safeLoaded = scope?.safeLoaded ?? false
+  const moduleKey = modules?.map((module) => module.value.toLowerCase()).join(',')
 
   useEffect(() => {
     setSafeTx(undefined)
@@ -61,9 +62,9 @@ const ReviewEnableModule = ({ onSubmit, children }: ReviewTransactionProps): Rea
     return () => {
       isStale = true
     }
-    // `scope` and `modules` are new objects on every Safe poll; the SDK and the module count stand in for them.
+    // `scope` and `modules` are new objects on every Safe poll; the SDK and the module addresses stand in for them.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [moduleAddress, chainId, sdk, safeLoaded, modules?.length, setSafeTx, setSafeTxError])
+  }, [moduleAddress, chainId, sdk, safeLoaded, moduleKey, setSafeTx, setSafeTxError])
 
   const summary = useMemo(
     () => (data ? toEnableModuleSummaryModel(data.safe, data.spenders, { accounts, names }) : undefined),
