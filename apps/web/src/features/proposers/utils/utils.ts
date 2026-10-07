@@ -2,6 +2,7 @@ import { signTypedData } from '@safe-global/utils/utils/web3'
 import { EthSafeSignature, buildContractSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
+import { isError } from 'ethers'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
@@ -21,10 +22,15 @@ const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateT
     return signTypedData(signer, typedData)
   }
 
-  const signature = await signer.provider.send('eth_signTypedData_v4', [
-    signer.address.toLowerCase(),
-    JSON.stringify(typedData),
-  ])
+  const address = signer.address.toLowerCase()
+  let signature: string
+  try {
+    signature = await signer.provider.send('eth_signTypedData_v4', [address, JSON.stringify(typedData)])
+  } catch (error) {
+    // Same Ledger fallback as the shared signTypedData helper
+    if (!isError(error, 'UNSUPPORTED_OPERATION')) throw error
+    signature = await signer.provider.send('eth_signTypedData', [address, typedData])
+  }
   return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }
 

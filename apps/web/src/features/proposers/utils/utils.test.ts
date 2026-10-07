@@ -5,7 +5,7 @@ import {
   signProposerTypedDataForSafe,
 } from './utils'
 import { faker } from '@faker-js/faker'
-import { BrowserProvider, JsonRpcSigner, getAddress } from 'ethers'
+import { BrowserProvider, JsonRpcSigner, getAddress, makeError } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -193,6 +193,31 @@ describe('signProposerTypedData', () => {
     expect(send).toHaveBeenCalledWith('eth_signTypedData_v4', [signer.address.toLowerCase(), JSON.stringify(typedData)])
     expect(web3Utils.signTypedData).not.toHaveBeenCalled()
     expect(result).toBe(`${signatureRs}1b`)
+  })
+
+  it('falls back to eth_signTypedData when the wallet does not support eth_signTypedData_v4', async () => {
+    const chain = queueServiceChain()
+    const signer = createSigner()
+    const send = jest
+      .spyOn(signer.provider, 'send')
+      .mockRejectedValueOnce(makeError('unsupported operation', 'UNSUPPORTED_OPERATION'))
+      .mockResolvedValueOnce(`${signatureRs}01`)
+
+    const result = await signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)
+
+    const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add')
+    expect(send).toHaveBeenLastCalledWith('eth_signTypedData', [signer.address.toLowerCase(), typedData])
+    expect(result).toBe(`${signatureRs}1c`)
+  })
+
+  it('does not fall back when the wallet rejects the signature request', async () => {
+    const chain = queueServiceChain()
+    const signer = createSigner()
+    const rejection = makeError('user rejected action', 'ACTION_REJECTED')
+    const send = jest.spyOn(signer.provider, 'send').mockRejectedValue(rejection)
+
+    await expect(signProposerTypedData(chain, proposerAddress, safeAddress, 'add', signer)).rejects.toBe(rejection)
+    expect(send).toHaveBeenCalledTimes(1)
   })
 })
 
