@@ -201,6 +201,10 @@ export const useTxActions = (): TxActions => {
       if (!isRelayed && !signer.isSafe && !isSmartAccount && safeTx.signatures.size < safe.threshold) {
         safeTx = await dispatchTxSigning(safeTx, signer.provider, txId)
         rePropose = true
+        // The UI-computed gasLimit was estimated with a pre-validated signature (near-zero cost
+        // when executor == owner). EIP-712 verification costs ~3 000 gas more (ecrecover).
+        // Clear the stale limit so sdk.executeTransaction re-estimates with the real signature.
+        txOptions = { ...txOptions, gasLimit: undefined }
       }
 
       // Propose the tx if there's no id yet, or send the new signature to the already proposed tx

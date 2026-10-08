@@ -678,7 +678,7 @@ describe('SignOrExecute hooks', () => {
           callOrder.push('propose')
           return Promise.resolve({ txId: '123' })
         }) as unknown as typeof txSender.dispatchTxProposal)
-        jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
+        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
           callOrder.push('execute')
           return Promise.resolve('0xhash')
         }) as unknown as typeof txSender.dispatchTxExecution)
@@ -689,6 +689,49 @@ describe('SignOrExecute hooks', () => {
         expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
         expect(callOrder).toEqual(['sign', 'propose', 'execute'])
         expect(id).toBe('123')
+        // dispatchTxExecution receives the signed tx
+        expect(executeSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          signedTx,
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+        )
+      })
+
+      it('clears the pre-validated-sig gas estimate before executing after EIP-712 signing', async () => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockResolvedValue(false)
+        setupThreshold1Safe()
+
+        const tx = createSafeTx()
+        const signedTx = createSafeTx()
+        signedTx.addSignature({
+          signer: '0x1234567890000000000000000000000000000000',
+          data: '0x0001',
+          staticPart: () => '',
+          dynamicPart: () => '',
+          isContractSignature: false,
+        })
+
+        jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(signedTx)
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const executeSpy = jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
+
+        const { result } = renderHook(() => useTxActions())
+        // Pass a gasLimit that was estimated with a pre-validated signature
+        await result.current.executeTx({ gasPrice: 1, gasLimit: 50000 }, tx)
+
+        // gasLimit must be cleared so the SDK re-estimates with the actual EIP-712 signature
+        const [, , calledTxOptions] = executeSpy.mock.calls[0]
+        expect(calledTxOptions).not.toHaveProperty('gasLimit', 50000)
+        expect(calledTxOptions?.gasLimit).toBeUndefined()
       })
 
       it('skips signing when the tx is already fully signed', async () => {
