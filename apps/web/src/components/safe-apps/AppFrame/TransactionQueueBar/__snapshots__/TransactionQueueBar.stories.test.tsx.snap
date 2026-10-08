@@ -287,7 +287,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_9_"
+                                        id="base-ui-_r_l_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -470,7 +470,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_e_"
+                                        id="base-ui-_r_n_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -653,7 +653,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_j_"
+                                        id="base-ui-_r_p_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -765,7 +765,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                   data-orientation="vertical"
                 >
                   <button
-                    aria-controls="base-ui-_r_l_"
+                    aria-controls="base-ui-_r_r_"
                     aria-disabled="false"
                     aria-expanded="true"
                     aria-label="expand transaction queue bar"
@@ -774,7 +774,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                     data-panel-open=""
                     data-slot="accordion-trigger"
                     data-value="queue"
-                    id="base-ui-_r_m_"
+                    id="base-ui-_r_s_"
                     style="height: 64px;"
                     tabindex="0"
                     type="button"
@@ -854,13 +854,13 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                   </svg>
                 </button>
                 <div
-                  aria-labelledby="base-ui-_r_m_"
+                  aria-labelledby="base-ui-_r_s_"
                   class="data-open:animate-accordion-down data-closed:animate-accordion-up text-sm overflow-hidden"
                   data-index="0"
                   data-open=""
                   data-orientation="vertical"
                   data-slot="accordion-content"
-                  id="base-ui-_r_l_"
+                  id="base-ui-_r_r_"
                   role="region"
                   style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
                 >
@@ -872,7 +872,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                     >
                       <span
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_o_"
+                        id="base-ui-_r_u_"
                       >
                         <button
                           class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
@@ -918,7 +918,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_r_"
+                                id="base-ui-_r_11_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -1015,7 +1015,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_t_"
+                                        id="base-ui-_r_1f_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -1101,7 +1101,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_10_"
+                                id="base-ui-_r_16_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -1198,7 +1198,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_12_"
+                                        id="base-ui-_r_1h_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -1284,7 +1284,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_15_"
+                                id="base-ui-_r_1b_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -1381,7 +1381,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_17_"
+                                        id="base-ui-_r_1j_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -1497,7 +1497,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                   data-orientation="vertical"
                 >
                   <button
-                    aria-controls="base-ui-_r_19_"
+                    aria-controls="base-ui-_r_1l_"
                     aria-disabled="false"
                     aria-expanded="true"
                     aria-label="expand transaction queue bar"
@@ -1506,7 +1506,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                     data-panel-open=""
                     data-slot="accordion-trigger"
                     data-value="queue"
-                    id="base-ui-_r_1a_"
+                    id="base-ui-_r_1m_"
                     style="height: 64px;"
                     tabindex="0"
                     type="button"
@@ -1586,13 +1586,13 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                   </svg>
                 </button>
                 <div
-                  aria-labelledby="base-ui-_r_1a_"
+                  aria-labelledby="base-ui-_r_1m_"
                   class="data-open:animate-accordion-down data-closed:animate-accordion-up text-sm overflow-hidden"
                   data-index="0"
                   data-open=""
                   data-orientation="vertical"
                   data-slot="accordion-content"
-                  id="base-ui-_r_19_"
+                  id="base-ui-_r_1l_"
                   role="region"
                   style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
                 >
@@ -1604,7 +1604,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                     >
                       <span
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_1c_"
+                        id="base-ui-_r_1o_"
                       >
                         <button
                           class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
@@ -1650,7 +1650,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_1f_"
+                                id="base-ui-_r_1r_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -1747,7 +1747,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_1h_"
+                                        id="base-ui-_r_6g_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -1833,7 +1833,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_1k_"
+                                id="base-ui-_r_20_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -1930,7 +1930,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_1m_"
+                                        id="base-ui-_r_6i_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2016,7 +2016,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_1p_"
+                                id="base-ui-_r_25_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -2113,7 +2113,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_1r_"
+                                        id="base-ui-_r_6k_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2199,7 +2199,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_1u_"
+                                id="base-ui-_r_2a_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -2296,7 +2296,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_20_"
+                                        id="base-ui-_r_6m_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2382,7 +2382,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_23_"
+                                id="base-ui-_r_2f_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -2479,7 +2479,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_25_"
+                                        id="base-ui-_r_6o_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2565,7 +2565,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_28_"
+                                id="base-ui-_r_2k_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -2662,7 +2662,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_2a_"
+                                        id="base-ui-_r_6q_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2748,7 +2748,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_2d_"
+                                id="base-ui-_r_2p_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -2845,7 +2845,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_2f_"
+                                        id="base-ui-_r_6s_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -2931,7 +2931,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_2i_"
+                                id="base-ui-_r_2u_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3028,7 +3028,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_2k_"
+                                        id="base-ui-_r_6u_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -3114,7 +3114,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_2n_"
+                                id="base-ui-_r_33_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3211,7 +3211,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_2p_"
+                                        id="base-ui-_r_70_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -3297,7 +3297,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_2s_"
+                                id="base-ui-_r_38_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3394,7 +3394,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_2u_"
+                                        id="base-ui-_r_72_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -3480,7 +3480,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_31_"
+                                id="base-ui-_r_3d_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3577,7 +3577,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_33_"
+                                        id="base-ui-_r_74_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -3663,7 +3663,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_36_"
+                                id="base-ui-_r_3i_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3760,7 +3760,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_38_"
+                                        id="base-ui-_r_76_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -3846,7 +3846,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_3b_"
+                                id="base-ui-_r_3n_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -3943,7 +3943,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_3d_"
+                                        id="base-ui-_r_78_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4029,7 +4029,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_3g_"
+                                id="base-ui-_r_3s_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -4126,7 +4126,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_3i_"
+                                        id="base-ui-_r_7a_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4212,7 +4212,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_3l_"
+                                id="base-ui-_r_41_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -4309,7 +4309,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_3n_"
+                                        id="base-ui-_r_7c_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4395,7 +4395,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_3q_"
+                                id="base-ui-_r_46_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -4492,7 +4492,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_3s_"
+                                        id="base-ui-_r_7e_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4578,7 +4578,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_3v_"
+                                id="base-ui-_r_4b_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -4675,7 +4675,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_41_"
+                                        id="base-ui-_r_7g_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4761,7 +4761,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_44_"
+                                id="base-ui-_r_4g_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -4858,7 +4858,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_46_"
+                                        id="base-ui-_r_7i_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -4944,7 +4944,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_49_"
+                                id="base-ui-_r_4l_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5041,7 +5041,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_4b_"
+                                        id="base-ui-_r_7k_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -5127,7 +5127,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_4e_"
+                                id="base-ui-_r_4q_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5224,7 +5224,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_4g_"
+                                        id="base-ui-_r_7m_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -5310,7 +5310,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_4j_"
+                                id="base-ui-_r_4v_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5407,7 +5407,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_4l_"
+                                        id="base-ui-_r_7o_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -5493,7 +5493,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_4o_"
+                                id="base-ui-_r_54_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5590,7 +5590,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_4q_"
+                                        id="base-ui-_r_7q_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -5676,7 +5676,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_4t_"
+                                id="base-ui-_r_59_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5773,7 +5773,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_4v_"
+                                        id="base-ui-_r_7s_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -5859,7 +5859,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_52_"
+                                id="base-ui-_r_5e_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -5956,7 +5956,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_54_"
+                                        id="base-ui-_r_7u_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6042,7 +6042,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_57_"
+                                id="base-ui-_r_5j_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -6139,7 +6139,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_59_"
+                                        id="base-ui-_r_80_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6225,7 +6225,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_5c_"
+                                id="base-ui-_r_5o_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -6322,7 +6322,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_5e_"
+                                        id="base-ui-_r_82_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6408,7 +6408,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_5h_"
+                                id="base-ui-_r_5t_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -6505,7 +6505,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_5j_"
+                                        id="base-ui-_r_84_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6591,7 +6591,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_5m_"
+                                id="base-ui-_r_62_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -6688,7 +6688,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_5o_"
+                                        id="base-ui-_r_86_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6774,7 +6774,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_5r_"
+                                id="base-ui-_r_67_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -6871,7 +6871,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_5t_"
+                                        id="base-ui-_r_88_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"
@@ -6957,7 +6957,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                 data-orientation="vertical"
                                 data-slot="accordion-trigger"
                                 data-value=""
-                                id="base-ui-_r_60_"
+                                id="base-ui-_r_6c_"
                                 role="button"
                                 tabindex="0"
                               >
@@ -7054,7 +7054,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     >
                                       <span
                                         data-slot="tooltip-trigger"
-                                        id="base-ui-_r_62_"
+                                        id="base-ui-_r_8a_"
                                       >
                                         <span
                                           data-track="tx-list: Confirm transaction"

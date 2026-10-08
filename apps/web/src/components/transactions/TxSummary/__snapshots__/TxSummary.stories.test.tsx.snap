@@ -153,7 +153,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_5_"
+                      id="base-ui-_r_1b_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -331,7 +331,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_b_"
+                      id="base-ui-_r_1d_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -561,7 +561,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_h_"
+                      id="base-ui-_r_1f_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -791,7 +791,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_n_"
+                      id="base-ui-_r_1h_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -937,7 +937,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_r_"
+                      id="base-ui-_r_1j_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1086,7 +1086,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_v_"
+                      id="base-ui-_r_1l_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1230,7 +1230,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_13_"
+                      id="base-ui-_r_1n_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1460,7 +1460,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_19_"
+                      id="base-ui-_r_1p_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1586,7 +1586,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2l_"
+                    id="base-ui-_r_3l_"
                   >
                     <div
                       class="relative"
@@ -1630,7 +1630,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2n_"
+                    id="base-ui-_r_3n_"
                   >
                     5 minutes ago
                   </span>
@@ -1659,7 +1659,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_2p_"
+                      id="base-ui-_r_4v_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1764,7 +1764,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2r_"
+                    id="base-ui-_r_3r_"
                   >
                     <div
                       class="relative"
@@ -1808,7 +1808,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2t_"
+                    id="base-ui-_r_3t_"
                   >
                     32 minutes ago
                   </span>
@@ -1837,7 +1837,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_2v_"
+                      id="base-ui-_r_51_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -1951,7 +1951,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_31_"
+                      id="base-ui-_r_41_"
                     >
                       <div
                         class="relative"
@@ -2038,7 +2038,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_33_"
+                    id="base-ui-_r_43_"
                   >
                     about 2 hours ago
                   </span>
@@ -2067,7 +2067,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_35_"
+                      id="base-ui-_r_53_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -2224,7 +2224,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_37_"
+                      id="base-ui-_r_47_"
                     >
                       <div
                         class="relative"
@@ -2268,7 +2268,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_39_"
+                    id="base-ui-_r_49_"
                   >
                     about 3 hours ago
                   </span>
@@ -2297,7 +2297,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3b_"
+                      id="base-ui-_r_55_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -2414,7 +2414,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_3d_"
+                    id="base-ui-_r_4d_"
                   >
                     about 5 hours ago
                   </span>
@@ -2443,7 +2443,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3f_"
+                      id="base-ui-_r_57_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -2563,7 +2563,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_3h_"
+                    id="base-ui-_r_4h_"
                   >
                     about 20 hours ago
                   </span>
@@ -2592,7 +2592,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3j_"
+                      id="base-ui-_r_59_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -2707,7 +2707,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_3l_"
+                    id="base-ui-_r_4l_"
                   >
                     1 day ago
                   </span>
@@ -2736,7 +2736,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3n_"
+                      id="base-ui-_r_5b_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -2850,7 +2850,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3p_"
+                      id="base-ui-_r_4p_"
                     >
                       <div
                         class="relative"
@@ -2937,7 +2937,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_3r_"
+                    id="base-ui-_r_4r_"
                   >
                     2 days ago
                   </span>
@@ -2966,7 +2966,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_3t_"
+                      id="base-ui-_r_5d_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -3092,7 +3092,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_3v_"
+                    id="base-ui-_r_5f_"
                   >
                     <div
                       class="relative"
@@ -3136,7 +3136,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_41_"
+                    id="base-ui-_r_5h_"
                   >
                     5 minutes ago
                   </span>
@@ -3165,7 +3165,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_43_"
+                      id="base-ui-_r_6p_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -3270,7 +3270,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_45_"
+                    id="base-ui-_r_5l_"
                   >
                     <div
                       class="relative"
@@ -3314,7 +3314,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_47_"
+                    id="base-ui-_r_5n_"
                   >
                     32 minutes ago
                   </span>
@@ -3343,7 +3343,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_49_"
+                      id="base-ui-_r_6r_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -3457,7 +3457,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4b_"
+                      id="base-ui-_r_5r_"
                     >
                       <div
                         class="relative"
@@ -3544,7 +3544,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_4d_"
+                    id="base-ui-_r_5t_"
                   >
                     about 2 hours ago
                   </span>
@@ -3573,7 +3573,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4f_"
+                      id="base-ui-_r_6t_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -3730,7 +3730,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4h_"
+                      id="base-ui-_r_61_"
                     >
                       <div
                         class="relative"
@@ -3774,7 +3774,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_4j_"
+                    id="base-ui-_r_63_"
                   >
                     about 3 hours ago
                   </span>
@@ -3803,7 +3803,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4l_"
+                      id="base-ui-_r_6v_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -3920,7 +3920,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_4n_"
+                    id="base-ui-_r_67_"
                   >
                     about 5 hours ago
                   </span>
@@ -3949,7 +3949,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4p_"
+                      id="base-ui-_r_71_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4069,7 +4069,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_4r_"
+                    id="base-ui-_r_6b_"
                   >
                     about 20 hours ago
                   </span>
@@ -4098,7 +4098,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_4t_"
+                      id="base-ui-_r_73_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4213,7 +4213,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_4v_"
+                    id="base-ui-_r_6f_"
                   >
                     1 day ago
                   </span>
@@ -4242,7 +4242,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_51_"
+                      id="base-ui-_r_75_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4356,7 +4356,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_53_"
+                      id="base-ui-_r_6j_"
                     >
                       <div
                         class="relative"
@@ -4443,7 +4443,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_55_"
+                    id="base-ui-_r_6l_"
                   >
                     2 days ago
                   </span>
@@ -4472,7 +4472,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_57_"
+                      id="base-ui-_r_77_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4598,7 +4598,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1b_"
+                    id="base-ui-_r_1r_"
                   >
                     <div
                       class="relative"
@@ -4642,7 +4642,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1d_"
+                    id="base-ui-_r_1t_"
                   >
                     5 minutes ago
                   </span>
@@ -4671,7 +4671,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_1f_"
+                      id="base-ui-_r_35_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4776,7 +4776,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1h_"
+                    id="base-ui-_r_21_"
                   >
                     <div
                       class="relative"
@@ -4820,7 +4820,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1j_"
+                    id="base-ui-_r_23_"
                   >
                     32 minutes ago
                   </span>
@@ -4849,7 +4849,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_1l_"
+                      id="base-ui-_r_37_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -4963,7 +4963,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_1n_"
+                      id="base-ui-_r_27_"
                     >
                       <div
                         class="relative"
@@ -5050,7 +5050,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1p_"
+                    id="base-ui-_r_29_"
                   >
                     about 2 hours ago
                   </span>
@@ -5079,7 +5079,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_1r_"
+                      id="base-ui-_r_39_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -5236,7 +5236,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_1t_"
+                      id="base-ui-_r_2d_"
                     >
                       <div
                         class="relative"
@@ -5280,7 +5280,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_1v_"
+                    id="base-ui-_r_2f_"
                   >
                     about 3 hours ago
                   </span>
@@ -5309,7 +5309,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_21_"
+                      id="base-ui-_r_3b_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -5426,7 +5426,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_23_"
+                    id="base-ui-_r_2j_"
                   >
                     about 5 hours ago
                   </span>
@@ -5455,7 +5455,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_25_"
+                      id="base-ui-_r_3d_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -5575,7 +5575,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_27_"
+                    id="base-ui-_r_2n_"
                   >
                     about 20 hours ago
                   </span>
@@ -5604,7 +5604,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_29_"
+                      id="base-ui-_r_3f_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -5719,7 +5719,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2b_"
+                    id="base-ui-_r_2r_"
                   >
                     1 day ago
                   </span>
@@ -5748,7 +5748,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_2d_"
+                      id="base-ui-_r_3h_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -5862,7 +5862,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_2f_"
+                      id="base-ui-_r_2v_"
                     >
                       <div
                         class="relative"
@@ -5949,7 +5949,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_2h_"
+                    id="base-ui-_r_31_"
                   >
                     2 days ago
                   </span>
@@ -5978,7 +5978,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                   >
                     <span
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_2j_"
+                      id="base-ui-_r_3j_"
                     >
                       <span
                         data-track="tx-list: Confirm transaction"
@@ -6104,7 +6104,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_59_"
+                    id="base-ui-_r_79_"
                   >
                     <div
                       class="relative"
@@ -6148,7 +6148,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5b_"
+                    id="base-ui-_r_7b_"
                   >
                     1:07 PM
                   </span>
@@ -6251,7 +6251,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5d_"
+                    id="base-ui-_r_7d_"
                   >
                     <div
                       class="relative"
@@ -6295,7 +6295,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5f_"
+                    id="base-ui-_r_7f_"
                   >
                     12:07 PM
                   </span>
@@ -6407,7 +6407,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                     <span
                       class="container verticalAlign"
                       data-slot="tooltip-trigger"
-                      id="base-ui-_r_5h_"
+                      id="base-ui-_r_7h_"
                     >
                       <div
                         class="relative"
@@ -6494,7 +6494,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5j_"
+                    id="base-ui-_r_7j_"
                   >
                     11:07 AM
                   </span>
@@ -6612,7 +6612,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5l_"
+                    id="base-ui-_r_7l_"
                   >
                     9:07 AM
                   </span>
@@ -6727,7 +6727,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5n_"
+                    id="base-ui-_r_7n_"
                   >
                     8:07 AM
                   </span>
@@ -6863,7 +6863,7 @@ exports[`./TxSummary.stories Batch 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_5p_"
+                  id="base-ui-_r_7p_"
                 >
                   about 20 hours ago
                 </span>
@@ -6892,7 +6892,7 @@ exports[`./TxSummary.stories Batch 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5r_"
+                    id="base-ui-_r_7t_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -7024,7 +7024,7 @@ exports[`./TxSummary.stories CustomTransaction 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_5t_"
+                  id="base-ui-_r_7v_"
                 >
                   1 day ago
                 </span>
@@ -7053,7 +7053,7 @@ exports[`./TxSummary.stories CustomTransaction 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_5v_"
+                    id="base-ui-_r_83_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -7175,7 +7175,7 @@ exports[`./TxSummary.stories HistorySendNativeToken 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_61_"
+                  id="base-ui-_r_85_"
                 >
                   <div
                     class="relative"
@@ -7219,7 +7219,7 @@ exports[`./TxSummary.stories HistorySendNativeToken 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_63_"
+                  id="base-ui-_r_87_"
                 >
                   1:07 PM
                 </span>
@@ -7348,7 +7348,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_65_"
+                    id="base-ui-_r_89_"
                   >
                     <div
                       class="relative"
@@ -7435,7 +7435,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_67_"
+                  id="base-ui-_r_8b_"
                 >
                   11:07 AM
                 </span>
@@ -7562,7 +7562,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                       <span
                         class="container verticalAlign"
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_69_"
+                        id="base-ui-_r_8d_"
                       >
                         <div
                           class="relative"
@@ -7606,7 +7606,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                     >
                       <span
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_6b_"
+                        id="base-ui-_r_8f_"
                       >
                         5 minutes ago
                       </span>
@@ -7741,7 +7741,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                       <span
                         class="container verticalAlign"
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_6d_"
+                        id="base-ui-_r_8h_"
                       >
                         <div
                           class="relative"
@@ -7785,7 +7785,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                     >
                       <span
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_6f_"
+                        id="base-ui-_r_8j_"
                       >
                         32 minutes ago
                       </span>
@@ -7814,7 +7814,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                       >
                         <span
                           data-slot="tooltip-trigger"
-                          id="base-ui-_r_6h_"
+                          id="base-ui-_r_8n_"
                         >
                           <span
                             data-track="tx-list: Confirm transaction"
@@ -7939,7 +7939,7 @@ exports[`./TxSummary.stories SendAt360 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_6p_"
+                  id="base-ui-_r_91_"
                 >
                   <div
                     class="relative"
@@ -7983,7 +7983,7 @@ exports[`./TxSummary.stories SendAt360 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_6r_"
+                  id="base-ui-_r_93_"
                 >
                   5 minutes ago
                 </span>
@@ -8012,7 +8012,7 @@ exports[`./TxSummary.stories SendAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_6t_"
+                    id="base-ui-_r_97_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -8134,7 +8134,7 @@ exports[`./TxSummary.stories SendAt600 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_6v_"
+                  id="base-ui-_r_99_"
                 >
                   <div
                     class="relative"
@@ -8178,7 +8178,7 @@ exports[`./TxSummary.stories SendAt600 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_71_"
+                  id="base-ui-_r_9b_"
                 >
                   5 minutes ago
                 </span>
@@ -8207,7 +8207,7 @@ exports[`./TxSummary.stories SendAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_73_"
+                    id="base-ui-_r_9f_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -8329,7 +8329,7 @@ exports[`./TxSummary.stories SendAt1000 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_6j_"
+                  id="base-ui-_r_8p_"
                 >
                   <div
                     class="relative"
@@ -8373,7 +8373,7 @@ exports[`./TxSummary.stories SendAt1000 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_6l_"
+                  id="base-ui-_r_8r_"
                 >
                   5 minutes ago
                 </span>
@@ -8402,7 +8402,7 @@ exports[`./TxSummary.stories SendAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_6n_"
+                    id="base-ui-_r_8v_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -8524,7 +8524,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_75_"
+                  id="base-ui-_r_9h_"
                 >
                   <div
                     class="relative"
@@ -8568,7 +8568,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_77_"
+                  id="base-ui-_r_9j_"
                 >
                   32 minutes ago
                 </span>
@@ -8597,7 +8597,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_79_"
+                    id="base-ui-_r_9n_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -8719,7 +8719,7 @@ exports[`./TxSummary.stories SendNativeToken 1`] = `
                 <span
                   class="container verticalAlign"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_7b_"
+                  id="base-ui-_r_9p_"
                 >
                   <div
                     class="relative"
@@ -8763,7 +8763,7 @@ exports[`./TxSummary.stories SendNativeToken 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_7d_"
+                  id="base-ui-_r_9r_"
                 >
                   5 minutes ago
                 </span>
@@ -8792,7 +8792,7 @@ exports[`./TxSummary.stories SendNativeToken 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7f_"
+                    id="base-ui-_r_9v_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -8926,7 +8926,7 @@ exports[`./TxSummary.stories SettingsChange 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_7h_"
+                  id="base-ui-_r_a1_"
                 >
                   about 5 hours ago
                 </span>
@@ -8955,7 +8955,7 @@ exports[`./TxSummary.stories SettingsChange 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7j_"
+                    id="base-ui-_r_a5_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -9086,7 +9086,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7r_"
+                    id="base-ui-_r_af_"
                   >
                     <div
                       class="relative"
@@ -9173,7 +9173,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_7t_"
+                  id="base-ui-_r_ah_"
                 >
                   about 2 hours ago
                 </span>
@@ -9202,7 +9202,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7v_"
+                    id="base-ui-_r_al_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -9333,7 +9333,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_81_"
+                    id="base-ui-_r_an_"
                   >
                     <div
                       class="relative"
@@ -9420,7 +9420,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_83_"
+                  id="base-ui-_r_ap_"
                 >
                   about 2 hours ago
                 </span>
@@ -9449,7 +9449,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_85_"
+                    id="base-ui-_r_at_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -9580,7 +9580,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7l_"
+                    id="base-ui-_r_a7_"
                   >
                     <div
                       class="relative"
@@ -9667,7 +9667,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_7n_"
+                  id="base-ui-_r_a9_"
                 >
                   about 2 hours ago
                 </span>
@@ -9696,7 +9696,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_7p_"
+                    id="base-ui-_r_ad_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -9870,7 +9870,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_87_"
+                    id="base-ui-_r_av_"
                   >
                     <div
                       class="relative"
@@ -9914,7 +9914,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_89_"
+                  id="base-ui-_r_b1_"
                 >
                   about 3 hours ago
                 </span>
@@ -9943,7 +9943,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_8b_"
+                    id="base-ui-_r_b5_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -10074,7 +10074,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_8d_"
+                    id="base-ui-_r_b7_"
                   >
                     <div
                       class="relative"
@@ -10161,7 +10161,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_8f_"
+                  id="base-ui-_r_b9_"
                 >
                   2 days ago
                 </span>
@@ -10190,7 +10190,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_8h_"
+                    id="base-ui-_r_bd_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
@@ -10321,7 +10321,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
                   <span
                     class="container verticalAlign"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_8j_"
+                    id="base-ui-_r_bf_"
                   >
                     <div
                       class="relative"
@@ -10408,7 +10408,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
               >
                 <span
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_8l_"
+                  id="base-ui-_r_bh_"
                 >
                   about 2 hours ago
                 </span>
@@ -10437,7 +10437,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
                 >
                   <span
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_8n_"
+                    id="base-ui-_r_bl_"
                   >
                     <span
                       data-track="tx-list: Confirm transaction"
