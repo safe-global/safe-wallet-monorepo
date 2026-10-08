@@ -269,7 +269,7 @@ export const SafenetChecksSectionView = ({
 }
 
 /** Reads once a proposed transaction's submission time is known; a new transaction gets the pre-check note. */
-export const SafenetChecksSection = ({ locked = false }: { locked?: boolean } = {}): ReactElement | null => {
+export const SafenetChecksSection = ({ locked = false }: { locked?: boolean }): ReactElement | null => {
   const { txId, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
   const { safe } = useSafeInfo()
   const { safeTxHash, submittedAt, check } = useFlowSafenetCheck(!locked)
