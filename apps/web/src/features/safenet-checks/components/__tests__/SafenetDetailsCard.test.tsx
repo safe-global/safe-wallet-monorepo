@@ -103,38 +103,51 @@ describe('SafenetDetailsCardView', () => {
     expect(screen.getByTestId('safenet-details-explorer')).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
   })
 
-  it('links the signed attestation when FROST-verified', () => {
-    const attested = attestedEvent({ safeTxHash: HASH })
-    const snapshot = buildBenignSnapshot({
-      safeTxHash: HASH,
-      events: [attested],
-      attestation: { status: AttestationVerificationStatus.VERIFIED, signatureId: attested.signatureId, message: null },
-    })
-    mockUseChain.mockReturnValue({
-      blockExplorerUriTemplate: {
-        txHash: 'https://gnosisscan.io/tx/{{txHash}}',
-        address: 'https://gnosisscan.io/address/{{address}}',
-        api: '',
-      },
-    } as Chain)
+  it.each([null, 0, 1_770_000_000_000])(
+    'links a FROST-verified attestation without rendering a missing timestamp (%s)',
+    (attestedAtMs) => {
+      const attested = attestedEvent({ safeTxHash: HASH })
+      const snapshot = buildBenignSnapshot({
+        safeTxHash: HASH,
+        events: [attested],
+        attestation: {
+          status: AttestationVerificationStatus.VERIFIED,
+          signatureId: attested.signatureId,
+          message: null,
+        },
+        attestedAtMs,
+      })
+      mockUseChain.mockReturnValue({
+        blockExplorerUriTemplate: {
+          txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+          address: 'https://gnosisscan.io/address/{{address}}',
+          api: '',
+        },
+      } as Chain)
 
-    render(
-      <SafenetDetailsCardView
-        publicStatus={CheckStatus.BENIGN}
-        snapshot={snapshot}
-        safeTxHash={HASH}
-        chainId="1"
-        defaultExpanded
-      />,
-    )
+      render(
+        <SafenetDetailsCardView
+          publicStatus={CheckStatus.BENIGN}
+          snapshot={snapshot}
+          safeTxHash={HASH}
+          chainId="1"
+          defaultExpanded
+        />,
+      )
 
-    expect(screen.getByTestId('safenet-details-attestation')).toHaveAccessibleName(SAFENET_ATTESTATION_LINK_LABEL)
-    expect(screen.getByTestId('safenet-details-attestation')).toHaveAttribute(
-      'href',
-      `https://gnosisscan.io/tx/${attested.transactionHash}`,
-    )
-    expect(screen.queryByTestId('safenet-details-explorer')).not.toBeInTheDocument()
-  })
+      expect(screen.getByTestId('safenet-details-attestation')).toHaveAccessibleName(SAFENET_ATTESTATION_LINK_LABEL)
+      expect(screen.getByTestId('safenet-details-attestation')).toHaveAttribute(
+        'href',
+        `https://gnosisscan.io/tx/${attested.transactionHash}`,
+      )
+      expect(screen.queryByTestId('safenet-details-explorer')).not.toBeInTheDocument()
+      if (attestedAtMs === null) {
+        expect(screen.queryByText(/Verified/)).not.toBeInTheDocument()
+      } else {
+        expect(screen.getByText(/Verified/)).toBeInTheDocument()
+      }
+    },
+  )
 
   it('shows the simulating sentence and no link while the check runs', () => {
     renderCard(CheckStatus.IN_PROGRESS)
