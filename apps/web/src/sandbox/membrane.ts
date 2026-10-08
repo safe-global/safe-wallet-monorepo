@@ -110,13 +110,18 @@ const isOnHost = (url: string, hosts: string[]): boolean => {
 }
 
 // A link only leaves the app on a click; images and other resources load by themselves, so their hosts are listed separately.
+const isMailToHost = (url: string, hosts: string[]): boolean => {
+  const domain = /^mailto:[^@?/]+@([^?/]+)$/i.exec(url)?.[1].toLowerCase()
+  return !!domain && hosts.some((h) => domain === h || domain.endsWith(`.${h}`))
+}
+
 const isAllowedUrl = (key: string, url: string): boolean =>
   key === 'href'
-    ? isOnHost(url, policy.linkHosts)
+    ? isOnHost(url, policy.linkHosts) || isMailToHost(url, policy.linkHosts)
     : isOnHost(url, policy.assetHosts) || (key === 'src' && url.startsWith('data:image/'))
 
 const isSafeLiteralUrl = (url: string): boolean =>
-  url.startsWith('#') || url.startsWith('?') || (url.startsWith('/') && !url.startsWith('//'))
+  url === '' || url.startsWith('#') || url.startsWith('?') || (url.startsWith('/') && !url.startsWith('//'))
 
 function Opaque(props: Obj): React.ReactNode {
   const { [OPAQUE_KEY]: token, ...extra } = props

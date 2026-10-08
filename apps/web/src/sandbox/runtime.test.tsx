@@ -79,6 +79,21 @@ describe('runView', () => {
     expect(screen.getByAltText('tracker')).not.toHaveAttribute('src')
   })
 
+  it('keeps mail links to hosts in the policy and drops others', () => {
+    const View = loadView(
+      `export const View = () => <>
+        <a href="mailto:info@safe.global">info</a>
+        <a href="mailto:x@example.com">other</a>
+        <img alt="mail" src="mailto:info@safe.global" />
+      </>`,
+    )
+    render(<View />)
+
+    expect(screen.getByText('info')).toHaveAttribute('href', 'mailto:info@safe.global')
+    expect(screen.getByText('other')).not.toHaveAttribute('href')
+    expect(screen.getByAltText('mail')).not.toHaveAttribute('src')
+  })
+
   it('keeps a same-origin path written by view code', () => {
     const View = loadView(`export const View = () => <a href="/settings">settings</a>`)
     render(<View />)
