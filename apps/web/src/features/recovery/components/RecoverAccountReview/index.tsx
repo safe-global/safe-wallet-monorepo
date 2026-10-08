@@ -25,7 +25,7 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '@/components/tx-flow'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
-import { getPeriod } from '@safe-global/utils/utils/date'
+import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import useRecovery from '../../hooks/useRecovery'
 import { useIsValidRecoveryExecTransactionFromModule } from '../../hooks/useIsValidRecoveryExecution'
 import { isWalletRejection } from '@/utils/wallets'
@@ -168,8 +168,10 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
         {recovery?.delay !== undefined && (
           <ErrorMessage level="info">
             Recovery will be{' '}
-            {recovery.delay === 0n ? 'immediately possible' : `possible in ${getPeriod(Number(recovery.delay))}`} after
-            this transaction is executed.
+            {recovery.delay === 0n
+              ? 'immediately possible'
+              : `possible in ${getDetailedPeriod(Number(recovery.delay))}`}{' '}
+            after this transaction is executed.
           </ErrorMessage>
         )}
 
