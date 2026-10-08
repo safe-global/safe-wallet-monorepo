@@ -5,6 +5,7 @@ import type { AllSafeItems, SafeItem } from '@/hooks/safes'
 import { PendingSafeStatus, type UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { RootState } from '@/store'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 // Spied, not module-mocked: `@/store` builds the real store from `gatewayApi`, and a `requireActual`
 // round-trip through this barrel re-enters the safeOverviews ↔ index cycle.
 import * as gatewayApi from '@/store/api/gateway'
@@ -15,6 +16,7 @@ const mockUseSpaceSafes = jest.fn()
 const mockUseGetMultipleSafeOverviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')
 const mockUseGetProposerSafesQuery = jest.spyOn(gatewayApi, 'useGetProposerSafesQuery')
 const mockUseWallet = jest.fn()
+const mockUseChains = jest.fn()
 
 type OverviewsQueryResult = ReturnType<typeof gatewayApi.useGetMultipleSafeOverviewsQuery>
 type ProposerSafesQueryResult = ReturnType<typeof gatewayApi.useGetProposerSafesQuery>
@@ -30,14 +32,14 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({
-    configs: [
-      { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth' },
-      { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic' },
-      { chainId: '11155111', chainName: 'Sepolia', chainLogoUri: null, shortName: 'sep' },
-    ],
-  }),
+  default: () => mockUseChains(),
 }))
+
+const CHAINS = [
+  { chainId: '1', chainName: 'Ethereum', chainLogoUri: null, shortName: 'eth', features: [FEATURES.QUEUE_SERVICE] },
+  { chainId: '137', chainName: 'Polygon', chainLogoUri: null, shortName: 'matic', features: [] },
+  { chainId: '11155111', chainName: 'Sepolia', chainLogoUri: null, shortName: 'sep', features: [] },
+]
 
 const WALLET = '0x1111111111111111111111111111111111111111'
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
@@ -98,6 +100,7 @@ describe('useEligibleSafeAccounts', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseWallet.mockReturnValue({ address: WALLET })
+    mockUseChains.mockReturnValue({ configs: CHAINS, loading: false })
     mockSpaceSafes([])
     mockOverviews([])
     mockProposerSafes({})
@@ -396,7 +399,31 @@ describe('useEligibleSafeAccounts', () => {
 
     renderHook(() => useEligibleSafeAccounts())
 
-    expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith({ chainIds: ['1', '137'], delegate: WALLET })
+    expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith({ chains: [CHAINS[0], CHAINS[1]], delegate: WALLET })
+  })
+
+  it('stays loading without asking for proposer status while the chain configs load', async () => {
+    mockUseChains.mockReturnValue({ configs: [], loading: true })
+    mockSpaceSafes([safeItem('1', SAFE_A, true)])
+    mockOverviews([overview('1', SAFE_A)])
+    mockProposerSafes(undefined, { isUninitialized: true })
+
+    const { result } = renderHook(() => useEligibleSafeAccounts())
+
+    expect(mockUseGetProposerSafesQuery).toHaveBeenCalledWith(skipToken)
+    expect(result.current.isLoading).toBe(true)
+  })
+
+  it('does not wait for the chain configs when only signers are eligible', async () => {
+    mockUseChains.mockReturnValue({ configs: [], loading: true })
+    mockSpaceSafes([safeItem('1', SAFE_A, false)])
+    mockOverviews([overview('1', SAFE_A)])
+    mockProposerSafes(undefined, { isUninitialized: true })
+
+    const { result } = renderHook(() => useEligibleSafeAccounts({ signersOnly: true }))
+
+    await waitFor(() => expect(result.current.accounts).toHaveLength(1))
+    expect(result.current.isLoading).toBe(false)
   })
 
   it('subscribes to the overviews with the args the Space dashboard uses, to share its cache entry', async () => {
