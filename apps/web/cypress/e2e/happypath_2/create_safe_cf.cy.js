@@ -27,7 +27,6 @@ describe('CF Safe creation happy path tests', () => {
     // selects the pay-later method and enables the review step's Next button.
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    cy.wait(1000)
     main.getAddedSafeAddressFromLocalStorage(constants.networkKeys.sepolia, 0).then((address) => {
       const safe_created = [
         {

@@ -56,7 +56,7 @@ describe('Swaps token tests', () => {
       () => {
         swaps.clickOnAssetSwapBtn(0)
         swaps.acceptLegalDisclaimer()
-        cy.wait(2000)
+        swaps.ensureWidgetWalletConnected(iframeSelector)
         main.getIframeBody(iframeSelector).within(() => {
           swaps.verifySelectedInputCurrancy(swaps.swapTokens.eth)
         })

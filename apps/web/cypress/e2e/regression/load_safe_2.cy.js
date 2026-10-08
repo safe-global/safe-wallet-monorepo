@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants'
 import * as main from '../pages/main.page'
 import * as safe from '../pages/load_safe.pages'
+import * as createwallet from '../pages/create_wallet.pages'
 import * as ls from '../../support/localstorage_data.js'
 import * as owner from '../pages/owners.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
@@ -32,7 +33,7 @@ describe('Load Safe tests 2', () => {
   describe('Without pre-seeded data', () => {
     beforeEach(() => {
       cy.visit(constants.loadNewSafeSepoliaUrl)
-      cy.wait(2000)
+      createwallet.verifyDefaultWalletName(createwallet.defaultSepoliaPlaceholder)
     })
 
     it('Verify Safe address checksum', () => {
