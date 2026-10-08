@@ -13,11 +13,7 @@ import {
   startOfYear,
   subYears,
 } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
 
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import {
   clearRange,
   DATE_DIGITS,
@@ -29,7 +25,7 @@ import {
   writeDigits,
   type SlotState,
 } from '@views/components/common/DatePickerInput/slots'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { DatePickerInputView } from '@views/components/common/DatePickerInput/DatePickerInputView'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
 const INVALID_DATE_ERROR = 'Invalid date'
@@ -268,67 +264,37 @@ const DatePickerField = ({
   }
 
   return (
-    <Field data-invalid={hasError}>
-      <FieldLabel htmlFor={inputId} className={hasError ? 'text-destructive' : undefined}>
-        {label}
-      </FieldLabel>
-
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <InputGroup ref={fieldRef} inputSize="hero" variant="surface" aria-invalid={hasError}>
-          <InputGroupInput
-            id={inputId}
-            name={field.name}
-            ref={(node) => {
-              inputRef.current = node
-              field.ref(node)
-            }}
-            value={text}
-            placeholder="DD/MM/YYYY"
-            autoComplete="off"
-            inputMode="numeric"
-            aria-invalid={hasError}
-            onChange={(event) => handleReplace(event.target.value)}
-            onKeyDown={handleKeyDown}
-            onPaste={(event) => {
-              event.preventDefault()
-              handleReplace(event.clipboardData.getData('text'))
-            }}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => {
-              setIsFocused(false)
-              field.onBlur()
-            }}
-          />
-          <InputGroupAddon align="inline-end">
-            <PopoverTrigger
-              render={<InputGroupButton variant="ghost" size="icon-xs" aria-label={`Open ${label} calendar`} />}
-            >
-              <CalendarIcon className="size-4 text-muted-foreground" />
-            </PopoverTrigger>
-          </InputGroupAddon>
-        </InputGroup>
-
-        {/* Anchored to the field, not the icon button, so the calendar lines up with the input */}
-        <PopoverContent className="w-auto p-0" align="start" anchor={fieldRef}>
-          <Calendar
-            mode="single"
-            captionLayout="dropdown"
-            startMonth={startMonth}
-            endMonth={endMonth}
-            selected={selectedDate}
-            defaultMonth={selectedDate}
-            onSelect={handleSelect}
-            disabled={disabledDays}
-            autoFocus
-          />
-        </PopoverContent>
-      </Popover>
-
-      {/* Fixed height: a message appearing must never move the field, or it eats the calendar click */}
-      <div className="min-h-5">
-        <FieldError>{errorMessage}</FieldError>
-      </div>
-    </Field>
+    <DatePickerInputView
+      inputId={inputId}
+      name={field.name}
+      label={label}
+      text={text}
+      hasError={hasError}
+      errorMessage={errorMessage}
+      isOpen={isOpen}
+      onOpenChange={setIsOpen}
+      fieldRef={fieldRef}
+      inputRef={(node) => {
+        inputRef.current = node
+        field.ref(node)
+      }}
+      onChange={(event) => handleReplace(event.target.value)}
+      onKeyDown={handleKeyDown}
+      onPaste={(event) => {
+        event.preventDefault()
+        handleReplace(event.clipboardData.getData('text'))
+      }}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => {
+        setIsFocused(false)
+        field.onBlur()
+      }}
+      startMonth={startMonth}
+      endMonth={endMonth}
+      selectedDate={selectedDate}
+      disabledDays={disabledDays}
+      onSelect={handleSelect}
+    />
   )
 }
 

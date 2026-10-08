@@ -1,18 +1,9 @@
 import type { MouseEvent } from 'react'
-import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { useRef, useState, type ReactElement } from 'react'
-import { EllipsisVertical } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAddressBookWriteScope } from '@/features/spaces'
 import SafeListRemoveDialog from '@/components/common/SafeListRemoveDialog'
-import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
-import EditIcon from '@/public/images/common/edit.svg'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import PlusIcon from '@/public/images/common/plus.svg'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
 import useAddressBook from '@/hooks/useAddressBook'
 import { AppRoutes } from '@/config/routes'
@@ -25,6 +16,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SafeListContextMenuView } from '@views/components/common/SafeListContextMenu/SafeListContextMenuView'
 
 enum ModalType {
   NESTED_SAFES = 'nested_safes',
@@ -97,124 +89,74 @@ const SafeListContextMenu = ({
   }
 
   return (
-    <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              ref={triggerRef}
-              variant="ghost"
-              size="icon-sm"
-              data-testid="safe-options-btn"
-              onClick={(e) => {
-                e.stopPropagation()
-                e.preventDefault()
-              }}
-              className="text-muted-foreground"
-            />
-          }
-        >
-          <EllipsisVertical />
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent
-          align="end"
-          onClick={(e) => {
-            e.stopPropagation()
-          }}
-        >
-          {isNestedSafesEnabled &&
-            !hideNestedSafes &&
-            !undeployedSafe &&
-            nestedSafesForChain &&
-            nestedSafesForChain.length > 0 && (
-              <DropdownMenuItem
-                onClick={handleOpenModal(ModalType.NESTED_SAFES, {
-                  ...NESTED_SAFE_EVENTS.OPEN_LIST,
-                  label: NESTED_SAFE_LABELS.sidebar,
-                })}
-              >
-                <NestedSafesIcon className="text-[var(--color-success-main)]" />
-                <span data-testid="nested-safes-btn">Nested Safes</span>
-              </DropdownMenuItem>
-            )}
-
-          {rename && (
-            <Tooltip>
-              <TooltipTrigger render={<div />}>
-                <DropdownMenuItem
-                  disabled={!canRename}
-                  title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
-                  onClick={canRename ? handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME) : undefined}
-                  onSelect={(e) => e.stopPropagation()}
-                >
-                  <EditIcon className="text-foreground" />
-                  <span data-testid="rename-btn">{hasName ? 'Rename' : 'Give name'}</span>
-                </DropdownMenuItem>
-              </TooltipTrigger>
-              {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
-            </Tooltip>
-          )}
-
-          {undeployedSafe && (
-            <DropdownMenuItem onClick={handleOpenModal(ModalType.REMOVE, OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST)}>
-              <DeleteIcon className="text-[var(--color-error-main)]" />
-              <span data-testid="remove-btn">Remove</span>
-            </DropdownMenuItem>
-          )}
-
-          {addNetwork && (
-            <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>
-              <PlusIcon className="text-[var(--color-primary-main)]" />
-              <span data-testid="add-chain-btn">Add another network</span>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {open[ModalType.NESTED_SAFES] && (
-        <NestedSafesPopover
-          anchorEl={triggerRef.current}
-          onClose={() => {
-            handleCloseModal()
-            onClose?.()
-          }}
-          rawNestedSafes={nestedSafesForChain}
-          allSafesWithStatus={allSafesWithStatus}
-          visibleSafes={visibleSafes}
-          hasCompletedCuration={hasCompletedCuration}
-          isLoading={isLoading}
-          hideCreationButton
-        />
+    <SafeListContextMenuView
+      triggerRef={triggerRef}
+      menuOpen={menuOpen}
+      onMenuOpenChange={setMenuOpen}
+      showNestedSafes={Boolean(
+        isNestedSafesEnabled &&
+        !hideNestedSafes &&
+        !undeployedSafe &&
+        nestedSafesForChain &&
+        nestedSafesForChain.length > 0,
       )}
-
-      {open[ModalType.RENAME] && (
+      rename={rename}
+      canRename={canRename}
+      hasName={hasName}
+      undeployedSafe={undeployedSafe}
+      addNetwork={addNetwork}
+      onNestedSafes={handleOpenModal(ModalType.NESTED_SAFES, {
+        ...NESTED_SAFE_EVENTS.OPEN_LIST,
+        label: NESTED_SAFE_LABELS.sidebar,
+      })}
+      onRename={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}
+      onRemove={handleOpenModal(ModalType.REMOVE, OVERVIEW_EVENTS.REMOVE_FROM_WATCHLIST)}
+      onAddNetwork={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}
+      nestedSafesPopover={
+        open[ModalType.NESTED_SAFES] && (
+          <NestedSafesPopover
+            anchorEl={triggerRef.current}
+            onClose={() => {
+              handleCloseModal()
+              onClose?.()
+            }}
+            rawNestedSafes={nestedSafesForChain}
+            allSafesWithStatus={allSafesWithStatus}
+            visibleSafes={visibleSafes}
+            hasCompletedCuration={hasCompletedCuration}
+            isLoading={isLoading}
+            hideCreationButton
+          />
+        )
+      }
+      renameDialogOpen={open[ModalType.RENAME]}
+      renderRenameDialog={(layer) => (
         <EntryDialog
           handleClose={handleCloseModal}
           defaultValues={{ name, address }}
           chainIds={[chainId]}
           scope={scope}
           disableAddressInput
-          // Above shadcn's overlay layer (--z-overlay) so Rename shows over the Trusted Safes modal
-          className="z-[var(--z-nested-overlay)]"
-          overlayClassName="z-[var(--z-nested-overlay)]"
+          {...layer}
         />
       )}
-
-      {open[ModalType.REMOVE] && (
-        <SafeListRemoveDialog handleClose={handleCloseModal} address={address} chainId={chainId} />
-      )}
-
-      {open[ModalType.ADD_CHAIN] && (
-        <CreateSafeOnNewChain
-          onClose={handleCloseModal}
-          currentName={name}
-          deployedChainIds={[chainId]}
-          open
-          safeAddress={address}
-        />
-      )}
-    </>
+      removeDialog={
+        open[ModalType.REMOVE] && (
+          <SafeListRemoveDialog handleClose={handleCloseModal} address={address} chainId={chainId} />
+        )
+      }
+      addChainDialog={
+        open[ModalType.ADD_CHAIN] && (
+          <CreateSafeOnNewChain
+            onClose={handleCloseModal}
+            currentName={name}
+            deployedChainIds={[chainId]}
+            open
+            safeAddress={address}
+          />
+        )
+      }
+    />
   )
 }
 

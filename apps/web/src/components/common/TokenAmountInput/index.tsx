@@ -3,15 +3,9 @@ import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/Creat
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { validateDecimalLength, validateLimitedAmount } from '@safe-global/utils/utils/validation'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import classNames from 'classnames'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldValues } from 'react-hook-form'
-import css from './styles.module.css'
 import {
   MultiTokenTransferFields,
   type MultiTokenTransferParams,
@@ -21,6 +15,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import FiatValue from '@/components/common/FiatValue'
 import { computeFiatValue } from '@/utils/fiat'
+import { TokenAmountInputView } from '@views/components/common/TokenAmountInput/TokenAmountInputView'
 
 export const InsufficientFundsValidationError = 'Insufficient funds'
 
@@ -116,7 +111,7 @@ const TokenAmountInput = ({
     trigger(deps)
   }, [maxAmount, selectedToken, setValue, amountField, trigger, deps, onMaxClick])
 
-  const handleTokenChange = (value: string) => setValue(tokenAddressField, value, { shouldValidate: true })
+  const handleTokenChange = (value: string | null) => setValue(tokenAddressField, value, { shouldValidate: true })
 
   // The amount survives a token change; its validators close over the new token's decimals and
   // balance only after this render, so re-run them here rather than in the change handler.
@@ -133,57 +128,23 @@ const TokenAmountInput = ({
   const selectedBalance = balances.find((item) => item.tokenInfo.address === tokenAddress)
 
   return (
-    <>
-      <div data-testid="token-amount-section" className="w-full">
+    <TokenAmountInputView
+      amountErrorMessage={shownAmountError?.message?.toString()}
+      isAmountError={isAmountError}
+      showMax={maxAmount !== undefined}
+      onMaxClick={onMaxAmountClick}
+      tokenAddressField={tokenAddressField}
+      tokenAddress={tokenAddress}
+      onTokenChange={handleTokenChange}
+      selectedToken={
+        selectedBalance ? (
+          <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
+        ) : undefined
+      }
+      tokens={balances.map((item) => ({ address: item.tokenInfo.address, item: <AutocompleteItem {...item} /> }))}
+      renderAmountField={(props) => (
         <NumberField
-          data-testid="token-amount-field"
-          label={shownAmountError?.message?.toString() || 'Amount'}
-          error={isAmountError}
-          fullWidth
-          inputSize="hero"
-          endAdornment={
-            <div className="flex items-stretch gap-1">
-              {maxAmount !== undefined && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  data-testid="max-btn"
-                  // eslint-disable-next-line no-restricted-syntax -- h-auto drops size="sm"'s h-8 so Max matches the content-sized token select beside it
-                  className="h-auto uppercase"
-                  onClick={onMaxAmountClick}
-                >
-                  Max
-                </Button>
-              )}
-              <Separator orientation="vertical" className="mx-1" />
-              <div data-testid="token-selector" className={css.select}>
-                <Select name={tokenAddressField} value={tokenAddress} onValueChange={handleTokenChange} required>
-                  {/* size="sm" lines the trigger up with the Max button and the h-8 divider beside it;
-                      min-h still lets it grow for the rich token row. */}
-                  <SelectTrigger size="sm">
-                    {/* Always pass a non-null child: with no child, base-ui's SelectValue falls back to
-                        rendering the raw address (e.g. in a new Safe with no funds). */}
-                    <SelectValue>
-                      {selectedBalance ? (
-                        <AutocompleteItem tokenInfo={selectedBalance.tokenInfo} balance={selectedBalance.balance} />
-                      ) : (
-                        ''
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="w-auto min-w-44 max-w-[var(--available-width)]">
-                    {balances.map((item) => (
-                      <SelectItem data-testid="token-item" key={item.tokenInfo.address} value={item.tokenInfo.address}>
-                        <AutocompleteItem {...item} />
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          }
-          required
-          placeholder="0"
+          {...props}
           {...register(amountField, {
             required: true,
             setValueAs: (value: string): string => {
@@ -197,17 +158,9 @@ const TokenAmountInput = ({
             deps,
           })}
         />
-      </div>
-      {fiatValue != null && (
-        <Typography
-          data-testid="fiat-display"
-          variant="paragraph-mini"
-          className={classNames(css.fiatDisplay, 'text-muted-foreground')}
-        >
-          <FiatValue value={fiatValue} precise />
-        </Typography>
       )}
-    </>
+      fiatValue={fiatValue != null ? <FiatValue value={fiatValue} precise /> : undefined}
+    />
   )
 }
 

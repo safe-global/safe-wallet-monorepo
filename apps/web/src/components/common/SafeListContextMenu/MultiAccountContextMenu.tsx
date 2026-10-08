@@ -1,19 +1,13 @@
 import type { MouseEvent } from 'react'
-import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { useState, type ReactElement } from 'react'
-import { EllipsisVertical } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAddressBookWriteScope } from '@/features/spaces'
-import EditIcon from '@/public/images/common/edit.svg'
-import PlusIcon from '@/public/images/common/plus.svg'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
+import { MultiAccountContextMenuView } from '@views/components/common/SafeListContextMenu/MultiAccountContextMenuView'
 
 enum ModalType {
   RENAME = 'rename',
@@ -51,71 +45,34 @@ const MultiAccountContextMenu = ({
   }
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              data-testid="safe-options-btn"
-              onClick={(e) => e.stopPropagation()}
-              className="text-muted-foreground"
-            />
-          }
-        >
-          <EllipsisVertical />
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent
-          align="end"
-          onClick={(e) => {
-            e.stopPropagation()
-          }}
-        >
-          <Tooltip>
-            <TooltipTrigger render={<div />}>
-              <DropdownMenuItem
-                disabled={!canRename}
-                title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
-                onClick={canRename ? handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME) : undefined}
-                onSelect={(e) => e.stopPropagation()}
-              >
-                <EditIcon className="text-foreground" />
-                <span data-testid="rename-btn">Rename</span>
-              </DropdownMenuItem>
-            </TooltipTrigger>
-            {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
-          </Tooltip>
-          {addNetwork && (
-            <DropdownMenuItem onClick={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}>
-              <PlusIcon className="text-[var(--color-primary-main)]" />
-              <span data-testid="add-chain-btn">Add another network</span>
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name, address }}
-          chainIds={chainIds}
-          scope={scope}
-          disableAddressInput
-        />
-      )}
-
-      {open[ModalType.ADD_CHAIN] && (
-        <CreateSafeOnNewChain
-          onClose={handleCloseModal}
-          currentName={name}
-          deployedChainIds={chainIds}
-          open
-          safeAddress={address}
-        />
-      )}
-    </>
+    <MultiAccountContextMenuView
+      canRename={canRename}
+      addNetwork={addNetwork}
+      onRename={handleOpenModal(ModalType.RENAME, OVERVIEW_EVENTS.SIDEBAR_RENAME)}
+      onAddNetwork={handleOpenModal(ModalType.ADD_CHAIN, OVERVIEW_EVENTS.ADD_NEW_NETWORK)}
+      renameDialog={
+        open[ModalType.RENAME] && (
+          <EntryDialog
+            handleClose={handleCloseModal}
+            defaultValues={{ name, address }}
+            chainIds={chainIds}
+            scope={scope}
+            disableAddressInput
+          />
+        )
+      }
+      addChainDialog={
+        open[ModalType.ADD_CHAIN] && (
+          <CreateSafeOnNewChain
+            onClose={handleCloseModal}
+            currentName={name}
+            deployedChainIds={chainIds}
+            open
+            safeAddress={address}
+          />
+        )
+      }
+    />
   )
 }
 

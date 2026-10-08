@@ -1,29 +1,17 @@
-import type { TransactionItemPage, QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement, useEffect, useState, useCallback, useRef } from 'react'
 import TxList from '@/components/transactions/TxList'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import type useTxHistory from '@/hooks/useTxHistory'
 import useTxQueue from '@/hooks/useTxQueue'
-import PagePlaceholder from '@views/components/common/PagePlaceholder'
 import InfiniteScroll from '../InfiniteScroll'
-import SkeletonTxList from '@views/components/common/PaginatedTxns/SkeletonTxList'
-import { type TxFilter, useTxFilter } from '@/utils/tx-history-filter'
+import { useTxFilter } from '@/utils/tx-history-filter'
 import { isTransactionListItem } from '@/utils/transaction-guards'
-import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useRecoveryQueue } from '@/features/recovery'
 import { isSamePage } from '@/utils/tx-list'
-
-const NoQueuedTxns = () => {
-  return <PagePlaceholder img={<NoTransactionsIcon />} text="Queued transactions will appear here" />
-}
-
-const getFilterResultCount = (filter: TxFilter, page: TransactionItemPage | QueuedItemPage) => {
-  const count = page.results.filter(isTransactionListItem).length
-
-  return `${page.next ? '> ' : ''}${count} ${filter.type} transactions found`.toLowerCase()
-}
+import { PaginatedTxnsView, TxPageView } from '@views/components/common/PaginatedTxns/PaginatedTxnsView'
 
 const TxPage = ({
   pageUrl,
@@ -54,26 +42,19 @@ const TxPage = ({
   }, [page, onPageLoaded])
 
   return (
-    <>
-      {isFirstPage && filter && page && (
-        <div className="flex flex-col items-end pt-4 pb-6 sm:pt-0">{getFilterResultCount(filter, page)}</div>
-      )}
-
-      {page && page.results.length > 0 && <TxList items={page.results} />}
-
-      {isQueue && page?.results.length === 0 && recoveryQueue.length === 0 && !hasPending && <NoQueuedTxns />}
-
-      {error && <ErrorMessage>Error loading transactions</ErrorMessage>}
-
-      {/* No skeletons for pending as they are shown above the queue which has them */}
-      {loading && !hasPending && (!page || page.results.length === 0) && <SkeletonTxList />}
-
-      {page?.next && onNextPage && (
-        <div className="my-8 text-center">
-          <InfiniteScroll onLoadMore={() => onNextPage(page.next!)} />
-        </div>
-      )}
-    </>
+    <TxPageView
+      filterResult={
+        isFirstPage && filter && page
+          ? { type: filter.type, count: page.results.filter(isTransactionListItem).length, hasMore: !!page.next }
+          : undefined
+      }
+      txList={page && page.results.length > 0 && <TxList items={page.results} />}
+      showNoQueued={isQueue && page?.results.length === 0 && recoveryQueue.length === 0 && !hasPending}
+      hasError={!!error}
+      renderErrorMessage={(message) => <ErrorMessage>{message}</ErrorMessage>}
+      showSkeleton={loading && !hasPending && (!page || page.results.length === 0)}
+      loadMore={page?.next && onNextPage && <InfiniteScroll onLoadMore={() => onNextPage(page.next!)} />}
+    />
   )
 }
 
@@ -131,7 +112,7 @@ const PaginatedTxns = ({
   }, [pages, loadedPages, onPagesChange])
 
   return (
-    <div className="relative">
+    <PaginatedTxnsView>
       {pages.map((pageUrl, index) => (
         <TxPage
           key={pageUrl}
@@ -142,7 +123,7 @@ const PaginatedTxns = ({
           onPageLoaded={handlePageLoaded(pageUrl)}
         />
       ))}
-    </div>
+    </PaginatedTxnsView>
   )
 }
 

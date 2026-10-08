@@ -1,12 +1,10 @@
 import type { ReactElement } from 'react'
 import { useCallback, useState } from 'react'
-import { cn } from '@/utils/cn'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { useCurrentChain } from '@/hooks/useChains'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { switchWalletChain } from '@/services/tx/tx-sender/sdk'
+import { ChainSwitcherView } from '@views/components/common/ChainSwitcher/ChainSwitcherView'
 
 const ChainSwitcher = ({
   fullWidth,
@@ -30,29 +28,14 @@ const ChainSwitcher = ({
   if (!isWrongChain) return null
 
   return (
-    <Button
-      onClick={handleChainSwitch}
-      variant={primaryCta ? 'default' : 'outline'}
-      className={cn('min-w-[200px]', !primaryCta && 'text-foreground', fullWidth && 'w-full')}
-      size={primaryCta ? 'default' : 'sm'}
-      disabled={loading}
-    >
-      {loading ? (
-        <Spinner className="size-5" />
-      ) : (
-        <>
-          <span className="whitespace-nowrap">Switch to&nbsp;</span>
-          <img
-            src={chain?.chainLogoUri ?? undefined}
-            alt={`${chain?.chainName} Logo`}
-            width={24}
-            height={24}
-            loading="lazy"
-          />
-          <span className="whitespace-nowrap">&nbsp;{chain?.chainName}</span>
-        </>
-      )}
-    </Button>
+    <ChainSwitcherView
+      chainName={chain?.chainName}
+      chainLogoUri={chain?.chainLogoUri}
+      loading={loading}
+      onSwitch={handleChainSwitch}
+      fullWidth={fullWidth}
+      primaryCta={primaryCta}
+    />
   )
 }
 

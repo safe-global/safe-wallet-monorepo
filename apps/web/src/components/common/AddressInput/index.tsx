@@ -3,7 +3,6 @@ import useAddressBook from '@/hooks/useAddressBook'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { FocusEvent, KeyboardEvent, ReactElement, ReactNode } from 'react'
 import { useEffect, useCallback, useId, useLayoutEffect, useRef, useMemo, useState } from 'react'
-import { Input as InputPrimitive } from '@base-ui/react/input'
 import { useFormContext, useWatch, type Validate, get } from 'react-hook-form'
 import { validatePrefixedAddress } from '@safe-global/utils/utils/validation'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -11,15 +10,11 @@ import useNameResolver, { getEnsNotAvailableError } from './useNameResolver'
 import { isDomain } from '@/services/ens'
 import { cleanInputValue, parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
-import CaretDownIcon from '@/public/images/common/caret-down.svg'
-import SaveAddressIcon from '@/public/images/common/save-address.svg'
-import classnames from 'classnames'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Field, FieldLabel } from '@/components/ui/field'
-import css from './styles.module.css'
 import Identicon from '../Identicon'
+import {
+  AddressInputView,
+  type AddressInputChangeHandler,
+} from '@views/components/common/AddressInput/AddressInputView'
 import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
 
 export type AddressInputProps = {
@@ -163,10 +158,8 @@ const AddressInput = ({
   }, [address, resolvedName, currentShortName, setAddressValue])
 
   // Label the field with the source ENS name while it still holds that resolved address
-  const resolvedFromLabel =
-    resolvedFrom && sameAddress(watchedValue, resolvedFrom.address)
-      ? `Address resolved from ${resolvedFrom.name}`
-      : undefined
+  const resolvedFromName =
+    resolvedFrom && sameAddress(watchedValue, resolvedFrom.address) ? resolvedFrom.name : undefined
 
   // Retransform the value when chain changes
   useEffect(() => {
@@ -226,11 +219,6 @@ const AddressInput = ({
     if (!event.currentTarget.contains(event.relatedTarget)) setEditingAddress(undefined)
   }
 
-  const labelText =
-    error?.message || resolvedFromLabel || label || `Recipient address${isDomainLookupEnabled ? ' or ENS' : ''}`
-
-  const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')
-
   const registerProps = register(name, {
     deps,
 
@@ -262,102 +250,55 @@ const AddressInput = ({
       }, 100),
   })
 
+  const onInputChange: AddressInputChangeHandler = (event) => {
+    setEditingAddress(undefined)
+    return registerProps.onChange(event)
+  }
+
   return (
-    <Field className={className}>
-      <FieldLabel htmlFor={id} className={error ? 'text-destructive' : undefined}>
-        {labelText}
-      </FieldLabel>
-
-      <div
-        data-testid={dataTestId}
-        className={classnames(css.inputWrapper, { [css.error]: !!error, [css.readOnly]: isReadOnly })}
-        onBlur={onWrapperBlur}
-      >
-        {isReadOnly ? (
-          <div
-            ref={readOnlyRef}
-            className="min-w-0 flex-1 outline-none"
-            role={disabled ? undefined : 'button'}
-            tabIndex={disabled ? undefined : 0}
-            onClick={disabled ? undefined : startEditing}
-            onKeyDown={disabled ? undefined : onReadOnlyKeyDown}
-          >
-            <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
-          </div>
-        ) : (
-          <div className={css.startAdornment}>
-            {InputProps?.startAdornment}
-            {watchedValue && !fieldError ? (
-              <Identicon address={watchedValue} size={32} />
-            ) : (
-              <Skeleton className="size-8 rounded-full animate-none" />
-            )}
-          </div>
-        )}
-
-        {/* The prefix span MUST remain the immediate previous sibling of the input */}
-        {showPrefix && !isReadOnly && !rawValueRef.current.startsWith(`${currentShortName}:`) && (
-          <span className={css.prefix}>{currentShortName}:</span>
-        )}
-
-        <InputPrimitive
-          {...props}
-          {...registerProps}
-          ref={(node: HTMLInputElement | null) => {
-            registerProps.ref(node)
-            inputRef.current = node
-          }}
-          onChange={(event) => {
-            setEditingAddress(undefined)
-            return registerProps.onChange(event)
-          }}
-          id={id}
-          className={classnames(css.input, InputProps?.className)}
-          autoComplete="off"
-          autoFocus={focused}
-          spellCheck={false}
-          disabled={disabled}
-          required={required}
-          placeholder={resolvedPlaceholder}
-          readOnly={InputProps?.readOnly}
-          aria-invalid={!!error || undefined}
-          // Workaround for a bug in react-hook-form when `register().value` is cached after `setValueAs`
-          // Only seems to occur on the `/load` route
-          value={watchedValue}
-        />
-
-        <div className={css.endAdornment}>
-          {resolving || isValidating ? (
-            <Spinner role="progressbar" className="size-5" />
-          ) : !disabled ? (
-            <>
-              {InputProps?.endAdornment}
-
-              {onAddressBookClick && (
-                <Button type="button" variant="ghost" size="icon-sm" onClick={onAddressBookClick}>
-                  <SaveAddressIcon className="size-4 text-[var(--color-primary-main)]" />
-                </Button>
-              )}
-
-              {onOpenListClick && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  data-testid="address-book-toggle"
-                  // Arrow down on the input opens the list, so the caret is a redundant tab stop.
-                  tabIndex={-1}
-                  onClick={onOpenListClick}
-                  className={classnames(css.openButton, { [css.rotated]: isAutocompleteOpen })}
-                >
-                  <CaretDownIcon className="size-4 text-[var(--color-primary-main)]" />
-                </Button>
-              )}
-            </>
-          ) : null}
-        </div>
-      </div>
-    </Field>
+    <AddressInputView
+      id={id}
+      fieldClassName={className}
+      label={label}
+      hasError={!!error}
+      errorMessage={error?.message}
+      resolvedFromName={resolvedFromName}
+      isDomainLookupEnabled={isDomainLookupEnabled}
+      required={required}
+      disabled={disabled}
+      placeholder={placeholder}
+      dataTestId={dataTestId}
+      onWrapperBlur={onWrapperBlur}
+      isReadOnly={isReadOnly}
+      readOnlyRef={readOnlyRef}
+      readOnlyContent={
+        isReadOnly ? (
+          <AddressInputReadOnly address={watchedValue} showPrefix={showPrefix} chainId={chain?.chainId} />
+        ) : undefined
+      }
+      onReadOnlyClick={startEditing}
+      onReadOnlyKeyDown={onReadOnlyKeyDown}
+      startAdornment={InputProps?.startAdornment}
+      identicon={watchedValue && !fieldError ? <Identicon address={watchedValue} size={32} /> : undefined}
+      showPrefixLabel={showPrefix && !isReadOnly && !rawValueRef.current.startsWith(`${currentShortName}:`)}
+      shortName={currentShortName}
+      forwardedProps={props}
+      registerProps={registerProps}
+      inputRef={(node: HTMLInputElement | null) => {
+        registerProps.ref(node)
+        inputRef.current = node
+      }}
+      onInputChange={onInputChange}
+      autoFocus={focused}
+      readOnly={InputProps?.readOnly}
+      value={watchedValue}
+      inputClassName={InputProps?.className}
+      isBusy={resolving || isValidating}
+      endAdornment={InputProps?.endAdornment}
+      onAddressBookClick={onAddressBookClick}
+      onOpenListClick={onOpenListClick}
+      isAutocompleteOpen={isAutocompleteOpen}
+    />
   )
 }
 

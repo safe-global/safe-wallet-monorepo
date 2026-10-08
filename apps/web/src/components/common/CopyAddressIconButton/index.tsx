@@ -1,37 +1,21 @@
-import type { KeyboardEvent } from 'react'
-import { Copy } from 'lucide-react'
-import CopyTooltip from '../CopyTooltip'
-import { cn } from '@/utils/cn'
+import useCopyTooltip from '../CopyTooltip/useCopyTooltip'
+import { CopyAddressIconButtonView } from '@views/components/common/CopyAddressIconButton/CopyAddressIconButtonView'
 
-/**
- * Inline copy-address affordance for account rows/cards. Reuses CopyTooltip for
- * the copy + tooltip logic, and renders a non-`<button>` element so it is safe
- * to nest inside clickable rows (links, collapsible triggers, selection
- * buttons) without invalid button-in-button markup.
- */
-const CopyAddressIconButton = ({ address, className }: { address: string; className?: string }) => {
-  const handleKeyDown = (e: KeyboardEvent<HTMLSpanElement>) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault()
-      e.currentTarget.click()
-    }
-  }
+/** Inline copy-address affordance for account rows/cards, with the same copy logic as CopyTooltip. */
+const CopyAddressIconButton = ({ address, ...viewProps }: { address: string; className?: string }) => {
+  const { status, showTooltip, setShowTooltip, handleCopy } = useCopyTooltip({
+    text: address,
+    needsConfirmation: false,
+  })
 
   return (
-    <CopyTooltip text={address} initialToolTipText="Copy address">
-      <span
-        role="button"
-        tabIndex={0}
-        aria-label="Copy address"
-        onKeyDown={handleKeyDown}
-        className={cn(
-          'text-muted-foreground hover:bg-muted hover:text-foreground inline-flex shrink-0 cursor-pointer rounded p-0.5 transition-colors',
-          className,
-        )}
-      >
-        <Copy className="size-3.5" />
-      </span>
-    </CopyTooltip>
+    <CopyAddressIconButtonView
+      {...viewProps}
+      status={status}
+      showTooltip={showTooltip}
+      onShowTooltipChange={setShowTooltip}
+      onCopy={handleCopy}
+    />
   )
 }
 

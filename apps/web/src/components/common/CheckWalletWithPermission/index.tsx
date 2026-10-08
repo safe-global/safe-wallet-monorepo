@@ -3,8 +3,8 @@ import { useMemo, type ReactElement } from 'react'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { CheckWalletView, type CheckWalletReason } from '@views/components/common/CheckWallet/CheckWalletView'
 import type { Permission, PermissionProps } from '@/permissions/config'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 
@@ -18,13 +18,6 @@ type CheckWalletWithPermissionProps<
   checkNetwork?: boolean
   allowUndeployedSafe?: boolean
 } & PProps
-
-enum Message {
-  WalletNotConnected = 'Please connect your wallet',
-  SDKNotInitialized = 'Still loading. Try again in a moment.',
-  NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',
-  SafeNotActivated = 'You need to activate the Safe before transacting',
-}
 
 const CheckWalletWithPermission = <P extends Permission>({
   children,
@@ -49,35 +42,32 @@ const CheckWalletWithPermission = <P extends Permission>({
 
   const isUndeployedSafe = !safe.deployed
 
-  const message = useMemo(() => {
+  const reason = useMemo((): CheckWalletReason | undefined => {
     if (!wallet) {
-      return Message.WalletNotConnected
+      return 'walletNotConnected'
     }
 
     if (!sdk && safeLoaded) {
-      return Message.SDKNotInitialized
+      return 'sdkNotInitialized'
     }
 
     if (isUndeployedSafe && !allowUndeployedSafe) {
-      return Message.SafeNotActivated
+      return 'safeNotActivated'
     }
 
     if (!hasPermission) {
-      return Message.NotSafeOwner
+      return 'notSafeOwner'
     }
   }, [allowUndeployedSafe, hasPermission, isUndeployedSafe, sdk, wallet, safeLoaded])
 
   if (checkNetwork && isWrongChain) return children(false)
-  if (!message) return children(true)
+  if (!reason) return children(true)
   if (noTooltip) return children(false)
 
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span aria-label={message} onClick={wallet ? undefined : connectWallet} />}>
-        {children(false)}
-      </TooltipTrigger>
-      <TooltipContent>{message}</TooltipContent>
-    </Tooltip>
+    <CheckWalletView reason={reason} onTriggerClick={wallet ? undefined : connectWallet}>
+      {children(false)}
+    </CheckWalletView>
   )
 }
 

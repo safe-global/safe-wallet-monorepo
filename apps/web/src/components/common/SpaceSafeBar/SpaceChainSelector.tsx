@@ -1,19 +1,13 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ChainSelectorBlock } from '@/features/spaces'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-
-function SpaceChainSelectorSkeleton() {
-  return (
-    <div className="self-stretch min-h-10 order-last flex items-center rounded-lg bg-muted px-4">
-      <Skeleton className="size-6 rounded-full" />
-    </div>
-  )
-}
+import {
+  SpaceChainSelectorSkeleton,
+  SpaceChainSelectorView,
+} from '@views/components/common/SpaceSafeBar/SpaceChainSelectorView'
 
 function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   const { deployedChains, selectedChainId, deployedChainIds, safeAddress, safeName, handleChainChange } =
@@ -52,27 +46,9 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
   }
 
   return (
-    // min-h-10 matches the safe selector's own `h-10` — see SpaceNestedSafesButton.
-    <div
-      className="self-stretch min-h-10 order-last flex items-stretch rounded-lg bg-muted"
-      data-testid="space-chain-selector"
-    >
-      {isDisabled ? (
-        <Tooltip>
-          <TooltipTrigger render={<span className="inline-flex" />}>
-            <ChainSelectorBlock
-              deployedChains={deployedChains}
-              selectedChainId={selectedChainId}
-              safeAddress={safeAddress}
-              deployedChainIds={deployedChainIds}
-              onChainSelect={handleChainSelect}
-              onAddNetwork={handleAddNetwork}
-              disabled
-            />
-          </TooltipTrigger>
-          <TooltipContent>Changing the network is not allowed in this screen</TooltipContent>
-        </Tooltip>
-      ) : (
+    <SpaceChainSelectorView
+      isDisabled={isDisabled}
+      renderChainSelector={(props) => (
         <ChainSelectorBlock
           deployedChains={deployedChains}
           selectedChainId={selectedChainId}
@@ -80,20 +56,22 @@ function SpaceChainSelector({ isLoading }: { isLoading?: boolean }) {
           deployedChainIds={deployedChainIds}
           onChainSelect={handleChainSelect}
           onAddNetwork={handleAddNetwork}
+          {...props}
         />
       )}
-
-      {addNetworkChainId && (
-        <CreateSafeOnNewChain
-          open
-          onClose={handleCloseDialog}
-          currentName={safeName}
-          safeAddress={safeAddress}
-          deployedChainIds={deployedChainIds}
-          defaultChainId={addNetworkChainId}
-        />
-      )}
-    </div>
+      addNetworkDialog={
+        addNetworkChainId && (
+          <CreateSafeOnNewChain
+            open
+            onClose={handleCloseDialog}
+            currentName={safeName}
+            safeAddress={safeAddress}
+            deployedChainIds={deployedChainIds}
+            defaultChainId={addNetworkChainId}
+          />
+        )
+      }
+    />
   )
 }
 

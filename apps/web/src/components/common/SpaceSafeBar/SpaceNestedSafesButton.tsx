@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { ReactElement } from 'react'
-import { GitMerge } from 'lucide-react'
 
 import { NestedSafesPopover } from '@/components/nested-safes/NestedSafesPopover'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
@@ -8,12 +7,8 @@ import { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import Track from '@/components/common/Track'
-import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
-import { cn } from '@/utils/cn'
+import { SpaceNestedSafesButtonView } from '@views/components/common/SpaceSafeBar/SpaceNestedSafesButtonView'
 
 function SpaceNestedSafesButton(): ReactElement | null {
   const { safe } = useSafeInfo()
@@ -47,56 +42,23 @@ function SpaceNestedSafesButton(): ReactElement | null {
   }
 
   return (
-    <>
-      {/* min-h-10 matches the safe selector's own `h-10`: `self-stretch` only sizes this to the
-          selector while they share a flex line, so without a floor the chip collapses to its
-          icon height on the narrow layouts where the selector wraps onto its own row. */}
-      <div className="flex self-stretch items-stretch min-h-10 order-1 rounded-lg bg-muted">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <button
-                onClick={isDisabled ? undefined : onClick}
-                disabled={isDisabled}
-                className={cn(
-                  'relative flex items-center border-0 rounded-lg bg-transparent px-3 transition-colors',
-                  isDisabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-muted-foreground/10',
-                )}
-                aria-label="Nested Safes"
-                data-testid="nested-safes-button"
-              />
-            }
-          >
-            <Track
-              {...NESTED_SAFE_EVENTS.OPEN_LIST}
-              label={NESTED_SAFE_LABELS.space_safe_bar}
-              mixpanelParams={{ [MixpanelEventParams.SAFE_SELECTOR_DROPDOWN]: 'Nested Safes' }}
-            >
-              <div className="relative flex items-center">
-                <GitMerge className="size-5 text-muted-foreground" />
-                {displayCount > 0 && (
-                  <span className="absolute left-[13px] -top-[5px] flex size-[14px] items-center justify-center rounded-full bg-[rgba(18,255,128,0.1)] text-[10px] font-medium leading-none text-secondary-foreground">
-                    {displayCount}
-                  </span>
-                )}
-              </div>
-            </Track>
-          </TooltipTrigger>
-          <TooltipContent>{isDisabled ? 'Nested Safes are not allowed in this screen' : 'Nested Safes'}</TooltipContent>
-        </Tooltip>
-      </div>
-
-      <NestedSafesPopover
-        anchorEl={anchorEl}
-        onClose={onClose}
-        rawNestedSafes={rawNestedSafes}
-        allSafesWithStatus={allSafesWithStatus}
-        visibleSafes={visibleSafes}
-        hasCompletedCuration={hasCompletedCuration}
-        isLoading={isLoading}
-        centered
-      />
-    </>
+    <SpaceNestedSafesButtonView
+      isDisabled={isDisabled}
+      displayCount={displayCount}
+      onClick={onClick}
+      popover={
+        <NestedSafesPopover
+          anchorEl={anchorEl}
+          onClose={onClose}
+          rawNestedSafes={rawNestedSafes}
+          allSafesWithStatus={allSafesWithStatus}
+          visibleSafes={visibleSafes}
+          hasCompletedCuration={hasCompletedCuration}
+          isLoading={isLoading}
+          centered
+        />
+      }
+    />
   )
 }
 

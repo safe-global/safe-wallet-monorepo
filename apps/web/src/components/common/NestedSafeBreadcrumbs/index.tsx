@@ -1,5 +1,4 @@
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -7,6 +6,7 @@ import { useParentSafe } from '@/hooks/useParentSafe'
 import { BreadcrumbItem } from '@/components/common/Breadcrumbs/BreadcrumbItem'
 import { formatPrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { useChain } from '@/hooks/useChains'
+import { NestedSafeBreadcrumbsView } from '@views/components/common/NestedSafeBreadcrumbs/NestedSafeBreadcrumbsView'
 
 export function NestedSafeBreadcrumbs(): ReactElement | null {
   const { pathname, query } = useRouter()
@@ -21,17 +21,14 @@ export function NestedSafeBreadcrumbs(): ReactElement | null {
   const prefixedAddress = formatPrefixedAddress(parentSafe.address.value, currentChain?.shortName)
 
   return (
-    <>
-      <BreadcrumbItem
-        title="Parent Safe"
-        address={parentSafe.address.value}
-        href={{
-          pathname,
-          query: { ...query, safe: prefixedAddress },
-        }}
-      />
-      <Typography variant="paragraph-small">/</Typography>
-      <BreadcrumbItem title="Nested Safe" address={safeAddress} />
-    </>
+    <NestedSafeBreadcrumbsView
+      parentAddress={parentSafe.address.value}
+      parentHref={{
+        pathname,
+        query: { ...query, safe: prefixedAddress },
+      }}
+      safeAddress={safeAddress}
+      renderItem={(props) => <BreadcrumbItem {...props} />}
+    />
   )
 }

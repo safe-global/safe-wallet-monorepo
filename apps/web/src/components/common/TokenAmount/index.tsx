@@ -1,13 +1,8 @@
 import { type ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TransferDirection } from '@safe-global/store/gateway/types'
-import css from './styles.module.css'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import TokenIcon from '../TokenIcon'
-import classNames from 'classnames'
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-
-const PRECISION = 20
+import { TokenAmountView } from '@views/components/common/TokenAmount/TokenAmountView'
 
 const TokenAmount = ({
   value,
@@ -30,39 +25,19 @@ const TokenAmount = ({
   iconSize?: number
   chainId?: string
 }): ReactElement => {
-  const sign = direction === TransferDirection.OUTGOING ? '-' : ''
-  const amount =
-    decimals !== undefined ? formatVisualAmount(value, decimals, preciseAmount ? PRECISION : undefined) : value
-
-  const fullAmount =
-    decimals !== undefined
-      ? sign + formatVisualAmount(value, decimals, PRECISION) + (tokenSymbol ? ' ' + tokenSymbol : '')
-      : value
-
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className={classNames(css.container, { [css.verticalAlign]: logoUri })}>
-            {logoUri && (
-              <TokenIcon
-                logoUri={logoUri}
-                tokenSymbol={tokenSymbol}
-                fallbackSrc={fallbackSrc}
-                size={iconSize}
-                chainId={chainId}
-                noRadius
-              />
-            )}
-            <b className={css.tokenText}>
-              {sign}
-              {amount} {tokenSymbol && tokenSymbol}
-            </b>
-          </span>
-        }
-      />
-      <TooltipContent>{fullAmount}</TooltipContent>
-    </Tooltip>
+    <TokenAmountView
+      value={value}
+      decimals={decimals}
+      logoUri={logoUri}
+      tokenSymbol={tokenSymbol}
+      isOutgoing={direction === TransferDirection.OUTGOING}
+      fallbackSrc={fallbackSrc}
+      preciseAmount={preciseAmount}
+      iconSize={iconSize}
+      chainId={chainId}
+      renderTokenIcon={(props) => <TokenIcon {...props} />}
+    />
   )
 }
 

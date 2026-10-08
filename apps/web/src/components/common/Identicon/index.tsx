@@ -1,10 +1,8 @@
-import type { ReactElement, CSSProperties } from 'react'
+import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import { blo } from 'blo'
-import { Skeleton } from '@/components/ui/skeleton'
-
-import css from './styles.module.css'
 import { isAddress } from 'ethers'
+import { IdenticonView } from '@views/components/common/Identicon/IdenticonView'
 
 export interface IdenticonProps {
   address: string
@@ -12,27 +10,18 @@ export interface IdenticonProps {
 }
 
 const Identicon = ({ address, size = 40 }: IdenticonProps): ReactElement => {
-  const style = useMemo<CSSProperties | null>(() => {
+  const blockie = useMemo<string | null>(() => {
     try {
       if (!isAddress(address)) {
         return null
       }
-      const blockie = blo(address as `0x${string}`)
-      return {
-        backgroundImage: `url(${blockie})`,
-        width: `${size}px`,
-        height: `${size}px`,
-      }
+      return blo(address as `0x${string}`)
     } catch (e) {
       return null
     }
-  }, [address, size])
+  }, [address])
 
-  return !style ? (
-    <Skeleton className="rounded-full" style={{ width: size, height: size }} />
-  ) : (
-    <div className={css.icon} style={style} />
-  )
+  return <IdenticonView blockie={blockie} size={size} />
 }
 
 export default Identicon

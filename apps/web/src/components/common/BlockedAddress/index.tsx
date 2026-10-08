@@ -2,8 +2,8 @@ import type { ReactElement } from 'react'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useRouter } from 'next/router'
-import Disclaimer from '@/components/common/Disclaimer'
 import { AppRoutes } from '@/config/routes'
+import { BlockedAddressView } from '@views/components/common/BlockedAddress/BlockedAddressView'
 
 const BlockedAddress = ({
   address,
@@ -23,10 +23,9 @@ const BlockedAddress = ({
   }
 
   return (
-    <Disclaimer
-      title="Blocked address"
-      subtitle={displayAddress}
-      content={`The above address is part of the OFAC SDN list and the ${featureTitle} is unavailable for sanctioned addresses.`}
+    <BlockedAddressView
+      displayAddress={displayAddress}
+      featureTitle={featureTitle}
       onAccept={onClose ?? handleAccept}
     />
   )

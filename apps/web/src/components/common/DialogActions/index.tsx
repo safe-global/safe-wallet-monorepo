@@ -1,9 +1,6 @@
 import type { ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import CheckWallet, { type CheckWalletProps } from '@/components/common/CheckWallet'
-import { cn } from '@/utils/cn'
+import { DialogActionsView, DialogConfirmButtonView } from '@views/components/common/DialogActions/DialogActionsView'
 
 type DialogActionsProps = {
   /** Confirm/primary button label (swaps to a spinner while `confirmLoading`). */
@@ -59,26 +56,25 @@ const DialogActions = ({
   confirmCheckWallet,
   confirmTooltip,
   onCancel,
-  cancelLabel = 'Cancel',
+  cancelLabel,
   cancelDisabled = false,
   cancelTestId,
   className,
 }: DialogActionsProps) => {
   const renderConfirm = (walletOk = true) => (
-    <Button
-      variant={confirmDestructive ? 'destructive' : 'default'}
-      size="submit"
+    <DialogConfirmButtonView
+      label={confirmLabel}
+      onClick={onConfirm}
       type={confirmType}
       form={confirmForm}
-      onClick={onConfirm}
       disabled={confirmDisabled || confirmLoading || !walletOk}
-      data-testid={confirmTestId}
-    >
-      {confirmLoading ? <Spinner /> : confirmLabel}
-    </Button>
+      loading={confirmLoading}
+      destructive={confirmDestructive}
+      testId={confirmTestId}
+    />
   )
 
-  let confirmButton = confirmCheckWallet ? (
+  const confirmButton = confirmCheckWallet ? (
     <CheckWallet {...(confirmCheckWallet === true ? {} : confirmCheckWallet)}>
       {(isOk) => renderConfirm(isOk)}
     </CheckWallet>
@@ -86,32 +82,17 @@ const DialogActions = ({
     renderConfirm()
   )
 
-  if (confirmTooltip) {
-    confirmButton = (
-      <Tooltip>
-        <TooltipTrigger render={<div className="inline-flex" />}>{confirmButton}</TooltipTrigger>
-        <TooltipContent>{confirmTooltip}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
   return (
-    <div className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)}>
-      {onCancel && (
-        <Button
-          type="button"
-          variant="outline"
-          size="submit"
-          onClick={onCancel}
-          disabled={cancelDisabled || confirmLoading}
-          data-testid={cancelTestId}
-          className="sm:mr-auto"
-        >
-          {cancelLabel}
-        </Button>
-      )}
-      {confirmButton}
-    </div>
+    <DialogActionsView
+      confirmButton={confirmButton}
+      confirmTooltip={confirmTooltip}
+      confirmLoading={confirmLoading}
+      onCancel={onCancel}
+      cancelLabel={cancelLabel}
+      cancelDisabled={cancelDisabled}
+      cancelTestId={cancelTestId}
+      wrapperClassName={className}
+    />
   )
 }
 

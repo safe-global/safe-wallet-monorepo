@@ -1,10 +1,11 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useMemo, useState, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableSortIcon } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
+import { useElementWidth } from '@/hooks/useElementWidth'
 
 // Bounded design-system styling for columns. Consumers pick from these variant
 // axes — they never pass raw className/style — so no table can drift on color,
@@ -130,17 +131,7 @@ function PaginatedDataTable<T>({
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<SortState | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [containerWidth, setContainerWidth] = useState<number | null>(null)
-
-  // Guarded for environments without ResizeObserver (jsdom) — there compact mode is viewport-only
-  useEffect(() => {
-    const element = containerRef.current
-    if (!element || typeof ResizeObserver === 'undefined') return
-    const observer = new ResizeObserver(([entry]) => setContainerWidth(entry.contentRect.width))
-    observer.observe(element)
-    return () => observer.disconnect()
-  }, [])
+  const [containerRef, containerWidth] = useElementWidth<HTMLDivElement>()
 
   // The identity of the row set, not of the array holding it: a parent that re-renders with an
   // equivalent `rows` must not send the user back to the first page.
