@@ -65,22 +65,53 @@ export function cypressEnvironment(env) {
   return result
 }
 
+// Measured in CI with one Cypress process per shard: a spec that needs a fork takes about 1.5 times as long
+// as one that does not, and starting the forks adds about 2.5 specs' worth of setup to a shard.
+const FORK_SPEC_COST = 1.5
+const FORK_SETUP_COST = 2.5
+
+/** How many of `count` shards the fork specs get, so that the longest shard is as short as possible. */
+export function forkShardCount(plainSpecs, forkSpecs, count) {
+  if (!forkSpecs) return 0
+  if (!plainSpecs || count < 2) return Math.min(Math.max(count - 1, 1), forkSpecs)
+  let best = 1
+  let bestCost = Infinity
+  for (let forkShards = 1; forkShards <= Math.min(forkSpecs, count - 1); forkShards++) {
+    const forkCost = (forkSpecs * FORK_SPEC_COST) / forkShards + FORK_SETUP_COST
+    const cost = Math.max(forkCost, plainSpecs / (count - forkShards))
+    if (cost < bestCost) [best, bestCost] = [forkShards, cost]
+  }
+  return best
+}
+
+// Fork specs sorted by the forks they need, then cut into consecutive chunks, so that each shard starts as
+// few forks as possible.
+function chunkByForks(forkSpecs, shardCount, specs) {
+  const chainKey = (spec) => specs[spec].chains.join(',')
+  const sorted = [...forkSpecs].sort((a, b) => chainKey(a).localeCompare(chainKey(b)))
+  return Array.from({ length: shardCount }, (_, index) =>
+    sorted.slice(
+      Math.round((index * sorted.length) / shardCount),
+      Math.round(((index + 1) * sorted.length) / shardCount),
+    ),
+  )
+}
+
 /**
- * Splits specs into at most `count` shards for parallel CI jobs. Specs that need extra forks get their own
- * shards, so only those jobs start the forks; each group gets a share of the jobs by its size.
+ * Splits specs into shards for parallel CI jobs. Specs that need extra forks get their own shards, so only those
+ * jobs start the forks; {@link forkShardCount} decides how many, from the measured relative costs.
  */
 export function planShards(selected, count, specs = isolatedSpecs) {
   if (!Number.isInteger(count) || count < 1) throw new Error('Shard count must be a positive integer')
   const needsForks = (spec) => Boolean(specs[spec]?.chains)
-  const groups = [selected.filter((spec) => !needsForks(spec)), selected.filter(needsForks)]
-    .filter((group) => group.length)
-    .map((group) => ({ specs: group, chains: requiredChains(group, specs) }))
-  const shards = []
-  for (const group of groups) {
-    const share = Math.max(1, Math.min(group.specs.length, Math.round((count * group.specs.length) / selected.length)))
-    const buckets = Array.from({ length: share }, () => [])
-    group.specs.forEach((spec, index) => buckets[index % share].push(spec))
-    shards.push(...buckets.map((bucket) => ({ specs: bucket, chains: group.chains.map((id) => chainProfiles[id]) })))
-  }
-  return shards
+  const plain = selected.filter((spec) => !needsForks(spec))
+  const forked = selected.filter(needsForks)
+  const forkShards = forkShardCount(plain.length, forked.length, count)
+  const plainShards = plain.length ? Math.min(plain.length, Math.max(1, count - forkShards)) : 0
+  const plainBuckets = Array.from({ length: plainShards }, () => [])
+  plain.forEach((spec, index) => plainBuckets[index % plainShards].push(spec))
+  return [...plainBuckets, ...chunkByForks(forked, forkShards, specs)].map((bucket) => ({
+    specs: bucket,
+    chains: requiredChains(bucket, specs).map((id) => chainProfiles[id]),
+  }))
 }
