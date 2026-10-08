@@ -1,5 +1,4 @@
 import CheckWallet from '@/components/common/CheckWallet'
-import Track from '@/components/common/Track'
 import {
   encodeEIP1271Signature,
   usesV1DelegateEndpoint,
@@ -8,9 +7,7 @@ import {
 } from '@/features/proposers/utils/utils'
 import { useParentSafeThreshold } from '../hooks/useParentSafeThreshold'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
-import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import useWallet from '@/hooks/wallets/useWallet'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -22,14 +19,6 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import React, { useState } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import DialogActions from '@/components/common/DialogActions'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { XIcon } from 'lucide-react'
 import madProps from '@/utils/mad-props'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -40,6 +29,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { DeleteProposerDialogView } from '@views/features/proposers/components/DeleteProposerDialogView'
 
 type DeleteProposerProps = {
   wallet: ReturnType<typeof useWallet>
@@ -195,132 +185,24 @@ const InternalDeleteProposer = ({ wallet, safeAddress, chainId, chain, proposer 
     (nestedSafeOwners?.some((addr) => sameAddress(addr, proposer.delegator)) ?? false)
 
   return (
-    <>
-      <CheckWallet>
-        {(isOk) => {
-          const tooltipTitle =
-            isOk && canDelete
-              ? 'Delete proposer'
-              : isOk && !canDelete
-                ? 'Only the owner of this proposer or the proposer itself can delete them'
-                : ''
-
-          const button = (
-            <span tabIndex={0}>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                data-testid="delete-proposer-btn"
-                onClick={() => setOpen(true)}
-                disabled={!isOk || !canDelete}
-              >
-                <DeleteIcon className="size-4 text-destructive" />
-              </Button>
-            </span>
-          )
-
-          return (
-            <Track {...SETTINGS_EVENTS.PROPOSERS.REMOVE_PROPOSER}>
-              {tooltipTitle ? (
-                <Tooltip>
-                  <TooltipTrigger render={button} />
-                  <TooltipContent>{tooltipTitle}</TooltipContent>
-                </Tooltip>
-              ) : (
-                button
-              )}
-            </Track>
-          )
-        }}
-      </CheckWallet>
-
-      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-        <DialogContent padding="none" showCloseButton={false}>
-          <DialogHeader className="flex-row items-center justify-between">
-            <DialogTitle>{multiSigInitiated ? 'Signature collection initiated' : 'Delete this proposer?'}</DialogTitle>
-
-            <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onCancel}>
-              <XIcon />
-            </Button>
-          </DialogHeader>
-
-          <Separator />
-
-          <div className="p-4">
-            {multiSigInitiated ? (
-              <>
-                <Alert variant="info" className="mb-4">
-                  <AlertSeverityIcon variant="info" />
-                  <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
-                </Alert>
-
-                <Typography variant="paragraph-small" className="mb-4 block">
-                  The removal request has been created as an off-chain message on your parent Safe. Other owners of the
-                  parent Safe need to sign it before the proposer can be removed.
-                </Typography>
-
-                <Typography variant="paragraph-small" color="muted">
-                  The other parent Safe owners can find and sign this pending delegation on the proposer settings page
-                  of this Safe.
-                </Typography>
-              </>
-            ) : (
-              <>
-                {isMultiSigRequired && (
-                  <Alert variant="info" className="mb-4">
-                    <AlertSeverityIcon variant="info" />
-                    <AlertDescription>
-                      This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
-                      complete.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <div className="mb-4">
-                  <Typography>
-                    Deleting this proposer will permanently remove the address, and it won&apos;t be able to suggest
-                    transactions anymore.
-                    <br />
-                    <br />
-                    To complete this action, confirm it with your connected wallet signature.
-                  </Typography>
-                </div>
-
-                {error && (
-                  <div className="mt-4">
-                    <ErrorMessage error={error}>{getProposerErrorText(error, 'Error deleting proposer')}</ErrorMessage>
-                  </div>
-                )}
-
-                <NetworkWarning action="sign" />
-              </>
-            )}
-          </div>
-
-          <Separator />
-
-          {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
-          <DialogFooter className="p-6">
-            {multiSigInitiated ? (
-              <DialogActions confirmLabel="Done" onConfirm={onCancel} />
-            ) : (
-              <DialogActions
-                onCancel={onCancel}
-                cancelLabel="No, keep it"
-                cancelTestId="reject-delete-proposer-btn"
-                confirmLabel="Yes, delete"
-                confirmTestId="confirm-delete-proposer-btn"
-                confirmDestructive
-                confirmLoading={isLoading}
-                confirmDisabled={isParentLoading || !canDelete}
-                confirmCheckWallet={{ checkNetwork: !isLoading }}
-                onConfirm={onConfirm}
-              />
-            )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+    <DeleteProposerDialogView
+      open={open}
+      canDelete={canDelete}
+      multiSigInitiated={multiSigInitiated}
+      isMultiSigRequired={isMultiSigRequired}
+      parentThreshold={parentThreshold}
+      parentOwnersCount={parentOwners?.length}
+      isLoading={isLoading}
+      isParentLoading={isParentLoading}
+      hasError={!!error}
+      onOpen={() => setOpen(true)}
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      renderCheckWallet={(children) => <CheckWallet>{children}</CheckWallet>}
+      renderErrorMessage={(fallback) =>
+        error && <ErrorMessage error={error}>{getProposerErrorText(error, fallback)}</ErrorMessage>
+      }
+    />
   )
 }
 

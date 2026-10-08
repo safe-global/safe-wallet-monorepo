@@ -1,6 +1,6 @@
-import type { ActiveProposerProps } from '@/features/spaces/components/Policies/ProposerDrawer/variants/ActiveProposer'
-import type { NotActivatedProposerProps } from '@/features/spaces/components/Policies/ProposerDrawer/variants/NotActivatedProposer'
-import type { PendingProposerProps } from '@/features/spaces/components/Policies/ProposerDrawer/variants/PendingProposer'
+import type { ActiveProposerProps } from './ActiveProposer'
+import type { NotActivatedProposerProps } from './NotActivatedProposer'
+import type { PendingProposerProps } from './PendingProposer'
 
 export enum ProposerStatus {
   ACTIVE = 'ACTIVE',

@@ -3,10 +3,10 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import { SafeTxContext } from '../../SafeTxProvider'
 import BatchIcon from '@/public/images/common/batch.svg'
 import { useDraftBatch } from '@/features/batching'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
+import { CONFIRM_BATCH_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/ConfirmBatch/copy'
 
 type ConfirmBatchProps = {
   onSubmit: () => void
@@ -21,7 +21,7 @@ const ConfirmBatch = (props: ReviewTransactionProps) => {
     createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
   }, [batchTxs, setSafeTx, setSafeTxError])
 
-  return <ReviewTransaction {...props} title="Confirm batch" />
+  return <ReviewTransaction {...props} title={COPY.reviewTitle} />
 }
 
 const ConfirmBatchFlow = ({ onSubmit }: ConfirmBatchProps) => {
@@ -30,7 +30,7 @@ const ConfirmBatchFlow = ({ onSubmit }: ConfirmBatchProps) => {
   return (
     <TxFlow
       icon={BatchIcon}
-      subtitle={`This batch contains ${length} transaction${maybePlural(length)}`}
+      subtitle={COPY.subtitle(length)}
       eventCategory={TxFlowType.CONFIRM_BATCH}
       ReviewTransactionComponent={ConfirmBatch}
       onSubmit={onSubmit}

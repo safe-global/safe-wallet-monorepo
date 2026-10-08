@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import DeclineInviteDialog from './DeclineInviteDialog'
+import { DeclineButtonView } from '@views/features/spaces/components/InviteBanner/DeclineButtonView'
 
 type DeclineButtonProps = {
   space: GetSpaceResponse
@@ -21,12 +21,10 @@ const DeclineButton = ({ space }: DeclineButtonProps) => {
   }
 
   return (
-    <>
-      <Button variant="secondary" size="sm" onClick={handleDeclineInvite} aria-label="Decline invitation">
-        Decline
-      </Button>
-      {declineOpen && <DeclineInviteDialog space={space} onClose={handleCloseDeclineDialog} />}
-    </>
+    <DeclineButtonView
+      onClick={handleDeclineInvite}
+      dialog={declineOpen && <DeclineInviteDialog space={space} onClose={handleCloseDeclineDialog} />}
+    />
   )
 }
 

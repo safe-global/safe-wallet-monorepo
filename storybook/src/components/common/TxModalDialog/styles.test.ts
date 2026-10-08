@@ -16,9 +16,7 @@ const ruleIn = (container: { nodes?: postcss.ChildNode[] }, selector: string): R
 const mediaBlock = (root: postcss.Root, params: string): AtRule | undefined =>
   root.nodes.find((node): node is AtRule => node.type === 'atrule' && node.name === 'media' && node.params === params)
 
-const PAGE_LAYOUT_ROOT = postcss.parse(
-  readFileSync(join(__dirname, '../../../../../apps/web/src/components/common/PageLayout/styles.module.css'), 'utf8'),
-)
+const PAGE_LAYOUT_ROOT = postcss.parse(readFileSync(join(__dirname, '../PageLayout/styles.module.css'), 'utf8'))
 const DIALOG_SOURCE = readFileSync(join(__dirname, 'index.tsx'), 'utf8')
 
 /**

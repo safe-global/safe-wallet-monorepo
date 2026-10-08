@@ -1,13 +1,7 @@
 import { ActionsTray } from '@/features/actions-tray'
-import { TotalValueElement } from '@views/features/spaces/components/TotalValueElement'
+import { DashboardHeaderView } from '@views/features/spaces/components/Dashboard/DashboardHeaderView'
 
-/**
- * DashboardHeader
- *
- * Dashboard header with Total value display and primary action buttons.
- * Part of Spaces Enterprise workspace design.
- * Figma: https://www.figma.com/design/5z9yzEgPAhCMGIumIwvXQY/Enterprise-workspace?node-id=7524-19551
- */
+/** Dashboard header with the Total value display and primary action buttons. */
 
 interface DashboardHeaderProps {
   value: string
@@ -22,10 +16,11 @@ interface DashboardHeaderProps {
 
 const DashboardHeader = ({ value, loading, noAssets }: DashboardHeaderProps) => {
   return (
-    <div className="flex flex-col gap-6 mb-10">
-      <TotalValueElement value={value} loading={loading} />
-      <ActionsTray noAssets={noAssets} variant="space" />
-    </div>
+    <DashboardHeaderView
+      value={value}
+      loading={loading}
+      renderActionsTray={(props) => <ActionsTray {...props} noAssets={noAssets} />}
+    />
   )
 }
 

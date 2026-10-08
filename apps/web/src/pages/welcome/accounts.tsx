@@ -6,7 +6,7 @@ import { MyAccountsFeature } from '@/features/myAccounts'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { BRAND_NAME, CONFIG_SERVICE_KEY } from '@/config/constants'
-import { Spinner } from '@/components/ui/spinner'
+import { AccountsView } from '@views/pages/welcome/AccountsView'
 
 const Accounts: NextPage = () => {
   const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
@@ -15,24 +15,13 @@ const Accounts: NextPage = () => {
 
   const isFlagResolved = !isLoading && isRedesignEnabled !== undefined
 
-  const renderAccounts = () => {
-    if (!isFlagResolved) {
-      return (
-        <div className="flex w-full justify-center py-16">
-          <Spinner className="text-muted-foreground size-6" />
-        </div>
-      )
-    }
-    return isRedesignEnabled ? <MyAccountsV2 /> : <MyAccounts />
-  }
-
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – My accounts`}</title>
       </Head>
 
-      {renderAccounts()}
+      <AccountsView isLoading={!isFlagResolved}>{isRedesignEnabled ? <MyAccountsV2 /> : <MyAccounts />}</AccountsView>
     </>
   )
 }

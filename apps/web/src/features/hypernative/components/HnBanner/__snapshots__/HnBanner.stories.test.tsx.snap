@@ -43,8 +43,7 @@ exports[`./HnBanner.stories Default 1`] = `
             data-variant="paragraph-small"
             style="color: var(--color-static-text-secondary);"
           >
-            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
-             
+            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by 
             <span
               style="color: rgb(0, 180, 96); font-weight: bold;"
             >
@@ -158,8 +157,7 @@ exports[`./HnBanner.stories NonDismissable 1`] = `
             data-variant="paragraph-small"
             style="color: var(--color-static-text-secondary);"
           >
-            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by
-             
+            Automatically monitor and block risky transactions using advanced, user-defined security policies, powered by 
             <span
               style="color: rgb(0, 180, 96); font-weight: bold;"
             >

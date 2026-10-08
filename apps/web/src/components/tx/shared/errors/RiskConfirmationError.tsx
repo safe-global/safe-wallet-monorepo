@@ -1,5 +1,5 @@
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { RiskConfirmationErrorView } from '@views/components/tx/shared/errors/RiskConfirmationErrorView'
 
 const RiskConfirmationError = () => {
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
@@ -8,7 +8,7 @@ const RiskConfirmationError = () => {
     return null
   }
 
-  return <ErrorMessage level="warning">Please acknowledge the risk before proceeding.</ErrorMessage>
+  return <RiskConfirmationErrorView />
 }
 
 export default RiskConfirmationError

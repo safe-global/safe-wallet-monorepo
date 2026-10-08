@@ -1,10 +1,7 @@
-import { Typography } from '@/components/ui/typography'
-import classNames from 'classnames'
-
 import type { ReactElement } from 'react'
 
 import { useCssHeightVar } from '@/hooks/useCssHeightVar'
-import css from './styles.module.css'
+import { PageHeaderView } from '@views/components/common/PageHeader/PageHeaderView'
 
 const PageHeader = ({
   title,
@@ -18,16 +15,7 @@ const PageHeader = ({
   // `Sticky` sub-headers pin at this header's bottom edge, which moves when its actions wrap.
   const setHeaderNode = useCssHeightVar('--page-header-height')
 
-  return (
-    <div ref={setHeaderNode} className={classNames(css.container, { [css.border]: noBorder })}>
-      {title && (
-        <Typography variant="h3" className={css.title}>
-          {title}
-        </Typography>
-      )}
-      {action}
-    </div>
-  )
+  return <PageHeaderView title={title} action={action} noBorder={noBorder} headerRef={setHeaderNode} />
 }
 
 export default PageHeader

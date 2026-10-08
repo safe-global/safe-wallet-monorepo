@@ -1,13 +1,15 @@
-import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import { type ReactElement } from 'react'
-import css from '@/components/common/ConnectWallet/styles.module.css'
+import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
+import { ConnectionCenterView } from '@views/components/common/ConnectWallet/ConnectionCenterView'
 
 const ConnectionCenter = (): ReactElement => {
-  return (
-    <div className={css.buttonContainer}>
-      <ConnectWalletButton size="sm" />
-    </div>
-  )
+  const connectWallet = useConnectWallet()
+
+  const handleConnect = () => {
+    connectWallet()
+  }
+
+  return <ConnectionCenterView onConnect={handleConnect} />
 }
 
 export default ConnectionCenter

@@ -1,8 +1,6 @@
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
@@ -10,6 +8,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
+import { ExecuteRecoveryButtonView } from '@views/features/recovery/components/ExecuteRecoveryButton/ExecuteRecoveryButtonView'
 
 export default function ExecuteRecoveryButton({
   recovery,
@@ -31,46 +30,19 @@ export default function ExecuteRecoveryButton({
     setTxFlow(<RecoveryAttemptFlow item={recovery} />)
   }
 
-  const getRecoveryBlockedReason = (): string | null => {
-    if (isWrongChain) {
-      return `Switch your wallet network to ${chain?.chainName} to execute this transaction`
-    }
-    if (!isDisabled) {
-      return null
-    }
-    return isNext
-      ? 'You can execute the recovery after the specified review window'
-      : 'Previous recovery proposals must be executed or cancelled first'
-  }
-
-  const blockedReason = getRecoveryBlockedReason()
-
   return (
-    <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
-      {(isOk) => {
-        const button = (
-          <Button
-            data-testid="execute-btn"
-            onClick={onClick}
-            variant="default"
-            disabled={!isOk || isDisabled}
-            size={compact ? 'default' : 'action'}
-          >
-            Execute
-          </Button>
-        )
-
-        if (!blockedReason) {
-          return button
-        }
-
-        return (
-          <Tooltip>
-            <TooltipTrigger render={<span />}>{button}</TooltipTrigger>
-            <TooltipContent>{blockedReason}</TooltipContent>
-          </Tooltip>
-        )
-      }}
-    </CheckWallet>
+    <ExecuteRecoveryButtonView
+      isWrongChain={isWrongChain}
+      chainName={chain?.chainName}
+      isDisabled={isDisabled}
+      isNext={isNext}
+      compact={compact}
+      onClick={onClick}
+      renderCheckWallet={(children) => (
+        <CheckWallet allowNonOwner checkNetwork={!isDisabled}>
+          {children}
+        </CheckWallet>
+      )}
+    />
   )
 }

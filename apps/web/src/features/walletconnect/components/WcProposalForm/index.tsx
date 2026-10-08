@@ -1,4 +1,3 @@
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { WCLoadingState } from '../../types'
 import { getPeerName, getSupportedChainIds, isBlockedBridge, isWarnedBridge } from '../../services/utils'
 import { isSafePassApp } from '@/services/safe-apps/utils'
@@ -8,21 +7,15 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Typography } from '@/components/ui/typography'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { ReactElement } from 'react'
 import { useId } from 'react'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import { CompatibilityWarning } from './CompatibilityWarning'
 import ProposalVerification from './ProposalVerification'
-import css from './styles.module.css'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
+import { WcProposalFormView } from '@views/features/walletconnect/components/WcProposalForm/WcProposalFormView'
 
 type ProposalFormProps = {
   proposal: WalletKitTypes.SessionProposal
@@ -48,7 +41,8 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
   const chainIds = useMemo(() => getSupportedChainIds(configs, proposal.params), [configs, proposal.params])
   const isUnsupportedChain = !chainIds.includes(chainId)
 
-  const name = getPeerName(proposer) || 'Unknown dApp'
+  const peerName = getPeerName(proposer)
+  const name = peerName || 'Unknown dApp'
   const isHighRisk = proposal.verifyContext.verified.validation === 'INVALID' || isWarnedBridge(origin, name)
   const isBlocked = isScam || isBlockedBridge(origin)
   const disabled =
@@ -94,68 +88,31 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
   }, [url, isUnsupportedChain])
 
   return (
-    <div className={css.container}>
-      <Typography variant="paragraph-small" className="text-muted-foreground">
-        WalletConnect
-      </Typography>
-
-      {proposer.metadata.icons[0] && (
-        <div className={css.icon}>
-          <SafeAppIconCard src={proposer.metadata.icons[0]} width={32} height={32} alt={`${name || 'dApp'} logo`} />
-        </div>
-      )}
-
-      <Typography className="mb-2">
-        <b>{name}</b> wants to connect
-      </Typography>
-
-      <Typography className={`mb-6 ${css.origin}`}>{proposal.verifyContext.verified.origin}</Typography>
-
-      <div className={css.info}>
-        <ProposalVerification proposal={proposal} />
-
-        <CompatibilityWarning proposal={proposal} chainIds={chainIds} />
-      </div>
-
-      {!isBlocked && isHighRisk && !isUnsupportedChain && (
-        <Field orientation="horizontal" className={css.checkbox}>
-          <Checkbox id={riskCheckboxId} checked={understandsRisk} onCheckedChange={onCheckboxClick} />
-          <FieldLabel htmlFor={riskCheckboxId}>
-            I understand the risks associated with interacting with this dApp and would like to continue.
-          </FieldLabel>
-        </Field>
-      )}
-
-      {isSafePass && sanctionedAddress && (
-        <BlockedAddress address={sanctionedAddress} featureTitle="Safe{Pass}" onClose={onReject} />
-      )}
-
-      <Separator className={css.divider} />
-
-      <div className={css.buttons}>
-        {!isUnsupportedChain && (
-          <Button
-            variant="default"
-            onClick={onApprove}
-            // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
-            className="py-[var(--space-1)] px-[var(--space-4)] min-w-[130px]"
-            disabled={disabled}
-          >
-            {loading === WCLoadingState.APPROVE ? <Spinner className="size-5" /> : 'Approve'}
-          </Button>
-        )}
-
-        <Button
-          variant={isUnsupportedChain ? 'ghost' : 'destructive'}
-          onClick={onReject}
-          // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
-          className="py-[var(--space-1)] px-[var(--space-4)] min-w-[130px]"
-          disabled={!!loading}
-        >
-          {loading === WCLoadingState.REJECT ? <Spinner className="size-5" /> : isUnsupportedChain ? 'Close' : 'Reject'}
-        </Button>
-      </div>
-    </div>
+    <WcProposalFormView
+      peerName={peerName}
+      iconUrl={proposer.metadata.icons[0]}
+      origin={proposal.verifyContext.verified.origin}
+      verification={<ProposalVerification proposal={proposal} />}
+      compatibilityWarning={<CompatibilityWarning proposal={proposal} chainIds={chainIds} />}
+      showRiskCheckbox={!isBlocked && isHighRisk && !isUnsupportedChain}
+      riskCheckboxId={riskCheckboxId}
+      understandsRisk={understandsRisk}
+      onRiskCheckboxChange={onCheckboxClick}
+      renderBlockedAddress={
+        isSafePass && sanctionedAddress
+          ? (featureTitle) => (
+              <BlockedAddress address={sanctionedAddress} featureTitle={featureTitle} onClose={onReject} />
+            )
+          : undefined
+      }
+      isUnsupportedChain={isUnsupportedChain}
+      approveDisabled={disabled}
+      isBusy={!!loading}
+      isApproving={loading === WCLoadingState.APPROVE}
+      isRejecting={loading === WCLoadingState.REJECT}
+      onApprove={onApprove}
+      onReject={onReject}
+    />
   )
 }
 

@@ -1,15 +1,12 @@
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
-import { Typography } from '@/components/ui/typography'
+import { FiatBalanceView } from '@views/components/common/FiatBalance/FiatBalanceView'
 
 /** Renders a raw fiat amount formatted in the user's selected currency. Shared across features. */
 const FiatBalance = ({ value }: { value: string | number | undefined }) => {
   const currency = useAppSelector(selectCurrency)
 
-  if (value === undefined) return null
-
-  return <Typography variant="paragraph-small-medium">{formatCurrency(value, currency)}</Typography>
+  return <FiatBalanceView value={value} currency={currency} />
 }
 
 export default FiatBalance

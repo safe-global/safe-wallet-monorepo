@@ -28,7 +28,6 @@ import { type ReactElement } from 'react'
 import SwapOrder from './SwapOrder'
 import StakingTx from './StakingTx'
 import UpdateSafe from './UpdateSafe'
-import { MigrateToL2Information } from '@views/components/tx/confirmation-views/MigrateToL2Information'
 import { NestedSafeCreation } from './NestedSafeCreation'
 import { isNestedSafeCreation } from '@/utils/nested-safes'
 import { VaultDepositConfirmation, VaultRedeemConfirmation } from '@/features/earn'
@@ -40,6 +39,10 @@ import { ManageSigners } from './ManageSigners'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
 import BridgeTransaction from './BridgeTransaction'
 import { LifiSwapTransaction } from './LifiSwapTransaction'
+import {
+  ConfirmationViewsView,
+  MigrateToL2QueueView,
+} from '@views/components/tx/confirmation-views/ConfirmationViewsView'
 
 type ConfirmationViewProps = {
   txDetails?: TransactionDetails
@@ -80,7 +83,7 @@ const getConfirmationViewComponent = ({ txInfo, txData, txFlow }: TransactionPre
   if (isCustomTxInfo(txInfo) && isSafeUpdateTxData(txData)) return <UpdateSafe txData={txData} />
 
   if (isCustomTxInfo(txInfo) && isSafeMigrationTxData(txData)) {
-    return <MigrateToL2Information variant="queue" />
+    return <MigrateToL2QueueView />
   }
 
   if (isCustomTxInfo(txInfo) && txData && isNestedSafeCreation(txData)) {
@@ -132,12 +135,12 @@ const ConfirmationView = ({
         (ConfirmationViewComponent ||
           (details && showTxDetails && (
             <TxData txData={details?.txData} txInfo={details?.txInfo} txDetails={txDetails} imitation={false} trusted>
-              <div ref={decodedDataRef}>
+              <ConfirmationViewsView decodedDataRef={decodedDataRef}>
                 <DecodedData
                   txData={details.txData}
                   toInfo={isCustomTxInfo(details.txInfo) ? details.txInfo.to : details.txData?.to}
                 />
-              </div>
+              </ConfirmationViewsView>
             </TxData>
           )))}
 

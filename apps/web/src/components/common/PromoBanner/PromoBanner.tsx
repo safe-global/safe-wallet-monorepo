@@ -1,14 +1,9 @@
-import css from './styles.module.css'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import Image, { type StaticImageData } from 'next/image'
-import Link, { type LinkProps } from 'next/link'
-import { X as CloseIcon } from 'lucide-react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { StaticImageData } from 'next/image'
+import type { LinkProps } from 'next/link'
+import type { ReactNode } from 'react'
 import type { AnalyticsEvent } from '@/services/analytics'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
-
-const DEFAULT_BACKGROUND = 'linear-gradient(90deg, #b0ffc9, #d7f6ff)'
+import { PromoBannerView } from '@views/components/common/PromoBanner/PromoBannerView'
 
 export interface PromoBannerProps {
   title: string
@@ -103,98 +98,34 @@ const PromoBanner = ({
     onDismiss?.()
   }
 
-  const bannerStyle: CSSProperties = {
-    background: `${customBackground || DEFAULT_BACKGROUND}`,
-    ...(onBannerClick ? { cursor: 'pointer' } : undefined),
-  }
-
-  const containedStyle: CSSProperties | undefined = customCtaColor ? { backgroundColor: customCtaColor } : undefined
-  const textStyle: CSSProperties | undefined = customCtaColor ? { color: customCtaColor } : undefined
-
-  const bannerContent = (
-    <div
-      className={css.banner}
-      style={bannerStyle}
-      onClick={onBannerClick ? handleClick : undefined}
-      {...(onBannerClick ? { role: 'button' } : {})}
-    >
-      <div className={`flex flex-row gap-4 ${css.bannerStack}`}>
-        {imageSrc ? (
-          <Image className={css.bannerImage} src={imageSrc} alt={imageAlt || ''} width={95} height={95} />
-        ) : null}
-        <div className={css.bannerContent}>
-          <Typography
-            variant="h4"
-            className={`${css.bannerText} ${css.bannerTitle}`}
-            style={customTitleColor ? { color: customTitleColor } : undefined}
-          >
-            {title}
-          </Typography>
-
-          {description ? (
-            <Typography
-              as="div"
-              variant="paragraph-small"
-              className={`${css.bannerText} ${css.bannerDescription}`}
-              style={customFontColor ? { color: customFontColor } : undefined}
-            >
-              {description}
-            </Typography>
-          ) : null}
-
-          {onCtaClick || onBannerClick ? (
-            <Button
-              variant={ctaVariant === 'text' ? 'ghost' : ctaVariant === 'contained' ? 'default' : 'outline'}
-              size="sm"
-              onClick={(e) => {
-                if (onBannerClick) {
-                  e.stopPropagation()
-                }
-                handleClick(e)
-              }}
-              className={ctaVariant === 'text' ? css.bannerCtaText : css.bannerCtaContained}
-              style={ctaVariant === 'text' ? textStyle : containedStyle}
-              disabled={ctaDisabled}
-            >
-              {ctaLabel}
-              {endIcon}
-            </Button>
-          ) : href ? (
-            <Button
-              variant="ghost"
-              size="default"
-              onClick={handleClick}
-              className={css.bannerCtaText}
-              style={textStyle}
-              render={<Link href={href} />}
-            >
-              {ctaLabel}
-              {endIcon}
-            </Button>
-          ) : (
-            <Button variant="ghost" size="default" className={css.bannerCtaText} style={textStyle}>
-              {ctaLabel}
-              {endIcon}
-            </Button>
-          )}
-        </div>
-      </div>
-
-      {onDismiss && (
-        <button
-          type="button"
-          className={css.closeButton}
-          aria-label="close"
-          onClick={handleDismiss}
-          style={customCloseIconColor ? { color: customCloseIconColor } : undefined}
-        >
-          <CloseIcon className={`size-6 ${css.closeIcon}`} />
-        </button>
-      )}
-    </div>
+  return (
+    <PromoBannerView
+      title={title}
+      description={description}
+      ctaLabel={ctaLabel}
+      href={href}
+      imageSrc={imageSrc}
+      imageAlt={imageAlt}
+      endIcon={endIcon}
+      customFontColor={customFontColor}
+      customTitleColor={customTitleColor}
+      customCtaColor={customCtaColor}
+      customCloseIconColor={customCloseIconColor}
+      customBackground={customBackground}
+      ctaDisabled={ctaDisabled}
+      ctaVariant={ctaVariant}
+      hasCtaAction={Boolean(onCtaClick || onBannerClick)}
+      onBannerClick={onBannerClick ? handleClick : undefined}
+      onCtaClick={(e) => {
+        if (onBannerClick) {
+          e.stopPropagation()
+        }
+        handleClick(e)
+      }}
+      onLinkClick={handleClick}
+      onDismiss={onDismiss ? handleDismiss : undefined}
+    />
   )
-
-  return bannerContent
 }
 
 export default PromoBanner

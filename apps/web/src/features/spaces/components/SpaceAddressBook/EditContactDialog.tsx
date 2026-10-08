@@ -1,10 +1,5 @@
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import ModalDialog from '@/components/common/ModalDialog'
-import DialogActions from '@/components/common/DialogActions'
 import { useState, useMemo } from 'react'
-import AddressInputReadOnly from '@/components/common/AddressInputReadOnly'
 import NameInput from '@/components/common/NameInput'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
@@ -19,13 +14,13 @@ import {
 import { showNotification } from '@/store/notificationsSlice'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useAppDispatch } from '@/store'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { EditContactDialogView } from '@views/features/spaces/components/SpaceAddressBook/EditContactDialogView'
 
 type EditContactDialogProps = {
   entry: SpaceAddressBookItemDto
@@ -127,72 +122,30 @@ const EditContactDialog = ({ entry, onClose }: EditContactDialogProps) => {
   })
 
   return (
-    <ModalDialog open={true} onClose={handleClose} dialogTitle="Edit contact" hideChainIndicator>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <div className="px-6 py-4">
-              <Typography className="mb-4">Edit contact details. Anyone in the Workspace can see it.</Typography>
-              <div className="flex flex-col gap-6">
-                <div className="pt-2">
-                  <AddressInputReadOnly address={entry.address} chainId={entry.chainIds[0]} />
-                </div>
-
-                {/* `hero` (66px) to match the AddressInputReadOnly above, whose wrapper is
-                    min-height 66px — the default h-9 left the two fields visibly uneven. */}
-                <NameInput
-                  name="name"
-                  label="Name"
-                  required
-                  validateCharset
-                  minLength={NAME_MIN_LENGTH}
-                  maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
-                  inputSize="hero"
-                />
-
-                <div>
-                  <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
-                  <p className="text-muted-foreground mb-2 text-sm">
-                    Add contact on all networks or only on specific ones of your choice.
-                  </p>
-                  <Controller
-                    name="networks"
-                    control={control}
-                    render={({ field }) => (
-                      <NetworkMultiSelectorInput
-                        name="networks"
-                        showSelectAll
-                        value={field.value || []}
-                        error={!!errors.networks}
-                        helperText={errors.networks ? 'Select at least one network' : ''}
-                      />
-                    )}
-                    rules={{ required: true }}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <Alert variant="destructive" className="mt-4">
-                  <AlertSeverityIcon variant="destructive" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            <DialogActions
-              className="p-4 pt-0"
-              onCancel={handleClose}
-              cancelTestId="cancel-btn"
-              confirmLabel="Save"
-              confirmType="submit"
-              confirmDisabled={!formState.isValid || !hasChanges}
-              confirmLoading={isSubmitting}
-            />
-          </form>
-        </FormProvider>
-      </div>
-    </ModalDialog>
+    <FormProvider {...methods}>
+      <EditContactDialogView
+        address={entry.address}
+        chainId={entry.chainIds[0]}
+        onClose={handleClose}
+        isDarkMode={isDarkMode}
+        onSubmit={onSubmit}
+        error={error}
+        hasNetworksError={!!errors.networks}
+        confirmDisabled={!formState.isValid || !hasChanges}
+        isSubmitting={isSubmitting}
+        renderNameInput={(props) => (
+          <NameInput {...props} validateCharset minLength={NAME_MIN_LENGTH} maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH} />
+        )}
+        renderNetworksInput={(props) => (
+          <Controller
+            name="networks"
+            control={control}
+            render={({ field }) => <NetworkMultiSelectorInput {...props} value={field.value || []} />}
+            rules={{ required: true }}
+          />
+        )}
+      />
+    </FormProvider>
   )
 }
 

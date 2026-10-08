@@ -5,17 +5,9 @@ import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
-import ExternalLink from '@/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
 import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
-import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
-
-const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warning' | 'info'> = {
-  error: 'destructive',
-  warning: 'warning',
-  info: 'info',
-}
+import { ErrorMessageView } from '@views/components/tx/ErrorMessage/ErrorMessageView'
 
 const ErrorMessage = ({
   children,
@@ -57,43 +49,22 @@ const ErrorMessage = ({
     guardErrorName && safe.guard && chain ? getBlockExplorerLink(chain, safe.guard.value) : undefined
 
   return (
-    <Alert
-      data-testid="error-message"
-      variant={alertVariant[level]}
-      outlined={false}
-      className={cn('errorMessage', className)}
-    >
-      <AlertSeverityIcon variant={alertVariant[level]} />
-
-      {title && <AlertTitle>{title}</AlertTitle>}
-
-      <AlertDescription>
-        <span>
-          {children}
-
-          {guardErrorName && (
-            <span className="mt-2 block">
-              <strong>
-                {guardExplorerLink ? (
-                  <>
-                    <ExternalLink href={guardExplorerLink.href}>Guard</ExternalLink> reverted the transaction (
-                    {guardErrorName})
-                  </>
-                ) : (
-                  <>Guard reverted the transaction ({guardErrorName})</>
-                )}
-              </strong>
-            </span>
-          )}
-        </span>
-
-        {effectiveGsCode ? (
+    <ErrorMessageView
+      customClassName={className}
+      level={level}
+      title={title}
+      guardErrorName={guardErrorName}
+      guardExplorerHref={guardExplorerLink?.href}
+      details={
+        effectiveGsCode ? (
           <ErrorDetails code={effectiveGsCode} customError={customError} />
         ) : (
           ledgerReference && <ErrorDetails code={ledgerReference} />
-        )}
-      </AlertDescription>
-    </Alert>
+        )
+      }
+    >
+      {children}
+    </ErrorMessageView>
   )
 }
 

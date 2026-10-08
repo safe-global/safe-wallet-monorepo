@@ -1,9 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
-import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@/components/common/ExternalLink'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,
   RecipientAnalysisResults,
@@ -22,15 +18,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
-
-const shieldLogoOnHover = [
-  'cursor-pointer',
-  '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
-  'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
-  'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
-  'hover:[&_.shield-lines]:fill-[var(--color-static-main)]',
-  'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
-].join(' ')
+import { SafeShieldDisplayView } from '@views/features/safe-shield/components/SafeShieldDisplayView'
 
 export const SafeShieldDisplay = ({
   recipient,
@@ -115,13 +103,10 @@ export const SafeShieldDisplay = ({
     ],
   )
 
-  const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
-
   return (
-    <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
-      {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
-          two curves stay concentric instead of the inner corner cutting inside the outer one. */}
-      <div className="overflow-hidden rounded-lg bg-card">
+    <SafeShieldDisplayView
+      isDarkMode={isDarkMode}
+      header={
         <SafeShieldHeader
           recipient={recipient}
           contract={contract}
@@ -130,7 +115,8 @@ export const SafeShieldDisplay = ({
           overallStatus={overallStatus}
           checks={checks}
         />
-
+      }
+      content={
         <SafeShieldContent
           threat={threat}
           recipient={recipient}
@@ -147,13 +133,7 @@ export const SafeShieldDisplay = ({
           isSafePro={isSafePro}
           isOffchainMessage={isOffchainMessage}
         />
-      </div>
-
-      <div className="flex flex-row items-center self-end">
-        <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
-        </ExternalLink>
-      </div>
-    </div>
+      }
+    />
   )
 }

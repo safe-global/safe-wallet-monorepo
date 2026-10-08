@@ -7,6 +7,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { REMOVE_RECOVERY_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/RemoveRecovery/copy'
 
 export type RecoveryFlowProps = {
   delayModifier: RecoveryStateItem
@@ -22,10 +23,10 @@ function RemoveRecoveryFlow({ delayModifier }: RecoveryFlowProps): ReactElement 
     <TxFlow
       eventCategory={TxFlowType.REMOVE_RECOVERY}
       icon={RecoveryPlus}
-      subtitle="Remove Recoverer"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={RemoveRecoveryReviewStep}
     >
-      <TxFlowStep title="Remove Account recovery">
+      <TxFlowStep title={COPY.stepTitle}>
         <RemoveRecoveryFlowOverview delayModifier={delayModifier} />
       </TxFlowStep>
     </TxFlow>

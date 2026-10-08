@@ -8,6 +8,7 @@ import type { RecoveryState } from '@/features/recovery'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
+import { UPSERT_RECOVERY_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/UpsertRecovery/copy'
 
 export enum UpsertRecoveryFlowFields {
   recoverer = 'recoverer',
@@ -43,13 +44,13 @@ function UpsertRecoveryFlow({ delayModifier }: { delayModifier?: RecoveryState[n
       eventCategory={TxFlowType.SETUP_RECOVERY}
       ReviewTransactionComponent={UpsertRecoveryFlowReview}
       icon={RecoveryPlus}
-      title="Account recovery"
-      subtitle="Set up account recovery"
+      title={COPY.title}
+      subtitle={COPY.subtitle}
     >
-      <TxFlowStep title="Account recovery" subtitle="How does recovery work" hideNonce hideProgress>
+      <TxFlowStep title={COPY.title} subtitle={COPY.introSubtitle} hideNonce hideProgress>
         <UpsertRecoveryFlowIntro />
       </TxFlowStep>
-      <TxFlowStep title="Account recovery" subtitle="Set up recovery settings" icon={RecoveryPlus}>
+      <TxFlowStep title={COPY.title} subtitle={COPY.settingsSubtitle} icon={RecoveryPlus}>
         <UpsertRecoveryFlowSettings />
       </TxFlowStep>
     </TxFlow>

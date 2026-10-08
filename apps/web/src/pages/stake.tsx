@@ -1,12 +1,13 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography } from '@/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { StakeFeature } from '@/features/stake'
 import { useLoadFeature } from '@/features/__core__'
+import { StakePageView } from '@views/pages/StakePageView'
 
 const StakePage: NextPage = () => {
   const stake = useLoadFeature(StakeFeature)
+  const { StakePage: StakeFeaturePage } = stake
 
   return (
     <>
@@ -14,15 +15,7 @@ const StakePage: NextPage = () => {
         <title>{`${BRAND_NAME} – Stake`}</title>
       </Head>
 
-      {stake.$isReady ? (
-        <stake.StakePage />
-      ) : stake.$isDisabled ? (
-        <main>
-          <Typography align="center" className="my-6">
-            Staking is not available on this network.
-          </Typography>
-        </main>
-      ) : null}
+      <StakePageView isReady={stake.$isReady} isDisabled={stake.$isDisabled} stakePage={<StakeFeaturePage />} />
     </>
   )
 }

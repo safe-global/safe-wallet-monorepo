@@ -1,7 +1,7 @@
 import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { type ReactElement } from 'react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { AnalysisCardItemWithLink } from './AnalysisCardItemWithLink'
+import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { FallbackHandlerCardItemView } from '@views/features/safe-shield/components/AnalysisGroupCard/FallbackHandlerCardItemView'
 
 interface FallbackHandlerCardItemProps {
   result: AnalysisResult
@@ -10,17 +10,11 @@ interface FallbackHandlerCardItemProps {
 
 export const FallbackHandlerCardItem = ({ result, isPrimary = false }: FallbackHandlerCardItemProps): ReactElement => {
   return (
-    <AnalysisCardItemWithLink
+    <AnalysisGroupCardItem
+      description={<FallbackHandlerCardItemView />}
       result={result}
-      isPrimary={isPrimary}
-      beforeLinkText="Verify the "
-      linkText="fallback handler"
-      afterLinkText=" is trusted and secure before proceeding."
-      linkUrl={HelpCenterArticle.FALLBACK_HANDLER}
-      noIcon={false}
-      linkProps={{
-        className: 'text-inherit [&>span]:underline',
-      }}
+      severity={isPrimary ? result.severity : undefined}
+      showImage
     />
   )
 }

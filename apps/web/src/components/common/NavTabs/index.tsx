@@ -1,8 +1,7 @@
-import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { NavTabsView } from '@views/components/common/NavTabs/NavTabsView'
 
 const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   const router = useRouter()
@@ -14,25 +13,7 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
   // and the active tab is never highlighted once the tabs arrive.
   if (!tabs.length) return null
 
-  return (
-    <Tabs value={activeHref}>
-      <TabsList variant="underline" tone="brand">
-        {tabs.map((tab) => (
-          <TabsTrigger
-            key={tab.href}
-            value={tab.href}
-            tabIndex={0}
-            nativeButton={false}
-            className="whitespace-nowrap"
-            render={<NextLink href={{ pathname: tab.href, query }} />}
-          >
-            {tab.label}
-            {tab.tag}
-          </TabsTrigger>
-        ))}
-      </TabsList>
-    </Tabs>
-  )
+  return <NavTabsView tabs={tabs} activeHref={activeHref} query={query} />
 }
 
 export default NavTabs

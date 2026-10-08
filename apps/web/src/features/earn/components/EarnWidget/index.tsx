@@ -4,6 +4,8 @@ import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import { widgetAppData } from '../../constants'
 import useGetWidgetUrl from '../../hooks/useGetWidgetUrl'
 
+const ALLOWED_FEATURES_LIST = 'clipboard-read; clipboard-write'
+
 const EarnWidget = ({ asset }: { asset?: string }) => {
   const url = useGetWidgetUrl(asset)
 
@@ -20,7 +22,7 @@ const EarnWidget = ({ asset }: { asset?: string }) => {
   return (
     <AppFrame
       appUrl={appData.url}
-      allowedFeaturesList="clipboard-read; clipboard-write"
+      allowedFeaturesList={ALLOWED_FEATURES_LIST}
       safeAppFromManifest={appData}
       isNativeEmbed
     />

@@ -1,9 +1,6 @@
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { CircleCheckIcon } from 'lucide-react'
-import ExternalLink from '@/components/common/ExternalLink'
 import { MastercopyWarning, useMastercopyMigration } from '@/features/multichain'
+import { ContractVersionView } from '@views/components/settings/ContractVersion/ContractVersionView'
 
 /**
  * Generates a GitHub release URL for a specific Safe contract version.
@@ -20,41 +17,17 @@ export const ContractVersion = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const { action, isOfficialDeployer } = useMastercopyMigration()
 
-  const isLatestVersion = safe.version && !(action === 'update' && isOfficialDeployer)
+  const isLatestVersion = !!safe.version && !(action === 'update' && isOfficialDeployer)
 
   const releaseUrl = safe.version ? getReleaseUrl(safe.version) : undefined
 
   return (
-    <>
-      <Typography variant="h4" className="mb-2">
-        Contract version
-      </Typography>
-
-      {/* as="div": the Skeleton renders a div, which is invalid inside the default <p> */}
-      <Typography as="div" className="flex items-center">
-        {safeLoaded ? (
-          <>
-            {safe.version ?? 'Unsupported contract'}
-            {isLatestVersion && (
-              <>
-                <CircleCheckIcon className="ml-2 mr-1 size-5 text-primary" /> Latest version
-              </>
-            )}
-          </>
-        ) : (
-          <Skeleton className="h-5 w-[60px]" />
-        )}
-      </Typography>
-
-      {safeLoaded && releaseUrl && (
-        <Typography variant="paragraph-small" className="block mt-1">
-          <ExternalLink href={releaseUrl}>View release</ExternalLink>
-        </Typography>
-      )}
-
-      <div className="mt-4">
-        <MastercopyWarning variant="settings" />
-      </div>
-    </>
+    <ContractVersionView
+      safeLoaded={safeLoaded}
+      version={safe.version}
+      isLatestVersion={isLatestVersion}
+      releaseUrl={releaseUrl}
+      renderMastercopyWarning={(props) => <MastercopyWarning {...props} />}
+    />
   )
 }

@@ -7,6 +7,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useGetIsSanctionedQuery } from '@/store/api/ofac'
 import { getKeyWithTrueValue } from '@/utils/helpers'
 import madProps from '@/utils/mad-props'
+import { SanctionWrapperView } from '@views/components/wrappers/SanctionWrapper/SanctionWrapperView'
 
 // TODO: Use with swaps/staking
 export function _SanctionWrapper({
@@ -35,9 +36,7 @@ export function _SanctionWrapper({
 
   if (blockedAddress) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <BlockedAddress address={blockedAddress} featureTitle={featureTitle} />
-      </div>
+      <SanctionWrapperView blockedAddress={<BlockedAddress address={blockedAddress} featureTitle={featureTitle} />} />
     )
   }
 

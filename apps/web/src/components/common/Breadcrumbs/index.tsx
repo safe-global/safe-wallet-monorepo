@@ -1,16 +1,16 @@
-import css from './styles.module.css'
 import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { NestedSafeBreadcrumbs } from '@/components/common/NestedSafeBreadcrumbs'
+import { BreadcrumbsView } from '@views/components/common/Breadcrumbs/BreadcrumbsView'
 
 const Breadcrumbs = () => {
-  const spaces = useLoadFeature(SpacesFeature)
+  const { SpaceBreadcrumbs } = useLoadFeature(SpacesFeature)
 
   return (
-    <div className={css.container} data-testid="safe-breadcrumb-container">
-      <spaces.SpaceBreadcrumbs />
+    <BreadcrumbsView>
+      <SpaceBreadcrumbs />
       <NestedSafeBreadcrumbs />
-    </div>
+    </BreadcrumbsView>
   )
 }
 

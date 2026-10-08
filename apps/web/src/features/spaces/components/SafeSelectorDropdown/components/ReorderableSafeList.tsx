@@ -1,12 +1,18 @@
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { cn } from '@/utils/cn'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { reorderByKey } from '@/utils/reorder'
 import DragHandle from '@views/features/spaces/components/SafeSelectorDropdown/components/DragHandle'
+import {
+  ReorderableGroupRowView,
+  ReorderableSafeListView,
+  ReorderableSingleRowView,
+} from '@views/features/spaces/components/SafeSelectorDropdown/components/ReorderableSafeListView'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type { SafeItemData, SafeRenameTarget } from '@views/features/spaces/components/SafeSelectorDropdown/types'
+
+const DROPPABLE_ID = 'safe-selector-reorder'
 
 interface ReorderableSafeListProps {
   items: SafeItemData[]
@@ -48,9 +54,13 @@ const ReorderableSafeList = ({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <Droppable droppableId="safe-selector-reorder">
+      <Droppable droppableId={DROPPABLE_ID}>
         {(dropProvided) => (
-          <div ref={dropProvided.innerRef} {...dropProvided.droppableProps} data-testid="safe-selector-reorder-list">
+          <ReorderableSafeListView
+            innerRef={dropProvided.innerRef}
+            droppableProps={dropProvided.droppableProps}
+            placeholder={dropProvided.placeholder}
+          >
             {items.map((item, index) => (
               <Draggable key={item.address} draggableId={item.address} index={index} isDragDisabled={isDragDisabled}>
                 {(dragProvided, snapshot) => {
@@ -65,12 +75,10 @@ const ReorderableSafeList = ({
                   // single-chain rows stay a flat, click-to-navigate row.
                   const row =
                     item.chains.length > 1 ? (
-                      <div
-                        ref={dragProvided.innerRef}
-                        {...dragProvided.draggableProps}
+                      <ReorderableGroupRowView
+                        innerRef={dragProvided.innerRef}
+                        draggableProps={dragProvided.draggableProps}
                         hidden={hidden}
-                        data-testid="reorder-safe-row"
-                        className="my-0.5"
                       >
                         <MultiChainSafeItemRow
                           item={item}
@@ -78,45 +86,26 @@ const ReorderableSafeList = ({
                           isSelected={isCurrent}
                           leading={dragHandle}
                         />
-                      </div>
+                      </ReorderableGroupRowView>
                     ) : (
-                      <div
-                        ref={dragProvided.innerRef}
-                        {...dragProvided.draggableProps}
+                      <ReorderableSingleRowView
+                        innerRef={dragProvided.innerRef}
+                        draggableProps={dragProvided.draggableProps}
                         hidden={hidden}
-                        className="my-0.5"
+                        isCurrent={isCurrent}
+                        onSelect={() => onSelect(item.id)}
+                        onKeyDown={clickOnEnterOrSpace}
+                        dragHandle={dragHandle}
                       >
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          data-current-safe={isCurrent ? 'true' : undefined}
-                          data-testid="reorder-safe-row"
-                          onClick={() => onSelect(item.id)}
-                          onKeyDown={clickOnEnterOrSpace}
-                          className={cn(
-                            'group/row flex cursor-pointer items-center gap-2 rounded-lg py-3 pl-2 pr-3',
-                            // The current safe hovers to a deeper green instead of the grey used by the rest.
-                            isCurrent
-                              ? 'bg-[var(--color-background-light)] hover:bg-[var(--color-background-light-hover)]'
-                              : 'hover:bg-muted',
-                          )}
-                        >
-                          {dragHandle}
-                          {/* Mirror SelectItem's `[&>div]:min-w-0 [&>div]:shrink`: without it SafeItem's
-                              w-full overflows past the grip and clips the trailing balance column. */}
-                          <div className="min-w-0 flex-1">
-                            <SafeItem {...item} onRename={onRename} />
-                          </div>
-                        </div>
-                      </div>
+                        <SafeItem {...item} onRename={onRename} />
+                      </ReorderableSingleRowView>
                     )
                   // Escape the Select popup's positioning transform so the lifted row tracks the cursor.
                   return snapshot.isDragging ? createPortal(row, document.body) : row
                 }}
               </Draggable>
             ))}
-            {dropProvided.placeholder}
-          </div>
+          </ReorderableSafeListView>
         )}
       </Droppable>
     </DragDropContext>

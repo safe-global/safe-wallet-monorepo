@@ -6,6 +6,7 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import IdentitySection from '../sections/IdentitySection'
 import AppearanceSection from '../sections/AppearanceSection'
 import DangerZoneSection from '../sections/DangerZoneSection'
+import { GeneralPageView } from '@views/features/spaces/components/SpaceSettings/pages/GeneralPageView'
 
 const GeneralPage = () => {
   const spaceId = useCurrentSpaceId()
@@ -15,12 +16,12 @@ const GeneralPage = () => {
   const isAdmin = useIsAdmin()
 
   return (
-    <div data-testid="settings-general-page">
+    <GeneralPageView>
       <IdentitySection space={space} />
       <WorkspaceTwoFactorSection members={activeMembers} spaceId={spaceId ?? undefined} isAdmin={isAdmin} />
       <AppearanceSection />
       <DangerZoneSection space={space} />
-    </div>
+    </GeneralPageView>
   )
 }
 

@@ -6,6 +6,7 @@ import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { SpeedupFeature } from '@/features/speedup'
+import { QueueActionsView } from '@views/components/transactions/TxSummary/QueueActionsView'
 
 const QueueActions = ({ tx }: { tx: Transaction }) => {
   const awaitingExecution = isAwaitingExecution(tx.txStatus)
@@ -25,10 +26,14 @@ const QueueActions = ({ tx }: { tx: Transaction }) => {
   if (!ExecutionComponent && !showSpeedUp) return null
 
   return (
-    <div data-testid="tx-actions" className="flex items-center">
-      {ExecutionComponent}
-      {showSpeedUp && <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger="alertButton" />}
-    </div>
+    <QueueActionsView
+      execution={ExecutionComponent}
+      renderSpeedUp={
+        pendingTx?.status === PendingStatus.PROCESSING
+          ? (modalTrigger) => <SpeedUpMonitor txId={tx.id} pendingTx={pendingTx} modalTrigger={modalTrigger} />
+          : undefined
+      }
+    />
   )
 }
 

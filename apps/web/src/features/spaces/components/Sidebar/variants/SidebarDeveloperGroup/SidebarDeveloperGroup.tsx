@@ -1,16 +1,7 @@
 import type { ReactElement } from 'react'
-import { motion } from 'motion/react'
-import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarSeparator,
-} from '@/components/ui/sidebar'
-import css from '../../styles.module.css'
 import { sidebarDeveloperGroup } from '../../developerItems'
 import { SidebarDeveloperItem } from './SidebarDeveloperItem'
-import { itemVariants } from '@views/features/spaces/components/Sidebar/constants'
+import { SidebarDeveloperGroupView } from '@views/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperGroupView'
 
 interface SidebarDeveloperGroupProps {
   isLoading?: boolean
@@ -25,18 +16,11 @@ export const SidebarDeveloperGroup = ({ isLoading = false }: SidebarDeveloperGro
   if (!sidebarDeveloperGroup.items.length) return null
 
   return (
-    <motion.div variants={itemVariants}>
-      <SidebarGroup className={css.sidebarGroup}>
-        <SidebarGroupLabel>{sidebarDeveloperGroup.label}</SidebarGroupLabel>
-        <SidebarSeparator className={css.collapsedSeparator} />
-        <SidebarGroupContent>
-          <SidebarMenu className="gap-0">
-            {sidebarDeveloperGroup.items.map((config) => (
-              <SidebarDeveloperItem key={config.id} config={config} isLoading={isLoading} />
-            ))}
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    </motion.div>
+    <SidebarDeveloperGroupView
+      label={sidebarDeveloperGroup.label}
+      items={sidebarDeveloperGroup.items.map((config) => (
+        <SidebarDeveloperItem key={config.id} config={config} isLoading={isLoading} />
+      ))}
+    />
   )
 }

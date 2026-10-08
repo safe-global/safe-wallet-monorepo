@@ -1,11 +1,8 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { RotateCcw } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 import { BASE_TX_GAS } from '@/config/constants'
 import { AdvancedField } from '@views/components/tx/AdvancedParams/types'
-import NumberField from '@/components/common/NumberField'
+import { GasLimitInputView } from '@views/components/tx/AdvancedParams/GasLimitInputView'
 
 const GasLimitInput = ({ recommendedGasLimit }: { recommendedGasLimit?: string }) => {
   const { safe } = useSafeInfo()
@@ -32,45 +29,16 @@ const GasLimitInput = ({ recommendedGasLimit }: { recommendedGasLimit?: string }
       }
     | undefined
 
-  const errorMessage = error ? (error.type === 'min' ? 'Gas limit must be at least 21000' : error.message) : undefined
-
   const showReset = !!recommendedGasLimit && recommendedGasLimit !== currentGasLimit?.toString()
 
   return (
-    <div className="w-full">
-      <NumberField
-        fullWidth
-        label={errorMessage || 'Gas limit'}
-        error={!!errorMessage}
-        // Always pass a truthy adornment: NumberField switches between a bare Input and an
-        // InputGroup based on it, and swapping remounts the input mid-typing (losing focus).
-        endAdornment={
-          <>
-            {showReset && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      onClick={onResetGasLimit}
-                      className="text-primary"
-                      aria-label="Reset to recommended gas limit"
-                    >
-                      <RotateCcw className="size-4" />
-                    </Button>
-                  }
-                />
-                <TooltipContent>Reset to recommended gas limit</TooltipContent>
-              </Tooltip>
-            )}
-          </>
-        }
-        disabled={!safe.deployed}
-        required
-        {...register(AdvancedField.gasLimit, { required: true, min: BASE_TX_GAS })}
-      />
-    </div>
+    <GasLimitInputView
+      error={error}
+      showReset={showReset}
+      onResetGasLimit={onResetGasLimit}
+      disabled={!safe.deployed}
+      field={register(AdvancedField.gasLimit, { required: true, min: BASE_TX_GAS })}
+    />
   )
 }
 

@@ -1,12 +1,7 @@
 import { useCallback, useRef, useState, type KeyboardEvent, type ReactElement } from 'react'
-import { XIcon } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import ChainIndicator from '../ChainIndicator'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Typography } from '@/components/ui/typography'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { InputGroup } from '@/components/ui/input-group'
-import css from './styles.module.css'
+import { NetworkMultiSelectorInputView } from '@views/components/common/NetworkSelector/NetworkMultiSelectorInputView'
 import { useFormContext } from 'react-hook-form'
 import useChains from '@/hooks/useChains'
 
@@ -101,52 +96,6 @@ const NetworkMultiSelectorInput = ({
       )
     : options
 
-  const renderChips = () => {
-    if (showSelectAll && isAllSelected) {
-      return (
-        <Typography variant="paragraph-small">
-          All networks <span className="text-muted-foreground">(Default)</span>
-        </Typography>
-      )
-    }
-
-    return value.map((chain) => (
-      <span key={chain.chainId} className={css.multiChainChip}>
-        <ChainIndicator chainId={chain.chainId} onlyLogo inline />
-        <span>{chain.chainName}</span>
-        <button
-          type="button"
-          aria-label={`Remove ${chain.chainName}`}
-          className={css.chipDelete}
-          onClick={(e) => {
-            e.stopPropagation()
-            handleDelete(chain.chainId)
-          }}
-        >
-          <XIcon data-testid="CancelIcon" className="size-3.5" />
-        </button>
-      </span>
-    ))
-  }
-
-  const renderOptionContent = (chain: Chain | typeof SELECT_ALL_OPTION) => {
-    if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
-      return (
-        <>
-          <Checkbox data-testid="select-all-checkbox" checked={isAllSelected} className="pointer-events-none" />
-          <span>Select All</span>
-        </>
-      )
-    }
-
-    return (
-      <>
-        <Checkbox data-testid="network-checkbox" checked={isSelected(chain.chainId)} className="pointer-events-none" />
-        <ChainIndicator chainId={chain.chainId} inline />
-      </>
-    )
-  }
-
   const handleOptionClick = (chain: Chain | typeof SELECT_ALL_OPTION, disabled: boolean) => {
     if (disabled) return
     if (showSelectAll && chain.chainId === SELECT_ALL_OPTION.chainId) {
@@ -203,86 +152,49 @@ const NetworkMultiSelectorInput = ({
   const activeOption = open && activeIndex >= 0 ? (visibleOptions[activeIndex] as Chain | undefined) : undefined
 
   return (
-    <div className={css.multiSelectWrapper}>
-      <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger
-          render={<InputGroup inputSize="heroWrap" className="cursor-text" onClick={() => inputRef.current?.focus()} />}
-        >
-          {renderChips()}
-
-          <input
-            ref={inputRef}
-            /* Lets InputGroup apply its focus ring and aria-invalid border to this input. */
-            data-slot="input-group-control"
-            role="combobox"
-            aria-expanded={open}
-            aria-controls={`${name}-listbox`}
-            aria-invalid={error || undefined}
-            aria-activedescendant={activeOption ? getOptionId(activeOption) : undefined}
-            className={css.multiSelectInput}
-            placeholder={value.length === 0 ? 'Select networks' : undefined}
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value)
-              setActiveIndex(-1)
-              setOpen(true)
-            }}
-            onKeyDown={handleInputKeyDown}
-          />
-
-          {value.length > 0 && (
-            <button
-              type="button"
-              aria-label="Clear all"
-              className={css.clearAll}
-              onClick={(e) => {
-                e.stopPropagation()
-                handleChange([])
-              }}
-            >
-              <XIcon data-testid="CloseIcon" className="size-4" />
-            </button>
-          )}
-        </PopoverTrigger>
-
-        {/* Portaled by PopoverContent so it escapes the dialog's overflow clipping. */}
-        <PopoverContent
-          align="start"
-          sideOffset={4}
-          initialFocus={inputRef}
-          className="max-h-[300px] w-[var(--anchor-width)] overflow-y-auto p-1"
-        >
-          <ul id={`${name}-listbox`} role="listbox" aria-multiselectable className="m-0 list-none p-0">
-            {visibleOptions.map((chain, index) => {
-              const disabled = isOptionDisabledState(chain as Chain)
-              const selected = isSelectAllOption(chain as Chain) ? isAllSelected : isSelected(chain.chainId)
-
-              return (
-                <li
-                  key={chain.chainId}
-                  id={getOptionId(chain as Chain)}
-                  role="option"
-                  aria-disabled={Boolean(disabled)}
-                  aria-selected={Boolean(selected)}
-                  data-active={index === activeIndex || undefined}
-                  className={css.multiSelectOption}
-                  onClick={() => handleOptionClick(chain, disabled)}
-                  onMouseEnter={() => setActiveIndex(index)}
-                >
-                  {renderOptionContent(chain)}
-                </li>
-              )
-            })}
-          </ul>
-        </PopoverContent>
-      </Popover>
-
-      {helperText && (
-        <Typography variant="paragraph-mini" className={error ? 'text-destructive' : 'text-muted-foreground'}>
-          {helperText}
-        </Typography>
-      )}
-    </div>
+    <NetworkMultiSelectorInputView
+      name={name}
+      chips={value.map((chain) => ({ chainId: chain.chainId, chainName: chain.chainName }))}
+      showAllSelected={showSelectAll && isAllSelected}
+      isAllSelected={isAllSelected}
+      hasValue={value.length > 0}
+      options={visibleOptions.map((chain) => ({
+        chainId: chain.chainId,
+        id: getOptionId(chain as Chain),
+        isSelectAll: isSelectAllOption(chain as Chain),
+        disabled: isOptionDisabledState(chain as Chain),
+        selected: isSelectAllOption(chain as Chain) ? isAllSelected : isSelected(chain.chainId),
+      }))}
+      activeIndex={activeIndex}
+      activeOptionId={activeOption ? getOptionId(activeOption) : undefined}
+      open={open}
+      onOpenChange={handleOpenChange}
+      inputRef={inputRef}
+      inputValue={inputValue}
+      error={error}
+      helperText={helperText}
+      onFieldClick={() => inputRef.current?.focus()}
+      onInputChange={(e) => {
+        setInputValue(e.target.value)
+        setActiveIndex(-1)
+        setOpen(true)
+      }}
+      onInputKeyDown={handleInputKeyDown}
+      onChipDelete={(e, chainId) => {
+        e.stopPropagation()
+        handleDelete(chainId)
+      }}
+      onClearAll={(e) => {
+        e.stopPropagation()
+        handleChange([])
+      }}
+      onOptionClick={(index) => {
+        const chain = visibleOptions[index]
+        handleOptionClick(chain, isOptionDisabledState(chain as Chain))
+      }}
+      onOptionHover={setActiveIndex}
+      renderChainIndicator={(props) => <ChainIndicator {...props} />}
+    />
   )
 }
 

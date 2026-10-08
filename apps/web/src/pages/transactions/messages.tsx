@@ -10,6 +10,7 @@ import { AppRoutes } from '@/config/routes'
 import { useCurrentChain } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { PageMainView } from '@views/pages/PageMainView'
 
 const Messages: NextPage = () => {
   const chain = useCurrentChain()
@@ -33,9 +34,9 @@ const Messages: NextPage = () => {
         <SignedMessagesHelpLink />
       </TxHeader>
 
-      <main>
+      <PageMainView>
         <PaginatedMsgs />
-      </main>
+      </PageMainView>
     </>
   )
 }

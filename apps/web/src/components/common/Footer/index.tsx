@@ -1,17 +1,11 @@
-import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Github } from 'lucide-react'
-import NextLink from 'next/link'
+import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
-import ExternalLink from '@views/components/common/ExternalLink'
-import { Link } from '@/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { HELP_CENTER_URL, PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { IS_PRODUCTION, COMMIT_HASH, LEGAL_URL } from '@/config/constants'
 import type { FooterProps } from '@views/components/common/Footer/footer.type'
+import { FooterView } from '@views/components/common/Footer/FooterView'
 
 const footerPages = [
   AppRoutes.settings.index,
@@ -22,16 +16,12 @@ const footerPages = [
   AppRoutes.welcome.spaces,
 ]
 
-const FooterLink = ({ children, href }: { children: ReactNode; href: string }): ReactElement => {
-  return href ? <Link render={<NextLink href={href} />}>{children}</Link> : <Link>{children}</Link>
-}
-
 const Footer: React.FC<FooterProps> = ({
   forceShow,
   preferences = true,
   versionIcon = true,
   helpCenter = true,
-  className = css.container,
+  className,
 }): ReactElement | null => {
   const router = useRouter()
   const isOfficialHost = useIsOfficialHost()
@@ -48,68 +38,22 @@ const Footer: React.FC<FooterProps> = ({
   }
 
   return (
-    <footer className={className}>
-      <ul>
-        {isOfficialHost ? (
-          <>
-            <li>
-              <Typography variant="paragraph-mini">&copy;{copyrightYear} Safe Labs GmbH</Typography>
-            </li>
-            <li>
-              <ExternalLink href={LEGAL_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-                Legal
-              </ExternalLink>
-            </li>
-            <li>
-              <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-                Privacy
-              </ExternalLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.licenses)}>Licenses</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.imprint)}>Imprint</FooterLink>
-            </li>
-            <li>
-              <FooterLink href={getHref(AppRoutes.cookie)}>Cookie policy</FooterLink>
-            </li>
-            {preferences && (
-              <li>
-                <FooterLink href={getHref(AppRoutes.settings.index)}>Preferences</FooterLink>
-              </li>
-            )}
-            {helpCenter && (
-              <li>
-                <ExternalLink
-                  href={HELP_CENTER_URL}
-                  noIcon
-                  className="[&_span]:underline [&_span]:decoration-primary/40"
-                >
-                  Help
-                </ExternalLink>
-              </li>
-            )}
-          </>
-        ) : (
-          <li>This is an unofficial distribution of the app</li>
-        )}
-
-        <li>
-          <ExternalLink href={`${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`} noIcon>
-            {versionIcon && <Github className="mr-1 inline size-3" />}v{APP_VERSION}
-          </ExternalLink>
-        </li>
-
-        {!IS_PRODUCTION && COMMIT_HASH && (
-          <li>
-            <ExternalLink href={`${APP_HOMEPAGE}/commit/${COMMIT_HASH}`} noIcon>
-              {COMMIT_HASH.slice(0, 7)}
-            </ExternalLink>
-          </li>
-        )}
-      </ul>
-    </footer>
+    <FooterView
+      isOfficialHost={isOfficialHost}
+      copyrightYear={copyrightYear}
+      legalUrl={LEGAL_URL}
+      licensesHref={getHref(AppRoutes.licenses)}
+      imprintHref={getHref(AppRoutes.imprint)}
+      cookieHref={getHref(AppRoutes.cookie)}
+      preferencesHref={getHref(AppRoutes.settings.index)}
+      preferences={preferences}
+      versionIcon={versionIcon}
+      helpCenter={helpCenter}
+      footerClassName={className}
+      appVersion={APP_VERSION}
+      appHomepage={APP_HOMEPAGE}
+      commitHash={!IS_PRODUCTION && COMMIT_HASH ? COMMIT_HASH : undefined}
+    />
   )
 }
 

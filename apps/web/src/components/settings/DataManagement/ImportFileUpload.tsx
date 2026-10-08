@@ -1,11 +1,9 @@
 import { useDropzone } from 'react-dropzone'
-import { Typography } from '@/components/ui/typography'
 import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
-import FileUpload, { FileTypes } from '@/components/common/FileUpload'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { BRAND_NAME } from '@/config/constants'
+import { ImportFileUploadView } from '@views/components/settings/DataManagement/ImportFileUploadView'
 
 const AcceptedMimeTypes = {
   'application/json': ['.json'],
@@ -52,23 +50,13 @@ export const ImportFileUpload = ({
   }
 
   return (
-    <>
-      <Typography>Import {BRAND_NAME} data by uploading a file in the area below.</Typography>
-
-      <FileUpload
-        fileType={FileTypes.JSON}
-        getRootProps={getRootProps}
-        className="h-[228px]"
-        getInputProps={getInputProps}
-        isDragActive={isDragActive}
-        isDragReject={isDragReject}
-        onRemove={onRemove}
-      />
-
-      <Typography>
-        <InfoIcon className="mr-1 inline size-4 align-middle text-muted-foreground" />
-        Only JSON files exported from the {BRAND_NAME} can be imported.
-      </Typography>
-    </>
+    <ImportFileUploadView
+      brandName={BRAND_NAME}
+      getRootProps={getRootProps}
+      getInputProps={getInputProps}
+      isDragActive={isDragActive}
+      isDragReject={isDragReject}
+      onRemove={onRemove}
+    />
   )
 }

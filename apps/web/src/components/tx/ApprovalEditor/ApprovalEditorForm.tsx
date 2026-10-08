@@ -1,12 +1,11 @@
-import { Separator } from '@/components/ui/separator'
 import { FormProvider, useForm } from 'react-hook-form'
-import css from './styles.module.css'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 
 import { useMemo } from 'react'
 import EditableApprovalItem from './EditableApprovalItem'
 import groupBy from 'lodash/groupBy'
 import { SpenderField } from './SpenderField'
+import { ApprovalEditorFormView } from '@views/components/tx/ApprovalEditor/ApprovalEditorFormView'
 
 export type ApprovalEditorFormData = {
   approvals: string[]
@@ -40,28 +39,19 @@ export const ApprovalEditorForm = ({
 
   let fieldIndex = 0
 
+  const groups = Object.entries(groupedApprovals).map(([spender, approvals]) => ({
+    spender,
+    spenderField: <SpenderField address={spender} />,
+    items: approvals.map((tx) => ({
+      key: tx.tokenAddress + tx.spender,
+      isZeroValue: 0n === tx.amount,
+      content: <EditableApprovalItem approval={tx} name={`approvals.${fieldIndex++}`} onSave={onSave} />,
+    })),
+  }))
+
   return (
     <FormProvider {...formMethods}>
-      <ul className={css.approvalsList}>
-        {Object.entries(groupedApprovals).map(([spender, approvals], spenderIdx) => (
-          <div key={spender}>
-            <div className="flex flex-col gap-4">
-              {approvals.map((tx) => (
-                <li
-                  key={tx.tokenAddress + tx.spender}
-                  className={`flex w-full ${0n === tx.amount ? css.zeroValueApproval : ''}`}
-                  data-testid="approval-item"
-                >
-                  <EditableApprovalItem approval={tx} name={`approvals.${fieldIndex++}`} onSave={onSave} />
-                </li>
-              ))}
-              <SpenderField address={spender} />
-
-              {spenderIdx !== Object.keys(groupedApprovals).length - 1 && <Separator />}
-            </div>
-          </div>
-        ))}
-      </ul>
+      <ApprovalEditorFormView groups={groups} />
     </FormProvider>
   )
 }

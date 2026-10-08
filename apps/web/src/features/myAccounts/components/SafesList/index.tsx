@@ -1,6 +1,7 @@
 import { type SafeItem, type AllSafeItems, type MultiChainSafeItem, isMultiChainSafeItem } from '@/hooks/safes'
 import MultiAccountItem from '../AccountItems/MultiAccountItem'
 import { SafeListItem } from './SafeListItem'
+import { SafesListView } from '@views/features/myAccounts/components/SafesList/SafesListView'
 
 export type SafeListProps = {
   safes?: AllSafeItems
@@ -25,7 +26,11 @@ const SafesList = ({ safes, onLinkClick, isSpaceSafe = false }: SafeListProps) =
     return null
   }
 
-  return safes.map((item) => <div key={item.address}>{renderSafeItem(item, onLinkClick, isSpaceSafe)}</div>)
+  return (
+    <SafesListView
+      items={safes.map((item) => ({ key: item.address, content: renderSafeItem(item, onLinkClick, isSpaceSafe) }))}
+    />
+  )
 }
 
 export default SafesList

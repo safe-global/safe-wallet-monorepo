@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -20,20 +14,10 @@ import { ENTERPRISE_TIER } from '@views/features/spaces/components/Plans/planCat
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import { InfoTip } from './PlanStatusCard'
 import type { CurrentPlan, PlanPick } from '@views/features/spaces/components/Plans/types'
+import { TrialEndingModalView } from '@views/features/spaces/components/Plans/TrialEndingModalView'
 
-export const _endsIn = (daysLeft: number | null): string =>
-  daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
-
-const TRIAL_REMINDER_TOOLTIP =
-  'Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
-
-/** What the reminder asks of the viewer: an admin can act, a member is told who can. */
-export const reminderSubtitle = (endsAt: string, isAdmin: boolean, spaceName?: string): string =>
-  isAdmin
-    ? `If you don't select a plan and add a payment method by ${endsAt}, your Workspace will be locked.`
-    : `${spaceName ?? 'This Workspace'} will be locked on ${endsAt} unless an admin chooses a plan and adds a payment method.\nYour Safe accounts remain available in My accounts.`
+export { _endsIn, reminderSubtitle } from '@views/features/spaces/components/Plans/TrialEndingModalView'
 
 const TrialEndingChooser = ({
   spaceId,
@@ -63,9 +47,6 @@ const TrialEndingChooser = ({
       ),
     [paidPlans, subscription, seatsQuota],
   )
-  const endsAt = currentPlan.periodEndsAt
-    ? formatDate(Date.parse(currentPlan.periodEndsAt))
-    : 'the end of your free access'
   const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.REMINDER_MODAL }
   useTrackOnce(
     SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED,
@@ -77,68 +58,41 @@ const TrialEndingChooser = ({
   )
 
   return (
-    <>
-      <Dialog open={!isChanged} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent size="md" surface="card" padding="sm">
-          <div className="flex flex-col gap-6 pt-5">
-            <div className="flex flex-col gap-1">
-              <Typography variant="h3" as={DialogTitle}>
-                Your free access will end {_endsIn(currentPlan.daysLeft ?? null)}
-              </Typography>
-              <Typography color="muted" className="flex items-center gap-1 whitespace-pre-line">
-                {reminderSubtitle(endsAt, isAdmin, spaceName)}
-                {isAdmin && <InfoTip text={TRIAL_REMINDER_TOOLTIP} data-testid="trial-reminder-tooltip" />}
-              </Typography>
-            </div>
-
-            {isLoading ? (
-              <div className="flex gap-4" data-testid="trial-ending-skeleton">
-                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-              </div>
-            ) : tiers.length === 0 ? (
-              <Alert variant="info">
-                <AlertSeverityIcon variant="info" />
-                <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
-              </Alert>
-            ) : (
-              <PlanCatalog
-                tiers={tiers}
-                currentPlan={currentPlan}
-                salesHint={salesHintFor(tiers)}
-                onManage={() => void openPortal()}
-                onSubscribe={setPick}
-                isBusy={isRedirecting}
-                readOnly={!isAdmin}
-                location={PlanLocation.REMINDER_MODAL}
-                onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
-              />
-            )}
-
-            {isAdmin ? (
-              <Button variant="ghost-muted" size="sm" className="self-center" onClick={onClose}>
-                Continue without Safe Pro
-              </Button>
-            ) : (
-              <Button size="lg" className="self-center" onClick={onClose}>
-                Got it
-              </Button>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {pick && (
-        <ChangePlanFlow
-          spaceId={spaceId}
-          pick={pick}
+    <TrialEndingModalView
+      open={!isChanged}
+      onClose={onClose}
+      daysLeft={currentPlan.daysLeft ?? null}
+      periodEndsAt={currentPlan.periodEndsAt}
+      isAdmin={isAdmin}
+      spaceName={spaceName}
+      isLoading={isLoading}
+      hasTiers={tiers.length > 0}
+      catalog={
+        <PlanCatalog
+          tiers={tiers}
           currentPlan={currentPlan}
-          entry={entry}
-          onClose={() => (isChanged ? onClose() : setPick(undefined))}
-          onChanged={() => setIsChanged(true)}
+          salesHint={salesHintFor(tiers)}
+          onManage={() => void openPortal()}
+          onSubscribe={setPick}
+          isBusy={isRedirecting}
+          readOnly={!isAdmin}
+          location={PlanLocation.REMINDER_MODAL}
+          onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
         />
-      )}
-    </>
+      }
+      changePlanFlow={
+        pick && (
+          <ChangePlanFlow
+            spaceId={spaceId}
+            pick={pick}
+            currentPlan={currentPlan}
+            entry={entry}
+            onClose={() => (isChanged ? onClose() : setPick(undefined))}
+            onChanged={() => setIsChanged(true)}
+          />
+        )
+      }
+    />
   )
 }
 

@@ -3,7 +3,7 @@ import { type OrderByOption, selectOrderByPreference, setOrderByPreference } fro
 import debounce from 'lodash/debounce'
 import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import OrderByButton from '../OrderByButton'
-import { SearchInput } from '@/components/ui/search-input'
+import { AccountListFiltersView } from '@views/features/myAccounts/components/AccountListFilters/AccountListFiltersView'
 
 const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetStateAction<string>> }) => {
   const dispatch = useAppDispatch()
@@ -17,21 +17,10 @@ const AccountListFilters = ({ setSearchQuery }: { setSearchQuery: Dispatch<SetSt
   }
 
   return (
-    <div className="px-4 py-2">
-      <div className="flex w-full items-center justify-between gap-2">
-        <SearchInput
-          inputSize="sm"
-          className="w-full"
-          id="search-by-name"
-          placeholder="Search by name, ENS, address, or chain"
-          aria-label="Search Safe list by name"
-          onChange={(e) => {
-            handleSearch(e.target.value)
-          }}
-        />
-        <OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />
-      </div>
-    </div>
+    <AccountListFiltersView
+      onSearch={handleSearch}
+      orderByButton={<OrderByButton orderBy={orderBy} onOrderByChange={handleOrderByChange} />}
+    />
   )
 }
 

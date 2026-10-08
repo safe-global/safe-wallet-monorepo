@@ -2,15 +2,12 @@ import { type SafeItem, type MultiChainSafeItem, isMultiChainSafeItem } from '@/
 import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
-import { LogOut, MoreVertical, Pencil } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
+import { SpaceSafeContextMenuView } from '@views/features/spaces/components/SafeAccounts/SpaceSafeContextMenuView'
 
 enum ModalType {
   RENAME = 'rename',
@@ -40,63 +37,30 @@ const SpaceSafeContextMenu = ({ safeItem }: { safeItem: SafeItem | MultiChainSaf
   }
 
   return (
-    <>
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              aria-label="Safe Account actions"
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-              }}
+    <SpaceSafeContextMenuView
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      canRename={canRename}
+      renameDisabledMessage={ADMIN_ONLY_RENAME_MESSAGE}
+      isAdmin={isAdmin}
+      onRename={(e) => handleOpenModal(e, ModalType.RENAME)}
+      onRemove={(e) => handleOpenModal(e, ModalType.REMOVE)}
+      dialogs={
+        <>
+          {open[ModalType.RENAME] && (
+            <EntryDialog
+              handleClose={handleCloseModal}
+              defaultValues={{ name, address: safeItem.address }}
+              chainIds={chainIds}
+              scope={scope}
+              disableAddressInput
             />
-          }
-        >
-          <MoreVertical className="size-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <Tooltip>
-            <TooltipTrigger render={<div />}>
-              <DropdownMenuItem
-                disabled={!canRename}
-                title={canRename ? undefined : ADMIN_ONLY_RENAME_MESSAGE}
-                onClick={canRename ? (e) => handleOpenModal(e, ModalType.RENAME) : undefined}
-                onSelect={(e) => e.stopPropagation()}
-              >
-                <Pencil className="size-4 text-muted-foreground" />
-                <span data-testid="space-safe-rename-btn">Rename</span>
-              </DropdownMenuItem>
-            </TooltipTrigger>
-            {!canRename && <TooltipContent>{ADMIN_ONLY_RENAME_MESSAGE}</TooltipContent>}
-          </Tooltip>
-
-          {isAdmin && (
-            <DropdownMenuItem
-              onClick={(e) => handleOpenModal(e, ModalType.REMOVE)}
-              onSelect={(e) => e.stopPropagation()}
-            >
-              <LogOut className="size-4 text-muted-foreground" />
-              <span>Remove from Workspace</span>
-            </DropdownMenuItem>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
 
-      {open[ModalType.RENAME] && (
-        <EntryDialog
-          handleClose={handleCloseModal}
-          defaultValues={{ name, address: safeItem.address }}
-          chainIds={chainIds}
-          scope={scope}
-          disableAddressInput
-        />
-      )}
-
-      {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
-    </>
+          {open[ModalType.REMOVE] && <RemoveSafeDialog safeItem={safeItem} handleClose={handleCloseModal} />}
+        </>
+      }
+    />
   )
 }
 

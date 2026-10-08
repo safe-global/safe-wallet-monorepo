@@ -20,15 +20,15 @@ jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 
-jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
+jest.mock('@views/components/common/AccountRow/SafeInfoDisplayView', () => {
   const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
       {onRename && <button data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
-  Mock.displayName = 'SafeInfoDisplay'
-  return { __esModule: true, default: Mock }
+  Mock.displayName = 'SafeInfoDisplayView'
+  return { __esModule: true, SafeInfoDisplayView: Mock }
 })
 
 jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
@@ -37,7 +37,7 @@ jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/Bal
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../ChainLogo', () => {
+jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/ChainLogo', () => {
   const Mock = ({ chainId }: { chainId: string }) => <div data-testid={`chain-logo-${chainId}`} />
   Mock.displayName = 'ChainLogo'
   return { __esModule: true, default: Mock }

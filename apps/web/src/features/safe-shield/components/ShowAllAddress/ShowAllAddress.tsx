@@ -1,13 +1,12 @@
-import { AddressImage } from '@views/features/safe-shield/components/AddressImage'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import { useState } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import ExplorerButton from '@/components/common/ExplorerButton'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { AnalysisDetailsDropdown } from '@views/features/safe-shield/components/AnalysisDetailsDropdown'
+import {
+  ShowAllAddressView,
+  type ShowAllAddressItem,
+} from '@views/features/safe-shield/components/ShowAllAddress/ShowAllAddressView'
 
 interface ShowAllAddressProps {
   showImage?: boolean
@@ -34,46 +33,19 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
     }
   }
 
-  return (
-    <AnalysisDetailsDropdown>
-      <div className="flex flex-col gap-2">
-        {addresses.map((item, index) => {
-          const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
-          const name = addressBook[item.address] || item.name
+  const items: ShowAllAddressItem[] = addresses.map((item, index) => {
+    const explorerLink = currentChain ? getBlockExplorerLink(currentChain, item.address) : undefined
 
-          return (
-            <div
-              key={`${item}-${index}`}
-              className="flex flex-row gap-2 rounded-[4px] bg-[var(--color-background-paper)] p-2"
-            >
-              {showImage && <AddressImage logoUrl={item.logoUrl} />}
-              <div className="flex flex-col gap-1">
-                {name && (
-                  <Typography variant="paragraph-mini" className="block mb-1 text-[var(--color-text-primary)]">
-                    {name}
-                  </Typography>
-                )}
-                <div className="leading-5" onClick={() => handleCopyToClipboard(item.address, index)}>
-                  <Tooltip>
-                    <TooltipTrigger render={<span className="inline-flex" />}>
-                      <Typography
-                        variant="paragraph-mini"
-                        className="flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                      >
-                        {item.address}
-                      </Typography>
-                    </TooltipTrigger>
-                    <TooltipContent>{copiedIndex === index ? 'Copied to clipboard' : 'Copy address'}</TooltipContent>
-                  </Tooltip>
-                  <span className="text-[var(--color-text-secondary)]">
-                    {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </AnalysisDetailsDropdown>
-  )
+    return {
+      key: `${item}-${index}`,
+      address: item.address,
+      name: addressBook[item.address] || item.name,
+      logoUrl: item.logoUrl,
+      explorerHref: explorerLink?.href,
+      isCopied: copiedIndex === index,
+      onCopy: () => handleCopyToClipboard(item.address, index),
+    }
+  })
+
+  return <ShowAllAddressView items={items} showImage={showImage} />
 }

@@ -1,10 +1,7 @@
 import type { ReactNode } from 'react'
-import { cn } from '@/utils/cn'
 import NetworkLogosTooltip from '../NetworkLogosTooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-
-/** Logo size inside the pill — matches the safe-selector dropdown's SafeRowStats stack. */
-const PILL_LOGO_SIZE = 22
+import { NetworkLogosPillView } from '@views/features/multichain/components/NetworkLogosPill/NetworkLogosPillView'
 
 export type NetworkLogosPillProps = {
   /** Chains rendered as a stacked-logo tooltip trigger; ignored when `children` is set. */
@@ -22,17 +19,14 @@ export type NetworkLogosPillProps = {
  * address book, and the safe-selector dropdown rows.
  */
 const NetworkLogosPill = ({ networks, maxVisible = 3, className, children }: NetworkLogosPillProps) => (
-  <span className={cn('bg-foreground/5 inline-flex items-center rounded-full p-0.75', className)}>
-    {children ?? (
-      <NetworkLogosTooltip
-        networks={networks ?? []}
-        maxVisible={maxVisible}
-        imageSize={PILL_LOGO_SIZE}
-        // Overrides the default scale-85 trigger, which would shrink the logos inside the pill.
-        triggerRender={<span className="inline-flex" />}
-      />
-    )}
-  </span>
+  <NetworkLogosPillView
+    networks={networks}
+    maxVisible={maxVisible}
+    pillClassName={className}
+    renderNetworkLogosTooltip={(props) => <NetworkLogosTooltip {...props} />}
+  >
+    {children}
+  </NetworkLogosPillView>
 )
 
 export default NetworkLogosPill

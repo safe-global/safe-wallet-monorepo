@@ -1,8 +1,4 @@
 import type { ReactElement } from 'react'
-import { CircleFadingPlus } from 'lucide-react'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
-import css from '../../styles.module.css'
 import type { SafeWorkspaceHeaderProps } from '@views/features/spaces/components/Sidebar/types'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { BackToSpaceButton } from '../../BackToSpaceButton'
@@ -10,6 +6,9 @@ import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePo
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
+import { SafeSidebarWorkspaceHeaderView } from '@views/features/spaces/components/Sidebar/variants/SafeSidebarWorkspaceHeader/SafeSidebarWorkspaceHeaderView'
+
+const ADD_TO_WORKSPACE_TRIGGER = 'addToWorkspace'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps
@@ -37,41 +36,14 @@ export const SafeSidebarWorkspaceHeader = ({
       if (hasSpaces) {
         return (
           <SpaceSelectorDropdown
-            triggerVariant="addToWorkspace"
+            triggerVariant={ADD_TO_WORKSPACE_TRIGGER}
             selectedSpace={workspaceHeader.selectedSpace}
             spaces={workspaceHeader.spaces}
           />
         )
       }
 
-      return (
-        <Dialog onOpenChange={(open) => open && handleAddSafeClick()}>
-          <DialogTrigger
-            render={
-              <SidebarMenuButton
-                size="lg"
-                className={css.addSafeToWorkspaceTrigger}
-                data-testid="add-safe-to-workspace-button"
-                aria-label="Add Safe to Workspace"
-                aria-haspopup="dialog"
-              />
-            }
-          >
-            <span className={css.addSafeToWorkspaceRing}>
-              <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
-            </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to Workspace</span>
-          </DialogTrigger>
-          <DialogContent
-            padding="none"
-            // eslint-disable-next-line no-restricted-syntax -- max-w-[420px]: bespoke width, not a size token (needs design to snap)
-            className="max-w-[420px]"
-            showCloseButton={false}
-          >
-            <AddToSpacePopupModal />
-          </DialogContent>
-        </Dialog>
-      )
+      return <SafeSidebarWorkspaceHeaderView onOpen={handleAddSafeClick} modal={<AddToSpacePopupModal />} />
     }
 
     default: {

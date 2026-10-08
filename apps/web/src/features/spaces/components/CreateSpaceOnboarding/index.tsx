@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Input } from '@/components/ui/input'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import {
   OnboardingLayout,
   StepCounter,
@@ -27,9 +21,12 @@ import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import {
+  CreateSpaceOnboardingFooterView,
+  CreateSpaceOnboardingView,
+} from '@views/features/spaces/components/CreateSpaceOnboarding/CreateSpaceOnboardingView'
 
 const ONBOARDING_STEP = 1
-const FORM_ID = 'create-space-form'
 
 const CreateSpaceOnboarding = (): ReactElement => {
   const router = useRouter()
@@ -99,90 +96,42 @@ const CreateSpaceOnboarding = (): ReactElement => {
   const isFilled = hasUserEdited ? trimmedWatched.length > 0 : trimmedWatched.length > 0 || trimmedExisting.length > 0
 
   const main = (
-    <>
-      {offersTrial && createdSpaceId && (
+    <CreateSpaceOnboardingView
+      showClaimTrial={Boolean(offersTrial && createdSpaceId)}
+      renderClaimTrialModal={(props) => (
         <ClaimTrialModal
-          spaceId={createdSpaceId}
-          variant="new"
+          {...props}
+          spaceId={createdSpaceId!}
           returnPathname={AppRoutes.welcome.selectSafes}
           onBack={() => router.push(AppRoutes.welcome.accounts)}
         />
       )}
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
-
-      <div className="flex flex-col gap-2">
-        <Typography variant="h2">Create a Workspace</Typography>
-        <Typography variant="paragraph" color="muted">
-          Your team&apos;s home for managing Safes, tracking activity, and collaborating.
-        </Typography>
-      </div>
-
-      <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-        <div className="relative">
-          <label htmlFor="space-name" className="m-0 text-sm leading-5 font-medium">
-            Workspace name
-          </label>
-          <Input
-            id="space-name"
-            data-testid="space-name-input"
-            placeholder="e.g. Treasury Ops, DeFi Team"
-            autoComplete="off"
-            disabled={isInputDisabled}
-            variant="surface"
-            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px onboarding field (h-11, rounded-sm, px-4); between the lg/xl tiers, no size fits
-            className="mt-2 h-11 rounded-sm px-4"
-            {...nameReg}
-            onChange={(e) => {
-              setHasUserEdited(true)
-              nameReg.onChange(e)
-            }}
-            error={errors.name?.message}
-            onBlur={(e) => {
-              nameReg.onBlur(e)
-              setValue('name', sanitizeName(e.target.value), { shouldValidate: true })
-            }}
-          />
-          {isSpaceLoading && (
-            <div className="absolute right-3 top-[2.4rem]">
-              <Spinner className="size-4" />
-            </div>
-          )}
-        </div>
-
-        {error && (
-          <Alert variant="destructive">
-            <AlertSeverityIcon variant="destructive" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {isTrialCheckFailed && (
-          <Alert variant="destructive" data-testid="trial-check-error">
-            <AlertSeverityIcon variant="destructive" />
-            <AlertDescription>
-              We couldn&apos;t check your Workspace&apos;s free access. Please try again.
-            </AlertDescription>
-            <AlertAction>
-              <Button type="button" variant="outline" size="sm" onClick={trialLock.retry}>
-                Try again
-              </Button>
-            </AlertAction>
-          </Alert>
-        )}
-      </form>
-    </>
+      stepCounter={<StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />}
+      onSubmit={onSubmit}
+      nameReg={nameReg}
+      onNameChange={(e) => {
+        setHasUserEdited(true)
+        nameReg.onChange(e)
+      }}
+      onNameBlur={(e) => {
+        nameReg.onBlur(e)
+        setValue('name', sanitizeName(e.target.value), { shouldValidate: true })
+      }}
+      isInputDisabled={isInputDisabled}
+      nameError={errors.name?.message}
+      isSpaceLoading={isSpaceLoading}
+      error={error}
+      isTrialCheckFailed={isTrialCheckFailed}
+      onRetryTrialCheck={trialLock.retry}
+    />
   )
 
   const footer = (
-    <OnboardingFooter
+    <CreateSpaceOnboardingFooterView
       onBack={onExit}
       backDisabled={isSubmitting}
-      continueLabel="Next"
-      continueType="submit"
-      continueForm={FORM_ID}
       continueDisabled={!isValid || isSubmitting || isCheckingAccess || isSpaceLoading || Boolean(createdSpaceId)}
       continueLoading={isSubmitting || (Boolean(createdSpaceId) && trialLock.isResolving)}
-      continueTestId="create-space-onboarding-continue-button"
     />
   )
 

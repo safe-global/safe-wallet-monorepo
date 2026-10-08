@@ -1,0 +1,113 @@
+import { AlertTriangle, Check, X } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+} from '@/components/ui/alert-dialog'
+import DialogActions from '@/components/common/DialogActions'
+import { Input } from '@/components/ui/input'
+import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+
+type Consequence = { variant: 'danger' | 'success'; text: string }
+
+const CONSEQUENCES: Consequence[] = [
+  { variant: 'danger', text: 'Members lose access to this Workspace immediately.' },
+  { variant: 'danger', text: 'Member list and Safe account names are deleted.' },
+  { variant: 'success', text: 'Linked Safe accounts keep working — only the Workspace is removed.' },
+]
+
+const ConsequenceRow = ({ variant, text }: Consequence) => (
+  <li className="flex items-start gap-3">
+    <span
+      className={
+        variant === 'danger'
+          ? 'flex items-center justify-center size-5 rounded-full bg-destructive/10 text-destructive shrink-0 mt-0.5'
+          : 'flex items-center justify-center size-5 rounded-full bg-sidebar-accent text-sidebar-accent-foreground shrink-0 mt-0.5'
+      }
+    >
+      {variant === 'danger' ? <X className="size-3" /> : <Check className="size-3" />}
+    </span>
+    <Typography variant="paragraph-small">{text}</Typography>
+  </li>
+)
+
+export type DeleteSpaceDialogViewProps = {
+  spaceName?: string
+  confirmName: string
+  onConfirmNameChange: (value: string) => void
+  error?: string
+  canConfirm: boolean
+  isLoading: boolean
+  onClose: () => void
+  onDelete: () => void
+}
+
+export const DeleteSpaceDialogView = ({
+  spaceName,
+  confirmName,
+  onConfirmNameChange,
+  error,
+  canConfirm,
+  isLoading,
+  onClose,
+  onDelete,
+}: DeleteSpaceDialogViewProps) => {
+  return (
+    <AlertDialog open onOpenChange={(open) => !open && !isLoading && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <div className="flex items-center justify-center size-10 rounded-full bg-destructive/10 text-destructive shrink-0">
+            <AlertTriangle className="size-5" />
+          </div>
+          <AlertDialogTitle>Delete Workspace</AlertDialogTitle>
+          <AlertDialogDescription>This action is permanent and cannot be undone.</AlertDialogDescription>
+        </AlertDialogHeader>
+
+        <ul className="flex flex-col gap-3">
+          {CONSEQUENCES.map((item) => (
+            <ConsequenceRow key={item.text} {...item} />
+          ))}
+        </ul>
+
+        <div className="flex flex-col gap-1.5">
+          {/* Not a <label>: clicking a label focuses the input, which clears the selection and stops users copying the name */}
+          <Typography id="delete-confirm-label" variant="paragraph-small-medium" as="p">
+            Type <span className="font-mono font-semibold text-foreground">{spaceName}</span> to confirm
+          </Typography>
+          <Input
+            id="delete-confirm-input"
+            aria-labelledby="delete-confirm-label"
+            data-testid="space-confirm-name-input"
+            value={confirmName}
+            onChange={(e) => onConfirmNameChange(e.target.value)}
+            placeholder={spaceName}
+            autoComplete="off"
+          />
+        </div>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertSeverityIcon variant="destructive" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <AlertDialogFooter>
+          <DialogActions
+            onCancel={onClose}
+            confirmLabel="Delete Workspace"
+            onConfirm={onDelete}
+            confirmDestructive
+            confirmDisabled={!canConfirm}
+            confirmLoading={isLoading}
+            confirmTestId="space-confirm-delete-button"
+          />
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  )
+}

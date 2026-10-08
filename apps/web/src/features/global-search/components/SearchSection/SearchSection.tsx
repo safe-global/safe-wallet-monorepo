@@ -3,16 +3,11 @@ import {
   SectionVisibilityProvider,
   useSectionVisibility,
 } from '@views/features/global-search/components/SearchSection/SectionVisibilityContext'
+import { SearchSectionView } from '@views/features/global-search/components/SearchSection/SearchSectionView'
 
 interface SearchSectionProps {
   query: string
 }
-
-const NoResults = () => (
-  <div className="flex h-full min-h-[350px] items-center justify-center px-4">
-    <p className="text-base text-muted-foreground">No results found</p>
-  </div>
-)
 
 const SectionEntry = ({ item, query }: { item: SectionItem; query: string }) => {
   const isActive = item.useActivate()
@@ -27,12 +22,11 @@ const SearchSectionContent = ({ query }: SearchSectionProps) => {
   const hasQuery = query.trim().length > 0
 
   return (
-    <>
+    <SearchSectionView showNoResults={hasQuery && !hasVisibleSections}>
       {sectionItems.map((item) => (
         <SectionEntry key={item.label} item={item} query={query} />
       ))}
-      {hasQuery && !hasVisibleSections && <NoResults />}
-    </>
+    </SearchSectionView>
   )
 }
 

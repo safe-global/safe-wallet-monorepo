@@ -8,6 +8,7 @@ import MethodCall from './MethodCall'
 import { useNativeTokenInfo } from '@/hooks/useNativeTokenInfo'
 import { DelegateCallWarning, UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useSetsUntrustedFallbackHandler } from '@/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlert'
+import { DecodedDataView } from '@views/components/transactions/TxDetails/TxData/DecodedData/DecodedDataView'
 
 interface Props {
   txData: TransactionDetails['txData']
@@ -30,12 +31,11 @@ const DecodedData = ({
     if (!toInfo) return null
 
     return (
-      <SendToBlock
-        title="Interact with"
-        address={toInfo.value}
-        name={toInfo.name}
-        customAvatar={toInfo.logoUri}
-        avatarSize={26}
+      <DecodedDataView
+        hasTxData={false}
+        renderSendToBlock={(props) => (
+          <SendToBlock address={toInfo.value} name={toInfo.name} customAvatar={toInfo.logoUri} {...props} />
+        )}
       />
     )
   }
@@ -46,28 +46,37 @@ const DecodedData = ({
   const addressInfo = txData.addressInfoIndex?.[toAddress]
   const name = addressInfo?.name || toInfo?.name || txData.to?.name
   const avatar = addressInfo?.logoUri || toInfo?.logoUri || txData.to?.logoUri
+  const hexData = txData.hexData
 
   return (
-    <div className="flex flex-col gap-4">
-      {setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
-      <DelegateCallWarning txData={txData} showWarning={isWarningEnabled} />
-
-      {method ? (
-        <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
-      ) : (
-        <SendToBlock address={toAddress} name={name} title="Interacted with" avatarSize={20} customAvatar={avatar} />
+    <DecodedDataView
+      hasTxData
+      untrustedFallbackHandlerWarning={
+        setsUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />
+      }
+      delegateCallWarning={<DelegateCallWarning txData={txData} showWarning={isWarningEnabled} />}
+      methodCall={
+        method ? (
+          <MethodCall contractAddress={toAddress} contractName={name} contractLogo={avatar} method={method} />
+        ) : undefined
+      }
+      renderSendToBlock={(props) => <SendToBlock address={toAddress} name={name} customAvatar={avatar} {...props} />}
+      showValue={amountInWei !== '0'}
+      renderSendAmountBlock={(props) => (
+        <SendAmountBlock amountInWei={amountInWei} tokenInfo={nativeTokenInfo} {...props} />
       )}
-
-      {amountInWei !== '0' && <SendAmountBlock title="Value" amountInWei={amountInWei} tokenInfo={nativeTokenInfo} />}
-
-      {txData.dataDecoded ? (
-        <MethodDetails data={txData.dataDecoded} hexData={txData.hexData} addressInfoIndex={txData.addressInfoIndex} />
-      ) : txData.hexData ? (
-        <div data-testid="hexData" className="text-sm">
-          <HexEncodedData title="Data" hexData={txData.hexData} />
-        </div>
-      ) : null}
-    </div>
+      methodDetails={
+        txData.dataDecoded ? (
+          <MethodDetails
+            data={txData.dataDecoded}
+            hexData={txData.hexData}
+            addressInfoIndex={txData.addressInfoIndex}
+          />
+        ) : undefined
+      }
+      showHexData={!!hexData}
+      renderHexData={(props) => hexData && <HexEncodedData hexData={hexData} {...props} />}
+    />
   )
 }
 

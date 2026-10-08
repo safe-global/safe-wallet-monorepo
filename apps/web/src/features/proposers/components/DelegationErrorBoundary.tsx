@@ -1,6 +1,5 @@
-import { Component, type ReactElement, type ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Component, type ReactNode } from 'react'
+import { DelegationErrorBoundaryView } from '@views/features/proposers/components/DelegationErrorBoundaryView'
 
 type DelegationErrorBoundaryProps = {
   children: ReactNode
@@ -31,9 +30,10 @@ class DelegationErrorBoundary extends Component<DelegationErrorBoundaryProps, De
   render(): ReactNode {
     if (this.state.hasError && this.state.error) {
       return (
-        <DelegationFallback
-          error={this.state.error}
+        <DelegationErrorBoundaryView
+          errorMessage={this.state.error.message}
           fallbackMessage={this.props.fallbackMessage}
+          showErrorDetails={process.env.NODE_ENV !== 'production'}
           onRetry={this.handleRetry}
         />
       )
@@ -41,32 +41,6 @@ class DelegationErrorBoundary extends Component<DelegationErrorBoundaryProps, De
 
     return this.props.children
   }
-}
-
-function DelegationFallback({
-  error,
-  fallbackMessage,
-  onRetry,
-}: {
-  error: Error
-  fallbackMessage?: string
-  onRetry: () => void
-}): ReactElement {
-  return (
-    <div className="rounded-lg border border-[var(--color-error-main)] bg-[var(--color-error-background)] p-4">
-      <Typography variant="paragraph-small" className="mb-1 block text-destructive">
-        {fallbackMessage || 'Something went wrong loading this content.'}
-      </Typography>
-      {process.env.NODE_ENV !== 'production' && (
-        <Typography variant="paragraph-mini" color="muted" className="mb-2 block whitespace-pre-wrap font-mono">
-          {error.message}
-        </Typography>
-      )}
-      <Button size="sm" variant="outline" className="text-destructive" onClick={onRetry}>
-        Try again
-      </Button>
-    </div>
-  )
 }
 
 export default DelegationErrorBoundary

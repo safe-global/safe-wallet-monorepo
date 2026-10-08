@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
-import { cn } from '@/utils/cn'
 import { MixpanelEventParams, WorkspaceCreateStep, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { StepCounterView } from '@views/features/spaces/components/OnboardingLayout/StepCounterView'
 
 const STEP_NAMES: Record<number, WorkspaceCreateStep> = {
   1: WorkspaceCreateStep.CREATE_WORKSPACE,
@@ -27,15 +27,7 @@ const StepCounter = ({ currentStep, totalSteps, className }: StepCounterProps) =
     })
   }, [currentStep])
 
-  return (
-    <div
-      role="group"
-      aria-label={`Step ${currentStep} of ${totalSteps}`}
-      className={cn('text-xs font-medium uppercase tracking-wider text-muted-foreground', className)}
-    >
-      STEP {currentStep} / {totalSteps}
-    </div>
-  )
+  return <StepCounterView currentStep={currentStep} totalSteps={totalSteps} counterClassName={className} />
 }
 
 export default StepCounter

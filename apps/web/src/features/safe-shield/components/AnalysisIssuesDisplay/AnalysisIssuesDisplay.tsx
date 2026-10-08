@@ -4,12 +4,13 @@ import type {
   MaliciousOrModerateThreatAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sortByIssueSeverity } from '@safe-global/utils/features/safe-shield/utils/analysisUtils'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import ExplorerButton from '@/components/common/ExplorerButton'
 import { useState } from 'react'
+import {
+  AnalysisIssuesDisplayView,
+  type AnalysisIssueItem,
+} from '@views/features/safe-shield/components/AnalysisIssuesDisplay/AnalysisIssuesDisplayView'
 
 interface AnalysisIssuesDisplayProps {
   result: AnalysisResult
@@ -45,54 +46,21 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
 
   let issueCounter = 0
 
-  return (
-    <div className="flex flex-col gap-2">
-      {sortedIssues.flatMap(({ severity, issues }) =>
-        issues.map((issue, index) => {
-          const globalIndex = issueCounter++
-          const explorerLink =
-            issue.address && currentChain ? getBlockExplorerLink(currentChain, issue.address) : undefined
+  const items: AnalysisIssueItem[] = sortedIssues.flatMap(({ severity, issues }) =>
+    issues.map((issue, index) => {
+      const globalIndex = issueCounter++
+      const explorerLink = issue.address && currentChain ? getBlockExplorerLink(currentChain, issue.address) : undefined
 
-          return (
-            <div
-              key={`${severity}-${index}`}
-              className="flex flex-col overflow-hidden rounded-[4px] bg-[var(--color-background-paper)]"
-            >
-              {issue.address && (
-                <div className="p-2">
-                  <div className="leading-5" onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}>
-                    <Tooltip>
-                      <TooltipTrigger render={<span className="inline-flex" />}>
-                        <Typography
-                          variant="paragraph-mini"
-                          className="flex-1 cursor-pointer leading-5 break-all text-[var(--color-primary-light)] transition-colors hover:text-[var(--color-text-primary)] [overflow-wrap:break-word]"
-                        >
-                          {issue.address}
-                        </Typography>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {copiedIndex === globalIndex ? 'Copied to clipboard' : 'Copy address'}
-                      </TooltipContent>
-                    </Tooltip>
-                    <span className="text-[var(--color-text-secondary)]">
-                      {explorerLink && <ExplorerButton href={explorerLink.href} />}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div
-                className="px-2 py-1"
-                style={{ backgroundColor: issue.address ? issueBackgroundColor : 'transparent' }}
-              >
-                <Typography variant="paragraph-mini" className="leading-[14px] text-[var(--color-primary-light)]">
-                  {issue.description}
-                </Typography>
-              </div>
-            </div>
-          )
-        }),
-      )}
-    </div>
+      return {
+        key: `${severity}-${index}`,
+        address: issue.address,
+        explorerHref: explorerLink?.href,
+        description: issue.description,
+        isCopied: copiedIndex === globalIndex,
+        onCopy: () => handleCopyToClipboard(issue.address!, globalIndex),
+      }
+    }),
   )
+
+  return <AnalysisIssuesDisplayView issues={items} issueBackgroundColor={issueBackgroundColor} />
 }

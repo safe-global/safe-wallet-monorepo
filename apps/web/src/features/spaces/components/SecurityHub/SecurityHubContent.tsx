@@ -1,5 +1,4 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -15,6 +14,7 @@ import useScanResultsState from './hooks/useScanResultsState'
 import useAutoScanOrchestrator from './hooks/useAutoScanOrchestrator'
 import useReportDrawer from './hooks/useReportDrawer'
 import { isSameSelection } from './utils'
+import { SecurityHubContentView } from '@views/features/spaces/components/SecurityHub/SecurityHubContentView'
 
 /**
  * The per-space body of the Security Hub. Mounted under a `key={currentSpaceId}`
@@ -67,47 +67,45 @@ const SecurityHubContent = (): ReactElement => {
   }
 
   return (
-    <>
-      {isLoadingSpacesSafes ? (
-        <Typography variant="paragraph-small" color="muted">
-          Loading accounts...
-        </Typography>
-      ) : safes.length === 0 ? (
-        <SecurityEmptyState />
-      ) : (
-        <>
-          <WorkspaceHealthCard
-            safes={safes}
-            scanResults={allScanResults}
-            isScanning={isRunning}
-            activeFilter={gradeFilter}
-            onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
-            lastScannedAt={lastScannedAt}
-            onRescan={() => startScan({ isManual: true })}
-            scanIncomplete={scanIncomplete}
-          />
-          <SecuritySafesTable
-            safes={safes}
-            onViewReport={handleViewReport}
-            selectedSafe={selectedSafe}
-            scanResults={allScanResults}
-            scanTimestamps={scanTimestamps}
-            scanningKeys={scanningKeys}
-            gradeFilter={gradeFilter}
-            balanceMap={balanceMap}
-            isLoading={isLoadingOverviews}
-          />
-        </>
-      )}
-
-      <SecurityReportDrawer
-        selectedSafe={selectedSafe}
-        selectedEntry={selectedEntry}
-        scanContext={scanContext}
-        onClose={closeReport}
-        onScanComplete={handleScanComplete}
-      />
-    </>
+    <SecurityHubContentView
+      isLoading={isLoadingSpacesSafes}
+      isEmpty={safes.length === 0}
+      emptyState={<SecurityEmptyState />}
+      healthCard={
+        <WorkspaceHealthCard
+          safes={safes}
+          scanResults={allScanResults}
+          isScanning={isRunning}
+          activeFilter={gradeFilter}
+          onFilterChange={(grade) => setGradeFilter((prev) => (prev === grade ? null : grade))}
+          lastScannedAt={lastScannedAt}
+          onRescan={() => startScan({ isManual: true })}
+          scanIncomplete={scanIncomplete}
+        />
+      }
+      table={
+        <SecuritySafesTable
+          safes={safes}
+          onViewReport={handleViewReport}
+          selectedSafe={selectedSafe}
+          scanResults={allScanResults}
+          scanTimestamps={scanTimestamps}
+          scanningKeys={scanningKeys}
+          gradeFilter={gradeFilter}
+          balanceMap={balanceMap}
+          isLoading={isLoadingOverviews}
+        />
+      }
+      drawer={
+        <SecurityReportDrawer
+          selectedSafe={selectedSafe}
+          selectedEntry={selectedEntry}
+          scanContext={scanContext}
+          onClose={closeReport}
+          onScanComplete={handleScanComplete}
+        />
+      }
+    />
   )
 }
 

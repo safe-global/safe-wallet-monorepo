@@ -1,9 +1,7 @@
 import type { ReactNode } from 'react'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
-import { Check } from 'lucide-react'
-import CopyIcon from '@/public/images/common/copy.svg'
-import { Button } from '@/components/ui/button'
 import CopyTooltip from '../CopyTooltip'
+import { CopyButtonView } from '@views/components/common/CopyButton/CopyButtonView'
 
 export interface ButtonProps {
   text: string
@@ -21,7 +19,7 @@ const CopyButton = ({
   text,
   className,
   children,
-  initialToolTipText = 'Copy to clipboard',
+  initialToolTipText,
   onCopy,
   dialogContent,
 }: ButtonProps): ReactElement => {
@@ -40,13 +38,7 @@ const CopyButton = ({
   return (
     <CopyTooltip text={text} onCopy={handleCopy} initialToolTipText={initialToolTipText} dialogContent={dialogContent}>
       {children ?? (
-        <Button variant="ghost" size="icon-xs" aria-label={initialToolTipText} className={className}>
-          {isCopied ? (
-            <Check data-testid="copy-btn-check" className="size-4 text-green-600" />
-          ) : (
-            <CopyIcon data-testid="copy-btn-icon" className="size-4 text-[var(--color-border-main)]" />
-          )}
-        </Button>
+        <CopyButtonView isCopied={isCopied} initialToolTipText={initialToolTipText} buttonClassName={className} />
       )}
     </CopyTooltip>
   )

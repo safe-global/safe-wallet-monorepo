@@ -42,6 +42,7 @@ import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBo
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
+import { ParsingErrorView, TxDataView } from '@views/components/transactions/TxDetails/TxData/TxDataView'
 
 const TxData = ({
   txInfo,
@@ -144,19 +145,20 @@ const TxData = ({
   return !!children ? (
     <>{children}</>
   ) : (
-    <>
-      <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
-
-      {(isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
-        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-          <Multisend
-            txData={txData}
-            isExecuted={!!txDetails?.executedAt}
-            executingSafeAddress={executingSafeAddress ?? txDetails?.safeAddress}
-          />
-        </ObservabilityErrorBoundary>
-      )}
-    </>
+    <TxDataView
+      decodedData={<DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />}
+      multisend={
+        (isMultiSendTxInfo(txInfo) || isOrderTxInfo(txInfo)) && (
+          <ObservabilityErrorBoundary fallback={<ParsingErrorView />}>
+            <Multisend
+              txData={txData}
+              isExecuted={!!txDetails?.executedAt}
+              executingSafeAddress={executingSafeAddress ?? txDetails?.safeAddress}
+            />
+          </ObservabilityErrorBoundary>
+        )
+      }
+    />
   )
 }
 

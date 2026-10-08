@@ -1,6 +1,6 @@
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import useWallet from '@/hooks/wallets/useWallet'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
+import { NoWalletConnectedWarningView } from '@views/components/new-safe/create/NoWalletConnectedWarning/NoWalletConnectedWarningView'
 
 const NoWalletConnectedWarning = () => {
   const wallet = useWallet()
@@ -9,18 +9,7 @@ const NoWalletConnectedWarning = () => {
     return null
   }
 
-  return (
-    <Alert variant="warning" outlined={false} className="mt-6">
-      <AlertSeverityIcon variant="warning" />
-      <AlertTitle className="font-bold">No wallet connected</AlertTitle>
-      <AlertDescription>
-        You need to connect a wallet to create a Safe account.
-        <div className="mt-4">
-          <ConnectWalletButton variant="outline" className="text-foreground" />
-        </div>
-      </AlertDescription>
-    </Alert>
-  )
+  return <NoWalletConnectedWarningView renderConnectWalletButton={(props) => <ConnectWalletButton {...props} />} />
 }
 
 export default NoWalletConnectedWarning

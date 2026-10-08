@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import WalletInfo from '@/components/common/WalletInfo'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { WalletPopoverView } from '@views/features/wallet/components/WalletPopover/WalletPopoverView'
 
 type WalletPopoverProps = {
   wallet: ConnectedWallet
@@ -22,20 +22,11 @@ const WalletPopover = ({
   onWalletDisconnect,
 }: WalletPopoverProps): ReactElement => {
   return (
-    <Popover
+    <WalletPopoverView
       open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) onClose()
-      }}
-    >
-      <PopoverContent
-        showBackdrop
-        anchor={anchorEl}
-        side="bottom"
-        align="center"
-        sideOffset={12}
-        className="w-[300px] rounded-3xl"
-      >
+      anchorEl={anchorEl}
+      onClose={onClose}
+      walletInfo={
         <WalletInfo
           wallet={wallet}
           balance={wallet.balance}
@@ -43,8 +34,8 @@ const WalletPopover = ({
           onSwitch={onWalletSwitch}
           onDisconnect={onWalletDisconnect}
         />
-      </PopoverContent>
-    </Popover>
+      }
+    />
   )
 }
 

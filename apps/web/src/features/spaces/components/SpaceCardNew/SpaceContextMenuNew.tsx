@@ -1,14 +1,9 @@
 import { type MouseEvent, useState } from 'react'
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
-import Track from '@/components/common/Track'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useSpaceDeletionGuard } from '@/features/spaces'
+import { SpaceContextMenuNewView } from '@views/features/spaces/components/SpaceCardNew/SpaceContextMenuNewView'
 
 enum ModalType {
   RENAME = 'rename',
@@ -33,52 +28,21 @@ const SpaceContextMenuNew = ({ space }: { space: GetSpaceResponse }) => {
   }
 
   return (
-    <>
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              onClick={(e) => {
-                e.stopPropagation()
-              }}
-            />
-          }
-        >
-          <MoreVertical className="size-4 text-[var(--color-border-main)]" />
-          <span className="sr-only">Workspace actions</span>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)} onSelect={(e) => e.stopPropagation()}>
-            <Pencil className="text-success" />
-            <span>Rename</span>
-          </DropdownMenuItem>
+    <SpaceContextMenuNewView
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      isDeletionBlocked={isDeletionBlocked}
+      blockedReason={blockedReason}
+      onRename={(e) => handleOpenModal(e, ModalType.RENAME)}
+      onRemove={(e) => handleOpenModal(e, ModalType.REMOVE)}
+      dialogs={
+        <>
+          {open[ModalType.RENAME] && <UpdateSpaceDialog space={space} onClose={handleCloseModal} />}
 
-          <Tooltip>
-            <TooltipTrigger render={<div />}>
-              <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-                <DropdownMenuItem
-                  data-testid="remove-button-spaces-new"
-                  disabled={isDeletionBlocked}
-                  onClick={isDeletionBlocked ? undefined : (e) => handleOpenModal(e, ModalType.REMOVE)}
-                  onSelect={(e) => e.stopPropagation()}
-                  variant="destructive"
-                >
-                  <Trash2 />
-                  <span>Remove</span>
-                </DropdownMenuItem>
-              </Track>
-            </TooltipTrigger>
-            {blockedReason && <TooltipContent side="left">{blockedReason}</TooltipContent>}
-          </Tooltip>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {open[ModalType.RENAME] && <UpdateSpaceDialog space={space} onClose={handleCloseModal} />}
-
-      {open[ModalType.REMOVE] && <DeleteSpaceDialog space={space} onClose={handleCloseModal} />}
-    </>
+          {open[ModalType.REMOVE] && <DeleteSpaceDialog space={space} onClose={handleCloseModal} />}
+        </>
+      }
+    />
   )
 }
 

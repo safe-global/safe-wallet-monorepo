@@ -1,4 +1,3 @@
-import Track from '@/components/common/Track'
 import { isPairingUri } from '../../services/utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import { WCLoadingState } from '../../types'
@@ -7,12 +6,8 @@ import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getClipboard, isClipboardSupported } from '@/utils/clipboard'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { InputGroup, InputGroupInput, InputGroupAddon } from '@/components/ui/input-group'
 import { useCallback, useContext, useEffect, useId, useState } from 'react'
+import { WcInputView } from '@views/features/walletconnect/components/WcInput/WcInputView'
 
 const PROPOSAL_TIMEOUT = 30_000
 
@@ -83,55 +78,17 @@ const WcInput = ({ uri }: { uri: string }) => {
     }
   }, [onInput])
 
-  const label = inputError ? inputError.message : 'Pairing code'
-
   return (
-    <div className="flex w-full flex-col gap-1.5 text-left">
-      <Label htmlFor={inputId} className={inputError ? 'text-destructive' : undefined}>
-        {label}
-      </Label>
-
-      {isClipboardSupported() ? (
-        <Input
-          id={inputId}
-          data-testid="wc-input"
-          value={value}
-          onChange={(e) => onInput(e.target.value)}
-          autoComplete="off"
-          autoFocus
-          disabled={!!loading}
-          aria-invalid={!!inputError}
-          placeholder="wc:"
-          spellCheck={false}
-        />
-      ) : (
-        <InputGroup>
-          <InputGroupInput
-            id={inputId}
-            data-testid="wc-input"
-            value={value}
-            onChange={(e) => onInput(e.target.value)}
-            autoComplete="off"
-            autoFocus
-            disabled={!!loading}
-            aria-invalid={!!inputError}
-            placeholder="wc:"
-            spellCheck={false}
-          />
-          <InputGroupAddon align="inline-end" className="pr-0">
-            <Track {...WALLETCONNECT_EVENTS.PASTE_CLICK}>
-              <Button variant="default" size="sm" onClick={onPaste} disabled={!!loading}>
-                {loading === WCLoadingState.CONNECT || loading === WCLoadingState.APPROVE ? (
-                  <Spinner className="size-5" />
-                ) : (
-                  'Paste'
-                )}
-              </Button>
-            </Track>
-          </InputGroupAddon>
-        </InputGroup>
-      )}
-    </div>
+    <WcInputView
+      inputId={inputId}
+      value={value}
+      errorMessage={inputError?.message}
+      isClipboardSupported={isClipboardSupported()}
+      isDisabled={!!loading}
+      isConnecting={loading === WCLoadingState.CONNECT || loading === WCLoadingState.APPROVE}
+      onInput={onInput}
+      onPaste={onPaste}
+    />
   )
 }
 

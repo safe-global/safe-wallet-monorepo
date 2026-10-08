@@ -1,13 +1,6 @@
 import { useState, useCallback, type ReactElement } from 'react'
-import { Sparkles } from 'lucide-react'
-import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { cn } from '@/utils/cn'
-import { icons } from '../config'
-import css from '../styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldLabel } from '@/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -25,7 +18,6 @@ import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -34,6 +26,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { reloadPage } from '@/utils/navigation'
+import { SidebarCommonFooterView } from '@views/features/spaces/components/Sidebar/SidebarCommonFooter/SidebarCommonFooterView'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -95,104 +88,38 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
   }, [dispatch, hasBeamerConsent])
 
   return (
-    <SidebarFooter data-testid="sidebar-common-footer">
-      {/* Dev Toggles - only in non-production */}
-      {!IS_PRODUCTION && (
-        <div className="flex flex-col gap-2 px-3 py-2 group-data-[collapsible=icon]:hidden">
-          <Field orientation="horizontal">
-            <Switch
-              id="dark-mode-toggle"
-              checked={isDarkMode}
-              onCheckedChange={(checked) => dispatch(setDarkMode(checked))}
-            />
-            <FieldLabel htmlFor="dark-mode-toggle">Dark mode</FieldLabel>
-          </Field>
-          {isSafeSidebar && (
-            <Field orientation="horizontal">
-              <Switch id="prod-cgw-toggle" checked={isProdGateway} onCheckedChange={onToggleGateway} />
-              <FieldLabel htmlFor="prod-cgw-toggle">Use prod CGW</FieldLabel>
-            </Field>
-          )}
-        </div>
-      )}
-
-      <SidebarMenu className="gap-0.5">
-        {!isBannerPending && (showSafeProBanner || showTwoFactorCard) && (
-          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-            {/* One grid cell for both, so nothing below moves when one gives way to the other. */}
-            <div className="mb-2 grid">
-              {hasSafeProBanner && (
-                <SafeProSidebarBanner
-                  className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
-                  isShown={showSafeProBanner}
-                  onDismiss={dismissSafeProBanner}
-                />
-              )}
-              {hasTwoFactorCard && (
-                <WorkspaceTwoFactorAwarenessCard
-                  className={cn('col-start-1 row-start-1', !showTwoFactorCard && 'invisible')}
-                  spaceId={spaceId ?? undefined}
-                  onDismiss={dismissTwoFactorCard}
-                />
-              )}
-            </div>
-          </SidebarMenuItem>
-        )}
-
-        <ApiCtaSidebar />
-
-        <SidebarMenuItem
-          className={cn(
-            css.footerHelpRow,
-            'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5',
-          )}
-        >
-          <SidebarMenuButton
-            className={cn(
-              'h-9 min-w-0 flex-1 gap-3 group-data-[collapsible=icon]:flex-none',
-              css.sidebarInteractive,
-              css.sidebarNavItem,
-            )}
-            data-testid="list-item-need-help"
-            onClick={handleHelpClick}
-          >
-            <Tooltip>
-              <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
-                <icons.CircleHelp />
-                <span className="truncate group-data-[collapsible=icon]:hidden">Help</span>
-              </TooltipTrigger>
-              <TooltipContent side="right">Help center</TooltipContent>
-            </Tooltip>
-          </SidebarMenuButton>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <SidebarMenuButton
-                  type="button"
-                  id={BEAMER_SELECTOR}
-                  data-testid="list-item-whats-new"
-                  aria-label="What's new"
-                  className={cn(
-                    'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
-                    '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
-                    css.sidebarInteractive,
-                    css.footerBeamerButton,
-                  )}
-                  onClick={handleBeamerClick}
-                />
-              }
-            >
-              <Sparkles aria-hidden strokeWidth={1.25} />
-            </TooltipTrigger>
-            <TooltipContent side="top">What&apos;s new</TooltipContent>
-          </Tooltip>
-          <div className={css.footerHelpStatus}>
-            <SidebarIndexingStatus isSafeSidebar={isSafeSidebar} />
-          </div>
-        </SidebarMenuItem>
-      </SidebarMenu>
-
-      <HelpMenu anchorEl={helpMenuAnchor} onClose={handleHelpMenuClose} />
-    </SidebarFooter>
+    <SidebarCommonFooterView
+      isSafeSidebar={isSafeSidebar}
+      showDevToggles={!IS_PRODUCTION}
+      isDarkMode={isDarkMode}
+      onDarkModeChange={(checked) => dispatch(setDarkMode(checked))}
+      isProdGateway={isProdGateway}
+      onToggleGateway={onToggleGateway}
+      showBannerSlot={!isBannerPending && (showSafeProBanner || showTwoFactorCard)}
+      showSafeProBanner={showSafeProBanner}
+      showTwoFactorCard={showTwoFactorCard}
+      renderSafeProBanner={
+        hasSafeProBanner
+          ? (props) => <SafeProSidebarBanner {...props} isShown={showSafeProBanner} onDismiss={dismissSafeProBanner} />
+          : undefined
+      }
+      renderTwoFactorCard={
+        hasTwoFactorCard
+          ? (props) => (
+              <WorkspaceTwoFactorAwarenessCard
+                {...props}
+                spaceId={spaceId ?? undefined}
+                onDismiss={dismissTwoFactorCard}
+              />
+            )
+          : undefined
+      }
+      apiCta={<ApiCtaSidebar />}
+      onHelpClick={handleHelpClick}
+      beamerId={BEAMER_SELECTOR}
+      onBeamerClick={handleBeamerClick}
+      indexingStatus={<SidebarIndexingStatus isSafeSidebar={isSafeSidebar} />}
+      helpMenu={<HelpMenu anchorEl={helpMenuAnchor} onClose={handleHelpMenuClose} />}
+    />
   )
 }

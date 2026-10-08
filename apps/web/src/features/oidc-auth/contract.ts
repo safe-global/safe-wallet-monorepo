@@ -10,7 +10,7 @@
 
 import type EmailSignInButton from './components/EmailSignInButton'
 import type GoogleSignInButton from './components/GoogleSignInButton'
-import type WorkspaceTwoFactorAwarenessCard from './components/WorkspaceTwoFactorAwarenessCard'
+import type WorkspaceTwoFactorAwarenessCard from '@views/features/oidc-auth/components/WorkspaceTwoFactorAwarenessCard'
 
 export interface OidcAuthContract {
   EmailSignInButton: typeof EmailSignInButton

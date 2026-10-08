@@ -1,7 +1,7 @@
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { useCurrentChain } from '@/hooks/useChains'
 import ChainSwitcher from '@/components/common/ChainSwitcher'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
+import { NetworkWarningView } from '@views/components/new-safe/create/NetworkWarning/NetworkWarningView'
 
 const NetworkWarning = ({ action }: { action?: string }) => {
   const chain = useCurrentChain()
@@ -9,19 +9,7 @@ const NetworkWarning = ({ action }: { action?: string }) => {
 
   if (!chain || !isWrongChain) return null
 
-  return (
-    <Alert variant="warning" outlined={false}>
-      <AlertSeverityIcon variant="warning" />
-      <AlertTitle className="font-bold">Change your wallet network</AlertTitle>
-      <AlertDescription>
-        You are trying to {action || 'sign or execute a transaction'} on {chain.chainName}. Make sure that your wallet
-        is set to the same network.
-        <div className="mt-4">
-          <ChainSwitcher />
-        </div>
-      </AlertDescription>
-    </Alert>
-  )
+  return <NetworkWarningView action={action} chainName={chain.chainName} chainSwitcher={<ChainSwitcher />} />
 }
 
 export default NetworkWarning

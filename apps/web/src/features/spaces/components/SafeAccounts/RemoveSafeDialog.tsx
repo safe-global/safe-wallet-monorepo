@@ -1,19 +1,15 @@
-import ModalDialog from '@/components/common/ModalDialog'
 import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/hooks/safes'
 import { getChainIdsParam, useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { RemoveSafeDialogView } from '@views/features/spaces/components/SafeAccounts/RemoveSafeDialogView'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {
@@ -34,7 +30,7 @@ const RemoveSafeDialog = ({
   const spaceId = useCurrentSpaceId()
   const dispatch = useAppDispatch()
   const [removeSafeAccounts] = useSpaceSafesDeleteV1Mutation()
-  const [error, setError] = useState('')
+  const [hasError, setHasError] = useState(false)
   const isDarkMode = useDarkMode()
 
   const handleConfirm = async () => {
@@ -70,36 +66,18 @@ const RemoveSafeDialog = ({
       )
     } catch (e) {
       if (isElevationRequiredError(e)) return
-      setError('Error removing safe account.')
+      setHasError(true)
     }
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Remove Safe account" hideChainIndicator>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <div className="p-6">
-          <Typography variant="paragraph">
-            Are you sure you want to remove <b>{address}</b> from this space?
-          </Typography>
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertSeverityIcon variant="destructive" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-        </div>
-
-        <DialogActions
-          className="px-6 pb-6"
-          onCancel={handleClose}
-          cancelTestId="cancel-btn"
-          confirmLabel="Remove"
-          onConfirm={handleConfirm}
-          confirmTestId="delete-btn"
-          confirmDestructive
-        />
-      </div>
-    </ModalDialog>
+    <RemoveSafeDialogView
+      address={address}
+      hasError={hasError}
+      isDarkMode={isDarkMode}
+      onClose={handleClose}
+      onConfirm={handleConfirm}
+    />
   )
 }
 

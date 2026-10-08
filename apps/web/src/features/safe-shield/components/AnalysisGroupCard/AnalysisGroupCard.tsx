@@ -1,7 +1,4 @@
 import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
-import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Typography } from '@/components/ui/typography'
 import {
   ContractStatus,
   RecipientStatus,
@@ -11,13 +8,13 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
-import { SeverityIcon } from '../SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'
 import { FallbackHandlerCardItem } from './FallbackHandlerCardItem'
 import { type AnalyticsEvent, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
+import { AnalysisGroupCardView } from '@views/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardView'
 
 export interface AnalysisGroupCardProps {
   data: { [address: string]: GroupedAnalysisResults }
@@ -44,8 +41,7 @@ export const AnalysisGroupCard = ({
 }: AnalysisGroupCardProps): ReactElement | null => {
   const [isOpen, setIsOpen] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  // The reveal animation caps max-height (can't animate to `auto`); once it finishes we drop the cap
-  // so tall content (many warnings) isn't clipped behind the widget footer.
+  // The reveal animation caps max-height (can't animate to `auto`); once it finishes the cap is dropped.
   const [revealed, setRevealed] = useState(false)
 
   const visibleResults = useMemo(() => mapVisibleAnalysisResults(data, expandedGroups), [data, expandedGroups])
@@ -66,7 +62,6 @@ export const AnalysisGroupCard = ({
     }, delay)
   }, [delay, primaryResult, isDataEmpty])
 
-  // Track analytics event when results change
   const prevTrackedResultsKeyRef = useRef<string>('')
   useEffect(() => {
     if (analyticsEvent && visibleResults.length > 0) {
@@ -83,78 +78,52 @@ export const AnalysisGroupCard = ({
     return null
   }
 
-  // Drop the reveal's max-height cap once its own transition ends (ignore opacity + bubbling Collapse height).
+  // Ignore opacity and the bubbling Collapse height transitions.
   const handleRevealTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && e.propertyName === 'max-height' && isVisible) setRevealed(true)
   }
 
+  const items = visibleResults.map((result, index) => {
+    const isPrimary = index === 0
+    const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
+
+    if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
+      return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
+    }
+
+    if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
+      return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
+    }
+
+    if (result.type === RecipientStatus.RESEMBLES_TRUSTED_ADDRESS) {
+      return <AddressPoisoningCardItem key={index} result={result} />
+    }
+
+    return (
+      <AnalysisGroupCardItem
+        showImage={showImage}
+        severity={shouldHighlight ? result.severity : undefined}
+        key={index}
+        result={result}
+        requestId={requestId}
+      />
+    )
+  })
+
   return (
-    <Collapsible
-      open={isOpen}
+    <AnalysisGroupCardView
+      isOpen={isOpen}
       onOpenChange={setIsOpen}
       data-testid={dataTestId}
       onTransitionEnd={handleRevealTransitionEnd}
-      style={{
-        // Capped during the reveal (animatable), uncapped after — see `revealed` above.
-        overflow: revealed ? 'visible' : 'hidden',
-        opacity: isVisible ? 1 : 0,
-        maxHeight: revealed ? 'none' : isVisible ? 1000 : 0,
-        transition: `opacity 0.6s ease-in-out, max-height 0.6s ease-in-out`,
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {/* Card header - always visible */}
-      <CollapsibleTrigger
-        nativeButton={false}
-        render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}
-      >
-        <div className="flex flex-row items-center gap-2">
-          <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
-          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
-            {primaryResult.title}
-          </Typography>
-        </div>
-
-        <ChevronDown
-          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
-        />
-      </CollapsibleTrigger>
-
-      {/* Expanded content */}
-      <CollapsibleContent keepMounted>
-        <div className="px-3 pt-1 pb-4">
-          <div className="flex flex-col gap-2">
-            {visibleResults.map((result, index) => {
-              const isPrimary = index === 0
-              const shouldHighlight = isHighlighted && isPrimary && result.severity === primarySeverity
-
-              if (result.type === ContractStatus.UNEXPECTED_DELEGATECALL) {
-                return <DelegateCallCardItem key={index} result={result} isPrimary={isPrimary} />
-              }
-
-              if (result.type === ContractStatus.UNOFFICIAL_FALLBACK_HANDLER) {
-                return <FallbackHandlerCardItem key={index} result={result} isPrimary={isPrimary} />
-              }
-
-              if (result.type === RecipientStatus.RESEMBLES_TRUSTED_ADDRESS) {
-                return <AddressPoisoningCardItem key={index} result={result} />
-              }
-
-              return (
-                <AnalysisGroupCardItem
-                  showImage={showImage}
-                  severity={shouldHighlight ? result.severity : undefined}
-                  key={index}
-                  result={result}
-                  requestId={requestId}
-                />
-              )
-            })}
-
-            {footer}
-          </div>
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
+      revealed={revealed}
+      isVisible={isVisible}
+      delay={delay}
+      severity={primaryResult.severity}
+      muted={!isHighlighted}
+      title={primaryResult.title}
+      items={items}
+      footer={footer}
+    />
   )
 }

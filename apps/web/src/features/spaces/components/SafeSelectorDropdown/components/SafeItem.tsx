@@ -1,14 +1,10 @@
 import FiatValue from '@/components/common/FiatValue'
-import { cn } from '@/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { SafeInfoDisplay } from '@/components/common/AccountRow'
-import BalanceDisplay from '@views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
-import RowEndColumn from '@views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
-import SafeRowStats from './SafeRowStats'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
+import CopyAddressButton from '@/components/common/AccountRow/CopyAddressButton'
+import { SafeItemView } from '@views/features/spaces/components/SafeSelectorDropdown/components/SafeItemView'
 import type { SafeItemData, SafeRenameTarget } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 const SafeItem = ({
@@ -36,29 +32,23 @@ const SafeItem = ({
   const { canRename } = useAddressBookWriteScope(address, chainIds)
 
   return (
-    <div className={cn('flex items-center gap-2 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
-      <SafeInfoDisplay
-        name={resolvedName}
-        address={address}
-        className="flex-1 min-w-0"
-        explorerLink={explorerLink}
-        onRename={onRename && canRename ? () => onRename({ address, name: resolvedName, chainIds }) : undefined}
-      />
-      <SafeRowStats
-        threshold={threshold}
-        owners={owners}
-        chains={chains}
-        pending={pending}
-        awaitingConfirmation={awaitingConfirmation}
-      />
-      {isUndeployed ? (
-        <RowEndColumn>
-          <NotActivatedBadge isActivating={isActivating} />
-        </RowEndColumn>
-      ) : (
-        <BalanceDisplay balance={<FiatValue value={balance} />} isLoading={isLoading} />
-      )}
-    </div>
+    <SafeItemView
+      name={resolvedName}
+      address={address}
+      threshold={threshold}
+      owners={owners}
+      chains={chains}
+      isLoading={isLoading}
+      isNested={isNested}
+      isUndeployed={isUndeployed}
+      isActivating={isActivating}
+      pending={pending}
+      awaitingConfirmation={awaitingConfirmation}
+      explorerLink={explorerLink}
+      onRename={onRename && canRename ? () => onRename({ address, name: resolvedName, chainIds }) : undefined}
+      copyButton={<CopyAddressButton address={address} testId="safe-item-copy-address" />}
+      balance={<FiatValue value={balance} />}
+    />
   )
 }
 

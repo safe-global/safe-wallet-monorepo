@@ -59,6 +59,41 @@ describe('runView', () => {
     expect(screen.getByText('given')).toHaveAttribute('href', 'https://help.safe.global')
   })
 
+  it('keeps links and images to hosts in the policy and drops others', () => {
+    const View = loadView(
+      `export const View = () => <>
+        <a href="https://help.safe.global/articles/1">help</a>
+        <img alt="logo" src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png" />
+        <img alt="identicon" src="data:image/svg+xml;base64,PHN2Zy8+" />
+        <img alt="tracker" src="https://example.com/pixel.png" />
+      </>`,
+    )
+    render(<View />)
+
+    expect(screen.getByText('help')).toHaveAttribute('href', 'https://help.safe.global/articles/1')
+    expect(screen.getByAltText('logo')).toHaveAttribute(
+      'src',
+      'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    )
+    expect(screen.getByAltText('identicon')).toHaveAttribute('src', 'data:image/svg+xml;base64,PHN2Zy8+')
+    expect(screen.getByAltText('tracker')).not.toHaveAttribute('src')
+  })
+
+  it('keeps mail links to hosts in the policy and drops others', () => {
+    const View = loadView(
+      `export const View = () => <>
+        <a href="mailto:info@safe.global">info</a>
+        <a href="mailto:x@example.com">other</a>
+        <img alt="mail" src="mailto:info@safe.global" />
+      </>`,
+    )
+    render(<View />)
+
+    expect(screen.getByText('info')).toHaveAttribute('href', 'mailto:info@safe.global')
+    expect(screen.getByText('other')).not.toHaveAttribute('href')
+    expect(screen.getByAltText('mail')).not.toHaveAttribute('src')
+  })
+
   it('keeps a same-origin path written by view code', () => {
     const View = loadView(`export const View = () => <a href="/settings">settings</a>`)
     render(<View />)
@@ -78,6 +113,19 @@ describe('runView', () => {
 
     expect(screen.getByText('own')).toHaveAttribute('data-href', '/home')
     expect(screen.getByText('external')).toHaveAttribute('data-href', 'none')
+  })
+
+  it('keeps a URL object whose pathname the view got from trusted props', () => {
+    const Link = ({ href, children }: { href?: { pathname?: string }; children: string }) => (
+      <span data-href={href?.pathname ?? 'none'}>{children}</span>
+    )
+    const View = loadView<{ href: string }>(
+      `import Link from 'next/link'\nexport const View = ({ href }) => <Link href={{ pathname: href, query: { tab: 'all' } }}>go</Link>`,
+      { 'next/link': { __esModule: true, default: Link } },
+    )
+    render(<View href="/transactions/messages" />)
+
+    expect(screen.getByText('go')).toHaveAttribute('data-href', '/transactions/messages')
   })
 
   it('drops dangerouslySetInnerHTML and url() styles from view code', () => {
@@ -174,6 +222,21 @@ describe('runView', () => {
     render(<View />)
 
     expect(screen.getByText('x')).toHaveClass('a c')
+  })
+
+  it('keeps unkeyed trusted elements unique across re-renders', () => {
+    const errors = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const View = loadView<{ a: ReactElement; b: ReactElement | null }>(
+      `export const View = ({ a, b }) => <header>{a}{b}</header>`,
+    )
+    const { rerender } = render(<View a={<span>bell</span>} b={null} />)
+    rerender(<View a={<span>bell</span>} b={<span>account</span>} />)
+    rerender(<View a={<span>bell</span>} b={<span>account</span>} />)
+
+    expect(screen.getAllByText('bell')).toHaveLength(1)
+    expect(screen.getAllByText('account')).toHaveLength(1)
+    expect(errors).not.toHaveBeenCalledWith(expect.stringContaining('same key'), expect.anything(), expect.anything())
+    errors.mockRestore()
   })
 
   it('gives a library the real props of an element that trusted code passed through a view', () => {

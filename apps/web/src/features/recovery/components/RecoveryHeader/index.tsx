@@ -9,6 +9,8 @@ import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'
 import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '../../services/recoveryEvents'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
+const HORIZONTAL = 'horizontal'
+
 function InternalRecoveryHeader({
   isProposalInProgress,
   isRecoverer,
@@ -23,11 +25,11 @@ function InternalRecoveryHeader({
   // Return the recovery card directly without wrappers so it's counted
   // as a direct child in the ActionRequiredPanel
   if (next) {
-    return <RecoveryInProgressCard orientation="horizontal" recovery={next} />
+    return <RecoveryInProgressCard orientation={HORIZONTAL} recovery={next} />
   }
 
   if (isRecoverer && !isProposalInProgress) {
-    return <RecoveryProposalCard orientation="horizontal" />
+    return <RecoveryProposalCard orientation={HORIZONTAL} />
   }
 
   return null

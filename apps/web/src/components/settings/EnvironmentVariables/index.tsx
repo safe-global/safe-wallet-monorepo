@@ -1,13 +1,11 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
-import SettingsCard from '@views/components/settings/SettingsCard'
+import { EnvironmentVariablesView } from '@views/components/settings/EnvironmentVariables/EnvironmentVariablesView'
 import { reloadPage } from '@/utils/navigation'
 
 export enum EnvVariablesField {
@@ -67,28 +65,20 @@ const EnvironmentVariables = () => {
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
-    <SettingsCard title="Environment variables" contentClassName="mb-4">
-      <Typography className="mb-6">
-        You can override some of our default APIs here in case you need to. Proceed at your own risk.
-      </Typography>
-
-      <FormProvider {...formMethods}>
-        <form onSubmit={onSubmit}>
-          <RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />
-
+    <FormProvider {...formMethods}>
+      <EnvironmentVariablesView
+        onSubmit={onSubmit}
+        rpcSection={<RpcProviderSection onReset={onResetRpc} showResetButton={!!rpc} />}
+        tenderlySection={
           <TenderlySection
             onResetUrl={onResetTenderlyUrl}
             onResetToken={onResetTenderlyToken}
             showResetUrlButton={!!tenderlyURL}
             showResetTokenButton={!!tenderlyToken}
           />
-
-          <Button type="submit" className="mt-4">
-            Save
-          </Button>
-        </form>
-      </FormProvider>
-    </SettingsCard>
+        }
+      />
+    </FormProvider>
   )
 }
 

@@ -5,6 +5,7 @@ import SafeAppsPermissions from '@/components/settings/SafeAppsPermissions'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { SafeAppsSigningMethod } from '@/components/settings/SafeAppsSigningMethod'
 import { BRAND_NAME } from '@/config/constants'
+import { PageMainView } from '@views/pages/PageMainView'
 
 const SafeAppsPermissionsPage: NextPage = () => {
   return (
@@ -15,10 +16,10 @@ const SafeAppsPermissionsPage: NextPage = () => {
 
       <SettingsHeader />
 
-      <main>
+      <PageMainView>
         <SafeAppsPermissions />
         <SafeAppsSigningMethod />
-      </main>
+      </PageMainView>
     </>
   )
 }

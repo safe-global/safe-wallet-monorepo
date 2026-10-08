@@ -1,26 +1,19 @@
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { DialogTitle } from '@/components/ui/dialog'
-import { highlightSafePro } from '@/components/common/ProHighlight'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { SearchInput } from '@/components/ui/search-input'
-import { Typography } from '@/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeRef } from '@views/features/spaces/components/Plans/types'
-import { removedSafesNote, summarizeRemovedSafes } from '@views/features/spaces/components/Plans/removedSafes'
+import { summarizeRemovedSafes } from '@views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import SelectedCounter from '@views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
 import { getMultiChainSafeId, getSafeId } from '@views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
+import { SelectAccountsStepView } from '@views/features/spaces/components/Plans/SelectAccountsStepView'
+
+export { seatsTooltip } from '@views/features/spaces/components/Plans/SelectAccountsStepView'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
 const NO_FLAGGED = new Set<string>()
@@ -42,14 +35,11 @@ export const _initialSelection = (items: AllSafeItems): Record<string, boolean> 
   return selected
 }
 
-export const seatsTooltip = (planName: string, limit: number): string =>
-  `${planName} covers ${limit} Safe accounts. Safe accounts you leave out remain available in My accounts. You can swap them in any time.`
-
 /** Trims the Workspace to the plan's seats before the plan is taken; the Safes deselected are removed from it. */
 export default function SelectAccountsStep({
   limit,
   planName,
-  continueLabel = 'Continue to checkout',
+  continueLabel,
   onBack,
   onContinue,
   isSubmitting,
@@ -80,7 +70,7 @@ export default function SelectAccountsStep({
   })
   const leaves = useMemo(() => leavesOf(allSafes), [allSafes])
   const removed = useMemo(() => leaves.filter((safe) => !selectedKeys.has(getSafeId(safe))), [leaves, selectedKeys])
-  const removedNote = removedSafesNote(summarizeRemovedSafes(leaves, removed))
+  const removedSummary = summarizeRemovedSafes(leaves, removed)
   useTrackOnce(
     SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_VIEWED,
     { [MixpanelEventParams.ACCOUNTS_AVAILABLE]: seatCount, [MixpanelEventParams.PLAN_LIMIT]: limit },
@@ -88,107 +78,35 @@ export default function SelectAccountsStep({
   )
 
   return (
-    <>
-      <Typography variant="h3" as={DialogTitle}>
-        {highlightSafePro('Select Safe accounts for your Safe Pro plan')}
-      </Typography>
-
-      <Alert variant="info">
-        <AlertSeverityIcon variant="info" />
-        <AlertTitle className="font-semibold">
-          {planName} covers {limit} Safe accounts
-        </AlertTitle>
-        <AlertDescription>
-          At {limit}, deselect one to add another. Safe accounts you leave out remain available in My accounts.
-        </AlertDescription>
-      </Alert>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-3">
-          {/* Amber only while the selection still exceeds the plan; sitting exactly at the cap is the goal. */}
-          <SelectedCounter
-            count={seatCount}
-            limit={limit}
-            isAtLimit={isOverLimit}
-            tooltip={seatsTooltip(planName, limit)}
-          />
-          <SearchInput
-            className="flex-1"
-            placeholder="by name, address or network"
-            aria-label="Search Safe list"
-            autoComplete="off"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-
-        <ScrollArea className="h-91">
-          {!isLoading && items.length === 0 ? (
-            <Typography align="center" color="muted" className="py-8">
-              No Safe accounts match your search
-            </Typography>
-          ) : (
-            <SafeAccountsTable
-              items={items}
-              columns={COLUMNS}
-              embedded
-              selection={{ selectedKeys, onToggle: handleToggle, isAtLimit }}
-              data-testid="plan-safes-table"
-            />
-          )}
-        </ScrollArea>
-      </div>
-
-      {isOverLimit ? (
-        <Alert variant="warning">
-          <AlertSeverityIcon variant="warning" />
-          <AlertDescription>
-            Deselect {seatCount - limit === 1 ? '1 Safe account' : `${seatCount - limit} Safe accounts`} to fit the
-            plan.
-          </AlertDescription>
-        </Alert>
-      ) : (
-        removedNote && (
-          <Alert variant="warning">
-            <AlertSeverityIcon variant="warning" />
-            <AlertDescription>{removedNote}</AlertDescription>
-          </Alert>
-        )
-      )}
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertSeverityIcon variant="destructive" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="flex gap-5">
-        <Button variant="secondary" size="lg" className="flex-1" onClick={onBack} disabled={isSubmitting}>
-          Back
-        </Button>
-        <Track
-          {...SAFE_PRO_EVENTS.SAFE_ACCOUNT_SELECTION_SUBMITTED}
-          mixpanelParams={{
-            [MixpanelEventParams.SELECTED_COUNT]: seatCount,
-            [MixpanelEventParams.DESELECTED_COUNT]: removed.length,
-            [MixpanelEventParams.PLAN_LIMIT]: limit,
-          }}
-          as="div"
-          className="flex-1"
-        >
-          <Button
-            size="lg"
-            accentIcon
-            className="w-full"
-            disabled={selectedKeys.size === 0 || isOverLimit || isSubmitting}
-            onClick={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
-          >
-            {continueLabel}
-            <ArrowRight />
-          </Button>
-        </Track>
-      </div>
-    </>
+    <SelectAccountsStepView
+      limit={limit}
+      planName={planName}
+      continueLabel={continueLabel}
+      onBack={onBack}
+      onContinue={() => onContinue(removed.map(({ chainId, address }) => ({ chainId, address })))}
+      isSubmitting={isSubmitting}
+      error={error}
+      query={query}
+      onQueryChange={setQuery}
+      isEmpty={!isLoading && items.length === 0}
+      table={
+        <SafeAccountsTable
+          items={items}
+          columns={COLUMNS}
+          embedded
+          selection={{ selectedKeys, onToggle: handleToggle, isAtLimit }}
+          data-testid="plan-safes-table"
+        />
+      }
+      seatCount={seatCount}
+      selectedCount={selectedKeys.size}
+      submitTrackingParams={{
+        [MixpanelEventParams.SELECTED_COUNT]: seatCount,
+        [MixpanelEventParams.DESELECTED_COUNT]: removed.length,
+        [MixpanelEventParams.PLAN_LIMIT]: limit,
+      }}
+      isOverLimit={isOverLimit}
+      removedSummary={removedSummary}
+    />
   )
 }

@@ -2,8 +2,6 @@ import { useMemo, useRef, type Dispatch, type ReactNode, type SetStateAction } f
 import partition from 'lodash/partition'
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { TableBody, tableVariants } from '@/components/ui/table'
-import tableCss from './styles.module.css'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from '@views/features/myAccounts/components/SafeAccountsTable/columns'
@@ -11,6 +9,12 @@ import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import { bandHeaderAt } from './SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
+import {
+  DraggedRowTableView,
+  ReorderableBodyView,
+} from '@views/features/myAccounts/components/SafeAccountsTable/ReorderableBodyView'
+
+const DROPPABLE_ID = 'safe-accounts-reorder'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */
@@ -216,15 +220,7 @@ const DraggableGroupRows = ({
           // would become its containing block and shove it sideways, so portal it to <body>. The wrapper
           // table keeps the detached <tr> renderable.
           return snapshot.isDragging
-            ? createPortal(
-                <table
-                  className={`${tableVariants({ variant: 'panel' })} ${tableCss.accounts}`}
-                  style={{ width: draggedRowWidth, margin: 0 }}
-                >
-                  <TableBody>{row}</TableBody>
-                </table>,
-                document.body,
-              )
+            ? createPortal(<DraggedRowTableView width={draggedRowWidth}>{row}</DraggedRowTableView>, document.body)
             : row
         }}
       </Draggable>
@@ -297,11 +293,12 @@ const ReorderableBody = ({
 
   return (
     <DragDropContext onBeforeCapture={handleBeforeCapture} onDragEnd={handleDragEnd}>
-      <Droppable droppableId="safe-accounts-reorder">
+      <Droppable droppableId={DROPPABLE_ID}>
         {(dropProvided) => (
-          <TableBody ref={dropProvided.innerRef} {...dropProvided.droppableProps}>
-            {/* Similarity bands are pinned on top and can't be split; only the rows below drag. */}
-            {pinnedGroups.map((group, index) => (
+          <ReorderableBodyView
+            bodyRef={dropProvided.innerRef}
+            droppableProps={dropProvided.droppableProps}
+            pinnedRows={pinnedGroups.map((group, index) => (
               <PinnedGroupRows
                 key={group.parent.key}
                 group={group}
@@ -312,8 +309,7 @@ const ReorderableBody = ({
                 shared={shared}
               />
             ))}
-
-            {draggableGroups.map((group, index) => (
+            draggableRows={draggableGroups.map((group, index) => (
               <DraggableGroupRows
                 key={group.parent.key}
                 group={group}
@@ -323,8 +319,8 @@ const ReorderableBody = ({
                 shared={shared}
               />
             ))}
-            {dropProvided.placeholder}
-          </TableBody>
+            placeholder={dropProvided.placeholder}
+          />
         )}
       </Droppable>
     </DragDropContext>

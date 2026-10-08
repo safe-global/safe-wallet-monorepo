@@ -1,18 +1,9 @@
 import type { WalletKitTypes } from '@reown/walletkit'
 
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { useCompatibilityWarning, type CompatibilityWarningSeverity } from './useCompatibilityWarning'
+import { useCompatibilityWarning } from './useCompatibilityWarning'
 import useSafeInfo from '@/hooks/useSafeInfo'
-
-import css from './styles.module.css'
-
-const SEVERITY_TO_VARIANT: Record<CompatibilityWarningSeverity, 'info' | 'destructive' | 'warning'> = {
-  error: 'destructive',
-  warning: 'warning',
-  info: 'info',
-}
+import { CompatibilityWarningView } from '@views/features/walletconnect/components/WcProposalForm/CompatibilityWarningView'
 
 export const CompatibilityWarning = ({
   proposal,
@@ -26,25 +17,12 @@ export const CompatibilityWarning = ({
   const { severity, message } = useCompatibilityWarning(proposal, isUnsupportedChain)
 
   return (
-    <>
-      <Alert variant={SEVERITY_TO_VARIANT[severity]} outlined={severity !== 'warning'} className={css.alert}>
-        <AlertSeverityIcon variant={SEVERITY_TO_VARIANT[severity]} />
-        <AlertDescription>{message}</AlertDescription>
-      </Alert>
-
-      {isUnsupportedChain && (
-        <>
-          <Typography variant="h4" className="mt-6 mb-2">
-            Supported networks
-          </Typography>
-
-          <div className={`flex flex-row ${css.chainContainer}`}>
-            {chainIds.map((chainId) => (
-              <ChainIndicator inline chainId={chainId} key={chainId} className={css.chain} />
-            ))}
-          </div>
-        </>
-      )}
-    </>
+    <CompatibilityWarningView
+      severity={severity}
+      message={message}
+      isUnsupportedChain={isUnsupportedChain}
+      chainIds={chainIds}
+      renderChainIndicator={(props) => <ChainIndicator inline key={props.chainId} {...props} />}
+    />
   )
 }

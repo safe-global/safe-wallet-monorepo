@@ -1,29 +1,10 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import {
-  SafeProNoticeModal,
-  SafeProPendingModal,
-  SafeProSubscriptionActivatedModal,
-  SafeProTrialActivatedModal,
-} from '@views/features/spaces/components/SafeProModals'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
-import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
+import { useCheckoutReturn } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'
-import { seatsLabel } from './planTiers'
-
-const PENDING_STATUSES: CheckoutReturnStatus[] = ['processing', 'activating']
-
-const FAILURE_COPY = {
-  timeout: {
-    title: 'Your subscription is taking longer than expected',
-    body: 'We haven’t been able to confirm your subscription yet. Try again in a moment; if the problem persists, contact support.',
-  },
-  error: {
-    title: 'We couldn’t confirm your checkout',
-    body: 'We couldn’t verify the checkout session. If you were charged, contact support and we’ll sort it out.',
-  },
-} as const
+import { CheckoutReturnModalsView } from '@views/features/spaces/components/Plans/CheckoutReturnModalsView'
 
 export default function CheckoutReturnModals({
   spaceId,
@@ -43,47 +24,29 @@ export default function CheckoutReturnModals({
     if (isComplete) refetch()
   }, [isComplete]) // eslint-disable-line react-hooks/exhaustive-deps -- refetch is a new function every render
 
-  if (PENDING_STATUSES.includes(checkout.status)) {
-    return <SafeProPendingModal title="Confirming your subscription" body="This usually takes a few seconds." />
-  }
-
-  if (checkout.status === 'timeout' || checkout.status === 'error') {
-    const { title, body } = FAILURE_COPY[checkout.status]
-    return (
-      <SafeProNoticeModal
-        open
-        title={title}
-        body={body}
-        actionLabel="Close"
-        onAction={leave}
-        secondaryActionLabel={checkout.status === 'timeout' ? 'Try again' : undefined}
-        onSecondaryAction={checkout.status === 'timeout' ? checkout.retry : undefined}
-        onOpenChange={(open) => !open && leave()}
-      />
-    )
-  }
-
-  if (!isComplete || !checkout.subscription) return null
-
+  const { subscription } = checkout
   // The fresh subscription knows its own period end; the entitlements it feeds may not have caught up yet.
-  const endsAt = getSubscriptionPeriodEnd(checkout.subscription) ?? plan?.periodEndsAt
+  const endsAt = getSubscriptionPeriodEnd(subscription) ?? plan?.periodEndsAt
   const parsedEndsAt = endsAt ? Date.parse(endsAt) : Number.NaN
-  const trialEndsAt = Number.isFinite(parsedEndsAt) ? parsedEndsAt : null
 
-  return checkout.subscription.status === 'trialing' ? (
-    <SafeProTrialActivatedModal
-      open
-      onOpenChange={checkout.dismiss}
-      trialEndsAt={trialEndsAt}
-      ctaLabel={trialCtaLabel}
-      hasPaymentMethod={checkout.subscription.hasPaymentMethod === true}
-    />
-  ) : (
-    <SafeProSubscriptionActivatedModal
-      open
-      onOpenChange={checkout.dismiss}
-      planName={getSubscriptionPlanName(checkout.subscription) ?? 'Safe Pro'}
-      seatsLabel={typeof seats?.quota === 'number' ? seatsLabel(seats.quota) : undefined}
+  return (
+    <CheckoutReturnModalsView
+      status={checkout.status}
+      subscription={
+        subscription
+          ? {
+              isTrialing: subscription.status === 'trialing',
+              hasPaymentMethod: subscription.hasPaymentMethod === true,
+              planName: getSubscriptionPlanName(subscription) ?? undefined,
+            }
+          : undefined
+      }
+      trialEndsAt={Number.isFinite(parsedEndsAt) ? parsedEndsAt : null}
+      seatsQuota={typeof seats?.quota === 'number' ? seats.quota : undefined}
+      trialCtaLabel={trialCtaLabel}
+      onLeave={leave}
+      onRetry={checkout.retry}
+      onDismiss={checkout.dismiss}
     />
   )
 }

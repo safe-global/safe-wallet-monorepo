@@ -1,0 +1,124 @@
+import NextLink from 'next/link'
+import type { ReactElement } from 'react'
+import { HelpCircle, Github, Send, Twitter } from 'lucide-react'
+import type { SafeAppSocialProfile } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import { Card } from '@/components/ui/card'
+import { Typography } from '@/components/ui/typography'
+import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
+import { Link } from '@/components/ui/link'
+import DiscordIcon from '@/public/images/common/discord-icon.svg'
+import css from './styles.module.css'
+
+export type SafeAppSocialLinksCardViewProps = {
+  hasSocialLinks: boolean
+  developerWebsite?: string | null
+  discordSocialLink?: SafeAppSocialProfile
+  twitterSocialLink?: SafeAppSocialProfile
+  githubSocialLink?: SafeAppSocialProfile
+  telegramSocialLink?: SafeAppSocialProfile
+}
+
+export function SafeAppSocialLinksCardView({
+  hasSocialLinks,
+  developerWebsite,
+  discordSocialLink,
+  twitterSocialLink,
+  githubSocialLink,
+  telegramSocialLink,
+}: SafeAppSocialLinksCardViewProps): ReactElement {
+  return (
+    <Card
+      // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke value has no variant
+      className="mt-[var(--space-4)] bg-[var(--color-info-background)] p-[var(--space-3)]"
+    >
+      <div className="flex items-center gap-2">
+        {/* Team Link section */}
+        <div className={css.questionMarkIcon}>
+          <HelpCircle className="size-6 text-[var(--color-info-main)]" />
+        </div>
+        <div>
+          <Typography variant="paragraph-bold">Something wrong with the Safe App?</Typography>
+          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
+            Get in touch with the team
+          </Typography>
+        </div>
+      </div>
+
+      <div className={`${css.socialLinksSectionContainer} flex gap-8`}>
+        {/* Social links section */}
+        {hasSocialLinks && (
+          <div>
+            <Typography variant="paragraph-small" className="pl-2 text-[var(--color-border-main)]">
+              Social Media
+            </Typography>
+
+            <div className="mt-0.5 flex min-h-[40px]">
+              {discordSocialLink && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Discord link"
+                  render={<a target="_blank" rel="noopener noreferrer" href={discordSocialLink.url} />}
+                >
+                  <DiscordIcon />
+                </Button>
+              )}
+
+              {twitterSocialLink && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Twitter link"
+                  render={<a target="_blank" rel="noopener noreferrer" href={twitterSocialLink.url} />}
+                >
+                  <Twitter className="text-[var(--color-border-main)]" />
+                </Button>
+              )}
+
+              {githubSocialLink && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Github link"
+                  render={<a target="_blank" rel="noopener noreferrer" href={githubSocialLink.url} />}
+                >
+                  <Github className="text-[var(--color-border-main)]" />
+                </Button>
+              )}
+
+              {telegramSocialLink && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Telegram link"
+                  render={<a target="_blank" rel="noopener noreferrer" href={telegramSocialLink.url} />}
+                >
+                  <Send className="text-[var(--color-border-main)]" />
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {hasSocialLinks && developerWebsite && <Separator orientation="vertical" className="h-[40px]" />}
+
+        {/* Developer website section */}
+        {developerWebsite && (
+          <div className="flex flex-col">
+            <Typography variant="paragraph-small" className="text-[var(--color-border-main)]">
+              Website
+            </Typography>
+
+            <Link
+              className={`${css.websiteLink} mt-1 font-bold`}
+              render={<NextLink href={developerWebsite} target="_blank" rel="noopener noreferrer" />}
+            >
+              {developerWebsite}
+            </Link>
+          </div>
+        )}
+      </div>
+    </Card>
+  )
+}

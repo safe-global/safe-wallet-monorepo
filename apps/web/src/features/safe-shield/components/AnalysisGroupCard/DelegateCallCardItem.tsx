@@ -1,7 +1,7 @@
 import { type AnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { type ReactElement } from 'react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { AnalysisCardItemWithLink } from './AnalysisCardItemWithLink'
+import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
+import { DelegateCallCardItemView } from '@views/features/safe-shield/components/AnalysisGroupCard/DelegateCallCardItemView'
 
 interface DelegateCallCardItemProps {
   result: AnalysisResult
@@ -10,12 +10,11 @@ interface DelegateCallCardItemProps {
 
 export const DelegateCallCardItem = ({ result, isPrimary = false }: DelegateCallCardItemProps): ReactElement => {
   return (
-    <AnalysisCardItemWithLink
+    <AnalysisGroupCardItem
+      description={<DelegateCallCardItemView />}
       result={result}
-      isPrimary={isPrimary}
-      beforeLinkText="This transaction calls a smart contract that will be able to modify your Safe account. "
-      linkText="Learn more"
-      linkUrl={HelpCenterArticle.UNEXPECTED_DELEGATE_CALL}
+      severity={isPrimary ? result.severity : undefined}
+      showImage
     />
   )
 }

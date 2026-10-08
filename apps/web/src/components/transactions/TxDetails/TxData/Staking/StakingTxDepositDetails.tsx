@@ -2,9 +2,9 @@ import type {
   NativeStakingDepositTransactionInfo,
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import FieldsGrid from '@/components/tx/FieldsGrid'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import StakingConfirmationTxDeposit from './StakingConfirmationTxDeposit'
+import { StakingTxDepositDetailsView } from '@views/components/transactions/TxDetails/TxData/Staking/StakingTxDepositDetailsView'
 
 const StakingTxDepositDetails = ({
   info,
@@ -14,13 +14,16 @@ const StakingTxDepositDetails = ({
   txData?: TransactionData | null
 }) => {
   return (
-    <div className="flex flex-col gap-2 pl-2 pr-10">
-      {txData && (
-        <SendAmountBlock title="Deposit" amountInWei={txData.value?.toString() || '0'} tokenInfo={info.tokenInfo} />
-      )}
-      <FieldsGrid title="Net reward rate">{info.annualNrr.toFixed(3)}%</FieldsGrid>
-      <StakingConfirmationTxDeposit order={info} isTxDetails />
-    </div>
+    <StakingTxDepositDetailsView
+      info={info}
+      hasTxData={!!txData}
+      renderSendAmountBlock={({ title }) =>
+        txData && (
+          <SendAmountBlock title={title} amountInWei={txData.value?.toString() || '0'} tokenInfo={info.tokenInfo} />
+        )
+      }
+      confirmation={<StakingConfirmationTxDeposit order={info} isTxDetails />}
+    />
   )
 }
 

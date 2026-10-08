@@ -17,6 +17,7 @@ import { SetupNestedSafeFormAssetFields } from '@/components/tx-flow/flows/Creat
 import type { SetupNestedSafeForm } from '@/components/tx-flow/flows/CreateNestedSafe/SetupNestedSafe'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { CREATE_NESTED_SAFE_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/CreateNestedSafe/copy'
 
 export function ReviewNestedSafe({
   params,
@@ -109,7 +110,7 @@ export function ReviewNestedSafe({
   }, [onSubmit, predictedSafeAddress])
 
   return (
-    <ReviewTransaction onSubmit={handleSubmit} title="Confirm Nested Safe">
+    <ReviewTransaction onSubmit={handleSubmit} title={COPY.reviewTitle}>
       {children}
     </ReviewTransaction>
   )

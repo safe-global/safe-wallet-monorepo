@@ -4,6 +4,7 @@ import Head from 'next/head'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import SecurityLogin from '@/components/settings/SecurityLogin'
 import { BRAND_NAME } from '@/config/constants'
+import { PageMainView } from '@views/pages/PageMainView'
 
 const SecurityPage: NextPage = () => {
   return (
@@ -14,9 +15,9 @@ const SecurityPage: NextPage = () => {
 
       <SettingsHeader />
 
-      <main>
+      <PageMainView>
         <SecurityLogin />
-      </main>
+      </PageMainView>
     </>
   )
 }

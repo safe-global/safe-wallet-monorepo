@@ -1,10 +1,4 @@
 import { type MouseEvent, useState } from 'react'
-import { Download, EllipsisVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import EditIcon from '@/public/images/common/edit.svg'
 import {
   type GetSpaceResponse,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -14,9 +8,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
 import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
-import Track from '@/components/common/Track'
-import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { useSpaceDeletionGuard } from '@/features/spaces'
+import { SpaceContextMenuView } from '@views/features/spaces/components/SpaceCard/SpaceContextMenuView'
 
 enum ModalType {
   RENAME = 'rename',
@@ -59,62 +52,23 @@ const SpaceContextMenu = ({ space }: { space: GetSpaceResponse }) => {
   }
 
   return (
-    <>
-      <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-muted-foreground"
-              onClick={(e) => e.stopPropagation()}
-              aria-label="Open space actions"
-              data-testid="space-card-context-menu-button"
-            />
-          }
-        >
-          <EllipsisVertical />
-        </DropdownMenuTrigger>
+    <SpaceContextMenuView
+      isMenuOpen={isMenuOpen}
+      onMenuOpenChange={setIsMenuOpen}
+      isDeletionBlocked={isDeletionBlocked}
+      blockedReason={blockedReason}
+      isDownloading={isDownloading}
+      onRename={(e) => handleOpenModal(e, ModalType.RENAME)}
+      onRemove={(e) => handleOpenModal(e, ModalType.REMOVE)}
+      onDownload={handleDownload}
+      dialogs={
+        <>
+          {open[ModalType.RENAME] && <UpdateSpaceDialog space={space} onClose={handleCloseModal} />}
 
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={(e) => handleOpenModal(e, ModalType.RENAME)}>
-            <EditIcon className="text-[var(--color-success-main)]" />
-            <span>Rename</span>
-          </DropdownMenuItem>
-
-          <Tooltip>
-            <TooltipTrigger render={<div />}>
-              <Track {...SPACE_EVENTS.DELETE_SPACE_MODAL} label={SPACE_LABELS.space_context_menu}>
-                <DropdownMenuItem
-                  data-testid="remove-button"
-                  disabled={isDeletionBlocked}
-                  onClick={isDeletionBlocked ? undefined : (e) => handleOpenModal(e, ModalType.REMOVE)}
-                >
-                  <DeleteIcon className="text-[var(--color-error-main)]" />
-                  <span>Remove</span>
-                </DropdownMenuItem>
-              </Track>
-            </TooltipTrigger>
-            {blockedReason && <TooltipContent side="left">{blockedReason}</TooltipContent>}
-          </Tooltip>
-
-          <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK} label={SPACE_LABELS.space_context_menu}>
-            <DropdownMenuItem
-              data-testid="download-address-book-button"
-              disabled={isDownloading}
-              onClick={handleDownload}
-            >
-              <Download className="text-muted-foreground" />
-              <span>Download shared address book</span>
-            </DropdownMenuItem>
-          </Track>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {open[ModalType.RENAME] && <UpdateSpaceDialog space={space} onClose={handleCloseModal} />}
-
-      {open[ModalType.REMOVE] && <DeleteSpaceDialog space={space} onClose={handleCloseModal} />}
-    </>
+          {open[ModalType.REMOVE] && <DeleteSpaceDialog space={space} onClose={handleCloseModal} />}
+        </>
+      }
+    />
   )
 }
 

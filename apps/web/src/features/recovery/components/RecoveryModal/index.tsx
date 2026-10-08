@@ -15,6 +15,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { RecoveryModalView } from '@views/features/recovery/components/RecoveryModal/RecoveryModalView'
 
 function InternalRecoveryModal({
   isOwner,
@@ -93,15 +94,7 @@ function InternalRecoveryModal({
     }
   }, [router])
 
-  return (
-    <div
-      className={`fixed inset-0 z-[3] flex items-center justify-center bg-[var(--color-background-main)] transition-opacity duration-300 ${
-        modal ? 'opacity-100' : 'pointer-events-none opacity-0'
-      }`}
-    >
-      {modal}
-    </div>
-  )
+  return <RecoveryModalView modal={modal} />
 }
 
 const useSidebar = () => {

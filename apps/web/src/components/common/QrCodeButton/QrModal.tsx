@@ -1,7 +1,4 @@
 import { type ReactElement } from 'react'
-import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
 import ModalDialog from '@/components/common/ModalDialog'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -9,6 +6,7 @@ import QRCode from '@/components/common/QRCode'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
+import { QrModalView } from '@views/components/common/QrCodeButton/QrModalView'
 
 const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const safeAddress = useSafeAddress()
@@ -21,49 +19,18 @@ const QrModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const nativeToken = chain?.nativeCurrency.symbol || ''
 
   return (
-    <ModalDialog
-      open
-      dialogTitle="Receive assets"
-      onClose={onClose}
-      hideChainIndicator
-      slotProps={{ paper: { sx: { borderRadius: '24px' } } }}
-    >
-      <div className="p-6">
-        <div
-          className="-mx-6 px-6 py-4"
-          style={{ backgroundColor: chain?.theme.backgroundColor, color: chain?.theme.textColor }}
-        >
-          {chainName} only &mdash; assets sent from other networks will be lost.
-        </div>
-
-        <Typography className="my-4">
-          Scan the QR or copy the address below to deposit {nativeToken} and any ERC‑20 or ERC‑721 token.
-        </Typography>
-
-        <div className="my-4 flex flex-col flex-wrap items-center justify-center">
-          <div className="mb-2 mt-2 rounded-lg border border-[var(--color-border-main)] p-2">
-            <QRCode value={qrCode} size={164} />
-          </div>
-
-          <Label className="gap-2">
-            <Switch checked={settings.shortName.qr} onCheckedChange={(checked) => dispatch(setQrShortName(checked))} />
-            <span>
-              QR code with chain prefix (<b>{chain?.shortName}:</b>)
-            </span>
-          </Label>
-
-          <div className="mt-4">
-            <EthHashInfo
-              address={safeAddress}
-              shortAddress={false}
-              showPrefix={qrPrefix.length > 0}
-              hasExplorer
-              showCopyButton
-            />
-          </div>
-        </div>
-      </div>
-    </ModalDialog>
+    <QrModalView
+      chainName={chainName}
+      nativeToken={nativeToken}
+      shortName={chain?.shortName}
+      themeBackgroundColor={chain?.theme.backgroundColor}
+      themeTextColor={chain?.theme.textColor}
+      showChainPrefix={settings.shortName.qr}
+      onShowChainPrefixChange={(checked) => dispatch(setQrShortName(checked))}
+      renderModal={(props) => <ModalDialog open onClose={onClose} {...props} />}
+      renderQrCode={({ size }) => <QRCode value={qrCode} size={size} />}
+      renderAddress={(props) => <EthHashInfo address={safeAddress} showPrefix={qrPrefix.length > 0} {...props} />}
+    />
   )
 }
 

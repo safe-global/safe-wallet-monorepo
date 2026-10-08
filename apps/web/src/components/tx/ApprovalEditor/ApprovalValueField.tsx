@@ -2,15 +2,9 @@ import { _formatNumber } from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { useController, useFormContext } from 'react-hook-form'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
-import css from './styles.module.css'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-import { approvalMethodDescription } from './ApprovalItem'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { ApprovalValueFieldView } from '@views/components/tx/ApprovalEditor/ApprovalValueFieldView'
 
 export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: ApprovalInfo; readOnly: boolean }) => {
   const { control } = useFormContext()
@@ -33,11 +27,7 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
     },
   })
 
-  const helperText = fieldState.error?.message ?? (fieldState.isDirty ? 'Save to apply changes' : '')
-  const hasError = !!fieldState.error
-
   const symbol = tx.tokenInfo?.symbol ?? ''
-  const labelText = approvalMethodDescription[tx.method](symbol, tx.tokenInfo?.type)
   const showAmountTooltip = tx.tokenInfo?.type === TokenType.ERC20
   const inputId = `${name}-approval-amount`
 
@@ -47,67 +37,22 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   }
 
   return (
-    <Combobox
-      items={selectValues}
-      // Bound alongside `inputValue`: Base UI resets the input to the selected value on close.
-      value={value ?? ''}
-      onValueChange={(next) => handleInputChange(typeof next === 'string' ? next : '')}
-      inputValue={value ?? ''}
-      onInputValueChange={handleInputChange}
-      // Always surface the presets regardless of the typed value
-      filter={() => true}
+    <ApprovalValueFieldView
+      name={name}
+      inputId={inputId}
       readOnly={readOnly}
+      value={value}
       inputRef={ref}
-    >
-      <Field data-invalid={hasError}>
-        <FieldLabel htmlFor={inputId} className={hasError ? 'text-destructive' : undefined}>
-          {showAmountTooltip ? (
-            <span className="inline-flex items-center gap-1">
-              {labelText}
-              <Tooltip>
-                <TooltipTrigger render={<span className="inline-flex" />}>
-                  <InfoIcon className="size-4 text-[var(--color-border-main)]" />
-                </TooltipTrigger>
-                <TooltipContent>Enter a decimal amount (e.g. 1.5), not a raw wei value.</TooltipContent>
-              </Tooltip>
-            </span>
-          ) : (
-            labelText
-          )}
-        </FieldLabel>
-
-        <ComboboxInput
-          id={inputId}
-          name={name}
-          readOnly={readOnly}
-          showTrigger={!readOnly}
-          autoComplete="off"
-          aria-invalid={hasError}
-          onBlur={onBlur}
-          onFocus={(event) => {
-            if (!readOnly) {
-              event.target.select()
-            }
-          }}
-          className={cn('w-full', css.approvalAmount)}
-        />
-
-        {!readOnly && (
-          <ComboboxContent>
-            <ComboboxList>
-              {(item: string) => (
-                <ComboboxItem key={item} value={item}>
-                  {item}
-                </ComboboxItem>
-              )}
-            </ComboboxList>
-          </ComboboxContent>
-        )}
-
-        {helperText && (
-          <FieldDescription className={hasError ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
-        )}
-      </Field>
-    </Combobox>
+      onBlur={onBlur}
+      onInputChange={handleInputChange}
+      selectValues={selectValues}
+      errorMessage={fieldState.error?.message}
+      hasError={!!fieldState.error}
+      isDirty={fieldState.isDirty}
+      method={tx.method}
+      symbol={symbol}
+      tokenType={tx.tokenInfo?.type}
+      showAmountTooltip={showAmountTooltip}
+    />
   )
 }

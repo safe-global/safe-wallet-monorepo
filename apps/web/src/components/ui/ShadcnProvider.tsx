@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
-import { cn } from '@/utils/cn'
+import { ShadcnProviderView } from '@views/components/ui/ShadcnProviderView'
 
 interface PortalContainerValue {
   ref: RefObject<HTMLDivElement | null>
@@ -83,9 +83,9 @@ export function ShadcnProvider({
 
   return (
     <PortalContainerContext.Provider value={value}>
-      <div className={cn('shadcn-scope', dark && 'dark', className)} ref={callbackRef}>
+      <ShadcnProviderView dark={dark} scopeClassName={className} containerRef={callbackRef}>
         {children}
-      </div>
+      </ShadcnProviderView>
     </PortalContainerContext.Provider>
   )
 }

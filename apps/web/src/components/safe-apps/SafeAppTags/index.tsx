@@ -1,8 +1,5 @@
-import { Chip } from '@/components/ui/chip'
-
 import { filterInternalCategories } from '@/components/safe-apps/utils'
-import css from './styles.module.css'
-import classnames from 'classnames'
+import { SafeAppTagsView } from '@views/components/safe-apps/SafeAppTags/SafeAppTagsView'
 
 type SafeAppTagsProps = {
   tags: string[]
@@ -12,15 +9,7 @@ type SafeAppTagsProps = {
 const SafeAppTags = ({ tags = [], compact }: SafeAppTagsProps) => {
   const displayedTags = filterInternalCategories(tags)
 
-  return (
-    <div className={classnames('flex flex-row flex-wrap gap-2', css.safeAppTagContainer, { [css.compact]: compact })}>
-      {displayedTags.map((tag) => (
-        <Chip size="lg" shape="tag" key={tag}>
-          {tag}
-        </Chip>
-      ))}
-    </div>
-  )
+  return <SafeAppTagsView tags={displayedTags} compact={compact} />
 }
 
 export default SafeAppTags

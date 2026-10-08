@@ -8,7 +8,21 @@
 const fs = require('fs')
 const path = require('path')
 const ts = require('typescript')
-const policy = require('./policy.json')
+
+const POLICY_DIR = path.join(__dirname, 'policy.d')
+
+/** policy.json plus every fragment in policy.d/, read on each call so new fragments apply without a restart. */
+function readPolicy() {
+  const parts = [path.join(__dirname, 'policy.json')]
+  if (fs.existsSync(POLICY_DIR))
+    for (const f of fs.readdirSync(POLICY_DIR).sort()) if (f.endsWith('.json')) parts.push(path.join(POLICY_DIR, f))
+  const merged = { packages: [], modules: [], widgets: [] }
+  for (const f of parts) {
+    const p = JSON.parse(fs.readFileSync(f, 'utf8'))
+    for (const key of Object.keys(merged)) merged[key].push(...(p[key] || []))
+  }
+  return merged
+}
 
 const WEB_SRC = path.resolve(__dirname, '../src')
 const VIEW_SRC = path.resolve(__dirname, '../../../storybook/src')
@@ -30,14 +44,16 @@ function resolveLocal(from, specifier) {
 
 const asAlias = (file) => '@/' + path.relative(WEB_SRC, file).replace(/(\/index)?\.(tsx?|js)$/, '')
 
-function checkPolicy(from, specifier) {
+function checkPolicy(from, specifier, policy = readPolicy()) {
   if (RUNTIME_PROVIDED.has(specifier)) return
   if (policy.packages.some((p) => specifier === p || specifier.startsWith(p + '/'))) return
-  if (policy.modules.includes(specifier)) return
+  const trusted = [...policy.modules, ...policy.widgets]
+  const allows = (spec) => trusted.some((t) => (t.endsWith('/') ? spec.startsWith(t) : spec === t))
+  if (allows(specifier)) return
   if (specifier.startsWith('@/public/') && ASSET.test(specifier)) return
   const file = resolveLocal(from, specifier)
   if (file && (file.startsWith(VIEW_SRC + path.sep) || ASSET.test(file))) return
-  if (file && file.startsWith(WEB_SRC + path.sep) && policy.modules.includes(asAlias(file))) return
+  if (file && file.startsWith(WEB_SRC + path.sep) && allows(asAlias(file))) return
   throw new Error(
     `${path.relative(VIEW_SRC, from)} imports "${specifier}", which apps/web/sandbox/policy.json does not allow for view code`,
   )
@@ -102,8 +118,7 @@ function collect(source, file) {
   return { usage, exportsNames, starExports }
 }
 
-module.exports = function viewLoader(source) {
-  const file = this.resourcePath
+function compile(source, file) {
   const { outputText } = ts.transpileModule(source, {
     fileName: file,
     compilerOptions: {
@@ -115,7 +130,121 @@ module.exports = function viewLoader(source) {
     },
   })
   const required = [...new Set([...outputText.matchAll(/require\("([^"]+)"\)/g)].map((m) => m[1]))]
-  for (const spec of required) checkPolicy(file, spec)
+  return { outputText, required }
+}
+
+// Browser and host globals that do not exist inside a view compartment (see src/sandbox/runtime.ts).
+const HOST_GLOBALS = new Set([
+  'window',
+  'document',
+  'globalThis',
+  'self',
+  'fetch',
+  'localStorage',
+  'sessionStorage',
+  'navigator',
+  'location',
+  'history',
+  'setTimeout',
+  'setInterval',
+  'clearTimeout',
+  'clearInterval',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'queueMicrotask',
+  'XMLHttpRequest',
+  'WebSocket',
+  'process',
+  'ResizeObserver',
+  'IntersectionObserver',
+  'MutationObserver',
+  'matchMedia',
+  'getComputedStyle',
+  'HTMLElement',
+  'HTMLInputElement',
+  'Element',
+  'Node',
+  'Event',
+  'CustomEvent',
+  'crypto',
+  'atob',
+  'btoa',
+  'URL',
+  'URLSearchParams',
+  'Blob',
+  'FileReader',
+  'alert',
+  'confirm',
+  'open',
+  'performance',
+  'structuredClone',
+])
+
+function hostGlobalUses(source, file) {
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const declared = new Set()
+  const found = []
+  const collect = (node) => {
+    if (
+      (ts.isVariableDeclaration(node) || ts.isParameter(node) || ts.isBindingElement(node)) &&
+      ts.isIdentifier(node.name)
+    )
+      declared.add(node.name.text)
+    if ((ts.isFunctionDeclaration(node) || ts.isImportSpecifier(node) || ts.isImportClause(node)) && node.name)
+      declared.add(node.name.text)
+    if (ts.isNamespaceImport(node)) declared.add(node.name.text)
+    ts.forEachChild(node, collect)
+  }
+  collect(sf)
+  const visit = (node) => {
+    if (ts.isIdentifier(node) && HOST_GLOBALS.has(node.text) && !declared.has(node.text)) {
+      const p = node.parent
+      const isName =
+        (ts.isPropertyAccessExpression(p) && p.name === node) ||
+        (ts.isPropertyAssignment(p) && p.name === node) ||
+        ts.isPropertySignature(p) ||
+        ts.isJsxAttribute(p) ||
+        ts.isTypeReferenceNode(p) ||
+        ts.isQualifiedName(p) ||
+        (ts.isMethodDeclaration(p) && p.name === node)
+      const inType = (() => {
+        for (let q = p; q; q = q.parent) if (ts.isTypeNode(q)) return true
+        return false
+      })()
+      if (!isName && !inType) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart())
+        found.push(
+          `${path.relative(VIEW_SRC, file)}:${line + 1} uses "${node.text}", which views do not have; pass what you need in as a prop`,
+        )
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sf)
+  return found
+}
+
+/** Returns the policy violations of one view module, without throwing. */
+function checkViewFile(file) {
+  const source = fs.readFileSync(file, 'utf8')
+  const { required } = compile(source, file)
+  const policy = readPolicy()
+  const errors = hostGlobalUses(source, file)
+  for (const spec of required) {
+    try {
+      checkPolicy(file, spec, policy)
+    } catch (e) {
+      errors.push(e.message)
+    }
+  }
+  return errors
+}
+
+module.exports = function viewLoader(source) {
+  const file = this.resourcePath
+  const { outputText, required } = compile(source, file)
+  const policy = readPolicy()
+  for (const spec of required) checkPolicy(file, spec, policy)
 
   const { usage, exportsNames, starExports } = collect(source, file)
   const lines = [`import { runView as __runView } from '@/sandbox/runtime'`]
@@ -156,3 +285,7 @@ module.exports = function viewLoader(source) {
   for (const spec of starExports) lines.push(`export * from ${JSON.stringify(spec)}`)
   return lines.join('\n') + '\n'
 }
+
+module.exports.checkViewFile = checkViewFile
+module.exports.VIEW_SRC = VIEW_SRC
+module.exports.WEB_SRC = WEB_SRC

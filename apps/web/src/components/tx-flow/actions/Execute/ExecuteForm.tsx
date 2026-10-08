@@ -1,13 +1,6 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type ReactNode, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
-import ModalDialog from '@/components/common/ModalDialog'
-import classNames from 'classnames'
-import ErrorMessage from '@/components/tx/ErrorMessage'
-import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -26,16 +19,12 @@ import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { ExecuteFormView } from '@views/components/tx-flow/actions/Execute/ExecuteFormView'
 
 export const ExecuteForm = ({
   safeTx,
@@ -189,127 +178,55 @@ export const ExecuteForm = ({
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
-          <AdvancedParams
-            willExecute
-            params={advancedParams}
-            recommendedGasLimit={gasLimit}
-            onFormSubmit={setAdvancedParams}
-            gasLimitError={gasLimitError}
-            willRelay={willRelay}
-            noFeeCampaign={
-              offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
-                ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
-                : undefined
-            }
-          />
-
-          {showExecutionSelector && (
-            <div className={css.noTopBorder}>
-              <ExecutionMethodSelector
-                executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
-                offer={offer}
-                showsProUpsell={showsProUpsell}
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Error messages */}
-        {cannotPropose ? (
-          <NonOwnerError />
-        ) : isExecutionLoop ? (
-          <ErrorMessage>
-            Cannot execute a transaction from the Safe account itself, please connect a different account.
-          </ErrorMessage>
-        ) : !walletCanPay && !willRelay ? (
-          <ErrorMessage level="info">
-            Your connected wallet doesn&apos;t have enough funds to execute this transaction.
-          </ErrorMessage>
-        ) : checkError ? (
-          <TxCheckError error={checkError} context="estimation" />
-        ) : null}
-
-        {refusalMessage && <ErrorMessage level="warning">{refusalMessage}</ErrorMessage>}
-
-        {/* CGW pre-relay simulation verdict */}
-        {relaySimError?.code === 'SIMULATION_FAILED' && (
-          <ErrorMessage>
-            This transaction is expected to fail on-chain, so it can&apos;t be relayed. Review the transaction or reject
-            it.
-          </ErrorMessage>
-        )}
-
-        <ModalDialog
-          open={relaySimError?.code === 'INDETERMINATE_SIMULATION'}
-          onClose={() => setRelaySimError(undefined)}
-          dialogTitle="Confirm execution"
-          chainId={currentChain?.chainId}
-          data-testid="relay-indeterminate-dialog"
-        >
-          <div className="px-6 pt-2 pb-4">
-            We couldn&apos;t review this transaction. If you execute and it fails, you&apos;ll still pay the network
-            fee. You can run the simulation yourself from the Safe Shield panel before deciding.
-          </div>
-
-          <div className="flex justify-between gap-2 p-6 pt-2">
-            <Button data-testid="relay-go-back-btn" variant="ghost" onClick={() => setRelaySimError(undefined)}>
-              Back
-            </Button>
-            <Button data-testid="relay-accept-unverified-btn" disabled={isSubmitLoading} onClick={() => submitTx(true)}>
-              Execute anyway
-            </Button>
-          </div>
-        </ModalDialog>
-
-        <div className="py-6">
-          <Separator bleed="6" />
-        </div>
-
-        <TxCardActions className={secondaryAction ? '[&>div]:w-full [&>div]:justify-between' : undefined}>
-          {secondaryAction}
-
-          {/* Shrink-wraps the split button so a full-width row keeps it at content width */}
-          <div>
-            <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
-              {(isOk) =>
-                tooltip ? (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <div>
-                          <SplitMenuButton
-                            selected={slotId}
-                            onChange={({ id }) => onChange?.(id)}
-                            options={options}
-                            disabled={!isOk || submitDisabled}
-                            loading={isSubmitLoading}
-                            tooltip={tooltip}
-                          />
-                        </div>
-                      }
-                    />
-                    <TooltipContent side="top">{tooltip}</TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <SplitMenuButton
-                    selected={slotId}
-                    onChange={({ id }) => onChange?.(id)}
-                    options={options}
-                    disabled={!isOk || submitDisabled}
-                    loading={isSubmitLoading}
-                    tooltip={tooltip}
-                  />
-                )
-              }
-            </CheckWallet>
-          </div>
-        </TxCardActions>
-      </form>
-    </>
+    <ExecuteFormView
+      onSubmit={handleSubmit}
+      showExecutionSelector={showExecutionSelector}
+      advancedParams={
+        <AdvancedParams
+          willExecute
+          params={advancedParams}
+          recommendedGasLimit={gasLimit}
+          onFormSubmit={setAdvancedParams}
+          gasLimitError={gasLimitError}
+          willRelay={willRelay}
+          noFeeCampaign={
+            offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
+              ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
+              : undefined
+          }
+        />
+      }
+      executionMethodSelector={
+        <ExecutionMethodSelector
+          executionMethod={executionMethod}
+          setExecutionMethod={setExecutionMethod}
+          offer={offer}
+          showsProUpsell={showsProUpsell}
+        />
+      }
+      cannotPropose={cannotPropose}
+      isExecutionLoop={isExecutionLoop}
+      walletCanPay={walletCanPay}
+      willRelay={willRelay}
+      checkError={checkError}
+      refusalMessage={refusalMessage}
+      relaySimErrorCode={relaySimError?.code}
+      onCloseRelayDialog={() => setRelaySimError(undefined)}
+      onExecuteAnyway={() => submitTx(true)}
+      isSubmitLoading={isSubmitLoading}
+      chainId={currentChain?.chainId}
+      secondaryAction={secondaryAction}
+      renderCheckWallet={(render) => (
+        <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!submitDisabled}>
+          {render}
+        </CheckWallet>
+      )}
+      slotId={slotId}
+      onChange={onChange}
+      options={options}
+      submitDisabled={submitDisabled}
+      tooltip={tooltip}
+    />
   )
 }
 

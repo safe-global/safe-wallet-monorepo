@@ -1,7 +1,6 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@/components/ui/button'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
@@ -16,6 +15,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { CancelRecoveryButtonView } from '@views/features/recovery/components/CancelRecoveryButton/CancelRecoveryButtonView'
 
 export default function CancelRecoveryButton({
   recovery,
@@ -57,22 +57,17 @@ export default function CancelRecoveryButton({
   }
 
   return (
-    <CheckWallet allowNonOwner checkNetwork>
-      {(isOk) => {
-        const isDisabled = isPending || (isOwner ? !isOk : !isOk || !isExpired)
-
-        return (
-          <Button
-            data-testid="cancel-recovery-btn"
-            onClick={onClick}
-            variant="destructive"
-            disabled={isDisabled}
-            size={compact ? 'sm' : 'action'}
-          >
-            Cancel
-          </Button>
-        )
-      }}
-    </CheckWallet>
+    <CancelRecoveryButtonView
+      isOwner={isOwner}
+      isExpired={isExpired}
+      isPending={isPending}
+      compact={compact}
+      onClick={onClick}
+      renderCheckWallet={(children) => (
+        <CheckWallet allowNonOwner checkNetwork>
+          {children}
+        </CheckWallet>
+      )}
+    />
   )
 }

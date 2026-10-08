@@ -1,5 +1,4 @@
 import { useEffect, type ReactElement } from 'react'
-import classnames from 'classnames'
 import { useForm } from 'react-hook-form'
 import * as metadata from '@/markdown/terms/version'
 
@@ -12,15 +11,14 @@ import {
 } from '@/store/cookiesAndTermsSlice'
 import { selectCookieBanner, openCookieBanner, closeCookieBanner } from '@/store/popupSlice'
 
-import css from './styles.module.css'
 import { COOKIE_AND_TERM_WARNING } from './constants'
-import WarningMessage from '@views/components/common/CookieAndTermBanner/WarningMessage'
-import IntroText from './IntroText'
 import CookieOptionsList from './CookieOptionsList'
-import CookieBannerActions from '@views/components/common/CookieAndTermBanner/CookieBannerActions'
+import {
+  CookieAndTermBannerView,
+  CookieBannerPopupView,
+} from '@views/components/common/CookieAndTermBanner/CookieAndTermBannerView'
 
-/** Overlay chrome for the first-visit popup, matching the other overlays in the design system. */
-export const POPUP_SURFACE = 'bg-popover text-popover-foreground rounded-lg shadow-lg ring-foreground/10 ring-1'
+export { POPUP_SURFACE } from '@views/components/common/CookieAndTermBanner/CookieAndTermBannerView'
 
 export const CookieAndTermBanner = ({ warningKey }: { warningKey?: CookieAndTermType }): ReactElement => {
   const warning = warningKey ? COOKIE_AND_TERM_WARNING[warningKey] : undefined
@@ -55,16 +53,13 @@ export const CookieAndTermBanner = ({ warningKey }: { warningKey?: CookieAndTerm
   }
 
   return (
-    <div data-testid="cookies-popup" className={css.container}>
-      {warning && <WarningMessage message={warning} />}
-      <form>
-        <IntroText lastUpdated={metadata.lastUpdated} />
-
-        <CookieOptionsList control={control} />
-
-        <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
-      </form>
-    </div>
+    <CookieAndTermBannerView
+      warning={warning}
+      lastUpdated={metadata.lastUpdated}
+      options={<CookieOptionsList control={control} />}
+      onAccept={handleAccept}
+      onAcceptAll={handleAcceptAll}
+    />
   )
 }
 
@@ -83,9 +78,9 @@ const CookieBannerPopup = (): ReactElement | null => {
   }, [dispatch, shouldOpen])
 
   return cookiePopup.open ? (
-    <div className={classnames(css.popup, POPUP_SURFACE)}>
+    <CookieBannerPopupView>
       <CookieAndTermBanner warningKey={cookiePopup.warningKey} />
-    </div>
+    </CookieBannerPopupView>
   ) : null
 }
 export default CookieBannerPopup

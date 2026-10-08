@@ -6,6 +6,7 @@ import useTxStepper from '../../useTxStepper'
 import { RecoverAccountFlowReview } from './RecoverAccountFlowReview'
 import { RecoverAccountFlowSetup } from './RecoverAccountFlowSetup'
 import { TxFlowType } from '@/services/analytics'
+import { RECOVER_ACCOUNT_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/RecoverAccount/copy'
 
 export enum RecoverAccountFlowFields {
   owners = 'owners',
@@ -34,8 +35,8 @@ function RecoverAccountFlow(): ReactElement {
 
   return (
     <TxLayout
-      title={step === 0 ? 'Start Account recovery' : 'Confirm transaction'}
-      subtitle="Change Account settings"
+      title={step === 0 ? COPY.setupTitle : COPY.reviewTitle}
+      subtitle={COPY.subtitle}
       icon={SaveAddressIcon}
       step={step}
       onBack={prevStep}

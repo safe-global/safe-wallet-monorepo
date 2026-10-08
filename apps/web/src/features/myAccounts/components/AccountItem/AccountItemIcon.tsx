@@ -1,5 +1,5 @@
 import SafeIcon from '@/components/common/SafeIcon'
-import css from '../AccountItems/styles.module.css'
+import { AccountItemIconView } from '@views/features/myAccounts/components/AccountItem/AccountItemIconView'
 
 export interface AccountItemIconProps {
   address: string
@@ -19,15 +19,18 @@ function AccountItemIcon({
   'data-testid': testId,
 }: AccountItemIconProps) {
   return (
-    <div className={css.accountItemIcon} data-testid={testId}>
-      <SafeIcon
-        address={address}
-        owners={owners && owners > 0 ? owners : undefined}
-        threshold={threshold && threshold > 0 ? threshold : undefined}
-        isMultiChainItem={isMultiChainItem}
-        chainId={chainId}
-      />
-    </div>
+    <AccountItemIconView
+      testId={testId}
+      safeIcon={
+        <SafeIcon
+          address={address}
+          owners={owners && owners > 0 ? owners : undefined}
+          threshold={threshold && threshold > 0 ? threshold : undefined}
+          isMultiChainItem={isMultiChainItem}
+          chainId={chainId}
+        />
+      }
+    />
   )
 }
 

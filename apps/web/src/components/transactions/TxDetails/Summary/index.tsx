@@ -1,20 +1,18 @@
+import { generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { memo, type ReactElement } from 'react'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { isCustomTxInfo, isMultiSendTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import type { SafeTransactionData } from '@safe-global/types-kit'
-import { dateString } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { Receipt } from '@/components/tx/ConfirmTxDetails/Receipt'
 import DecodedData from '../TxData/DecodedData'
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
-import { Separator } from '@/components/ui/separator'
-import DecoderLinks from '@views/components/transactions/TxDetails/Summary/DecoderLinks'
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { useLoadFeature } from '@/features/__core__'
 import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
+import { SummaryView } from '@views/components/transactions/TxDetails/Summary/SummaryView'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -74,59 +72,29 @@ const Summary = ({
   const transactionData = txData ?? txDetails?.txData
 
   return (
-    <>
-      {showMultisend && isMultisend && (
-        <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
+    <SummaryView
+      multisend={
+        showMultisend &&
+        isMultisend && <Multisend txData={transactionData} isExecuted={!!txDetails?.executedAt} compact />
+      }
+      showAuditLogFields={showAuditLogFields}
+      submittedAt={submittedAt}
+      executedAt={executedAt}
+      txHash={txHash}
+      txHashValue={generateDataRowValue(txHash ?? undefined, 'hash', true)}
+      historyFees={txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
+      showDetails={showDetails}
+      renderAccordion={(children) => (
+        <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
+          {children}
+        </ColorCodedTxAccordion>
       )}
-
-      {showAuditLogFields && submittedAt && (
-        <TxDataRow datatestid="tx-created-at" title="Created">
-          <div className="text-sm">{dateString(submittedAt)}</div>
-        </TxDataRow>
-      )}
-
-      {showAuditLogFields && executedAt && (
-        <TxDataRow datatestid="tx-executed-at" title="Executed">
-          <div className="text-sm">{dateString(executedAt)}</div>
-        </TxDataRow>
-      )}
-
-      {showAuditLogFields && txHash && (
-        <TxDataRow datatestid="tx-hash" title="Transaction hash">
-          {generateDataRowValue(txHash, 'hash', true)}{' '}
-        </TxDataRow>
-      )}
-
-      {txDetails?.executedAt && <HistoryFees txDetails={txDetails} />}
-
-      {showDetails && (
-        <div className="mt-4">
-          <ColorCodedTxAccordion txInfo={txInfo} txData={txData}>
-            <div className="flex flex-col gap-2">
-              {showDecodedData && (
-                <>
-                  <DecodedData txData={txData} toInfo={toInfo} />
-                  <Separator bleed="4" className="my-2" />
-                </>
-              )}
-
-              <div>
-                <DecoderLinks />
-
-                <Receipt
-                  safeTxData={safeTxData}
-                  txData={txData}
-                  txDetails={txDetails}
-                  txInfo={txInfo}
-                  withSignatures
-                  grid
-                />
-              </div>
-            </div>
-          </ColorCodedTxAccordion>
-        </div>
-      )}
-    </>
+      showDecodedData={showDecodedData}
+      decodedData={<DecodedData txData={txData} toInfo={toInfo} />}
+      receipt={
+        <Receipt safeTxData={safeTxData} txData={txData} txDetails={txDetails} txInfo={txInfo} withSignatures grid />
+      }
+    />
   )
 }
 

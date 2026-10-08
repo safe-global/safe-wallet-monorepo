@@ -4,6 +4,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
 import { ReviewRemoveGuard } from './ReviewRemoveGuard'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { REMOVE_GUARD_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/RemoveGuard/copy'
 
 export type RemoveGuardFlowProps = {
   address: string
@@ -18,7 +19,7 @@ const RemoveGuardFlow = ({ address }: RemoveGuardFlowProps) => {
   return (
     <TxFlow
       initialData={{ address }}
-      subtitle="Remove guard"
+      subtitle={COPY.subtitle}
       eventCategory={TxFlowType.REMOVE_GUARD}
       ReviewTransactionComponent={ReviewRemoveGuardStep}
     />

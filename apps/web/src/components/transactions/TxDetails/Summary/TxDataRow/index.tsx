@@ -1,9 +1,9 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { Typography } from '@/components/ui/typography'
 import { DataRow } from '@/components/common/Table/DataRow'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import { TxDataRowValueView } from '@views/components/transactions/TxDetails/Summary/TxDataRow/TxDataRowView'
 
 export const TxDataRow = DataRow
 
@@ -21,32 +21,32 @@ export const generateDataRowValue = (
       const customAvatar = addressInfo?.logoUri
 
       return (
-        <Typography variant="paragraph-small">
-          <NamedAddressInfo
-            address={value}
-            name={addressInfo?.name}
-            customAvatar={customAvatar}
-            showAvatar={type === 'address'}
-            avatarSize={20}
-            showPrefix={false}
-            shortAddress={type !== 'address'}
-            hasExplorer={hasExplorer}
-            highlight4bytes
-          />
-        </Typography>
+        <TxDataRowValueView
+          value={value}
+          content={
+            <NamedAddressInfo
+              address={value}
+              name={addressInfo?.name}
+              customAvatar={customAvatar}
+              showAvatar={type === 'address'}
+              avatarSize={20}
+              showPrefix={false}
+              shortAddress={type !== 'address'}
+              hasExplorer={hasExplorer}
+              highlight4bytes
+            />
+          }
+        />
       )
     case 'rawData':
     case 'bytes':
       return (
-        <Typography variant="paragraph-small">
-          <HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />
-        </Typography>
+        <TxDataRowValueView
+          value={value}
+          content={<HexEncodedData highlightFirstBytes={false} limit={66} hexData={value} />}
+        />
       )
     default:
-      return (
-        <Typography variant="paragraph-small" className="break-all">
-          {value}
-        </Typography>
-      )
+      return <TxDataRowValueView value={value} />
   }
 }

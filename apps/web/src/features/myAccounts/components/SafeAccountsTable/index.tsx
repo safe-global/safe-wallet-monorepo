@@ -1,9 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { TableBody, TableHead, TableHeader, TableRow, TableSortIcon, tableVariants } from '@/components/ui/table'
-import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
 import {
   SAFE_ACCOUNT_COLUMNS,
   SELECT_COLUMN,
@@ -26,6 +23,7 @@ import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAddressBookWriteScope } from '@/features/spaces'
+import { SafeAccountsTableView } from '@views/features/myAccounts/components/SafeAccountsTable/SafeAccountsTableView'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
 type RenameTarget = { name: string; address: string; chainIds: string[] }
@@ -267,142 +265,84 @@ export default function SafeAccountsTable({
   if (items.length === 0) return null
 
   return (
-    <div data-testid={testId} className="w-full">
-      <div
-        className={cn(
-          'w-full',
-          embedded ? 'overflow-x-visible' : 'overflow-x-auto',
-          !embedded && tableCss.container,
-          // `bordered={false}` drops the panel's edge — for tables nested in something that draws its own.
-          !embedded && !bordered && tableCss.containerBorderless,
-        )}
-      >
-        {/* Raw <table> instead of the ui <Table> wrapper: we own the horizontal-scroll container
-            above so `embedded` tables can opt out of it. The shadcn table sub-components are used
-            throughout. */}
-        <table
-          className={cn(tableVariants({ variant: 'panel' }), tableCss.accounts)}
-          style={{ tableLayout: 'fixed', minWidth: embedded ? undefined : minWidth }}
-        >
-          {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
-              column is left unsized so it flexes to fill the card, while the stat columns stay fixed. */}
-          {embedded && (
-            <colgroup>
-              {visibleColumns.map((column) => (
-                <col key={column.id} style={column.id === 'name' ? undefined : { width: column.width }} />
-              ))}
-            </colgroup>
-          )}
+    <SafeAccountsTableView
+      testId={testId}
+      embedded={embedded}
+      bordered={bordered}
+      minWidth={minWidth}
+      visibleColumns={visibleColumns}
+      sort={sort}
+      sortableColumns={sortableColumns}
+      hasSelection={Boolean(selection)}
+      onSort={handleSort}
+      isReorderable={Boolean(reorder)}
+      reorderableBody={
+        reorder ? (
+          <ReorderableBody
+            groups={displayGroups}
+            columns={visibleColumns}
+            similarWarnings={similarWarnings}
+            similarityGroups={similarityGroups}
+            expanded={expanded}
+            setExpanded={setExpanded}
+            renderActions={renderActions}
+            onRename={onRename}
+            onLinkClick={onLinkClick}
+            getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
+            onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
+            onReorder={handleReorder}
+            onOverviewsLoaded={handleOverviewsLoaded}
+          />
+        ) : null
+      }
+      rows={
+        reorder
+          ? null
+          : lines.flatMap(({ line, groupKey, group }, index) => {
+              const clusterId = similarityGroups?.get(line.address.toLowerCase())
+              const bandHeader = bandHeaderAt(
+                index,
+                (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
+                visibleColumns.length,
+              )
 
-          {!embedded && (
-            <TableHeader>
-              <TableRow>
-                {visibleColumns.map((column) => {
-                  const active = sort.orderBy === column.sortKey
-                  const canSort = column.sortable && column.sortKey && sortableColumns
-                  return (
-                    <TableHead
-                      key={column.id}
-                      aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
-                      // Indents the NAME label so it sits above the account name text rather than the
-                      // avatar (see styles.module.css) — a leading checkbox column already offsets
-                      // the cell, so it needs less.
-                      data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
-                      className="px-2 py-2.5"
-                      style={{ width: column.width, textAlign: column.align ?? 'left' }}
-                    >
-                      {canSort ? (
-                        <span
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => handleSort(column.sortKey as SafeSortColumn)}
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault()
-                              handleSort(column.sortKey as SafeSortColumn)
-                            }
-                          }}
-                          data-testid={`account-sort-${column.id}`}
-                          className="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 uppercase select-none"
-                        >
-                          {column.label}
-                          <TableSortIcon direction={active ? sort.order : undefined} />
-                        </span>
-                      ) : (
-                        column.label
-                      )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            </TableHeader>
-          )}
+              const row = (
+                <SafeAccountTableRow
+                  key={line.key}
+                  line={line}
+                  columns={visibleColumns}
+                  expanded={line.expandable ? expanded.has(groupKey) : undefined}
+                  warning={similarWarnings?.get(line.address.toLowerCase())}
+                  highlighted={Boolean(clusterId)}
+                  renderActions={renderActions}
+                  renderName={renderName}
+                  onRename={onRename}
+                  checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
+                  onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
+                  onToggle={line.expandable ? () => toggle(groupKey) : undefined}
+                  onLinkClick={onLinkClick}
+                  showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
+                  onOverviewsLoaded={handleOverviewsLoaded}
+                />
+              )
 
-          {reorder ? (
-            <ReorderableBody
-              groups={displayGroups}
-              columns={visibleColumns}
-              similarWarnings={similarWarnings}
-              similarityGroups={similarityGroups}
-              expanded={expanded}
-              setExpanded={setExpanded}
-              renderActions={renderActions}
-              onRename={onRename}
-              onLinkClick={onLinkClick}
-              getCheckbox={selection ? (group, line) => getRowCheckbox(group, line, selection) : undefined}
-              onSelectToggle={selection ? (line, next) => selection.onToggle(line, next) : undefined}
-              onReorder={handleReorder}
-              onOverviewsLoaded={handleOverviewsLoaded}
-            />
-          ) : (
-            <TableBody>
-              {lines.flatMap(({ line, groupKey, group }, index) => {
-                const clusterId = similarityGroups?.get(line.address.toLowerCase())
-                const bandHeader = bandHeaderAt(
-                  index,
-                  (i) => similarityGroups?.get(lines[i].line.address.toLowerCase()),
-                  visibleColumns.length,
-                )
-
-                const row = (
-                  <SafeAccountTableRow
-                    key={line.key}
-                    line={line}
-                    columns={visibleColumns}
-                    expanded={line.expandable ? expanded.has(groupKey) : undefined}
-                    warning={similarWarnings?.get(line.address.toLowerCase())}
-                    highlighted={Boolean(clusterId)}
-                    renderActions={renderActions}
-                    renderName={renderName}
-                    onRename={onRename}
-                    checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
-                    onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
-                    onToggle={line.expandable ? () => toggle(groupKey) : undefined}
-                    onLinkClick={onLinkClick}
-                    showDivider={!embedded && index < lines.length - 1 && lines[index + 1].groupKey !== groupKey}
-                    onOverviewsLoaded={handleOverviewsLoaded}
-                  />
-                )
-
-                return bandHeader ? [bandHeader, row] : [row]
-              })}
-            </TableBody>
-          )}
-        </table>
-      </div>
-
-      {renameTarget && (
-        <EntryDialog
-          handleClose={() => setRenameTarget(null)}
-          defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
-          chainIds={renameTarget.chainIds}
-          scope={renameScope}
-          disableAddressInput
-          // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
-          className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
-          overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
-        />
-      )}
-    </div>
+              return bandHeader ? [bandHeader, row] : [row]
+            })
+      }
+      isRenaming={Boolean(renameTarget)}
+      allowRenameInDialog={allowRenameInDialog}
+      renderRenameDialog={(props) =>
+        renameTarget && (
+          <EntryDialog
+            handleClose={() => setRenameTarget(null)}
+            defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
+            chainIds={renameTarget.chainIds}
+            scope={renameScope}
+            disableAddressInput
+            {...props}
+          />
+        )
+      }
+    />
   )
 }

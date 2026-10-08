@@ -1,18 +1,13 @@
 import { LabelValue } from '@safe-global/store/gateway/types'
 import type { LabelQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
-import css from './styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { GroupLabelView } from '@views/components/transactions/GroupLabel/GroupLabelView'
 
 const GroupLabel = ({ item }: { item: LabelQueuedItem }): ReactElement => {
   const { safe } = useSafeInfo()
 
-  const label =
-    item.label === LabelValue.Queued
-      ? `${item.label} - transaction with nonce ${safe.nonce} needs to be executed first`
-      : item.label
-
-  return <div className={css.container}>{label}</div>
+  return <GroupLabelView label={item.label} isQueued={item.label === LabelValue.Queued} nonce={safe.nonce} />
 }
 
 export default GroupLabel

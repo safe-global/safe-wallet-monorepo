@@ -1,8 +1,7 @@
-import type { ReactNode } from 'react'
 import { type AllSafeItems } from '@/hooks/safes'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
+import { OnboardingSafesListView } from '@views/features/spaces/components/SelectSafesOnboarding/components/OnboardingSafesListView'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']
 
@@ -21,10 +20,6 @@ interface SafeListProps {
   isAtLimit: boolean
 }
 
-const SectionLabel = ({ children }: { children: ReactNode }) => (
-  <p className="px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">{children}</p>
-)
-
 const OnboardingSafesList = ({
   trustedSafes,
   ownedSafes,
@@ -39,12 +34,12 @@ const OnboardingSafesList = ({
   const selection = { selectedKeys, onToggle, isAtLimit }
 
   return (
-    <div className="flex w-full min-w-0 flex-col gap-4">
-      {flaggedAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
-
-      {trustedSafes.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <SectionLabel>My accounts</SectionLabel>
+    <OnboardingSafesListView
+      hasFlaggedAddresses={flaggedAddresses.size > 0}
+      hasTrustedSafes={trustedSafes.length > 0}
+      hasOwnedSafes={ownedSafes.length > 0}
+      renderTable={(section) =>
+        section === 'trusted' ? (
           <SafeAccountsTable
             items={trustedSafes}
             columns={COLUMNS}
@@ -53,12 +48,7 @@ const OnboardingSafesList = ({
             selection={selection}
             data-testid="onboarding-trusted-table"
           />
-        </div>
-      )}
-
-      {ownedSafes.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <SectionLabel>Owned safe accounts</SectionLabel>
+        ) : (
           <SafeAccountsTable
             items={ownedSafes}
             columns={COLUMNS}
@@ -67,9 +57,9 @@ const OnboardingSafesList = ({
             selection={selection}
             data-testid="onboarding-owned-table"
           />
-        </div>
-      )}
-    </div>
+        )
+      }
+    />
   )
 }
 

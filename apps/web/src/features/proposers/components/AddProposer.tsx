@@ -1,7 +1,5 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
-import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
-import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import {
@@ -11,11 +9,7 @@ import {
   signProposerDelegation,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
-import {
-  PROPOSER_LABEL_PLACEHOLDER,
-  SMART_CONTRACT_PROPOSER_ERROR,
-  SMART_CONTRACT_PROPOSER_INFO,
-} from '@/features/proposers/constants'
+import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
@@ -32,13 +26,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
-import { XIcon } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
   type CreateDelegateDto,
@@ -47,9 +34,7 @@ import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import SignerSelector from '@/components/common/SignerSelector'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import SignatureIcon from '@/public/images/transactions/signature.svg'
+import { AddProposerView } from '@views/features/proposers/components/AddProposerView'
 
 type AddProposerProps = {
   onClose: () => void
@@ -238,165 +223,32 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
     onClose()
   }
 
-  if (multiSigInitiated) {
-    return (
-      <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>
-        <DialogContent padding="none" showCloseButton={false}>
-          <DialogHeader className="flex-row items-center justify-between">
-            <DialogTitle>Signature collection initiated</DialogTitle>
-            <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onClose}>
-              <XIcon />
-            </Button>
-          </DialogHeader>
-
-          <Separator />
-
-          <div className="p-4">
-            <Alert variant="info" className="mb-4">
-              <AlertSeverityIcon variant="info" />
-              <AlertDescription>1 of {parentThreshold} signatures collected</AlertDescription>
-            </Alert>
-
-            <Typography variant="paragraph-small" className="mb-4 block">
-              The delegation request has been created as an off-chain message on your parent Safe. Other owners of the
-              parent Safe need to sign it before the proposer can be added.
-            </Typography>
-
-            <Typography variant="paragraph-small" color="muted">
-              The other parent Safe owners can find and sign this pending delegation on the proposer settings page of
-              this Safe.
-            </Typography>
-          </div>
-
-          <Separator />
-
-          {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
-          <DialogFooter className="p-6">
-            <DialogActions confirmLabel="Done" onConfirm={onClose} />
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    )
-  }
-
   return (
-    <Dialog open onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <DialogContent padding="none" showCloseButton={false}>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <DialogHeader className="flex-row items-center justify-between">
-              <DialogTitle data-testid="untrusted-token-warning">Add proposer</DialogTitle>
-
-              <Button variant="ghost" size="icon-sm" aria-label="close" onClick={onCancel}>
-                <XIcon />
-              </Button>
-            </DialogHeader>
-
-            <Separator />
-
-            <div className="p-4">
-              {isMultiSigRequired && (
-                <Alert variant="info" className="mb-4">
-                  <AlertSeverityIcon variant="info" />
-                  <AlertDescription>
-                    This requires {parentThreshold} of {parentOwners?.length ?? '?'} parent Safe owner signatures to
-                    complete.
-                  </AlertDescription>
-                </Alert>
-              )}
-
-              <div className="mb-4">
-                <Typography variant="paragraph-small">
-                  You&apos;re about to grant this address the ability to propose transactions. To complete the setup,
-                  confirm with a signature from your connected wallet.
-                </Typography>
-              </div>
-
-              <Alert variant="info">
-                <AlertSeverityIcon variant="info" />
-                <AlertDescription>
-                  The proposer&apos;s address is publicly visible. The name is saved on this device only.
-                </AlertDescription>
-              </Alert>
-
-              <div className="my-4">
-                <AddressBookInput
-                  name="address"
-                  label="Address"
-                  validate={validateAddress}
-                  variant="outlined"
-                  fullWidth
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <NameInput name="name" label="Name" required inputSize="hero" />
-              </div>
-
-              {error && (
-                <div className="mt-4">
-                  <ErrorMessage error={error}>{getProposerErrorText(error, 'Error adding proposer')}</ErrorMessage>
-                </div>
-              )}
-
-              {blockedReason && (
-                <div className="mt-4">
-                  <ErrorMessage>{blockedReason}</ErrorMessage>
-                </div>
-              )}
-
-              <NetworkWarning action="sign" />
-
-              {delegatorOptions.length > 1 && (
-                <div className="mt-4">
-                  <Typography variant="h4" className="mb-2 flex items-center gap-2">
-                    <SignatureIcon className="size-4" />
-                    Delegate as
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <span tabIndex={0} className="inline-flex">
-                            <InfoIcon className="size-4 text-[var(--color-border-main)]" />
-                          </span>
-                        }
-                      />
-                      <TooltipContent>
-                        Your connected wallet controls multiple Safe accounts that are owners of this Safe. Select which
-                        account to create the proposer under.
-                      </TooltipContent>
-                    </Tooltip>
-                  </Typography>
-
-                  <SignerSelector
-                    options={delegatorOptions}
-                    value={effectiveDelegator}
-                    onChange={setSelectedDelegator}
-                    label="Delegator account"
-                  />
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            {/* eslint-disable-next-line no-restricted-syntax -- p-6: bespoke footer padding around DialogActions (item A), no token */}
-            <DialogFooter className="p-6">
-              <DialogActions
-                onCancel={onCancel}
-                confirmLabel="Continue"
-                confirmTestId="submit-proposer-btn"
-                confirmType="submit"
-                confirmLoading={isLoading}
-                confirmDisabled={isParentLoading || !formState.isValid}
-                confirmCheckWallet={{ checkNetwork: !isLoading, allowProposer: false }}
-                confirmTooltip={isSmartContractError ? SMART_CONTRACT_PROPOSER_INFO : undefined}
-              />
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <FormProvider {...methods}>
+      <AddProposerView
+        multiSigInitiated={multiSigInitiated}
+        isMultiSigRequired={isMultiSigRequired}
+        parentThreshold={parentThreshold}
+        parentOwnersCount={parentOwners?.length}
+        isLoading={isLoading}
+        isParentLoading={isParentLoading}
+        isValid={formState.isValid}
+        isSmartContractError={isSmartContractError}
+        hasError={!!error}
+        blockedMessage={blockedReason && <ErrorMessage>{blockedReason}</ErrorMessage>}
+        delegatorOptions={delegatorOptions}
+        effectiveDelegator={effectiveDelegator}
+        onDelegatorChange={setSelectedDelegator}
+        onClose={onClose}
+        onCancel={onCancel}
+        onSubmit={onSubmit}
+        renderAddressInput={(props) => <AddressBookInput {...props} validate={validateAddress} />}
+        renderNameInput={(props) => <NameInput {...props} />}
+        renderErrorMessage={(fallback) =>
+          error && <ErrorMessage error={error}>{getProposerErrorText(error, fallback)}</ErrorMessage>
+        }
+      />
+    </FormProvider>
   )
 }
 

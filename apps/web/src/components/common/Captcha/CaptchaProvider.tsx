@@ -17,6 +17,7 @@ import CaptchaModal from './CaptchaModal'
 initializeCaptchaHeaders()
 
 const TURNSTILE_SCRIPT_URL = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
+const TURNSTILE_SCRIPT_STRATEGY = 'afterInteractive'
 
 // Isolated sub-component so useCaptchaToken only runs when the widget is actually needed.
 function CaptchaWidget() {
@@ -29,7 +30,7 @@ function CaptchaWidget() {
     <>
       <Script
         src={TURNSTILE_SCRIPT_URL}
-        strategy="afterInteractive"
+        strategy={TURNSTILE_SCRIPT_STRATEGY}
         onReady={() => setIsScriptReady(true)}
         onError={resolveCaptchaReady}
       />

@@ -1,11 +1,7 @@
-import ShieldIcon from '@/public/images/settings/permissions/shield.svg'
-import { Typography } from '@/components/ui/typography'
-
 import { getBrowserPermissionDisplayValues } from '@/hooks/safe-apps/permissions'
-import PermissionsCheckbox from '@views/components/safe-apps/PermissionCheckbox'
-
 import type { AllowedFeatures, AllowedFeatureSelection } from '@views/components/safe-apps/types'
 import { isBrowserFeature } from '@views/components/safe-apps/types'
+import { AllowedFeaturesListView } from '@views/components/safe-apps/SafeAppsInfoModal/AllowedFeaturesListView'
 
 type SafeAppsInfoAllowedFeaturesProps = {
   features: AllowedFeatureSelection[]
@@ -17,31 +13,16 @@ const AllowedFeaturesList: React.FC<SafeAppsInfoAllowedFeaturesProps> = ({
   onFeatureSelectionChange,
 }): React.ReactElement => {
   return (
-    <>
-      <ShieldIcon className="mx-auto mb-2 size-6 text-[var(--color-primary-main)]" />
-
-      <Typography variant="paragraph-small" className="text-center text-[var(--color-text-secondary)]">
-        Manage the features Safe Apps can use
-      </Typography>
-
-      <div className="mx-2 my-6 text-left">
-        <Typography>This Safe App is requesting permission to use:</Typography>
-
-        <div className="m-4 flex flex-col gap-4">
-          {features
-            .filter(({ feature }) => isBrowserFeature(feature))
-            .map(({ feature, checked }, index) => (
-              <PermissionsCheckbox
-                key={index}
-                name="checkbox"
-                checked={checked}
-                onChange={(_, checked) => onFeatureSelectionChange(feature, checked)}
-                label={getBrowserPermissionDisplayValues(feature).displayName}
-              />
-            ))}
-        </div>
-      </div>
-    </>
+    <AllowedFeaturesListView
+      features={features
+        .filter(({ feature }) => isBrowserFeature(feature))
+        .map(({ feature, checked }) => ({
+          feature,
+          checked,
+          label: getBrowserPermissionDisplayValues(feature).displayName,
+        }))}
+      onFeatureSelectionChange={onFeatureSelectionChange}
+    />
   )
 }
 

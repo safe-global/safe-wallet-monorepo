@@ -10,6 +10,8 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 import { SWAP_WIDGET_URL } from '../../constants'
 
+const ALLOWED_FEATURES = 'clipboard-read; clipboard-write'
+
 function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement | null {
   const isDarkMode = useDarkMode()
   const chain = useCurrentChain()
@@ -26,12 +28,7 @@ function FallbackSwapWidget({ fromToken }: { fromToken?: string }): ReactElement
   }
 
   return (
-    <AppFrame
-      appUrl={appData.url}
-      allowedFeaturesList="clipboard-read; clipboard-write"
-      safeAppFromManifest={appData}
-      isNativeEmbed
-    />
+    <AppFrame appUrl={appData.url} allowedFeaturesList={ALLOWED_FEATURES} safeAppFromManifest={appData} isNativeEmbed />
   )
 }
 

@@ -1,15 +1,10 @@
 import { useContext } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import ArrowIconNW from '@/public/images/common/arrow-up-right.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSpendingLimit } from '@/features/spending-limits'
-import Track from '@/components/common/Track'
-import { ASSETS_EVENTS } from '@/services/analytics/events/assets'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { TxModalContext } from '@/components/tx-flow'
-import css from '@/components/common/AssetActionButton/styles.module.css'
+import { SendButtonView } from '@views/components/balances/AssetsTable/SendButtonView'
 
 const SendButton = ({
   tokenInfo,
@@ -29,43 +24,7 @@ const SendButton = ({
 
   return (
     <CheckWallet allowSpendingLimit={!!spendingLimit}>
-      {(isOk) => (
-        <Track {...ASSETS_EVENTS.SEND}>
-          {onlyIcon ? (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span>
-                    <Button
-                      variant="ghost"
-                      data-testid="send-button"
-                      onClick={onSendClick}
-                      disabled={!isOk}
-                      aria-label="Send"
-                      className={`size-7 min-w-7 p-1.5 ${css.assetActionIconButton}`}
-                    >
-                      <ArrowIconNW />
-                    </Button>
-                  </span>
-                }
-              />
-              {isOk && <TooltipContent>Send</TooltipContent>}
-            </Tooltip>
-          ) : (
-            <Button
-              data-testid="send-button"
-              variant={light ? 'secondary' : 'default'}
-              onClick={onSendClick}
-              disabled={!isOk}
-              // eslint-disable-next-line no-restricted-syntax -- faithful css-module port of .sendButton (h-8 + px:var(--space-2)), pixel-identical; bespoke value has no variant
-              className="h-8 px-[var(--space-2)]"
-            >
-              <ArrowIconNW />
-              Send
-            </Button>
-          )}
-        </Track>
-      )}
+      {(isOk) => <SendButtonView isOk={isOk} onClick={onSendClick} light={light} onlyIcon={onlyIcon} />}
     </CheckWallet>
   )
 }

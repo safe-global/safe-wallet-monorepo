@@ -6,7 +6,6 @@ import type {
 import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
 
-import { List } from '@/components/ui/list'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
@@ -14,6 +13,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { Operation } from '@safe-global/store/gateway/types'
 import { type SafeTransaction } from '@safe-global/types-kit'
+import { BatchTxListView } from '@views/features/batching/components/BatchSidebar/BatchTxListView'
 
 const extractMultiSendActions = (txPreview: TransactionPreview | undefined): MultiSend[] => {
   if (!txPreview) {
@@ -78,22 +78,20 @@ const BatchTxList = ({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelet
   const multiSendActions = extractMultiSendActions(decodedBatch)
 
   return (
-    <>
-      <List className="gap-4">
-        {txItems.map((item, index) => (
-          <BatchTxItem
-            key={item.id}
-            count={index + 1}
-            {...item}
-            txDecoded={multiSendActions?.[index]}
-            onDelete={onDelete}
-            addressInfoIndex={decodedBatch?.txData.addressInfoIndex ?? {}}
-            // @ts-ignore
-            tokenInfoIndex={decodedBatch?.txData.tokenInfoIndex ?? {}}
-          />
-        ))}
-      </List>
-    </>
+    <BatchTxListView>
+      {txItems.map((item, index) => (
+        <BatchTxItem
+          key={item.id}
+          count={index + 1}
+          {...item}
+          txDecoded={multiSendActions?.[index]}
+          onDelete={onDelete}
+          addressInfoIndex={decodedBatch?.txData.addressInfoIndex ?? {}}
+          // @ts-ignore
+          tokenInfoIndex={decodedBatch?.txData.tokenInfoIndex ?? {}}
+        />
+      ))}
+    </BatchTxListView>
   )
 }
 

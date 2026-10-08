@@ -1,9 +1,4 @@
 import useGasPrice from '@/hooks/useGasPrice'
-import ModalDialog from '@/components/common/ModalDialog'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useSafeAddress from '@/hooks/useSafeAddress'
@@ -30,6 +25,7 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SpeedUpModalView } from '@views/features/speedup/components/SpeedUpModal/SpeedUpModalView'
 
 type Props = {
   open: boolean
@@ -162,69 +158,34 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     return null
   }
 
-  if (safeTxHasSignatures) {
-    return (
-      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction" forceBackdrop>
-        <div className="p-6">
-          <div className="mb-4 flex items-center justify-center">
-            <RocketSpeedup className="size-[90px]" />
-          </div>
-
-          <Typography data-testid="speedup-summary">
-            This will speed up the pending transaction by{' '}
-            <Typography as="span" variant="paragraph-bold" className="inline">
-              replacing
-            </Typography>{' '}
-            the original gas parameters with new ones.
-          </Typography>
-
-          <div className="mt-4">
-            {speedUpFee && signerNonce && (
-              <GasParams
-                params={{
-                  // nonce: safeTx?.data?.nonce,
-                  userNonce: signerNonce,
-                  gasLimit: typeof gasLimit === 'undefined' ? null : BigInt(gasLimit),
-                  maxFeePerGas: speedUpFee.maxFeePerGas,
-                  maxPriorityFeePerGas: speedUpFee.maxPriorityFeePerGas,
-                }}
-                isExecution={true}
-                isEIP1559={isEIP1559}
-                willRelay={false}
-              />
-            )}
-          </div>
-          <div className="[&:not(:empty)]:mt-6">
-            <NetworkWarning action="speed up a transaction" />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-2 p-4 pb-6">
-          <Button variant="ghost" onClick={onCancel}>
-            Cancel
-          </Button>
-
-          <Button disabled={isDisabled || isWrongChain} onClick={onSubmit}>
-            {isDisabled ? <Spinner className="size-5" /> : 'Confirm'}
-          </Button>
-        </div>
-      </ModalDialog>
-    )
-  }
-
   return (
-    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction" forceBackdrop>
-      <div className="p-6">
-        <div className="mb-4 flex items-center justify-center">
-          <RocketSpeedup className="size-[90px]" />
-        </div>
-
-        <Typography data-testid="speedup-summary">
-          Is this transaction taking too long? Speed it up by using the &quot;speed up&quot; option in your connected
-          wallet.
-        </Typography>
-      </div>
-    </ModalDialog>
+    <SpeedUpModalView
+      open={open}
+      safeTxHasSignatures={safeTxHasSignatures}
+      isDisabled={isDisabled}
+      isWrongChain={isWrongChain}
+      gasParams={
+        speedUpFee &&
+        signerNonce && (
+          <GasParams
+            params={{
+              // nonce: safeTx?.data?.nonce,
+              userNonce: signerNonce,
+              gasLimit: typeof gasLimit === 'undefined' ? null : BigInt(gasLimit),
+              maxFeePerGas: speedUpFee.maxFeePerGas,
+              maxPriorityFeePerGas: speedUpFee.maxPriorityFeePerGas,
+            }}
+            isExecution={true}
+            isEIP1559={isEIP1559}
+            willRelay={false}
+          />
+        )
+      }
+      renderNetworkWarning={(action) => <NetworkWarning action={action} />}
+      onCancel={onCancel}
+      onClose={handleClose}
+      onSubmit={onSubmit}
+    />
   )
 }
 

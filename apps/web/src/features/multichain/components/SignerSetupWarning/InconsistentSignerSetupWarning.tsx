@@ -1,7 +1,5 @@
 import { useIsMultichainSafe } from '../../hooks/useIsMultichainSafe'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import { trackEvent } from '@/services/analytics'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useAppSelector } from '@/store'
@@ -10,12 +8,15 @@ import { useAllSafesGrouped } from '@/hooks/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { getDeviatingSetups, getSafeSetups } from '../../utils'
-import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import {
+  ChainIndicatorListView,
+  InconsistentSignerSetupWarningView,
+} from '@views/features/multichain/components/SignerSetupWarning/InconsistentSignerSetupWarningView'
 
 /**
  * ChainIndicatorList component displays a list of chains with their logos and names
@@ -25,20 +26,13 @@ export const ChainIndicatorList = ({ chainIds }: { chainIds: string[] }) => {
   const { configs } = useChains()
 
   return (
-    <>
-      {chainIds.map((chainId, index) => {
-        const chain = configs.find((chain) => chain.chainId === chainId)
-        return (
-          <div key={chainId} className="relative top-[5px] inline-flex flex-wrap">
-            <ChainIndicator responsive key={chainId} chainId={chainId} showUnknown={false} onlyLogo={true} />
-            <Typography className="relative top-[2px] mx-1">
-              {chain && chain.chainName}
-              {index === chainIds.length - 1 ? '.' : ','}
-            </Typography>
-          </div>
-        )
-      })}
-    </>
+    <ChainIndicatorListView
+      chains={chainIds.map((chainId) => ({
+        chainId,
+        chainName: configs.find((chain) => chain.chainId === chainId)?.chainName,
+      }))}
+      renderChainIndicator={(props) => <ChainIndicator {...props} />}
+    />
   )
 }
 
@@ -79,27 +73,11 @@ export const InconsistentSignerSetupWarning = () => {
   }
 
   return (
-    <Alert variant="warning" outlined={false}>
-      <AlertSeverityIcon variant="warning" />
-      <AlertTitle className="font-bold">You have different signers across different networks.</AlertTitle>
-      <AlertDescription>
-        This could break approvals and you may risk losing control of this Safe. First, switch to the affected network
-        and review the signer setup for this Safe.
-        <div className="mt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-foreground"
-            data-testid="review-signers-btn"
-            onClick={() => {
-              trackEvent(ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS)
-              handleReviewSigners()
-            }}
-          >
-            Review signers
-          </Button>
-        </div>
-      </AlertDescription>
-    </Alert>
+    <InconsistentSignerSetupWarningView
+      onReviewSigners={() => {
+        trackEvent(ATTENTION_PANEL_EVENTS.REVIEW_SIGNERS)
+        handleReviewSigners()
+      }}
+    />
   )
 }

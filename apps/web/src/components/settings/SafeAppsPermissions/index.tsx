@@ -10,11 +10,7 @@ import { useCallback, useMemo } from 'react'
 import type { AllowedFeatures } from '@/components/safe-apps/types'
 import { PermissionStatus } from '@/components/safe-apps/types'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
-import PermissionsCheckbox from '@/components/safe-apps/PermissionCheckbox'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import SettingsCard from '@/components/settings/SettingsCard'
+import { SafeAppsPermissionsView } from '@views/components/settings/SafeAppsPermissions/SafeAppsPermissionsView'
 
 const SafeAppsPermissions = (): ReactElement => {
   const { allSafeApps } = useSafeApps()
@@ -92,81 +88,31 @@ const SafeAppsPermissions = (): ReactElement => {
     return appNames
   }, [allSafeApps])
 
-  if (!allSafeApps.length) {
-    return <div />
-  }
+  const items = domains.map((domain) => ({
+    domain,
+    appName: appNames[domain],
+    safePermissions: safePermissions[domain]?.map(({ parentCapability, caveats }) => ({
+      capability: parentCapability,
+      label: getSafePermissionDisplayValues(parentCapability).displayName,
+      checked: !isUserRestricted(caveats),
+    })),
+    browserPermissions: browserPermissions[domain]?.map(({ feature, status }) => ({
+      feature,
+      label: getBrowserPermissionDisplayValues(feature).displayName,
+      checked: status === PermissionStatus.GRANTED ? true : false,
+    })),
+  }))
 
   return (
-    <SettingsCard title="Safe Apps permissions">
-      {!domains.length && (
-        <Typography className="text-muted-foreground">There are no Safe Apps using permissions.</Typography>
-      )}
-      {domains.map((domain) => (
-        <div
-          key={domain}
-          data-testid="app-permissions-item"
-          className="mb-4 rounded-lg border border-[var(--color-border-light)]"
-        >
-          <div className="grid grid-cols-1 border-b border-[var(--color-border-light)] px-6 py-4 sm:grid-cols-12">
-            <div className="py-2 sm:col-span-5">
-              <Typography variant="paragraph-bold" as="h5">
-                {appNames[domain]}
-              </Typography>
-              <Typography variant="paragraph-small">{domain}</Typography>
-            </div>
-            <div className="grid grid-cols-1 gap-x-4 py-2 sm:col-span-7 sm:grid-cols-2 2xl:grid-cols-3">
-              {safePermissions[domain]?.map(({ parentCapability, caveats }) => {
-                return (
-                  <div key={parentCapability}>
-                    <PermissionsCheckbox
-                      name={parentCapability}
-                      label={getSafePermissionDisplayValues(parentCapability).displayName}
-                      onChange={(_, checked: boolean) => handleSafePermissionsChange(domain, parentCapability, checked)}
-                      checked={!isUserRestricted(caveats)}
-                    />
-                  </div>
-                )
-              })}
-              {browserPermissions[domain]?.map(({ feature, status }) => {
-                return (
-                  <div key={feature}>
-                    <PermissionsCheckbox
-                      name={feature.toString()}
-                      label={getBrowserPermissionDisplayValues(feature).displayName}
-                      onChange={(_, checked: boolean) => handleBrowserPermissionsChange(domain, feature, checked)}
-                      checked={status === PermissionStatus.GRANTED ? true : false}
-                    />
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-          <div className="flex justify-end gap-4 px-6 py-3">
-            <Link
-              href="#"
-              className="no-underline hover:no-underline"
-              onClick={(event) => handleAllowAll(event, domain)}
-            >
-              Allow all
-            </Link>
-            <Link
-              href="#"
-              className="text-destructive no-underline hover:no-underline"
-              onClick={(event) => handleClearAll(event, domain)}
-            >
-              Clear all
-            </Link>
-            <Link
-              href="#"
-              className="flex items-center text-destructive"
-              onClick={(event) => handleRemoveApp(event, domain)}
-            >
-              <DeleteIcon className="size-4" />
-            </Link>
-          </div>
-        </div>
-      ))}
-    </SettingsCard>
+    <SafeAppsPermissionsView
+      hasApps={!!allSafeApps.length}
+      items={items}
+      onSafePermissionChange={handleSafePermissionsChange}
+      onBrowserPermissionChange={handleBrowserPermissionsChange}
+      onAllowAll={handleAllowAll}
+      onClearAll={handleClearAll}
+      onRemoveApp={handleRemoveApp}
+    />
   )
 }
 

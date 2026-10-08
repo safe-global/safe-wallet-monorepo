@@ -1,6 +1,7 @@
 import SignInButton from '../SignInButton'
 import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
+import { SignInOptionsView } from '@views/features/spaces/components/SignInOptions/SignInOptionsView'
 
 interface SignInOptionsProps {
   afterSignIn: () => void
@@ -12,27 +13,19 @@ const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsPr
   const showOidc = !$isDisabled && $isReady
 
   return (
-    <div className="flex w-full flex-col gap-2.5">
-      <SignInButton
-        afterSignIn={afterSignIn}
-        redirectLoading={redirectLoading}
-        buttonStyle="walletBtnSecondary"
-        buttonText={{ connected: 'Continue with', disconnected: 'Connect wallet' }}
-      />
-
-      {showOidc && (
-        <>
-          <div className="flex items-center gap-3 py-0.5">
-            <span className="h-px flex-1 bg-border" />
-            <span className="text-[13px] font-medium tracking-[0.5px] text-muted-foreground">OR</span>
-            <span className="h-px flex-1 bg-border" />
-          </div>
-
-          <GoogleSignInButton />
-          <EmailSignInButton />
-        </>
+    <SignInOptionsView
+      renderSignInButton={(props) => (
+        <SignInButton afterSignIn={afterSignIn} redirectLoading={redirectLoading} {...props} />
       )}
-    </div>
+      oidcButtons={
+        showOidc ? (
+          <>
+            <GoogleSignInButton />
+            <EmailSignInButton />
+          </>
+        ) : undefined
+      }
+    />
   )
 }
 

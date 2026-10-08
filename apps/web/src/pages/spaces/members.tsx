@@ -3,11 +3,12 @@ import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
 import { SpacesFeature, useFeatureFlagRedirect } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
+import { PageMainView } from '@views/pages/PageMainView'
 
 export default function SpaceMembersPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  const spaces = useLoadFeature(SpacesFeature)
+  const { SpaceMembersPage: FeatureSpaceMembersPage } = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
   if (!router.isReady || !spaceId) return null
@@ -18,9 +19,9 @@ export default function SpaceMembersPage() {
         <title>{`${BRAND_NAME} – Workspace members`}</title>
       </Head>
 
-      <main>
-        <spaces.SpaceMembersPage spaceId={spaceId as string} />
-      </main>
+      <PageMainView>
+        <FeatureSpaceMembersPage spaceId={spaceId as string} />
+      </PageMainView>
     </>
   )
 }
