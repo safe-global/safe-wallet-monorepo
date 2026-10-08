@@ -240,7 +240,7 @@ export function verifyConnectWalletBtnDisplayed() {
   return cy.get(connectWalletBtn).should('be.visible')
 }
 export function typeWalletName(name) {
-  cy.get(main.nameInput).type(name).should('have.value', name)
+  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function clearWalletName() {

@@ -109,7 +109,7 @@ export function verifyDataDoesNotExist(data) {
 export function inputOwnerName(index, name) {
   getOwnerNameInput(index)
     .clear()
-    .type(name)
+    .type(name, main.nameTypingOptions)
     .then(($input) => {
       const typedValue = $input.val()
       expect(name).to.contain(typedValue)
@@ -198,8 +198,7 @@ export function inputNameAndAddress(name, address) {
 }
 
 export function inputName(name) {
-  // Without a delay between keystrokes the form does not show the name length error.
-  cy.get(main.nameInput).type(name, { delay: 10 }).should('have.value', name)
+  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function verifyIncorrectAddressErrorMessage() {
