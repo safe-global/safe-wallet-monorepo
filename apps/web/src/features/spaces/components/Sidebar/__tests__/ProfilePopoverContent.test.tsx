@@ -23,6 +23,13 @@ jest.mock('@/components/common/Identicon', () => ({
   default: ({ address }: { address: string }) => <div data-testid="identicon" data-address={address} />,
 }))
 
+jest.mock('@/components/common/CopyAddressIconButton', () => ({
+  __esModule: true,
+  default: ({ address }: { address: string }) => (
+    <span role="button" aria-label="Copy address" data-address={address} />
+  ),
+}))
+
 describe('ProfilePopoverContent', () => {
   it('renders the avatar, display name, role and sign-out button', () => {
     render(<ProfilePopoverContent avatarName="Alice A" displayName="Alice" role="ADMIN" onSignOut={jest.fn()} />)
@@ -145,6 +152,60 @@ describe('ProfilePopoverContent', () => {
     )
 
     expect(screen.getAllByTestId('sidebar-profile-sign-out')).toHaveLength(1)
+  })
+
+  it('offers a copy button for the signer address, carrying the full address', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    const copyButtons = screen.getAllByRole('button', { name: 'Copy address' })
+    expect(copyButtons).toHaveLength(1)
+    expect(copyButtons[0]).toHaveAttribute('data-address', SIGNER)
+  })
+
+  it('offers a copy button for each address when both sections are shown', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(
+      screen.getAllByRole('button', { name: 'Copy address' }).map((el) => el.getAttribute('data-address')),
+    ).toEqual([SIGNER, CONNECTED])
+  })
+
+  it('offers no copy button for an email account', () => {
+    render(
+      <ProfilePopoverContent avatarName="alice@safe.global" displayName="alice@safe.global" onSignOut={jest.fn()} />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Copy address' })).not.toBeInTheDocument()
+  })
+
+  it('offers only the connected wallet copy button for an email account with a wallet', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="alice@safe.global"
+        displayName="alice@safe.global"
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    const copyButtons = screen.getAllByRole('button', { name: 'Copy address' })
+    expect(copyButtons).toHaveLength(1)
+    expect(copyButtons[0]).toHaveAttribute('data-address', CONNECTED)
   })
 
   it('calls onSignOut once per click', async () => {

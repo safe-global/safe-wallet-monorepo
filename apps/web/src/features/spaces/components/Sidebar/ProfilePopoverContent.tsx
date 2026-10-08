@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 
@@ -41,6 +42,7 @@ export const ProfilePopoverContent = ({
           <InitialsAvatar name={avatarName} size="medium" rounded />
         )}
         <span className={css.profileName}>{displayName}</span>
+        {signerAddress && <CopyAddressIconButton address={signerAddress} />}
       </div>
 
       <span className={css.profileSectionCaption}>Manages your Safe Pro subscription.</span>
@@ -57,6 +59,7 @@ export const ProfilePopoverContent = ({
           <div className={css.profileIdentity}>
             <Identicon address={connectedWallet} size={32} />
             <span className={css.profileName}>{shortenAddress(connectedWallet)}</span>
+            <CopyAddressIconButton address={connectedWallet} />
           </div>
 
           <span className={css.profileSectionCaption}>Signs and executes transactions.</span>
