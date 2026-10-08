@@ -17,6 +17,7 @@ import {
   AttestationVerificationStatus,
   CheckEventType,
   CheckStatus,
+  DisputeOutcome,
   UNVERIFIED_ATTESTATION,
   type AttestationVerification,
   type NormalizedCheckEvent,
@@ -131,6 +132,50 @@ describe('deriveCheckState — precedence table', () => {
   it('TIMED_OUT for a frozen dispute past the deadline', () => {
     const events = [proposedEvent(), request(), disputeResolvedEvent()]
     expect(derive(events, '151')).toBe(CheckStatus.TIMED_OUT)
+  })
+})
+
+describe('Gnosis Chain deployment arbitration', () => {
+  it('settles council denial without OracleResult, even after the deadline', () => {
+    const denied = disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_DENIED })
+    expect(derive([proposedEvent(), request(), denied], '999')).toBe(CheckStatus.MALICIOUS)
+    expect(derive([denied, attestedEvent()], '999', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.MALICIOUS,
+    )
+  })
+
+  it('never approves from a council ruling without an attestation', () => {
+    const approved = disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED })
+    expect(derive([proposedEvent(), request(), approved])).toBe(CheckStatus.IN_PROGRESS)
+  })
+
+  it('keeps a frozen dispute inconclusive before and after its arbitration deadline', () => {
+    const event = { ...disputeResolvedEvent(), type: CheckEventType.DISPUTE_TRIGGERED as const, deadlineBlock: '200' }
+    expect(derive([request(), event], '140')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '160')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '200')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '201')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([event, disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED })], '160')).toBe(
+      CheckStatus.TIMED_OUT,
+    )
+    expect(derive([event, disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_DENIED })], '160')).toBe(
+      CheckStatus.MALICIOUS,
+    )
+    expect(derive([event, attestedEvent()], '201', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.BENIGN,
+    )
+  })
+
+  it.each([
+    CheckEventType.DISPUTE_OUT_OF_SCOPE,
+    CheckEventType.ARBITRATION_TIMED_OUT,
+    CheckEventType.REQUEST_TIMED_OUT,
+  ] as const)('shows %s as inconclusive before the request deadline', (type) => {
+    const event = { ...disputeResolvedEvent(), type, deadlineBlock: '200' }
+    expect(derive([proposedEvent(), request(), event], '140')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([event, attestedEvent()], '140', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.BENIGN,
+    )
   })
 })
 

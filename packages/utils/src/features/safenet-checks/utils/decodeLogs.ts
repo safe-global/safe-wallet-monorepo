@@ -163,6 +163,17 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
         outcome: Number(args.outcome),
         slashed: str(args.slashed),
       }
+    case CheckEventType.DISPUTE_TRIGGERED:
+      return {
+        ...base,
+        type: CheckEventType.DISPUTE_TRIGGERED,
+        requestId: args.requestId as Hex,
+        deadlineBlock: str(args.deadline),
+      }
+    case CheckEventType.DISPUTE_OUT_OF_SCOPE:
+    case CheckEventType.ARBITRATION_TIMED_OUT:
+    case CheckEventType.REQUEST_TIMED_OUT:
+      return { ...base, type: dispatch.type, requestId: args.requestId as Hex }
     default:
       return null
   }

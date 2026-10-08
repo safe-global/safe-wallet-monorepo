@@ -11,7 +11,6 @@ import {
   SAFENET_CONSENSUS_ADDRESS,
   SAFENET_COORDINATOR_ADDRESS,
   SAFENET_ORACLE_ADDRESSES,
-  SAFENET_RPC_URLS,
   TARGETED_WINDOW_BACK_BLOCKS,
 } from '../constants'
 import {
@@ -68,8 +67,6 @@ export type SafenetReaderConfig = {
   oracles: string[]
 }
 
-const IS_DEV = process.env.NODE_ENV !== 'production'
-
 const isProposed = (event: NormalizedCheckEvent): event is OracleProposedEvent =>
   event.type === CheckEventType.ORACLE_PROPOSED
 
@@ -101,7 +98,6 @@ export class SafenetReader {
 
   private urlIndex = 0
   private currentProvider: JsonRpcProvider | null = null
-  private chainIdChecked = false
   private readonly groupKeyCache = new Map<string, { x: string; y: string }>()
   private readonly holds = new Map<JsonRpcProvider, number>()
 
@@ -116,7 +112,7 @@ export class SafenetReader {
   private provider(): JsonRpcProvider {
     if (!this.currentProvider) {
       const url = this.rpcUrls[this.urlIndex]
-      if (!url) throw new Error('Safenet reader: no RPC URLs configured (set SAFENET_RPC_URLS)')
+      if (!url) throw new Error('Safenet reader: no RPC URL configured')
       this.currentProvider = new JsonRpcProvider(url, Number(this.chainId), {
         staticNetwork: true,
         batchMaxCount: PROVIDER_BATCH_MAX_COUNT,
@@ -180,26 +176,6 @@ export class SafenetReader {
       }
     }
     throw lastError
-  }
-
-  /** Dev-only, one-shot: warn if the RPC's chain id disagrees with config. */
-  private async assertChainId(provider: JsonRpcProvider): Promise<void> {
-    if (this.chainIdChecked || !IS_DEV) return
-    try {
-      const actual = Number(await provider.send('eth_chainId', []))
-      // Consume the one shot only after a successful probe.
-      this.chainIdChecked = true
-      if (actual !== Number(this.chainId)) {
-        console.error(
-          `[safenet-reader] chain id mismatch: SAFENET_CHAIN_ID=${this.chainId} but the RPC ` +
-            `reports ${actual}. It feeds the EIP-712 domain every attestation is verified ` +
-            `against, so attestations will verify as INVALID and every check will read as ` +
-            `failed. Fix SAFENET_CHAIN_ID / SAFENET_RPC_URLS.`,
-        )
-      }
-    } catch {
-      // A development aid, never a hard gate on the read path.
-    }
   }
 
   private async getLogsChunked(
@@ -324,8 +300,6 @@ export class SafenetReader {
       throw new Error(`Safenet reader: invalid safeTxHash '${safeTxHash}'`)
     }
     return this.withProvider(async (provider) => {
-      await this.assertChainId(provider)
-
       const latest = await provider.getBlock('latest')
       if (!latest) throw new Error('Safenet reader: could not read the chain head')
       const head = latest.number
@@ -343,9 +317,9 @@ export class SafenetReader {
       })
       // Sorted before the requestId cap below — eth_getLogs ordering is a node
       // convention with no guarantee behind it.
-      const consensusEvents = decodeLogs(consensusLogs).sort(
-        (a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex,
-      )
+      const consensusEvents = decodeLogs(consensusLogs)
+        .filter((event) => !('oracle' in event) || this.oracles.includes(event.oracle.toLowerCase()))
+        .sort((a, b) => a.blockNumber - b.blockNumber || a.logIndex - b.logIndex)
 
       // Only proposals naming an allowlisted oracle may drive the oracle read:
       // `proposeOracleTransaction` is permissionless with a caller-chosen oracle
@@ -513,14 +487,21 @@ export class SafenetReader {
   }
 }
 
-let defaultReader: SafenetReader | null = null
+let defaultReader: { rpcUrl: string; reader: SafenetReader } | null = null
 
-/** The process-wide reader singleton, built from the env constants. */
-export const getSafenetReader = (): SafenetReader =>
-  (defaultReader ??= new SafenetReader({
-    rpcUrls: SAFENET_RPC_URLS,
-    chainId: SAFENET_CHAIN_ID,
-    consensus: SAFENET_CONSENSUS_ADDRESS,
-    coordinator: SAFENET_COORDINATOR_ADDRESS,
-    oracles: SAFENET_ORACLE_ADDRESSES,
-  }))
+/** Reuse the reader while the config-service RPC URL is unchanged. */
+export const getSafenetReader = (rpcUrl: string): SafenetReader => {
+  if (defaultReader?.rpcUrl !== rpcUrl) {
+    defaultReader = {
+      rpcUrl,
+      reader: new SafenetReader({
+        rpcUrls: [rpcUrl],
+        chainId: SAFENET_CHAIN_ID,
+        consensus: SAFENET_CONSENSUS_ADDRESS,
+        coordinator: SAFENET_COORDINATOR_ADDRESS,
+        oracles: SAFENET_ORACLE_ADDRESSES,
+      }),
+    }
+  }
+  return defaultReader.reader
+}

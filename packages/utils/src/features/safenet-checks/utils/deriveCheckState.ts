@@ -2,6 +2,7 @@ import {
   AttestationVerificationStatus,
   CheckEventType,
   CheckStatus,
+  DisputeOutcome,
   type AttestationVerification,
   type NormalizedCheckEvent,
 } from '../types'
@@ -19,7 +20,7 @@ type DeriveCheckStateInput = {
 export const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bigint | null => {
   let deadline: bigint | null = null
   for (const event of events) {
-    if (event.type === CheckEventType.REQUEST_CREATED) {
+    if (event.type === CheckEventType.REQUEST_CREATED || event.type === CheckEventType.DISPUTE_TRIGGERED) {
       const value = BigInt(event.deadlineBlock)
       if (deadline === null || value > deadline) deadline = value
     }
@@ -27,14 +28,22 @@ export const deadlineBlockOf = (events: ReadonlyArray<NormalizedCheckEvent>): bi
   return deadline
 }
 
-/**
- * True if the oracle has SETTLED on a rejection. Only `OracleResult` counts: a
- * single sentinel's `Committed`/`Revealed` is one bonded vote, not a verdict —
- * a split goes to arbitration, which can still approve, and arbitrated
- * rejections re-emit `OracleResult` alongside `DisputeResolved`.
- */
+/** A council denial settles rejection without emitting another OracleResult. */
 const hasNegativeVerdict = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
-  events.some((event) => event.type === CheckEventType.ORACLE_RESULT && event.approved === false)
+  events.some(
+    (event) =>
+      (event.type === CheckEventType.ORACLE_RESULT && event.approved === false) ||
+      (event.type === CheckEventType.DISPUTE_RESOLVED && event.outcome === DisputeOutcome.RESOLVED_DENIED),
+  )
+
+const hasInconclusiveResult = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
+  events.some(
+    (event) =>
+      event.type === CheckEventType.DISPUTE_TRIGGERED ||
+      event.type === CheckEventType.DISPUTE_OUT_OF_SCOPE ||
+      event.type === CheckEventType.ARBITRATION_TIMED_OUT ||
+      event.type === CheckEventType.REQUEST_TIMED_OUT,
+  )
 
 const hasAnyProposal = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
   events.some((event) => event.type === CheckEventType.ORACLE_PROPOSED || event.type === CheckEventType.PLAIN_PROPOSED)
@@ -60,7 +69,7 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
  *  2. Attested → `BENIGN` only if the FROST signature verified,
  *     `VERIFICATION_FAILED` if it did not, else `AWAITING_VERIFICATION`.
  *     Above the deadline check so a late attestation beats `TIMED_OUT`.
- *  3. Past the deadline block → `TIMED_OUT` (incl. frozen disputes).
+ *  3. Frozen dispute, explicit timeout/out-of-scope or past the deadline block → `TIMED_OUT`.
  *  4. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
  *     NOT `BENIGN` without a verified attestation).
  *  5. Any proposal event → `SUBMITTED`.
@@ -87,6 +96,8 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
     if (attestation.status === AttestationVerificationStatus.INVALID) return CheckStatus.VERIFICATION_FAILED
     return CheckStatus.AWAITING_VERIFICATION
   }
+
+  if (hasInconclusiveResult(events)) return CheckStatus.TIMED_OUT
 
   const deadline = deadlineBlockOf(events)
   if (deadline !== null && headBlock !== null && BigInt(headBlock) > deadline) {
