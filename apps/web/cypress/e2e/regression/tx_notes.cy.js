@@ -8,14 +8,17 @@ import * as msg_confirmation_modal from '../pages/modals/message_confirmation.pa
 import * as navigation from '../pages/navigation.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
 import notes from '../../fixtures/notes.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+let signer, signer2, signerAddress
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+})
 
 function happyPathToStepTwo() {
   createtx.typeRecipientAddress(constants.EOA)

@@ -55,7 +55,7 @@ describe('[SMOKE] Load Safe tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('[SMOKE] Verify non-smart contract address is not allowed in safe address', () => {
-    safe.inputAddress(constants.DEFAULT_OWNER_ADDRESS)
+    safe.inputAddress(constants.defaultOwnerAddress())
     safe.verifyAddressError()
   })
 })

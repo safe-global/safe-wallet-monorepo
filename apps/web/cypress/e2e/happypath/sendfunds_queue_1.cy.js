@@ -12,10 +12,13 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as navigation from '../pages/navigation.page.js'
 import * as fundSafes from '../../fixtures/safes/funds.json'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const receiver = walletCredentials.OWNER_2_WALLET_ADDRESS
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let receiver, signer
+before(() => {
+  receiver = walletCredentials.OWNER_2_WALLET_ADDRESS
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 const tokenAmount = '0.0001'
 const netwrok = 'sepolia'
@@ -33,13 +36,14 @@ let apiKit,
 let safes = []
 let safesData = []
 
-const provider = new ethers.InfuraProvider(netwrok, Cypress.env('INFURA_API_KEY'))
-const privateKeys = [walletCredentials.OWNER_1_PRIVATE_KEY, walletCredentials.OWNER_2_PRIVATE_KEY]
-
-const signers = createSigners(privateKeys, provider)
-
-const owner1Signer = signers[0]
-const owner2Signer = signers[1]
+let provider, privateKeys, owner1Signer, owner2Signer
+before(() => {
+  privateKeys = [walletCredentials.OWNER_1_PRIVATE_KEY, walletCredentials.OWNER_2_PRIVATE_KEY]
+  cy.env(['INFURA_API_KEY']).then(({ INFURA_API_KEY }) => {
+    provider = new ethers.InfuraProvider(netwrok, INFURA_API_KEY)
+    ;[owner1Signer, owner2Signer] = createSigners(privateKeys, provider)
+  })
+})
 
 function visit(url) {
   cy.visit(url)

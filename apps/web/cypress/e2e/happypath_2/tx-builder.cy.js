@@ -5,13 +5,16 @@ import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let safeAppSafes = []
 let iframeSelector
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+let signer, signer2
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+})
 
 describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 }, () => {
   before(async () => {

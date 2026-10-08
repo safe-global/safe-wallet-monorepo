@@ -101,7 +101,7 @@ export function clickOnAddrressSortBtn() {
 }
 
 export function verifyEntriesOrder(option = 'ascending') {
-  let address = constants.DEFAULT_OWNER_ADDRESS
+  let address = constants.defaultOwnerAddress()
   let name = sortSafe1
   if (option == 'descending') {
     address = constants.RECIPIENT_ADDRESS

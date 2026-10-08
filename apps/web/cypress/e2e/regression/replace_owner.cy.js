@@ -7,10 +7,13 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 const ownerName = 'Replacement Signer Name'
 
@@ -65,7 +68,7 @@ describe('Replace Owners tests', () => {
       owner.typeOwnerAddress(getMockAddress().replace('A', 'a'))
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidChecksum)
 
-      owner.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS)
+      owner.typeOwnerAddress(constants.defaultOwnerAddress())
       owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.alreadyAdded)
     })
   })

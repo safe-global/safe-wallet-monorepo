@@ -61,6 +61,10 @@ describe('[VISUAL] Feature screenshots', { defaultCommandTimeout: 60000, ...cons
 
 Use `wallet.connectSignerViaStorage(signer, url)` in `beforeEach` — it seeds storage and skips the slow UI flow of the older `connectSigner()` (still present in ~18 legacy call sites; don't add new ones).
 
+### Credentials and environment values
+
+`Cypress.env()` no longer exists (Cypress 16). Read wallet keys from `walletCredentials` (`support/credentials.js`) inside hooks or tests, never at module level: a root `before` hook fills it, from `cy.env()` on staging and from the scenario in isolated runs. Read the default owner with `constants.defaultOwnerAddress()` at the same places. Both live on the window, because the support file and each spec are separate bundles. Read other secrets with `cy.env([...])` in a hook. Read public values (URLs, flags, scenario data) with `Cypress.expose()`; add a new one to `exposedValues()` in `e2e/environment/cypress.mjs`.
+
 ### Key utilities
 
 | Utility                     | Location                        | Purpose                                       |

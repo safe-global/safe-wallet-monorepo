@@ -11,11 +11,14 @@ import * as create_wallet from '../pages/create_wallet.pages.js'
 import * as owner from '../pages/owners.pages.js'
 
 import { suspendOutreachModal } from '../pages/modals.page.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 const sidebarNavItem = '[data-testid="sidebar-list-item"]'
 
@@ -60,7 +63,7 @@ describe('Multichain setup tests', { defaultCommandTimeout: 60000 }, () => {
         address: { value: safeAddress },
         chainId: '137',
         threshold: 1,
-        owners: [{ value: constants.DEFAULT_OWNER_ADDRESS }],
+        owners: [{ value: constants.defaultOwnerAddress() }],
         fiatTotal: '0',
         queued: 0,
       },
