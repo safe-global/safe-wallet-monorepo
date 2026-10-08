@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import TxCard from '@/components/tx-flow/common/TxCard'
@@ -11,6 +11,8 @@ import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
+import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import { Execute } from '@/components/tx-flow/actions/Execute'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
 import useTxPreview from '../confirmation-views/useTxPreview'
@@ -27,6 +29,7 @@ const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
  */
 export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
   const chainId = useChainId()
+  const scope = useSafeScope()
   const { safeTx, setSafeTx, setSafeTxError } = useContext(SafeTxContext)
   const { txId, onPrev } = useContext(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
@@ -35,19 +38,29 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   const [txPreview] = useTxPreview(safeTx?.data)
   const [isReloaded, setIsReloaded] = useState(false)
 
+  const scopeSafeAddress = scope?.safeAddress
+  const scopeSdk = scope?.sdk
+  const txSenderScope = useMemo<TxSenderScope | undefined>(
+    () => (scopeSafeAddress ? { chainId, safeAddress: scopeSafeAddress, sdk: scopeSdk } : undefined),
+    [chainId, scopeSafeAddress, scopeSdk],
+  )
+  const scopedSafeQuery = scope?.chain ? `${scope.chain.shortName}:${scope.safeAddress}` : undefined
+
   useEffect(() => {
     if (!txId) return
-    createExistingTx(chainId, txId)
+    if (txSenderScope && !txSenderScope.sdk) return
+    createExistingTx(chainId, txId, undefined, txSenderScope)
       .then((signedTx) => {
         setSafeTx(signedTx)
         setIsReloaded(true)
       })
       .catch(setSafeTxError)
-  }, [txId, chainId, setSafeTx, setSafeTxError])
+  }, [txId, chainId, txSenderScope, setSafeTx, setSafeTxError])
 
   const executeLater = () => {
     setTxFlow(undefined)
-    router.push({ pathname: AppRoutes.transactions.queue, query: safeLinkQuery })
+    const query = scopedSafeQuery ? { ...safeLinkQuery, safe: scopedSafeQuery } : safeLinkQuery
+    router.push({ pathname: AppRoutes.transactions.queue, query })
   }
 
   return (

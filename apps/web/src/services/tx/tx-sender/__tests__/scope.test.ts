@@ -7,7 +7,10 @@ import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { registerActiveScope } from '@/components/tx-flow/safe-scope/activeScope'
 import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
 import { getAndValidateSafeSDK, getSafeProvider, getSafeSDKWithSigner } from '../sdk'
-import { createMultiSendCallOnlyTx, createTx } from '../create'
+import { createExistingTx, createMultiSendCallOnlyTx, createTx } from '../create'
+import { faker } from '@faker-js/faker'
+import { createMockSafeTransaction } from '@/tests/transactions'
+import { multisigExecutionDetailsBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { getReadOnlyCurrentGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { safeInfoBuilder } from '@/tests/builders/safe'
 
@@ -103,6 +106,31 @@ describe('tx-sender scope handling', () => {
     await createMultiSendCallOnlyTx([txParams], scope)
     expect(scopedSdk.createTransaction).toHaveBeenCalledWith({ transactions: [txParams], onlyCalls: true })
     expect(singletonSdk.createTransaction).not.toHaveBeenCalled()
+  })
+
+  it('createExistingTx builds on the scoped SDK while a SafeScope is mounted', async () => {
+    const executionInfo = multisigExecutionDetailsBuilder().build()
+    const txDetails = transactionDetailsBuilder().with({ detailedExecutionInfo: executionInfo }).build()
+    jest
+      .mocked(scopedSdk.createTransaction)
+      .mockResolvedValueOnce(createMockSafeTransaction({ to: scope.safeAddress, data: '0x' }))
+
+    const unregister = registerActiveScope()
+    try {
+      const tx = await createExistingTx(scope.chainId, faker.string.uuid(), txDetails, scope)
+
+      expect([...tx.signatures.keys()]).toEqual(
+        executionInfo.confirmations.map(({ signer }) => signer.value.toLowerCase()),
+      )
+    } finally {
+      unregister()
+    }
+
+    expect(scopedSdk.createTransaction).toHaveBeenLastCalledWith({
+      transactions: [expect.objectContaining({ nonce: executionInfo.nonce })],
+    })
+    expect(singletonSdk.createTransaction).not.toHaveBeenCalled()
+    expect(mockLogError).not.toHaveBeenCalled()
   })
 
   it('getReadOnlyCurrentGnosisSafeContract (relay path) uses the scoped SDK and never touches the singleton', async () => {

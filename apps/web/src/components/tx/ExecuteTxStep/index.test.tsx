@@ -8,6 +8,10 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import { AppRoutes } from '@/config/routes'
+import type Safe from '@safe-global/protocol-kit'
+import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import type { SafeScope } from '@/components/tx-flow/safe-scope/types'
+import { chainBuilder } from '@/tests/builders/chains'
 
 jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn(() => '1') }))
@@ -33,7 +37,25 @@ describe('ExecuteTxStep', () => {
   const unsignedTx = createMockSafeTransaction({ to: faker.finance.ethereumAddress(), data: '0x' })
   const reloadedTx = createMockSafeTransaction({ to: unsignedTx.data.to, data: '0x' })
 
-  const renderStep = ({ afterSigning, spaceId }: { afterSigning?: boolean; spaceId?: string } = {}) => {
+  const buildScope = (sdk?: Safe): SafeScope => {
+    const chain = chainBuilder().build()
+    const safeAddress = faker.finance.ethereumAddress()
+    return {
+      chainId: chain.chainId,
+      safeAddress,
+      scopeKey: `${chain.chainId}:${safeAddress}`,
+      safeLoaded: true,
+      safeLoading: false,
+      chain,
+      sdk,
+    }
+  }
+
+  const renderStep = ({
+    afterSigning,
+    spaceId,
+    scope,
+  }: { afterSigning?: boolean; spaceId?: string; scope?: SafeScope } = {}) => {
     const setSafeTx = jest.fn()
     const setTxFlow = jest.fn()
     const onPrev = jest.fn()
@@ -42,15 +64,19 @@ describe('ExecuteTxStep', () => {
     const safeQuery = `eth:${faker.finance.ethereumAddress()}`
     const safeTxContext = { safeTx: unsignedTx, setSafeTx, setSafeTxError: jest.fn() } as unknown as SafeTxContextParams
 
+    const query = scope ? { spaceId } : spaceId ? { safe: safeQuery, spaceId } : { safe: safeQuery }
+
     render(
-      <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
-        <SafeTxContext.Provider value={safeTxContext}>
-          <TxFlowContext.Provider value={{ ...initialContext, txId, onPrev, updateTxLayoutProps }}>
-            <ExecuteTxStep afterSigning={afterSigning} />
-          </TxFlowContext.Provider>
-        </SafeTxContext.Provider>
-      </TxModalContext.Provider>,
-      { routerProps: { push, query: spaceId ? { safe: safeQuery, spaceId } : { safe: safeQuery } } },
+      <SafeScopeContext.Provider value={scope && { scope, setScope: jest.fn(), clearScope: jest.fn() }}>
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <SafeTxContext.Provider value={safeTxContext}>
+            <TxFlowContext.Provider value={{ ...initialContext, txId, onPrev, updateTxLayoutProps }}>
+              <ExecuteTxStep afterSigning={afterSigning} />
+            </TxFlowContext.Provider>
+          </SafeTxContext.Provider>
+        </TxModalContext.Provider>
+      </SafeScopeContext.Provider>,
+      { routerProps: { push, query } },
     )
 
     return { setSafeTx, setTxFlow, onPrev, push, safeQuery, updateTxLayoutProps }
@@ -72,7 +98,7 @@ describe('ExecuteTxStep', () => {
       expect(setSafeTx).toHaveBeenCalledWith(reloadedTx)
       expect(screen.getByTestId('execute-action')).toBeInTheDocument()
     })
-    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId)
+    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, undefined)
     expect(screen.getByTestId('receipt')).toBeInTheDocument()
   })
 
@@ -167,5 +193,41 @@ describe('ExecuteTxStep', () => {
     })
     expect(screen.queryByTestId('execute-action')).not.toBeInTheDocument()
     expect(screen.queryByRole('note')).not.toBeInTheDocument()
+  })
+
+  it('reloads the signed transaction with the selected Safe of a Workspace-level flow', async () => {
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+    const sdk = {} as Safe
+    const scope = buildScope(sdk)
+
+    renderStep({ afterSigning: true, scope })
+
+    await screen.findByTestId('execute-action')
+    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, {
+      chainId: '1',
+      safeAddress: scope.safeAddress,
+      sdk,
+    })
+  })
+
+  it('waits for the selected Safe SDK of a Workspace-level flow before reloading', () => {
+    renderStep({ afterSigning: true, scope: buildScope() })
+
+    expect(mockCreateExistingTx).not.toHaveBeenCalled()
+  })
+
+  it('opens the queue of the selected Safe when executing later from a Workspace-level flow', async () => {
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+    const spaceId = faker.string.uuid()
+    const scope = buildScope({} as Safe)
+
+    const { push } = renderStep({ afterSigning: true, spaceId, scope })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: AppRoutes.transactions.queue,
+      query: { safe: `${scope.chain?.shortName}:${scope.safeAddress}`, spaceId },
+    })
   })
 })

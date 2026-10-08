@@ -120,6 +120,7 @@ export const createExistingTx = async (
   chainId: string,
   txId: string,
   txDetails?: TransactionDetails,
+  scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
   // Get the tx details from the backend if not provided
   txDetails = txDetails || (await getTransactionDetails(chainId, txId))
@@ -128,7 +129,7 @@ export const createExistingTx = async (
   const { txParams, signatures } = extractTxInfo(txDetails)
 
   // Create a tx and add pre-approved signatures
-  const safeTx = await createTx(txParams, txParams.nonce)
+  const safeTx = await createTx(txParams, txParams.nonce, scope)
   Object.entries(signatures).forEach(([signer, data]) => {
     safeTx.addSignature({
       signer,
