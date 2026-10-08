@@ -22,6 +22,8 @@ import { Typography } from '@/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
 import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
 
+/** Collapsed Safenet verdict card for the transaction details column (design-pass prototype). */
+
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
 export type SafenetDetailsCardViewProps = {
