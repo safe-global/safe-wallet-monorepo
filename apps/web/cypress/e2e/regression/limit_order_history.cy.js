@@ -5,6 +5,7 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as data from '../../fixtures/txhistory_data_data.json'
+import swapFixtures from '../../fixtures/swaps.js'
 
 let staticSafes = []
 
@@ -27,7 +28,7 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify "Filled" field in the tx details for limit orders', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
+    cy.visit(constants.transactionUrl + swapFixtures.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
     const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
     const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
 
@@ -40,7 +41,7 @@ describe('Limit order history tests', { defaultCommandTimeout: 30000 }, () => {
     'Verify that limit order tx created via CowSwap safe app has decoding in the history',
     { defaultCommandTimeout: 30000 },
     () => {
-      cy.visit(constants.transactionUrl + swaps.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
+      cy.visit(constants.transactionUrl + swapFixtures.limitOrderSafe + swaps.swapTxs.sellLimitOrderFilled)
       const usdc = swaps.createRegex(swapsHistory.forAtLeastFullUSDT, 'USDT')
       const eq = swaps.createRegex(swapsHistory.USDTeqUSDC, 'USDC')
 

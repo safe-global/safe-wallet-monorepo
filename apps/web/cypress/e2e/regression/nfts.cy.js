@@ -19,7 +19,7 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 describe('NFTs tests', () => {
   before(() => {
-    getSafes(CATEGORIES.nfts)
+    return getSafes(CATEGORIES.nfts)
       .then((nfts) => {
         nftsSafes = nfts
         return getSafes(CATEGORIES.static)

@@ -1,3 +1,5 @@
+import { fixtureGetters } from '../../support/fixture.js'
+
 const executeNowOption = '[data-testid="execute-checkbox"]'
 const executeLaterOption = '[data-testid="sign-checkbox"]'
 const connectedWalletExecutionMethod = '[data-testid="connected-wallet-execution-method"]'
@@ -12,10 +14,10 @@ const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handle
 const txCompletedStr = 'Transaction was successful'
 export const relayRemainingAttemptsStr = 'free transactions left today'
 
-export const fallbackhandlerTx = {
+export const fallbackhandlerTx = fixtureGetters('fallbackHandlers', {
   illegalContract:
     '&id=multisig_0xc36A530ccD728d36a654ccedEB7994473474C018_0xceccff6539d75da107014e1a4ae9ccb864a6a4bf10b4e0dd38431ac80148f2f5',
-}
+})
 
 export function verifyUntrustedHandllerWarningVisible() {
   cy.get(untrustedFallbackHandlerWarning).should('be.visible')
@@ -45,8 +47,9 @@ export function selectConnectedWalletOption() {
   cy.get(connectedWalletExecutionMethod).click()
 }
 
+// The Safe creation review also uses the connected-wallet test ID for its Pay later option.
 export function selectRelayOtion() {
-  cy.get(connectedWalletExecutionMethod).prev().click()
+  cy.get(relayExecutionMethod).click()
 }
 
 export function verifyRelayExecutionMethodChecked() {

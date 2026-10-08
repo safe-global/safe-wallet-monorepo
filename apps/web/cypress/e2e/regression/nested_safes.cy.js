@@ -9,6 +9,7 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
 import { checkExistingSignerCount, checkExistingSignerAddress } from '../pages/owners.pages.js'
+import nested from '../../fixtures/nested.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
@@ -17,8 +18,6 @@ const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const mainSafe = 'Main nested safe'
 const nestedSafe1 = 'Nested safe1'
 const nestedSafe2 = 'Nested safe2'
-const nestedSafe1Short = '0x22e5...Cf9d'
-const nestedSafe2Short = '0xE557...2208'
 
 describe('Nested safes basic flow tests', () => {
   before(async () => {
@@ -33,8 +32,8 @@ describe('Nested safes basic flow tests', () => {
     safeNav.clickOnNestedSafesBtn()
     // Handle intro screen if present (select all safes including suspicious ones)
     nsafes.completeIntroScreenSelectAll()
-    sideBar.checkSafesInPopverList([nestedSafe1Short])
-    sideBar.clickOnSafeInPopover(nestedSafe1Short)
+    sideBar.checkSafesInPopverList([nested.safe1Short])
+    sideBar.clickOnSafeInPopover(nested.safe1Short)
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_40.substring(4))
     sideBar.checkParentSafeInBreadcrumb(mainSafe, staticSafes.SEP_STATIC_SAFE_39.substring(4))
     sideBar.checkNestedSafeInBreadcrumb(nestedSafe1)
@@ -47,8 +46,8 @@ describe('Nested safes basic flow tests', () => {
     safeNav.clickOnNestedSafesBtn()
     // Handle intro screen if present (select all safes including suspicious ones)
     nsafes.completeIntroScreenSelectAll()
-    sideBar.checkSafesInPopverList([nestedSafe2Short])
-    sideBar.clickOnSafeInPopover(nestedSafe2Short)
+    sideBar.checkSafesInPopverList([nested.safe2Short])
+    sideBar.clickOnSafeInPopover(nested.safe2Short)
     cy.url().should('include', staticSafes.SEP_STATIC_SAFE_41.substring(4))
     sideBar.checkParentSafeInBreadcrumb(nestedSafe1, staticSafes.SEP_STATIC_SAFE_40.substring(4))
     sideBar.checkNestedSafeInBreadcrumb(nestedSafe2)

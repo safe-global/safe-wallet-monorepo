@@ -50,7 +50,7 @@ export const timePeriodOptions = {
 }
 
 const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
-const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
+const automationOwner = ls.addressBookData.sepoliaAddress2[11155111][constants.DEFAULT_OWNER_ADDRESS]
 
 export const actionNames = {
   enableModule: 'enableModule',

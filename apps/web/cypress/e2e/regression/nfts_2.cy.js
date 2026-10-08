@@ -1,3 +1,4 @@
+import nftFixtures from '../../fixtures/nfts/metadata.js'
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as nfts from '../pages/nfts.pages.js'
@@ -6,7 +7,6 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 let staticSafes = []
 
 const nftsName = 'CatFactory'
-const nftsAddress = '0x373B...866c'
 const nftsTokenID = 'CF'
 
 describe('NFTs 2 tests', () => {
@@ -24,7 +24,7 @@ describe('NFTs 2 tests', () => {
   })
 
   it('Verify NFT row contains data', () => {
-    nfts.verifyDataInTable(nftsName, nftsAddress, nftsTokenID)
+    nfts.verifyDataInTable(nftsName, nftFixtures.address, nftsTokenID)
   })
 
   it('Verify NFT open does not open if no NFT exits', () => {
