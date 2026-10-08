@@ -212,10 +212,12 @@ const ReplaySafeDialog = ({
     }
   })
 
+  // Before the creation data loads, submitting would close the dialog without adding the network.
   const submitDisabled =
     isUnsupportedSafeCreationVersion ||
     !!safeCreationDataError ||
     safeCreationDataLoading ||
+    !safeCreationData ||
     !formState.isValid ||
     isSubmitting
 
