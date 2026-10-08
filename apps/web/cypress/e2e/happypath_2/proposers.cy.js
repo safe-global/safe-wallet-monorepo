@@ -42,6 +42,7 @@ describe('Happy path Proposers tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify a proposer can be added', () => {
+    proposer.disableProposerGating()
     wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_32)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
     navigation.verifyTxBtnStatus(constants.enabledStates.enabled)

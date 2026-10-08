@@ -62,15 +62,15 @@ export function acceptWidgetDisclaimer() {
 }
 
 /**
- * Intercepts the chains list endpoint to inject a feature flag for a specific chain,
+ * Intercepts the chains list endpoint to inject and/or remove a feature flag for a specific chain,
  * and optionally aliases the feature's data endpoint for use with cy.wait().
  *
  * Handles both list responses ({ results: [...] }) and single-chain responses ({ chainId, ... }).
  *
  * @param {object} options
  * @param {string} options.chainId       - The chain to target (e.g. constants.networkKeys.polygon)
- * @param {string} options.addFlag       - Feature flag to inject (e.g. constants.chainFeatures.positions)
- * @param {string} [options.removeFlag]  - Optional legacy flag to remove before adding the new one
+ * @param {string} [options.addFlag]    - Feature flag to inject (e.g. constants.chainFeatures.positions)
+ * @param {string} [options.removeFlag]  - Feature flag to remove (before adding `addFlag`, if any)
  * @param {string} [options.dataEndpoint] - Optional data endpoint glob to alias
  * @param {string} [options.dataAlias]   - Alias name for cy.wait() (required if dataEndpoint is set)
  */
@@ -80,7 +80,7 @@ export function injectChainFeature({ chainId, addFlag, removeFlag, dataEndpoint,
       const applyFlags = (chain) => {
         let features = chain.features || []
         if (removeFlag) features = features.filter((f) => f !== removeFlag)
-        if (!features.includes(addFlag)) features.push(addFlag)
+        if (addFlag && !features.includes(addFlag)) features.push(addFlag)
         return { ...chain, features }
       }
 
