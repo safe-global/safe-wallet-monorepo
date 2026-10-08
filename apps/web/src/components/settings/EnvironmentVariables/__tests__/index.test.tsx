@@ -375,6 +375,23 @@ describe('EnvironmentVariables', () => {
     expect(reloadPage).toHaveBeenCalled()
   })
 
+  it('stores a Simulation API URL without its trailing slash', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+      },
+    })
+
+    fireEvent.change(screen.getByLabelText('Tenderly API URL'), { target: { value: `${mockTenderlyUrl}/` } })
+    fireEvent.change(screen.getByLabelText('Tenderly access token'), { target: { value: mockTenderlyToken } })
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(store.getState().settings.env.tenderly.url).toBe(mockTenderlyUrl)
+    })
+  })
+
   it('clears the URL error when the field is reset', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {

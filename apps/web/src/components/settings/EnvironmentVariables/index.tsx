@@ -54,7 +54,7 @@ const EnvironmentVariables = () => {
 
     dispatch(
       setTenderly({
-        url: data[EnvVariablesField.tenderlyURL],
+        url: data[EnvVariablesField.tenderlyURL].replace(/\/$/, ''),
         accessToken: data[EnvVariablesField.tenderlyToken],
       }),
     )
