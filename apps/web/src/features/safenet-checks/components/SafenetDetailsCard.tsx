@@ -38,8 +38,13 @@ export type SafenetDetailsCardViewProps = {
 // Colour lives in the chip and the blocks; the card itself only turns red on a risk.
 const NEUTRAL_BORDER = 'var(--color-border-main)'
 
+/** Meta lines on white/grey — same token as Receipt grid labels in Transaction details. */
+const META_TEXT_CLASS = 'text-[var(--color-primary-light)]'
+/** Softer than body copy; still readable on paper (lighter than META_TEXT_CLASS in light mode). */
+const META_SOFT_TEXT_CLASS = 'text-muted-foreground'
+
 const Secondary = ({ children }: { children: ReactNode }): ReactElement => (
-  <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
+  <Typography variant="paragraph-small" className={META_TEXT_CLASS}>
     {children}
   </Typography>
 )
@@ -71,18 +76,24 @@ const ResultBlock = ({
 }): ReactElement | null => {
   const { copy } = STATUS_PRESENTATION[publicStatus]
   const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
+  const showVerified = publicStatus === CheckStatus.BENIGN && attestationHref !== null && snapshot.attestedAtMs !== null
   if (publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 0) return null
 
   return (
     <div className="flex flex-col gap-1">
-      <BodyText>{copy}</BodyText>
+      {showVerified ? (
+        <Typography variant="paragraph-small" className="text-[var(--color-text-primary)]">
+          {copy}
+          {' · '}
+          <span className={META_TEXT_CLASS}>
+            Verified <DateTime value={snapshot.attestedAtMs} />
+          </span>
+        </Typography>
+      ) : (
+        <BodyText>{copy}</BodyText>
+      )}
       {isInFlight && isQueued && (
         <Secondary>You can sign now and come back to execute once the check is done.</Secondary>
-      )}
-      {publicStatus === CheckStatus.BENIGN && attestationHref && snapshot.attestedAtMs !== null && (
-        <Secondary>
-          Verified <DateTime value={snapshot.attestedAtMs} />
-        </Secondary>
       )}
     </div>
   )
@@ -99,7 +110,7 @@ const FlaggedRuleBlocks = ({ summary }: { summary: RejectionSummary }): ReactEle
           <div key={rule.id} className="flex flex-col gap-1">
             <BodyText>{rule.label}</BodyText>
             <BodyText>{rule.description}</BodyText>
-            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
+            <Typography variant="paragraph-small" className={META_SOFT_TEXT_CLASS}>
               Flagged by {sentinels(rule.citedBy)}
             </Typography>
           </div>
