@@ -72,7 +72,6 @@ const TenderlySection = ({
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={EnvVariablesField.tenderlyURL} className={cn('gap-1.5', urlError && 'text-destructive')}>
-            <span aria-hidden className="bg-current size-0.5 rounded-full" />
             Tenderly API URL
           </Label>
           <Controller
@@ -126,7 +125,6 @@ const TenderlySection = ({
 
         <div className="flex flex-col gap-1.5">
           <Label htmlFor={EnvVariablesField.tenderlyToken} className="gap-1.5">
-            <span aria-hidden className="bg-current size-0.5 rounded-full" />
             Tenderly access token
           </Label>
           <Controller
