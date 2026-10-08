@@ -27,7 +27,6 @@ describe('Load Safe tests - 3', () => {
   it('Verify that when changing a network in dropdown, the same network is displayed in right top corner', () => {
     safe.clickNetworkSelector(constants.networks.sepolia)
     safe.selectPolygon()
-    cy.wait(1000)
     safe.checkMainNetworkSelected(constants.networks.polygon)
   })
 
@@ -52,7 +51,6 @@ describe('Load Safe tests - 3', () => {
   it('Verify a network can be selected in the Safe', () => {
     safe.clickNetworkSelector(constants.networks.sepolia)
     safe.selectPolygon()
-    cy.wait(2000)
     safe.clickNetworkSelector(constants.networks.polygon)
     safe.selectSepolia()
   })

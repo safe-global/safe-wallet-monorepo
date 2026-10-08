@@ -96,7 +96,6 @@ describe('Replace Owners tests', () => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_25)
       owner.waitForConnectionStatus()
       owner.openReplaceOwnerWindow(1)
-      cy.wait(1000)
       owner.typeOwnerName(ownerName)
       owner.typeOwnerAddress(constants.SEPOLIA_OWNER_2)
       createTx.changeNonce(0)

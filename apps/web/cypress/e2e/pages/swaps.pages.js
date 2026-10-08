@@ -319,20 +319,22 @@ export function acceptLegalDisclaimer() {
   cy.get('button').contains('Continue').click()
 }
 
+const WIDGET_WALLET_TIMEOUT_MS = 15000
+
+const isWidgetWalletConnected = (iframeSelector) => () => {
+  const $body = Cypress.$(Cypress.$(iframeSelector)[0]?.contentDocument?.body)
+  return $body.find(inputCurrencyInput).length > 0 && !$body.find('button:contains("Connect Wallet")').length
+}
+
 // The widget can miss the host wallet handshake and stay on "Connect Wallet" — reload to redo it.
 export function ensureWidgetWalletConnected(iframeSelector, attempt = 0) {
-  cy.wait(5000)
-  main.getIframeBody(iframeSelector).then(($body) => {
-    if (!$body.find('button:contains("Connect Wallet")').length) return
+  main.pollUntil(isWidgetWalletConnected(iframeSelector), WIDGET_WALLET_TIMEOUT_MS).then((connected) => {
+    if (connected) return
     if (attempt >= 2) {
       throw new Error('CoW widget did not receive the connected wallet after reloading')
     }
     cy.reload()
-    cy.wait(4000)
-    cy.get('button').then(($btns) => {
-      const $continue = $btns.filter(':contains("Continue")')
-      if ($continue.length) cy.wrap($continue.first()).click()
-    })
+    cy.get('button').contains('Continue').click()
     ensureWidgetWalletConnected(iframeSelector, attempt + 1)
   })
 }
