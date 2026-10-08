@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -7,13 +7,9 @@ import { Typography } from '@/components/ui/typography'
 import { AppRoutes } from '@/config/routes'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import {
-  trackEvent,
-  MixpanelEventParams,
-  PlanSelectionEntryPoint,
-  UpgradeFeature,
-  UpgradeLocation,
-} from '@/services/analytics'
+import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
 const PROMPT = {
@@ -55,12 +51,7 @@ const SponsoredTxsCounter = ({
   isPro: boolean | null
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (isPro || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT)
-  }, [isPro])
+  useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !isPro)
 
   return (
     <div className="flex items-center justify-between gap-3 bg-muted px-4 py-2" data-testid="sponsored-txs-counter">
@@ -105,25 +96,24 @@ const SponsoredTxsCounter = ({
           <ProChip className="size-full" />
         </span>
       ) : (
-        <Button
-          variant="outline"
-          size="xs"
+        <Track
+          {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+          mixpanelParams={{ [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT, ...PROMPT }}
           className="shrink-0"
-          render={<NextLink href={AppRoutes.welcome.spaces} />}
-          data-testid="sponsored-txs-upgrade"
-          onClick={() =>
-            trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, {
-              [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
-              ...PROMPT,
-            })
-          }
         >
-          Upgrade to
-          <span className="block h-4 w-6" aria-label="Safe Pro">
-            <ProChip className="size-full" />
-          </span>
-          <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
-        </Button>
+          <Button
+            variant="outline"
+            size="xs"
+            render={<NextLink href={AppRoutes.welcome.spaces} />}
+            data-testid="sponsored-txs-upgrade"
+          >
+            Upgrade to
+            <span className="block h-4 w-6" aria-label="Safe Pro">
+              <ProChip className="size-full" />
+            </span>
+            <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
+          </Button>
+        </Track>
       )}
     </div>
   )
