@@ -65,3 +65,5 @@ export const RiskDetectedSeveralRules = malicious(['R-4.5', 'R-4.5', 'R-4.4', 'R
 /** Example #8: a split vote with no ruling before the deadline. */
 export const CheckFailed = story(safenetCheck.timedOut(spec, [null, 'R-4.3']))
 export const NoCheck: Story = story([])
+
+// Preview deploy marker (no runtime effect).
