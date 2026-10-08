@@ -322,7 +322,6 @@ export default [
     },
   },
   // Containers render views only; markup, styling and copy live in storybook/src (see storybook/AGENTS.md).
-  // Components not yet split are listed in eslint-suppressions.json; only new violations fail.
   {
     files: ['src/**/*.tsx'],
     ignores: [
