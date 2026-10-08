@@ -1,6 +1,6 @@
 import type { MouseEvent, ReactNode } from 'react'
 import { useMemo } from 'react'
-import { Search, Bell, Wallet, Layers, ChevronUp, ChevronDown } from 'lucide-react'
+import { Search, Bell, Wallet, Layers } from 'lucide-react'
 import { blo } from 'blo'
 import { isAddress } from 'ethers'
 import { Button } from '@/components/ui/button'
@@ -32,10 +32,6 @@ export interface HeaderNavigationProps {
    * Wallet provider label (e.g. "MetaMask", "WalletConnect")
    */
   walletLabel?: string
-  /**
-   * Whether the wallet popover is open (controls chevron direction)
-   */
-  walletOpen?: boolean
   /**
    * Number of unread messages
    */
@@ -76,7 +72,6 @@ export function HeaderNavigation({
   isConnected = false,
   walletIcon,
   walletLabel,
-  walletOpen = false,
   messages = 0,
   showSearch = false,
   onSearchClick,
@@ -161,9 +156,9 @@ export function HeaderNavigation({
         <div className="flex items-center rounded-lg bg-muted">
           <Button
             variant="ghost"
-            size="sm"
+            size="chip"
             onClick={onWalletClick}
-            className="gap-1.5 m-1"
+            className="m-1"
             aria-label={isConnected ? `Wallet ${walletDisplayName}` : 'Connect wallet'}
             data-testid={isConnected ? 'open-account-center' : 'connect-wallet-btn'}
           >
@@ -184,12 +179,6 @@ export function HeaderNavigation({
             <span className="text-xs text-muted-foreground font-normal">
               {isConnected ? walletDisplayName : 'Connect Wallet'}
             </span>
-            {isConnected &&
-              (walletOpen ? (
-                <ChevronUp className="size-3.5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="size-3.5 text-muted-foreground" />
-              ))}
           </Button>
         </div>
       </Track>
