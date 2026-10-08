@@ -49,7 +49,7 @@ const TenderlySection = ({
 
   return (
     <>
-      <Typography variant="paragraph-bold" className="mb-4 mt-6">
+      <Typography variant="paragraph-bold" className="mb-2 mt-6">
         Tenderly
       </Typography>
 
