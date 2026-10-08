@@ -10,6 +10,8 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { BRIDGE_WIDGET_URL } from '../../constants'
 
+const ALLOWED_FEATURES_LIST = 'clipboard-read; clipboard-write'
+
 export function BridgeWidget(): ReactElement | null {
   const isDarkMode = useDarkMode()
   const chain = useCurrentChain()
@@ -28,7 +30,7 @@ export function BridgeWidget(): ReactElement | null {
   return (
     <AppFrame
       appUrl={appData.url}
-      allowedFeaturesList="clipboard-read; clipboard-write"
+      allowedFeaturesList={ALLOWED_FEATURES_LIST}
       safeAppFromManifest={appData}
       isNativeEmbed
     />

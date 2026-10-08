@@ -1,8 +1,6 @@
 import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
-import { DataRow } from '@/components/common/Table/DataRow'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { HelpIconTooltip } from '@views/features/swap/components/HelpIconTooltip'
+import { SurplusFeeView } from '@views/features/swap/components/SwapOrder/rows/SurplusFeeView'
 
 export const SurplusFee = ({
   order,
@@ -16,24 +14,5 @@ export const SurplusFee = ({
     return null
   }
 
-  return (
-    <DataRow
-      title={
-        <>
-          Total fees
-          <HelpIconTooltip
-            title={
-              <>
-                The amount of fees paid for this order.
-                {bps > 0 && ` This includes a Widget fee of ${bps / 100}% and network fees.`}
-              </>
-            }
-          />
-        </>
-      }
-      key="widget_fee"
-    >
-      {formatVisualAmount(BigInt(executedFee), executedFeeToken.decimals)} {executedFeeToken.symbol}
-    </DataRow>
-  )
+  return <SurplusFeeView bps={bps} executedFee={executedFee} executedFeeToken={executedFeeToken} />
 }

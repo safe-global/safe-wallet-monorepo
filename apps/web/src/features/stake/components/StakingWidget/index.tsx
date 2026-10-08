@@ -4,6 +4,8 @@ import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import { useGetStakeWidgetUrl } from '../../hooks/useGetStakeWidgetUrl'
 import { widgetAppData } from '../../constants'
 
+const ALLOWED_FEATURES = 'clipboard-read; clipboard-write'
+
 const StakingWidget = ({ asset }: { asset?: string }) => {
   const url = useGetStakeWidgetUrl(asset)
 
@@ -18,12 +20,7 @@ const StakingWidget = ({ asset }: { asset?: string }) => {
   )
 
   return (
-    <AppFrame
-      appUrl={appData.url}
-      allowedFeaturesList="clipboard-read; clipboard-write"
-      safeAppFromManifest={appData}
-      isNativeEmbed
-    />
+    <AppFrame appUrl={appData.url} allowedFeaturesList={ALLOWED_FEATURES} safeAppFromManifest={appData} isNativeEmbed />
   )
 }
 

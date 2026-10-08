@@ -1,10 +1,9 @@
 import type { ReactElement } from 'react'
-import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { HypernativeLoginLineView } from '@views/features/safe-shield/components/HypernativeLoginLineView'
 
 // Passed only for Safes eligible for Hypernative (guard or allowlist)
 export const HypernativeLoginLine = ({
@@ -24,18 +23,5 @@ export const HypernativeLoginLine = ({
     initiateLogin()
   }
 
-  return (
-    <Typography
-      variant="paragraph-mini"
-      align="center"
-      className="flex items-center justify-center gap-1 py-2 text-[var(--color-primary-light)]"
-      data-testid="hypernative-login-line"
-    >
-      Already using Hypernative?{' '}
-      <button type="button" onClick={login} className="cursor-pointer font-semibold underline">
-        Log in
-      </button>
-      <ExternalLinkIcon className="size-3.5" aria-hidden />
-    </Typography>
-  )
+  return <HypernativeLoginLineView onLogin={login} />
 }

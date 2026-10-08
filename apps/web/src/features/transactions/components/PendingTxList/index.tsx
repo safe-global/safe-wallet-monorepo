@@ -1,13 +1,10 @@
 import { type ReactElement, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { ChevronRight } from 'lucide-react'
 import { getLatestTransactions } from '@/utils/tx-list'
 import useTxQueue, { useQueuedTxsLength } from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { AppRoutes } from '@/config/routes'
 import { SafeWidget } from '@/features/spaces'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { getTxStatus, formatTxDate, _getTransactionsToDisplay } from '../../utils'
 import type { RecoveryQueueItem } from '@/features/recovery'
 import { useRecoveryQueue } from '@/features/recovery'
@@ -18,18 +15,13 @@ import PendingRecoveryListItem from '@/components/dashboard/PendingTxs/PendingRe
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
-
-const MAX_TXS = 3
+import { PendingTxListView, TxIconView } from '@views/features/transactions/components/PendingTxList/PendingTxListView'
 
 interface TxIconProps {
   tx: TransactionQueuedItem
 }
 
-export const TxIcon = ({ tx }: TxIconProps): ReactElement => (
-  <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-[#f0fdf4]">
-    <TxTypeIcon tx={tx.transaction} />
-  </div>
-)
+export const TxIcon = ({ tx }: TxIconProps): ReactElement => <TxIconView icon={<TxTypeIcon tx={tx.transaction} />} />
 
 const PendingTxList = (): ReactElement => {
   const { page, loading } = useTxQueue()
@@ -62,49 +54,28 @@ const PendingTxList = (): ReactElement => {
   }
 
   return (
-    <SafeWidget
-      title="Pending"
-      action={
-        <Button variant="ghost" size="icon-sm" onClick={handleNavigate}>
-          <ChevronRight className="size-6" />
-        </Button>
-      }
-    >
-      {isLoading ? (
-        Array.from({ length: MAX_TXS }).map((_, i) => <SafeWidget.ItemSkeleton key={i} />)
-      ) : queuedTxs.length === 0 ? (
-        <p className="px-4 py-3 text-sm text-muted-foreground">No pending transactions</p>
-      ) : (
-        <>
-          {recoveryTxs.map((tx: RecoveryQueueItem) => (
-            <PendingRecoveryListItem transaction={tx} key={tx.transactionHash} />
-          ))}
-
-          {queuedTxs.map((tx: TransactionQueuedItem) => {
-            return (
-              <SafeWidget.Item
-                key={tx.transaction.id}
-                href={withSpaceIdInUrl(
-                  `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`,
-                  safeLinkQuery.spaceId,
-                )}
-                label={
-                  <div className="flex gap-1 items-center">
-                    <TxTypeText tx={tx.transaction} /> <TxInfo info={tx.transaction.txInfo} />
-                  </div>
-                }
-                info={formatTxDate(tx.transaction.timestamp)}
-                startNode={<TxIcon tx={tx} />}
-                actionNode={<Badge variant="secondary">{getTxStatus(tx)}</Badge>}
-              />
-            )
-          })}
-        </>
-      )}
-      {!isLoading && queuedTxs.length > 0 && (
-        <SafeWidget.Footer count={parseInt(queueSize)} text="View all pending transactions" onClick={handleViewAll} />
-      )}
-    </SafeWidget>
+    <PendingTxListView
+      isLoading={isLoading}
+      recoveryItems={recoveryTxs.map((tx: RecoveryQueueItem) => (
+        <PendingRecoveryListItem transaction={tx} key={tx.transactionHash} />
+      ))}
+      items={queuedTxs.map((tx: TransactionQueuedItem) => ({
+        id: tx.transaction.id,
+        href: withSpaceIdInUrl(
+          `${AppRoutes.transactions.tx}?id=${tx.transaction.id}&safe=${router.query.safe}`,
+          safeLinkQuery.spaceId,
+        ),
+        typeText: <TxTypeText tx={tx.transaction} />,
+        txInfo: <TxInfo info={tx.transaction.txInfo} />,
+        date: formatTxDate(tx.transaction.timestamp),
+        icon: <TxTypeIcon tx={tx.transaction} />,
+        status: getTxStatus(tx),
+      }))}
+      queueSize={parseInt(queueSize)}
+      onNavigate={handleNavigate}
+      onViewAll={handleViewAll}
+      renderItem={(key, slots) => <SafeWidget.Item key={key} {...slots} />}
+    />
   )
 }
 

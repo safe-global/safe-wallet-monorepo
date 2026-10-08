@@ -1,10 +1,7 @@
-import { ArrowUpRight, Coins, Repeat2, SquareDashedBottomCode, WalletCards } from 'lucide-react'
-import { type ReactNode, useCallback, useContext, useMemo } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import { cn } from '@/utils/cn'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
-import SectionWrapper from '@views/features/global-search/components/SearchSection/SectionWrapper'
 import { AppRoutes } from '@/config/routes'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
@@ -19,20 +16,12 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useCurrentSpaceId } from '@/features/spaces'
-
-interface NavigationItem {
-  icon: ReactNode
-  label: string
-}
-
-const COMMON_ITEMS: NavigationItem[] = [
-  { icon: <ArrowUpRight className="size-5" />, label: 'Send' },
-  { icon: <Repeat2 className="size-5" />, label: 'Swap' },
-  { icon: <SquareDashedBottomCode className="size-5" />, label: 'Transaction builder' },
-]
-
-const SAFE_LEVEL_ITEM: NavigationItem = { icon: <Coins className="size-5" />, label: 'Assets' }
-const SPACE_LEVEL_ITEM: NavigationItem = { icon: <WalletCards className="size-5" />, label: 'Accounts' }
+import {
+  COMMON_ITEMS,
+  NavigateToSectionView,
+  SAFE_LEVEL_ITEM,
+  SPACE_LEVEL_ITEM,
+} from '@views/features/global-search/components/SearchSection/sections/NavigateTo/NavigateToSectionView'
 
 const NavigateToSection = ({ query, label }: SectionItemProps) => {
   const router = useRouter()
@@ -132,36 +121,15 @@ const NavigateToSection = ({ query, label }: SectionItemProps) => {
     ],
   )
 
-  if (filteredItems.length === 0) return null
-
   return (
-    <SectionWrapper label={label}>
-      <div className="flex flex-col">
-        {filteredItems.map((item) => {
-          const isDisabled = (item.label === 'Send' && !wallet) || (item.label === 'Swap' && !isSwapEnabled)
-
-          return (
-            <button
-              key={item.label}
-              type="button"
-              disabled={isDisabled}
-              data-search-item
-              className={cn(
-                'flex items-center gap-3 px-4 py-2 font-bold text-sm text-foreground',
-                'rounded-lg mx-2 transition-colors',
-                isDisabled
-                  ? 'cursor-not-allowed opacity-50'
-                  : 'cursor-pointer hover:bg-muted/100 data-[focused]:bg-accent',
-              )}
-              onClick={() => handleNavigation(item.label)}
-            >
-              <span className="text-muted-foreground">{item.icon}</span>
-              {item.label}
-            </button>
-          )
-        })}
-      </div>
-    </SectionWrapper>
+    <NavigateToSectionView
+      label={label}
+      items={filteredItems.map((item) => ({
+        ...item,
+        isDisabled: (item.label === 'Send' && !wallet) || (item.label === 'Swap' && !isSwapEnabled),
+      }))}
+      onNavigate={handleNavigation}
+    />
   )
 }
 

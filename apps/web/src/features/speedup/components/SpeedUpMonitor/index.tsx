@@ -1,8 +1,4 @@
-import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
-import Rocket from '@/public/images/common/rocket.svg'
 import { useCounter } from '@/components/common/Notifications/useCounter'
 import type { MouseEventHandler } from 'react'
 import { useState } from 'react'
@@ -15,6 +11,7 @@ import { isSpeedableTx } from '../../services/isSpeedableTx'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { SpeedUpMonitorView } from '@views/features/speedup/components/SpeedUpMonitor/SpeedUpMonitorView'
 
 type SpeedUpMonitorProps = {
   txId: string
@@ -51,34 +48,22 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
   }
 
   return (
-    <div>
-      <SpeedUpModal
-        open={openSpeedUpModal}
-        handleClose={() => setOpenSpeedUpModal(false)}
-        pendingTx={pendingTx}
-        gasLimit={pendingTx.gasLimit}
-        txId={txId}
-        txHash={pendingTx.txHash!}
-        signerAddress={pendingTx.signerAddress}
-        signerNonce={pendingTx.signerNonce}
-      />
-      {modalTrigger === 'alertBox' ? (
-        <Alert variant="warning" outlined={false}>
-          <Rocket className="size-4" />
-          <AlertTitle>
-            <Typography align="left">Taking too long?</Typography>
-          </AlertTitle>
-          <AlertDescription>Try to speed up with better gas parameters.</AlertDescription>
-          <AlertAction className="top-1/2">
-            <Button variant="outline" className="text-foreground" onClick={onOpen}>{`Speed up >`}</Button>
-          </AlertAction>
-        </Alert>
-      ) : (
-        <Button variant="outline" size="sm" onClick={onOpen}>
-          Speed up
-        </Button>
-      )}
-    </div>
+    <SpeedUpMonitorView
+      modalTrigger={modalTrigger}
+      onOpen={onOpen}
+      modal={
+        <SpeedUpModal
+          open={openSpeedUpModal}
+          handleClose={() => setOpenSpeedUpModal(false)}
+          pendingTx={pendingTx}
+          gasLimit={pendingTx.gasLimit}
+          txId={txId}
+          txHash={pendingTx.txHash!}
+          signerAddress={pendingTx.signerAddress}
+          signerNonce={pendingTx.signerNonce}
+        />
+      }
+    />
   )
 }
 

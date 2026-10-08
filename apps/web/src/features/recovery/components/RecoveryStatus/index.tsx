@@ -1,17 +1,9 @@
 import type { ReactElement } from 'react'
 
-import { Spinner } from '@/components/ui/spinner'
-import ClockIcon from '@/public/images/common/clock.svg'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import { RecoveryEvent } from '../../services/recoveryEvents'
 import store from '../RecoveryContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
-import TxStatusChip from '@/components/transactions/TxStatusChip'
-
-const STATUS_LABELS: Partial<Record<RecoveryEvent, string>> = {
-  [RecoveryEvent.PROCESSING]: 'Processing',
-  [RecoveryEvent.PROCESSED]: 'Loading',
-}
+import { RecoveryStatusView } from '@views/features/recovery/components/RecoveryStatus/RecoveryStatusView'
 
 const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactElement => {
   const { isExecutable, isExpired } = useRecoveryTxState(recovery)
@@ -19,23 +11,7 @@ const RecoveryStatus = ({ recovery }: { recovery: RecoveryQueueItem }): ReactEle
 
   const pendingTxStatus = pending?.[recovery.args.txHash]?.status
 
-  const status = pendingTxStatus ? (
-    <>
-      <Spinner className="size-3.5" />
-      {STATUS_LABELS[pendingTxStatus]}
-    </>
-  ) : isExecutable ? (
-    'Awaiting execution'
-  ) : isExpired ? (
-    'Expired'
-  ) : (
-    <>
-      <ClockIcon className="size-[1em] fill-current" />
-      Pending
-    </>
-  )
-
-  return <TxStatusChip color={isExpired ? 'error' : 'warning'}>{status}</TxStatusChip>
+  return <RecoveryStatusView pendingTxStatus={pendingTxStatus} isExecutable={isExecutable} isExpired={isExpired} />
 }
 
 export default RecoveryStatus

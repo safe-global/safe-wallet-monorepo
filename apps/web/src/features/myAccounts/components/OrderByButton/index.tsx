@@ -1,28 +1,10 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import TransactionsIcon from '@/public/images/transactions/transactions.svg'
-import CheckIcon from '@/public/images/common/check.svg'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OrderByButtonView, orderByLabels } from '@views/features/myAccounts/components/OrderByButton/OrderByButtonView'
 
 type OrderByButtonProps = {
   orderBy: OrderByOption
   onOrderByChange: (orderBy: OrderByOption) => void
-}
-
-const orderByLabels = {
-  [OrderByOption.LAST_VISITED]: 'Last visited',
-  [OrderByOption.NAME]: 'Name',
-  // Manual is only selectable on surfaces that support drag ordering; the label keeps the
-  // shared preference readable here (the legacy list falls back to A→Z under Manual).
-  [OrderByOption.MANUAL]: 'Manual',
 }
 
 const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: OrderByButtonProps) => {
@@ -32,40 +14,11 @@ const OrderByButton = ({ orderBy: orderBy, onOrderByChange: onOrderByChange }: O
   }
 
   return (
-    <div className="flex">
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={
-            <Button
-              data-testid="sortby-button"
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground font-normal"
-            />
-          }
-        >
-          <TransactionsIcon className="size-4" />
-          <Typography variant="paragraph-small" className="whitespace-nowrap">
-            Sort by: {orderByLabels[orderBy]}
-          </Typography>
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent align="end" className="min-w-[250px]">
-          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-          <DropdownMenuItem
-            data-testid="last-visited-option"
-            onClick={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
-          >
-            <span className="mr-4">{orderByLabels[OrderByOption.LAST_VISITED]}</span>
-            {orderBy === OrderByOption.LAST_VISITED && <CheckIcon className="ml-auto size-4" />}
-          </DropdownMenuItem>
-          <DropdownMenuItem data-testid="name-option" onClick={() => handleOrderByChange(OrderByOption.NAME)}>
-            <span>{orderByLabels[OrderByOption.NAME]}</span>
-            {orderBy === OrderByOption.NAME && <CheckIcon className="ml-auto size-4" />}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <OrderByButtonView
+      orderBy={orderBy}
+      onSelectLastVisited={() => handleOrderByChange(OrderByOption.LAST_VISITED)}
+      onSelectName={() => handleOrderByChange(OrderByOption.NAME)}
+    />
   )
 }
 

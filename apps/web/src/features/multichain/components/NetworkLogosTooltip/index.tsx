@@ -1,8 +1,8 @@
 import type { ReactElement, ReactNode } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import NetworkLogosList from '../NetworkLogosList'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { NetworkLogosTooltipView } from '@views/features/multichain/components/NetworkLogosTooltip/NetworkLogosTooltipView'
 
 export type NetworkLogosTooltipProps = {
   networks: Pick<Chain, 'chainId'>[]
@@ -19,31 +19,12 @@ export type NetworkLogosTooltipProps = {
   contentTestId?: string
 }
 
-const NetworkLogosTooltip = ({
-  networks,
-  maxVisible = 3,
-  imageSize,
-  contentImageSize,
-  trigger,
-  triggerRender = <span className="inline-flex origin-left scale-85" />,
-  contentTestId,
-}: NetworkLogosTooltipProps) => (
-  <Tooltip>
-    <TooltipTrigger render={triggerRender}>
-      {trigger ?? <NetworkLogosList networks={networks} showHasMore maxVisible={maxVisible} imageSize={imageSize} />}
-    </TooltipTrigger>
-    <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
-      <div
-        data-testid={contentTestId}
-        className="no-scrollbar flex flex-col gap-1 overflow-y-auto overscroll-contain"
-        style={{ maxHeight: 'calc(var(--available-height) - 0.75rem)' }}
-      >
-        {networks.map((network) => (
-          <ChainIndicator key={network.chainId} chainId={network.chainId} imageSize={contentImageSize} />
-        ))}
-      </div>
-    </TooltipContent>
-  </Tooltip>
+const NetworkLogosTooltip = (props: NetworkLogosTooltipProps) => (
+  <NetworkLogosTooltipView
+    {...props}
+    renderChainIndicator={(indicatorProps) => <ChainIndicator {...indicatorProps} />}
+    renderNetworkLogosList={(listProps) => <NetworkLogosList {...listProps} />}
+  />
 )
 
 export default NetworkLogosTooltip

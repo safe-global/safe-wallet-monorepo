@@ -1,10 +1,10 @@
-import { Typography } from '@/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { AllSafeItems } from '@/hooks/safes'
 import { useMemo } from 'react'
 import useAddressBook from '@/hooks/useAddressBook'
 import { SafeListItem } from '../SafesList/SafeListItem'
+import { CurrentSafeView } from '@views/features/myAccounts/components/CurrentSafe/CurrentSafeView'
 
 function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLinkClick?: () => void }) {
   const { safe, safeAddress } = useSafeInfo()
@@ -29,14 +29,7 @@ function CurrentSafe({ allSafes, onLinkClick }: { allSafes: AllSafeItems; onLink
 
   if (!safeAddress || safeInList?.isPinned) return null
 
-  return (
-    <div data-testid="current-safe-section" className="mb-6">
-      <Typography variant="h4" className="mb-4">
-        Current Safe account
-      </Typography>
-      <SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />
-    </div>
-  )
+  return <CurrentSafeView safeListItem={<SafeListItem safeItem={safeItem} onLinkClick={onLinkClick} />} />
 }
 
 export default CurrentSafe

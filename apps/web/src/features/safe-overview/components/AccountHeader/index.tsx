@@ -1,9 +1,6 @@
 import { type ReactElement, useContext, useMemo, useCallback, useState, Suspense } from 'react'
 import { useRouter } from 'next/router'
 import dynamic from 'next/dynamic'
-import { Settings } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
 import { DashboardHeader } from '@/features/spaces'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
@@ -17,6 +14,10 @@ import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
+import {
+  AccountHeaderView,
+  ManageSafeButtonView,
+} from '@views/features/safe-overview/components/AccountHeader/AccountHeaderView'
 
 const QrModal = dynamic(() => import('@/components/common/QrCodeButton/QrModal'))
 
@@ -65,44 +66,29 @@ const AccountHeader = (): ReactElement => {
     router.push({ pathname: AppRoutes.settings.setup, query: router.query })
   }, [router])
 
-  if (isLoading) return <SafeAccountHeaderSkeleton />
-
   return (
-    <>
-      <DashboardHeader
-        value={formattedValue}
-        loading={!balancesLoaded}
-        noAssets={noAssets}
-        onSend={!noAssets && safe.deployed ? handleSend : undefined}
-        onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}
-        onReceive={safe.deployed ? handleReceive : undefined}
-        onBuildTransaction={safe.deployed ? handleBuildTransaction : undefined}
-        otherActions={
-          <Button variant="surface" size="action" onClick={handleManageSafe}>
-            <Settings className="size-4" />
-            Manage Safe
-          </Button>
-        }
-      />
-
-      {qrModalOpen && (
-        <Suspense>
-          <QrModal onClose={() => setQrModalOpen(false)} />
-        </Suspense>
-      )}
-    </>
-  )
-}
-
-const SafeAccountHeaderSkeleton = (): ReactElement => {
-  return (
-    <div className="mb-10 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-[16px] w-[80px]" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-[36px] w-[500px]" />
-    </div>
+    <AccountHeaderView
+      isLoading={isLoading}
+      header={
+        <DashboardHeader
+          value={formattedValue}
+          loading={!balancesLoaded}
+          noAssets={noAssets}
+          onSend={!noAssets && safe.deployed ? handleSend : undefined}
+          onSwap={isSwapFeatureEnabled && !noAssets && safe.deployed ? handleSwap : undefined}
+          onReceive={safe.deployed ? handleReceive : undefined}
+          onBuildTransaction={safe.deployed ? handleBuildTransaction : undefined}
+          otherActions={<ManageSafeButtonView onClick={handleManageSafe} />}
+        />
+      }
+      qrModal={
+        qrModalOpen && (
+          <Suspense>
+            <QrModal onClose={() => setQrModalOpen(false)} />
+          </Suspense>
+        )
+      }
+    />
   )
 }
 

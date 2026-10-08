@@ -1,4 +1,3 @@
-import ModalDialog from '@/components/common/ModalDialog'
 import NetworkInput from '@/components/common/NetworkInput'
 import { updateAddressBook } from '@/components/new-safe/create/logic/address-book'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -6,9 +5,6 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
 import useChains from '@/hooks/useChains'
@@ -17,7 +13,6 @@ import { selectRpc } from '@/store/settingsSlice'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '../../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import ExternalLink from '@/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -33,6 +28,7 @@ import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spa
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { CreateSafeOnNewChainView } from '@views/features/multichain/components/CreateSafeOnNewChain/CreateSafeOnNewChainView'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -223,89 +219,35 @@ const ReplaySafeDialog = ({
     !chain && safeCreationData && replayableChains && replayableChains.filter((chain) => chain.available).length === 0
 
   return (
-    <ModalDialog open={open} onClose={onClose} dialogTitle="Add another network" hideChainIndicator>
-      <form onSubmit={onFormSubmit} id="recreate-safe">
-        <div className="px-6 py-4" data-testid="add-chain-dialog">
-          <FormProvider {...formMethods}>
-            <div className="flex flex-col gap-4">
-              <Typography>Add this Safe to another network with the same address.</Typography>
-
-              {chain && (
-                <div data-testid="added-network" className="rounded-md bg-[var(--color-background-main)] p-4">
-                  <ChainIndicator chainId={chain.chainId} />
-                </div>
-              )}
-
-              <ErrorMessage level="info">
-                The Safe will use the initial setup of the copied Safe. Any changes to owners, threshold, modules or the
-                Safe&apos;s version will not be reflected in the copy.
-              </ErrorMessage>
-
-              {willStayOutsideSpace && (
-                <div data-testid="space-seat-limit-notice">
-                  <ErrorMessage level="info">
-                    This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new network will be added in
-                    My accounts, outside the Workspace.
-                  </ErrorMessage>
-                </div>
-              )}
-
-              {safeCreationDataLoading ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Spinner className="size-10" />
-                  <Typography variant="paragraph-small">Loading Safe data</Typography>
-                </div>
-              ) : safeCreationDataError ? (
-                <ErrorMessage error={safeCreationDataError} level="error">
-                  Could not determine the Safe creation parameters.
-                </ErrorMessage>
-              ) : isUnsupportedSafeCreationVersion ? (
-                <ErrorMessage>
-                  This account was created from an outdated mastercopy. Adding another network is not possible.
-                </ErrorMessage>
-              ) : noChainsAvailable ? (
-                <ErrorMessage level="error">This Safe cannot be replayed on any chains.</ErrorMessage>
-              ) : (
-                <>
-                  {!chain && (
-                    <NetworkInput
-                      required
-                      name="chainId"
-                      chainConfigs={(replayableChains as (Chain & { available: boolean })[]) ?? []}
-                    />
-                  )}
-                </>
-              )}
-
-              {creationError && (
-                <ErrorMessage error={creationError} level="error">
-                  {creationError.message || 'The Safe could not be created with the same address.'}
-                </ErrorMessage>
-              )}
-            </div>
-          </FormProvider>
-        </div>
-        <div className="flex w-full items-center justify-between gap-2 border-t border-[var(--color-border-light)] px-6 py-4">
-          {isUnsupportedSafeCreationVersion ? (
-            <>
-              <ExternalLink className="grow" href={MULTICHAIN_HELP_ARTICLE}>
-                Read more
-              </ExternalLink>
-              <Button onClick={onClose}>Got it</Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={onCancel}>
-                Cancel
-              </Button>
-              <Button data-testid="modal-add-network-btn" type="submit" disabled={submitDisabled}>
-                {isSubmitting ? <Spinner className="size-5" /> : 'Add network'}
-              </Button>
-            </>
-          )}
-        </div>
-      </form>
-    </ModalDialog>
+    <FormProvider {...formMethods}>
+      <CreateSafeOnNewChainView
+        open={open}
+        onClose={onClose}
+        onCancel={onCancel}
+        onSubmit={onFormSubmit}
+        chainIndicator={chain && <ChainIndicator chainId={chain.chainId} />}
+        networkInput={
+          !chain && (
+            <NetworkInput
+              required
+              name="chainId"
+              chainConfigs={(replayableChains as (Chain & { available: boolean })[]) ?? []}
+            />
+          )
+        }
+        willStayOutsideSpace={willStayOutsideSpace}
+        spaceSafeLimit={spaceSafeLimit}
+        safeCreationDataLoading={safeCreationDataLoading}
+        safeCreationDataError={safeCreationDataError}
+        isUnsupportedSafeCreationVersion={isUnsupportedSafeCreationVersion}
+        noChainsAvailable={!!noChainsAvailable}
+        creationError={creationError}
+        isSubmitting={isSubmitting}
+        submitDisabled={submitDisabled}
+        helpArticleUrl={MULTICHAIN_HELP_ARTICLE}
+        renderErrorMessage={(props) => <ErrorMessage {...props} />}
+      />
+    </FormProvider>
   )
 }
 

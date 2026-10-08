@@ -10,8 +10,7 @@ import GroupedRecoveryListItems from '../GroupedRecoveryListItems'
 import { isRecoveryQueueItem } from '@/utils/transaction-guards'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
-
-import labelCss from '@/components/transactions/GroupLabel/styles.module.css'
+import { RecoveryListView } from '@views/features/recovery/components/RecoveryList/RecoveryListView'
 
 function InternalRecoveryList({ recoveryQueue }: { recoveryQueue: Array<RecoveryQueueItem> }): ReactElement {
   const queue = useTxQueue()
@@ -48,15 +47,7 @@ function RecoveryList(): ReactElement | null {
     return null
   }
 
-  return (
-    <>
-      <div className={labelCss.container}>Pending recovery</div>
-
-      <TxListGrid>
-        <InternalRecoveryList recoveryQueue={recoveryQueue} />
-      </TxListGrid>
-    </>
-  )
+  return <RecoveryListView list={<InternalRecoveryList recoveryQueue={recoveryQueue} />} />
 }
 
 export default RecoveryList

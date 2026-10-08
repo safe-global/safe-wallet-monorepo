@@ -1,8 +1,6 @@
-import { Settings2 } from 'lucide-react'
 import AddAccountsChooser from '@/components/common/AddAccountsChooser'
-import { Button } from '@/components/ui/button'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { TrustedAccountsActionsView } from '@views/features/myAccounts/components/MyAccountsV2/components/TrustedAccountsActions/TrustedAccountsActionsView'
 
 /**
  * Action buttons on the trusted-accounts panel: open the "Add accounts" chooser
@@ -13,14 +11,11 @@ const TrustedAccountsActions = ({ onManage, onLinkClick }: { onManage: () => voi
   const isDarkMode = useDarkMode()
 
   return (
-    <div className={cn('shadcn-scope flex flex-wrap gap-2', isDarkMode && 'dark')}>
-      <AddAccountsChooser onLinkClick={onLinkClick} className="hover:bg-muted" />
-
-      <Button variant="outline" onClick={onManage} className="hover:bg-muted" data-testid="add-more-safes-button">
-        <Settings2 className="size-4" />
-        Manage list
-      </Button>
-    </div>
+    <TrustedAccountsActionsView
+      isDarkMode={isDarkMode}
+      onManage={onManage}
+      renderAddAccountsChooser={(props) => <AddAccountsChooser onLinkClick={onLinkClick} {...props} />}
+    />
   )
 }
 

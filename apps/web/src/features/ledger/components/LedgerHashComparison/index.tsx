@@ -1,18 +1,9 @@
-import { XIcon } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
 import DialogActions from '@/components/common/DialogActions'
 import ledgerHashStore from '../../store/ledgerHashStore'
-import {
-  DIALOG_TITLE,
-  DIALOG_DESCRIPTION,
-  CLOSE_BUTTON_TEXT,
-  HASH_DISPLAY_WIDTH,
-  HASH_DISPLAY_LIMIT,
-} from '../../constants'
+import { HASH_DISPLAY_LIMIT } from '../../constants'
+import { LedgerHashComparisonView } from '@views/features/ledger/components/LedgerHashComparison/LedgerHashComparisonView'
 
 const LedgerHashComparison = () => {
   const hash = ledgerHashStore.useStore()
@@ -23,45 +14,13 @@ const LedgerHashComparison = () => {
   }
 
   return (
-    <Dialog
+    <LedgerHashComparisonView
       open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
-      }}
-    >
-      <DialogContent showCloseButton={false} size="sm">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <DialogTitle>{DIALOG_TITLE}</DialogTitle>
-            <Button onClick={handleClose} variant="ghost" size="icon-sm">
-              <XIcon />
-            </Button>
-          </div>
-        </DialogHeader>
-
-        <div className="px-4">
-          <Alert variant="info" className="mb-6">
-            <AlertSeverityIcon variant="info" />
-            <AlertDescription>{DIALOG_DESCRIPTION}</AlertDescription>
-          </Alert>
-
-          <div className="flex flex-row items-center justify-center">
-            <div
-              className="bg-card relative box-content rounded-lg px-24 py-2 shadow-lg"
-              style={{ maxWidth: HASH_DISPLAY_WIDTH }}
-            >
-              <HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={HASH_DISPLAY_LIMIT} />
-
-              <div className="absolute top-0.5 right-0.5">
-                <CopyButton text={hash || ''} />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <DialogActions confirmLabel={CLOSE_BUTTON_TEXT} onConfirm={handleClose} className="p-4" />
-      </DialogContent>
-    </Dialog>
+      onClose={handleClose}
+      hexData={<HexEncodedData hexData={hash || ''} highlightFirstBytes={false} limit={HASH_DISPLAY_LIMIT} />}
+      copyButton={<CopyButton text={hash || ''} />}
+      renderDialogActions={(props) => <DialogActions {...props} />}
+    />
   )
 }
 

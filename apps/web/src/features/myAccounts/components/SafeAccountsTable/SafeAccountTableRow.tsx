@@ -2,41 +2,30 @@ import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import { TableCell, TableRow } from '@/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
-import { GripVertical } from 'lucide-react'
 import { SimilarityWarningIcon } from './SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import Identicon from '@/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import FiatBalance from '@/components/common/FiatBalance'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { cn } from '@/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
 import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from '@views/features/myAccounts/components/SafeAccountsTable/columns'
-import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
-import { Checkbox } from '@/components/ui/checkbox'
-import { WorkspaceAvatars } from './cells'
+import {
+  SafeAccountNameCellView,
+  SafeAccountNameContentView,
+  SafeAccountTableRowView,
+  type RowCheckbox,
+} from '@views/features/myAccounts/components/SafeAccountsTable/SafeAccountTableRowView'
 
-/** Precomputed checkbox state for a selectable row (see SafeAccountsSelection). */
-export type RowCheckbox = {
-  checked: boolean
-  indeterminate: boolean
-  disabled: boolean
-  /** When set, the row is dimmed and the checkbox shows this tooltip on hover. */
-  disabledReason?: string
-  ariaLabel?: string
-}
+export type { RowCheckbox }
 
 type SafeAccountTableRowProps = {
   line: AccountLine
@@ -97,17 +86,20 @@ const NameCellContent = ({
   const leading = line.variant === 'child' ? null : <Identicon address={line.address} />
 
   return (
-    <SafeInfoDisplay
-      name={line.displayName}
-      address={line.address}
-      leading={<span className="flex w-10 items-center">{leading}</span>}
-      hideAddress={!line.showAddress}
-      explorerLink={explorerLink}
-      onRename={canRename ? onRename : undefined}
-      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
-      nameVariant="paragraph-bold"
-      className="min-w-0"
-      nameLink={nameLink}
+    <SafeAccountNameContentView
+      identicon={leading}
+      warningIcon={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
+      renderSafeInfoDisplay={(props) => (
+        <SafeInfoDisplay
+          name={line.displayName}
+          address={line.address}
+          hideAddress={!line.showAddress}
+          explorerLink={explorerLink}
+          onRename={canRename ? onRename : undefined}
+          nameLink={nameLink}
+          {...props}
+        />
+      )}
     />
   )
 }
@@ -143,204 +135,30 @@ const NameCell = ({
   // render the ⚠️ adornment with them listed rather than just tinting the row.
   const content = <NameCellContent line={line} warning={warning} onRename={onRename} nameLink={nameLink} />
 
-  if (line.expandable) {
-    return (
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={expanded}
-        data-testid="account-group-toggle"
-        className="hover:bg-muted/40 -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center rounded-lg px-2 py-1 text-left transition-colors"
-      >
-        {content}
-      </button>
-    )
-  }
-
-  return content
-}
-
-// Always-visible grip, absolutely positioned so it reserves no layout space. Two placements:
-//  • default: inside the Name cell's left padding (the cell widens via `pl` while reordering, shifting
-//    the avatar right to make room — see the RowCell sx), used by the page lists.
-//  • inline: sits in the leading checkbox cell's own left padding (selection surfaces like the Manage
-//    list, whose table is inside a horizontally-clipping scroll container).
-const ReorderHandle = ({
-  dragHandleProps,
-  inline,
-}: {
-  dragHandleProps?: DraggableProvidedDragHandleProps | null
-  inline?: boolean
-}) => (
-  <span
-    {...dragHandleProps}
-    data-testid="account-drag-handle"
-    aria-label="Drag to reorder"
-    className={cn(
-      'text-muted-foreground hover:text-foreground absolute inset-y-0 flex cursor-grab items-center justify-center active:cursor-grabbing',
-      inline ? 'left-0 w-4' : 'left-0 w-7',
-    )}
-  >
-    <GripVertical className="size-4" />
-  </span>
-)
-
-const SelectCell = ({
-  checkbox,
-  onSelectToggle,
-}: {
-  checkbox?: RowCheckbox
-  onSelectToggle?: (next: boolean) => void
-}) => (
-  <div className="flex items-center justify-center">
-    {checkbox && (
-      <Checkbox
-        checked={checkbox.checked}
-        indeterminate={checkbox.indeterminate}
-        disabled={checkbox.disabled}
-        onCheckedChange={(next) => onSelectToggle?.(Boolean(next))}
-        aria-label={`Select ${checkbox.ariaLabel ?? ''}`.trim()}
-        data-testid="account-select-checkbox"
-      />
-    )}
-  </div>
-)
-
-const CellContent = ({ column, line }: { column: SafeAccountColumn; line: AccountLine }): ReactNode => {
-  switch (column.id) {
-    case 'threshold':
-      return (
-        <ThresholdBadge
-          threshold={line.threshold}
-          owners={line.owners}
-          iconOnly={line.thresholdMixed}
-          loading={!line.dataLoaded}
-        />
-      )
-    case 'networks':
-      return (
-        <NetworkLogosPill>
-          {line.networks ? (
-            <BaseAccountItem.ChainBadge safes={line.networks} />
-          ) : (
-            <BaseAccountItem.ChainBadge chainId={line.chainId} />
-          )}
-        </NetworkLogosPill>
-      )
-    case 'workspaces':
-      return <WorkspaceAvatars spaces={line.workspaces} />
-    case 'pending': {
-      const pendingBadge = (
-        <PendingBadge
-          count={line.pending}
-          awaitingConfirmation={line.awaitingConfirmation}
-          loading={!line.dataLoaded}
-        />
-      )
-      // Only a rendered badge (loaded and non-zero) gets the hover breakdown; a skeleton/empty cell has nothing to explain.
-      if (!line.dataLoaded || line.pending <= 0) return pendingBadge
-      return (
-        <Tooltip>
-          <TooltipTrigger render={<span className="inline-flex" />}>{pendingBadge}</TooltipTrigger>
-          <TooltipContent>{formatPendingLabel(line.pending, line.awaitingConfirmation)}</TooltipContent>
-        </Tooltip>
-      )
-    }
-    case 'balance':
-      if (line.undeployed) {
-        return <NotActivatedBadge isActivating={line.isActivating} />
-      }
-      return line.dataLoaded ? <FiatBalance value={line.balance} /> : <Skeleton className="h-4 w-16" />
-    case 'actions':
-      return line.contextMenu.type === 'single' ? (
-        <BaseAccountItem.ContextMenu
-          address={line.contextMenu.address}
-          chainId={line.contextMenu.chainId}
-          name={line.contextMenu.name}
-          isReplayable={line.contextMenu.addNetwork}
-          undeployedSafe={line.contextMenu.undeployedSafe}
-          hideNestedSafes
-          onClose={undefined}
-        />
-      ) : (
-        <MultiAccountContextMenu
-          name={line.contextMenu.name}
-          address={line.contextMenu.address}
-          chainIds={line.contextMenu.chainIds}
-          addNetwork={line.contextMenu.addNetwork}
-        />
-      )
-    default:
-      return null
-  }
-}
-
-const RowCell = ({
-  column,
-  line,
-  isFirstCell,
-  reorderable,
-  nameCell,
-  nameOverflows,
-  checkbox,
-  onSelectToggle,
-  renderActions,
-  dragHandleProps,
-}: {
-  column: SafeAccountColumn
-  line: AccountLine
-  isFirstCell: boolean
-  reorderable: boolean
-  nameCell: ReactNode
-  nameOverflows: boolean
-  checkbox?: RowCheckbox
-  onSelectToggle?: (next: boolean) => void
-  renderActions?: (line: AccountLine) => ReactNode
-  dragHandleProps?: DraggableProvidedDragHandleProps | null
-}) => {
-  // The draggable parent's first cell hosts the (absolutely-positioned) grip — the Name cell normally,
-  // or the leading checkbox cell in selection mode, so the grip sits left of the checkbox instead of
-  // over it. It anchors to the cell, which must let the grip overflow into the left gutter without clipping.
-  const hostsHandle = isFirstCell && dragHandleProps != null
-
   return (
-    <TableCell
-      data-testid={`account-cell-${column.id}`}
-      // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
-      // padding for the avatar to start after the grip rather than under it. The selection cell's
-      // grip is the narrower `inline` one and fits the default padding. Widening happens in
-      // the panel variant — the `td:first-of-type` rule there outranks a utility class.
-      data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
-      // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
-      // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
-      className={cn(
-        hostsHandle ? 'relative overflow-visible' : 'overflow-hidden',
-        nameOverflows && column.id === 'name' && 'overflow-visible',
-      )}
-      style={{
-        textAlign: column.align ?? 'left',
-        ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
-      }}
-      onClick={column.id === 'actions' || column.id === 'select' ? (e) => e.stopPropagation() : undefined}
-    >
-      {hostsHandle && <ReorderHandle dragHandleProps={dragHandleProps} inline={column.id === 'select'} />}
-      {column.id === 'select' ? (
-        <SelectCell checkbox={checkbox} onSelectToggle={onSelectToggle} />
-      ) : column.id === 'name' ? (
-        nameCell
-      ) : (
-        <div
-          className={cn(
-            'flex items-center',
-            column.align === 'right' ? 'justify-end' : column.align === 'center' ? 'justify-center' : 'justify-start',
-          )}
-        >
-          {column.id === 'actions' && renderActions ? renderActions(line) : <CellContent column={column} line={line} />}
-        </div>
-      )}
-    </TableCell>
+    <SafeAccountNameCellView expandable={line.expandable} expanded={expanded} onToggle={onToggle} content={content} />
   )
 }
+
+const ContextMenuCell = ({ line }: { line: AccountLine }) =>
+  line.contextMenu.type === 'single' ? (
+    <BaseAccountItem.ContextMenu
+      address={line.contextMenu.address}
+      chainId={line.contextMenu.chainId}
+      name={line.contextMenu.name}
+      isReplayable={line.contextMenu.addNetwork}
+      undeployedSafe={line.contextMenu.undeployedSafe}
+      hideNestedSafes
+      onClose={undefined}
+    />
+  ) : (
+    <MultiAccountContextMenu
+      name={line.contextMenu.name}
+      address={line.contextMenu.address}
+      chainIds={line.contextMenu.chainIds}
+      addNetwork={line.contextMenu.addNetwork}
+    />
+  )
 
 const SafeAccountTableRow = ({
   line,
@@ -419,61 +237,39 @@ const SafeAccountTableRow = ({
     />
   )
 
-  const rowEl = (
-    <TableRow
-      ref={setRowRef}
-      {...rowDraggableProps}
-      data-testid="account-table-row"
-      data-variant={line.variant}
-      // Locked rows opt out of the table's grey row hover (see the Table sx override).
-      data-disabled={checkbox?.disabledReason ? '' : undefined}
-      // The variant draws a separator under every row but the last; suppress it inside a group and
-      // inside a band, both of which close themselves.
-      data-no-divider={!showDivider || highlighted ? '' : undefined}
-      // Band membership marker — the card styling is keyed off this attribute.
-      data-highlighted={highlighted && !isDragging ? '' : undefined}
-      // The band fill is the row's own; opt out of the shared hover pill so it isn't painted over.
-      data-no-hover={highlighted ? '' : undefined}
-      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover;
-      // the lifted-while-dragging chrome is here.
-      className={cn(
-        'group/row',
-        checkbox?.disabledReason && 'opacity-[0.55]',
-        (rowSelectable || rowNavigable) && 'cursor-pointer',
-        isDragging && 'rounded-xl bg-[var(--color-background-paper)] shadow-md',
-      )}
-      tabIndex={-1}
-      onClick={rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined}
-    >
-      {columns.map((column, index) => (
-        <RowCell
-          key={column.id}
-          column={column}
-          line={line}
-          isFirstCell={index === 0}
-          reorderable={reorderable}
-          nameCell={nameCell}
-          nameOverflows={Boolean(renderName)}
-          checkbox={checkbox}
-          onSelectToggle={onSelectToggle}
-          renderActions={renderActions}
-          dragHandleProps={dragHandleProps}
-        />
-      ))}
-    </TableRow>
+  return (
+    <SafeAccountTableRowView
+      line={line}
+      columns={columns}
+      showDivider={showDivider}
+      highlighted={highlighted}
+      isDragging={isDragging}
+      checkbox={checkbox}
+      clickable={rowSelectable || rowNavigable}
+      onRowClick={
+        rowSelectable ? () => onSelectToggle?.(!checkbox?.checked) : rowNavigable ? handleRowClick : undefined
+      }
+      rowRef={setRowRef}
+      rowDraggableProps={rowDraggableProps}
+      dragHandleProps={dragHandleProps}
+      reorderable={reorderable}
+      nameCell={nameCell}
+      nameOverflows={Boolean(renderName)}
+      onSelectToggle={onSelectToggle}
+      renderActions={renderActions}
+      networksCell={
+        <NetworkLogosPill>
+          {line.networks ? (
+            <BaseAccountItem.ChainBadge safes={line.networks} />
+          ) : (
+            <BaseAccountItem.ChainBadge chainId={line.chainId} />
+          )}
+        </NetworkLogosPill>
+      }
+      fiatBalance={<FiatBalance value={line.balance} />}
+      contextMenu={<ContextMenuCell line={line} />}
+    />
   )
-
-  // Locked rows (e.g. already in the workspace) explain themselves on hover over the whole row.
-  if (checkbox?.disabledReason) {
-    return (
-      <Tooltip>
-        <TooltipTrigger render={rowEl} />
-        <TooltipContent>{checkbox.disabledReason}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return rowEl
 }
 
 export default SafeAccountTableRow

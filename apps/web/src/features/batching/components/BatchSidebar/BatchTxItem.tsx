@@ -1,14 +1,11 @@
 import type { TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
-import { ListItem } from '@/components/ui/list'
-import { Skeleton } from '@/components/ui/skeleton'
-import css from './styles.module.css'
 
 import { type DraftBatchItem } from '../../store/batchSlice'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
 import { Operation } from '@safe-global/store/gateway/types'
+import { BatchTxItemView } from '@views/features/batching/components/BatchSidebar/BatchTxItemView'
 
 type BatchTxItemProps = DraftBatchItem & {
   id: string
@@ -54,32 +51,17 @@ const BatchTxItem = ({
   )
 
   return (
-    <ListItem className="items-start gap-4 py-0">
-      <div className={css.number}>{count}</div>
-      {txDecoded ? (
-        <div className={css.accordion}>
-          <SingleTxDecoded
-            actionTitle=""
-            tx={txDecoded}
-            txData={transactionDetails}
-            actions={
-              onDelete ? (
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  title="Delete transaction"
-                  className="inline-flex cursor-pointer items-center justify-center border-0 bg-transparent p-0.5"
-                >
-                  <DeleteIcon className="size-4" />
-                </button>
-              ) : undefined
-            }
-          />
-        </div>
-      ) : (
-        <Skeleton className="h-[56px] w-full" />
-      )}
-    </ListItem>
+    <BatchTxItemView
+      count={count}
+      isDecoded={!!txDecoded}
+      canDelete={!!onDelete}
+      onDelete={handleDelete}
+      renderDecoded={({ actionTitle, actions }) =>
+        txDecoded ? (
+          <SingleTxDecoded actionTitle={actionTitle} tx={txDecoded} txData={transactionDetails} actions={actions} />
+        ) : null
+      }
+    />
   )
 }
 

@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { Typography } from '@/components/ui/typography'
 import { useAppDispatch } from '@/store'
 import { setFormCompleted } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import HnModal from '@views/features/hypernative/components/HnSignupFlow/HnModal'
-import HnSignupIntro from './HnSignupIntro'
+import {
+  HnSignupCalendlyConfigErrorView,
+  HnSignupFlowView,
+  HnSignupHubSpotConfigErrorView,
+} from '@views/features/hypernative/components/HnSignupFlow/HnSignupFlowView'
+import HnSignupIntro from '@views/features/hypernative/components/HnSignupFlow/HnSignupIntro'
 import HnSignupForm from './HnSignupForm'
 import HnCalendlyStep from './HnCalendlyStep'
 
@@ -86,13 +89,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
         return <HnSignupIntro onGetStarted={handleNext} onClose={handleClose} />
       case 1:
         if (!hubSpotConfig) {
-          return (
-            <div className="p-8">
-              <Typography className="text-[var(--color-error-main)]">
-                HubSpot configuration is missing or invalid.
-              </Typography>
-            </div>
-          )
+          return <HnSignupHubSpotConfigErrorView />
         }
         return (
           <HnSignupForm
@@ -106,13 +103,7 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
       case 2:
         const calendlyUrl = calendlyConfig[selectedRegion] || calendlyConfig['AMERICAS']
         if (!calendlyUrl) {
-          return (
-            <div className="p-8">
-              <Typography className="text-[var(--color-error-main)]">
-                Calendly configuration is missing for region: {selectedRegion}
-              </Typography>
-            </div>
-          )
+          return <HnSignupCalendlyConfigErrorView region={selectedRegion} />
         }
         return <HnCalendlyStep calendlyUrl={calendlyUrl} />
       default:
@@ -121,9 +112,9 @@ const HnSignupFlow = ({ open, onClose }: HnSignupFlowProps) => {
   }
 
   return (
-    <HnModal open={open} onClose={handleClose}>
-      <div>{renderStepContent()}</div>
-    </HnModal>
+    <HnSignupFlowView open={open} onClose={handleClose}>
+      {renderStepContent()}
+    </HnSignupFlowView>
   )
 }
 

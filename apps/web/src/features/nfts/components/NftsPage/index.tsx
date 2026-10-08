@@ -1,10 +1,9 @@
 import { type ReactElement, memo } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import NftCollections from '../NftCollections'
+import { NftAppsView, NftsPageView } from '@views/features/nfts/components/NftsPage/NftsPageView'
 
 const NftApps = memo(function NftApps(): ReactElement | null {
   const [nftApps] = useRemoteSafeApps({ tag: SafeAppsTag.NFT })
@@ -14,37 +13,14 @@ const NftApps = memo(function NftApps(): ReactElement | null {
   }
 
   return (
-    <div className="lg:order-1 lg:w-1/4 lg:shrink-0">
-      <Typography variant="paragraph-bold" className="mb-4 mt-1.5 font-bold">
-        NFT Safe Apps
-      </Typography>
-      <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-1">
-        {nftApps ? (
-          nftApps.map((nftSafeApp) => (
-            <div key={nftSafeApp.id}>
-              <SafeAppCard safeApp={nftSafeApp} />
-            </div>
-          ))
-        ) : (
-          <div>
-            <Skeleton className="h-[245px] w-full rounded-md" />
-          </div>
-        )}
-      </div>
-    </div>
+    <NftAppsView
+      apps={nftApps?.map((nftSafeApp) => ({ id: nftSafeApp.id, card: <SafeAppCard safeApp={nftSafeApp} /> }))}
+    />
   )
 })
 
 const NftsPage = (): ReactElement => {
-  return (
-    <div className="flex flex-col gap-6 lg:flex-row">
-      <NftApps />
-
-      <div className="min-w-0 flex-1">
-        <NftCollections />
-      </div>
-    </div>
-  )
+  return <NftsPageView apps={<NftApps />} collections={<NftCollections />} />
 }
 
 export default NftsPage

@@ -1,22 +1,9 @@
-import NextLink from 'next/link'
-import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
+import { CreateButtonView } from '@views/features/myAccounts/components/CreateButton/CreateButtonView'
 
 const CreateButton = ({ isPrimary, className }: { isPrimary: boolean; className?: string }) => {
   const next = useNewSafeNextParam()
-  return (
-    <Button
-      data-testid="create-safe-btn"
-      size="action"
-      variant={isPrimary ? 'default' : 'outline'}
-      className={cn('max-[599px]:w-full', className)}
-      render={<NextLink href={{ pathname: AppRoutes.newSafe.create, query: { next } }} />}
-    >
-      Create account
-    </Button>
-  )
+  return <CreateButtonView isPrimary={isPrimary} buttonClassName={className} next={next} />
 }
 
 export default CreateButton

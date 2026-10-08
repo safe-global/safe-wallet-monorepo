@@ -2,14 +2,12 @@ import AccountListFilters from '../AccountListFilters'
 import AccountsHeader from '../AccountsHeader'
 import AccountsList from '../AccountsList'
 import { useState } from 'react'
-import { Separator } from '@/components/ui/separator'
 import madProps from '@/utils/mad-props'
-import css from '../../styles.module.css'
 import useWallet from '@/hooks/wallets/useWallet'
 import { type AllSafeItemsGrouped, useAllSafesGrouped } from '@/hooks/safes'
-import classNames from 'classnames'
 import useTrackSafesCount from '../../hooks/useTrackedSafesCount'
 import { DataWidget } from '../DataWidget'
+import { MyAccountsView } from '@views/features/myAccounts/components/MyAccounts/MyAccountsView'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -23,28 +21,15 @@ const MyAccounts = ({ safes, onLinkClick, isSidebar = false }: MyAccountsProps) 
   useTrackSafesCount(safes, wallet)
 
   return (
-    <div data-testid="sidebar-safe-container" className={css.container}>
-      <div
-        className={classNames(css.myAccounts, {
-          [css.sidebarAccounts]: isSidebar,
-        })}
-      >
-        <AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />
-
-        <div className="bg-background rounded-lg">
-          <AccountListFilters setSearchQuery={setSearchQuery} />
-
-          {isSidebar && <Separator />}
-
-          <div className={classNames('bg-background', css.safeList)}>
-            <AccountsList searchQuery={searchQuery} safes={safes} isSidebar={isSidebar} onLinkClick={onLinkClick} />
-          </div>
-        </div>
-
-        {isSidebar && <Separator />}
-        <DataWidget />
-      </div>
-    </div>
+    <MyAccountsView
+      isSidebar={isSidebar}
+      header={<AccountsHeader isSidebar={isSidebar} onLinkClick={onLinkClick} />}
+      filters={<AccountListFilters setSearchQuery={setSearchQuery} />}
+      accountsList={
+        <AccountsList searchQuery={searchQuery} safes={safes} isSidebar={isSidebar} onLinkClick={onLinkClick} />
+      }
+      dataWidget={<DataWidget />}
+    />
   )
 }
 

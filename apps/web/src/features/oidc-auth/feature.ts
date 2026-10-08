@@ -11,7 +11,7 @@
 import type { OidcAuthContract } from './contract'
 import EmailSignInButton from './components/EmailSignInButton'
 import GoogleSignInButton from './components/GoogleSignInButton'
-import WorkspaceTwoFactorAwarenessCard from './components/WorkspaceTwoFactorAwarenessCard'
+import WorkspaceTwoFactorAwarenessCard from '@views/features/oidc-auth/components/WorkspaceTwoFactorAwarenessCard'
 
 const feature: OidcAuthContract = {
   EmailSignInButton,

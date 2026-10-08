@@ -1,10 +1,7 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertSeverityIcon } from '@/components/ui/alert'
 
-import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'
@@ -17,9 +14,9 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 import { createNewSpendingLimitTx } from '../../services/spendingLimitExecution'
 import { useAppSelector } from '@/store'
+import { ReviewSpendingLimitView } from '@views/features/spending-limits/components/ReviewSpendingLimit/ReviewSpendingLimitView'
 
 const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => {
   const { data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
@@ -79,21 +76,16 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
-      {token && (
-        <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title="Amount">
-          {existingAmount && existingAmount !== data?.amount && (
-            <>
-              <span data-testid="old-token-amount" className="text-destructive line-through">
-                {existingAmount}
-              </span>
-              →
-            </>
-          )}
-        </SendAmountBlock>
-      )}
-
-      <TxDetailsRow label="Beneficiary" grid>
-        <div data-testid="beneficiary-address">
+      <ReviewSpendingLimitView
+        hasToken={!!token}
+        renderAmountBlock={(title, amountChildren) =>
+          token && (
+            <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} title={title}>
+              {amountChildren}
+            </SendAmountBlock>
+          )
+        }
+        beneficiaryHashInfo={
           <EthHashInfo
             address={data?.beneficiary || ''}
             shortAddress={false}
@@ -101,48 +93,23 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
             showCopyButton
             showAvatar={false}
           />
-        </div>
-      </TxDetailsRow>
-
-      <TxDetailsRow label="Reset time" grid>
-        {existingSpendingLimit ? (
-          <>
-            <SpendingLimitLabel
-              label={
-                <>
-                  {existingSpendingLimit.resetTimeMin !== data?.resetTime && (
-                    <>
-                      <span data-testid="old-reset-time" className="text-destructive line-through">
-                        {oldResetTime}
-                      </span>
-                      {' → '}
-                    </>
-                  )}
-                  <span>{resetTime}</span>
-                </>
+        }
+        existing={
+          existingSpendingLimit
+            ? {
+                amount: existingAmount,
+                showOldAmount: !!existingAmount && existingAmount !== data?.amount,
+                resetTimeChanged: existingSpendingLimit.resetTimeMin !== data?.resetTime,
+                oldResetTime,
+                isOneTime: existingSpendingLimit.resetTimeMin === '0',
               }
-              isOneTime={existingSpendingLimit.resetTimeMin === '0'}
-            />
-          </>
-        ) : (
-          <SpendingLimitLabel
-            data-testid="spending-limit-label"
-            label={resetTime || 'One-time spending limit'}
-            isOneTime={!!resetTime && isOneTime}
-          />
-        )}
-      </TxDetailsRow>
-
-      {existingSpendingLimit && (
-        <Alert variant="warning" outlined={false} className="border-none">
-          <AlertSeverityIcon variant="warning" />
-          <Typography data-testid="limit-replacement-warning" className="font-bold">
-            You are about to replace an existing spending limit
-          </Typography>
-        </Alert>
-      )}
-
-      {children}
+            : undefined
+        }
+        resetTime={resetTime}
+        isOneTime={isOneTime}
+      >
+        {children}
+      </ReviewSpendingLimitView>
     </ReviewTransaction>
   )
 }

@@ -1,8 +1,6 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { useContext, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import SendToBlock from '@/components/tx/SendToBlock'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'
@@ -20,7 +18,6 @@ import { getTxOptions } from '@/utils/transactions'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import { type SubmitCallback } from '@/components/tx/shared/types'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -29,6 +26,7 @@ import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import type { SpendingLimitTxParams } from '../../types'
+import { ReviewSpendingLimitTxView } from '@views/features/spending-limits/components/ReviewSpendingLimitTx/ReviewSpendingLimitTxView'
 
 export type TokenTransferParams = {
   recipient: string
@@ -124,41 +122,21 @@ const ReviewSpendingLimitTx = ({
   const submitDisabled = !isSubmittable || gasLimitLoading
 
   return (
-    <form onSubmit={handleSubmit}>
-      <TxCard>
-        <Typography variant="paragraph-small">
-          Spending limit transactions only appear in the interface once they are successfully processed and indexed.
-          Pending transactions can only be viewed in your signer wallet application or under your wallet address on a
-          Blockchain Explorer.
-        </Typography>
-
-        {token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} />}
-
-        <SendToBlock address={params.recipient} />
-
-        <AdvancedParams params={advancedParams} willExecute={true} onFormSubmit={setManualParams} />
-
-        <NetworkWarning />
-
-        {submitError && <TxSubmitError error={submitError} />}
-
-        {isRejectedByUser && <WalletRejectionError />}
-
-        <Typography variant="paragraph-small" align="center" className="text-muted-foreground">
-          You&apos;re about to create a transaction and will need to confirm it with your currently connected wallet.
-        </Typography>
-
-        <TxCardActions>
-          <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <Button type="submit" disabled={!isOk || submitDisabled}>
-                Execute
-              </Button>
-            )}
-          </CheckWallet>
-        </TxCardActions>
-      </TxCard>
-    </form>
+    <ReviewSpendingLimitTxView
+      onSubmit={handleSubmit}
+      amountBlock={token && <SendAmountBlock amountInWei={amountInWei} tokenInfo={token.tokenInfo} />}
+      sendToBlock={<SendToBlock address={params.recipient} />}
+      advancedParams={<AdvancedParams params={advancedParams} willExecute={true} onFormSubmit={setManualParams} />}
+      networkWarning={<NetworkWarning />}
+      submitError={submitError && <TxSubmitError error={submitError} />}
+      walletRejectionError={isRejectedByUser && <WalletRejectionError />}
+      submitDisabled={submitDisabled}
+      renderCheckWallet={(children) => (
+        <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
+          {children}
+        </CheckWallet>
+      )}
+    />
   )
 }
 
