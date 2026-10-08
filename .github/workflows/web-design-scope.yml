@@ -1,0 +1,54 @@
+name: Design scope
+
+# Checks whether a pull request only changes styling, copy and presentational markup.
+# For pull requests from the design team (or labelled `design`) the check must pass.
+# For everyone else it only reports the result in the job summary.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  design-scope:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # The checker and its rules come from the base branch, so a pull request cannot change the rules
+      # it is checked against. The pull request's code is only read, never run.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch the pull request head
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: git fetch --no-tags origin "pull/${PR_NUMBER}/head"
+
+      - name: Install the TypeScript parser
+        run: npm install --prefix "$RUNNER_TEMP/design-check" --no-save --ignore-scripts --no-audit --no-fund typescript@5.9.2
+
+      - name: Check the design scope
+        env:
+          NODE_PATH: ${{ runner.temp }}/design-check/node_modules
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          set +e
+          node scripts/design-check/index.cjs --base "$BASE_SHA" --head "$HEAD_SHA" --summary "$GITHUB_STEP_SUMMARY"
+          result=$?
+          set -e
+          if node scripts/design-check/is-design-pr.cjs; then
+            exit "$result"
+          fi
+          echo "Not a design pull request; the result above is for information only."
