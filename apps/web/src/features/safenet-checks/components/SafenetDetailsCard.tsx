@@ -6,7 +6,6 @@ import DateTime from '@/components/common/DateTime'
 import { cn } from '@/utils/cn'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   CheckStatus,
   type PublicCheckStatus,
@@ -78,7 +77,8 @@ const ResultBlock = ({
 }): ReactElement | null => {
   const { copy } = STATUS_PRESENTATION[publicStatus]
   const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
-  const showVerified = publicStatus === CheckStatus.BENIGN && attestationHref !== null && snapshot.attestedAtMs !== null
+  const verifiedAt = snapshot.attestedAtMs
+  const showVerified = publicStatus === CheckStatus.BENIGN && attestationHref !== null && verifiedAt !== null
   if (publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 0) return null
 
   return (
@@ -88,7 +88,7 @@ const ResultBlock = ({
           {copy}
           {' · '}
           <span className={META_TEXT_CLASS}>
-            Verified <DateTime value={snapshot.attestedAtMs} />
+            Verified <DateTime value={verifiedAt} />
           </span>
         </Typography>
       ) : (
@@ -128,7 +128,6 @@ export const SafenetDetailsCardView = ({
   snapshot,
   safeTxHash,
   chainId,
-  timestampMs,
   isQueued,
   defaultExpanded,
 }: SafenetDetailsCardViewProps): ReactElement => {
