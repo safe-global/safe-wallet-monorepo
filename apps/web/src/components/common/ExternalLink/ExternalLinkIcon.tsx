@@ -19,5 +19,5 @@ export const ExternalLinkIcon = ({
 }) => {
   const plain = useContext(PlainIconContext)
   const Icon = plain ? ArrowUpRight : fallback
-  return <Icon className={className} aria-hidden={plain || ariaHidden || undefined} />
+  return <Icon className={className} {...(ariaHidden === undefined ? {} : { 'aria-hidden': ariaHidden })} />
 }
