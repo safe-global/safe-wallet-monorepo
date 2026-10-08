@@ -3,7 +3,6 @@ import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 
 const MAX_LOCAL_PART = 8
 
-/** Trims the local part but keeps the domain, which is what identifies the account at a glance. */
 const shortenEmail = (email: string): string => {
   const atIndex = email.lastIndexOf('@')
   if (atIndex <= MAX_LOCAL_PART) return email

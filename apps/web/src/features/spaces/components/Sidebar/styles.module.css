@@ -400,7 +400,6 @@
   display: flex;
   flex-direction: column;
   gap: 0 !important;
-  /* Sections own the inset so the dividers can run full-bleed. */
   padding: 0 !important;
   width: 19.5rem !important;
   background-color: var(--popover) !important;

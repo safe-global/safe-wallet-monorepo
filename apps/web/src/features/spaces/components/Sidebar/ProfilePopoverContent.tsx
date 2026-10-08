@@ -14,7 +14,6 @@ export interface ProfilePopoverContentProps {
   displayName: string
   shortDisplayName?: string
   role?: string
-  /** Active non-admin member: cannot manage billing, so the caption says membership. */
   isMember?: boolean
   signerAddress?: string
   connectedWallet?: string
