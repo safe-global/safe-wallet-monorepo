@@ -12,6 +12,7 @@ import css from './styles.module.css'
 export interface ProfilePopoverContentProps {
   avatarName: string
   displayName: string
+  shortDisplayName?: string
   role?: string
   signerAddress?: string
   connectedWallet?: string
@@ -21,6 +22,7 @@ export interface ProfilePopoverContentProps {
 export const ProfilePopoverContent = ({
   avatarName,
   displayName,
+  shortDisplayName,
   role,
   signerAddress,
   connectedWallet,
@@ -44,7 +46,9 @@ export const ProfilePopoverContent = ({
         )}
         {displayName && (
           <Tooltip>
-            <TooltipTrigger render={<span className={css.profileName} />}>{displayName}</TooltipTrigger>
+            <TooltipTrigger render={<span className={css.profileName} />}>
+              {shortDisplayName || displayName}
+            </TooltipTrigger>
             <TooltipContent side="top">{signerAddress || displayName}</TooltipContent>
           </Tooltip>
         )}

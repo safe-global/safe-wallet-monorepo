@@ -45,7 +45,7 @@ export const AccountInfo = ({
           </span>
 
           {displayName && (
-            <span className="hidden max-w-[8rem] min-w-0 truncate text-xs font-normal text-muted-foreground sm:block">
+            <span className="hidden max-w-[10rem] min-w-0 truncate text-xs font-normal text-muted-foreground sm:block">
               {shortDisplayName || displayName}
             </span>
           )}
@@ -61,6 +61,7 @@ export const AccountInfo = ({
       <ProfilePopoverContent
         avatarName={profileName}
         displayName={displayName}
+        shortDisplayName={shortDisplayName}
         signerAddress={signerAddress}
         connectedWallet={connectedWallet}
         onSignOut={handleSignOut}

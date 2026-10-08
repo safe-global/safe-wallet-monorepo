@@ -402,7 +402,7 @@
   gap: 0 !important;
   /* Sections own the inset so the dividers can run full-bleed. */
   padding: 0 !important;
-  width: 17.5rem !important;
+  width: 19.5rem !important;
   background-color: var(--popover) !important;
   /* Match the notifications popover radius (overrides the base popover's rounded-md). */
   border-radius: 24px !important;
