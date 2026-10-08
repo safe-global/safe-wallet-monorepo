@@ -1,14 +1,10 @@
 import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Check, Plus } from 'lucide-react'
-import InvalidContactNameTooltip from './InvalidContactNameTooltip'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { Spinner } from '@/components/ui/spinner'
 import { useAddOrRequestWorkspaceContact } from '../../hooks/useAddOrRequestWorkspaceContact'
 import { validateContactName } from './utils'
+import { AddToWorkspaceButtonView } from '@views/features/spaces/components/SpaceAddressBook/AddToWorkspaceButtonView'
 
 type AddToWorkspaceButtonProps = {
   address: string
@@ -37,35 +33,14 @@ const AddToWorkspaceButton = ({ address, name, chainIds, isCompact }: AddToWorks
     }
   }
 
-  const label = added ? 'Added' : 'Add to Workspace'
-  const icon = added ? <Check className="size-4" /> : <Plus className="size-4" />
-
-  // Compact has no room for the label, so it moves into the accessible name and a tooltip
-  const button = (
-    <Button
-      variant="outline"
-      size={isCompact ? 'icon-sm' : 'sm'}
-      aria-label={isCompact ? label : undefined}
-      onClick={handleAdd}
-      disabled={isSubmitting || added || !!nameError}
-    >
-      {isSubmitting ? <Spinner className="size-3.5" /> : isCompact ? icon : label}
-    </Button>
-  )
-
-  if (nameError) {
-    return <InvalidContactNameTooltip nameError={nameError}>{button}</InvalidContactNameTooltip>
-  }
-
-  if (!isCompact) {
-    return button
-  }
-
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>{label}</TooltipContent>
-    </Tooltip>
+    <AddToWorkspaceButtonView
+      added={added}
+      isSubmitting={isSubmitting}
+      nameError={nameError}
+      isCompact={isCompact}
+      onAdd={handleAdd}
+    />
   )
 }
 

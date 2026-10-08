@@ -1,5 +1,4 @@
 import { useCallback, useMemo, type ReactElement } from 'react'
-import { Plus, Trash2 } from 'lucide-react'
 import { useFieldArray, useFormContext } from 'react-hook-form'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/utils/utils/validation'
@@ -7,10 +6,6 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/utils/cn'
-import { FieldDescription } from '@/components/ui/field'
 import TokenLimitCard from './TokenLimitCard'
 import { validateUniqueSpender } from '../utils/validation'
 import {
@@ -20,17 +15,10 @@ import {
   type SpendingLimitPolicyFormValues,
 } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
-  ADD_TOKEN_LABEL,
-  REMOVE_SPENDER_LABEL,
-  SPENDER_HELPER_TEXT,
   SPENDER_IS_SAFE_ERROR,
-  SPENDER_LABEL,
-  SPENDER_PLACEHOLDER,
   SPENDER_RESERVED_ERROR,
 } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-
-/** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
-const ICON_STROKE_WIDTH = 1.5
+import { SpenderCardView } from '@views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCardView'
 
 export type SpenderCardProps = {
   spenderIndex: number
@@ -79,64 +67,34 @@ const SpenderCard = ({ spenderIndex, spenderCount, removable, onRemove }: Spende
   const excludeAddresses = useMemo(() => otherSpendersKey.split(',').filter(Boolean), [otherSpendersKey])
 
   return (
-    <Card variant="muted" size="none" radius="xl" className="relative" data-testid="spender-card">
-      {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
-      <div className="flex flex-col gap-4 p-4">
-        {removable && (
-          <Button
-            type="button"
-            variant="ghost-destructive"
-            size="icon-circle"
-            aria-label={REMOVE_SPENDER_LABEL}
-            onClick={onRemove}
-            data-testid="remove-spender-btn"
-            /* The address field's wrapper follows this in the DOM and would otherwise paint over it. */
-            className="absolute top-2 right-2 z-10"
-          >
-            <Trash2 strokeWidth={ICON_STROKE_WIDTH} />
-          </Button>
-        )}
-
-        <div className={cn('flex flex-col gap-1', isFixed && 'cursor-not-allowed opacity-50')}>
-          <AddressBookInput
-            name={spenderAddressPath(spenderIndex)}
-            label={SPENDER_LABEL}
-            placeholder={SPENDER_PLACEHOLDER}
-            validate={validateSpender}
-            deps={otherSpenderPaths}
-            excludeAddresses={excludeAddresses}
-            disabled={isFixed}
-            data-testid="spender-address-input"
-          />
-          <FieldDescription>{SPENDER_HELPER_TEXT}</FieldDescription>
-        </div>
-
-        <div className="flex flex-col gap-3">
-          {fields.map((field, index) => (
-            <TokenLimitCard
-              key={field.id}
-              spenderIndex={spenderIndex}
-              limitIndex={index}
-              limitCount={fields.length}
-              removable={fields.length > 1}
-              onRemove={() => remove(index)}
-            />
-          ))}
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => append(createEmptyLimit())}
-            data-testid="add-token-btn"
-          >
-            <Plus />
-            {ADD_TOKEN_LABEL}
-          </Button>
-        </div>
-      </div>
-    </Card>
+    <SpenderCardView
+      removable={removable}
+      onRemove={onRemove}
+      isFixed={isFixed}
+      renderAddressInput={({ label, placeholder }) => (
+        <AddressBookInput
+          name={spenderAddressPath(spenderIndex)}
+          label={label}
+          placeholder={placeholder}
+          validate={validateSpender}
+          deps={otherSpenderPaths}
+          excludeAddresses={excludeAddresses}
+          disabled={isFixed}
+          data-testid="spender-address-input"
+        />
+      )}
+      limits={fields.map((field, index) => (
+        <TokenLimitCard
+          key={field.id}
+          spenderIndex={spenderIndex}
+          limitIndex={index}
+          limitCount={fields.length}
+          removable={fields.length > 1}
+          onRemove={() => remove(index)}
+        />
+      ))}
+      onAddToken={() => append(createEmptyLimit())}
+    />
   )
 }
 

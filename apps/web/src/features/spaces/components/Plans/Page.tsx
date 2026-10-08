@@ -1,10 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { cn } from '@/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
@@ -23,13 +19,9 @@ import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
 import type { PlanPick, PlanTier } from '@views/features/spaces/components/Plans/types'
+import { PageView } from '@views/features/spaces/components/Plans/PageView'
 
-const PlansSkeleton = () => (
-  <div className="flex flex-col gap-6" data-testid="plans-skeleton">
-    <Skeleton className="h-49 w-full rounded-xl" />
-    <Skeleton className="h-140 w-full rounded-xl" />
-  </div>
-)
+const ANNOUNCEMENT_LOCATION = 'plans_page'
 
 /** The seats the recommended card opens on, the same option its card picks first. */
 const defaultSeats = (tiers: PlanTier[]): number | undefined => {
@@ -85,22 +77,12 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
 
   return (
     <AuthState spaceId={spaceId}>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
-          Plans
-        </Typography>
-
-        {!isSafePro ? (
-          <Card
-            size="none"
-            // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
-            className="w-full rounded-4xl"
-          >
-            <SafeProAnnouncement location="plans_page" />
-          </Card>
-        ) : isPlanLoading || isOffersLoading ? (
-          <PlansSkeleton />
-        ) : (
+      <PageView
+        isDarkMode={isDarkMode}
+        isSafePro={isSafePro}
+        isLoading={isPlanLoading || isOffersLoading}
+        announcement={<SafeProAnnouncement location={ANNOUNCEMENT_LOCATION} />}
+        plans={
           <Plans
             plan={plan}
             safeAccounts={seats}
@@ -119,18 +101,20 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             currentPlan={currentPlan}
             readOnly={!isAdmin}
           />
-        )}
-
-        {pick && currentPlan && (
-          <ChangePlanFlow
-            spaceId={spaceId}
-            pick={pick}
-            currentPlan={currentPlan}
-            entry={entry}
-            onClose={() => setPick(undefined)}
-          />
-        )}
-      </div>
+        }
+        changePlanFlow={
+          pick &&
+          currentPlan && (
+            <ChangePlanFlow
+              spaceId={spaceId}
+              pick={pick}
+              currentPlan={currentPlan}
+              entry={entry}
+              onClose={() => setPick(undefined)}
+            />
+          )
+        }
+      />
     </AuthState>
   )
 }

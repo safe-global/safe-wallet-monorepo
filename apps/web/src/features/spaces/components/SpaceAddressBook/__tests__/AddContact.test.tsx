@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddContact from '../AddContact'
+import { AddContactDialogView as MockAddContactDialogView } from '@views/features/spaces/components/SpaceAddressBook/AddContactDialogView'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
@@ -28,8 +29,8 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 type CapturedProps = {
-  triggerLabel: string
-  dialogTitle: string
+  triggerLabel?: string
+  dialogTitle?: string
   successMessage: string
   successGroupKey: string
   submit: (item: unknown, sid: string) => Promise<unknown>
@@ -39,11 +40,39 @@ type CapturedProps = {
 
 let lastProps: CapturedProps | undefined
 
+jest.mock('@/components/common/ModalDialog', () => ({
+  __esModule: true,
+  default: ({ children, open, dialogTitle }: { children: React.ReactNode; open: boolean; dialogTitle: string }) =>
+    open ? (
+      <div role="dialog" aria-label={dialogTitle}>
+        {children}
+      </div>
+    ) : null,
+}))
+
 jest.mock('../AddContactDialog', () => ({
   __esModule: true,
   default: (props: CapturedProps) => {
     lastProps = props
-    return <div data-testid="dialog-stub">{props.triggerLabel}</div>
+    return (
+      <div data-testid="dialog-stub">
+        <MockAddContactDialogView
+          open
+          onOpen={() => {}}
+          onClose={() => {}}
+          triggerLabel={props.triggerLabel}
+          dialogTitle={props.dialogTitle}
+          isDarkMode={false}
+          onSubmit={() => {}}
+          hasNetworksError={false}
+          confirmDisabled
+          isSubmitting={false}
+          renderNameInput={() => null}
+          renderAddressInput={() => null}
+          renderNetworksInput={() => null}
+        />
+      </div>
+    )
   },
 }))
 
@@ -56,16 +85,17 @@ describe('AddContact', () => {
   it('passes the trigger label, dialog title, and success copy', () => {
     render(<AddContact label="Add shared contact" />)
 
-    expect(lastProps?.triggerLabel).toBe('Add shared contact')
-    expect(lastProps?.dialogTitle).toBe('Add contact')
+    expect(screen.getByRole('button', { name: 'Add shared contact' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Add contact' })).toBeInTheDocument()
     expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
-    expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
   })
 
-  it('defaults the trigger label to "Add contact"', () => {
+  it('defaults the trigger label and dialog title to "Add contact"', () => {
     render(<AddContact />)
-    expect(lastProps?.triggerLabel).toBe('Add contact')
+    const dialog = screen.getByRole('dialog', { name: 'Add contact' })
+    const triggers = screen.getAllByRole('button', { name: 'Add contact' }).filter((button) => !dialog.contains(button))
+    expect(triggers).toHaveLength(1)
   })
 
   it('submit calls the shared-address-book mutation with the right payload', async () => {

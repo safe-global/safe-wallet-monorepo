@@ -3,7 +3,7 @@ import { useChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import type { ProposerOverviewProps } from '../../ProposerDrawer/components/ProposerOverview'
+import type { ProposerOverviewProps } from '@views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview'
 import type { ProposerRef } from '@views/features/spaces/components/Policies/ProposerDetails/hooks/types'
 
 /** The grant carries no timestamp, so the drawer cannot say when it was made. */

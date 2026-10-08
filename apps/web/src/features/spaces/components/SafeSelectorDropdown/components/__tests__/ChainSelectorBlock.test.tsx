@@ -28,7 +28,7 @@ jest.mock('@/components/ui/dropdown-menu', () => ({
   ),
 }))
 
-jest.mock('../ChainLogo', () => ({
+jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/ChainLogo', () => ({
   __esModule: true,
   default: ({ chainId }: { chainId: string }) => <span data-testid="chain-logo" data-chain-id={chainId} />,
 }))

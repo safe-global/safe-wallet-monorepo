@@ -2,6 +2,7 @@ import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import PlanCards, { type PlanCardActions } from './PlanCards'
 import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
 import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from '@views/features/spaces/components/Plans/types'
+import { PlansView } from '@views/features/spaces/components/Plans/PlansView'
 
 export default function Plans({
   plan,
@@ -31,27 +32,31 @@ export default function Plans({
   readOnly?: boolean
 } & Pick<PlanCardActions, 'onCta'>) {
   return (
-    <div className="flex flex-col gap-6">
-      <PlanStatusCard
-        plan={plan}
-        safeAccounts={safeAccounts}
-        sponsoredTxs={sponsoredTxs}
-        tierName={plan?.name}
-        onManage={onManage}
-        isManaging={isManaging}
-        canManage={readOnly ? false : canManage}
-      />
-      <PlanCards
-        tiers={tiers}
-        currentBadge={getCurrentBadge(plan)}
-        currentPlan={currentPlan}
-        onSubscribe={onSubscribe}
-        onManage={onManage}
-        isBusy={isSubscribing || isManaging}
-        readOnly={readOnly}
-        location={PlanLocation.PLANS_PAGE}
-        onCta={onCta}
-      />
-    </div>
+    <PlansView
+      statusCard={
+        <PlanStatusCard
+          plan={plan}
+          safeAccounts={safeAccounts}
+          sponsoredTxs={sponsoredTxs}
+          tierName={plan?.name}
+          onManage={onManage}
+          isManaging={isManaging}
+          canManage={readOnly ? false : canManage}
+        />
+      }
+      planCards={
+        <PlanCards
+          tiers={tiers}
+          currentBadge={getCurrentBadge(plan)}
+          currentPlan={currentPlan}
+          onSubscribe={onSubscribe}
+          onManage={onManage}
+          isBusy={isSubscribing || isManaging}
+          readOnly={readOnly}
+          location={PlanLocation.PLANS_PAGE}
+          onCta={onCta}
+        />
+      }
+    />
   )
 }

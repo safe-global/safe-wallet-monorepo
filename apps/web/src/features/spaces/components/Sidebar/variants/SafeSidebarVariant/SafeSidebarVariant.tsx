@@ -1,17 +1,6 @@
 import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { Settings } from 'lucide-react'
-import { motion } from 'motion/react'
-import {
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarSeparator,
-} from '@/components/ui/sidebar'
-import css from '../../styles.module.css'
 import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '@views/features/spaces/components/Sidebar/types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
@@ -24,7 +13,7 @@ import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { containerVariants, itemVariants } from '@views/features/spaces/components/Sidebar/constants'
+import { SafeSidebarVariantView } from '@views/features/spaces/components/Sidebar/variants/SafeSidebarVariant/SafeSidebarVariantView'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
@@ -77,64 +66,30 @@ export const SafeSidebarVariant = ({
   const displayDefiItems = defiGroup?.items || Array(DEFI_GROUP_SKELETON_COUNT).fill(null)
 
   return (
-    <SidebarContent>
-      <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        {shouldRenderWorkspaceHeaderGroup && (
-          <motion.div variants={itemVariants} className="mb-4">
-            <SidebarGroup className={css.sidebarGroup}>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} />
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroup>
-          </motion.div>
-        )}
-
-        {/* Action Button */}
-        <motion.div variants={itemVariants} className="mb-4">
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupContent>
-              <SidebarActionButton />
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </motion.div>
-
-        {/* Main Navigation */}
-        <motion.div variants={itemVariants}>
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5">
-                {displayMainNavItems.map((item, index) => (
-                  <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
-                ))}
-                <NavItem item={settingsItem} isLoading={isLoading} />
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </motion.div>
-
-        {/* DeFi Group */}
-        {(defiGroup?.items?.length ?? 0) > 0 && (
-          <motion.div variants={itemVariants}>
-            <SidebarGroup className={css.sidebarGroup}>
-              <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-                {defiGroup?.label ?? ''}
-              </SidebarGroupLabel>
-              <SidebarSeparator className={css.collapsedSeparator} />
-              <SidebarGroupContent>
-                <SidebarMenu className="gap-0">
-                  {displayDefiItems.map((item, index) => (
-                    <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </motion.div>
-        )}
-
-        <SidebarDeveloperGroup isLoading={isLoading} />
-      </motion.div>
-    </SidebarContent>
+    <SafeSidebarVariantView
+      workspaceHeader={
+        shouldRenderWorkspaceHeaderGroup ? <SafeSidebarWorkspaceHeader workspaceHeader={workspaceHeader} /> : undefined
+      }
+      actionButton={<SidebarActionButton />}
+      mainNavItems={
+        <>
+          {displayMainNavItems.map((item, index) => (
+            <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isLoading={isLoading} />
+          ))}
+          <NavItem item={settingsItem} isLoading={isLoading} />
+        </>
+      }
+      defiGroup={
+        (defiGroup?.items?.length ?? 0) > 0
+          ? {
+              label: defiGroup?.label ?? '',
+              items: displayDefiItems.map((item, index) => (
+                <NavItem key={item?.href ?? `skeleton-defi-${index}`} item={item} isLoading={isLoading} />
+              )),
+            }
+          : undefined
+      }
+      developerGroup={<SidebarDeveloperGroup isLoading={isLoading} />}
+    />
   )
 }

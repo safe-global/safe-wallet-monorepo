@@ -11,7 +11,7 @@ import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../Ex
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { toSpendingLimitFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
 import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import BaselineGate from './BaselineGate'
+import BaselineGate from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/BaselineGate'
 import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 const noop = () => {}

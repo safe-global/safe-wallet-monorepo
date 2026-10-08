@@ -1,6 +1,5 @@
-import { useEffect, type CSSProperties, type ReactElement } from 'react'
+import { type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
 import { EnhancedSidebar } from '../index'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -13,7 +12,7 @@ import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
-import { cn } from '@/utils/cn'
+import { SpacesEnhancedSidebarView } from '@views/features/spaces/components/Sidebar/SpacesEnhancedSidebar/SpacesEnhancedSidebarView'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SpacesEnhancedSidebarProps {
@@ -27,15 +26,6 @@ interface SpacesEnhancedSidebarProps {
   isContainedInDrawer?: boolean
 }
 
-/** Reports sidebar open/collapsed state to parent without interfering with internal state. */
-const SidebarStateReporter = ({ onOpenChange }: { onOpenChange?: (open: boolean) => void }): null => {
-  const { open } = useSidebar()
-  useEffect(() => {
-    onOpenChange?.(open)
-  }, [open, onOpenChange])
-  return null
-}
-
 export const SpacesEnhancedSidebar = ({
   isDrawerOpen,
   onDrawerClose,
@@ -44,29 +34,21 @@ export const SpacesEnhancedSidebar = ({
 }: SpacesEnhancedSidebarProps = {}): ReactElement => {
   const isHydrated = useIsHydrated()
   const isDarkMode = useDarkMode()
-  const spacesSidebarWidth = 'min(230px, 100%)'
-  const spacesSidebarIconWidth = '34px'
 
   return (
-    <SidebarProvider
-      open={isContainedInDrawer ? true : undefined}
-      openMobile={isDrawerOpen}
-      onOpenMobileChange={(open) => !open && onDrawerClose?.()}
-      style={
-        {
-          '--sidebar-width': spacesSidebarWidth,
-          '--sidebar-width-icon': spacesSidebarIconWidth,
-        } as CSSProperties
-      }
-      className={cn('shadcn-scope', isDarkMode && 'dark', isContainedInDrawer && 'h-dvh')}
+    <SpacesEnhancedSidebarView
+      isDrawerOpen={isDrawerOpen}
+      onDrawerClose={onDrawerClose}
+      onOpenChange={onOpenChange}
+      isContainedInDrawer={isContainedInDrawer}
+      isDarkMode={isDarkMode}
     >
-      <SidebarStateReporter onOpenChange={onOpenChange} />
       {isHydrated ? (
         <HydratedSidebar contained={isContainedInDrawer} />
       ) : (
         <SidebarSkeleton contained={isContainedInDrawer} />
       )}
-    </SidebarProvider>
+    </SpacesEnhancedSidebarView>
   )
 }
 

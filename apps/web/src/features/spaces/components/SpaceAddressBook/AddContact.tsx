@@ -8,7 +8,9 @@ import AddContactDialog from './AddContactDialog'
 
 export type { ContactField } from './AddContactDialog'
 
-const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
+const SUCCESS_GROUP_KEY = 'add-contact-success'
+
+const AddContact = ({ label }: { label?: string }) => {
   const addressBookItems = useGetSpaceAddressBook()
   const workspaceAddressBookLabel = useWorkspaceAddressBookLabel()
   const [upsertAddressBook] = useAddressBooksUpsertAddressBookItemsV1Mutation()
@@ -16,9 +18,8 @@ const AddContact = ({ label = 'Add contact' }: { label?: string }) => {
   return (
     <AddContactDialog
       triggerLabel={label}
-      dialogTitle="Add contact"
       successMessage={getContactAddedMessage(workspaceAddressBookLabel)}
-      successGroupKey="add-contact-success"
+      successGroupKey={SUCCESS_GROUP_KEY}
       validateCharset
       submit={(item, sid) =>
         upsertAddressBook({

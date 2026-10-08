@@ -7,6 +7,7 @@ import {
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
 import { ENTERPRISE_TIER, PLAN_ORDER } from '@views/features/spaces/components/Plans/planCatalog'
+import { seatsLabel } from '@views/features/spaces/components/Plans/planPrice'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -19,10 +20,7 @@ import type {
 
 const CYCLES = ['month', 'year'] as const
 
-export const formatPlanPrice = (price: number, currency: string): string =>
-  new Intl.NumberFormat('en', { style: 'currency', currency, maximumFractionDigits: 0 }).format(price)
-
-export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (billingCycle === 'year' ? '/yr' : '/mo')
+export { formatPlanPrice, priceSuffix, seatsLabel } from '@views/features/spaces/components/Plans/planPrice'
 
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
@@ -110,9 +108,6 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, rec
     label: direction === 'upgrade' ? `Upgrade to ${target}` : `Switch to ${target}`,
   }
 }
-
-export const seatsLabel = (seats: PlanOffer['seats']): string =>
-  seats === null ? 'Safe accounts' : seats === 'unlimited' ? 'Unlimited Safe accounts' : `${seats} Safe accounts`
 
 const toOption = (offer: PlanOffer, monthly: PlanOffer | undefined): PlanSeatOption => ({
   paymentLinkId: offer.paymentLinkId,

@@ -1,0 +1,163 @@
+import type { ReactElement, ReactNode } from 'react'
+import { Fuel, Info, WalletCards } from 'lucide-react'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { formatDate } from '@safe-global/utils/utils/date'
+import type { CurrentBadge } from './PlanCardsView'
+import type { Meter, PlanSummary } from './types'
+
+export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
+
+export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
+  `${tierName ? `Your ${tierName} plan` : 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
+
+export const InfoTip = ({ text, 'data-testid': testId }: { text: string; 'data-testid'?: string }) => (
+  <Tooltip>
+    <TooltipTrigger render={<span className="inline-flex" data-testid={testId} />}>
+      <Info className="size-4 text-muted-foreground" />
+    </TooltipTrigger>
+    <TooltipContent className="max-w-65">{text}</TooltipContent>
+  </Tooltip>
+)
+
+const UsageMeter = ({
+  icon,
+  label,
+  tooltip,
+  meter,
+}: {
+  icon: ReactNode
+  label: string
+  tooltip?: string
+  meter: Meter | null
+}) => {
+  const left = meter && _remaining(meter)
+  const isExhausted = left === 0
+
+  return (
+    <Card variant="muted" size="sm" className="flex-1">
+      <CardContent className="flex items-center justify-between">
+        <div className="mr-4 flex items-center gap-3">
+          <Avatar>
+            <AvatarFallback surface="card">{icon}</AvatarFallback>
+          </Avatar>
+          <Typography variant="paragraph-medium">{label}</Typography>
+          {tooltip && <InfoTip text={tooltip} />}
+        </div>
+        <Typography
+          variant="paragraph-bold"
+          className="flex items-center gap-1.5 whitespace-nowrap"
+          data-testid={isExhausted ? 'meter-exhausted' : undefined}
+        >
+          {isExhausted && <span aria-hidden className="size-1.5 rounded-full bg-destructive" />}
+          {meter === null ? (
+            '—'
+          ) : left === null ? (
+            'Unlimited'
+          ) : (
+            <>
+              <span data-testid="meter-left">{left}</span>{' '}
+              <Typography variant="paragraph-small" color="muted">
+                / {meter.quota}
+              </Typography>
+            </>
+          )}
+        </Typography>
+      </CardContent>
+    </Card>
+  )
+}
+
+const statusText = (plan: PlanSummary | null, endDate: string | null, isSeatsFull: boolean): string | null => {
+  if (plan === null) {
+    return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available in My accounts.'
+  }
+  if (plan.status === 'active') {
+    return isSeatsFull ? 'Safe accounts above the limit remain available in My accounts.' : null
+  }
+  const until = endDate ?? 'the end of the period'
+  return !plan.hasPaymentMethod
+    ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
+    : `Active until ${until}.`
+}
+
+export type PlanStatusCardViewProps = {
+  plan: PlanSummary | null
+  safeAccounts: Meter | null
+  sponsoredTxs: Meter | null
+  tierName?: string
+  onManage?: () => void
+  isManaging?: boolean
+  canManage: boolean
+  badge?: CurrentBadge
+  /** Shown behind the info icon while a trial has no payment method. */
+  trialDisclaimer: string
+}
+
+export const PlanStatusCardView = ({
+  plan,
+  safeAccounts,
+  sponsoredTxs,
+  tierName,
+  onManage,
+  isManaging,
+  canManage,
+  badge,
+  trialDisclaimer,
+}: PlanStatusCardViewProps): ReactElement => {
+  const isTrial = plan?.status === 'trialing'
+  const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
+  const text = statusText(plan, endDate, safeAccounts !== null && _remaining(safeAccounts) === 0)
+
+  return (
+    <Card radius="xl">
+      <CardContent>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
+                {badge && (
+                  <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
+                    {badge.label}
+                  </Badge>
+                )}
+              </div>
+              {text && (
+                <Typography className="flex items-center gap-1">
+                  {text}
+                  {isTrial && !plan?.hasPaymentMethod && (
+                    <InfoTip text={trialDisclaimer} data-testid="trial-disclaimer" />
+                  )}
+                </Typography>
+              )}
+            </div>
+            {canManage && (
+              <Button variant="outline" size="lg" onClick={onManage} disabled={isManaging}>
+                Manage plan
+              </Button>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-4 md:flex-row">
+            <UsageMeter
+              icon={<WalletCards className="size-5" strokeWidth={1.5} />}
+              label="Safe accounts available"
+              tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
+              meter={safeAccounts}
+            />
+            <UsageMeter
+              icon={<Fuel className="size-5" strokeWidth={1.5} />}
+              label="Sponsored transactions available"
+              meter={sponsoredTxs}
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}

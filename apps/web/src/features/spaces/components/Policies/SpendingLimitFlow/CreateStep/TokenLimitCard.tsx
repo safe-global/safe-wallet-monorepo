@@ -1,24 +1,17 @@
-import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
-import { CalendarClock, X } from 'lucide-react'
+import { useEffect, useMemo, type ReactElement } from 'react'
 import { Controller, get, useFormContext } from 'react-hook-form'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useChainId from '@/hooks/useChainId'
 import { computeFiatValue } from '@/utils/fiat'
-import FiatValue from '@/components/common/FiatValue'
 import NumberField from '@/components/common/NumberField'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, tokenOptionLabel } from '../utils/tokenOptions'
 import { describeResetPeriod } from '../utils/resetPeriod'
 import {
   existingTokensForSpender,
@@ -32,16 +25,7 @@ import {
   spenderAddressPath,
   type SpendingLimitPolicyFormValues,
 } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import {
-  EXISTING_LIMIT_TOOLTIP,
-  FREQUENCY_LABEL,
-  LIMIT_AMOUNT_LABEL,
-  LIMIT_AMOUNT_PLACEHOLDER,
-  REMOVE_LIMIT_LABEL,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-
-/** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
-const ICON_STROKE_WIDTH = 1.5
+import { TokenLimitCardView } from '@views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/TokenLimitCardView'
 
 export type TokenLimitCardProps = {
   spenderIndex: number
@@ -50,22 +34,6 @@ export type TokenLimitCardProps = {
   limitCount: number
   removable: boolean
   onRemove: () => void
-}
-
-/** Holds one line even when empty, so the Frequency row does not move as the helpers come and go. */
-const HelperLine = ({ children }: { children?: ReactNode }): ReactElement => (
-  <span className="block min-h-lh">{children}</span>
-)
-
-const FiatLine = ({ amount, token }: { amount: string; token: TokenOption }): ReactElement | null => {
-  const fiat = computeFiatValue(parseFloat(amount), token.fiatConversion)
-  if (fiat === null) return null
-
-  return (
-    <span data-testid="amount-fiat">
-      <FiatValue value={fiat} />
-    </span>
-  )
 }
 
 const TokenLimitCard = ({
@@ -152,114 +120,71 @@ const TokenLimitCard = ({
   const amountError = get(errors, amountPath)
 
   return (
-    <Card variant="muted-nested" size="none" radius="lg" className="relative" data-testid="token-limit-card">
-      {/* Corner-pinned so it never narrows the two fields. */}
-      {removable && (
-        <Button
-          type="button"
-          variant="ghost-destructive"
-          size="icon-circle"
-          aria-label={REMOVE_LIMIT_LABEL}
-          onClick={onRemove}
-          data-testid="remove-limit-btn"
-          className="absolute top-2 right-2"
-        >
-          <X strokeWidth={ICON_STROKE_WIDTH} />
-        </Button>
+    <TokenLimitCardView
+      removable={removable}
+      onRemove={onRemove}
+      renderTokenSelector={({ helperText, disabledAddressReason }) => (
+        <Controller
+          control={control}
+          name={tokenPath}
+          rules={{ required: NO_TOKEN_SELECTED_ERROR, deps: siblingTokenPaths, validate: validateTokenChoice }}
+          render={({ field }) => (
+            <TokenSelector
+              value={field.value || undefined}
+              onChange={(next) => field.onChange(next ?? '')}
+              excludeAddresses={excludeAddresses}
+              disabledAddresses={existingTokens}
+              disabledAddressReason={disabledAddressReason}
+              name={field.name}
+              error={!!tokenError}
+              helperText={helperText}
+              data-testid="limit-token-selector"
+            />
+          )}
+        />
       )}
-
-      {/* `Card` takes spacing only through `size`/`radius`, so the padding lives on this div. */}
-      <div className="flex flex-col gap-3 p-3">
-        {/* Both columns bring their own label and helper via `Field`, so they line up with no spacing here. */}
-        <div className="flex items-start gap-4">
-          <div className="flex min-w-0 flex-1 flex-col">
-            <Controller
-              control={control}
-              name={tokenPath}
-              rules={{ required: NO_TOKEN_SELECTED_ERROR, deps: siblingTokenPaths, validate: validateTokenChoice }}
-              render={({ field }) => (
-                <TokenSelector
-                  value={field.value || undefined}
-                  onChange={(next) => field.onChange(next ?? '')}
-                  excludeAddresses={excludeAddresses}
-                  disabledAddresses={existingTokens}
-                  disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
-                  name={field.name}
-                  error={!!tokenError}
-                  helperText={
-                    <HelperLine>
-                      {tokenError?.message ? (
-                        <span data-testid="token-error">{String(tokenError.message)}</span>
-                      ) : selectedToken?.balance !== undefined ? (
-                        <span data-testid="token-balance">
-                          {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}
-                          {tokenOptionLabel(selectedToken)}
-                        </span>
-                      ) : null}
-                    </HelperLine>
-                  }
-                  data-testid="limit-token-selector"
-                />
-              )}
-            />
-          </div>
-
-          <div className="flex min-w-0 flex-1 flex-col">
-            <NumberField
-              label={LIMIT_AMOUNT_LABEL}
-              placeholder={LIMIT_AMOUNT_PLACEHOLDER}
-              fullWidth
-              error={!!amountError}
-              helperText={
-                <HelperLine>
-                  {amountError?.message ? (
-                    String(amountError.message)
-                  ) : selectedToken ? (
-                    <FiatLine amount={amount} token={selectedToken} />
-                  ) : null}
-                </HelperLine>
-              }
-              data-testid="limit-amount-input"
-              {...register(amountPath, {
-                // NumberField leaves at most one separator, the locale's; store it as a dot.
-                setValueAs: (value: unknown) =>
-                  typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
-                validate: (value) => validateLimitAmount(value, decimals),
-              })}
-            />
-          </div>
-        </div>
-
+      tokenErrorMessage={tokenError?.message ? String(tokenError.message) : undefined}
+      tokenBalance={
+        selectedToken?.balance !== undefined
+          ? { balance: selectedToken.balance, decimals: selectedToken.decimals, label: tokenOptionLabel(selectedToken) }
+          : undefined
+      }
+      renderAmountField={({ label, placeholder, helperText }) => (
+        <NumberField
+          label={label}
+          placeholder={placeholder}
+          fullWidth
+          error={!!amountError}
+          helperText={helperText}
+          data-testid="limit-amount-input"
+          {...register(amountPath, {
+            // NumberField leaves at most one separator, the locale's; store it as a dot.
+            setValueAs: (value: unknown) =>
+              typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
+            validate: (value) => validateLimitAmount(value, decimals),
+          })}
+        />
+      )}
+      amountErrorMessage={amountError?.message ? String(amountError.message) : undefined}
+      hasSelectedToken={Boolean(selectedToken)}
+      fiatValue={selectedToken ? computeFiatValue(parseFloat(amount), selectedToken.fiatConversion) : null}
+      renderFrequencyField={(renderField) => (
         <Controller
           control={control}
           name={resetTimePath}
           rules={{ required: true }}
-          render={({ field }) => {
-            const triggerId = `${field.name}-frequency`
-            const selected = resetTimeOptions.find((option) => option.value === field.value)
-            return (
-              <Field>
-                <FieldLabel htmlFor={triggerId}>{FREQUENCY_LABEL}</FieldLabel>
-                <Select items={resetTimeOptions} value={field.value} onValueChange={(value) => field.onChange(value)}>
-                  <SelectTrigger id={triggerId} className="w-full" data-testid="frequency-select">
-                    <CalendarClock className="text-muted-foreground" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {resetTimeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value} data-testid="frequency-item">
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FieldDescription data-testid="frequency-helper">{describeResetPeriod(selected)}</FieldDescription>
-              </Field>
-            )
-          }}
+          render={({ field }) =>
+            renderField({
+              name: field.name,
+              value: field.value,
+              onChange: field.onChange,
+              description: describeResetPeriod(resetTimeOptions.find((option) => option.value === field.value)),
+            })
+          }
         />
-      </div>
-    </Card>
+      )}
+      resetTimeOptions={resetTimeOptions}
+    />
   )
 }
 

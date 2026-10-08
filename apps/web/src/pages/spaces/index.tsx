@@ -4,13 +4,14 @@ import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
 import { SpacesFeature, useFeatureFlagRedirect, useLandingSpaceId } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
+import { SpaceDashboardPageView } from '@views/pages/spaces/SpaceDashboardPageView'
 import { AppRoutes } from '@/config/routes'
 import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 
 export default function SpacePage() {
   const router = useRouter()
   const spaceId = parseSpaceId(router.query.spaceId)
-  const spaces = useLoadFeature(SpacesFeature)
+  const { SpaceDashboardPage: FeatureSpaceDashboardPage } = useLoadFeature(SpacesFeature)
   const landing = useLandingSpaceId()
   useFeatureFlagRedirect()
 
@@ -33,9 +34,9 @@ export default function SpacePage() {
         <title>{`${BRAND_NAME} – Workspace dashboard`}</title>
       </Head>
 
-      <main className="!pt-0">
-        <spaces.SpaceDashboardPage spaceId={spaceId} />
-      </main>
+      <SpaceDashboardPageView>
+        <FeatureSpaceDashboardPage spaceId={spaceId} />
+      </SpaceDashboardPageView>
     </>
   )
 }

@@ -1,16 +1,9 @@
-import { Button as ShadcnButton } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import AddMemberModal from '../AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
-import TableCard from '@/components/common/TableCard'
 import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
-import { SPACE_LABELS } from '@/services/analytics/events/spaces'
-import Track from '@/components/common/Track'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { MembersView } from '@views/features/spaces/components/Members/MembersView'
 
 const SpaceMembers = () => {
   const [openAddMembersModal, setOpenAddMembersModal] = useState(false)
@@ -19,57 +12,17 @@ const SpaceMembers = () => {
   const isInvited = useIsInvited()
 
   return (
-    <>
-      {isInvited && <PreviewInvite />}
-
-      <div>
-        <div className="mb-6 flex flex-col gap-6">
-          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-            Team
-          </Typography>
-          {isAdmin && (
-            <Track {...SPACE_EVENTS.ADD_MEMBER_MODAL} label={SPACE_LABELS.members_page}>
-              <ShadcnButton
-                data-testid="add-member-button"
-                size="lg"
-                className="px-4 py-0"
-                onClick={() => setOpenAddMembersModal(true)}
-              >
-                <Plus className="size-4 mr-1 text-green-500" />
-                Add member
-              </ShadcnButton>
-            </Track>
-          )}
-        </div>
-
-        <Tabs defaultValue="members">
-          <TabsList variant="underline" className="flex-wrap mb-4 sm:mb-0">
-            <TabsTrigger value="members" className="cursor-pointer" data-testid="members-tab">
-              Members ({activeMembers.length})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="cursor-pointer" data-testid="pending-members-tab">
-              Pending ({invitedMembers.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TableCard className="mt-6">
-            <TabsContent value="members">
-              <MembersList members={activeMembers} variant="active" />
-            </TabsContent>
-
-            <TabsContent value="pending">
-              {invitedMembers.length === 0 ? (
-                <p className="text-muted-foreground p-4 text-sm">No pending members.</p>
-              ) : (
-                <MembersList members={invitedMembers} variant="pending" />
-              )}
-            </TabsContent>
-          </TableCard>
-        </Tabs>
-
-        {openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
-      </div>
-    </>
+    <MembersView
+      previewInvite={isInvited && <PreviewInvite />}
+      isAdmin={isAdmin}
+      onAddMember={() => setOpenAddMembersModal(true)}
+      activeCount={activeMembers.length}
+      invitedCount={invitedMembers.length}
+      renderMembersList={(variant) => (
+        <MembersList members={variant === 'active' ? activeMembers : invitedMembers} variant={variant} />
+      )}
+      addMemberModal={openAddMembersModal && <AddMemberModal onClose={() => setOpenAddMembersModal(false)} />}
+    />
   )
 }
 

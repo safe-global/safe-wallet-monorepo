@@ -1,8 +1,5 @@
 import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
@@ -10,11 +7,10 @@ import {
   type AddPolicyId,
 } from '@views/features/spaces/components/Policies/AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
-import { PoliciesLoadError, PoliciesLoading } from '@views/features/spaces/components/Policies/PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyLock } from '@views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
-import ProposerIntroDialog from './ProposerIntroDialog'
+import ProposerIntroDialog from '@views/features/spaces/components/Policies/ProposerIntroDialog'
 import { PROPOSER_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
@@ -22,7 +18,7 @@ import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
 import EnableSpendingLimitModuleFlow from './SpendingLimitFlow/EnableModuleFlow'
-import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
+import SpendingLimitIntroDialog from '@views/features/spaces/components/Policies/SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import {
   REQUEST_POLICY_FORM_HEIGHT,
@@ -37,6 +33,7 @@ import {
   type PolicySafe,
   type SpendingLimitPolicy,
 } from '@views/features/spaces/components/Policies/types'
+import { LOCKED_POLICY_TOOLTIP, PoliciesView } from '@views/features/spaces/components/Policies/PoliciesView'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -87,8 +84,6 @@ const Policies = ({
   const [isProposerIntroOpen, setIsProposerIntroOpen] = useState(false)
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
-
-  const isSettled = !isLoading && !isError
 
   const selectPolicy = useCallback((policy: Policy) => {
     if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
@@ -193,7 +188,7 @@ const Policies = ({
     () =>
       ADD_POLICY_OPTIONS.map((option) =>
         locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
-          ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
+          ? { ...option, disabled: true, disabledTooltip: LOCKED_POLICY_TOOLTIP }
           : option,
       ),
     [locked],
@@ -210,47 +205,23 @@ const Policies = ({
   }, [closeProposerIntro, startProposerFlow])
 
   return (
-    <div data-testid="policies">
-      <div className="mb-6 flex flex-col gap-6">
-        <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-          Policies
-        </Typography>
-
-        {isSettled && (
-          <Typography variant="paragraph-medium">
-            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-            automatically.{' '}
-            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
-              Learn more
-            </ExternalLink>
-          </Typography>
-        )}
-      </div>
-
-      {isLoading ? (
-        <PoliciesLoading />
-      ) : isError ? (
-        <PoliciesLoadError onReload={onRetry} />
-      ) : (
-        <>
-          {locked && (
-            <div className="mb-4">
-              <PolicyUpsellBanner {...locked} />
-            </div>
-          )}
-
-          {policies.length > 0 ? (
-            <PoliciesList
-              policies={policies}
-              onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
-              onSelectPolicy={onSelectPolicy ?? selectPolicy}
-            />
-          ) : (
-            <PolicyCatalogue onSelect={handleSelect} locked={locked} />
-          )}
-        </>
-      )}
-
+    <PoliciesView
+      isLoading={isLoading}
+      isError={isError}
+      onRetry={onRetry}
+      upsellBanner={locked && <PolicyUpsellBanner {...locked} />}
+      content={
+        policies.length > 0 ? (
+          <PoliciesList
+            policies={policies}
+            onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
+            onSelectPolicy={onSelectPolicy ?? selectPolicy}
+          />
+        ) : (
+          <PolicyCatalogue onSelect={handleSelect} locked={locked} />
+        )
+      }
+    >
       <AddPolicyDialog
         open={isAddPolicyOpen}
         onOpenChange={setIsAddPolicyOpen}
@@ -287,7 +258,7 @@ const Policies = ({
           onEnableModule={isSpendingLimitLocked ? undefined : () => enableSpendingLimitModule(openedPolicy)}
         />
       )}
-    </div>
+    </PoliciesView>
   )
 }
 

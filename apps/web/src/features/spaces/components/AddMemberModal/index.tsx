@@ -1,14 +1,6 @@
 import { type ReactElement, useCallback, useEffect, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import ModalDialog from '@/components/common/ModalDialog'
-import DialogActions from '@/components/common/DialogActions'
-import memberIcon from '@/public/images/spaces/member.svg'
-import adminIcon from '@/public/images/spaces/admin.svg'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
 import { useRouter } from 'next/router'
@@ -32,6 +24,10 @@ import {
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import {
+  AddMemberModalView,
+  RoleMenuItemView,
+} from '@views/features/spaces/components/AddMemberModal/AddMemberModalView'
 
 export const RoleMenuItem = ({
   role,
@@ -39,30 +35,7 @@ export const RoleMenuItem = ({
 }: {
   role: MemberRole
   hasDescription?: boolean
-}): ReactElement => {
-  const isAdmin = role === MemberRole.ADMIN
-  const Icon = isAdmin ? adminIcon : memberIcon
-
-  return (
-    <div className={cn('w-full items-center', css.roleMenuItem)}>
-      <div className="flex items-center" style={{ gridArea: 'icon' }}>
-        <Icon className="size-4" />
-      </div>
-      <Typography variant={hasDescription ? 'paragraph-bold' : 'paragraph'} style={{ gridArea: 'title' }}>
-        {isAdmin ? 'Admin' : 'Member'}
-      </Typography>
-      {hasDescription && (
-        <div style={{ gridArea: 'description' }}>
-          <Typography variant="paragraph-small" className="max-w-[300px] break-words whitespace-normal">
-            {isAdmin
-              ? 'Admins can create and delete Workspaces, invite members, and more.'
-              : 'Can view the Workspace data.'}
-          </Typography>
-        </div>
-      )}
-    </div>
-  )
-}
+}): ReactElement => <RoleMenuItemView isAdmin={role === MemberRole.ADMIN} hasDescription={hasDescription} />
 
 const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   const spaceId = useCurrentSpaceId()
@@ -176,48 +149,25 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
   })
 
   return (
-    <ModalDialog open onClose={onClose} dialogTitle="Add member" hideChainIndicator>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <div className="overflow-visible px-6 py-4">
-              <Typography variant="paragraph" className="mb-4">
-                Invite a member by email or wallet address.
-              </Typography>
-
-              <div className="flex flex-col gap-8">
-                <MemberInfoForm />
-
-                <AddMemberInput
-                  error={formState.errors.inviteeIdentifier?.message}
-                  inputProps={inviteeIdentifierInputProps}
-                  onSelectAddress={handleSelectAddress}
-                  value={inviteeIdentifierValue}
-                />
-              </div>
-
-              {error && (
-                <Alert variant="destructive" className="mt-4">
-                  <AlertSeverityIcon variant="destructive" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            <DialogActions
-              className="px-6 pb-6"
-              onCancel={onClose}
-              cancelTestId="cancel-btn"
-              confirmType="submit"
-              confirmLabel="Add member"
-              confirmTestId="add-member-modal-button"
-              confirmDisabled={!formState.isValid}
-              confirmLoading={isSubmitting}
-            />
-          </form>
-        </FormProvider>
-      </div>
-    </ModalDialog>
+    <FormProvider {...methods}>
+      <AddMemberModalView
+        onClose={onClose}
+        isDarkMode={isDarkMode}
+        onSubmit={onSubmit}
+        memberInfoForm={<MemberInfoForm />}
+        addMemberInput={
+          <AddMemberInput
+            error={formState.errors.inviteeIdentifier?.message}
+            inputProps={inviteeIdentifierInputProps}
+            onSelectAddress={handleSelectAddress}
+            value={inviteeIdentifierValue}
+          />
+        }
+        error={error}
+        isValid={formState.isValid}
+        isSubmitting={isSubmitting}
+      />
+    </FormProvider>
   )
 }
 

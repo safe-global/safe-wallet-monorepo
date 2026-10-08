@@ -1,9 +1,4 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { BookUser, Check, ChevronRight, Rocket, UsersRound, WalletCards } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
-import SafeWidget from '../SafeWidget'
-import { cn } from '@/utils/cn'
 import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook, useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -14,7 +9,7 @@ import ImportAddressBookDialog from '../SpaceAddressBook/Import/ImportAddressBoo
 import AddAccounts from '../AddAccounts'
 import AddMemberModal from '../AddMemberModal'
 import SpaceInfoModal from '../SpaceInfoModal'
-import type { LucideIcon } from 'lucide-react'
+import { SetupWidgetView, type SetupStepKey } from '@views/features/spaces/components/SetupWidget/SetupWidgetView'
 
 interface StepsDependencies {
   addressBookCount: number
@@ -23,9 +18,7 @@ interface StepsDependencies {
 }
 
 interface SetupStep {
-  key: string
-  label: string
-  icon: LucideIcon
+  key: SetupStepKey
   activeFn?: (deps: StepsDependencies) => boolean
 }
 
@@ -33,22 +26,16 @@ const SETUP_STEPS: SetupStep[] = [
   {
     key: 'address-book',
     activeFn: ({ addressBookCount }: StepsDependencies) => addressBookCount > 0,
-    label: 'Import your address book',
-    icon: BookUser,
   },
   {
     key: 'safe-accounts',
     activeFn: ({ safeAccountsCount }: StepsDependencies) => safeAccountsCount > 0,
-    label: 'Add your Safe accounts',
-    icon: WalletCards,
   },
   {
     key: 'team-members',
     activeFn: ({ teamMembersCount }: StepsDependencies) => teamMembersCount > 1,
-    label: 'Invite team members',
-    icon: UsersRound,
   },
-  { key: 'explore', label: 'Explore Workspaces', icon: Rocket },
+  { key: 'explore' },
 ]
 
 const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
@@ -102,7 +89,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
     })
   }, [deps.addressBookCount, deps.safeAccountsCount, deps.teamMembersCount])
 
-  const handleStepClick = (stepKey: string) => {
+  const handleStepClick = (stepKey: SetupStepKey) => {
     trackEvent(SPACE_EVENTS.ONBOARDING_WIZARD, { item_clicked: stepKey, workspace_id: spaceId })
     if (stepKey === 'address-book') {
       setImportOpen(true)
@@ -149,77 +136,14 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
 
   return (
     <>
-      <AnimatePresence onExitComplete={persistDismiss}>
-        {!dismissed && (
-          <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
-            <SafeWidget
-              title="Set up your Workspace"
-              testId="space-dashboard-setup-widget"
-              action={
-                <Typography
-                  variant="paragraph-small"
-                  color="muted"
-                  className="cursor-pointer"
-                  onClick={handleDismiss}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && handleDismiss()}
-                >
-                  Dismiss
-                </Typography>
-              }
-            >
-              <div
-                className={cn('flex flex-col gap-2 px-2 pb-2', {
-                  'sm:grid sm:grid-cols-2 xl:grid-cols-4': horizontal,
-                })}
-              >
-                {sortedSteps.map(({ key, label, icon: Icon, activeFn }, index) => {
-                  const isCompleted = activeFn ? activeFn(deps) : false
-
-                  return (
-                    <motion.div
-                      key={key}
-                      role="button"
-                      tabIndex={isCompleted ? undefined : 0}
-                      aria-disabled={isCompleted}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: isCompleted ? 0.6 : 1, y: 0 }}
-                      transition={{ duration: 0.3, ease: 'easeOut', delay: index * 0.08 }}
-                      onClick={() => !isCompleted && handleStepClick(key)}
-                      onKeyDown={(e) => e.key === 'Enter' && !isCompleted && handleStepClick(key)}
-                      className={cn(
-                        'flex min-w-0 items-center gap-4 rounded-3xl p-4 transition-colors',
-                        isCompleted ? 'cursor-not-allowed bg-muted/50' : 'cursor-pointer bg-muted hover:bg-muted/70',
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          'flex size-9 shrink-0 items-center justify-center rounded-full',
-                          isCompleted ? 'bg-green-200' : 'bg-green-100',
-                        )}
-                      >
-                        {isCompleted ? (
-                          <Check className="size-5 text-green-600" />
-                        ) : (
-                          <Icon className="size-5 text-green-500" />
-                        )}
-                      </div>
-                      <Typography
-                        variant="paragraph-bold"
-                        className={cn('min-w-0 flex-1', { 'line-through': isCompleted })}
-                      >
-                        {label}
-                      </Typography>
-                      {!isCompleted && <ChevronRight className="size-5 text-muted-foreground" />}
-                    </motion.div>
-                  )
-                })}
-              </div>
-            </SafeWidget>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <SetupWidgetView
+        dismissed={dismissed}
+        onDismiss={handleDismiss}
+        onExitComplete={persistDismiss}
+        horizontal={horizontal}
+        steps={sortedSteps.map(({ key, activeFn }) => ({ key, isCompleted: activeFn ? activeFn(deps) : false }))}
+        onStepClick={handleStepClick}
+      />
 
       {importOpen && <ImportAddressBookDialog handleClose={() => setImportOpen(false)} />}
       <AddAccounts externalOpen={addAccountsOpen} onExternalClose={() => setAddAccountsOpen(false)} />

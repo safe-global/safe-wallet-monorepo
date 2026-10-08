@@ -1,7 +1,3 @@
-import { Fragment } from 'react'
-import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { ChevronDown, ChevronRight, TriangleAlert } from 'lucide-react'
 import type { ScanResult } from '@/features/security/types'
 import Identicon from '@/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
@@ -9,17 +5,7 @@ import ChainIndicator from '@/components/common/ChainIndicator'
 import { NetworkLogosList } from '@/features/multichain'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { cn } from '@/utils/cn'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ScoreCell } from './cells'
-import {
-  CARD_ROW_CLASS,
-  CELL_BASE,
-  GRID_COLS,
-  HIDE_BALANCE,
-  ROW_VARIANTS,
-} from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import {
   formatBalance,
   getAggregateNonPassingCount,
@@ -31,6 +17,10 @@ import {
   type GetSafeSecurityHref,
   type RowSecurity,
 } from './utils'
+import {
+  MultichainChildRowView,
+  MultichainSafeRowView,
+} from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/MultichainSafeRowView'
 import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 export type MultichainSafeRowProps = {
@@ -62,7 +52,6 @@ type ChildRowProps = {
   getSafeSecurityHref: GetSafeSecurityHref
 }
 
-/** Per-chain row rendered under an expanded multichain parent. */
 const MultichainChildRow = ({
   safe,
   chain,
@@ -87,70 +76,24 @@ const MultichainChildRow = ({
   const childName = safe.name || shortenAddress(safe.address)
 
   return (
-    <motion.div
-      data-testid="security-safe-row"
-      data-selected={isSelected || undefined}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.15, delay: childIdx * 0.03 }}
-      onClick={chain.isDeployed ? () => onViewReport(safe.address, chain.chainId) : undefined}
-      className={cn(CARD_ROW_CLASS, GRID_COLS, {
-        'cursor-pointer hover:bg-muted/100': chain.isDeployed,
-        'cursor-default': !chain.isDeployed,
-        'bg-muted/100 border-card': isSelected,
-      })}
-    >
-      <div className={cn(CELL_BASE, 'gap-2 pl-7 ')}>
-        <Identicon address={safe.address} size={24} />
-        {childHref ? (
-          <Link
-            href={childHref}
-            onClick={(e) => e.stopPropagation()}
-            className="min-w-0 truncate text-sm text-muted-foreground no-underline hover:underline"
-          >
-            {childName}
-          </Link>
-        ) : (
-          <span className="min-w-0 truncate text-sm text-muted-foreground">{childName}</span>
-        )}
-      </div>
-      <div className={CELL_BASE}>
-        <ChainIndicator chainId={chain.chainId} onlyLogo imageSize={18} />
-      </div>
-      <div className={cn(CELL_BASE, HIDE_BALANCE)}>
-        <BalanceCell value={balanceMap[key]} isScanning={isScanning} />
-      </div>
-      <div className={cn(CELL_BASE, 'justify-start')}>
-        <ScoreCell summary={summary} isScanning={isScanning} />
-      </div>
-      <div className={CELL_BASE}>
-        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />
-      </div>
-      <div className={cn(CELL_BASE, 'justify-end')}>
-        {chain.isDeployed ? (
-          <ChevronRight className={cn('h-5 w-5', isSelected ? 'text-primary' : 'text-muted-foreground')} />
-        ) : (
-          <Tooltip>
-            <TooltipTrigger
-              render={<span />}
-              tabIndex={0}
-              className="text-right text-[0.65rem] leading-tight text-muted-foreground"
-            >
-              Not deployed
-            </TooltipTrigger>
-            <TooltipContent>Safe not yet deployed on this network</TooltipContent>
-          </Tooltip>
-        )}
-      </div>
-    </motion.div>
+    <MultichainChildRowView
+      name={childName}
+      childIdx={childIdx}
+      isDeployed={chain.isDeployed}
+      isSelected={isSelected}
+      isScanning={isScanning}
+      href={childHref}
+      balance={balanceMap[key]}
+      formattedBalance={formatBalance(balanceMap[key])}
+      summary={summary}
+      onViewReport={() => onViewReport(safe.address, chain.chainId)}
+      identicon={<Identicon address={safe.address} size={24} />}
+      chainLogo={<ChainIndicator chainId={chain.chainId} onlyLogo imageSize={18} />}
+      statusCell={<StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />}
+    />
   )
 }
 
-/**
- * Collapsed parent row for a multichain Safe + the child rows for each chain
- * when expanded. The parent aggregates balance/score/grade/scan-state across
- * all chain entries; clicking the row toggles expansion.
- */
 const MultichainSafeRow = ({
   safe,
   safeIdx,
@@ -175,87 +118,31 @@ const MultichainSafeRow = ({
     (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
     0,
   )
-  const parentName = safe.name || shortenAddress(safe.address)
 
   return (
-    <Fragment>
-      <motion.div
-        data-testid="security-safe-row"
-        variants={ROW_VARIANTS}
-        initial={hasAnimated ? false : 'hidden'}
-        animate="visible"
-        transition={{ duration: 0.2, delay: hasAnimated ? 0 : safeIdx * 0.03 }}
-        onClick={() => onToggleExpand(safe.address)}
-        className={cn(CARD_ROW_CLASS, GRID_COLS, 'cursor-pointer hover:bg-muted/100', {
-          'bg-muted/100 border-card': isExpanded,
-        })}
-      >
-        <div className={CELL_BASE}>
-          <div className="flex min-w-0 items-center gap-4">
-            <Identicon address={safe.address} size={32} />
-            <div className="flex min-w-0 flex-col">
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="min-w-0 truncate text-[0.8125rem] font-bold" title={safe.name || safe.address}>
-                  {parentName}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Toggle networks"
-                  data-testid="expand-networks"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onToggleExpand(safe.address)
-                  }}
-                  className="inline-flex shrink-0 items-center justify-center rounded p-0.5 text-muted-foreground hover:bg-muted/60"
-                >
-                  <ChevronDown className={cn('h-[18px] w-[18px] transition-transform', isExpanded && 'rotate-180')} />
-                </button>
-                {showMultichainWarning && (
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={<span aria-label="Signer setup differs across networks" />}
-                      tabIndex={0}
-                      className="inline-flex shrink-0 items-center"
-                    >
-                      <TriangleAlert className="h-[18px] w-[18px] text-amber-500" />
-                    </TooltipTrigger>
-                    <TooltipContent>Signer setup differs across networks</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <div className="flex min-w-0 items-center gap-1.5">
-                <span className="truncate text-[0.6875rem] leading-none text-muted-foreground">
-                  {shortenAddress(safe.address)}
-                </span>
-                <CopyAddressIconButton address={safe.address} />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={CELL_BASE}>
-          <div className="flex items-center gap-1">
-            <NetworkLogosList
-              networks={safe.chainEntries.slice(0, 3).map((c) => ({ chainId: c.chainId }))}
-              imageSize={18}
-            />
-            {safe.chainEntries.length > 3 && (
-              <span className="text-xs text-muted-foreground">+{safe.chainEntries.length - 3}</span>
-            )}
-          </div>
-        </div>
-        <div className={cn(CELL_BASE, HIDE_BALANCE)}>
-          <span className="text-sm font-bold text-foreground">{formatBalance(String(totalBalance))}</span>
-        </div>
-        <div className={cn(CELL_BASE, 'justify-start')}>
-          <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
-        </div>
-        <div className={CELL_BASE}>
-          <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
-        </div>
-        <div className={cn(CELL_BASE, 'justify-end')} />
-      </motion.div>
-
-      {isExpanded &&
+    <MultichainSafeRowView
+      address={safe.address}
+      name={safe.name}
+      safeIdx={safeIdx}
+      hasAnimated={hasAnimated}
+      isExpanded={isExpanded}
+      onToggleExpand={() => onToggleExpand(safe.address)}
+      showMultichainWarning={showMultichainWarning}
+      chainCount={safe.chainEntries.length}
+      formattedTotalBalance={formatBalance(String(totalBalance))}
+      aggregateSummary={aggregateSummary}
+      aggregateScanning={aggregateScanning}
+      identicon={<Identicon address={safe.address} size={32} />}
+      copyButton={<CopyAddressIconButton address={safe.address} />}
+      networkLogos={
+        <NetworkLogosList
+          networks={safe.chainEntries.slice(0, 3).map((c) => ({ chainId: c.chainId }))}
+          imageSize={18}
+        />
+      }
+      statusCell={<StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />}
+      childRows={
+        isExpanded &&
         safe.chainEntries.map((chain, childIdx) => (
           <MultichainChildRow
             key={scanKey(safe.address, chain.chainId)}
@@ -270,8 +157,9 @@ const MultichainSafeRow = ({
             security={security}
             getSafeSecurityHref={getSafeSecurityHref}
           />
-        ))}
-    </Fragment>
+        ))
+      }
+    />
   )
 }
 

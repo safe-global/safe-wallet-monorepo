@@ -1,22 +1,17 @@
 import { useEffect, useRef, type ReactElement } from 'react'
-import { Plus } from 'lucide-react'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import { Button } from '@/components/ui/button'
 import type { SafeAccountEntry } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
 import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import PendingRemovalsCard from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
 import { useEditState } from '../EditFlow/useEditState'
 import SafeAccountField from './SafeAccountField'
-import SpenderCallout from '@views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
 import SpenderCard from './SpenderCard'
+import { SpendingLimitPolicyFormView } from '@views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpendingLimitPolicyFormView'
 import {
   createDefaultFormValues,
   createEmptySpender,
   type SpendingLimitPolicyFormValues,
 } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { ADD_SPENDER_LABEL, NEXT_LABEL } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export type SpendingLimitPolicyFormProps = {
   defaultValues: SpendingLimitPolicyFormValues
@@ -83,15 +78,13 @@ const SpendingLimitPolicyForm = ({
   const isSafeBlocked = !isEditMode && (!selectedSafe || Boolean(selectedSafe.ineligibleReason))
 
   return (
-    <TxCard>
-      <FormProvider {...formMethods}>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-5"
-          data-testid="spending-limit-policy-form"
-        >
-          {!isEditMode && <SpenderCallout dismissed={isCalloutDismissed} onDismiss={onDismissCallout} />}
-
+    <FormProvider {...formMethods}>
+      <SpendingLimitPolicyFormView
+        onSubmit={handleSubmit(onSubmit)}
+        isEditMode={isEditMode}
+        isCalloutDismissed={isCalloutDismissed}
+        onDismissCallout={onDismissCallout}
+        safeAccountField={
           <SafeAccountField
             accounts={accounts}
             isLoading={isAccountsLoading}
@@ -101,44 +94,22 @@ const SpendingLimitPolicyForm = ({
             onSafeChange={onSafeChange}
             readOnly={isEditMode}
           />
-
-          {removalCopy && <PendingRemovalsCard copy={removalCopy} onDiscard={discardChanges} />}
-
-          {fields.map((field, index) => (
-            <SpenderCard
-              key={field.id}
-              spenderIndex={index}
-              spenderCount={fields.length}
-              removable={isEditMode || fields.length > 1}
-              onRemove={() => remove(index)}
-            />
-          ))}
-
-          <div>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => append(createEmptySpender())}
-              data-testid="add-spender-btn"
-            >
-              <Plus />
-              {ADD_SPENDER_LABEL}
-            </Button>
-          </div>
-
-          <TxCardActions>
-            <Button
-              type="submit"
-              size="submit"
-              disabled={!formState.isValid || isSafeBlocked || isUnchangedEdit}
-              data-testid="next-btn"
-            >
-              {NEXT_LABEL}
-            </Button>
-          </TxCardActions>
-        </form>
-      </FormProvider>
-    </TxCard>
+        }
+        removalCopy={removalCopy}
+        onDiscardChanges={discardChanges}
+        spenderCards={fields.map((field, index) => (
+          <SpenderCard
+            key={field.id}
+            spenderIndex={index}
+            spenderCount={fields.length}
+            removable={isEditMode || fields.length > 1}
+            onRemove={() => remove(index)}
+          />
+        ))}
+        onAddSpender={() => append(createEmptySpender())}
+        isNextDisabled={!formState.isValid || isSafeBlocked || isUnchangedEdit}
+      />
+    </FormProvider>
   )
 }
 

@@ -3,7 +3,7 @@ import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { PolicyLock } from '@views/features/spaces/components/Policies/policyLock'
-import PolicyCatalogueTile from '@views/features/spaces/components/Policies/PolicyCatalogue/PolicyCatalogueTile'
+import { PolicyCatalogueView } from '@views/features/spaces/components/Policies/PolicyCatalogue/PolicyCatalogueView'
 import {
   POLICY_CATALOGUE,
   type PolicyCatalogueEntry,
@@ -37,17 +37,12 @@ const PolicyCatalogue = ({ onSelect, locked }: PolicyCatalogueProps): ReactEleme
   const entries = locked ? POLICY_CATALOGUE.filter(isPolicyEntry) : POLICY_CATALOGUE
 
   return (
-    <div data-testid="policy-catalogue" className="grid gap-4 md:grid-cols-3">
-      {entries.map((entry) => (
-        <PolicyCatalogueTile
-          key={entry.id}
-          {...entry}
-          locked={isLocked(entry.id)}
-          accountCount={isPolicyEntry(entry) ? locked?.accountCounts?.[entry.id] : undefined}
-          onClick={() => handleClick(entry)}
-        />
-      ))}
-    </div>
+    <PolicyCatalogueView
+      entries={entries}
+      isLocked={isLocked}
+      getAccountCount={(entry) => (isPolicyEntry(entry) ? locked?.accountCounts?.[entry.id] : undefined)}
+      onTileClick={handleClick}
+    />
   )
 }
 

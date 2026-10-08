@@ -1,6 +1,4 @@
 import { useMemo, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
-import TableCard from '@/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -15,14 +13,7 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
-import { Check } from 'lucide-react'
-import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
-import Track from '@/components/common/Track'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import AddContact from './AddContact'
 import AddLocalContact from './AddLocalContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
@@ -30,6 +21,7 @@ import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
+import { SpaceAddressBookView } from '@views/features/spaces/components/SpaceAddressBook/SpaceAddressBookView'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -95,154 +87,60 @@ const SpaceAddressBook = () => {
     [pendingRequests],
   )
 
+  const renderShareAction = (entry: AddressBookEntry, isCompact: boolean) => {
+    if (isAdmin) {
+      return (
+        <AddToWorkspaceButton
+          address={entry.address}
+          name={entry.name}
+          chainIds={entry.chainIds}
+          isCompact={isCompact}
+        />
+      )
+    }
+    // Invitees can preview the space but cannot propose contacts
+    if (isInvited) {
+      return null
+    }
+    return (
+      <RequestToAddButton
+        address={entry.address}
+        name={entry.name}
+        chainIds={entry.chainIds}
+        alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+        isCompact={isCompact}
+      />
+    )
+  }
+
   return (
-    <>
-      {isInvited && <PreviewInvite />}
-
-      <div>
-        <div className="mb-6 flex flex-col gap-6">
-          <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
-            Address book
-          </Typography>
-        </div>
-
-        <Tabs
-          defaultValue="workspace"
-          onValueChange={(val) => {
-            setSearchQuery('')
-            setActiveTab(val)
-          }}
-        >
-          <TabsList variant="underline" className="flex-wrap mb-4">
-            <TabsTrigger value="workspace" className="cursor-pointer">
-              <Tooltip>
-                <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
-                <TooltipContent>Shared contacts visible to everyone in this Workspace</TooltipContent>
-              </Tooltip>
-            </TabsTrigger>
-            {isPrivateAddressBookEnabled && (
-              <>
-                <TabsTrigger value="mine" className="cursor-pointer">
-                  <Tooltip>
-                    <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
-                    <TooltipContent>These contacts are in your local browser storage</TooltipContent>
-                  </Tooltip>
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="cursor-pointer">
-                  <Tooltip>
-                    <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
-                    <TooltipContent>Contacts you proposed to add to the Workspace</TooltipContent>
-                  </Tooltip>
-                </TabsTrigger>
-              </>
-            )}
-          </TabsList>
-
-          {(activeTab === 'workspace' || activeTab === 'mine') && (
-            // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
-            <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
-              {/* Only rendered when it holds an action. An always-present wrapper is still a flex
-                  item when empty, so the row's gap-2 pushed the search 8px right of the table card
-                  it sits above — three different left edges for viewers without admin rights. */}
-              {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
-                <div className="flex shrink-0 gap-2">
-                  {isAdmin && activeTab === 'workspace' && (
-                    <>
-                      <Track {...SPACE_EVENTS.ADD_ADDRESS}>
-                        <AddContact label="Add shared contact" />
-                      </Track>
-                      <ImportAddressBook />
-                    </>
-                  )}
-                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
-                </div>
-              ) : null}
-              {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
-                // `default` (h-9), not `lg`: the Add contact / Import buttons on this row are
-                // `size="action"`, which is h-9.
-                <AddressBookSearchInput value={searchQuery} onChange={setSearchQuery} inputSize="default" />
-              )}
-            </div>
-          )}
-
-          <TableCard>
-            <TabsContent value="workspace">
-              {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
-              ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground p-4 text-sm">No contacts in this Workspace yet.</p>
-              ) : (
-                <SpaceAddressBookTable entries={filteredAll} />
-              )}
-            </TabsContent>
-
-            {isPrivateAddressBookEnabled && (
-              <>
-                <TabsContent value="mine">
-                  {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
-                  ) : filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground p-4 text-sm">You haven&apos;t added any contacts yet.</p>
-                  ) : (
-                    <SpaceAddressBookTable
-                      entries={filteredMine}
-                      showAddedBy={false}
-                      renderExtraAction={(entry, { isCompact }) => {
-                        if (entry.isDuplicate) {
-                          return (
-                            <Tooltip>
-                              <TooltipTrigger
-                                render={
-                                  <span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />
-                                }
-                              >
-                                {isCompact ? (
-                                  <Check className="text-muted-foreground size-4" />
-                                ) : (
-                                  <Badge variant="secondary">Already shared</Badge>
-                                )}
-                              </TooltipTrigger>
-                              <TooltipContent>Already saved in your Workspace address book</TooltipContent>
-                            </Tooltip>
-                          )
-                        }
-                        if (isAdmin) {
-                          return (
-                            <AddToWorkspaceButton
-                              address={entry.address}
-                              name={entry.name}
-                              chainIds={entry.chainIds}
-                              isCompact={isCompact}
-                            />
-                          )
-                        }
-                        // Invitees can preview the space but cannot propose contacts
-                        if (isInvited) {
-                          return null
-                        }
-                        return (
-                          <RequestToAddButton
-                            address={entry.address}
-                            name={entry.name}
-                            chainIds={entry.chainIds}
-                            alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
-                            isCompact={isCompact}
-                          />
-                        )
-                      }}
-                    />
-                  )}
-                </TabsContent>
-
-                <TabsContent value="pending" className="mt-4 sm:mt-0">
-                  <PendingRequestsTable requests={pendingRequests} />
-                </TabsContent>
-              </>
-            )}
-          </TableCard>
-        </Tabs>
-      </div>
-    </>
+    <SpaceAddressBookView
+      isAdmin={isAdmin}
+      isInvited={isInvited}
+      isPrivateAddressBookEnabled={isPrivateAddressBookEnabled}
+      activeTab={activeTab}
+      onTabChange={(val) => {
+        setSearchQuery('')
+        setActiveTab(val)
+      }}
+      searchQuery={searchQuery}
+      onSearchQueryChange={setSearchQuery}
+      workspaceCount={addressBookItems.length}
+      localCount={sortedLocalContacts.length}
+      pendingCount={pendingRequests.length}
+      filteredWorkspaceCount={filteredAll.length}
+      filteredLocalCount={filteredMine.length}
+      previewInvite={<PreviewInvite />}
+      renderAddContact={(label) => <AddContact label={label} />}
+      importAddressBook={<ImportAddressBook />}
+      addLocalContact={<AddLocalContact />}
+      workspaceTable={<SpaceAddressBookTable entries={filteredAll} />}
+      renderLocalTable={(renderExtraAction) => (
+        <SpaceAddressBookTable entries={filteredMine} showAddedBy={false} renderExtraAction={renderExtraAction} />
+      )}
+      renderShareAction={renderShareAction}
+      pendingTable={<PendingRequestsTable requests={pendingRequests} />}
+    />
   )
 }
 

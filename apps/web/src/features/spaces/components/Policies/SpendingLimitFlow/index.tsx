@@ -1,8 +1,5 @@
 import { useCallback, useState, type ReactElement } from 'react'
 import SpendingLimitIcon from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
-import { Info } from 'lucide-react'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import ExternalLink from '@/components/common/ExternalLink'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { TxFlow, type SubmitCallbackWithData } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
@@ -15,29 +12,12 @@ import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
 } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import {
-  CREATE_STEP_TITLE,
-  FLOW_HELP_LABEL,
-  FLOW_SUBTITLE,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { CREATE_STEP_TITLE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { SpendingLimitFlowView } from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitFlowView'
 
 const trackTxSigned: SubmitCallbackWithData<SpendingLimitPolicyFormValues> = ({ isExecuted = false }) => {
   trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, { [MixpanelEventParams.IS_EXECUTED]: isExecuted })
 }
-
-const FlowSubtitle = (): ReactElement => (
-  <span className="flex items-center gap-2.5">
-    {FLOW_SUBTITLE}
-    <ExternalLink
-      href={HelpCenterArticle.SPENDING_LIMITS}
-      noIcon
-      aria-label={FLOW_HELP_LABEL}
-      className="text-muted-foreground no-underline hover:text-foreground"
-    >
-      <Info className="size-4" aria-hidden />
-    </ExternalLink>
-  </span>
-)
 
 /**
  * The SafeScopeProvider sits above TxFlow so every tx-flow provider and hook resolves the Safe picked
@@ -54,7 +34,7 @@ const SpendingLimitFlow = (): ReactElement => {
       <ExistingSpendingLimitsProvider>
         <TxFlow
           icon={SpendingLimitIcon}
-          subtitle={<FlowSubtitle />}
+          subtitle={<SpendingLimitFlowView />}
           ReviewTransactionComponent={ReviewSpendingLimitPolicy}
           eventCategory={TxFlowType.SETUP_SPACE_SPENDING_LIMIT}
           initialData={createDefaultFormValues()}

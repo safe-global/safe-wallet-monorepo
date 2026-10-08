@@ -2,7 +2,6 @@ import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 
 export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
@@ -122,6 +121,4 @@ export const findTokenOption = (
   address: string | undefined,
 ): TokenOption | undefined => (address ? options.find((option) => sameAddress(option.address, address)) : undefined)
 
-/** What the input shows for a selected option: symbol, else name, else the shortened address. */
-export const tokenOptionLabel = (option: TokenOption): string =>
-  option.symbol || option.name || shortenAddress(option.address)
+export { tokenOptionLabel } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenOptionLabel'

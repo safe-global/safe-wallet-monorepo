@@ -25,11 +25,15 @@ jest.mock('@/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
+jest.mock('@/features/multichain/components/NetworkLogosTooltip', () => ({
+  __esModule: true,
+  default: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
     <span data-testid="network-logos" data-max-visible={maxVisible} data-count={networks.length} />
   ),
-  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+}))
+jest.mock('@/features/multichain/components/NetworkLogosPill', () => ({
+  __esModule: true,
+  default: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos" data-count={networks.length} />
   ),
 }))

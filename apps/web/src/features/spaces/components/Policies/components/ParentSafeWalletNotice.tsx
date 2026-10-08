@@ -1,9 +1,7 @@
 import type { MouseEvent, ReactElement } from 'react'
 import type { UrlObject } from 'url'
-import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Link } from '@/components/ui/link'
+import { ParentSafeWalletNoticeView } from '@views/features/spaces/components/Policies/components/ParentSafeWalletNoticeView'
 
 export type ParentSafeWalletCopy = {
   title: string
@@ -35,25 +33,14 @@ const ParentSafeWalletNotice = ({
   }
 
   return (
-    <Alert variant="warning" outlined={false} data-testid="parent-safe-wallet-notice">
-      <AlertSeverityIcon variant="warning" />
-      <AlertTitle>{title}</AlertTitle>
-      <AlertDescription>
-        <p>
-          Your connected wallet, {parentSafeName}, is a parent Safe account of {safeName}. To {action} on its behalf,
-          open the settings of {safeName} with a signer of {parentSafeName}.
-        </p>
-        {settingsHref && (
-          <Link
-            render={<NextLink href={settingsHref} />}
-            onMouseDown={(event) => event.stopPropagation()}
-            onClick={goToSettings}
-          >
-            Go to Safe settings
-          </Link>
-        )}
-      </AlertDescription>
-    </Alert>
+    <ParentSafeWalletNoticeView
+      title={title}
+      action={action}
+      safeName={safeName}
+      parentSafeName={parentSafeName}
+      settingsHref={settingsHref}
+      onGoToSettings={goToSettings}
+    />
   )
 }
 

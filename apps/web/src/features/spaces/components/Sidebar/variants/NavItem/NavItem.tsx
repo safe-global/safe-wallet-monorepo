@@ -1,11 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
-import Link from 'next/link'
-import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
 import type { ResolvedSidebarItem } from '@views/features/spaces/components/Sidebar/types'
 import { getSidebarItemTestId } from '../../utils'
-import css from '../../styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
@@ -16,6 +11,7 @@ import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { AppRoutes } from '@/config/routes'
 import { PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { trackPlanSelectionStarted } from '../../../Plans/planSelection'
+import { NavItemView } from '@views/features/spaces/components/Sidebar/variants/NavItem/NavItemView'
 
 const customNavEvents: Record<
   string,
@@ -31,23 +27,6 @@ const customNavEvents: Record<
   [AppRoutes.earn]: { event: EARN_EVENTS.OPEN_EARN_PAGE, label: EARN_LABELS.sidebar },
 }
 
-const getBadgeAriaLabel = (label: string, count: number | string): string =>
-  `${count} ${label} ${count === 1 ? 'notification' : 'notifications'}`
-
-const SkeletonPulse = ({ className }: { className: string }): ReactElement => (
-  <div className={cn('bg-sidebar-border animate-pulse', className)} />
-)
-
-const NavItemSkeleton = (): ReactElement => (
-  <div className="relative flex h-9 min-h-9 w-full items-center rounded-md p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2">
-    <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:hidden">
-      <SkeletonPulse className="size-4 shrink-0 rounded-md" />
-      <SkeletonPulse className="h-4 min-h-4 flex-1 rounded-md" />
-    </div>
-    <SkeletonPulse className="hidden size-8 shrink-0 rounded-md group-data-[collapsible=icon]:block" />
-  </div>
-)
-
 interface NavItemProps {
   item: ResolvedSidebarItem | null
   /** Spaces sidebar: per-label test ids; no tooltip wrapper so disabled state reaches the DOM. */
@@ -62,21 +41,12 @@ interface NavItemProps {
 }
 
 export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, children }: NavItemProps): ReactElement => {
-  const { state, isMobile, isTablet, setOpenMobile } = useSidebar()
+  const dataTestId = item
+    ? (item.testId ?? (isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item'))
+    : 'sidebar-list-item'
 
-  if (isLoading || !item) {
-    return (
-      <SidebarMenuItem>
-        <NavItemSkeleton />
-        {children}
-      </SidebarMenuItem>
-    )
-  }
-
-  const dataTestId = item.testId ?? (isSpacesVariant ? getSidebarItemTestId(item.label) : 'sidebar-list-item')
-
-  const handleClick = () => {
-    if (item.disabled) return
+  const handleItemClick = () => {
+    if (!item || item.disabled) return
 
     if (item.onSelect) {
       item.onSelect()
@@ -91,69 +61,17 @@ export const NavItem = ({ item, isSpacesVariant = false, isLoading = false, chil
     }
 
     trackEvent({ ...OVERVIEW_EVENTS.SIDEBAR_CLICKED }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: item.label })
-
-    // The drawer only closes for navigation, so the destination isn't hidden behind it. Action
-    // items open UI mounted inside the drawer's own subtree, which dismissing would unmount.
-    if (!item.onSelect && (isMobile || isTablet)) {
-      setOpenMobile(false)
-    }
   }
 
-  const menuButton = (
-    <SidebarMenuButton
-      size="lg"
-      isActive={item.isActive}
-      disabled={item.disabled}
-      className={`h-9 gap-3 ${css.sidebarInteractive} ${css.sidebarNavItem}`}
-      render={!item.disabled && item.link ? <Link href={item.link} /> : undefined}
-      data-testid={dataTestId}
-      onClick={handleClick}
-    >
-      <div className={item.isActive ? css.activeIcon : undefined}>
-        {item.indicator ? (
-          <span className="relative">
-            <item.icon />
-            <span className={css.outdatedDot} aria-hidden />
-          </span>
-        ) : (
-          <item.icon />
-        )}
-      </div>
-      <span className="truncate group-data-[collapsible=icon]:hidden">{item.label}</span>
-    </SidebarMenuButton>
-  )
-
-  // Disabled Safe nav items always explain why they're inactive; for every other item the
-  // label tooltip is redundant while the sidebar is expanded, so it only shows when collapsed.
-  const showsDisabledReason = item.disabled && !isSpacesVariant
-  const tooltipContent = showsDisabledReason ? 'You need to activate your Safe first.' : item.label
-  const isTooltipHidden = showsDisabledReason ? false : state !== 'collapsed' || isMobile
-
-  const interactive = (
-    <Tooltip>
-      <TooltipTrigger render={<span className="block w-full" />}>{menuButton}</TooltipTrigger>
-      <TooltipContent side="right" hidden={isTooltipHidden}>
-        {tooltipContent}
-      </TooltipContent>
-    </Tooltip>
-  )
-
   return (
-    <SidebarMenuItem className="relative">
-      {interactive}
-      {!!item.badge && (
-        <>
-          <span
-            className={cn(css.transactionsBadge, item.isActive && css.transactionsBadgeActive)}
-            aria-label={getBadgeAriaLabel(item.label, item.badge)}
-            data-testid="queued-tx-info"
-          >
-            {item.badge}
-          </span>
-          <span className={css.transactionsBadgeDot} aria-hidden />
-        </>
-      )}
+    <NavItemView
+      item={item}
+      isSpacesVariant={isSpacesVariant}
+      isLoading={isLoading}
+      dataTestId={dataTestId}
+      onItemClick={handleItemClick}
+    >
       {children}
-    </SidebarMenuItem>
+    </NavItemView>
   )
 }

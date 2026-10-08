@@ -1,9 +1,4 @@
 import { useState } from 'react'
-import NextLink from 'next/link'
-import { ArrowRight, Lock } from 'lucide-react'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
 import { sessionItem } from '@/services/local-storage/session'
 import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
@@ -17,6 +12,7 @@ import {
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../Plans/planSelection'
+import { SeatLimitBannerView } from '@views/features/spaces/components/SafeAccounts/SeatLimitBannerView'
 
 const PROMPT = {
   [MixpanelEventParams.FEATURE]: UpgradeFeature.SAFE_ACCOUNTS_LIMIT,
@@ -40,100 +36,28 @@ export default function SeatLimitBanner({
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, limit !== null && Boolean(upgradePlanName))
   if (limit === null) return null
 
-  const title = `${tierName ? `The ${tierName} plan` : 'Your plan'} includes ${limit} Safe accounts`
-  const body = upgradePlanName
-    ? 'Upgrade for more, or remove one to add another.'
-    : 'Remove one to add another, or talk to us about a higher limit.'
-  const cta = (
-    <Button
-      size="sm"
-      accentIcon
-      className="shrink-0"
-      render={
-        upgradePlanName ? (
-          <NextLink href={plansHref} />
-        ) : (
-          <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />
-        )
-      }
-      onClick={() =>
-        upgradePlanName &&
-        trackPlanSelectionStarted({
-          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
-          ...PROMPT,
-        })
-      }
-    >
-      {upgradePlanName ? `Upgrade to ${upgradePlanName}` : 'Talk to sales'}
-      <ArrowRight data-icon="inline-end" />
-    </Button>
-  )
-
-  if (variant === 'alert') {
-    return (
-      <Alert variant="warning" outlined={false} className={className} data-testid="seat-limit-banner">
-        <Lock className="size-4" />
-        <AlertDescription>
-          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-col">
-              <span className="font-semibold text-foreground">{title}</span>
-              <span>{body}</span>
-            </div>
-            {cta}
-          </div>
-        </AlertDescription>
-      </Alert>
-    )
-  }
-
-  if (isDismissed) return null
-
   const dismiss = () => {
     if (spaceId) dismissedBanners.set({ ...(dismissedBanners.get() ?? {}), [spaceId]: true })
     setIsDismissed(true)
   }
 
   return (
-    <Alert variant="info" className={className} data-testid="seat-limit-banner">
-      <AlertDescription>
-        <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-0.5">
-            <span className="font-semibold text-foreground">{title}</span>
-            <span className="text-muted-foreground">
-              Remove one to add another, or{' '}
-              {upgradePlanName ? (
-                <Link
-                  variant="inherit"
-                  className="font-medium underline"
-                  render={<NextLink href={plansHref} />}
-                  onClick={() =>
-                    trackPlanSelectionStarted({
-                      [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
-                      ...PROMPT,
-                    })
-                  }
-                >
-                  upgrade to {upgradePlanName}.
-                </Link>
-              ) : (
-                <Link
-                  variant="inherit"
-                  className="font-medium underline"
-                  href={CONTACT_SALES_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  talk to us about a higher limit.
-                </Link>
-              )}{' '}
-              <ArrowRight className="inline size-4 align-text-bottom" />
-            </span>
-          </div>
-          <Button variant="outline" className="shrink-0" onClick={dismiss}>
-            Got it
-          </Button>
-        </div>
-      </AlertDescription>
-    </Alert>
+    <SeatLimitBannerView
+      variant={variant}
+      bannerClassName={className}
+      tierName={tierName}
+      limit={limit}
+      upgradePlanName={upgradePlanName}
+      plansHref={plansHref}
+      salesUrl={CONTACT_SALES_URL}
+      onUpgradeClick={() =>
+        trackPlanSelectionStarted({
+          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+          ...PROMPT,
+        })
+      }
+      isDismissed={isDismissed}
+      onDismiss={dismiss}
+    />
   )
 }
