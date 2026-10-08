@@ -38,6 +38,8 @@ export const sendBatchStr = /send batch/i
 export const transactionDetailsStr = /transaction details/i
 export const addOwnerWithThreshold = /add signer with threshold/i
 export const enterABIStr = /Enter ABI/i
+// The ABI field misses the ABI when keystrokes come with no delay (the Cypress 16 default).
+export const abiTypingOptions = { parseSpecialCharSequences: false, delay: 10 }
 export const toAddressStr = /to address/i
 export const tokenAmount = /ETH value */i
 export const dataStr = /data */i
