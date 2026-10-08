@@ -6245,7 +6245,7 @@
     "/v1/chains/{chainId}/delegates": {
       "get": {
         "deprecated": true,
-        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesGetDelegatesV1",
         "parameters": [
           {
@@ -6323,7 +6323,7 @@
       },
       "post": {
         "deprecated": true,
-        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesPostDelegateV1",
         "parameters": [
           {
@@ -6365,7 +6365,7 @@
     "/v1/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
-        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesDeleteDelegateV1",
         "parameters": [
           {
@@ -6416,7 +6416,7 @@
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
-        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesDeleteSafeDelegateV1",
         "parameters": [
           {
@@ -6475,7 +6475,8 @@
     },
     "/v2/chains/{chainId}/delegates": {
       "get": {
-        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
+        "deprecated": true,
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesGetDelegatesV2",
         "parameters": [
           {
@@ -6546,13 +6547,14 @@
             }
           }
         },
-        "summary": "Get delegates",
+        "summary": "Get delegates (deprecated)",
         "tags": [
           "delegates"
         ]
       },
       "post": {
-        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
+        "deprecated": true,
+        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesPostDelegateV2",
         "parameters": [
           {
@@ -6585,7 +6587,7 @@
             "description": "Invalid delegate data, signature, or unauthorized creation attempt"
           }
         },
-        "summary": "Create delegate",
+        "summary": "Create delegate (deprecated)",
         "tags": [
           "delegates"
         ]
@@ -6593,7 +6595,8 @@
     },
     "/v2/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
-        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
+        "deprecated": true,
+        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesDeleteDelegateV2",
         "parameters": [
           {
@@ -6635,7 +6638,7 @@
             "description": "Invalid signature or unauthorized deletion attempt"
           }
         },
-        "summary": "Delete delegate",
+        "summary": "Delete delegate (deprecated)",
         "tags": [
           "delegates"
         ]
@@ -7315,7 +7318,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-bb28731",
+    "version": "main-527a177",
     "contact": {}
   },
   "tags": [],
@@ -16280,6 +16283,7 @@
             }
           },
           "rejectors": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AddressInfo"
