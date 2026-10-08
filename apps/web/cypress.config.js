@@ -48,7 +48,11 @@ async function registerIsolatedScenarios(on, config) {
   const scenarioFixtures = await createScenarioFixtures(config.fixturesFolder)
   config.fixturesFolder = scenarioFixtures.directory
   config.hosts = { ...config.hosts, '*.safe-e2e.test': '127.0.0.1' }
-  const owners = createOwners()
+  // Every spec gets its own owners, although one Cypress process runs all specs of a shard.
+  let owners = createOwners()
+  on('before:spec', () => {
+    owners = createOwners()
+  })
   config.taskTimeout = 600000
   on('task', {
     async prepareSafeScenario(spec) {
