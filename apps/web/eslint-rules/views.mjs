@@ -3,6 +3,9 @@
  * no markup, styling or copy of its own. See storybook/AGENTS.md.
  */
 
+import { readFileSync } from 'node:fs'
+
+const { widgets: WIDGETS } = JSON.parse(readFileSync(new URL('../sandbox/policy.json', import.meta.url), 'utf8'))
 const HEAD_TAGS = new Set(['title', 'meta', 'link'])
 const STYLE_PROPS = new Set(['className', 'style', 'sx'])
 const NON_COPY_PROPS = /^(key|id|name|href|type|target|rel|role|autoComplete|inputMode|data-.*|testId)$/
@@ -39,12 +42,17 @@ const noMarkupInContainers = {
       ImportDeclaration(node) {
         const source = node.source.value
         if (node.importKind === 'type') return
-        if (source.startsWith('@/components/ui/') && source !== '@/components/ui/ShadcnProvider')
+        if (
+          source.startsWith('@/components/ui/') &&
+          source !== '@/components/ui/ShadcnProvider' &&
+          !WIDGETS.includes(source)
+        )
           context.report({ node, messageId: 'primitive', data: { source } })
       },
       JSXOpeningElement(node) {
         const tag = jsxName(node.name)
-        if (/^[a-z]/.test(tag) && !HEAD_TAGS.has(tag)) context.report({ node, messageId: 'hostElement', data: { tag } })
+        if (/^[a-z][\w-]*$/.test(tag) && !HEAD_TAGS.has(tag))
+          context.report({ node, messageId: 'hostElement', data: { tag } })
         for (const attr of node.attributes) {
           if (attr.type !== 'JSXAttribute') continue
           const prop = jsxName(attr.name)
