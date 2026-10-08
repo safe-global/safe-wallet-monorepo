@@ -5,6 +5,7 @@ import TransactionGuards from '@/components/settings/TransactionGuards'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import { FallbackHandler } from '@/components/settings/FallbackHandler'
 import { BRAND_NAME } from '@/config/constants'
+import { ModulesSettingsView } from '@views/pages/settings/ModulesSettingsView'
 
 const Modules: NextPage = () => {
   return (
@@ -15,21 +16,11 @@ const Modules: NextPage = () => {
 
       <SettingsHeader />
 
-      <main>
-        <div className="flex flex-col gap-4">
-          <div>
-            <SafeModules />
-          </div>
-
-          <div>
-            <TransactionGuards />
-          </div>
-
-          <div>
-            <FallbackHandler />
-          </div>
-        </div>
-      </main>
+      <ModulesSettingsView
+        safeModules={<SafeModules />}
+        transactionGuards={<TransactionGuards />}
+        fallbackHandler={<FallbackHandler />}
+      />
     </>
   )
 }

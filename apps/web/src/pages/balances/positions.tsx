@@ -3,6 +3,7 @@ import Head from 'next/head'
 
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import { BRAND_NAME } from '@/config/constants'
+import { PageMainView } from '@views/pages/PageMainView'
 import dynamic from 'next/dynamic'
 
 const DefiPositions = dynamic(() => import('@/features/positions'))
@@ -16,9 +17,9 @@ const Positions: NextPage = () => {
 
       <AssetsHeader />
 
-      <main>
+      <PageMainView>
         <DefiPositions />
-      </main>
+      </PageMainView>
     </>
   )
 }

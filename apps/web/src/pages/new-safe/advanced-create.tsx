@@ -3,20 +3,17 @@ import type { NextPage } from 'next'
 
 import AdvancedCreateSafe from '@/components/new-safe/create/AdvancedCreateSafe'
 import { BRAND_NAME } from '@/config/constants'
-import SafeLogo from '@/components/common/SafeLogo'
+import { NewSafePageView } from '@views/pages/new-safe/NewSafePageView'
 
 const Open: NextPage = () => {
   return (
-    <main>
-      <div className="fixed top-0 left-0 z-[1300] flex items-center px-6" style={{ height: 'var(--header-height)' }}>
-        <SafeLogo />
-      </div>
+    <NewSafePageView>
       <Head>
         <title>{`${BRAND_NAME} – Advanced Safe creation`}</title>
       </Head>
 
       <AdvancedCreateSafe />
-    </main>
+    </NewSafePageView>
   )
 }
 

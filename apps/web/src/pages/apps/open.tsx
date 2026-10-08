@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
@@ -20,6 +19,7 @@ import { useSafeAppRedirects } from '@/hooks/safe-apps/useSafeAppRedirects'
 
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { SafeAppLoaderView } from '@views/pages/apps/SafeAppLoaderView'
 
 const SafeApps: NextPage = () => {
   const chainId = useChainId()
@@ -84,11 +84,7 @@ const SafeApps: NextPage = () => {
   }
 
   if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <Spinner className="size-10" />
-      </div>
-    )
+    return <SafeAppLoaderView />
   }
 
   return (

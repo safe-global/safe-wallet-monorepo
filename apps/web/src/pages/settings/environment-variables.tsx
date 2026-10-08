@@ -3,6 +3,7 @@ import Head from 'next/head'
 import SettingsHeader from '@/components/settings/SettingsHeader'
 import EnvironmentVariables from '@/components/settings/EnvironmentVariables'
 import { BRAND_NAME } from '@/config/constants'
+import { PageMainView } from '@views/pages/PageMainView'
 
 const EnvironmentVariablesPage: NextPage = () => {
   return (
@@ -13,9 +14,9 @@ const EnvironmentVariablesPage: NextPage = () => {
 
       <SettingsHeader />
 
-      <main>
+      <PageMainView>
         <EnvironmentVariables />
-      </main>
+      </PageMainView>
     </>
   )
 }

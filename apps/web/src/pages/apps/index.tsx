@@ -1,7 +1,6 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
 import { useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -17,6 +16,7 @@ import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { SafeAppsView, type SafeAppsListKind } from '@views/pages/apps/SafeAppsView'
 
 const SafeApps: NextPage = () => {
   const router = useRouter()
@@ -48,64 +48,65 @@ const SafeApps: NextPage = () => {
     }
   }, [router, safeLinkQuery])
 
+  const renderAppList = (kind: SafeAppsListKind, { title }: { title: string }) => {
+    if (kind === 'pinned') {
+      return (
+        <SafeAppList
+          title={title}
+          safeAppsList={pinnedSafeApps}
+          bookmarkedSafeAppsId={pinnedSafeAppIds}
+          eventLabel={SAFE_APPS_LABELS.apps_pinned}
+        />
+      )
+    }
+
+    if (kind === 'featured') {
+      return (
+        <SafeAppList
+          title={title}
+          safeAppsList={featuredSafeApps}
+          bookmarkedSafeAppsId={pinnedSafeAppIds}
+          eventLabel={SAFE_APPS_LABELS.apps_featured}
+        />
+      )
+    }
+
+    return (
+      <SafeAppList
+        title={title}
+        isFiltered={isFiltered}
+        safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
+        safeAppsListLoading={remoteSafeAppsLoading}
+        bookmarkedSafeAppsId={pinnedSafeAppIds}
+        eventLabel={SAFE_APPS_LABELS.apps_all}
+        query={query}
+        showNativeSwapsCard
+      />
+    )
+  }
+
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – Safe Apps`}</title>
       </Head>
 
-      {isSafeAppsEnabled === undefined ? null : !isSafeAppsEnabled ? (
-        <Typography align="center" className="my-6">
-          Safe Apps are not available on this network.
-        </Typography>
-      ) : (
-        <>
-          <SafeAppsHeader />
-
-          <main>
-            {/* Safe Apps Filters */}
-            <SafeAppsFilters
-              onChangeQuery={onChangeQuery}
-              onChangeFilterCategory={setSelectedCategories}
-              onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
-              selectedCategories={selectedCategories}
-              safeAppsList={remoteSafeApps}
-            />
-
-            {/* Pinned apps */}
-            {!isFiltered && pinnedSafeApps.length > 0 && (
-              <SafeAppList
-                title="My pinned apps"
-                safeAppsList={pinnedSafeApps}
-                bookmarkedSafeAppsId={pinnedSafeAppIds}
-                eventLabel={SAFE_APPS_LABELS.apps_pinned}
-              />
-            )}
-
-            {/* Featured apps */}
-            {!isFiltered && featuredSafeApps.length > 0 && (
-              <SafeAppList
-                title="Featured apps"
-                safeAppsList={featuredSafeApps}
-                bookmarkedSafeAppsId={pinnedSafeAppIds}
-                eventLabel={SAFE_APPS_LABELS.apps_featured}
-              />
-            )}
-
-            {/* All apps */}
-            <SafeAppList
-              title="All apps"
-              isFiltered={isFiltered}
-              safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
-              safeAppsListLoading={remoteSafeAppsLoading}
-              bookmarkedSafeAppsId={pinnedSafeAppIds}
-              eventLabel={SAFE_APPS_LABELS.apps_all}
-              query={query}
-              showNativeSwapsCard
-            />
-          </main>
-        </>
-      )}
+      <SafeAppsView
+        isSafeAppsEnabled={isSafeAppsEnabled}
+        header={<SafeAppsHeader />}
+        filters={
+          <SafeAppsFilters
+            onChangeQuery={onChangeQuery}
+            onChangeFilterCategory={setSelectedCategories}
+            onChangeOptimizedWithBatch={setOptimizedWithBatchFilter}
+            selectedCategories={selectedCategories}
+            safeAppsList={remoteSafeApps}
+          />
+        }
+        showPinnedApps={!isFiltered && pinnedSafeApps.length > 0}
+        showFeaturedApps={!isFiltered && featuredSafeApps.length > 0}
+        renderAppList={renderAppList}
+      />
     </>
   )
 }
