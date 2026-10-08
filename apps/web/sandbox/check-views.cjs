@@ -8,7 +8,8 @@
  *   elements, no className or style, no visible text, and no design-system primitives from
  *   @/components/ui. Everything a user sees comes from a view.
  *
- * Usage: node apps/web/sandbox/check-views.cjs [--all | <file>...]
+ * Usage: node apps/web/sandbox/check-views.cjs [--all | --views | <file>...]
+ * Containers are also checked by the ESLint rule views/no-markup-in-containers.
  */
 const fs = require('fs')
 const path = require('path')
@@ -88,10 +89,11 @@ function check(file) {
 }
 
 const args = process.argv.slice(2)
-const files = args[0] === '--all' ? [...walk(WEB_SRC), ...walk(VIEW_SRC)] : args
+const files =
+  args[0] === '--all' ? [...walk(WEB_SRC), ...walk(VIEW_SRC)] : args[0] === '--views' ? walk(VIEW_SRC) : args
 const errors = files.filter((f) => fs.existsSync(f)).flatMap(check)
 for (const e of errors) console.log(e)
-if (args[0] === '--all') {
+if (args[0] === '--all' || args[0] === '--views') {
   const byFile = new Set(errors.map((e) => e.split(':')[0]))
   console.log(`${errors.length} problems in ${byFile.size} files`)
 }

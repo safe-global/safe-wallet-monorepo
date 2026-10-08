@@ -6,6 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
 import { FlatCompat } from '@eslint/eslintrc'
+import views from './eslint-rules/views.mjs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -319,6 +320,22 @@ export default [
       // ("Component variants over custom styling").
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
+  },
+  // Containers render views only; markup, styling and copy live in storybook/src (see storybook/AGENTS.md).
+  {
+    files: ['src/**/*.tsx'],
+    ignores: [
+      '**/*.test.tsx',
+      '**/__tests__/**',
+      '**/__mocks__/**',
+      '**/*.stories.tsx',
+      'src/tests/**',
+      'src/stories/**',
+      'src/pages/_document.tsx',
+      'src/components/common/Track/index.tsx',
+    ],
+    plugins: { views },
+    rules: { 'views/no-markup-in-containers': 'error' },
   },
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {

@@ -1,0 +1,41 @@
+name: Web views check
+
+# Views in storybook/src may only import what apps/web/sandbox/policy.json allows.
+# Containers in apps/web/src are checked by the ESLint rule views/no-markup-in-containers in Web Checks.
+
+on:
+  pull_request:
+    paths:
+      - storybook/**
+      - apps/web/sandbox/**
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - storybook/**
+      - apps/web/sandbox/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  views:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the TypeScript parser
+        run: npm install --prefix "$RUNNER_TEMP/views-check" --no-save --ignore-scripts --no-audit --no-fund typescript@5.9.2
+
+      - name: Check the views
+        env:
+          NODE_PATH: ${{ runner.temp }}/views-check/node_modules
+        run: node apps/web/sandbox/check-views.cjs --views
