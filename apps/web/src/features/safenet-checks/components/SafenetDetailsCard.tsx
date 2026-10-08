@@ -14,21 +14,13 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
-import {
-  CHIP_LABEL,
-  CHIP_VARIANT,
-  MULTIPLE_RULES_TITLE,
-  SAFENET_BLURB,
-  STATUS_PRESENTATION,
-} from '../statusPresentation'
-import { SAFENET_RULE_IDS, SAFENET_RULES, type SafenetRuleId } from '../rejectionRules'
+import { CHIP_LABEL, CHIP_VARIANT, STATUS_PRESENTATION } from '../statusPresentation'
 import { summariseRejection, type RejectionSummary } from '../summariseRejection'
-import { formatTimingSentence } from '../checkTiming'
-import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { useSafenetLinks } from '../useSafenetLinks'
-import { SafenetLearnMore, SafenetOutboundLink } from './SafenetLinks'
-import { SafenetBlock, SafenetPulse } from './SafenetBlocks'
+import { Typography } from '@/components/ui/typography'
+import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
+import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -46,142 +38,74 @@ export type SafenetDetailsCardViewProps = {
 // Colour lives in the chip and the blocks; the card itself only turns red on a risk.
 const NEUTRAL_BORDER = 'var(--color-border-main)'
 
-const Muted = ({ children }: { children: ReactNode }): ReactElement => (
-  <span className="text-[var(--color-text-secondary)]">{children}</span>
+const Secondary = ({ children }: { children: ReactNode }): ReactElement => (
+  <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
+    {children}
+  </Typography>
+)
+
+const BodyText = ({ children }: { children: ReactNode }): ReactElement => (
+  <Typography variant="paragraph-small" className="text-[var(--color-text-primary)]">
+    {children}
+  </Typography>
 )
 
 const sentinels = (count: number) => `${count} sentinel${count === 1 ? '' : 's'}`
 
-/** What each rule's row says: flagged rules name how many sentinels cited them; the rest depend on the verdict. */
-const ruleOutcome = (
-  id: SafenetRuleId,
-  status: VerdictStatus,
-  summary: RejectionSummary,
-): { severity: Severity; muted: boolean; note: string } => {
-  const cited = summary.rules.find((rule) => rule.id === id)
-  if (cited) {
-    const severity = status === CheckStatus.MALICIOUS ? Severity.CRITICAL : Severity.WARN
-    return { severity, muted: false, note: `Flagged by ${sentinels(cited.citedBy)}` }
-  }
-  if (status === CheckStatus.BENIGN || status === CheckStatus.MALICIOUS) {
-    return { severity: Severity.OK, muted: true, note: 'Not detected' }
-  }
-  if (status === CheckStatus.TIMED_OUT) return { severity: Severity.INFO, muted: true, note: 'No result' }
-  return { severity: Severity.INFO, muted: true, note: 'Checking' }
-}
-
-const sentinelSentence = (status: VerdictStatus, summary: RejectionSummary): string | null => {
-  const { revealed, flagged } = summary
-  if (revealed === 0) return null
-  if (status === CheckStatus.BENIGN) return `${revealed - flagged} of ${sentinels(revealed)} approved this transaction.`
-  return `${flagged} of ${sentinels(revealed)} flagged this transaction.`
-}
-
-/** The result first: what Safenet concluded, or how long is left while it runs. */
+/**
+ * The PRD sentence for states that have no cited rules.
+ * A risk with recognised rules renders only in FlaggedRuleBlocks.
+ */
 const ResultBlock = ({
   publicStatus,
   snapshot,
   summary,
-  timestampMs,
   isQueued,
   attestationHref,
 }: {
   publicStatus: VerdictStatus
   snapshot: SafenetCheckSnapshot
   summary: RejectionSummary
-  timestampMs?: number
   isQueued?: boolean
   attestationHref: string | null
-}): ReactElement => {
-  const timing = formatTimingSentence(useCheckTiming(snapshot, timestampMs))
-  const { severity, label, copy } = STATUS_PRESENTATION[publicStatus]
+}): ReactElement | null => {
+  const { copy } = STATUS_PRESENTATION[publicStatus]
   const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
-  const title = publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 1 ? MULTIPLE_RULES_TITLE : label
-  // The title already says the result here, so the body explains Safenet instead of repeating it.
-  const showBlurb = publicStatus === CheckStatus.BENIGN || publicStatus === CheckStatus.IN_PROGRESS
+  if (publicStatus === CheckStatus.MALICIOUS && summary.rules.length > 0) return null
 
   return (
-    <SafenetBlock severity={severity}>
-      <span className="font-bold">{title}</span>
-      {isInFlight && timing && (
-        <>
-          <br />
-          <Muted>{timing}</Muted>
-        </>
-      )}
-      <br />
-      {showBlurb ? SAFENET_BLURB : copy} <SafenetLearnMore />
+    <div className="flex flex-col gap-1">
+      <BodyText>{copy}</BodyText>
       {isInFlight && isQueued && (
-        <>
-          <br />
-          <Muted>You can sign now and come back to execute once the check is done.</Muted>
-        </>
+        <Secondary>You can sign now and come back to execute once the check is done.</Secondary>
       )}
       {publicStatus === CheckStatus.BENIGN && attestationHref && snapshot.attestedAtMs !== null && (
-        <>
-          <br />
-          <Muted>
-            Verified <DateTime value={snapshot.attestedAtMs} />
-          </Muted>
-        </>
+        <Secondary>
+          Verified <DateTime value={snapshot.attestedAtMs} />
+        </Secondary>
       )}
-    </SafenetBlock>
+    </div>
   )
 }
 
 /** One block per rule a sentinel cited, like Copilot's threat results. */
-const FlaggedRuleBlocks = ({
-  status,
-  summary,
-}: {
-  status: VerdictStatus
-  summary: RejectionSummary
-}): ReactElement | null => {
+const FlaggedRuleBlocks = ({ summary }: { summary: RejectionSummary }): ReactElement | null => {
   if (summary.rules.length === 0) return null
-  const severity = status === CheckStatus.MALICIOUS ? Severity.CRITICAL : Severity.WARN
 
   return (
-    <>
-      {summary.rules.map((rule) => (
-        <SafenetBlock key={rule.id} severity={severity}>
-          <span className="font-bold">{rule.label}</span>
-          <br />
-          {rule.description}
-          <br />
-          <Muted>Flagged by {sentinels(rule.citedBy)}</Muted>
-        </SafenetBlock>
-      ))}
-    </>
-  )
-}
-
-/** All six rules with their outcome, and who checked them. */
-const ChecksBlock = ({ status, summary }: { status: VerdictStatus; summary: RejectionSummary }): ReactElement => {
-  const isInFlight = status === CheckStatus.SUBMITTED || status === CheckStatus.IN_PROGRESS
-  const sentinelLine = sentinelSentence(status, summary)
-
-  return (
-    <SafenetBlock>
-      <span className="flex flex-col gap-2">
-        <span className="font-bold">{isInFlight ? 'What Safenet checks' : 'What Safenet checked'}</span>
-        <ul className="flex flex-col gap-1.5" data-testid="safenet-details-rules">
-          {SAFENET_RULE_IDS.map((id) => {
-            const outcome = ruleOutcome(id, status, summary)
-            return (
-              <li key={id} className="flex items-center gap-2" data-rule={id} data-outcome={outcome.note}>
-                <SeverityIcon severity={outcome.severity} muted={outcome.muted} width={14} height={14} />
-                <span className="min-w-0 flex-1 truncate">{SAFENET_RULES[id].label}</span>
-                <Muted>{outcome.note}</Muted>
-              </li>
-            )
-          })}
-        </ul>
-        {summary.unrecognised && (
-          <Muted>A sentinel also cited a reason this version of the app doesn&apos;t recognize.</Muted>
-        )}
-        {sentinelLine && <Muted>{sentinelLine}</Muted>}
-      </span>
-    </SafenetBlock>
+    <SafenetDetailsPanel>
+      <SafenetDetailsPanelStack>
+        {summary.rules.map((rule) => (
+          <div key={rule.id} className="flex flex-col gap-1">
+            <BodyText>{rule.label}</BodyText>
+            <BodyText>{rule.description}</BodyText>
+            <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
+              Flagged by {sentinels(rule.citedBy)}
+            </Typography>
+          </div>
+        ))}
+      </SafenetDetailsPanelStack>
+    </SafenetDetailsPanel>
   )
 }
 
@@ -198,7 +122,19 @@ export const SafenetDetailsCardView = ({
   const links = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
   const summary = summariseRejection(snapshot.events)
   const isInFlight = publicStatus === CheckStatus.SUBMITTED || publicStatus === CheckStatus.IN_PROGRESS
-  const accent = publicStatus === CheckStatus.MALICIOUS ? 'var(--color-error-main)' : NEUTRAL_BORDER
+  const isMalicious = publicStatus === CheckStatus.MALICIOUS
+  const accent = isMalicious ? 'var(--color-error-main)' : NEUTRAL_BORDER
+  const openFill = isMalicious ? 'var(--color-error-background)' : 'transparent'
+  const proofLink =
+    publicStatus === CheckStatus.BENIGN && links.attestationHref
+      ? {
+          href: links.attestationHref,
+          testId: 'safenet-details-attestation',
+          label: SAFENET_ATTESTATION_LINK_LABEL,
+        }
+      : !isInFlight
+        ? { href: links.explorerHref, testId: 'safenet-details-explorer', label: SAFENET_EXPLORER_LINK_LABEL }
+        : null
 
   return (
     <Card
@@ -208,7 +144,7 @@ export const SafenetDetailsCardView = ({
       style={
         {
           '--accordion-border-active': accent,
-          '--accordion-fill-active': 'transparent',
+          '--accordion-fill-active': openFill,
         } as CSSProperties
       }
     >
@@ -230,35 +166,21 @@ export const SafenetDetailsCardView = ({
           </AccordionTrigger>
 
           <AccordionContent className={cn(accordionCss.content, 'p-4')}>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               <ResultBlock
                 publicStatus={publicStatus}
                 snapshot={snapshot}
                 summary={summary}
-                timestampMs={timestampMs}
                 isQueued={isQueued}
                 attestationHref={links.attestationHref}
               />
 
-              <FlaggedRuleBlocks status={publicStatus} summary={summary} />
+              {publicStatus === CheckStatus.MALICIOUS && <FlaggedRuleBlocks summary={summary} />}
 
-              <ChecksBlock status={publicStatus} summary={summary} />
-
-              {(links.attestationHref || !isInFlight) && (
-                <SafenetBlock>
-                  <span className="flex flex-wrap gap-x-4 gap-y-1">
-                    {links.attestationHref && (
-                      <SafenetOutboundLink testId="safenet-details-attestation" href={links.attestationHref}>
-                        View signed attestation
-                      </SafenetOutboundLink>
-                    )}
-                    {!isInFlight && (
-                      <SafenetOutboundLink testId="safenet-details-explorer" href={links.explorerHref}>
-                        View on Safenet explorer
-                      </SafenetOutboundLink>
-                    )}
-                  </span>
-                </SafenetBlock>
+              {proofLink && (
+                <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId}>
+                  {proofLink.label}
+                </SafenetOutboundLink>
               )}
             </div>
           </AccordionContent>
@@ -275,7 +197,7 @@ export type SafenetDetailsCardProps = {
   isQueued?: boolean
 }
 
-/** Renders nothing until a check has been observed for this transaction. Opens by itself on a risk. */
+/** Renders nothing until a check has been observed for this transaction. Starts collapsed. */
 const SafenetDetailsCard = ({
   safeTxHash,
   chainId,
@@ -293,7 +215,6 @@ const SafenetDetailsCard = ({
       chainId={chainId}
       timestampMs={timestampMs}
       isQueued={isQueued}
-      defaultExpanded={display.publicStatus === CheckStatus.MALICIOUS}
     />
   )
 }

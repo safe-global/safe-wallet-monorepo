@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { userEvent, within } from 'storybook/test'
 import { createMockStory, createMockTransactionDetails, getFixtureData } from '@/stories/mocks'
 import TxDetail from '@/pages/transactions/tx'
 import { safenetChainsHandler, safenetCheck, safenetRpcHandler, type Vote } from './safenetChainMocks'
@@ -40,7 +39,7 @@ const story = (logs: ReturnType<typeof safenetCheck.submitted>): Story => ({
 })
 
 const meta = {
-  title: 'Pages/Safenet/Transaction detail',
+  title: 'Pages/Safenet/Transaction details',
   component: TxDetail,
   parameters: {
     layout: 'fullscreen',
@@ -49,12 +48,6 @@ const meta = {
     visualTest: { disable: true },
   },
   decorators: [setup.decorator],
-  // Opens the Safenet card once the chain read lands, so the capture shows its details.
-  play: async ({ canvasElement }) => {
-    const card = await within(canvasElement).findByTestId('safenet-details-card', {}, { timeout: 15_000 })
-    const trigger = within(card).getAllByRole('button')[0]
-    if (trigger.getAttribute('aria-expanded') !== 'true') await userEvent.click(trigger)
-  },
 } satisfies Meta<typeof TxDetail>
 
 export default meta
@@ -71,4 +64,4 @@ export const RiskDetected = malicious(['R-4.6'])
 export const RiskDetectedSeveralRules = malicious(['R-4.5', 'R-4.5', 'R-4.4', 'R-4.5'])
 /** Example #8: a split vote with no ruling before the deadline. */
 export const CheckFailed = story(safenetCheck.timedOut(spec, [null, 'R-4.3']))
-export const NoCheck: Story = { ...story([]), play: undefined }
+export const NoCheck: Story = story([])

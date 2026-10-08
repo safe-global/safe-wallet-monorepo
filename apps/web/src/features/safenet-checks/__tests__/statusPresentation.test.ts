@@ -5,6 +5,15 @@ import { resolvePresentation, STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } fr
 const VERDICT_STATUSES = Object.keys(STATUS_PRESENTATION) as Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>[]
 const UNAVAILABLE_REASONS = Object.keys(UNAVAILABLE_PRESENTATION) as UnavailableReason[]
 
+/** PRD copy for verdict states — regression guard when product strings change. */
+const PRD_STATUS_COPY = {
+  [CheckStatus.SUBMITTED]: 'Check submitted to Safenet.',
+  [CheckStatus.IN_PROGRESS]: 'Safenet is simulating this transaction.',
+  [CheckStatus.BENIGN]: 'Safenet found no issues',
+  [CheckStatus.MALICIOUS]: 'Safenet flagged this address/transaction as malicious',
+  [CheckStatus.TIMED_OUT]: 'Safenet check is unavailable. You can still continue.',
+} as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
+
 describe('resolvePresentation', () => {
   it.each(UNAVAILABLE_REASONS)('renders the %s copy with a neutral icon', (reason) => {
     expect(resolvePresentation(CheckStatus.UNAVAILABLE, reason, false)).toEqual({
@@ -33,10 +42,15 @@ describe('resolvePresentation', () => {
     expect(STATUS_PRESENTATION[CheckStatus.TIMED_OUT].copy).toContain('You can still continue.')
   })
 
+  it.each(VERDICT_STATUSES)('matches PRD copy for %s', (status) => {
+    expect(STATUS_PRESENTATION[status].copy).toBe(PRD_STATUS_COPY[status])
+  })
+
   it('keeps the protocol timeout distinct from an unreadable status', () => {
     const timedOut = STATUS_PRESENTATION[CheckStatus.TIMED_OUT].copy
+    expect(timedOut).toBe(PRD_STATUS_COPY[CheckStatus.TIMED_OUT])
     expect(timedOut).not.toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED.copy)
-    expect(timedOut).not.toMatch(/unavailable/i)
+    expect(timedOut).not.toMatch(/couldn't reach/i)
   })
 
   it('keeps the neutral icon even when a snapshot says no check was requested', () => {

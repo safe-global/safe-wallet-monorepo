@@ -3,6 +3,19 @@ import type { ReactElement, ReactNode } from 'react'
 import { AnalysisGroupCardItem } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardItem'
 import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 
+/** Muted inset for the transaction-details Safenet card — same surface as Receipt / PaperViewToggle. */
+export const SafenetDetailsPanel = ({ children }: { children: ReactNode }): ReactElement => (
+  <div className="rounded-md bg-[var(--color-background-main)] px-4 py-3">{children}</div>
+)
+
+const detailsStackClass =
+  'flex flex-col divide-y divide-[var(--color-border-light)] [&>*]:py-3 [&>*:first-child]:pt-0 [&>*:last-child]:pb-0'
+
+/** Divided rows inside {@link SafenetDetailsPanel}. */
+export const SafenetDetailsPanelStack = ({ children }: { children: ReactNode }): ReactElement => (
+  <div className={detailsStackClass}>{children}</div>
+)
+
 /** Gray block with a severity bar, the same component Copilot's checks expand into. */
 export const SafenetBlock = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => (
   <AnalysisGroupCardItem

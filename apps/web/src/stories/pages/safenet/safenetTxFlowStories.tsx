@@ -44,15 +44,15 @@ const txSummary = (() => {
   return { ...row.transaction, id: TX_ID, timestamp: SUBMITTED_AT } as unknown as Transaction
 })()
 
-type Access = 'active' | 'no-plan' | 'pro-disabled'
+type Access = 'active' | 'no-plan'
 const SPACE_ID = '11111111-1111-4111-8111-111111111111'
 
-const createSetup = (access: Access) =>
+const createSetup = () =>
   createMockStory({
     scenario: 'efSafe',
     wallet: 'owner',
-    features: { safenetChecks: true, spaces: access !== 'pro-disabled', safePro: access !== 'pro-disabled' },
-    query: access === 'pro-disabled' ? {} : { spaceId: SPACE_ID },
+    features: { safenetChecks: true, spaces: true, safePro: true },
+    query: { spaceId: SPACE_ID },
     shadcn: true,
     store: {
       auth: { sessionExpiresAt: Date.now() + 60 * 60_000, isStoreHydrated: true },
@@ -61,24 +61,24 @@ const createSetup = (access: Access) =>
     },
   })
 
+const setup = createSetup()
 const setups = {
-  active: createSetup('active'),
-  'no-plan': createSetup('no-plan'),
-  'pro-disabled': createSetup('pro-disabled'),
+  active: setup,
+  'no-plan': setup,
 }
-const setup = setups['pro-disabled']
 
 // --- Network ------------------------------------------------------------------------------
 
-/** Keep simulation enabled so access and rollout stories show the full check list. */
-const chainsHandler = (access: Access) => {
+/** Keep simulation enabled so the access stories show the full check list. */
+const chainsHandler = () => {
   const page = safenetChainsPage()
   const results = page.results.map((chain) => ({
     ...chain,
     features: [
       ...chain.features.filter((feature) => feature !== FEATURES.SAFE_PRO && feature !== FEATURES.TX_SIMULATION),
       FEATURES.TX_SIMULATION,
-      ...(access === 'pro-disabled' ? [] : [FEATURES.SAFE_PRO, FEATURES.SPACES]),
+      FEATURES.SAFE_PRO,
+      FEATURES.SPACES,
     ],
   }))
   return http.get(/\/v2\/chains$/, () => HttpResponse.json({ ...page, results }))
@@ -101,24 +101,21 @@ const recipientResult = {
 }
 
 /** Safe Shield's CGW analyses, all settled with no findings and the transfer's USDC outflow. */
-const safeShieldHandlers = (amountOut: string, asset: 'token' | 'native' = 'token'): RequestHandler[] => [
+const safeShieldHandlers = (amountOut: string): RequestHandler[] => [
   http.get(/\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/recipient\/0x[a-fA-F0-9]+$/, () =>
     HttpResponse.json(recipientResult),
   ),
   http.post(/\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/counterparty-analysis$/, () =>
     HttpResponse.json({
       recipient: { [CONFIRM_RECIPIENT]: recipientResult, [NEW_RECIPIENT]: recipientResult },
-      contract:
-        asset === 'native'
-          ? {}
-          : {
-              [USDC]: {
-                name: 'USD Coin',
-                logoUrl: USDC_LOGO,
-                CONTRACT_VERIFICATION: [ok('VERIFIED', 'Verified contract')],
-                CONTRACT_INTERACTION: [ok('KNOWN_CONTRACT', 'Known contract')],
-              },
-            },
+      contract: {
+        [USDC]: {
+          name: 'USD Coin',
+          logoUrl: USDC_LOGO,
+          CONTRACT_VERIFICATION: [ok('VERIFIED', 'Verified contract')],
+          CONTRACT_INTERACTION: [ok('KNOWN_CONTRACT', 'Known contract')],
+        },
+      },
       deadlock: {},
     }),
   ),
@@ -127,10 +124,7 @@ const safeShieldHandlers = (amountOut: string, asset: 'token' | 'native' = 'toke
       THREAT: [ok('NO_THREAT', 'No threat detected')],
       BALANCE_CHANGE: [
         {
-          asset:
-            asset === 'native'
-              ? { type: 'NATIVE', symbol: 'ETH', logo_url: null }
-              : { type: 'ERC20', symbol: 'USDC', address: USDC, logo_url: USDC_LOGO },
+          asset: { type: 'ERC20', symbol: 'USDC', address: USDC, logo_url: USDC_LOGO },
           in: [],
           out: [{ value: amountOut }],
         },
@@ -173,16 +167,12 @@ const mainnetRpcHandler = http.post(MAINNET_RPC, async ({ request }) => {
   return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
 })
 
-const handlers = (
-  logs: ReturnType<typeof safenetCheck.submitted>,
-  amountOut: string,
-  asset: 'token' | 'native' = 'token',
-) => [
-  chainsHandler('pro-disabled'),
+const handlers = (logs: ReturnType<typeof safenetCheck.submitted>, amountOut: string) => [
+  chainsHandler(),
   txDetailsHandler,
   safenetRpcHandler(logs),
   mainnetRpcHandler,
-  ...safeShieldHandlers(amountOut, asset),
+  ...safeShieldHandlers(amountOut),
   ...setup.parameters.msw.handlers,
 ]
 
@@ -270,7 +260,7 @@ const meta = {
   decorators: [
     (Story, context) => <Fragment key={context.id}>{setups[context.args.access].decorator(Story, context)}</Fragment>,
   ],
-  args: { flow: 'confirm', access: 'pro-disabled' },
+  args: { flow: 'confirm', access: 'active' },
   parameters: {
     layout: 'fullscreen',
     ...setup.parameters,
@@ -299,35 +289,30 @@ export const ConfirmRiskDetected = malicious(['R-4.5', 'R-4.5', 'R-4.4', 'R-4.5'
 /** A split vote with no ruling before the deadline. */
 export const ConfirmCheckFailed = confirm(safenetCheck.timedOut(spec, [null, 'R-4.3']))
 
-/** Review through the real send form, with the selected asset deciding contract-check applicability. */
-const newTransferReview = (asset: 'token' | 'native'): Story => ({
+/** USDC send, stopped on the pre-sign review so the Safenet row is what differs between plans. */
+export const NewTransactionReview: Story = {
+  name: 'New transaction review',
   args: { flow: 'new' },
-  parameters: { msw: { handlers: handlers([], asset === 'native' ? '0.1' : '1', asset) } },
+  parameters: { msw: { handlers: handlers([], '1') } },
   play: async () => {
     const page = within(document.body)
     await userEvent.click(await page.findByRole('button', { name: 'Send tokens' }, { timeout: 15_000 }))
     const tokenSelector = within(await page.findByTestId('token-selector'))
     await userEvent.click(await tokenSelector.findByRole('combobox'))
-    const symbol = asset === 'native' ? 'ETH' : 'USDC'
     const options = await page.findAllByRole('option')
-    const option = options.find((option) =>
-      option.textContent?.trim().startsWith(asset === 'native' ? 'Ether' : symbol),
-    )
-    if (!option) throw new Error(`${symbol} missing from mock token options`)
+    const option = options.find((option) => option.textContent?.trim().startsWith('USDC'))
+    if (!option) throw new Error('USDC missing from mock token options')
     await userEvent.click(option)
     const recipient = await page.findByRole('combobox', { name: /Recipient address/ })
     await userEvent.type(recipient, NEW_RECIPIENT)
-    await userEvent.type(page.getByTestId('token-amount-field'), asset === 'native' ? '0.1' : '1')
+    await userEvent.type(page.getByTestId('token-amount-field'), '1')
     const nextButton = page.getByRole('button', { name: 'Next' })
     await waitFor(() => expect(nextButton).toBeEnabled())
     await userEvent.click(nextButton)
     await page.findByRole('heading', { name: 'Confirm transaction' })
     await settle()
   },
-})
-
-export const NewTokenTransferReview = newTransferReview('token')
-export const NewNativeTransferReview = newTransferReview('native')
+}
 
 export const withAccess = (story: Story, access: Access): Story => ({
   ...story,
@@ -337,7 +322,7 @@ export const withAccess = (story: Story, access: Access): Story => ({
     nextjs: setups[access].parameters.nextjs,
     msw: {
       handlers: [
-        chainsHandler(access),
+        chainsHandler(),
         http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: { [safeData.chainId]: [SAFE] } })),
         ...billingHandlers(
           access === 'active'

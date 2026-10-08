@@ -11,7 +11,7 @@ import { LockedCheckRow } from '@/features/safe-shield/components/LockedCheckRow
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
-import { CheckStatus, type SafenetCheckSnapshot } from '@safe-global/utils/features/safenet-checks'
+import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import {
@@ -22,10 +22,13 @@ import {
   STALE_NOTE,
 } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection, type RejectionSummary } from '../summariseRejection'
-import { formatTimingSentence } from '../checkTiming'
-import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
-import { SafenetLearnMore, SafenetOutboundLink } from './SafenetLinks'
+import {
+  SAFENET_ATTESTATION_LINK_LABEL,
+  SAFENET_EXPLORER_LINK_LABEL,
+  SafenetLearnMore,
+  SafenetOutboundLink,
+} from './SafenetLinks'
 import { SafenetBlock, SafenetPulse } from './SafenetBlocks'
 
 export type SafenetChecksSectionViewProps = {
@@ -154,28 +157,11 @@ const maliciousTitle = (summary: RejectionSummary, fallback: string): string => 
   return fallback
 }
 
-const InFlightTiming = ({
-  snapshot,
-  submittedAt,
-}: {
-  snapshot: SafenetCheckSnapshot
-  submittedAt?: number
-}): ReactElement | null => {
-  const sentence = formatTimingSentence(useCheckTiming(snapshot, submittedAt))
-  return sentence ? (
-    <>
-      <br />
-      <span data-testid="safenet-check-timing">{sentence}</span>
-    </>
-  ) : null
-}
-
 /** Safenet section in the Safe Shield widget, rendered from builders in stories and tests. */
 export const SafenetChecksSectionView = ({
   check,
   safeTxHash,
   chainId,
-  submittedAt,
   preCheck,
   locked = false,
 }: SafenetChecksSectionViewProps): ReactElement | null => {
@@ -203,6 +189,12 @@ export const SafenetChecksSectionView = ({
   const showsExplorerLink =
     !!safeTxHash && (isRisk || unavailableReason === 'READ_FAILED' || unavailableReason === 'WINDOW_UNCERTAIN')
   const blockSeverity = content.muted ? undefined : content.severity
+  const proofLink =
+    publicStatus === CheckStatus.BENIGN && links.attestationHref
+      ? { href: links.attestationHref, testId: 'safenet-attestation-link', label: SAFENET_ATTESTATION_LINK_LABEL }
+      : showsExplorerLink
+        ? { href: links.explorerHref, testId: 'safenet-explorer-link', label: SAFENET_EXPLORER_LINK_LABEL }
+        : null
 
   return (
     <SectionRow
@@ -221,20 +213,23 @@ export const SafenetChecksSectionView = ({
       defaultOpen={isRisk}
     >
       <SafenetBlock severity={blockSeverity}>
-        <span className="font-bold">{title}</span>
-        {publicStatus === CheckStatus.IN_PROGRESS && snapshot && (
-          <InFlightTiming snapshot={snapshot} submittedAt={submittedAt} />
-        )}
-        <br />
-        {flaggedCount && summary && summary.rules.length > 0 ? (
-          <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+        {isInFlight ? (
+          <span className="font-bold">{content.copy}</span>
         ) : (
           <>
-            {content.copy}
-            {flaggedCount && (
+            <span className="font-bold">{title}</span>
+            <br />
+            {flaggedCount && summary && summary.rules.length > 0 ? (
+              <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+            ) : (
               <>
-                {' '}
-                <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+                {content.copy}
+                {flaggedCount && (
+                  <>
+                    {' '}
+                    <span data-testid="safenet-flagged-count">{flaggedCount}</span>
+                  </>
+                )}
               </>
             )}
           </>
@@ -249,20 +244,10 @@ export const SafenetChecksSectionView = ({
 
       {summary && summary.rules.length > 0 && <RejectionReasons summary={summary} />}
 
-      {publicStatus === CheckStatus.BENIGN && links.attestationHref && (
-        <SafenetBlock>
-          <SafenetOutboundLink href={links.attestationHref} testId="safenet-attestation-link">
-            View signed attestation
-          </SafenetOutboundLink>
-        </SafenetBlock>
-      )}
-
-      {showsExplorerLink && (
-        <SafenetBlock>
-          <SafenetOutboundLink href={links.explorerHref} testId="safenet-explorer-link">
-            View on Safenet explorer
-          </SafenetOutboundLink>
-        </SafenetBlock>
+      {proofLink && (
+        <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId}>
+          {proofLink.label}
+        </SafenetOutboundLink>
       )}
     </SectionRow>
   )

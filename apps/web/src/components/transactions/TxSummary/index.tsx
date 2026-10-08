@@ -26,7 +26,6 @@ import {
   HypernativeFeature,
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
@@ -39,8 +38,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
-  const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -57,8 +54,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
-  // Bulk-group rows hide the cell via CSS; skipping the mount also skips the chain read.
-  const showSafenetStatus = isSafenetEnabled && isQueue && !isBulkGroup && !!safeTxHash
 
   return (
     <div
@@ -71,7 +66,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.bulkGroup]: isBulkGroup,
         [css.untrusted]: showWarning,
         [css.withAssessment]: showAssessment,
-        [css.withSafenet]: showSafenetStatus,
       })}
       id={tx.id}
     >
@@ -133,12 +127,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       {showAssessment && safeTxHash && (
         <div style={{ gridArea: 'assessment' }} className={css.assessment}>
           <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
-        </div>
-      )}
-
-      {showSafenetStatus && safeTxHash && (
-        <div style={{ gridArea: 'safenet' }} className={css.safenet}>
-          <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} variant="chip" />
         </div>
       )}
 

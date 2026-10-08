@@ -64,6 +64,14 @@ export const RiskDetected: Story = {
   },
 }
 
+/** Settings change plus delegate call — multiple rows in one inset panel. */
+export const RiskDetectedSeveralRules: Story = {
+  args: {
+    publicStatus: CheckStatus.MALICIOUS,
+    snapshot: rejectedSnapshot(SAFENET_EXAMPLE_VOTES.delegateCallAndSettings),
+  },
+}
+
 /** Example #8: a split vote with no ruling in time. */
 export const CheckFailed: Story = {
   args: {

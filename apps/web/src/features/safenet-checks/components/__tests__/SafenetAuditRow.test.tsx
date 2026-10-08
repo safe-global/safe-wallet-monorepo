@@ -12,6 +12,7 @@ import {
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
+import { SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
@@ -114,7 +115,7 @@ describe('SafenetAuditRow', () => {
     // The explorer page is not proof, so it never stands in for the attestation link.
     expect(screen.getByText('No issues found')).toBeInTheDocument()
     expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
-    expect(screen.getByTestId('safenet-explorer-link')).toHaveAccessibleName('View on Safenet explorer')
+    expect(screen.getByTestId('safenet-explorer-link')).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
   })
 
   it('dates the No-issues step from the attested block', () => {
@@ -193,7 +194,7 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('Risk detected')).toBeInTheDocument()
     const link = screen.getByTestId('safenet-explorer-link')
-    expect(link).toHaveAccessibleName('View on Safenet explorer')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
     expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
   })
 
@@ -213,21 +214,5 @@ describe('SafenetAuditRow', () => {
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText('Risk detected')).toBeInTheDocument()
-  })
-
-  it('shows the time left while simulating', () => {
-    const snapshot = buildSnapshot({
-      safeTxHash: HASH as `0x${string}`,
-      status: CheckStatus.IN_PROGRESS,
-      headBlock: '1000',
-      deadlineBlock: '1024',
-    })
-    mockUseSafenetCheck.mockReturnValue(
-      view({ snapshot, status: CheckStatus.IN_PROGRESS, publicStatus: CheckStatus.IN_PROGRESS }),
-    )
-
-    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
-
-    expect(screen.getByText('Simulating · up to ~2 min')).toBeInTheDocument()
   })
 })

@@ -63,7 +63,7 @@ export const exampleSnapshot = (
 export const rejectedSnapshot = (votes: Vote[], status = CheckStatus.MALICIOUS): SafenetCheckSnapshot =>
   exampleSnapshot(status as Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, { events: reveals(votes) })
 
-/** 24 blocks of 5s before the reveal deadline: "up to about 2 min". */
+/** In progress with head and reveal deadline blocks set (for story fixtures). */
 export const inProgressWithDeadline = (): SafenetCheckSnapshot =>
   exampleSnapshot(CheckStatus.IN_PROGRESS, {
     headBlock: '48600000',
@@ -71,6 +71,6 @@ export const inProgressWithDeadline = (): SafenetCheckSnapshot =>
     events: [requestCreatedEvent({ blockNumber: 48_599_976, deadlineBlock: '48600024' })],
   })
 
-/** No blocks known, started 3 min before the story renders: the elapsed fallback. */
+/** In progress with aimedAtMs set (no head/deadline blocks). */
 export const inProgressElapsed = (): SafenetCheckSnapshot =>
   exampleSnapshot(CheckStatus.IN_PROGRESS, { aimedAtMs: Date.now() - 3 * 60_000 - 5_000 })

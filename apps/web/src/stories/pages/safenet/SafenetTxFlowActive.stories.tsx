@@ -4,8 +4,7 @@ import meta, {
   ConfirmNoIssuesFound as ConfirmNoIssuesFoundStory,
   ConfirmRiskDetected as ConfirmRiskDetectedStory,
   ConfirmCheckFailed as ConfirmCheckFailedStory,
-  NewTokenTransferReview as NewTokenTransferReviewStory,
-  NewNativeTransferReview as NewNativeTransferReviewStory,
+  NewTransactionReview as NewTransactionReviewStory,
 } from './safenetTxFlowStories'
 
 export default {
@@ -18,6 +17,7 @@ export const ConfirmSimulating = withAccess(ConfirmSimulatingStory, 'active')
 export const ConfirmNoIssuesFound = withAccess(ConfirmNoIssuesFoundStory, 'active')
 export const ConfirmRiskDetected = withAccess(ConfirmRiskDetectedStory, 'active')
 export const ConfirmCheckFailed = withAccess(ConfirmCheckFailedStory, 'active')
-export const NewTokenTransferReview = withAccess(NewTokenTransferReviewStory, 'active')
-
-export const NewNativeTransferReview = withAccess(NewNativeTransferReviewStory, 'active')
+export const NewTransactionReview = {
+  ...withAccess(NewTransactionReviewStory, 'active'),
+  name: 'New transaction review',
+}

@@ -59,7 +59,7 @@ const story = (snapshot: SafenetCheckSnapshot, description: string): Story => ({
 })
 
 export const Submitted = story(exampleSnapshot(CheckStatus.SUBMITTED), 'SUBMITTED.')
-export const InProgress = story(inProgressWithDeadline(), 'IN_PROGRESS with time left.')
+export const InProgress = story(inProgressWithDeadline(), 'IN_PROGRESS: label is "Simulating".')
 export const Benign = story(exampleSnapshot(CheckStatus.BENIGN), 'BENIGN, verified: "Safenet" links the attestation.')
 export const MaliciousOneRule = story(
   rejectedSnapshot(SAFENET_EXAMPLE_VOTES.settingsChange),

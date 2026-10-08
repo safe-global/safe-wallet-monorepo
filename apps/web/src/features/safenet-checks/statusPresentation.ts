@@ -26,7 +26,7 @@ export const STATUS_PRESENTATION: Record<
   [CheckStatus.SUBMITTED]: {
     severity: Severity.INFO,
     label: 'Submitted',
-    copy: 'Submitted to Safenet. Takes about a minute.',
+    copy: 'Check submitted to Safenet.',
   },
   [CheckStatus.IN_PROGRESS]: {
     severity: Severity.INFO,
@@ -36,17 +36,17 @@ export const STATUS_PRESENTATION: Record<
   [CheckStatus.BENIGN]: {
     severity: Severity.OK,
     label: 'No issues found',
-    copy: 'Safenet found no issues.',
+    copy: 'Safenet found no issues',
   },
   [CheckStatus.MALICIOUS]: {
     severity: Severity.CRITICAL,
     label: 'Risk detected',
-    copy: 'Safenet flagged this transaction as malicious.',
+    copy: 'Safenet flagged this address/transaction as malicious',
   },
   [CheckStatus.TIMED_OUT]: {
     severity: Severity.ERROR,
     label: 'Safenet check failed',
-    copy: "Safenet couldn't reach a trusted result for this transaction. You can still continue.",
+    copy: 'Safenet check is unavailable. You can still continue.',
   },
 }
 
@@ -70,9 +70,6 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
     copy: "We couldn't confirm whether Safenet checked this transaction. You can still continue.",
   },
 }
-
-/** One line on what Safenet is, for states whose title already says the result. */
-export const SAFENET_BLURB = 'Independent sentinels simulate each transaction and check it for known risks.'
 
 /** Shown before the first signature, while no check exists yet. */
 export const SAFENET_ABOUT =

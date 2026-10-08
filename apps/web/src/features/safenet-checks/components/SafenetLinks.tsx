@@ -3,6 +3,9 @@ import { ArrowUpRight } from 'lucide-react'
 import { Link } from '@/components/ui/link'
 import { SAFENET_DOCS_URL } from '../statusPresentation'
 
+export const SAFENET_ATTESTATION_LINK_LABEL = 'View signed attestation'
+export const SAFENET_EXPLORER_LINK_LABEL = 'View on Safenet explorer'
+
 /** Gray outbound link with the up-and-out arrow; turns black on hover. */
 export const SafenetOutboundLink = ({
   href,

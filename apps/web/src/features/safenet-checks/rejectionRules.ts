@@ -7,36 +7,31 @@ export type SafenetRuleCopy = {
   description: string
 }
 
-/** UI copy for each Arbitration Charter rule a sentinel can cite. Sentinels send only the code. */
+/** User-facing label and description for each charter rule. Sentinels send only the code. */
 export const SAFENET_RULES: Record<SafenetRuleId, SafenetRuleCopy> = {
   'R-4.1': {
     label: 'Safe account settings change',
-    description:
-      "This transaction changes your Safe account's settings, such as signers or threshold. Safenet flags every settings change, so this is expected if your team made it.",
+    description: 'This transaction changes signers, threshold, modules, guard, or fallback handler.',
   },
   'R-4.2': {
-    label: 'Unknown delegate call',
-    description:
-      "This transaction uses delegate call to a contract Safenet doesn't recognize. That contract could change your Safe account's setup.",
+    label: 'Unexpected delegate call',
+    description: "This transaction runs external code that can change your Safe account's setup.",
   },
   'R-4.3': {
-    label: 'Lookalike recipient',
-    description:
-      'Funds go to an address that looks like one this Safe account has used before. This is a sign of address poisoning.',
+    label: 'Unknown recipient',
+    description: 'Funds go to an address outside your usual recipients. This can be address poisoning.',
   },
   'R-4.4': {
-    label: 'Lookalike spender',
-    description:
-      'This transaction lets an address that looks like a known one spend your tokens, or sends swap proceeds outside this Safe account.',
+    label: 'Unknown spender',
+    description: 'This transaction lets an unfamiliar address spend or move your assets.',
   },
   'R-4.5': {
-    label: 'Excessive approval',
-    description:
-      'This transaction approves an unlimited amount, a whole NFT collection, or more than the swap order needs.',
+    label: 'Unlimited approval',
+    description: 'This transaction approves an unlimited token amount.',
   },
   'R-4.6': {
-    label: 'Blocklisted address',
-    description: "This transaction interacts with an address on Safenet's list of malicious or compromised addresses.",
+    label: 'Malicious threat detected',
+    description: 'This transaction interacts with an address known to be malicious or compromised.',
   },
 }
 

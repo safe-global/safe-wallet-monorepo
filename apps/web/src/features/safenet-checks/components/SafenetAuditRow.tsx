@@ -9,9 +9,8 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
-import { formatSimulatingLabel } from '../checkTiming'
-import { useCheckTiming } from '../useCheckTiming'
 import { useSafenetLinks } from '../useSafenetLinks'
+import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
@@ -50,35 +49,34 @@ export type SafenetAuditRowViewProps = {
   isLast?: boolean
 }
 
-const useStepLabel = (
-  publicStatus: VerdictStatus,
-  snapshot: SafenetCheckSnapshot,
-  timestampMs: number | null | undefined,
-): string => {
-  const timing = useCheckTiming(snapshot, timestampMs)
-  if (publicStatus === CheckStatus.IN_PROGRESS) return formatSimulatingLabel(timing)
-  return STATUS_PRESENTATION[publicStatus].label
-}
-
 /** Safenet audit-log step. Dated from the attested block, so it can read later than Executed below it. */
 export const SafenetAuditRowView = ({
   publicStatus,
   snapshot,
   safeTxHash,
   chainId,
-  timestampMs,
   isLast,
 }: SafenetAuditRowViewProps): ReactElement => {
   const isDarkMode = useDarkMode()
-  const label = useStepLabel(publicStatus, snapshot, timestampMs)
+  const label = STATUS_PRESENTATION[publicStatus].label
   const { attestationHref, explorerHref } = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash)
 
   const actor = attestationHref ? (
-    <ExternalLink data-testid="safenet-attestation-link" href={attestationHref} aria-label="View attestation" noIcon>
+    <ExternalLink
+      data-testid="safenet-attestation-link"
+      href={attestationHref}
+      aria-label={SAFENET_ATTESTATION_LINK_LABEL}
+      noIcon
+    >
       Safenet
     </ExternalLink>
   ) : publicStatus === CheckStatus.MALICIOUS || publicStatus === CheckStatus.BENIGN ? (
-    <ExternalLink data-testid="safenet-explorer-link" href={explorerHref} aria-label="View on Safenet explorer" noIcon>
+    <ExternalLink
+      data-testid="safenet-explorer-link"
+      href={explorerHref}
+      aria-label={SAFENET_EXPLORER_LINK_LABEL}
+      noIcon
+    >
       Safenet
     </ExternalLink>
   ) : (

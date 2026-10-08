@@ -1,8 +1,7 @@
 import meta, {
   withAccess,
   ConfirmSimulating as ConfirmSimulatingStory,
-  NewTokenTransferReview as NewTokenTransferReviewStory,
-  NewNativeTransferReview as NewNativeTransferReviewStory,
+  NewTransactionReview as NewTransactionReviewStory,
 } from './safenetTxFlowStories'
 
 export default {
@@ -12,6 +11,7 @@ export default {
 }
 
 export const ConfirmTransaction = withAccess(ConfirmSimulatingStory, 'no-plan')
-export const NewTokenTransferReview = withAccess(NewTokenTransferReviewStory, 'no-plan')
-
-export const NewNativeTransferReview = withAccess(NewNativeTransferReviewStory, 'no-plan')
+export const NewTransactionReview = {
+  ...withAccess(NewTransactionReviewStory, 'no-plan'),
+  name: 'New transaction review',
+}
