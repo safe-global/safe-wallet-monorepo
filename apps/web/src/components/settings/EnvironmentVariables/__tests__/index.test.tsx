@@ -1,4 +1,4 @@
-import { fireEvent, waitFor, screen, render as rtlRender } from '@testing-library/react'
+import { fireEvent, waitFor, screen, within, render as rtlRender } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
@@ -62,6 +62,7 @@ describe('EnvironmentVariables', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false, spaceId: null })
   })
 
   afterEach(() => {
@@ -276,7 +277,7 @@ describe('EnvironmentVariables', () => {
   })
 
   it('hides the plans link for Safe Pro users', () => {
-    mockUseSafeProAccess.mockReturnValueOnce({ hasProFeatures: true, isLoading: false, spaceId: 'space-1' })
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false, spaceId: 'space-1' })
     render(<EnvironmentVariables />, {
       initialReduxState: {
         settings: {
@@ -346,7 +347,8 @@ describe('EnvironmentVariables', () => {
     fireEvent.change(tenderlyUrlInput, { target: { value: 'https://dashboard.tenderly.co/my-org/my-project' } })
     await screen.findByText('This is not a Simulation API URL. Copy it from your Tenderly project.')
 
-    fireEvent.click(screen.getByLabelText('Reset to default value'))
+    const urlGroup = tenderlyUrlInput.closest('[data-slot="input-group"]') as HTMLElement
+    fireEvent.click(within(urlGroup).getByRole('button', { name: 'Reset to default value' }))
 
     await waitFor(() => {
       expect(

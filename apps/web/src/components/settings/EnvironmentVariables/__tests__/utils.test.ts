@@ -1,4 +1,4 @@
-import { isTenderlySimulateUrl } from '../utils'
+import { isTenderlySimulateUrl, TENDERLY_SIMULATE_URL_PLACEHOLDER } from '../utils'
 
 describe('isTenderlySimulateUrl', () => {
   it('accepts a Simulation API URL', () => {
@@ -23,6 +23,10 @@ describe('isTenderlySimulateUrl', () => {
     expect(isTenderlySimulateUrl('https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate/')).toBe(
       false,
     )
+  })
+
+  it('accepts the placeholder, whose slug braces survive URL parsing as percent-encoded path segments', () => {
+    expect(isTenderlySimulateUrl(TENDERLY_SIMULATE_URL_PLACEHOLDER)).toBe(true)
   })
 
   it('rejects values that are not URLs', () => {
