@@ -390,6 +390,8 @@ describe('Topbar', () => {
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
       expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
       expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
+      // Unlike the safe bar, this variant does not reorder — see the wrap-shape test below.
+      expect(context.className).not.toMatch(/order-last/)
       // This variant keeps the FIXED height: the search input sizes itself with `h-full`, which
       // needs a definite parent — a min-height would leave it collapsed to its content.
       expect(context.className).toContain(SEARCH_CONTEXT_HEIGHT)
@@ -409,6 +411,19 @@ describe('Topbar', () => {
       // Repeating it on the actions set the painted card's *width* to the whole row, leaving its
       // chips at the left of a wide empty white area.
       expect(actions.className).not.toContain('basis-full')
+    })
+
+    it('leaves the search in DOM order so it does not flip sides as the row wraps', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces')
+
+      const { context } = groups(render(<Topbar />).container)
+
+      // The search is already first in the DOM, so it keeps the top row when the pair wraps on its
+      // own. Reordering it only moved it below the actions once the threshold fired, which read as
+      // the search jumping above and below while resizing.
+      expect(context.className).not.toMatch(/order-last/)
+      expect(context.className).toContain('basis-full')
     })
 
     it('stacks the account card above the context with both rows on the left edge', () => {

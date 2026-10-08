@@ -34,7 +34,7 @@ import { cn } from '@/utils/cn'
 
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
-export const SEARCH_CONTEXT_WRAP = '@max-[660px]:order-last @max-[660px]:basis-full'
+export const SEARCH_CONTEXT_WRAP = '@max-[660px]:basis-full'
 export const SAFE_BAR_CONTEXT_WRAP = '@max-[1150px]:order-last @max-[1150px]:basis-full'
 
 interface TopbarProps {
