@@ -2,8 +2,12 @@ import { useContext, useState, type ReactElement, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import InfoIcon from '@/public/images/notifications/info.svg'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+// eslint-disable-next-line no-restricted-imports -- shared locked row stays inside this lazy feature chunk
+import { LockedCheckRow } from '@/features/safe-shield/components/LockedCheckRow'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
@@ -15,7 +19,6 @@ import {
   PRE_CHECK_COPY,
   resolvePresentation,
   SAFENET_ABOUT,
-  SAFENET_BLURB,
   STALE_NOTE,
 } from '../statusPresentation'
 import { formatFlaggedCount, summariseRejection, type RejectionSummary } from '../summariseRejection'
@@ -32,9 +35,27 @@ export type SafenetChecksSectionViewProps = {
   submittedAt?: number
   /** A new transaction, before any check exists. `executeNow`: it executes in the same click as the signature. */
   preCheck?: PreCheckKind
+  locked?: boolean
 }
 
 export type PreCheckKind = 'multisig' | 'single' | 'executeNow'
+
+const EducationCopy = ({ kind }: { kind?: PreCheckKind }): ReactElement => (
+  <>
+    {SAFENET_ABOUT} {kind && PRE_CHECK_COPY[kind]} <SafenetLearnMore />
+  </>
+)
+
+const EducationTooltip = ({ kind }: { kind?: PreCheckKind }): ReactElement => (
+  <Tooltip>
+    <TooltipTrigger render={<span className="inline-flex" tabIndex={0} />} aria-label="About Safenet">
+      <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+    </TooltipTrigger>
+    <TooltipContent className="text-center">
+      <EducationCopy kind={kind} />
+    </TooltipContent>
+  </Tooltip>
+)
 
 /** Same collapsible row as the other Copilot checks: icon and "Safenet", then the details on expand. */
 const SectionRow = ({
@@ -68,24 +89,24 @@ const SectionRow = ({
         {announcement}
       </span>
 
-      <CollapsibleTrigger
-        nativeButton={false}
-        render={<div className="flex cursor-pointer flex-row items-center justify-between gap-2 p-3" />}
-      >
-        <div className="flex flex-row items-center gap-2">
-          {icon}
-          <Typography
-            variant="paragraph-small"
-            className="text-[var(--color-primary-light)]"
-            data-testid="safenet-section-label"
-          >
-            Safenet
-          </Typography>
-        </div>
+      <div className="relative flex items-center gap-2 p-3">
+        <CollapsibleTrigger aria-label="Safenet" className="absolute inset-0 cursor-pointer" />
+        <span className="pointer-events-none inline-flex">{icon}</span>
+        <Typography
+          variant="paragraph-small"
+          className="pointer-events-none text-[var(--color-primary-light)]"
+          data-testid="safenet-section-label"
+        >
+          Safenet
+        </Typography>
+        <span className="relative inline-flex items-center">
+          <EducationTooltip />
+        </span>
         <ChevronDown
-          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          aria-hidden
+          className={`pointer-events-none ml-auto size-4 text-[var(--color-text-secondary)] transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
-      </CollapsibleTrigger>
+      </div>
 
       <CollapsibleContent keepMounted>
         <div className="flex flex-col gap-2 px-3 pt-1 pb-4">{children}</div>
@@ -95,17 +116,24 @@ const SectionRow = ({
 }
 
 const PreCheck = ({ kind }: { kind: PreCheckKind }): ReactElement => (
-  <SectionRow
-    icon={<SeverityIcon severity={Severity.INFO} muted width={16} height={16} />}
-    announcement="Safenet checks this transaction after you sign"
-    status="PRE_CHECK"
-    reason={kind}
-    defaultOpen
+  <div
+    data-testid="safenet-checks-section"
+    data-status="PRE_CHECK"
+    data-reason={kind}
+    className="flex items-center gap-2 p-3"
   >
-    <SafenetBlock>
-      {SAFENET_ABOUT} {PRE_CHECK_COPY[kind]} <SafenetLearnMore />
-    </SafenetBlock>
-  </SectionRow>
+    <span role="status" aria-live="polite" className="sr-only">
+      Safenet checks this transaction after you sign
+    </span>
+    <Typography
+      variant="paragraph-small"
+      className="text-[var(--color-primary-light)]"
+      data-testid="safenet-section-label"
+    >
+      Safenet
+    </Typography>
+    <EducationTooltip kind={kind} />
+  </div>
 )
 
 const RejectionReasons = ({ summary }: { summary: RejectionSummary }): ReactElement => (
@@ -149,9 +177,18 @@ export const SafenetChecksSectionView = ({
   chainId,
   submittedAt,
   preCheck,
+  locked = false,
 }: SafenetChecksSectionViewProps): ReactElement | null => {
   const { publicStatus, snapshot, unavailableReason, isStale } = check
   const links = useSafenetLinks(publicStatus, snapshot, chainId, safeTxHash ?? '')
+
+  if (locked) {
+    return (
+      <LockedCheckRow data-testid="safenet-checks-locked" tooltip={<EducationCopy kind={preCheck ?? 'multisig'} />}>
+        Safenet check
+      </LockedCheckRow>
+    )
+  }
 
   if (preCheck) return <PreCheck kind={preCheck} />
 
@@ -163,8 +200,6 @@ export const SafenetChecksSectionView = ({
   const summary = isRisk && snapshot ? summariseRejection(snapshot.events) : null
   const flaggedCount = summary ? formatFlaggedCount(summary) : null
   const title = summary ? maliciousTitle(summary, content.label) : content.label
-  // The title already says the result here, so the block explains Safenet instead of repeating it.
-  const showBlurb = publicStatus === CheckStatus.BENIGN || publicStatus === CheckStatus.IN_PROGRESS
   const showsExplorerLink =
     !!safeTxHash && (isRisk || unavailableReason === 'READ_FAILED' || unavailableReason === 'WINDOW_UNCERTAIN')
   const blockSeverity = content.muted ? undefined : content.severity
@@ -195,7 +230,7 @@ export const SafenetChecksSectionView = ({
           <span data-testid="safenet-flagged-count">{flaggedCount}</span>
         ) : (
           <>
-            {showBlurb ? SAFENET_BLURB : content.copy}
+            {content.copy}
             {flaggedCount && (
               <>
                 {' '}
@@ -203,8 +238,7 @@ export const SafenetChecksSectionView = ({
               </>
             )}
           </>
-        )}{' '}
-        <SafenetLearnMore />
+        )}
         {isStale && isInFlight && (
           <>
             <br />
@@ -235,10 +269,10 @@ export const SafenetChecksSectionView = ({
 }
 
 /** Reads once a proposed transaction's submission time is known; a new transaction gets the pre-check note. */
-export const SafenetChecksSection = (): ReactElement | null => {
+export const SafenetChecksSection = ({ locked = false }: { locked?: boolean } = {}): ReactElement | null => {
   const { txId, isCreation, isProposing, willExecute, txLayoutProps } = useContext(TxFlowContext)
   const { safe } = useSafeInfo()
-  const { safeTxHash, submittedAt, check } = useFlowSafenetCheck()
+  const { safeTxHash, submittedAt, check } = useFlowSafenetCheck(!locked)
 
   const isNewTransaction = !txId && !!isCreation && !isProposing && !txLayoutProps?.isMessage
   const preCheck: PreCheckKind | undefined = !isNewTransaction
@@ -256,6 +290,7 @@ export const SafenetChecksSection = (): ReactElement | null => {
       chainId={safe.chainId}
       submittedAt={submittedAt}
       preCheck={preCheck}
+      locked={locked}
     />
   )
 }

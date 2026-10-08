@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { ExternalLinkIcon } from '@/components/common/ExternalLink/ExternalLinkIcon'
 import { Typography } from '@/components/ui/typography'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'

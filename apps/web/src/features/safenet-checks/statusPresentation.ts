@@ -79,10 +79,9 @@ export const SAFENET_ABOUT =
   "Independent sentinels simulate this transaction and check it against Safenet's security rules."
 
 export const PRE_CHECK_COPY = {
-  multisig: 'The check starts after you sign and takes about a minute. The next signer will see the result.',
-  single: "The check starts after you sign and takes about a minute. Execute from the queue once it's in.",
-  executeNow:
-    'The check starts after you sign and takes about a minute. Choose "No, later" to see the result before executing.',
+  multisig: 'The check starts after you sign. The next signer will see the result.',
+  single: "The check starts after you sign. Execute from the queue once it's in.",
+  executeNow: 'The check starts after you sign. Choose "No, later" to see the result before executing.',
 }
 
 /** Compact queue-chip labels; the full state name stays in the tooltip and screen-reader copy. */

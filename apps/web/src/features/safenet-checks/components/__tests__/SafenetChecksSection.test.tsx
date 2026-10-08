@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
@@ -36,7 +36,7 @@ const txDetails = {
 } as unknown as TransactionDetails
 
 const renderInFlow = (flow: Partial<TxFlowContextType>) =>
-  render(
+  renderWithUserEvent(
     <TxFlowContext.Provider value={flow as TxFlowContextType}>
       <SafenetChecksSection />
     </TxFlowContext.Provider>,
@@ -158,21 +158,80 @@ describe('SafenetChecksSection', () => {
 
   it.each<[Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string]>([
     [CheckStatus.SUBMITTED, 'Submitted to Safenet. Takes about a minute.'],
-    [CheckStatus.IN_PROGRESS, 'Independent sentinels simulate each transaction and check it for known risks.'],
-    [CheckStatus.BENIGN, 'Independent sentinels simulate each transaction and check it for known risks.'],
+    [CheckStatus.IN_PROGRESS, 'Safenet is simulating this transaction.'],
+    [CheckStatus.BENIGN, 'Safenet found no issues.'],
     [CheckStatus.MALICIOUS, 'Safenet flagged this transaction as malicious.'],
     [CheckStatus.TIMED_OUT, "Safenet couldn't reach a trusted result for this transaction. You can still continue."],
-  ])('renders %s copy', (status, copy) => {
+  ])('preserves %s results and offers separate general education', async (status, copy) => {
     const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status })
     mockUseSafenetCheck.mockReturnValue(buildCheckView({ snapshot, status, publicStatus: status }))
 
-    renderInFlow({ txId: TX_ID, txDetails })
+    const { user } = renderInFlow({ txId: TX_ID, txDetails })
 
     const section = screen.getByTestId('safenet-checks-section')
     expect(section).toHaveAttribute('data-status', status)
     expect(screen.getByTestId('safenet-section-label')).toHaveTextContent('Safenet')
     expect(section).toHaveTextContent(copy)
-    expect(screen.getByTestId('safenet-about-link')).toHaveTextContent('Learn more')
+    expect(section).not.toHaveTextContent('Independent sentinels')
+    expect(screen.queryByRole('link', { name: /Learn more/ })).not.toBeInTheDocument()
+    const trigger = screen.getByLabelText('About Safenet')
+    expect(trigger.closest('[data-slot=collapsible-trigger]')).toBeNull()
+    await user.hover(trigger)
+    const tooltip = (await screen.findByRole('link', { name: /Learn more/ })).closest('[data-slot=tooltip-content]')
+    expect(tooltip).toHaveTextContent(
+      "Independent sentinels simulate this transaction and check it against Safenet's security rules.",
+    )
+    expect(section).toHaveTextContent(copy)
+  })
+
+  it('keeps the check locked and shows education only when its information icon receives focus', async () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView())
+
+    const { container, user } = renderWithUserEvent(
+      <TxFlowContext.Provider value={{ txId: TX_ID, txDetails } as TxFlowContextType}>
+        <SafenetChecksSection locked />
+      </TxFlowContext.Provider>,
+    )
+
+    const section = screen.getByTestId('safenet-checks-locked')
+    expect(mockUseSafenetCheck).toHaveBeenCalledWith(undefined, SUBMITTED_AT, expect.objectContaining({ chainId: '1' }))
+    expect(container.querySelector('.lucide-lock-keyhole')).toBeInTheDocument()
+    expect(section).toHaveTextContent('Safenet check')
+    expect(screen.queryByRole('link', { name: /Learn more/ })).not.toBeInTheDocument()
+    await user.tab()
+    expect(screen.getByLabelText('About Safenet check')).toHaveFocus()
+    const tooltip = (await screen.findByRole('link', { name: /Learn more/ })).closest('[data-slot=tooltip-content]')
+    expect(tooltip).toHaveTextContent(
+      "Independent sentinels simulate this transaction and check it against Safenet's security rules.",
+    )
+    expect(tooltip).toHaveTextContent('The check starts after you sign. The next signer will see the result.')
+    expect(tooltip).not.toHaveTextContent('takes about a minute')
+    expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
+      'href',
+      'https://docs.safefoundation.org/safenet',
+    )
+    expect(screen.queryByTestId('safenet-checks-section')).not.toBeInTheDocument()
+  })
+
+  it('keeps result expansion and adjacent education independently accessible by keyboard', async () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.BENIGN })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
+    )
+    const { user } = renderInFlow({ txId: TX_ID, txDetails })
+    const toggle = screen.getByRole('button', { name: 'Safenet' })
+
+    await user.tab()
+    expect(toggle).toHaveFocus()
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await user.keyboard('{Enter}')
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    await user.tab()
+    expect(screen.getByLabelText('About Safenet')).toHaveFocus()
+    const link = await screen.findByRole('link', { name: /Learn more/ })
+    await user.tab()
+    expect(link).toHaveFocus()
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
   })
 
   it('announces status changes politely', () => {
@@ -277,32 +336,39 @@ describe('SafenetChecksSection', () => {
   describe('before the first signature', () => {
     const creationFlow = { isCreation: true, isProposing: false, willExecute: false, txLayoutProps: {} }
 
-    it('explains in one line when the check runs', () => {
+    it('keeps pre-check education in a keyboard-accessible tooltip', async () => {
       mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
-      renderInFlow(creationFlow)
+      const { user } = renderInFlow(creationFlow)
 
       const section = screen.getByTestId('safenet-checks-section')
       expect(section).toHaveAttribute('data-status', 'PRE_CHECK')
-      expect(section).toHaveTextContent(
-        "Independent sentinels simulate this transaction and check it against Safenet's",
+      expect(section).not.toHaveTextContent('Independent sentinels')
+      expect(screen.queryByRole('link', { name: /Learn more/ })).not.toBeInTheDocument()
+      expect(section.querySelector('[data-slot=collapsible-trigger]')).toBeNull()
+      await user.tab()
+      expect(screen.getByLabelText('About Safenet')).toHaveFocus()
+      const link = await screen.findByRole('link', { name: /Learn more/ })
+      const tooltip = link.closest('[data-slot=tooltip-content]')
+      expect(tooltip).toHaveTextContent(
+        "Independent sentinels simulate this transaction and check it against Safenet's security rules.",
       )
-      expect(section).toHaveTextContent('The check starts after you sign and takes about a minute.')
-      expect(section).toHaveTextContent('The next signer will see the result.')
-      expect(screen.getByRole('link', { name: /Learn more/ })).toHaveAttribute(
-        'href',
-        'https://docs.safefoundation.org/safenet',
-      )
+      expect(tooltip).toHaveTextContent('The check starts after you sign. The next signer will see the result.')
+      expect(tooltip).not.toHaveTextContent('takes about a minute')
+      expect(link).toHaveAttribute('href', 'https://docs.safefoundation.org/safenet')
+      await user.tab()
+      expect(link).toHaveFocus()
     })
 
-    it('tells a signer who executes in the same click how to see the result first', () => {
+    it('tells a signer who executes in the same click how to see the result first', async () => {
       mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
-      renderInFlow({ ...creationFlow, willExecute: true })
+      const { user } = renderInFlow({ ...creationFlow, willExecute: true })
 
-      const section = screen.getByTestId('safenet-checks-section')
-      expect(section).toHaveAttribute('data-reason', 'executeNow')
-      expect(section).toHaveTextContent('Choose "No, later" to see the result before executing.')
+      expect(screen.getByTestId('safenet-checks-section')).toHaveAttribute('data-reason', 'executeNow')
+      await user.hover(screen.getByLabelText('About Safenet'))
+      const tooltip = (await screen.findByRole('link', { name: /Learn more/ })).closest('[data-slot=tooltip-content]')
+      expect(tooltip).toHaveTextContent('Choose "No, later" to see the result before executing.')
     })
 
     it.each([

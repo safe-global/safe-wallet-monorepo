@@ -2,6 +2,7 @@ import { useContext } from 'react'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
+import ExternalLink from '@/components/common/ExternalLink'
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useTopbarElevation: jest.fn(),
@@ -197,4 +198,31 @@ describe('TxModalProvider navigation gate', () => {
     expect(screen.getByText(FLOW_TEXT)).toBeInTheDocument()
     expect(push).not.toHaveBeenCalled()
   })
+})
+
+it('uses plain outbound arrows only within the transaction dialog', async () => {
+  const user = userEvent.setup()
+  const ExternalLinkOpener = () => {
+    const { setTxFlow } = useContext(TxModalContext)
+    return (
+      <button
+        onClick={() => setTxFlow(<ExternalLink href="https://example.com">Flow link</ExternalLink>, undefined, false)}
+      >
+        open
+      </button>
+    )
+  }
+  render(
+    <TxModalProvider>
+      <ExternalLinkOpener />
+      <ExternalLink href="https://example.com">Page link</ExternalLink>
+    </TxModalProvider>,
+  )
+
+  await user.click(screen.getByRole('button', { name: 'open' }))
+
+  const flowLink = await screen.findByText('Flow link')
+  expect(flowLink.querySelector('.lucide-arrow-up-right')).toBeInTheDocument()
+  expect(flowLink.querySelector('.lucide-external-link')).not.toBeInTheDocument()
+  expect(screen.getByText('Page link').querySelector('.lucide-external-link')).toBeInTheDocument()
 })

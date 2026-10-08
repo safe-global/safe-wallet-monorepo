@@ -1,4 +1,5 @@
 import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
+import { PlainExternalLinkIcons } from '@/components/common/ExternalLink/ExternalLinkIcon'
 import TxModalDialog from '@/components/common/TxModalDialog'
 import {
   AlertDialog,
@@ -118,7 +119,7 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       {children}
 
       <TxModalDialog open={!!txFlow} onClose={handleModalClose} fullWidth={fullWidth}>
-        {txFlow}
+        <PlainExternalLinkIcons>{txFlow}</PlainExternalLinkIcons>
       </TxModalDialog>
 
       <AlertDialog

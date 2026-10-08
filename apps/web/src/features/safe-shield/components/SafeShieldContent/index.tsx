@@ -159,9 +159,6 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          {/* Without SAFE_PRO there is no Pro block, so Safenet joins the open checks like the counterparty ones. */}
-          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
-
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
               safeTx={safeTx}
@@ -169,6 +166,9 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
+
+          {/* Safenet is the final check, including when the Pro rollout is off. */}
+          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
         </div>
 
         {showProSection && (
@@ -205,11 +205,7 @@ export const SafeShieldContent = ({
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
 
               {isSafenetEnabled &&
-                (hasProFeatures ? (
-                  <safenet.SafenetChecksSection />
-                ) : (
-                  <LockedCheckRow data-testid="safenet-checks-locked">Safenet check</LockedCheckRow>
-                ))}
+                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
             </div>
           </div>
         )}

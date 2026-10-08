@@ -2,14 +2,13 @@ import type { Preview } from '@storybook/nextjs-vite'
 import React, { useEffect } from 'react'
 
 import { initialize, mswLoader } from 'msw-storybook-addon'
+import { storybookSimulationHandler } from '../src/stories/mocks/tenderly'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from '../.storybook/shadcn'
 
 // Initialize MSW for API mocking in Storybook
-initialize({
-  onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-})
+initialize({ onUnhandledRequest: 'bypass' }, [storybookSimulationHandler])
 
 // Export decorators for use in individual stories
 // These are not applied globally but can be imported and used per-story
@@ -107,6 +106,14 @@ const preview: Preview = {
             'Spaces',
             'Static',
             ['Error', 'Legal', 'Handlers'],
+            'Safenet',
+            [
+              'Transaction flow - Active Pro plan',
+              'Transaction flow - No Plan',
+              'Transaction flow - Pro rollout off',
+              'Transaction detail',
+              'Queue',
+            ],
           ],
           'Components',
           'Features',

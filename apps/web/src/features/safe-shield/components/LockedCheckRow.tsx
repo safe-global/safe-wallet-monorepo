@@ -22,7 +22,10 @@ export const LockedCheckRow = ({
     </Typography>
     {tooltip && (
       <Tooltip>
-        <TooltipTrigger render={<span className="inline-flex" />}>
+        <TooltipTrigger
+          render={<span className="inline-flex" tabIndex={0} />}
+          aria-label={typeof children === 'string' ? `About ${children}` : 'More information'}
+        >
           <InfoIcon className="size-4 text-[var(--color-border-main)]" />
         </TooltipTrigger>
         <TooltipContent className="text-center">{tooltip}</TooltipContent>
