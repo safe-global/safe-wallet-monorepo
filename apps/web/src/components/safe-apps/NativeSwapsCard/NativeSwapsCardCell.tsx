@@ -1,5 +1,6 @@
 import NativeSwapsCard from './index'
 import { useNativeSwapsCard } from './useNativeSwapsCard'
+import { NativeSwapsCardCellView } from '@views/components/safe-apps/NativeSwapsCard/NativeSwapsCardView'
 
 // Owns the visibility decision and the `li`, so a hidden card leaves no empty grid cell.
 const NativeSwapsCardCell = () => {
@@ -8,9 +9,9 @@ const NativeSwapsCardCell = () => {
   if (!isVisible) return null
 
   return (
-    <li>
+    <NativeSwapsCardCellView>
       <NativeSwapsCard onDismiss={dismiss} />
-    </li>
+    </NativeSwapsCardCellView>
   )
 }
 

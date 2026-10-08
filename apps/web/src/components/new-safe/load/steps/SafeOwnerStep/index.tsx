@@ -1,15 +1,13 @@
 import React, { useEffect } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import useChainId from '@/hooks/useChainId'
 import type { NamedAddress } from '@/components/new-safe/create/types'
-import layoutCss from '@/components/new-safe/create/styles.module.css'
 import OwnerRow from '@/components/new-safe/OwnerRow'
+import { SafeOwnerStepView } from '@views/components/new-safe/load/steps/SafeOwnerStep/SafeOwnerStepView'
 
 enum Field {
   owners = 'owners',
@@ -64,24 +62,14 @@ const SafeOwnerStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormD
 
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className={layoutCss.row}>
-          {fields.map((field, index) => (
-            <OwnerRow key={field.id} index={index} groupName="owners" readOnly />
-          ))}
-        </div>
-        <Separator />
-        <div className={layoutCss.row}>
-          <div className="flex justify-between gap-2">
-            <Button type="button" variant="outline" size="lg" onClick={handleBack}>
-              Back
-            </Button>
-            <Button type="submit" size="lg" disabled={!isValid}>
-              Next
-            </Button>
-          </div>
-        </div>
-      </form>
+      <SafeOwnerStepView
+        onSubmit={handleSubmit(onSubmit)}
+        onBack={handleBack}
+        isValid={isValid}
+        ownerRows={fields.map((field, index) => (
+          <OwnerRow key={field.id} index={index} groupName={Field.owners} readOnly />
+        ))}
+      />
     </FormProvider>
   )
 }

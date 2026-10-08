@@ -1,6 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'
@@ -12,17 +9,13 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { EURCV_ASSET_ID } from '@/config/eurcv'
-import css from './styles.module.css'
 import { useSafeLinkQuery, type SafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import {
+  ExplorePossibleWidgetView,
+  type ExplorePossibleApp,
+} from '@views/components/dashboard/ExplorePossibleWidget/ExplorePossibleWidgetView'
 
-export type ExplorePossibleApp = {
-  id: string
-  title: string
-  subtitle?: string
-  badge?: string
-  iconUrl: string
-  link: string | UrlObject
-}
+export type { ExplorePossibleApp }
 
 const EXPLORE_POSSIBLE_CONFIG = [
   {
@@ -175,82 +168,16 @@ const ExplorePossibleWidget = () => {
   }
 
   return (
-    <section className="overflow-hidden rounded-xl bg-[var(--color-background-paper)] px-6 pb-3 pt-5">
-      <div style={{ position: 'relative' }}>
-        {/* Gradient fade on the right */}
-        <div
-          className={css.gradientFade}
-          style={{
-            background: `linear-gradient(to left, var(--color-background-paper), transparent)`,
-          }}
-          aria-hidden="true"
-        />
-
-        {/* Header with title and navigation */}
-        <div className={css.header}>
-          <h2 className={css.headerTitle}>Explore what&apos;s possible</h2>
-          {(canScrollLeft || canScrollRight) && (
-            <nav className={css.carouselNav} aria-label="Carousel navigation">
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Scroll to previous apps"
-                onClick={() => scrollList('left')}
-                disabled={!canScrollLeft}
-              >
-                <ChevronLeft className="size-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Scroll to next apps"
-                onClick={() => scrollList('right')}
-                disabled={!canScrollRight}
-              >
-                <ChevronRight className="size-5" />
-              </Button>
-            </nav>
-          )}
-        </div>
-
-        {/* Scrollable container */}
-        <ul
-          ref={scrollContainerRef}
-          onScroll={updateScrollState}
-          className={css.carouselContainer}
-          role="list"
-          aria-label="Explore possible features"
-          tabIndex={0}
-        >
-          {EXPLORE_POSSIBLE_APPS.map((app) => (
-            <li key={app.id} className={css.carouselItem}>
-              <Link
-                href={app.link}
-                className={css.cardLink}
-                onClick={() => handleAppClick(app.id, app.title)}
-                aria-label={app.subtitle ? `${app.title} ${app.badge} ${app.subtitle}` : app.title}
-              >
-                <div className={`${css.card} ${app.id === 'earn' ? css.earnCard : ''}`}>
-                  {/* Icon */}
-                  <div className={css.iconContainer}>
-                    <img src={app.iconUrl} alt={`${app.title} icon`} className={css.icon} />
-                  </div>
-
-                  {/* Title with optional badge and subtitle */}
-                  <div className={css.titleContainer}>
-                    <p className={css.title}>
-                      {app.title}
-                      {app.badge && <span className={css.badge}>{app.badge}</span>}
-                    </p>
-                    {app.subtitle && <p className={css.subtitle}>{app.subtitle}</p>}
-                  </div>
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <ExplorePossibleWidgetView
+      apps={EXPLORE_POSSIBLE_APPS}
+      listRef={scrollContainerRef}
+      canScrollLeft={canScrollLeft}
+      canScrollRight={canScrollRight}
+      onScrollLeft={() => scrollList('left')}
+      onScrollRight={() => scrollList('right')}
+      onListScroll={updateScrollState}
+      onAppClick={handleAppClick}
+    />
   )
 }
 

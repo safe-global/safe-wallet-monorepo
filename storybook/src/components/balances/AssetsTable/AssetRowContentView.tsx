@@ -1,0 +1,87 @@
+import type { ReactElement, ReactNode } from 'react'
+import { Link } from '@/components/ui/link'
+import { Typography } from '@/components/ui/typography'
+import TokenIcon from '@/components/common/TokenIcon'
+import TokenAmount from '@/components/common/TokenAmount'
+import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { FiatChange } from './FiatChange'
+import { FiatBalance } from './FiatBalance'
+import css from './styles.module.css'
+
+export type AssetRowContentViewProps = {
+  item: Balance
+  explorerLink: { href: string; title: string } | null
+  promoButtons: ReactNode
+  showMobileValue?: boolean
+  showMobileBalance?: boolean
+}
+
+export const AssetRowContentView = ({
+  item,
+  explorerLink,
+  promoButtons,
+  showMobileValue = false,
+  showMobileBalance = false,
+}: AssetRowContentViewProps): ReactElement => {
+  return (
+    <div className={css.mobileAssetRow}>
+      <div className={css.token}>
+        <TokenIcon logoUri={item.tokenInfo.logoUri} tokenSymbol={item.tokenInfo.symbol} size={32} />
+
+        <div className="flex flex-col">
+          <span className="inline-flex items-center gap-2">
+            {explorerLink ? (
+              <Link
+                data-testid="token-name"
+                href={explorerLink.href}
+                target="_blank"
+                rel="noreferrer"
+                title={explorerLink.title}
+                variant="inherit"
+                className="cursor-pointer font-bold text-[var(--color-text-primary)] no-underline hover:text-[var(--color-primary-main)] hover:underline"
+              >
+                {item.tokenInfo.name}
+              </Link>
+            ) : (
+              <Typography data-testid="token-name" variant="paragraph" className="font-bold">
+                {item.tokenInfo.name}
+              </Typography>
+            )}
+            {promoButtons}
+          </span>
+          {showMobileBalance && (
+            <Typography
+              variant="paragraph-small"
+              className={`font-normal text-[var(--color-primary-light)] ${css.mobileBalance}`}
+            >
+              <TokenAmount
+                value={item.balance}
+                decimals={item.tokenInfo.decimals}
+                tokenSymbol={item.tokenInfo.symbol}
+              />
+            </Typography>
+          )}
+          <Typography
+            variant="paragraph-small"
+            className={`text-[13px] text-[var(--color-primary-light)] ${css.desktopSymbol}`}
+            data-testid="token-symbol"
+          >
+            {item.tokenInfo.symbol}
+          </Typography>
+        </div>
+      </div>
+      {showMobileValue && (
+        <div className={css.mobileValue}>
+          <Typography variant="paragraph" as="div">
+            <FiatBalance balanceItem={item} />
+          </Typography>
+          {item.fiatBalance24hChange && (
+            <Typography variant="paragraph-mini">
+              <FiatChange balanceItem={item} inline />
+            </Typography>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}

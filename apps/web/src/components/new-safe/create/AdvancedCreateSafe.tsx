@@ -1,6 +1,5 @@
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { Typography } from '@/components/ui/typography'
 import { useRouter } from 'next/router'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -20,6 +19,7 @@ import { type NewSafeFormData } from '.'
 import AdvancedOptionsStep from './steps/AdvancedOptionsStep'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { AdvancedCreateSafeView } from '@views/components/new-safe/create/AdvancedCreateSafeView'
 
 const AdvancedCreateSafe = () => {
   const router = useRouter()
@@ -100,9 +100,7 @@ const AdvancedCreateSafe = () => {
     threshold: 1,
     saltNonce: 0,
     safeVersion: getLatestSafeVersion(chain),
-    // Checksummed because the advanced step validates this field with `validateAddress`, which
-    // rejects a non-checksummed address. NEXT_PUBLIC_ECOSYSTEM_ID_ADDRESS is injected per
-    // environment, so a lowercase value would otherwise open the step already-invalid.
+    // Checksummed: the advanced step's `validateAddress` rejects the lowercase per-env value
     paymentReceiver: checksumAddress(ECOSYSTEM_ID_ADDRESS),
   }
 
@@ -111,32 +109,22 @@ const AdvancedCreateSafe = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] px-4">
-      <div className="mt-4 grid grid-cols-12 justify-center gap-x-6 md:mt-14">
-        <div className="col-span-12">
-          <Typography variant="h2" className="pb-4">
-            Create new Safe account
-          </Typography>
-        </div>
-        <div className="order-1 col-span-12 md:order-0 md:col-span-8">
-          <CardStepper
-            initialData={initialData}
-            initialStep={initialStep}
-            onClose={onClose}
-            steps={CreateSafeSteps}
-            eventCategory={CREATE_SAFE_CATEGORY}
-            setWidgetStep={setActiveStep}
-          />
-        </div>
-
-        <div className="order-0 col-span-12 mb-6 md:order-1 md:col-span-4 md:mb-0">
-          <div className="grid grid-cols-12 gap-6">
-            {activeStep < 2 && <OverviewWidget safeName={safeName} networks={[]} />}
-            {wallet?.address && <CreateSafeInfos dynamicHint={dynamicHint} />}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AdvancedCreateSafeView
+      stepper={
+        <CardStepper
+          initialData={initialData}
+          initialStep={initialStep}
+          onClose={onClose}
+          steps={CreateSafeSteps}
+          eventCategory={CREATE_SAFE_CATEGORY}
+          setWidgetStep={setActiveStep}
+        />
+      }
+      showOverview={activeStep < 2}
+      overviewWidget={<OverviewWidget safeName={safeName} networks={[]} />}
+      walletAddress={wallet?.address}
+      createSafeInfos={<CreateSafeInfos dynamicHint={dynamicHint} />}
+    />
   )
 }
 

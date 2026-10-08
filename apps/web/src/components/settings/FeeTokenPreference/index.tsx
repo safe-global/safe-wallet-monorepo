@@ -1,11 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { XIcon } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
@@ -15,11 +8,10 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { Interface } from 'ethers'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { isWalletRejection } from '@/utils/wallets'
 import { didRevert, didReprice, type EthersError } from '@/utils/ethers-utils'
 import type { Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import SettingsCard from '@/components/settings/SettingsCard'
+import { FeeTokenPreferenceView } from '@views/components/settings/FeeTokenPreference/FeeTokenPreferenceView'
 
 // TODO: move to external source to prevent code edits
 const TEMPO_FEE_TOKENS = [
@@ -248,85 +240,21 @@ export const FeeTokenPreference = () => {
   const loading = loadingBalances || loadingPreference
 
   return (
-    <SettingsCard title="Fee token preference" data-testid="fee-token-preference-section" className="mt-4">
-      {wallet ? (
-        <div>
-          <Typography className="mb-6">
-            Select your preferred token for paying transaction fees on Tempo. This preference will be used for all
-            future transactions for the connected wallet.
-          </Typography>
-
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertSeverityIcon variant="destructive" />
-              <AlertDescription>{error}</AlertDescription>
-              <AlertAction>
-                <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setError(undefined)}>
-                  <XIcon />
-                </Button>
-              </AlertAction>
-            </Alert>
-          )}
-
-          {success && (
-            <Alert variant="success" className="mb-4">
-              <AlertSeverityIcon variant="success" />
-              <AlertDescription>Fee token preference updated successfully!</AlertDescription>
-              <AlertAction>
-                <Button variant="ghost" size="icon-xs" aria-label="Dismiss" onClick={() => setSuccess(false)}>
-                  <XIcon />
-                </Button>
-              </AlertAction>
-            </Alert>
-          )}
-
-          <div className="mb-4 flex flex-col gap-1.5">
-            <Label htmlFor="fee-token">Fee token</Label>
-            <Select
-              value={loading ? null : selectedToken || null}
-              onValueChange={(value) => {
-                setSelectedToken(value as `0x${string}`)
-                setSuccess(false)
-              }}
-              disabled={loading || saving}
-            >
-              <SelectTrigger id="fee-token" className="w-full">
-                {loading && <Spinner className="size-5" />}
-                <SelectValue placeholder={loading ? 'Loading...' : 'Fee token'} />
-              </SelectTrigger>
-              <SelectContent>
-                {tokenOptions.map((token) => {
-                  const balanceStr = formatVisualAmount(token.balance.toString(), token.decimals)
-
-                  return (
-                    <SelectItem key={token.address} value={token.address}>
-                      <div className="flex w-full justify-between">
-                        <Typography>{token.name}</Typography>
-                        <Typography variant="paragraph-small" className="text-muted-foreground">
-                          Balance: {balanceStr}
-                        </Typography>
-                      </div>
-                    </SelectItem>
-                  )
-                })}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button onClick={handleSave} disabled={!selectedToken || saving || loading}>
-            {saving ? (
-              <>
-                <Spinner className="mr-1 size-4" />
-                Saving...
-              </>
-            ) : (
-              'Save preference'
-            )}
-          </Button>
-        </div>
-      ) : (
-        <Typography>Please connect your wallet to configure fee token preference.</Typography>
-      )}
-    </SettingsCard>
+    <FeeTokenPreferenceView
+      hasWallet={!!wallet}
+      error={error}
+      onDismissError={() => setError(undefined)}
+      success={success}
+      onDismissSuccess={() => setSuccess(false)}
+      loading={loading}
+      saving={saving}
+      selectedToken={selectedToken}
+      onSelectToken={(value) => {
+        setSelectedToken(value as `0x${string}`)
+        setSuccess(false)
+      }}
+      tokenOptions={tokenOptions}
+      onSave={handleSave}
+    />
   )
 }

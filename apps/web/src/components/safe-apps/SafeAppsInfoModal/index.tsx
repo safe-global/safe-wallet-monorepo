@@ -1,8 +1,4 @@
 import { memo, type ReactElement, useMemo, useState } from 'react'
-import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
-
-import { cn } from '@/utils/cn'
-import { ProgressTrack, ProgressIndicator } from '@/components/ui/progress'
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
 import Slider from './Slider'
 import AllowedFeaturesList from './AllowedFeaturesList'
@@ -11,6 +7,7 @@ import { PermissionStatus } from '@views/components/safe-apps/types'
 import UnknownAppWarning from '@views/components/safe-apps/SafeAppsInfoModal/UnknownAppWarning'
 import { getOrigin } from '../utils'
 import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
+import { SafeAppsInfoModalView } from '@views/components/safe-apps/SafeAppsInfoModal/SafeAppsInfoModalView'
 
 type SafeAppsInfoModalProps = {
   onCancel: () => void
@@ -115,41 +112,22 @@ const SafeAppsInfoModal = ({
   const origin = useMemo(() => getOrigin(appUrl), [appUrl])
 
   return (
-    <div className="flex h-[calc(100vh-52px)] flex-col items-center justify-center p-4">
-      <div
-        data-testid="app-info-modal"
-        className="flex max-h-full w-[450px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
-      >
-        {totalSlides > 1 && (
-          <ProgressPrimitive.Root value={progressValue} className="block shrink-0">
-            <ProgressTrack className="h-1.5 rounded-none bg-muted">
-              <ProgressIndicator
-                className={cn(
-                  'rounded-lg',
-                  progressValue === 100 && shouldShowUnknownAppWarning
-                    ? 'bg-[var(--color-warning-main)]'
-                    : 'bg-[var(--color-primary-main)]',
-                )}
-              />
-            </ProgressTrack>
-          </ProgressPrimitive.Root>
-        )}
-        <div className="flex min-h-0 flex-auto flex-col p-6 text-center">
-          <Slider onSlideChange={handleSlideChange}>
-            {!isConsentAccepted && <LegalDisclaimerContent />}
+    <SafeAppsInfoModalView
+      showProgress={totalSlides > 1}
+      progressValue={progressValue}
+      isWarningProgress={progressValue === 100 && shouldShowUnknownAppWarning}
+      slider={
+        <Slider onSlideChange={handleSlideChange}>
+          {!isConsentAccepted && <LegalDisclaimerContent />}
 
-            {!isPermissionsReviewCompleted && (
-              <AllowedFeaturesList
-                features={selectedFeatures}
-                onFeatureSelectionChange={handleFeatureSelectionChange}
-              />
-            )}
+          {!isPermissionsReviewCompleted && (
+            <AllowedFeaturesList features={selectedFeatures} onFeatureSelectionChange={handleFeatureSelectionChange} />
+          )}
 
-            {shouldShowUnknownAppWarning && <UnknownAppWarning url={origin} onHideWarning={setHideWarning} />}
-          </Slider>
-        </div>
-      </div>
-    </div>
+          {shouldShowUnknownAppWarning && <UnknownAppWarning url={origin} onHideWarning={setHideWarning} />}
+        </Slider>
+      }
+    />
   )
 }
 

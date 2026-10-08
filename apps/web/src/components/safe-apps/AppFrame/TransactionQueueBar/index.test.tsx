@@ -65,7 +65,13 @@ const renderBar = (expanded: boolean, setExpanded = jest.fn()) => {
 }
 
 const getDeclaration = (className: string, prop: string): string | undefined => {
-  const css = readFileSync(join(__dirname, 'styles.module.css'), 'utf-8')
+  const css = readFileSync(
+    join(
+      __dirname,
+      '../../../../../../../storybook/src/components/safe-apps/AppFrame/TransactionQueueBar/styles.module.css',
+    ),
+    'utf-8',
+  )
   const rule = new RegExp(`\\.${className}\\s*\\{([^}]*)\\}`).exec(css)?.[1]
 
   return rule ? new RegExp(`(?<![\\w-])${prop}:\\s*([^;]+)`).exec(rule)?.[1].trim() : undefined

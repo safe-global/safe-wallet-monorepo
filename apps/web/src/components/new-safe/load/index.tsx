@@ -2,7 +2,6 @@ import React from 'react'
 import { useRouter } from 'next/router'
 
 import { LOAD_SAFE_CATEGORY } from '@/services/analytics'
-import { Typography } from '@/components/ui/typography'
 import { CardStepper } from '@/components/new-safe/CardStepper'
 import type { TxStepperProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NamedAddress } from '@/components/new-safe/create/types'
@@ -10,6 +9,7 @@ import SetAddressStep from '@/components/new-safe/load/steps/SetAddressStep'
 import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import SafeOwnerStep from '@/components/new-safe/load/steps/SafeOwnerStep'
 import SafeReviewStep from '@/components/new-safe/load/steps/SafeReviewStep'
+import { LoadView } from '@views/components/new-safe/load/LoadView'
 
 export type LoadSafeFormData = NamedAddress & {
   threshold: number
@@ -52,25 +52,18 @@ const LoadSafe = ({ initialData }: { initialData?: TxStepperProps<LoadSafeFormDa
   const initialSafe = initialData ?? loadSafeDefaultData
 
   return (
-    <div data-testid="load-safe-form" className="mx-auto w-full max-w-[1200px] px-4 sm:px-6">
-      <div className="grid grid-cols-12 gap-x-6">
-        <div className="col-span-12 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3">
-          <Typography variant="h2" className="pb-4">
-            Add existing Safe account
-          </Typography>
-        </div>
-        <div className="order-1 col-span-12 md:order-0 md:col-span-10 md:col-start-2 lg:col-span-8 lg:col-start-3">
-          <CardStepper
-            // Populate initial data
-            key={initialSafe.address}
-            initialData={initialSafe}
-            onClose={onClose}
-            steps={LoadSafeSteps}
-            eventCategory={LOAD_SAFE_CATEGORY}
-          />
-        </div>
-      </div>
-    </div>
+    <LoadView
+      stepper={
+        <CardStepper
+          // Populate initial data
+          key={initialSafe.address}
+          initialData={initialSafe}
+          onClose={onClose}
+          steps={LoadSafeSteps}
+          eventCategory={LOAD_SAFE_CATEGORY}
+        />
+      }
+    />
   )
 }
 

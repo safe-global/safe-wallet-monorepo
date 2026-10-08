@@ -29,11 +29,8 @@ import {
   getWillRelay,
   shouldShowNetworkWarning,
 } from '@/components/new-safe/create/steps/ReviewStep/utils'
-import css from '@/components/new-safe/create/steps/ReviewStep/styles.module.css'
-import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
-import ReviewRow from '@/components/new-safe/ReviewRow'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
@@ -54,14 +51,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
-import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import classnames from 'classnames'
 import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -87,28 +77,13 @@ import {
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
+import {
+  NetworkFee,
+  ReviewStepView,
+  SafeSetupOverviewView,
+} from '@views/components/new-safe/create/steps/ReviewStep/ReviewStepView'
 
-export const NetworkFee = ({
-  totalFee,
-  chain,
-  isWaived,
-  inline = false,
-}: {
-  totalFee: string
-  chain: Chain | undefined
-  isWaived: boolean
-  inline?: boolean
-}) => {
-  return (
-    <div className={classnames(css.networkFee, { [css.networkFeeInline]: inline })}>
-      <Typography className={classnames({ [css.strikethrough]: isWaived })}>
-        <b>
-          &asymp; {totalFee} {chain?.nativeCurrency.symbol}
-        </b>
-      </Typography>
-    </div>
-  )
-}
+export { NetworkFee }
 
 export const SafeSetupOverview = ({
   name,
@@ -122,57 +97,26 @@ export const SafeSetupOverview = ({
   networks: Chain[]
 }) => {
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <ReviewRow
-        name={getNetworkLabel(networks.length)}
-        value={
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span data-testid="network-list" className="inline-block">
-                  <NetworkLogosList networks={networks} />
-                </span>
-              }
-            />
-            <TooltipContent>
-              <div>
-                {networks.map((safeItem) => (
-                  <div key={safeItem.chainId} className="py-1">
-                    <ChainIndicator chainId={safeItem.chainId} />
-                  </div>
-                ))}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-        }
-      />
-      {name && <ReviewRow name="Name" value={<Typography data-testid="review-step-safe-name">{name}</Typography>} />}
-      <ReviewRow
-        name="Signers"
-        value={
-          <div data-testid="review-step-owner-info" className={css.ownersArray}>
-            {owners.map((owner, index) => (
-              <EthHashInfo
-                address={owner.address}
-                name={owner.name || owner.ens}
-                shortAddress={false}
-                showPrefix={false}
-                showName
-                hasExplorer
-                showCopyButton
-                key={index}
-              />
-            ))}
-          </div>
-        }
-      />
-      <ReviewRow
-        name="Threshold"
-        value={
-          <Typography data-testid="review-step-threshold">{getThresholdLabel(threshold, owners.length)}</Typography>
-        }
-      />
-    </div>
+    <SafeSetupOverviewView
+      name={name}
+      networkLabel={getNetworkLabel(networks.length)}
+      networkLogos={<NetworkLogosList networks={networks} />}
+      networks={networks}
+      renderChainIndicator={(chainId) => <ChainIndicator chainId={chainId} />}
+      ownerInfos={owners.map((owner, index) => (
+        <EthHashInfo
+          address={owner.address}
+          name={owner.name || owner.ens}
+          shortAddress={false}
+          showPrefix={false}
+          showName
+          hasExplorer
+          showCopyButton
+          key={index}
+        />
+      ))}
+      thresholdLabel={getThresholdLabel(threshold, owners.length)}
+    />
   )
 }
 
@@ -514,139 +458,51 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const requiresSignIn = effectivePayMethod === PayMethod.PayLater && !isUserAuthenticated
   const isDisabled = showNetworkWarning || isCreating || requiresSignIn
 
+  const executionMethodSelector = (
+    <ExecutionMethodSelector
+      executionMethod={executionMethod}
+      setExecutionMethod={setExecutionMethod}
+      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
+    />
+  )
+
   return (
-    <>
-      <div data-testid="safe-setup-overview" className={layoutCss.row}>
+    <ReviewStepView
+      safeSetupOverview={
         <SafeSetupOverview name={data.name} owners={data.owners} threshold={data.threshold} networks={data.networks} />
-      </div>
-      {isCounterfactualEnabled && (
-        <>
-          <Separator />
-          <div data-testid="pay-now-later-message-box" className={layoutCss.row}>
-            <PayNowPayLater
-              totalFee={totalFee}
-              canRelay={willRelay}
-              isMultiChain={isMultiChainDeployment}
-              payMethod={effectivePayMethod}
-              setPayMethod={setPayMethod}
-              isUserAuthenticated={isUserAuthenticated}
-            />
-
-            {canRelay && effectivePayMethod === PayMethod.PayNow && (
-              <div className="grid grid-cols-12 gap-6 pt-4">
-                <ReviewRow
-                  value={
-                    <ExecutionMethodSelector
-                      executionMethod={executionMethod}
-                      setExecutionMethod={setExecutionMethod}
-                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
-                    />
-                  }
-                />
-              </div>
-            )}
-
-            {showNetworkWarning && (
-              <div className="mt-6">
-                <NetworkWarning action="create a Safe account" />
-              </div>
-            )}
-
-            {effectivePayMethod === PayMethod.PayLater && willStayOutsideSpace && (
-              <div className="mt-4" data-testid="space-seat-limit-notice">
-                <ErrorMessage level="info">
-                  This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new Safe will be created in My
-                  accounts, outside the Workspace.
-                </ErrorMessage>
-              </div>
-            )}
-
-            {effectivePayMethod === PayMethod.PayNow && (
-              <div className="mt-4">
-                <Typography>
-                  {!showFeeInConfirmationText ? (
-                    'You will have to confirm a transaction with your connected wallet'
-                  ) : (
-                    <>
-                      You will have to confirm a transaction and pay an estimated fee of{' '}
-                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} inline /> with your connected
-                      wallet
-                    </>
-                  )}
-                </Typography>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-      {!isCounterfactualEnabled && (
-        <>
-          <Separator />
-          <div className={`${layoutCss.row} flex flex-col gap-6`}>
-            {canRelay && (
-              <div className="grid grid-cols-12 gap-6">
-                <ReviewRow
-                  name="Execution method"
-                  value={
-                    <ExecutionMethodSelector
-                      executionMethod={executionMethod}
-                      setExecutionMethod={setExecutionMethod}
-                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
-                    />
-                  }
-                />
-              </div>
-            )}
-
-            {showGasFeeEstimation && (
-              <div data-testid="network-fee-section" className="grid grid-cols-12 gap-6">
-                <ReviewRow
-                  name="Est. network fee"
-                  value={
-                    <>
-                      <NetworkFee totalFee={totalFee} isWaived={willRelay} chain={chain} />
-
-                      {!willRelay && (
-                        <Typography variant="paragraph-small" className="mt-2 block text-[var(--color-text-secondary)]">
-                          You will have to confirm a transaction with your connected wallet.
-                        </Typography>
-                      )}
-                    </>
-                  }
-                />
-              </div>
-            )}
-
-            {showNetworkWarning && <NetworkWarning action="create a Safe account" />}
-
-            {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
-              <ErrorMessage>
-                Your connected wallet doesn&apos;t have enough funds to execute this transaction
-              </ErrorMessage>
-            )}
-          </div>
-        </>
-      )}
-      <Separator />
-      <div className={layoutCss.row}>
-        {submitError && <ErrorMessage className={css.errorMessage}>{submitError}</ErrorMessage>}
-        <div className="flex flex-row justify-between gap-6">
-          <Button data-testid="back-btn" variant="outline" size="lg" onClick={handleBack}>
-            <ArrowBackIcon className="size-4" />
-            Back
-          </Button>
-          <Button
-            data-testid="review-step-next-btn"
-            onClick={handleCreateSafeClick}
-            variant="default"
-            size="lg"
-            disabled={isDisabled}
-          >
-            {isCreating ? <Spinner className="size-[18px]" /> : 'Create account'}
-          </Button>
-        </div>
-      </div>
-    </>
+      }
+      isCounterfactualEnabled={isCounterfactualEnabled}
+      payNowPayLater={
+        <PayNowPayLater
+          totalFee={totalFee}
+          canRelay={willRelay}
+          isMultiChain={isMultiChainDeployment}
+          payMethod={effectivePayMethod}
+          setPayMethod={setPayMethod}
+          isUserAuthenticated={isUserAuthenticated}
+        />
+      }
+      isPayNow={effectivePayMethod === PayMethod.PayNow}
+      isPayLater={effectivePayMethod === PayMethod.PayLater}
+      canRelay={canRelay}
+      willRelay={willRelay}
+      executionMethodSelector={executionMethodSelector}
+      showNetworkWarning={showNetworkWarning}
+      renderNetworkWarning={(action) => <NetworkWarning action={action} />}
+      willStayOutsideSpace={willStayOutsideSpace}
+      spaceSafeLimit={spaceSafeLimit}
+      showFeeInConfirmationText={showFeeInConfirmationText}
+      showGasFeeEstimation={showGasFeeEstimation}
+      showInsufficientFunds={!walletCanPay && !willRelay && showInsufficientFundsWarning}
+      totalFee={totalFee}
+      chain={chain}
+      renderErrorMessage={(props) => <ErrorMessage {...props} />}
+      submitError={submitError}
+      onBack={handleBack}
+      onCreate={handleCreateSafeClick}
+      isDisabled={isDisabled}
+      isCreating={isCreating}
+    />
   )
 }
 

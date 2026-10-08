@@ -1,43 +1,28 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 
-import css from './styles.module.css'
-import ExternalLink from '@/components/common/ExternalLink'
 import { SafeFeature } from '@safe-global/protocol-kit'
 import { hasSafeFeature } from '@/utils/safe-versions'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import SettingsCard from '@views/components/settings/SettingsCard'
-
-const NoTransactionGuard = () => {
-  return <Typography className="mt-4 text-muted-foreground">No transaction guard set</Typography>
-}
+import {
+  GuardDisplayView,
+  TransactionGuardsView,
+} from '@views/components/settings/TransactionGuards/TransactionGuardsView'
 
 const GuardDisplay = ({ guardAddress, chainId }: { guardAddress: string; chainId: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
 
   return (
-    <div className={css.guardDisplay}>
-      <EthHashInfo shortAddress={false} address={guardAddress} showCopyButton hasExplorer chainId={chainId} />
-      <CheckWallet>
-        {(isOk) => (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setTxFlow(<RemoveGuardFlow address={guardAddress} />)}
-            disabled={!isOk}
-          >
-            <DeleteIcon className="size-4 text-destructive" />
-          </Button>
-        )}
-      </CheckWallet>
-    </div>
+    <GuardDisplayView
+      addressInfo={
+        <EthHashInfo shortAddress={false} address={guardAddress} showCopyButton hasExplorer chainId={chainId} />
+      }
+      renderCheckWallet={(render) => <CheckWallet>{render}</CheckWallet>}
+      onRemove={() => setTxFlow(<RemoveGuardFlow address={guardAddress} />)}
+    />
   )
 }
 
@@ -51,20 +36,9 @@ const TransactionGuards = () => {
   }
 
   return (
-    <SettingsCard title="Transaction guards">
-      <div>
-        <Typography>
-          Transaction guards impose additional constraints that are checked prior to executing a Safe transaction.
-          Transaction guards are potentially risky, so make sure to only use transaction guards from trusted sources.
-          Learn more about transaction guards{' '}
-          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.TRANSACTION_GUARD}>
-            here
-          </ExternalLink>
-          .
-        </Typography>
-        {safe.guard ? <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} /> : <NoTransactionGuard />}
-      </div>
-    </SettingsCard>
+    <TransactionGuardsView
+      guard={safe.guard ? <GuardDisplay guardAddress={safe.guard.value} chainId={safe.chainId} /> : undefined}
+    />
   )
 }
 

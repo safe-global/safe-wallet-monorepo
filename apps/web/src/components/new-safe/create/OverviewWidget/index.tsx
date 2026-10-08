@@ -1,62 +1,23 @@
 import WalletOverview from '@/components/common/WalletOverview'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
-import SafeLogo from '@/public/images/logo-no-text.svg'
-
-import css from '@/components/new-safe/create/OverviewWidget/styles.module.css'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { NetworkLogosList } from '@/features/multichain'
-
-const LOGO_DIMENSIONS = '22px'
+import { OverviewWidgetView } from '@views/components/new-safe/create/OverviewWidget/OverviewWidgetView'
 
 const OverviewWidget = ({ safeName, networks }: { safeName: string; networks: Chain[] }): ReactElement | null => {
   const wallet = useWallet()
-  const rows = [
-    ...(wallet ? [{ title: 'Wallet', component: <WalletOverview wallet={wallet} /> }] : []),
-    ...(safeName !== '' ? [{ title: 'Name', component: <Typography>{safeName}</Typography> }] : []),
-    ...(networks.length
-      ? [
-          {
-            title: 'Network(s)',
-            component: <NetworkLogosList networks={networks} />,
-          },
-        ]
-      : []),
-  ]
 
   return (
-    <div className="col-span-12">
-      <Card className="w-full">
-        <div className={css.header}>
-          <SafeLogo alt="Safe logo" width={LOGO_DIMENSIONS} height={LOGO_DIMENSIONS} />
-          <Typography variant="h4">Your Safe account preview</Typography>
-        </div>
-        {wallet ? (
-          <div className={css.rows}>
-            {rows.map((row) => (
-              <div key={row.title} className={css.row}>
-                <Typography variant="paragraph-small">{row.title}</Typography>
-                {row.component}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={css.rows}>
-            <Typography
-              variant="paragraph-small"
-              align="center"
-              className="mb-2 block w-full text-[var(--color-border-main)]"
-            >
-              Connect your wallet to continue
-            </Typography>
-            <ConnectWalletButton fullWidth />
-          </div>
-        )}
-      </Card>
-    </div>
+    <OverviewWidgetView
+      safeName={safeName}
+      hasWallet={!!wallet}
+      walletOverview={wallet && <WalletOverview wallet={wallet} />}
+      hasNetworks={networks.length > 0}
+      networkLogos={<NetworkLogosList networks={networks} />}
+      connectWalletButton={<ConnectWalletButton fullWidth />}
+    />
   )
 }
 

@@ -1,8 +1,5 @@
-import EnhancedTable from '@/components/common/EnhancedTable'
-import tableCss from '@/components/common/EnhancedTable/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
 import SafeProLock from '@/components/common/SafeProLock'
-import Track from '@/components/common/Track'
 import {
   AddProposer,
   DeleteProposerDialog,
@@ -16,64 +13,13 @@ import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
-import AddIcon from '@/public/images/common/add.svg'
-import { SETTINGS_EVENTS, UpgradeFeature } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { UpgradeFeature } from '@/services/analytics'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ExternalLink from '@/components/common/ExternalLink'
 import { useMemo, useState } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-
-const headCells = [
-  {
-    id: 'proposer',
-    label: 'Proposer',
-  },
-  {
-    id: 'creator',
-    label: 'Creator',
-  },
-  {
-    id: 'Actions',
-    label: '',
-  },
-]
-const SafeNotActivated = 'You need to activate the Safe before transacting'
-
-const AddProposerButton = ({ onAdd, isUndeployedSafe }: { onAdd: () => void; isUndeployedSafe: boolean }) => (
-  <div className="mb-4">
-    <CheckWallet allowProposer={false}>
-      {(isOk) => (
-        <Track {...SETTINGS_EVENTS.PROPOSERS.ADD_PROPOSER}>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span>
-                  <Button
-                    data-testid="add-proposer-btn"
-                    variant="ghost"
-                    size="lg"
-                    onClick={onAdd}
-                    disabled={!isOk || isUndeployedSafe}
-                  >
-                    <AddIcon className="size-4" />
-                    Add proposer
-                  </Button>
-                </span>
-              }
-            />
-            {isUndeployedSafe && <TooltipContent>{SafeNotActivated}</TooltipContent>}
-          </Tooltip>
-        </Track>
-      )}
-    </CheckWallet>
-  </div>
-)
+import { ProposersListView } from '@views/components/settings/ProposersList/ProposersListView'
 
 const ProposersList = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState<boolean>()
@@ -88,34 +34,22 @@ const ProposersList = () => {
   const { threshold: parentThreshold } = useParentSafeThreshold(nestedSafeOwners?.[0])
   const showPendingDelegations = isNestedSafeOwner && parentThreshold !== undefined && parentThreshold > 1
 
-  const rows = useMemo(() => {
+  const items = useMemo(() => {
     if (!proposers.data) return []
 
-    return proposers.data.results.map((proposer) => {
-      return {
-        cells: {
-          proposer: {
-            rawValue: proposer.delegate,
-            content: <NamedAddressInfo address={proposer.delegate} showCopyButton hasExplorer shortAddress />,
-          },
-
-          creator: {
-            rawValue: proposer.delegator,
-            content: <EthHashInfo address={proposer.delegator} showCopyButton hasExplorer shortAddress />,
-          },
-          actions: {
-            rawValue: '',
-            content: isEnabled && (
-              <div className={tableCss.actions}>
-                <EditProposerDialog proposer={proposer} />
-                <DeleteProposerDialog proposer={proposer} />
-              </div>
-            ),
-          },
-        },
-      }
-    })
-  }, [isEnabled, proposers.data])
+    return proposers.data.results.map((proposer) => ({
+      delegate: proposer.delegate,
+      delegator: proposer.delegator,
+      proposer: <NamedAddressInfo address={proposer.delegate} showCopyButton hasExplorer shortAddress />,
+      creator: <EthHashInfo address={proposer.delegator} showCopyButton hasExplorer shortAddress />,
+      actions: (
+        <>
+          <EditProposerDialog proposer={proposer} />
+          <DeleteProposerDialog proposer={proposer} />
+        </>
+      ),
+    }))
+  }, [proposers.data])
 
   if (!proposers.data?.results) return null
 
@@ -124,39 +58,25 @@ const ProposersList = () => {
   }
 
   return (
-    <div data-testid="proposer-section">
-      <Typography variant="paragraph-bold" className="mb-4">
-        Proposers
-      </Typography>
-      <Typography className="mb-4">
-        Proposers can suggest transactions but cannot approve or execute them. Signers should review and approve
-        transactions first.{' '}
-        <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.PROPOSERS}>
-          Learn more
-        </ExternalLink>
-      </Typography>
-
-      {showPendingDelegations && <PendingDelegationsList />}
-
-      {isEnabled &&
-        (mustUpgradeToSafePro ? (
-          <div className="mb-4">
-            <SafeProLock
-              title="Adding proposers requires Safe Pro"
-              href={upgradeHref}
-              feature={UpgradeFeature.PROPOSERS}
-            />
-          </div>
-        ) : (
-          !isPlanLoading && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />
-        ))}
-
-      {rows.length > 0 && <EnhancedTable rows={rows} headCells={headCells} />}
-
-      {isAddDialogOpen && (
-        <AddProposer onClose={() => setIsAddDialogOpen(false)} onSuccess={() => setIsAddDialogOpen(false)} />
+    <ProposersListView
+      items={items}
+      isEnabled={!!isEnabled}
+      mustUpgradeToSafePro={mustUpgradeToSafePro}
+      isPlanLoading={isPlanLoading}
+      isUndeployedSafe={isUndeployedSafe}
+      showPendingDelegations={showPendingDelegations}
+      pendingDelegations={<PendingDelegationsList />}
+      renderSafeProLock={({ title }) => (
+        <SafeProLock title={title} href={upgradeHref} feature={UpgradeFeature.PROPOSERS} />
       )}
-    </div>
+      renderCheckWallet={(render) => <CheckWallet allowProposer={false}>{render}</CheckWallet>}
+      onAdd={onAdd}
+      addDialog={
+        isAddDialogOpen && (
+          <AddProposer onClose={() => setIsAddDialogOpen(false)} onSuccess={() => setIsAddDialogOpen(false)} />
+        )
+      }
+    />
   )
 }
 

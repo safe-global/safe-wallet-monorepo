@@ -1,5 +1,6 @@
 import InfoWidget from '@/components/new-safe/create/InfoWidget'
 import { type ReactElement } from 'react'
+import { CreateSafeInfosView } from '@views/components/new-safe/create/CreateSafeInfos/CreateSafeInfosView'
 
 export type CreateSafeInfoVariant = 'info' | 'success' | 'warning' | 'error'
 
@@ -21,25 +22,16 @@ const CreateSafeInfos = ({
   }
 
   return (
-    <div className="col-span-12">
-      <div className="flex flex-col gap-6">
-        {staticHint && (
-          <div>
-            <InfoWidget title={staticHint.title} variant={staticHint.variant} steps={staticHint.steps} />
-          </div>
-        )}
-        {dynamicHint && (
-          <div>
-            <InfoWidget
-              title={dynamicHint.title}
-              variant={dynamicHint.variant}
-              steps={dynamicHint.steps}
-              startExpanded
-            />
-          </div>
-        )}
-      </div>
-    </div>
+    <CreateSafeInfosView
+      staticWidget={
+        staticHint && <InfoWidget title={staticHint.title} variant={staticHint.variant} steps={staticHint.steps} />
+      }
+      dynamicWidget={
+        dynamicHint && (
+          <InfoWidget title={dynamicHint.title} variant={dynamicHint.variant} steps={dynamicHint.steps} startExpanded />
+        )
+      }
+    />
   )
 }
 

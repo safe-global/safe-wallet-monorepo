@@ -1,27 +1,18 @@
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import NetworkSelector from '@/components/common/NetworkSelector'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import AddressInput from '@/components/common/AddressInput'
-import { largeFormFieldSurfaceClassName } from '@/components/common/formFieldStyles'
 import React from 'react'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
 import { LOAD_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import ExternalLink from '@/components/common/ExternalLink'
-import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
+import { SetAddressStepView } from '@views/components/new-safe/load/steps/SetAddressStep/SetAddressStepView'
 
 enum Field {
   name = 'name',
@@ -32,8 +23,6 @@ type FormData = {
   [Field.name]: string
   [Field.address]: string
 }
-
-const networkSelectTriggerClassName = `${largeFormFieldSurfaceClassName} w-full`
 
 const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeFormData>) => {
   const currentChainId = useChainId()
@@ -97,79 +86,17 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
 
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={onFormSubmit}>
-        <div className={layoutCss.row}>
-          <div className="mb-6 flex flex-col gap-4">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
-              <div className="order-last md:order-first">
-                <NameInput
-                  name={Field.name}
-                  label={errors?.[Field.name]?.message || 'Name'}
-                  placeholder={fallbackName}
-                  InputLabelProps={{ shrink: true }}
-                  inputSize="hero"
-                  variant="surface"
-                  InputProps={{
-                    endAdornment: resolving ? (
-                      <div className="flex items-center">
-                        <Spinner className="size-5" />
-                      </div>
-                    ) : (
-                      <Tooltip>
-                        <TooltipTrigger
-                          render={
-                            <span className="flex items-center">
-                              <InfoIcon className="size-5" />
-                            </span>
-                          }
-                        />
-                        <TooltipContent>
-                          This name is stored locally and will never be shared with us or any third parties.
-                        </TooltipContent>
-                      </Tooltip>
-                    ),
-                  }}
-                />
-              </div>
-              <div className="order-first w-full md:order-last md:w-[220px]">
-                <NetworkSelector triggerClassName={networkSelectTriggerClassName} />
-              </div>
-            </div>
-
-            <AddressInput
-              data-testid="address-section"
-              label="Safe account"
-              validate={validateSafeAddress}
-              name={Field.address}
-            />
-          </div>
-
-          <Typography className="mt-8 block">
-            By continuing you consent to the{' '}
-            <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-              terms of use
-            </ExternalLink>{' '}
-            and{' '}
-            <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-              privacy policy
-            </ExternalLink>
-            .
-          </Typography>
-        </div>
-
-        <Separator />
-
-        <div className={layoutCss.row}>
-          <div className="flex justify-between gap-2">
-            <Button type="button" variant="outline" size="lg" onClick={handleBack}>
-              Back
-            </Button>
-            <Button data-testid="load-safe-next-btn" type="submit" size="lg" disabled={!isValid}>
-              Next
-            </Button>
-          </div>
-        </div>
-      </form>
+      <SetAddressStepView
+        onSubmit={onFormSubmit}
+        onBack={handleBack}
+        isValid={isValid}
+        nameError={errors?.[Field.name]?.message}
+        fallbackName={fallbackName}
+        resolving={resolving}
+        renderNameInput={(props) => <NameInput name={Field.name} {...props} />}
+        renderNetworkSelector={(props) => <NetworkSelector {...props} />}
+        renderAddressInput={(props) => <AddressInput validate={validateSafeAddress} name={Field.address} {...props} />}
+      />
     </FormProvider>
   )
 }
