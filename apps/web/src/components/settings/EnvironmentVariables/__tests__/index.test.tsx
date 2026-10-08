@@ -9,6 +9,8 @@ import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
 import { reloadPage } from '@/utils/navigation'
+import type { useSafeProAccess } from '@/features/spaces'
+import { TENDERLY_SETUP_GUIDE_URL, TENDERLY_SIMULATE_URL_PLACEHOLDER } from '../utils'
 
 // Mock chain data
 const mockChain = chainBuilder()
@@ -27,6 +29,13 @@ jest.mock('@/hooks/useChainId', () => ({
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
 }))
+
+const mockUseSafeProAccess = jest.fn<Partial<ReturnType<typeof useSafeProAccess>>, []>(() => ({
+  hasProFeatures: false,
+  isLoading: false,
+  spaceId: null,
+}))
+jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
 
 // Mock analytics
 jest.mock('@/services/analytics', () => ({
@@ -48,7 +57,7 @@ const renderWithStore = (ui: React.ReactElement, initialReduxState?: Partial<Roo
 
 describe('EnvironmentVariables', () => {
   const mockRpcUrl = faker.internet.url()
-  const mockTenderlyUrl = faker.internet.url()
+  const mockTenderlyUrl = 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate'
   const mockTenderlyToken = faker.string.alphanumeric(32)
 
   beforeEach(() => {
@@ -241,6 +250,86 @@ describe('EnvironmentVariables', () => {
         }),
       )
     })
+  })
+
+  it('explains both simulation paths in a visible tile instead of a heading tooltip', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    const tile = screen.getByTestId('tenderly-info')
+    expect(tile).toHaveTextContent(
+      'Transaction simulation is included in Safe Pro. You can also connect your own Tenderly project.',
+    )
+
+    const guideLink = screen.getByRole('link', { name: /View setup guide/ })
+    expect(guideLink).toHaveAttribute('href', TENDERLY_SETUP_GUIDE_URL)
+    expect(guideLink).toHaveAttribute('target', '_blank')
+
+    expect(screen.getByRole('link', { name: 'See plans' })).toHaveAttribute('href', '/welcome/spaces')
+    expect(screen.queryByText('Read more')).not.toBeInTheDocument()
+  })
+
+  it('hides the plans link for Safe Pro users', () => {
+    mockUseSafeProAccess.mockReturnValueOnce({ hasProFeatures: true, isLoading: false, spaceId: 'space-1' })
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    expect(screen.getByRole('link', { name: /View setup guide/ })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'See plans' })).not.toBeInTheDocument()
+  })
+
+  it('shows the Simulation API endpoint format as placeholder and helper text', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    const tenderlyUrlInput = screen.getByLabelText('Tenderly API URL')
+    expect(tenderlyUrlInput).toHaveAttribute('placeholder', TENDERLY_SIMULATE_URL_PLACEHOLDER)
+    expect(tenderlyUrlInput).toHaveAccessibleDescription(
+      'Copy the Simulation API URL from your Tenderly project. It ends in /simulate.',
+    )
+  })
+
+  it('rejects a Tenderly dashboard URL and does not save', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+      },
+    })
+
+    const tenderlyUrlInput = screen.getByLabelText('Tenderly API URL')
+    fireEvent.change(tenderlyUrlInput, { target: { value: 'https://dashboard.tenderly.co/my-org/my-project' } })
+
+    expect(
+      await screen.findByText('This is not a Simulation API URL. Copy it from your Tenderly project.'),
+    ).toBeInTheDocument()
+    expect(tenderlyUrlInput).toHaveAttribute('aria-invalid', 'true')
+
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(analytics.trackEvent).not.toHaveBeenCalled()
+    })
+    expect(store.getState().settings.env.tenderly.url).toBe('')
+    expect(reloadPage).not.toHaveBeenCalled()
   })
 
   it('should allow clearing all inputs', async () => {

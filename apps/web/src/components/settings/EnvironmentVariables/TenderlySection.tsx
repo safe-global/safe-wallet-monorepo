@@ -1,14 +1,25 @@
 import { useState } from 'react'
+import NextLink from 'next/link'
 import { Controller, useFormContext } from 'react-hook-form'
 import { Typography } from '@/components/ui/typography'
 import { Label } from '@/components/ui/label'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { FieldDescription, FieldError } from '@/components/ui/field'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
-import { EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { ArrowRight, EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
-import { TENDERLY_SIMULATE_ENDPOINT_URL } from '@safe-global/utils/config/constants'
-import { EnvVariablesField } from './index'
+import { AppRoutes } from '@/config/routes'
+import { useSafeProAccess } from '@/features/spaces'
+import { EnvVariablesField, type EnvVariablesFormData } from './index'
+import {
+  isTenderlySimulateUrl,
+  TENDERLY_SETUP_GUIDE_URL,
+  TENDERLY_SIMULATE_URL_PLACEHOLDER,
+  TENDERLY_URL_ERROR,
+  TENDERLY_URL_HELPER_TEXT,
+} from './utils'
 
 type TenderlySectionProps = {
   onResetUrl: () => void
@@ -23,64 +34,81 @@ const TenderlySection = ({
   showResetUrlButton,
   showResetTokenButton,
 }: TenderlySectionProps) => {
-  const { control } = useFormContext()
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<EnvVariablesFormData>()
+  const { hasProFeatures, spaceId } = useSafeProAccess()
   const [isTokenVisible, setIsTokenVisible] = useState(false)
   const tokenVisibilityLabel = isTokenVisible ? 'Hide access token' : 'Show access token'
+  const urlError = errors[EnvVariablesField.tenderlyURL]
+  const urlDescriptionId = `${EnvVariablesField.tenderlyURL}-description`
+  const plansHref = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces
 
   return (
     <>
-      <Typography variant="paragraph-bold" className="mb-4 mt-6 flex items-center">
+      <Typography variant="paragraph-bold" className="mb-4 mt-6">
         Tenderly
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <span>
-                <InfoIcon className="ml-1 size-4 align-middle text-muted-foreground" />
-              </span>
-            }
-          />
-          <TooltipContent>
-            You can use your own Tenderly project to keep track of all your transaction simulations.{' '}
-            <ExternalLink
-              color="secondary"
-              href="https://docs.tenderly.co/simulations-and-forks/simulation-api/configuration-of-api-access"
-            >
-              Read more
-            </ExternalLink>
-          </TooltipContent>
-        </Tooltip>
       </Typography>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <Alert variant="info" className="mb-4" data-testid="tenderly-info">
+        <AlertSeverityIcon variant="info" />
+        <AlertDescription>
+          Transaction simulation is included in Safe Pro. You can also connect your own Tenderly project.
+          <span className="mt-2 flex flex-wrap items-center gap-3">
+            <ExternalLink href={TENDERLY_SETUP_GUIDE_URL}>View setup guide</ExternalLink>
+            {!hasProFeatures && (
+              <Button variant="outline" size="xs" render={<NextLink href={plansHref} />}>
+                See plans
+                <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
+              </Button>
+            )}
+          </span>
+        </AlertDescription>
+      </Alert>
+
+      <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={EnvVariablesField.tenderlyURL}>Tenderly API URL</Label>
+          <Label htmlFor={EnvVariablesField.tenderlyURL} className={urlError ? 'text-destructive' : undefined}>
+            Tenderly API URL
+          </Label>
           <Controller
             name={EnvVariablesField.tenderlyURL}
             control={control}
-            render={({ field }) => (
-              <InputGroup>
-                <InputGroupInput
-                  {...field}
-                  id={EnvVariablesField.tenderlyURL}
-                  value={field.value || ''}
-                  type="url"
-                  placeholder={TENDERLY_SIMULATE_ENDPOINT_URL}
-                />
-                {showResetUrlButton && (
-                  <InputGroupAddon align="inline-end">
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <InputGroupButton size="icon-sm" onClick={onResetUrl} aria-label="Reset to default value">
-                            <RotateCcwIcon />
-                          </InputGroupButton>
-                        }
-                      />
-                      <TooltipContent>Reset to default value</TooltipContent>
-                    </Tooltip>
-                  </InputGroupAddon>
+            rules={{ validate: (value) => !value || isTenderlySimulateUrl(value) || TENDERLY_URL_ERROR }}
+            render={({ field, fieldState }) => (
+              <>
+                <InputGroup>
+                  <InputGroupInput
+                    {...field}
+                    id={EnvVariablesField.tenderlyURL}
+                    value={field.value || ''}
+                    type="url"
+                    placeholder={TENDERLY_SIMULATE_URL_PLACEHOLDER}
+                    aria-invalid={fieldState.invalid || undefined}
+                    aria-describedby={urlDescriptionId}
+                  />
+                  {showResetUrlButton && (
+                    <InputGroupAddon align="inline-end">
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <InputGroupButton size="icon-sm" onClick={onResetUrl} aria-label="Reset to default value">
+                              <RotateCcwIcon />
+                            </InputGroupButton>
+                          }
+                        />
+                        <TooltipContent>Reset to default value</TooltipContent>
+                      </Tooltip>
+                    </InputGroupAddon>
+                  )}
+                </InputGroup>
+                {fieldState.error ? (
+                  <FieldError id={urlDescriptionId}>{fieldState.error.message}</FieldError>
+                ) : (
+                  <FieldDescription id={urlDescriptionId}>{TENDERLY_URL_HELPER_TEXT}</FieldDescription>
                 )}
-              </InputGroup>
+              </>
             )}
           />
         </div>
