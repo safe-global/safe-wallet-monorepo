@@ -262,6 +262,20 @@ describe('ProfilePopoverContent', () => {
     expect(screen.getAllByTestId('tooltip-content').map((el) => el.textContent)).toEqual([SIGNER, CONNECTED])
   })
 
+  it('tells a member their account is a membership, not a subscription', () => {
+    render(<ProfilePopoverContent avatarName="Alice" displayName="Alice" isMember onSignOut={jest.fn()} />)
+
+    expect(screen.getByText('Your Safe Pro membership.')).toBeInTheDocument()
+    expect(screen.queryByText('Manages your Safe Pro subscription.')).not.toBeInTheDocument()
+  })
+
+  it('keeps the subscription caption for anyone who is not a member', () => {
+    render(<ProfilePopoverContent avatarName="Alice" displayName="Alice" isMember={false} onSignOut={jest.fn()} />)
+
+    expect(screen.getByText('Manages your Safe Pro subscription.')).toBeInTheDocument()
+    expect(screen.queryByText('Your Safe Pro membership.')).not.toBeInTheDocument()
+  })
+
   it('calls onSignOut once per click', async () => {
     const onSignOut = jest.fn()
 

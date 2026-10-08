@@ -14,6 +14,8 @@ export interface ProfilePopoverContentProps {
   displayName: string
   shortDisplayName?: string
   role?: string
+  /** Active non-admin member: cannot manage billing, so the caption says membership. */
+  isMember?: boolean
   signerAddress?: string
   connectedWallet?: string
   onSignOut: () => void
@@ -24,6 +26,7 @@ export const ProfilePopoverContent = ({
   displayName,
   shortDisplayName,
   role,
+  isMember = false,
   signerAddress,
   connectedWallet,
   onSignOut,
@@ -56,7 +59,9 @@ export const ProfilePopoverContent = ({
         {signerAddress && <CopyAddressIconButton address={signerAddress} />}
       </div>
 
-      <span className={css.profileSectionCaption}>Manages your Safe Pro subscription.</span>
+      <span className={css.profileSectionCaption}>
+        {isMember ? 'Your Safe Pro membership.' : 'Manages your Safe Pro subscription.'}
+      </span>
       {role && <span className={css.profileRole}>{role}</span>}
     </div>
 

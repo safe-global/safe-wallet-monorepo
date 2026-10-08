@@ -11,7 +11,9 @@ jest.mock('@/hooks/useIsSignedIn', () => ({ useIsSignedIn: jest.fn() }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: jest.fn() }))
 
 const mockProfile = jest.fn()
+// Keep the real MemberRole/MemberStatus enums; the component compares against them.
 jest.mock('../../hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../hooks/useSpaceMembers'),
   useCurrentMemberProfile: () => mockProfile(),
 }))
 
@@ -21,11 +23,13 @@ jest.mock('../SpacesList/AccountInfo', () => ({
     displayName,
     signerAddress,
     connectedWallet,
+    isMember,
   }: {
     profileName: string
     displayName: string
     signerAddress?: string
     connectedWallet?: string
+    isMember?: boolean
   }) => (
     <div
       data-testid="account-info"
@@ -33,6 +37,7 @@ jest.mock('../SpacesList/AccountInfo', () => ({
       data-display={displayName}
       data-signer={signerAddress ?? ''}
       data-connected={connectedWallet ?? ''}
+      data-is-member={String(Boolean(isMember))}
     />
   ),
 }))
@@ -132,6 +137,51 @@ describe('HeaderAccountInfo', () => {
     render(<HeaderAccountInfo />)
 
     expect(screen.getByTestId('account-info')).toHaveAttribute('data-connected', '')
+  })
+
+  it('marks an active member so the popover shows the membership caption', () => {
+    mockProfile.mockReturnValue({
+      membership: { status: 'ACTIVE', role: 'MEMBER' },
+      signerAddress: SIGNER,
+      email: undefined,
+      isLoading: false,
+    })
+
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-is-member', 'true')
+  })
+
+  it('does not mark an admin as a member', () => {
+    mockProfile.mockReturnValue({
+      membership: { status: 'ACTIVE', role: 'ADMIN' },
+      signerAddress: SIGNER,
+      email: undefined,
+      isLoading: false,
+    })
+
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-is-member', 'false')
+  })
+
+  it('does not mark an invited member as a member until they accept', () => {
+    mockProfile.mockReturnValue({
+      membership: { status: 'INVITED', role: 'MEMBER' },
+      signerAddress: SIGNER,
+      email: undefined,
+      isLoading: false,
+    })
+
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-is-member', 'false')
+  })
+
+  it('does not mark a user without a workspace as a member', () => {
+    render(<HeaderAccountInfo />)
+
+    expect(screen.getByTestId('account-info')).toHaveAttribute('data-is-member', 'false')
   })
 
   it('withholds the signer address and connected wallet for email sign-ins', () => {

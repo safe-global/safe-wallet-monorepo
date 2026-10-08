@@ -1,7 +1,7 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
+import { MemberRole, MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { getSidebarProfileInfo } from './getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
 
@@ -19,6 +19,8 @@ const HeaderAccountInfo = () => {
 
   const { profileName, displayName, shortDisplayName } = getSidebarProfileInfo(membership, signerAddress, email)
   const showConnectedWallet = Boolean(signerAddress) && !sameAddress(wallet?.address, signerAddress)
+  // Only an active member lacks billing rights; invited/declined users see the default caption.
+  const isMember = membership?.status === MemberStatus.ACTIVE && membership.role === MemberRole.MEMBER
 
   return (
     <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
@@ -26,6 +28,7 @@ const HeaderAccountInfo = () => {
         profileName={profileName}
         displayName={isLoading ? '' : displayName}
         shortDisplayName={isLoading ? '' : shortDisplayName}
+        isMember={isMember}
         signerAddress={signerAddress}
         connectedWallet={showConnectedWallet ? wallet?.address : undefined}
       />

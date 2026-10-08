@@ -11,6 +11,7 @@ interface MembershipProps {
   profileName?: string
   displayName?: string
   shortDisplayName?: string
+  isMember?: boolean
   signerAddress?: string
   connectedWallet?: string
 }
@@ -19,6 +20,7 @@ export const AccountInfo = ({
   profileName = '',
   displayName = '',
   shortDisplayName,
+  isMember,
   signerAddress,
   connectedWallet,
 }: MembershipProps) => {
@@ -62,6 +64,7 @@ export const AccountInfo = ({
         avatarName={profileName}
         displayName={displayName}
         shortDisplayName={shortDisplayName}
+        isMember={isMember}
         signerAddress={signerAddress}
         connectedWallet={connectedWallet}
         onSignOut={handleSignOut}
