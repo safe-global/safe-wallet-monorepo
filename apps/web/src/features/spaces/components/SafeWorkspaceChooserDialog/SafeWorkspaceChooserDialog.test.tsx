@@ -30,7 +30,8 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => false }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
-jest.mock('@/hooks/useSafeAddressFromUrl', () => ({ useSafeAddressFromUrl: () => SAFE_ADDRESS }))
+let mockSafeAddress = SAFE_ADDRESS
+jest.mock('@/hooks/useSafeAddressFromUrl', () => ({ useSafeAddressFromUrl: () => mockSafeAddress }))
 
 const signedIn = {
   auth: {
@@ -45,16 +46,23 @@ const signedIn = {
 
 const renderDialog = (query: Record<string, string> = { safe: `eth:${SAFE_ADDRESS}` }) => {
   const replace = jest.fn(() => Promise.resolve(true))
-  render(<SafeWorkspaceChooserDialog />, {
+  const { rerender } = render(<SafeWorkspaceChooserDialog />, {
     initialReduxState: signedIn,
     routerProps: { pathname: '/home', query, replace },
   })
-  return replace
+  const leaveAndReturnToSafe = () => {
+    mockSafeAddress = ''
+    rerender(<SafeWorkspaceChooserDialog />)
+    mockSafeAddress = SAFE_ADDRESS
+    rerender(<SafeWorkspaceChooserDialog />)
+  }
+  return { replace, leaveAndReturnToSafe }
 }
 
 describe('SafeWorkspaceChooserDialog', () => {
   beforeEach(() => {
     mockSpaces = ALL_SPACES
+    mockSafeAddress = SAFE_ADDRESS
   })
 
   it('lists only the Workspaces that hold the Safe, with their Safe counts', () => {
@@ -74,7 +82,7 @@ describe('SafeWorkspaceChooserDialog', () => {
   })
 
   it('opens the Safe in the chosen Workspace and closes', () => {
-    const replace = renderDialog()
+    const { replace } = renderDialog()
 
     fireEvent.click(screen.getByRole('button', { name: /Operations/ }))
 
@@ -87,7 +95,7 @@ describe('SafeWorkspaceChooserDialog', () => {
   })
 
   it('closes without a Workspace when the user continues without one', () => {
-    const replace = renderDialog()
+    const { replace } = renderDialog()
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue without Workspace' }))
 
@@ -107,5 +115,17 @@ describe('SafeWorkspaceChooserDialog', () => {
     renderDialog()
 
     expect(screen.queryByTestId('safe-workspace-chooser-dialog')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['chose a Workspace', /Operations/],
+    ['continued without one', 'Continue without Workspace'],
+  ])('asks again on the next visit to the Safe after the user %s', (_, answer) => {
+    const { leaveAndReturnToSafe } = renderDialog()
+    fireEvent.click(screen.getByRole('button', { name: answer }))
+
+    leaveAndReturnToSafe()
+
+    expect(screen.getByTestId('safe-workspace-chooser-dialog')).toBeInTheDocument()
   })
 })

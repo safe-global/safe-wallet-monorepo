@@ -14,23 +14,22 @@ import {
 } from '@/components/ui/dialog'
 import { useSafePageWorkspacePick } from '../../hooks/useSafeWorkspaceAttach'
 import { useAddUrlSpaceId } from '../../hooks/useSafeWorkspaceCheck'
+import type { SafeWorkspacePick } from '@/utils/spaces'
 
-/** Asks a user who opens a Safe of several Workspaces without a `spaceId` which Workspace to open it in. */
-const SafeWorkspaceChooserDialog = (): ReactElement | null => {
-  const { safeKey, pick } = useSafePageWorkspacePick()
+/** The chooser for one visit to a Safe; it asks once, also when useSafeWorkspaceCheck removes the chosen id again. */
+const WorkspaceChooser = ({ pick }: { pick: SafeWorkspacePick | undefined }): ReactElement | null => {
   const addUrlSpaceId = useAddUrlSpaceId()
   const isChoosing = pick?.kind === 'choose'
   const { currentData: spaces } = useSpacesGetV1Query(undefined, { skip: !isChoosing })
-  // Asks once per visit to a Safe, also when useSafeWorkspaceCheck removes the chosen id again
-  const [answeredSafe, setAnsweredSafe] = useState<string | undefined>(undefined)
+  const [isAnswered, setIsAnswered] = useState(false)
 
-  if (!isChoosing || answeredSafe === safeKey || !spaces) return null
+  if (!isChoosing || isAnswered || !spaces) return null
 
   // The Workspace list and the Safes of the Workspaces are separate caches, so the list can lag behind
   const choices = spaces.filter((space) => pick.spaceIds.includes(space.uuid))
   if (choices.length === 0) return null
 
-  const close = () => setAnsweredSafe(safeKey)
+  const close = () => setIsAnswered(true)
   const choose = (spaceId: string) => {
     close()
     addUrlSpaceId(spaceId)
@@ -67,6 +66,14 @@ const SafeWorkspaceChooserDialog = (): ReactElement | null => {
       </DialogContent>
     </Dialog>
   )
+}
+
+/** Asks a user who opens a Safe of several Workspaces without a `spaceId` which Workspace to open it in. */
+const SafeWorkspaceChooserDialog = (): ReactElement | null => {
+  const { safeKey, pick } = useSafePageWorkspacePick()
+
+  // A new key for each visit to a Safe drops the answer of the previous visit
+  return safeKey ? <WorkspaceChooser key={safeKey} pick={pick} /> : null
 }
 
 export default SafeWorkspaceChooserDialog
