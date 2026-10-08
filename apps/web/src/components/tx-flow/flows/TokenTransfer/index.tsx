@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
+import { TOKEN_TRANSFER_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/TokenTransfer/copy'
 import {
   TokenTransferType,
   type MultiTokenTransferParams,
@@ -55,11 +56,11 @@ const TokenTransferFlow = ({ txNonce, ...params }: MultiTokenTransferFlowProps) 
     <TxFlow
       initialData={initialData}
       icon={AssetsIcon}
-      subtitle="Send tokens"
+      subtitle={COPY.subtitle}
       eventCategory={TxFlowType.TOKEN_TRANSFER}
       ReviewTransactionComponent={ReviewTokenTx}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <CreateTokenTransfer txNonce={txNonce} />
       </TxFlowStep>
     </TxFlow>

@@ -3,5 +3,5 @@ export { DrawerTitle } from '@views/components/common/Drawer/components/DrawerTi
 export { DrawerSubtitle } from '@views/components/common/Drawer/components/DrawerSubtitle'
 export { DrawerSection } from '@views/components/common/Drawer/components/DrawerSection'
 export { DrawerList, type DrawerListItem } from '@views/components/common/Drawer/components/DrawerList'
-export { DrawerBody } from './DrawerBody'
+export { DrawerBody } from '@views/components/common/Drawer/components/DrawerBody'
 export { DrawerFooter } from '@views/components/common/Drawer/components/DrawerFooter'

@@ -1,24 +1,12 @@
 import { useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import {
-  SafeProPlanSwitchedModal,
-  SafeProSubscriptionActivatedModal,
-} from '@views/features/spaces/components/SafeProModals'
 import { useSeatTrim } from '../../hooks/billing/useSeatTrim'
 import ChangePlanDialog from './ChangePlanDialog'
-import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
+import { getChangeDirection } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from '@views/features/spaces/components/Plans/types'
+import type { CurrentPlan, PlanPick, SafeRef } from '@views/features/spaces/components/Plans/types'
+import { ChangePlanFlowView } from '@views/features/spaces/components/Plans/ChangePlanFlowView'
 
-/** The accounts step leads to the change summary, not to Stripe: a live plan is moved, not bought. */
-export const _continueLabelFor = (direction: PlanChangeDirection): string =>
-  direction === 'change' ? 'Continue' : `Continue to ${direction}`
-
-/** What the picked plan costs once the trial is over, as the confirmation words it. */
-export const _pickedPrice = (pick: PlanPick): string =>
-  pick.option.price === null
-    ? 'a custom price'
-    : `${formatPlanPrice(pick.option.price, pick.tier.currency)}${priceSuffix(pick.tier.billingCycle)}`
+export { _continueLabelFor, _pickedPrice } from '@views/features/spaces/components/Plans/ChangePlanFlowView'
 
 export default function ChangePlanFlow({
   spaceId,
@@ -42,57 +30,43 @@ export default function ChangePlanFlow({
   const [removed, setRemoved] = useState<SafeRef[]>()
   const [isChanged, setIsChanged] = useState(false)
   const seats = pick.option.seats
-
-  if (isChanged) {
-    return currentPlan.isTrialing ? (
-      <SafeProPlanSwitchedModal
-        open
-        planName={pick.tier.name}
-        trialEndsAt={currentPlan.periodEndsAt ? Date.parse(currentPlan.periodEndsAt) : null}
-        price={_pickedPrice(pick)}
-        seatsLabel={pick.option.label}
-        onOpenChange={(open) => !open && onClose()}
-      />
-    ) : (
-      <SafeProSubscriptionActivatedModal
-        open
-        planName={pick.tier.name}
-        seatsLabel={pick.option.label}
-        onOpenChange={(open) => !open && onClose()}
-      />
-    )
-  }
-
-  if (removed === undefined && needsTrim(seats)) {
-    return (
-      <Dialog open onOpenChange={(open) => !open && onClose()}>
-        <DialogContent size="md" surface="card" padding="sm">
-          <div className="flex flex-col gap-6 pt-5">
-            <SelectAccountsStep
-              limit={seats}
-              planName={pick.tier.name}
-              continueLabel={_continueLabelFor(getChangeDirection(currentPlan, pick))}
-              onBack={onClose}
-              onContinue={setRemoved}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    )
-  }
+  const trimTo = removed === undefined && needsTrim(seats) ? seats : undefined
 
   return (
-    <ChangePlanDialog
-      spaceId={spaceId}
+    <ChangePlanFlowView
       pick={pick}
-      currentPlan={currentPlan}
-      entry={entry}
-      removed={removed}
+      direction={getChangeDirection(currentPlan, pick)}
+      isChanged={isChanged}
+      isTrialing={currentPlan.isTrialing}
+      trialEndsAt={currentPlan.periodEndsAt ? Date.parse(currentPlan.periodEndsAt) : null}
+      renderAccountsStep={
+        trimTo === undefined
+          ? undefined
+          : (continueLabel) => (
+              <SelectAccountsStep
+                limit={trimTo}
+                planName={pick.tier.name}
+                continueLabel={continueLabel}
+                onBack={onClose}
+                onContinue={setRemoved}
+              />
+            )
+      }
+      changeDialog={
+        <ChangePlanDialog
+          spaceId={spaceId}
+          pick={pick}
+          currentPlan={currentPlan}
+          entry={entry}
+          removed={removed}
+          onClose={onClose}
+          onChanged={() => {
+            setIsChanged(true)
+            onChanged?.()
+          }}
+        />
+      }
       onClose={onClose}
-      onChanged={() => {
-        setIsChanged(true)
-        onChanged?.()
-      }}
     />
   )
 }

@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
-import { Copy, Check } from 'lucide-react'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
-import RowIconAction from '@views/components/common/AccountRow/RowIconAction'
+import { CopyAddressButtonView } from '@views/components/common/AccountRow/CopyAddressButtonView'
 
 // Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
 // a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.
@@ -23,16 +22,7 @@ const CopyAddressButton = ({
     onCopy?.()
   }, [copy, address, onCopy])
 
-  return (
-    <RowIconAction
-      label="Copy address"
-      tooltip={copied ? 'Copied!' : 'Copy address'}
-      testId={testId}
-      onActivate={runCopy}
-    >
-      {copied ? <Check className="size-3 text-green-600" /> : <Copy className="size-3 text-muted-foreground" />}
-    </RowIconAction>
-  )
+  return <CopyAddressButtonView copied={copied} testId={testId} onCopy={runCopy} />
 }
 
 export default CopyAddressButton

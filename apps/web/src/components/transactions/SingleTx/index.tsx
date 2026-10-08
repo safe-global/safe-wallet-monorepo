@@ -15,7 +15,7 @@ import ExpandableTransactionItem, {
   TransactionSkeleton,
 } from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import GroupLabel from '../GroupLabel'
-import TransactionDetailsError from '@views/components/transactions/SingleTx/TransactionDetailsError'
+import { SingleTxView } from '@views/components/transactions/SingleTx/SingleTxView'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useHnQueueAssessment } from '@/features/hypernative'
@@ -78,11 +78,11 @@ const SingleTx = () => {
 
   // Reloading cannot pull a tx into a Safe it does not belong to, so that state gets no CTA.
   if (txDetails && !sameAddress(txDetails.safeAddress, safeAddress)) {
-    return <TransactionDetailsError message="This transaction was not found in this Safe account." />
+    return <SingleTxView isForeignTx />
   }
 
   if (error) {
-    return <TransactionDetailsError onReload={reloadPage} />
+    return <SingleTxView isForeignTx={false} onReload={reloadPage} />
   }
 
   if (txDetails) {

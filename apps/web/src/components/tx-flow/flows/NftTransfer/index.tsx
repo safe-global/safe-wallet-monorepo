@@ -5,6 +5,7 @@ import ReviewNftBatch from './ReviewNftBatch'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
+import { NFT_TRANSFER_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/NftTransfer/copy'
 
 export type NftTransferParams = {
   recipient: string
@@ -25,11 +26,11 @@ const NftTransferFlow = (params: NftTransferFlowProps) => (
       ...params,
     }}
     icon={NftIcon}
-    subtitle="Send NFTs"
+    subtitle={COPY.subtitle}
     eventCategory={TxFlowType.NFT_TRANSFER}
     ReviewTransactionComponent={ReviewNftBatch}
   >
-    <TxFlowStep title="New transaction">
+    <TxFlowStep title={COPY.stepTitle}>
       <SendNftBatch />
     </TxFlowStep>
   </TxFlow>

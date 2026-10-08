@@ -1,9 +1,7 @@
 import { type ReactElement } from 'react'
 
 import { HypernativeTooltip } from '../HypernativeTooltip'
-import SafeShieldIconSvg from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
-
-import { safeShieldSvgClassName } from '@views/features/hypernative/components/SafeHeaderHnTooltip/styles'
+import { SafeHeaderHnTooltipView } from '@views/features/hypernative/components/SafeHeaderHnTooltip/SafeHeaderHnTooltipView'
 
 /**
  * SafeHeaderHnTooltip component
@@ -11,9 +9,5 @@ import { safeShieldSvgClassName } from '@views/features/hypernative/components/S
  * Only renders when Hypernative Guard is active
  */
 export const SafeHeaderHnTooltip = (): ReactElement | null => {
-  return (
-    <HypernativeTooltip side="right">
-      <SafeShieldIconSvg className={safeShieldSvgClassName} />
-    </HypernativeTooltip>
-  )
+  return <SafeHeaderHnTooltipView renderTooltip={(props) => <HypernativeTooltip {...props} />} />
 }

@@ -1,8 +1,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useContext, useMemo, useRef, type ReactElement } from 'react'
-import { Menu } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { Button } from '@/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation, HeaderAccountInfo } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
@@ -21,7 +19,6 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import NotificationsPopover, { type NotificationsPopoverRef } from './NotificationsPopover'
-import { ICON_STROKE } from '@/components/common/iconStroke'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -30,12 +27,14 @@ import SpaceSafeBar from '@/components/common/SpaceSafeBar'
 import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
-import { cn } from '@/utils/cn'
+import { TopbarView } from '@views/components/common/Header/Topbar/TopbarView'
 
-export const SEARCH_CONTEXT_HEIGHT = 'h-14'
-export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
-export const SEARCH_CONTEXT_WRAP = '@max-[660px]:basis-full'
-export const SAFE_BAR_CONTEXT_WRAP = '@max-[1150px]:order-last @max-[1150px]:basis-full'
+export {
+  SEARCH_CONTEXT_HEIGHT,
+  SAFE_BAR_CONTEXT_HEIGHT,
+  SEARCH_CONTEXT_WRAP,
+  SAFE_BAR_CONTEXT_WRAP,
+} from '@views/components/common/Header/Topbar/TopbarView'
 
 interface TopbarProps {
   onMenuToggle?: Dispatch<SetStateAction<boolean>>
@@ -75,9 +74,6 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
   const showSpaceSafeBar = !isSpaceRoute || (Boolean(txFlow) && Boolean(safeAddress))
 
-  const contextWrap = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_WRAP : SEARCH_CONTEXT_WRAP
-  const contextHeight = showLogo ? undefined : showSpaceSafeBar ? SAFE_BAR_CONTEXT_HEIGHT : SEARCH_CONTEXT_HEIGHT
-
   const showBatchButton = Boolean(safeAddress && (!isProposer || isSafeOwner))
 
   const handleWalletSwitch = () => {
@@ -95,42 +91,16 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
 
   return (
     <>
-      <header
-        className={cn(
-          '@container flex flex-wrap gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background',
-          showLogo ? 'items-center' : 'items-start',
-          showMenuButton && 'pl-2',
-        )}
-      >
-        {showMenuButton ? (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="mr-2"
-            onClick={() => onMenuToggle?.((open) => !open)}
-            aria-label="Open sidebar menu"
-          >
-            <Menu className="size-5" strokeWidth={ICON_STROKE} />
-          </Button>
-        ) : null}
-
-        <div className={cn('mr-auto shrink-0 flex items-center', contextHeight, contextWrap)}>
-          {showLogo ? (
-            <SafeLogo />
-          ) : showSpaceSafeBar ? (
-            <SpaceSafeBar />
-          ) : (
-            <GlobalSearchInput className="h-full w-64 rounded-3xl md:w-80" />
-          )}
-        </div>
-
-        <div className="flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
-          {showSafeToken && (
-            <div className="hidden sm:block">
-              <SafenetStakingButton />
-            </div>
-          )}
-
+      <TopbarView
+        showLogo={showLogo}
+        showSpaceSafeBar={showSpaceSafeBar}
+        showMenuButton={showMenuButton}
+        onMenuClick={() => onMenuToggle?.((open) => !open)}
+        logo={<SafeLogo />}
+        safeBar={<SpaceSafeBar />}
+        SearchInput={GlobalSearchInput}
+        safenetStaking={showSafeToken && <SafenetStakingButton />}
+        navigation={
           <HeaderNavigation
             walletAddress={wallet?.address ?? ''}
             walletEns={walletName}
@@ -147,10 +117,9 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             batchCount={draftBatch.length}
             onBatchClick={() => onBatchToggle?.((open) => !open)}
           />
-
-          <HeaderAccountInfo />
-        </div>
-      </header>
+        }
+        accountInfo={<HeaderAccountInfo />}
+      />
 
       <GlobalSearchModal />
 

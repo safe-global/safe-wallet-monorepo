@@ -1,10 +1,7 @@
 import { useCallback } from 'react'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { Controller, useForm } from 'react-hook-form'
-import { Typography } from '@/components/ui/typography'
-import { Field } from '@/components/ui/field'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
-import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
+import { TxNoteInputView } from '@views/features/tx-notes/components/TxNoteInput/TxNoteInputView'
 
 const MAX_NOTE_LENGTH = 60
 
@@ -34,46 +31,31 @@ export default function TxNoteInput({ onChange }: { onChange: (note: string) => 
   }, [isDirty, note])
 
   return (
-    <div className="flex flex-col gap-2">
-      <TxSectionTitle>Note</TxSectionTitle>
-
-      <Controller
-        name="note"
-        control={control}
-        render={({ field }) => (
-          <Field>
-            <InputGroup inputSize="hero" data-testid="tx-note-textfield">
-              <InputGroupInput
-                name={field.name}
-                id="tx-note-input"
-                aria-label="Note"
-                placeholder="Optional"
-                value={field.value || ''}
-                maxLength={MAX_NOTE_LENGTH}
-                onChange={(e) => {
-                  const limitedValue = e.target.value.slice(0, MAX_NOTE_LENGTH)
-                  field.onChange(limitedValue)
-                  onChange(limitedValue)
-                }}
-                onFocus={onFocus}
-                onBlur={() => {
-                  field.onBlur()
-                  onBlur()
-                }}
-              />
-              <InputGroupAddon align="inline-end">
-                <Typography variant="paragraph-mini">
-                  {note.length}/{MAX_NOTE_LENGTH}
-                </Typography>
-              </InputGroupAddon>
-            </InputGroup>
-          </Field>
-        )}
-      />
-
-      <Typography data-testid="tx-note-alert" variant="paragraph-small" color="muted">
-        Notes are publicly visible. Do not share any private or sensitive details.
-      </Typography>
-    </div>
+    <TxNoteInputView
+      noteLength={note.length}
+      maxLength={MAX_NOTE_LENGTH}
+      renderController={(renderField) => (
+        <Controller
+          name="note"
+          control={control}
+          render={({ field }) =>
+            renderField({
+              name: field.name,
+              value: field.value || '',
+              onChange: (value) => {
+                const limitedValue = value.slice(0, MAX_NOTE_LENGTH)
+                field.onChange(limitedValue)
+                onChange(limitedValue)
+              },
+              onFocus,
+              onBlur: () => {
+                field.onBlur()
+                onBlur()
+              },
+            })
+          }
+        />
+      )}
+    />
   )
 }

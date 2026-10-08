@@ -4,6 +4,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MemberRole, MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { getSidebarProfileInfo } from '@views/features/spaces/components/HeaderNavigation/getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
+import { HeaderAccountInfoView } from '@views/features/spaces/components/HeaderNavigation/HeaderAccountInfoView'
 
 /**
  * Round account icon (with the sign-out popover) for the top bar, next to the
@@ -22,16 +23,18 @@ const HeaderAccountInfo = () => {
   const isMember = membership?.status === MemberStatus.ACTIVE && membership.role === MemberRole.MEMBER
 
   return (
-    <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
-      <AccountInfo
-        profileName={profileName}
-        displayName={isLoading ? '' : displayName}
-        shortDisplayName={isLoading ? '' : shortDisplayName}
-        isMember={isMember}
-        signerAddress={signerAddress}
-        connectedWallet={showConnectedWallet ? wallet?.address : undefined}
-      />
-    </div>
+    <HeaderAccountInfoView
+      accountInfo={
+        <AccountInfo
+          profileName={profileName}
+          displayName={isLoading ? '' : displayName}
+          shortDisplayName={isLoading ? '' : shortDisplayName}
+          isMember={isMember}
+          signerAddress={signerAddress}
+          connectedWallet={showConnectedWallet ? wallet?.address : undefined}
+        />
+      }
+    />
   )
 }
 

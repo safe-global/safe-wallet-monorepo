@@ -1,11 +1,12 @@
-import React, { type ReactElement } from 'react'
-import { Checkbox } from '@/components/ui/checkbox'
+import type { ReactElement } from 'react'
 import SendButton from './SendButton'
 import { SwapFeature } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import css from './styles.module.css'
+import { ActionButtonsView } from '@views/components/balances/AssetsTable/ActionButtonsView'
+
+const SWAP_AMOUNT = '0'
 
 interface ActionButtonsProps {
   tokenInfo: Balance['tokenInfo']
@@ -27,36 +28,20 @@ export const ActionButtons = ({
   onToggleAsset,
 }: ActionButtonsProps): ReactElement => {
   const { SwapButton } = useLoadFeature(SwapFeature)
-
-  if (mobile) {
-    return (
-      <div className={`flex flex-row ${css.mobileButtons}`}>
-        <div className={css.mobileButtonWrapper}>
-          <SendButton tokenInfo={tokenInfo} />
-        </div>
-
-        {isSwapFeatureEnabled && (
-          <div className={css.mobileButtonWrapper}>
-            <SwapButton tokenInfo={tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} />
-          </div>
-        )}
-      </div>
-    )
-  }
+  const iconOnly = mobile ? undefined : onlyIcon
 
   return (
-    <div className={`-mr-2 flex flex-row items-center justify-end gap-2 ${onlyIcon ? css.sticky : ''}`}>
-      <SendButton tokenInfo={tokenInfo} onlyIcon={onlyIcon} />
-
-      {isSwapFeatureEnabled && (
-        <SwapButton tokenInfo={tokenInfo} amount="0" trackingLabel={SWAP_LABELS.asset} onlyIcon={onlyIcon} />
-      )}
-
-      {showHiddenAssets && onToggleAsset && (
-        <div className="flex h-[28px] items-center">
-          <Checkbox checked={isSelected} onClick={onToggleAsset} data-testid="hide-asset-checkbox" />
-        </div>
-      )}
-    </div>
+    <ActionButtonsView
+      sendButton={<SendButton tokenInfo={tokenInfo} onlyIcon={iconOnly} />}
+      swapButton={
+        <SwapButton tokenInfo={tokenInfo} amount={SWAP_AMOUNT} trackingLabel={SWAP_LABELS.asset} onlyIcon={iconOnly} />
+      }
+      isSwapFeatureEnabled={isSwapFeatureEnabled}
+      onlyIcon={onlyIcon}
+      mobile={mobile}
+      showHiddenAssets={showHiddenAssets}
+      isSelected={isSelected}
+      onToggleAsset={onToggleAsset}
+    />
   )
 }

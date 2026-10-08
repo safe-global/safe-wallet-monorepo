@@ -27,7 +27,7 @@ jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
 }))
 
-jest.mock('../SafeBalanceBlock', () => {
+jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/SafeBalanceBlock', () => {
   const Mock = () => <div data-testid="safe-balance-block" />
   Mock.displayName = 'SafeBalanceBlock'
   return { __esModule: true, default: Mock }

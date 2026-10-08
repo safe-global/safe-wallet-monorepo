@@ -19,10 +19,19 @@ const read = (...segments: string[]) =>
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '')
 
-const SELECTOR_SOURCE = read('..', '..', '..', 'features', 'spaces', 'components', 'SafeSelectorDropdown', 'index.tsx')
+const VIEWS_ROOT = ['..', '..', '..', '..', '..', '..', 'storybook', 'src']
+const SELECTOR_SOURCE = read(
+  ...VIEWS_ROOT,
+  'features',
+  'spaces',
+  'components',
+  'SafeSelectorDropdown',
+  'SafeSelectorDropdownView.tsx',
+)
+const VIEWS = [...VIEWS_ROOT, 'components', 'common', 'SpaceSafeBar']
 const CHIP_SOURCES = {
-  'nested safes': read('SpaceNestedSafesButton.tsx'),
-  network: read('SpaceChainSelector.tsx'),
+  'nested safes': read(...VIEWS, 'SpaceNestedSafesButtonView.tsx'),
+  network: read(...VIEWS, 'SpaceChainSelectorView.tsx'),
 }
 
 // Class lists are matched by an anchor utility unique to the safe-bar controls, so the heights of

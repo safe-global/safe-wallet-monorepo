@@ -1,7 +1,7 @@
 import type { MutableRefObject, ReactElement } from 'react'
 import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
-import css from './styles.module.css'
 import { sanitizeUrl } from '@/utils/url'
+import { SafeAppIframeView } from '@views/components/safe-apps/AppFrame/SafeAppIframeView'
 
 type SafeAppIFrameProps = {
   appUrl: string
@@ -41,10 +41,9 @@ const SafeAppIframe = ({
   const encodedAppUrl = encodeURIComponent(appUrl)
 
   return (
-    <iframe
-      className={css.iframe}
+    <SafeAppIframeView
       id={`iframe-${encodedAppUrl}`}
-      ref={iframeRef}
+      iframeRef={iframeRef}
       src={sanitizedSafeAppUrl}
       title={title}
       onLoad={onLoad}

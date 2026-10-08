@@ -3,7 +3,7 @@ import { groupTxs, type AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement, ReactNode } from 'react'
 import { useMemo } from 'react'
 import TxListItem from '../TxListItem'
-import css from './styles.module.css'
+import { TxListView } from '@views/components/transactions/TxList/TxListView'
 import uniq from 'lodash/uniq'
 import BulkTxListGroup from '@/components/transactions/BulkTxListGroup'
 import type { AnyResults } from '@/utils/transaction-guards'
@@ -18,7 +18,7 @@ const getBulkGroupTxHash = (group: AnyTransactionItem[]) => {
 }
 
 export const TxListGrid = ({ children }: { children: ReactNode }): ReactElement => {
-  return <div className={css.container}>{children}</div>
+  return <TxListView>{children}</TxListView>
 }
 
 const TxList = ({ items }: TxListProps): ReactElement => {

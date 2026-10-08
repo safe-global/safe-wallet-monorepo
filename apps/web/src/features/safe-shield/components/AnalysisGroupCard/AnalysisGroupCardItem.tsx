@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   type AnalysisResult,
@@ -13,7 +11,7 @@ import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { AddressChanges } from '@views/features/safe-shield/components/AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
 import { ReportFalseResultModal } from '../ReportFalseResultModal'
-import { AnalysisDetailsDropdown } from '@views/features/safe-shield/components/AnalysisDetailsDropdown'
+import { AnalysisGroupCardItemView } from '@views/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardItemView'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult
@@ -40,60 +38,28 @@ export const AnalysisGroupCardItem = ({
   const hasError = Boolean(result.error)
 
   return (
-    <>
-      <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
-        <div className="border-l-4 p-3" style={{ borderLeftColor: borderColor }}>
-          <div className="flex flex-col gap-4">
-            <Typography variant="paragraph-small" className="break-words text-[var(--color-primary-light)]">
-              {displayDescription}
-            </Typography>
-
-            {hasError && (
-              <AnalysisDetailsDropdown
-                showLabel="Show details"
-                hideLabel="Hide details"
-                contentWrapper={(children) => (
-                  <div className="mt-1 rounded-[4px] bg-[var(--color-background-paper)] px-2 py-1 break-words">
-                    {children}
-                  </div>
-                )}
-              >
-                <Typography variant="paragraph-mini" className="leading-[14px] text-[var(--color-text-secondary)]">
-                  {result.error}
-                </Typography>
-              </AnalysisDetailsDropdown>
-            )}
-
-            <AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />
-
-            {isAddressChange(result) && <AddressChanges result={result} />}
-
-            {/* Only show ShowAllAddress dropdown if there are no issues (to avoid duplication) */}
-            {!hasIssues && result.addresses?.length && (
-              <ShowAllAddress addresses={result.addresses} showImage={showImage} />
-            )}
-
-            {shouldShowReportLink && (
-              <Link
-                variant="inherit"
-                render={<button type="button" />}
-                onClick={() => setIsReportModalOpen(true)}
-                className="cursor-pointer text-left text-xs leading-4 font-normal text-[var(--color-text-secondary)] no-underline hover:no-underline"
-              >
-                Report false result
-              </Link>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {shouldShowReportLink && (
-        <ReportFalseResultModal
-          open={isReportModalOpen}
-          onClose={() => setIsReportModalOpen(false)}
-          requestId={requestId}
-        />
-      )}
-    </>
+    <AnalysisGroupCardItemView
+      borderColor={borderColor}
+      description={displayDescription}
+      hasError={hasError}
+      error={result.error}
+      issuesDisplay={<AnalysisIssuesDisplay result={result} issueBackgroundColor={issueBackgroundColor} />}
+      addressChanges={isAddressChange(result) && <AddressChanges result={result} />}
+      // Only show ShowAllAddress if there are no issues (to avoid duplication)
+      showAllAddress={
+        !hasIssues && result.addresses?.length && <ShowAllAddress addresses={result.addresses} showImage={showImage} />
+      }
+      showReportLink={shouldShowReportLink}
+      onReportClick={() => setIsReportModalOpen(true)}
+      reportModal={
+        shouldShowReportLink && (
+          <ReportFalseResultModal
+            open={isReportModalOpen}
+            onClose={() => setIsReportModalOpen(false)}
+            requestId={requestId}
+          />
+        )
+      }
+    />
   )
 }

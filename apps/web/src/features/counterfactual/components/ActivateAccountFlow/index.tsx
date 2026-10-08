@@ -1,8 +1,6 @@
 import { createNewSafe, relaySafeCreation } from '@/components/new-safe/create/logic'
 import { NetworkFee, SafeSetupOverview } from '@/components/new-safe/create/steps/ReviewStep'
-import ReviewRow from '@/components/new-safe/ReviewRow'
 import { TxModalContext } from '@/components/tx-flow'
-import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxSubmitError from '@/components/tx/TxSubmitError'
@@ -26,10 +24,6 @@ import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
 import React, { useContext, useMemo, useState } from 'react'
 import { getSafeToL2SetupVersionByAddress } from '@safe-global/utils/services/contracts/deployments'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
@@ -42,6 +36,7 @@ import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/
 import type { TransactionOptions } from '@safe-global/types-kit'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import useGasPrice from '@/hooks/useGasPrice'
+import { ActivateAccountFlowView } from '@views/features/counterfactual/components/ActivateAccountFlow/ActivateAccountFlowView'
 
 const useActivateAccount = (undeployedSafe: UndeployedSafe | undefined) => {
   const chain = useCurrentChain()
@@ -153,90 +148,45 @@ const ActivateAccountFlow = () => {
   const submitDisabled = !isSubmittable || isWrongChain
 
   return (
-    <TxLayout title="Activate account" hideNonce hideSafeShield>
-      <TxCard>
-        <Typography>
-          You&apos;re about to deploy this Safe account and will have to confirm the transaction with your connected
-          wallet.
-        </Typography>
-
-        <Separator bleed="6" className="my-4" />
-
+    <ActivateAccountFlowView
+      layout={(title, children) => (
+        <TxLayout title={title} hideNonce hideSafeShield>
+          {children}
+        </TxLayout>
+      )}
+      safeSetupOverview={
         <SafeSetupOverview
           owners={owners.map((owner) => ({ name: '', address: owner }))}
           threshold={threshold}
           networks={chain ? [chain] : []}
         />
-
-        {showGasFeeEstimation && <Separator bleed="6" className="mt-4 mb-2" />}
-        <div className="flex flex-col gap-6">
-          {canRelay && (
-            <div>
-              <ReviewRow
-                name="Execution method"
-                value={
-                  <ExecutionMethodSelector
-                    executionMethod={executionMethod}
-                    setExecutionMethod={setExecutionMethod}
-                    offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
-                  />
-                }
-              />
-            </div>
-          )}
-
-          {showGasFeeEstimation && (
-            <div data-testid="network-fee-section">
-              <ReviewRow
-                name="Est. network fee"
-                value={
-                  <>
-                    <NetworkFee totalFee={totalFee} isWaived={willRelay || isWrongChain} chain={chain} />
-
-                    {!willRelay && (
-                      <Typography variant="paragraph-small" color="muted" className="block mt-2">
-                        {isWrongChain
-                          ? `Switch your connected wallet to ${chain?.chainName} to see the correct estimated network fee`
-                          : 'You will have to confirm a transaction with your connected wallet.'}
-                      </Typography>
-                    )}
-                  </>
-                }
-              />
-            </div>
-          )}
-
-          {submitError && (
-            <div className="mt-2">
-              <TxSubmitError error={submitError} />
-            </div>
-          )}
-          {isWrongChain && <NetworkWarning />}
-          {!walletCanPay && !willRelay && showInsufficientFundsWarning && (
-            <ErrorMessage>
-              Your connected wallet doesn&apos;t have enough funds to execute this transaction
-            </ErrorMessage>
-          )}
-        </div>
-
-        <Separator bleed="6" className="mt-4 mb-2" />
-
-        <div className="flex flex-row justify-end gap-6">
-          <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
-            {(isOk) => (
-              <Button
-                data-testid="activate-account-flow-btn"
-                onClick={createSafe}
-                size="lg"
-                disabled={!isOk || submitDisabled}
-              >
-                {!isSubmittable ? <Spinner className="size-5" /> : 'Activate'}
-              </Button>
-            )}
-          </CheckWallet>
-        </div>
-      </TxCard>
-    </TxLayout>
+      }
+      executionMethodSelector={
+        <ExecutionMethodSelector
+          executionMethod={executionMethod}
+          setExecutionMethod={setExecutionMethod}
+          offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
+        />
+      }
+      networkFee={<NetworkFee totalFee={totalFee} isWaived={willRelay || isWrongChain} chain={chain} />}
+      submitError={submitError ? <TxSubmitError error={submitError} /> : undefined}
+      networkWarning={<NetworkWarning />}
+      renderErrorMessage={(children) => <ErrorMessage>{children}</ErrorMessage>}
+      checkWallet={(render) => (
+        <CheckWallet checkNetwork={!submitDisabled} allowNonOwner allowUndeployedSafe>
+          {render}
+        </CheckWallet>
+      )}
+      canRelay={canRelay}
+      willRelay={willRelay}
+      isWrongChain={isWrongChain}
+      chainName={chain?.chainName}
+      showGasFeeEstimation={showGasFeeEstimation}
+      showInsufficientFunds={!walletCanPay && !willRelay && showInsufficientFundsWarning}
+      isSubmittable={isSubmittable}
+      submitDisabled={submitDisabled}
+      onActivate={createSafe}
+    />
   )
 }
 

@@ -1,17 +1,10 @@
 import useWallet from '@/hooks/wallets/useWallet'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Alert } from '@/components/ui/alert'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { useState, useMemo, useContext, useCallback } from 'react'
 import type { SyntheticEvent } from 'react'
-import TxCheckError from '@/components/tx/TxCheckError'
-import TxSubmitError from '@/components/tx/TxSubmitError'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import DecodedTxs from '@/components/tx-flow/flows/ExecuteBatch/DecodedTxs'
 import { useGasPaymentOptions } from '@/hooks/useGasPaymentOptions'
@@ -21,22 +14,17 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { logError, Errors } from '@/services/exceptions'
 import { createMultiSendCallOnlyTx, dispatchBatchExecution, dispatchBatchExecutionRelay } from '@/services/tx/tx-sender'
 import { getMultiSendTxs } from '@/utils/transactions'
-import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
 import CheckWallet from '@/components/common/CheckWallet'
 import type { ExecuteBatchFlowProps } from '.'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import SendToBlock from '@/components/tx/SendToBlock'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
 import { TxModalContext } from '@/components/tx-flow'
 import useGasPrice from '@/hooks/useGasPrice'
 import type { Overrides } from 'ethers'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { isWalletRejection } from '@/utils/wallets'
-import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
 import useUserNonce from '@/components/tx/AdvancedParams/useUserNonce'
-import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
@@ -44,6 +32,7 @@ import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/Sa
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 import { useMultiSendContract } from './useMultiSendContract'
+import { ReviewBatchView } from '@views/components/tx-flow/flows/ExecuteBatch/ReviewBatchView'
 
 /**
  * Build gas overrides for batch execution based on chain EIP-1559 support
@@ -60,25 +49,6 @@ const buildGasOverrides = (
 
   return { ...gasOverrides, nonce: userNonce }
 }
-
-const BatchErrorMessages = ({
-  estimationError,
-  submitError,
-  refusalMessage,
-  isRejectedByUser,
-}: {
-  estimationError: unknown
-  submitError: Error | undefined
-  refusalMessage?: string
-  isRejectedByUser: Boolean
-}) => (
-  <>
-    {estimationError && <TxCheckError error={asError(estimationError)} context="estimation" />}
-    {submitError && <TxSubmitError error={submitError} context="execution" />}
-    {refusalMessage && <ErrorMessage level="warning">{refusalMessage}</ErrorMessage>}
-    {isRejectedByUser && <WalletRejectionError />}
-  </>
-)
 
 export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const [isSubmittable, setIsSubmittable] = useState<boolean>(true)
@@ -219,67 +189,35 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const submitDisabled = loading || !isSubmittable || !gasPrice || isUntrustedSafeBlocked
 
   return (
-    <>
-      <TxCard>
-        <Typography variant="paragraph-small" className="block">
-          This transaction batches a total of {params.txs.length} transactions from your queue into a single Ethereum
-          transaction. Please check every included transaction carefully, especially if you have rejection transactions,
-          and make sure you want to execute all of them. Included transactions are highlighted when you hover over the
-          execute button.
-        </Typography>
-
-        {multiSendContract && <SendToBlock address={multiSendContractAddress} title="Interact with" />}
-
-        {multiSendTxData && <HexEncodedData title="Data" hexData={multiSendTxData} />}
-
-        <div>
-          <DecodedTxs txs={txsWithDetails} />
-        </div>
-
-        <Separator bleed="6" className="mt-4" />
-
-        <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
-
-        <NetworkWarning />
-
-        {(offer !== null || showsProUpsell) && (
-          <ExecutionMethodSelector
-            executionMethod={executionMethod}
-            setExecutionMethod={setExecutionMethod}
-            offer={offer}
-            showsProUpsell={showsProUpsell}
-            tooltip="You can only relay multisend transactions containing executions from the same Safe account."
-          />
-        )}
-
-        <Alert variant="warning" outlined={false}>
-          Be aware that if any of the included transactions revert, none of them will be executed. This will result in
-          the loss of the allocated transaction fees.
-        </Alert>
-
-        <BatchErrorMessages
-          refusalMessage={refusalMessage}
-          estimationError={error}
-          submitError={submitError}
-          isRejectedByUser={isRejectedByUser}
+    <ReviewBatchView
+      txCount={params.txs.length}
+      hasMultiSendContract={!!multiSendContract}
+      renderSendToBlock={(props) => <SendToBlock address={multiSendContractAddress} {...props} />}
+      multiSendTxData={multiSendTxData}
+      decodedTxs={<DecodedTxs txs={txsWithDetails} />}
+      networkWarning={<NetworkWarning />}
+      showExecutionMethodSelector={offer !== null || showsProUpsell}
+      renderExecutionMethodSelector={(props) => (
+        <ExecutionMethodSelector
+          executionMethod={executionMethod}
+          setExecutionMethod={setExecutionMethod}
+          offer={offer}
+          showsProUpsell={showsProUpsell}
+          {...props}
         />
-
-        <div>
-          <div className="pt-4">
-            <Separator bleed="6" />
-          </div>
-
-          <TxCardActions>
-            <CheckWallet allowNonOwner={true} checkNetwork>
-              {(isOk) => (
-                <Button type="submit" size="submit" disabled={!isOk || submitDisabled} onClick={handleSubmit}>
-                  {!isSubmittable ? <Spinner className="size-5" /> : 'Submit'}
-                </Button>
-              )}
-            </CheckWallet>
-          </TxCardActions>
-        </div>
-      </TxCard>
-    </>
+      )}
+      estimationError={error ? asError(error) : undefined}
+      submitError={submitError}
+      refusalMessage={refusalMessage}
+      isRejectedByUser={!!isRejectedByUser}
+      renderCheckWallet={(render) => (
+        <CheckWallet allowNonOwner={true} checkNetwork>
+          {render}
+        </CheckWallet>
+      )}
+      submitDisabled={submitDisabled}
+      isSubmittable={isSubmittable}
+      onSubmit={handleSubmit}
+    />
   )
 }

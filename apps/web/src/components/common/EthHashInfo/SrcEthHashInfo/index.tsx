@@ -1,18 +1,12 @@
-import classnames from 'classnames'
-import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { isAddress } from 'ethers'
-import NextLink, { type LinkProps } from 'next/link'
-import { Cloud } from 'lucide-react'
-import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
+import { type LinkProps } from 'next/link'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import Identicon from '../../Identicon'
 import CopyAddressButton from '../../CopyAddressButton'
-import ExplorerButton, { type ExplorerButtonProps } from '@views/components/common/ExplorerButton'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import ImageFallback from '@views/components/common/ImageFallback'
-import css from './styles.module.css'
-import { ContactSource } from '@/hooks/useAllAddressBooks'
+import { type ExplorerButtonProps } from '@views/components/common/ExplorerButton'
+import type { ContactSource } from '@/hooks/useAllAddressBooks'
+import { SrcEthHashInfoView } from '@views/components/common/EthHashInfo/SrcEthHashInfo/SrcEthHashInfoView'
 
 export type EthHashInfoProps = {
   address: string
@@ -42,8 +36,6 @@ export type EthHashInfoProps = {
   showAddressTooltip?: boolean
 }
 
-const stopPropagation = (e: SyntheticEvent) => e.stopPropagation()
-
 const SrcEthHashInfo = ({
   address,
   customAvatar,
@@ -71,123 +63,41 @@ const SrcEthHashInfo = ({
   const isMobile = useIsBelowSm()
   const identicon = <Identicon address={address} size={avatarSize} />
 
-  const accountStylesWithBadge = badgeTooltip
-    ? {
-        backgroundColor: 'var(--color-background-main)',
-        fontWeight: 'bold',
-        borderRadius: '16px',
-        padding: name ? '2px 8px 2px 6px' : undefined,
-      }
-    : undefined
-
-  const highlightedAddress = highlight4bytes ? (
-    <>
-      {address.slice(0, 2)}
-      <b>{address.slice(2, 6)}</b>
-      {address.slice(6, -4)}
-      <b>{address.slice(-4)}</b>
-    </>
-  ) : (
-    address
-  )
-
-  const addressElement = (
-    <>
-      {showPrefix && shouldPrefix && prefix && <b>{prefix}:</b>}
-      <span>{shortAddress || isMobile ? shortenAddress(address) : highlightedAddress}</span>
-    </>
-  )
-
   return (
-    <div className={css.container}>
-      {showAvatar && (
-        <div
-          className={css.avatarContainer}
-          style={avatarSize !== undefined ? { width: `${avatarSize}px`, height: `${avatarSize}px` } : undefined}
+    <SrcEthHashInfoView
+      address={address}
+      name={name}
+      identicon={identicon}
+      customAvatar={customAvatar}
+      avatarSize={avatarSize}
+      showAvatar={showAvatar}
+      onlyName={onlyName}
+      prefix={prefix}
+      showPrefix={showPrefix}
+      shouldPrefix={shouldPrefix}
+      shortAddress={shortAddress}
+      isMobile={isMobile}
+      copyAddress={copyAddress}
+      renderCopyableAddress={(addressElement) => (
+        <CopyAddressButton
+          address={address}
+          trusted={trusted}
+          initialToolTipText={showAddressTooltip ? address : undefined}
         >
-          {customAvatar ? (
-            <ImageFallback src={customAvatar} fallbackComponent={identicon} width={avatarSize} height={avatarSize} />
-          ) : (
-            identicon
-          )}
-        </div>
+          {addressElement}
+        </CopyAddressButton>
       )}
-
-      <div className={classnames('gap-1 overflow-hidden', { [css.inline]: onlyName })}>
-        {!!name ? (
-          <div
-            title={name}
-            className={classnames('ethHashInfo-name flex items-center gap-1', { 'font-bold': boldLabel })}
-            style={accountStylesWithBadge}
-          >
-            {href ? (
-              <NextLink href={href} className="overflow-hidden text-ellipsis text-inherit hover:underline">
-                {name}
-              </NextLink>
-            ) : (
-              <div className="overflow-hidden text-ellipsis">{name}</div>
-            )}
-
-            {badgeTooltip
-              ? badgeTooltip
-              : !!addressBookNameSource && (
-                  <Tooltip>
-                    <TooltipTrigger render={<span style={{ lineHeight: 0 }} />}>
-                      {addressBookNameSource === ContactSource.local ? (
-                        <AddressBookIcon className="size-5 text-[var(--color-border-main)]" />
-                      ) : (
-                        <Cloud className="size-5 text-[var(--color-border-main)]" />
-                      )}
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      From your {addressBookNameSource === ContactSource.space ? 'Workspace' : 'local'} address book
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-          </div>
-        ) : (
-          badgeTooltip && <div className="flex items-center gap-1">{badgeTooltip}</div>
-        )}
-
-        <div className={classnames(css.addressContainer, { [css.inline]: onlyName })}>
-          {(!onlyName || !name) && (
-            <div
-              className={classnames(
-                'overflow-hidden text-ellipsis',
-                boldLabel && !name ? 'font-bold' : 'font-[weight:inherit]',
-                'text-[length:inherit]',
-              )}
-            >
-              {href && !name ? (
-                <NextLink href={href} className="text-inherit hover:underline">
-                  {addressElement}
-                </NextLink>
-              ) : copyAddress ? (
-                <CopyAddressButton
-                  address={address}
-                  trusted={trusted}
-                  initialToolTipText={showAddressTooltip ? address : undefined}
-                >
-                  {addressElement}
-                </CopyAddressButton>
-              ) : (
-                addressElement
-              )}
-            </div>
-          )}
-
-          {showCopyButton && <CopyAddressButton address={address} trusted={trusted} />}
-
-          {hasExplorer && ExplorerButtonProps && (
-            <div className="text-[var(--color-border-main)]">
-              <ExplorerButton {...ExplorerButtonProps} onClick={stopPropagation} />
-            </div>
-          )}
-
-          {children}
-        </div>
-      </div>
-    </div>
+      copyButton={showCopyButton && <CopyAddressButton address={address} trusted={trusted} />}
+      hasExplorer={hasExplorer}
+      ExplorerButtonProps={ExplorerButtonProps}
+      addressBookNameSource={addressBookNameSource}
+      highlight4bytes={highlight4bytes}
+      badgeTooltip={badgeTooltip}
+      href={href}
+      boldLabel={boldLabel}
+    >
+      {children}
+    </SrcEthHashInfoView>
   )
 }
 

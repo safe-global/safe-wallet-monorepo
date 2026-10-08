@@ -2,11 +2,6 @@ import { FormProvider, useForm } from 'react-hook-form'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
-import { Alert } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { SearchInput } from '@/components/ui/search-input'
-import DialogActions from '@/components/common/DialogActions'
-
 import ContactsList from './ContactsList'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useContactSearch } from '../useContactSearch'
@@ -25,6 +20,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { ImportAddressBookDialogView } from '@views/features/spaces/components/SpaceAddressBook/Import/ImportAddressBookDialogView'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined>
@@ -133,42 +129,19 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
   }, [isSuccess])
 
   return (
-    <Dialog open onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent padding="none">
-        <DialogHeader divided>
-          <DialogTitle className="font-bold text-xl">Import address book</DialogTitle>
-        </DialogHeader>
-
-        <FormProvider {...formMethods}>
-          <form onSubmit={onSubmit}>
-            <div className="px-4 pt-4 mb-2">
-              <SearchInput
-                id="search-by-name"
-                placeholder="Search"
-                aria-label="Search contact list by name or address"
-                onChange={(e) => handleSearch(e.target.value)}
-              />
-            </div>
-
-            <ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />
-
-            <DialogFooter divided className="items-stretch">
-              {error && <Alert variant="destructive">{error}</Alert>}
-
-              <DialogActions
-                onCancel={handleClose}
-                cancelTestId="cancel-btn"
-                confirmLabel={`Import contacts (${selectedCount})`}
-                confirmType="submit"
-                confirmLoading={isSubmitting}
-                confirmDisabled={selectedCount === 0 || isSuccess}
-                confirmTooltip={hasNoImportableContacts ? 'You have no new contacts to import.' : undefined}
-              />
-            </DialogFooter>
-          </form>
-        </FormProvider>
-      </DialogContent>
-    </Dialog>
+    <FormProvider {...formMethods}>
+      <ImportAddressBookDialogView
+        onClose={handleClose}
+        onSubmit={onSubmit}
+        onSearch={handleSearch}
+        contactsList={<ContactsList contactItems={searchQuery ? filteredEntries : allContactItems} />}
+        error={error}
+        selectedCount={selectedCount}
+        isSubmitting={isSubmitting}
+        isSuccess={isSuccess}
+        hasNoImportableContacts={hasNoImportableContacts}
+      />
+    </FormProvider>
   )
 }
 

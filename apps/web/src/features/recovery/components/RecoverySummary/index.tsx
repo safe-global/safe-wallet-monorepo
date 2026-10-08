@@ -1,15 +1,12 @@
 import type { ReactElement } from 'react'
 
-import RecoveryType from '@views/features/recovery/components/RecoveryType'
-import RecoveryInfo from '@views/features/recovery/components/RecoveryInfo'
 import RecoveryStatus from '../RecoveryStatus'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
-import classNames from 'classnames'
-import css from '@/components/transactions/TxSummary/styles.module.css'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import DateTime from '@/components/common/DateTime'
+import { RecoverySummaryView } from '@views/features/recovery/components/RecoverySummary/RecoverySummaryView'
 
 export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): ReactElement {
   const wallet = useWallet()
@@ -17,28 +14,13 @@ export default function RecoverySummary({ item }: { item: RecoveryQueueItem }): 
   const { isMalicious } = item
 
   return (
-    <div data-testid="transaction-item" className={classNames(css.gridContainer, css.queue, css.recovery)}>
-      <div className={css.type} style={{ gridArea: 'type' }}>
-        <RecoveryType isMalicious={isMalicious} />
-      </div>
-
-      <div className={css.info} style={{ gridArea: 'info' }}>
-        <RecoveryInfo isMalicious={isMalicious} />
-      </div>
-
-      <div style={{ gridArea: 'date' }} data-testid="tx-date" className={css.date}>
-        <DateTime value={Number(item.timestamp)} />
-      </div>
-
-      <div className={css.actions} style={{ gridArea: 'actions' }}>
-        {!isExecutable || isPending ? (
-          <RecoveryStatus recovery={item} />
-        ) : (
-          <div data-testid="tx-actions">
-            {!isMalicious && wallet && <ExecuteRecoveryButton recovery={item} compact />}
-          </div>
-        )}
-      </div>
-    </div>
+    <RecoverySummaryView
+      isMalicious={isMalicious}
+      showStatus={!isExecutable || isPending}
+      showExecuteButton={!isMalicious && !!wallet}
+      date={<DateTime value={Number(item.timestamp)} />}
+      status={<RecoveryStatus recovery={item} />}
+      executeButton={<ExecuteRecoveryButton recovery={item} compact />}
+    />
   )
 }

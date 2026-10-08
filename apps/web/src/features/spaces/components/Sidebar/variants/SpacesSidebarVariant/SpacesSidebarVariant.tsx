@@ -1,15 +1,4 @@
 import type { ReactElement } from 'react'
-import { motion } from 'motion/react'
-import {
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarGroupContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarSeparator,
-} from '@/components/ui/sidebar'
-import css from '../../styles.module.css'
 import type {
   SpaceSelectorProps,
   ResolvedSidebarNavItem,
@@ -18,7 +7,7 @@ import type {
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
-import { containerVariants, itemVariants } from '@views/features/spaces/components/Sidebar/constants'
+import { SpacesSidebarVariantView } from '@views/features/spaces/components/Sidebar/variants/SpacesSidebarVariant/SpacesSidebarVariantView'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null
@@ -40,60 +29,16 @@ export const SpacesSidebarVariant = ({
   const displaySetupItems = setupGroup?.items || Array(SPACES_SETUP_GROUP_SKELETON_COUNT).fill(null)
 
   return (
-    <SidebarContent>
-      <motion.div variants={containerVariants} initial="hidden" animate="visible">
-        <motion.div variants={itemVariants} className="mb-6 group-data-[collapsible=icon]:mb-4">
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        </motion.div>
-
-        {/* Main Navigation */}
-        <motion.div variants={itemVariants}>
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5">
-                {displayMainNavItems.map((item, index) => (
-                  <NavItem
-                    key={item?.href ?? `skeleton-main-${index}`}
-                    item={item}
-                    isSpacesVariant
-                    isLoading={isLoading}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </motion.div>
-
-        {/* Setup Group */}
-        <motion.div variants={itemVariants}>
-          <SidebarGroup className={css.sidebarGroup}>
-            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-              {setupGroup?.label ?? ''}
-            </SidebarGroupLabel>
-            <SidebarSeparator className={css.collapsedSeparator} />
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0">
-                {displaySetupItems.map((item, index) => (
-                  <NavItem
-                    key={item?.href ?? `skeleton-setup-${index}`}
-                    item={item}
-                    isSpacesVariant
-                    isLoading={isLoading}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </motion.div>
-
-        <SidebarDeveloperGroup isLoading={isLoading} />
-      </motion.div>
-    </SidebarContent>
+    <SpacesSidebarVariantView
+      spaceSelector={<SpaceSelectorDropdown selectedSpace={selectedSpace} spaces={spaces} />}
+      mainNavItems={displayMainNavItems.map((item, index) => (
+        <NavItem key={item?.href ?? `skeleton-main-${index}`} item={item} isSpacesVariant isLoading={isLoading} />
+      ))}
+      setupGroupLabel={setupGroup?.label ?? ''}
+      setupItems={displaySetupItems.map((item, index) => (
+        <NavItem key={item?.href ?? `skeleton-setup-${index}`} item={item} isSpacesVariant isLoading={isLoading} />
+      ))}
+      developerGroup={<SidebarDeveloperGroup isLoading={isLoading} />}
+    />
   )
 }

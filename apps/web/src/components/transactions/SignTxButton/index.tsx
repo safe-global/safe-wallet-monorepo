@@ -3,18 +3,15 @@ import { useIsExpiredSwap } from '@/features/swap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
 import { useContext, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { isSignableBy } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
-import Track from '@/components/common/Track'
-import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { TxModalContext } from '@/components/tx-flow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
+import { SignTxButtonView } from '@views/components/transactions/SignTxButton/SignTxButtonView'
 
 const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; compact?: boolean }): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -35,33 +32,16 @@ const SignTxButton = ({ txSummary, compact = false }: { txSummary: Transaction; 
 
   return (
     <CheckWallet>
-      {(isOk) => {
-        const button = (
-          <span>
-            <Track {...TX_LIST_EVENTS.CONFIRM}>
-              <Button
-                onClick={onClick}
-                variant={compact ? 'outline' : 'default'}
-                disabled={!isOk || isDisabled}
-                // Matches ExecuteTxButton — both sit in the same queue row slot, so a different height
-                // here would make Confirm and Execute rows inconsistent.
-                size={compact ? 'default' : 'action'}
-              >
-                Confirm
-              </Button>
-            </Track>
-          </span>
-        )
-
-        return isOk && !isSignable && isSafeOwner ? (
-          <Tooltip>
-            <TooltipTrigger render={button} />
-            <TooltipContent>You&apos;ve already signed this transaction</TooltipContent>
-          </Tooltip>
-        ) : (
-          button
-        )
-      }}
+      {(isOk) => (
+        <SignTxButtonView
+          isOk={isOk}
+          isSignable={!!isSignable}
+          isSafeOwner={isSafeOwner}
+          isDisabled={!!isDisabled}
+          compact={compact}
+          onClick={onClick}
+        />
+      )}
     </CheckWallet>
   )
 }

@@ -1,0 +1,116 @@
+import * as React from 'react'
+import { Input as InputPrimitive } from '@base-ui/react/input'
+import { cva, type VariantProps } from 'class-variance-authority'
+
+import { cn } from '@/utils/cn'
+
+/**
+ * Heights mirror `Button`'s so a field and a button on the same row line up: `sm` (h-8) pairs with
+ * `size="sm"`, `default` (h-9) with `size="default"` and SelectTrigger's default, `lg` (h-10) with
+ * `size="lg"`/`"action"`/`"submit"`. `hero` (66px) is the tall Safe-creation / big-filter field.
+ * Prefer `inputSize` over a hand-rolled `className="h-…"`. Border uses the shared `--border` token (not a
+ * hard-coded gray). NB: `--input` is the field *fill* token, not a border colour — a visible field
+ * border must use `border-border`, like AddressInput.
+ *
+ * Skins: `default` (`bg-input`) is the filled field — white in light mode, a translucent lift in dark
+ * that works over any parent surface. `surface` (`bg-card`) is the opaque card-coloured fill; reach
+ * for it only when translucency would show through (over images, gradients or coloured strips).
+ *
+ * `text-foreground` is explicit because an invalid `Field` ancestor sets `text-destructive`,
+ * which the typed value would otherwise inherit — only border/ring and label carry the error colour.
+ */
+const inputVariants = cva(
+  'border-border border shadow-none focus-visible:ring-0 focus-visible:border-border aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md py-1.5 text-base text-foreground transition-[color,box-shadow] file:h-7 file:text-sm file:font-medium md:text-sm file:text-foreground placeholder:text-muted-foreground w-full min-w-0 outline-none file:inline-flex file:border-0 file:bg-transparent disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  {
+    variants: {
+      // Named `inputSize` (not `size`) so it doesn't collide with the native numeric `size` attr
+      // that callers spread through via `ComponentProps<'input'>`. SelectTrigger uses `size` freely
+      // because its props have no native `size`.
+      inputSize: {
+        sm: 'h-8 px-3',
+        default: 'h-9 px-3',
+        lg: 'h-10 px-3',
+        hero: 'h-[66px] min-h-[66px] rounded-[calc(var(--radius)-2px)] px-4',
+      },
+      variant: {
+        default: 'bg-input',
+        surface: 'bg-card dark:bg-card',
+      },
+    },
+    defaultVariants: {
+      inputSize: 'default',
+      variant: 'default',
+    },
+  },
+)
+
+/**
+ * The error message rendered under the field. `sm` is the design-system default (matches
+ * `FieldError`); `xs` is for compact rows where a full-size message would crowd the layout.
+ */
+const inputErrorVariants = cva('mt-1 text-destructive', {
+  variants: {
+    errorSize: {
+      sm: 'text-sm',
+      xs: 'text-xs',
+    },
+  },
+  defaultVariants: {
+    errorSize: 'sm',
+  },
+})
+
+/**
+ * Input Component
+ *
+ * Displays a form input field.
+ *
+ * @see https://ui.shadcn.com/docs/components/base/input
+ *
+ * @example
+ * ```tsx
+ * <Input type="email" placeholder="Email" />
+ * ```
+ *
+ * @remarks
+ * Key Props:
+ * - `type`, `placeholder`, `disabled`, `className` — extends native input props, see Base UI
+ * - `error`, `errorSize` ('sm' | 'xs') — message rendered under the field
+ */
+
+export type InputViewProps = Omit<React.ComponentProps<'input'>, 'aria-invalid'> &
+  VariantProps<typeof inputVariants> &
+  VariantProps<typeof inputErrorVariants> & {
+    errorMessage?: string
+    invalid?: boolean
+  }
+
+function InputView({
+  className,
+  type,
+  inputSize,
+  variant,
+  errorSize,
+  errorMessage,
+  invalid,
+  ...props
+}: InputViewProps) {
+  return (
+    <div className="w-full">
+      <InputPrimitive
+        type={type}
+        data-slot="input"
+        aria-invalid={invalid || undefined}
+        className={cn(inputVariants({ inputSize, variant }), className)}
+        {...props}
+      />
+      {errorMessage ? (
+        <p role="alert" data-slot="field-error" className={inputErrorVariants({ errorSize })}>
+          {errorMessage}
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+export { InputView, inputVariants, inputErrorVariants }

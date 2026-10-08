@@ -1,24 +1,13 @@
-import Link from 'next/link'
-import { EllipsisVertical } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Separator } from '@/components/ui/separator'
-import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { SpaceSummary } from '@views/features/spaces/components/SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
-import { AdminOnlyWorkspaceTooltip } from '@views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
-import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import { useBillingSpaceId } from '../../hooks/billing/useBillingSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
-
-const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
+import { SpaceRowView } from '@views/features/spaces/components/SpacesList/SpaceRowView'
 
 /**
  * A single workspace row in the welcome "Workspaces" list, showing the
@@ -42,7 +31,6 @@ const SpaceRow = ({
     ...SPACE_REFRESH_OPTIONS,
     selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
   })
-  const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   const handleOpenWorkspace = () => {
     trackEvent(
@@ -57,55 +45,19 @@ const SpaceRow = ({
   }
 
   return (
-    <>
-      <div
-        data-testid="space-row"
-        className="relative isolate before:absolute before:-inset-x-3 before:inset-y-1 before:-z-10 before:rounded-md hover:before:bg-muted"
-      >
-        <Link
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } }}
-          onClick={handleOpenWorkspace}
-          className="flex items-center gap-3 py-3 pr-10"
-        >
-          <InitialsAvatar name={space.name} size="medium" rounded />
-          <div className="min-w-0 flex-1">
-            <SpaceSummary
-              name={space.name}
-              numberOfAccounts={space.safeCount}
-              numberOfMembers={space.memberCount}
-              isCompact
-            />
-          </div>
-          {plan && (
-            <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
-              <span className="block h-4 w-6">
-                <ProChip className="size-full" />
-              </span>
-              {badgeLabel && `· ${badgeLabel}`}
-            </Badge>
-          )}
-        </Link>
-
-        <div className="absolute right-0 top-1/2 -translate-y-1/2">
-          <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="left" message={MEMBER_NO_EDIT_MESSAGE}>
-            {isAdmin ? (
-              <SpaceContextMenu space={space} />
-            ) : (
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                data-testid="space-row-locked-actions"
-                disabled
-                aria-label={MEMBER_NO_EDIT_MESSAGE}
-              >
-                <EllipsisVertical className="text-muted-foreground" />
-              </Button>
-            )}
-          </AdminOnlyWorkspaceTooltip>
-        </div>
-      </div>
-      {showDivider && <Separator />}
-    </>
+    <SpaceRowView
+      uuid={space.uuid}
+      name={space.name}
+      safeCount={space.safeCount}
+      memberCount={space.memberCount}
+      hasPlan={!!plan}
+      planName={plan?.name ?? undefined}
+      isTrialing={plan?.status === 'trialing'}
+      isAdmin={isAdmin}
+      showDivider={showDivider}
+      onOpenWorkspace={handleOpenWorkspace}
+      contextMenu={<SpaceContextMenu space={space} />}
+    />
   )
 }
 

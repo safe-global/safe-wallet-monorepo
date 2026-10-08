@@ -1,20 +1,11 @@
-import { LogOut, Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { useCurrentMemberProfile, MemberStatus, getMemberDisplayName } from '@/features/spaces'
 import { SwitchAuthenticatorSection, WalletTwoFactorSection } from '@/features/oidc-auth'
 import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import InitialsAvatar from '@/components/common/InitialsAvatar'
-import SpaceSettingsSection, {
-  SpaceSettingsSectionTitle,
-} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import EditMemberDialog from '../../MembersList/EditMemberDialog'
+import { AccountPageView } from '@views/features/spaces/components/SpaceSettings/pages/AccountPageView'
 
 const AccountPage = () => {
   const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
@@ -26,97 +17,30 @@ const AccountPage = () => {
     logout()
   }
 
-  if (isLoading && !membership) {
-    return (
-      <SpaceSettingsSection>
-        <SpaceSettingsSectionTitle>Signed in</SpaceSettingsSectionTitle>
-        <div className="flex items-center gap-4">
-          <Skeleton className="size-12 rounded-md" />
-          <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-3 w-16" />
-          </div>
-        </div>
-      </SpaceSettingsSection>
-    )
-  }
-
-  if (!membership || membership.status !== MemberStatus.ACTIVE) {
-    return (
-      <SpaceSettingsSection data-testid="settings-account-page">
-        <SpaceSettingsSectionTitle className="mb-2">Signed in</SpaceSettingsSectionTitle>
-        <Typography variant="paragraph-small" color="muted">
-          You&apos;re not signed in to this Workspace.
-        </Typography>
-      </SpaceSettingsSection>
-    )
-  }
-
-  const memberName = getMemberDisplayName(membership) || 'User'
-  const role = membership.role.toLowerCase()
+  const isActive = !!membership && membership.status === MemberStatus.ACTIVE
+  const status = isLoading && !membership ? 'loading' : isActive ? 'active' : 'signed-out'
 
   return (
-    <>
-      <SpaceSettingsSection data-testid="settings-account-page">
-        <SpaceSettingsSectionTitle>Signed in</SpaceSettingsSectionTitle>
-
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <InitialsAvatar name={memberName} size="large" rounded />
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1">
-                <Typography variant="paragraph-small-bold" className="block">
-                  {memberName}
-                </Typography>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  onClick={() => setIsEditOpen(true)}
-                  aria-label="Edit your name"
-                  data-testid="settings-edit-name"
-                >
-                  <Pencil className="size-3.5 text-muted-foreground" />
-                </Button>
-              </div>
-              {email ? (
-                <Typography variant="paragraph-mini" color="muted" className="block mt-0.5">
-                  {email}
-                </Typography>
-              ) : signerAddress ? (
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <Typography
-                        variant="paragraph-mini"
-                        color="muted"
-                        className="block mt-0.5 font-mono w-fit cursor-default"
-                      />
-                    }
-                  >
-                    {shortenAddress(signerAddress)}
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="font-mono">
-                    {signerAddress}
-                  </TooltipContent>
-                </Tooltip>
-              ) : null}
-              <Typography variant="paragraph-mini" color="muted" className="block mt-0.5 capitalize">
-                {role}
-              </Typography>
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut} data-testid="settings-account-sign-out">
-            <LogOut className="h-3.5 w-3.5" />
-            Sign out
-          </Button>
-        </div>
-
-        {isEditOpen && <EditMemberDialog member={membership} handleClose={() => setIsEditOpen(false)} />}
-      </SpaceSettingsSection>
-
-      <SwitchAuthenticatorSection />
-      <WalletTwoFactorSection />
-    </>
+    <AccountPageView
+      status={status}
+      memberName={membership ? getMemberDisplayName(membership) : undefined}
+      role={membership?.role.toLowerCase()}
+      email={email}
+      signerAddress={signerAddress}
+      onEditName={() => setIsEditOpen(true)}
+      onSignOut={handleSignOut}
+      editDialog={
+        isEditOpen && membership ? (
+          <EditMemberDialog member={membership} handleClose={() => setIsEditOpen(false)} />
+        ) : null
+      }
+      authSections={
+        <>
+          <SwitchAuthenticatorSection />
+          <WalletTwoFactorSection />
+        </>
+      }
+    />
   )
 }
 

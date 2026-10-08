@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 
-import FileIcon from '@/public/images/settings/data/file.svg'
-import ExportIcon from '@/public/images/common/export.svg'
 import { getPersistedState, useAppSelector } from '@/store'
 import { addressBookSlice, selectAllAddressBooks } from '@/store/addressBookSlice'
 import { addedSafesSlice, selectAllAddedSafes } from '@/store/addedSafesSlice'
@@ -16,11 +12,8 @@ import { SAFE_EXPORT_VERSION } from '@/components/settings/DataManagement/useGlo
 import { FileListCard } from '@/components/settings/DataManagement/FileListCard'
 import { selectAllVisitedSafes, visitedSafesSlice } from '@/store/visitedSafesSlice'
 
-import css from './styles.module.css'
-import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
-import SettingsCard from '@views/components/settings/SettingsCard'
+import { DataManagementView } from '@views/components/settings/DataManagement/DataManagementView'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -77,56 +70,33 @@ const DataManagement = () => {
   }, [])
 
   return (
-    <>
-      <SettingsCard title="Data export" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
-        <div data-testid="export-file-section">
-          <Typography>Download your local data with your added Safe accounts, address book and settings.</Typography>
-
-          <FileListCard
-            avatar={
-              <div className={`${css.fileIcon} rounded`}>
-                <FileIcon className="size-4 fill-none" />
-              </div>
-            }
-            title={<b>{exportFileName}</b>}
-            action={
-              <Track {...OVERVIEW_EVENTS.EXPORT_DATA} label={OVERVIEW_LABELS.settings}>
-                <Button className="min-w-[unset] p-[var(--space-1)]" onClick={exportAppData}>
-                  <ExportIcon className="size-4" />
-                </Button>
-              </Track>
-            }
-            addedSafes={addedSafes}
-            addressBook={addressBook}
-            settings={settings}
-            visitedSafes={visitedSafes}
-            safeApps={safeApps}
-            undeployedSafes={undeployedSafes}
-          />
-        </div>
-      </SettingsCard>
-
-      <SettingsCard title="Data import" className="mb-4" contentClassName="sm:grid-cols-[1fr_2fr]">
-        <div>
-          <ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />
-        </div>
-
-        {jsonData && (
+    <DataManagementView
+      exportFileName={exportFileName}
+      onExport={exportAppData}
+      renderExportFileList={(headerProps) => (
+        <FileListCard
+          {...headerProps}
+          addedSafes={addedSafes}
+          addressBook={addressBook}
+          settings={settings}
+          visitedSafes={visitedSafes}
+          safeApps={safeApps}
+          undeployedSafes={undeployedSafes}
+        />
+      )}
+      importUpload={<ImportFileUpload setFileName={setImportFileName} setJsonData={setJsonData} />}
+      importDialog={
+        jsonData && (
           <ImportDialog
             jsonData={jsonData}
             fileName={importFileName}
             setJsonData={setJsonData}
             setFileName={setImportFileName}
           />
-        )}
-      </SettingsCard>
-
-      <SettingsCard title="Pending transactions" contentClassName="sm:grid-cols-[1fr_2fr]">
-        <div data-testid="clear-pending-tx-section">
-          <ClearPendingTxs />
-        </div>
-      </SettingsCard>
-    </>
+        )
+      }
+      clearPendingTxs={<ClearPendingTxs />}
+    />
   )
 }
 

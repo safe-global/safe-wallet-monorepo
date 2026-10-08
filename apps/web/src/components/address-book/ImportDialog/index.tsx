@@ -1,22 +1,16 @@
-import { Typography } from '@/components/ui/typography'
 import { useCSVReader, formatFileSize } from 'react-papaparse'
 import type { ParseResult } from 'papaparse'
 import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
-import ModalDialog from '@/components/common/ModalDialog'
-import DialogActions from '@/components/common/DialogActions'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
-
-import css from './styles.module.css'
 import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
 import FileUpload, { FileTypes, type FileInfo } from '@/components/common/FileUpload'
-import ExternalLink from '@/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { ImportDialogView, ImportSummaryView } from '@views/components/address-book/ImportDialog/ImportDialogView'
 
 type AddressBookCSVRow = ['address', 'name', 'chainId']
 
@@ -28,6 +22,8 @@ type PapaparseErrorType = {
   row?: number
   index?: number
 }
+
+const CSV_MIME_TYPE = 'text/csv'
 
 const hasEntry = (entry: string[]) => {
   return entry.length === 3 && entry[0] && entry[1] && entry[2]
@@ -71,10 +67,15 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Import address book" hideChainIndicator>
-      <div className="px-6 py-5">
+    <ImportDialogView
+      brandName={BRAND_NAME}
+      onClose={handleClose}
+      onImport={handleImport}
+      importDisabled={!csvData || !!error}
+      errorMessage={error && <ErrorMessage>{error}</ErrorMessage>}
+      uploader={
         <CSVReader
-          accept="text/csv"
+          accept={CSV_MIME_TYPE}
           multiple={false}
           onDragOver={() => {
             setZoneHover(true)
@@ -129,11 +130,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               ? {
                   name: acceptedFile.name,
                   additionalInfo: formatFileSize(acceptedFile.size),
-                  summary: [
-                    <Typography data-testid="summary-message" key="abSummary">
-                      {`Found ${entryCount} entries on ${chainCount} ${chainCount > 1 ? 'chains' : 'chain'}`}
-                    </Typography>,
-                  ],
+                  summary: [<ImportSummaryView key="abSummary" entryCount={entryCount} chainCount={chainCount} />],
                 }
               : undefined
 
@@ -148,32 +145,8 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
             )
           }}
         </CSVReader>
-
-        <div className={css.horizontalDivider} />
-
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-
-        <Typography>
-          Only CSV files exported from a {BRAND_NAME} can be imported.
-          <br />
-          <ExternalLink
-            href={HelpCenterArticle.ADDRESS_BOOK_DATA}
-            title="Learn about the address book import and export"
-          >
-            Learn about the address book import and export
-          </ExternalLink>
-        </Typography>
-      </div>
-      <DialogActions
-        className="p-6 pt-2"
-        onCancel={handleClose}
-        cancelTestId="cancel-btn"
-        confirmLabel="Import"
-        onConfirm={handleImport}
-        confirmDisabled={!csvData || !!error}
-        confirmTestId="import-btn"
-      />
-    </ModalDialog>
+      }
+    />
   )
 }
 

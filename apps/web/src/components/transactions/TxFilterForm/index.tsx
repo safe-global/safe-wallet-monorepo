@@ -1,7 +1,3 @@
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Label } from '@/components/ui/label'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
 import { useMemo, type ReactElement } from 'react'
@@ -15,8 +11,8 @@ import { txFilter, useTxFilter, TxFilterType, type TxFilter } from '@/utils/tx-h
 import { useCurrentChain } from '@/hooks/useChains'
 import NumberField from '@/components/common/NumberField'
 
-import css from './styles.module.css'
 import AddressInput from '@/components/common/AddressInput'
+import { TxFilterFormView } from '@views/components/transactions/TxFilterForm/TxFilterFormView'
 
 enum TxFilterFormFieldNames {
   FILTER_TYPE = 'type',
@@ -110,190 +106,113 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
   }
 
   return (
-    <div className={css.filterWrapper}>
-      <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div data-testid="filter-modal" className="flex min-w-0 flex-col md:min-h-[320px] md:flex-row">
-            <div className="w-full shrink-0 p-6 md:w-[220px] md:p-8">
-              <div className="flex w-full flex-col">
-                <Label className={css.filterSectionTitle}>Transaction type</Label>
-                <Controller
-                  name={TxFilterFormFieldNames.FILTER_TYPE}
-                  control={control}
-                  render={({ field }) => (
-                    <RadioGroup
-                      value={field.value}
-                      onValueChange={field.onChange}
-                      onBlur={field.onBlur}
-                      className="gap-4"
-                    >
-                      {Object.values(TxFilterType).map((value) => (
-                        <div key={value} className={css.radioOption}>
-                          <RadioGroupItem value={value} id={`filter-type-${value}`} />
-                          <Label htmlFor={`filter-type-${value}`} className="font-normal">
-                            {value}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                  )}
-                />
-              </div>
-            </div>
-
-            <Separator orientation="vertical" className="hidden md:block md:self-stretch" />
-
-            <div className="w-full min-w-0 flex-1 p-6 md:p-8">
-              <div className="flex w-full flex-col">
-                <Label className={css.filterSectionTitle}>Parameters</Label>
-                <div className="flex flex-col gap-4">
-                  {!isModuleFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField} data-testid="start-date">
-                        <DatePickerInput
-                          name={TxFilterFormFieldNames.DATE_FROM}
-                          label="From"
-                          deps={[TxFilterFormFieldNames.DATE_TO]}
-                          validate={(val: TxFilterFormState[TxFilterFormFieldNames.DATE_FROM]) => {
-                            const toDate = getValues(TxFilterFormFieldNames.DATE_TO)
-                            if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
-                              return 'Must be before "To" date'
-                            }
-                          }}
-                        />
-                      </div>
-                      <div className={css.paramField} data-testid="end-date">
-                        <DatePickerInput
-                          name={TxFilterFormFieldNames.DATE_TO}
-                          label="To"
-                          deps={[TxFilterFormFieldNames.DATE_FROM]}
-                          validate={(val: TxFilterFormState[TxFilterFormFieldNames.DATE_FROM]) => {
-                            const fromDate = getValues(TxFilterFormFieldNames.DATE_FROM)
-                            if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
-                              return 'Must be after "From" date'
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {!isModuleFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField}>
-                        <Controller
-                          name={TxFilterFormFieldNames.AMOUNT}
-                          control={control}
-                          rules={{
-                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
-                              if (val?.length > 0) {
-                                return validateAmount(val)
-                              }
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <NumberField
-                              data-testid="amount-input"
-                              inputSize="hero"
-                              variant="surface"
-                              label={
-                                fieldState.error?.message ||
-                                (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
-                              }
-                              error={!!fieldState.error}
-                              {...field}
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </div>
-
-                      {isIncomingFilter && (
-                        <div className={css.paramField}>
-                          <AddressInput
-                            data-testid="token-input"
-                            label="Token address"
-                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
-                            required={false}
-                            fullWidth
-                          />
-                        </div>
-                      )}
-
-                      {isMultisigFilter && (
-                        <div className={css.paramField}>
-                          <AddressBookInput
-                            label="Recipient"
-                            name={TxFilterFormFieldNames.RECIPIENT}
-                            required={false}
-                            fullWidth
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {isMultisigFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField}>
-                        <Controller
-                          name={TxFilterFormFieldNames.NONCE}
-                          control={control}
-                          rules={{
-                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
-                              if (val?.length > 0) {
-                                return validateAmount(val)
-                              }
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <NumberField
-                              data-testid="nonce-input"
-                              inputSize="hero"
-                              variant="surface"
-                              label={fieldState.error?.message || 'Nonce'}
-                              error={!!fieldState.error}
-                              {...field}
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {isModuleFilter && (
-                    <div className={css.paramField}>
-                      <AddressBookInput
-                        label="Module"
-                        name={TxFilterFormFieldNames.MODULE}
-                        required={false}
-                        fullWidth
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-6 flex justify-end gap-2">
-                <Button
-                  data-testid="clear-btn"
-                  type="button"
-                  variant="ghost"
-                  onClick={clearFilter}
-                  disabled={!canClear}
-                >
-                  Clear
-                </Button>
-                <Button data-testid="apply-btn" type="submit" disabled={!isValid}>
-                  Apply
-                </Button>
-              </div>
-            </div>
-          </div>
-        </form>
-      </FormProvider>
-    </div>
+    <FormProvider {...formMethods}>
+      <TxFilterFormView
+        onSubmit={handleSubmit(onSubmit)}
+        filterTypes={Object.values(TxFilterType)}
+        renderFilterTypeField={(render) => (
+          <Controller
+            name={TxFilterFormFieldNames.FILTER_TYPE}
+            control={control}
+            render={({ field }) => render(field)}
+          />
+        )}
+        isIncomingFilter={isIncomingFilter}
+        isMultisigFilter={isMultisigFilter}
+        isModuleFilter={isModuleFilter}
+        nativeCurrencySymbol={chain?.nativeCurrency.symbol}
+        renderFromDate={({ label, invalidMessage }) => (
+          <DatePickerInput
+            name={TxFilterFormFieldNames.DATE_FROM}
+            label={label}
+            deps={[TxFilterFormFieldNames.DATE_TO]}
+            validate={(val: TxFilterFormState[TxFilterFormFieldNames.DATE_FROM]) => {
+              const toDate = getValues(TxFilterFormFieldNames.DATE_TO)
+              if (val && toDate && isBefore(startOfDay(toDate), startOfDay(val))) {
+                return invalidMessage
+              }
+            }}
+          />
+        )}
+        renderToDate={({ label, invalidMessage }) => (
+          <DatePickerInput
+            name={TxFilterFormFieldNames.DATE_TO}
+            label={label}
+            deps={[TxFilterFormFieldNames.DATE_FROM]}
+            validate={(val: TxFilterFormState[TxFilterFormFieldNames.DATE_FROM]) => {
+              const fromDate = getValues(TxFilterFormFieldNames.DATE_FROM)
+              if (val && fromDate && isAfter(startOfDay(fromDate), startOfDay(val))) {
+                return invalidMessage
+              }
+            }}
+          />
+        )}
+        renderAmountField={({ getLabel, ...props }) => (
+          <Controller
+            name={TxFilterFormFieldNames.AMOUNT}
+            control={control}
+            rules={{
+              validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
+                if (val?.length > 0) {
+                  return validateAmount(val)
+                }
+              },
+            }}
+            render={({ field, fieldState }) => (
+              <NumberField
+                data-testid="amount-input"
+                {...props}
+                label={getLabel(fieldState.error?.message)}
+                error={!!fieldState.error}
+                {...field}
+                fullWidth
+              />
+            )}
+          />
+        )}
+        renderTokenInput={({ label }) => (
+          <AddressInput
+            data-testid="token-input"
+            label={label}
+            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
+            required={false}
+            fullWidth
+          />
+        )}
+        renderRecipientInput={({ label }) => (
+          <AddressBookInput label={label} name={TxFilterFormFieldNames.RECIPIENT} required={false} fullWidth />
+        )}
+        renderNonceField={({ getLabel, ...props }) => (
+          <Controller
+            name={TxFilterFormFieldNames.NONCE}
+            control={control}
+            rules={{
+              validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
+                if (val?.length > 0) {
+                  return validateAmount(val)
+                }
+              },
+            }}
+            render={({ field, fieldState }) => (
+              <NumberField
+                data-testid="nonce-input"
+                {...props}
+                label={getLabel(fieldState.error?.message)}
+                error={!!fieldState.error}
+                {...field}
+                fullWidth
+              />
+            )}
+          />
+        )}
+        renderModuleInput={({ label }) => (
+          <AddressBookInput label={label} name={TxFilterFormFieldNames.MODULE} required={false} fullWidth />
+        )}
+        canClear={canClear}
+        isValid={isValid}
+        onClear={clearFilter}
+      />
+    </FormProvider>
   )
 }
 

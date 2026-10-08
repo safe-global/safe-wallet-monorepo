@@ -1,7 +1,6 @@
 import { useRouter } from 'next/router'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AuthState from '../AuthState'
@@ -10,6 +9,9 @@ import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpacePolicies } from './hooks/useSpacePolicies'
 import type { PolicyId } from '@views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
 import Policies from './index'
+import { PageView } from '@views/features/spaces/components/Policies/PageView'
+
+const ADDRESS_BOOK_SOURCE = 'merged'
 
 const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer']
 
@@ -50,10 +52,10 @@ export default function SpacePoliciesPage({ spaceId }: { spaceId: string }) {
 
   return (
     <AuthState spaceId={spaceId}>
-      <AddressBookSourceProvider source="merged">
-        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+      <AddressBookSourceProvider source={ADDRESS_BOOK_SOURCE}>
+        <PageView isDarkMode={isDarkMode}>
           <SpacePolicies spaceId={spaceId} />
-        </div>
+        </PageView>
       </AddressBookSourceProvider>
     </AuthState>
   )

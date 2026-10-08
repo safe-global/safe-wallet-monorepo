@@ -8,7 +8,7 @@ import Overview from '@/components/dashboard/Overview/Overview'
 import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
 import { useIsRecoverySupported } from '@/features/recovery'
 import { useHasFeature } from '@/hooks/useChains'
-import css from './styles.module.css'
+import { DashboardView } from '@views/components/dashboard/DashboardView'
 import { InconsistentSignerSetupWarning, MastercopyWarning } from '@/features/multichain'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from './ActionRequiredPanel'
@@ -28,7 +28,7 @@ const PositionsWidget = dynamic(() => import('@/features/positions/components/Po
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
-  const hn = useLoadFeature(HypernativeFeature)
+  const { HnPendingBanner } = useLoadFeature(HypernativeFeature)
   const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const supportsRecovery = useIsRecoverySupported()
@@ -48,54 +48,33 @@ const Dashboard = (): ReactElement => {
   const noAssets = balancesLoaded && items.length === 0
 
   return (
-    <>
-      <div className={css.dashboardGrid}>
-        <div className={css.leftCol}>
-          <Overview />
-
-          {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
-
-          {noAssets && (
-            <div className="flex flex-col gap-2">
-              {showHnBanner && <HnBannerForCarousel onDismiss={() => {}} />}
-              {!showHnBanner && <AddFundsToGetStarted />}
-            </div>
-          )}
-
-          <div className={css.hideIfEmpty}>
-            <FirstSteps />
-          </div>
-
-          {safe.deployed && (
-            <>
-              <AssetsWidget />
-
-              {isPositionsFeatureEnabled && (
-                <div className={css.hideIfEmpty}>
-                  <PositionsWidget />
-                </div>
-              )}
-
-              {showSafeApps && <ExplorePossibleWidget />}
-            </>
-          )}
-        </div>
-
-        <div className={css.rightCol}>
-          <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
-            <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
-            {supportsRecovery && <RecoveryHeader />}
-            <InconsistentSignerSetupWarning />
-            <MastercopyWarning />
-            <NonPinnedWarning />
-          </ActionRequiredPanel>
-
-          {safe.deployed && <PendingTxsList />}
-
-          <hn.HnPendingBanner />
-        </div>
-      </div>
-    </>
+    <DashboardView
+      overview={<Overview />}
+      showStakingPromoBanner={isStakingPromoBannerVisible}
+      stakingPromoBanner={<StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
+      noAssets={noAssets}
+      showHnBanner={showHnBanner}
+      hnBanner={<HnBannerForCarousel onDismiss={() => {}} />}
+      addFundsBanner={<AddFundsToGetStarted />}
+      firstSteps={<FirstSteps />}
+      isDeployed={safe.deployed}
+      assetsWidget={<AssetsWidget />}
+      showPositions={isPositionsFeatureEnabled}
+      positionsWidget={<PositionsWidget />}
+      showSafeApps={showSafeApps}
+      explorePossibleWidget={<ExplorePossibleWidget />}
+      actionRequiredPanel={
+        <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
+          <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
+          {supportsRecovery && <RecoveryHeader />}
+          <InconsistentSignerSetupWarning />
+          <MastercopyWarning />
+          <NonPinnedWarning />
+        </ActionRequiredPanel>
+      }
+      pendingTxsList={<PendingTxsList />}
+      hnPendingBanner={<HnPendingBanner />}
+    />
   )
 }
 

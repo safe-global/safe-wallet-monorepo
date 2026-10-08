@@ -3,8 +3,6 @@ import useChainId from '@/hooks/useChainId'
 import { type AddressBookItem, Methods } from '@safe-global/safe-apps-sdk'
 import type { ReactElement } from 'react'
 import { useCallback, useEffect } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Spinner } from '@/components/ui/spinner'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -20,17 +18,16 @@ import { gtmTrackPageview } from '@/services/analytics/gtm'
 import useThirdPartyCookies from './useThirdPartyCookies'
 import useAnalyticsFromSafeApp from './useFromAppAnalytics'
 import useAppIsLoading from './useAppIsLoading'
-import { ThirdPartyCookiesWarning } from './ThirdPartyCookiesWarning'
-import TransactionQueueBar, { TRANSACTION_BAR_HEIGHT } from './TransactionQueueBar'
+import TransactionQueueBar from './TransactionQueueBar'
 import PermissionsPrompt from '@/components/safe-apps/PermissionsPrompt'
 import { PermissionStatus, type SafeAppDataWithPermissions } from '@/components/safe-apps/types'
 
-import css from './styles.module.css'
 import SafeAppIframe from './SafeAppIframe'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import { BRAND_NAME } from '@/config/constants'
+import { AppFrameBlockedView, AppFrameEmptyView, AppFrameView } from '@views/components/safe-apps/AppFrame/AppFrameView'
 
 const UNKNOWN_APP_NAME = 'Unknown Safe App'
 
@@ -118,7 +115,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
   }, [appUrl, iframeRef, setAppIsLoading, router, isNativeEmbed])
 
   if (!safeLoaded) {
-    return <div />
+    return <AppFrameEmptyView />
   }
 
   if (sanctionedAddress && isSafePass) {
@@ -127,9 +124,9 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         <Head>
           <title>{`Safe Apps - Viewer - ${remoteApp ? remoteApp.name : UNKNOWN_APP_NAME}`}</title>
         </Head>
-        <div className="p-4">
-          <BlockedAddress address={sanctionedAddress} featureTitle="Safe{Pass} Safe app" />
-        </div>
+        <AppFrameBlockedView
+          renderBlockedAddress={(props) => <BlockedAddress address={sanctionedAddress} {...props} />}
+        />
       </>
     )
   }
@@ -142,27 +139,13 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
         </Head>
       )}
 
-      <div className={css.wrapper}>
-        {thirdPartyCookiesDisabled && <ThirdPartyCookiesWarning onClose={() => setThirdPartyCookiesDisabled(false)} />}
-
-        {appIsLoading && (
-          <div className={css.loadingContainer}>
-            {isLoadingSlow && (
-              <Typography variant="h4" className="mb-2">
-                The Safe App is taking too long to load, consider refreshing.
-              </Typography>
-            )}
-            <Spinner className="size-12 text-[var(--color-primary-main)]" />
-          </div>
-        )}
-
-        <div
-          style={{
-            height: '100%',
-            display: appIsLoading ? 'none' : 'block',
-            paddingBottom: queueBarVisible ? TRANSACTION_BAR_HEIGHT : 0,
-          }}
-        >
+      <AppFrameView
+        showCookiesWarning={thirdPartyCookiesDisabled}
+        onCloseCookiesWarning={() => setThirdPartyCookiesDisabled(false)}
+        appIsLoading={appIsLoading}
+        isLoadingSlow={isLoadingSlow}
+        queueBarVisible={queueBarVisible}
+        iframe={
           <SafeAppIframe
             appUrl={appUrl}
             allowedFeaturesList={allowedFeaturesList}
@@ -170,27 +153,30 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
             onLoad={onIframeLoad}
             title={safeAppFromManifest?.name}
           />
-        </div>
-
-        <TransactionQueueBar
-          expanded={queueBarExpanded}
-          visible={queueBarVisible && !queueBarDismissed}
-          setExpanded={setExpanded}
-          onDismiss={dismissQueueBar}
-          transactions={transactions}
-        />
-
-        {!isNativeEmbed && permissionsRequest && (
-          <PermissionsPrompt
-            isOpen
-            origin={permissionsRequest.origin}
-            requestId={permissionsRequest.requestId}
-            onAccept={onAcceptPermissionRequest}
-            onReject={onRejectPermissionRequest}
-            permissions={permissionsRequest.request}
+        }
+        queueBar={
+          <TransactionQueueBar
+            expanded={queueBarExpanded}
+            visible={queueBarVisible && !queueBarDismissed}
+            setExpanded={setExpanded}
+            onDismiss={dismissQueueBar}
+            transactions={transactions}
           />
-        )}
-      </div>
+        }
+        permissionsPrompt={
+          !isNativeEmbed &&
+          permissionsRequest && (
+            <PermissionsPrompt
+              isOpen
+              origin={permissionsRequest.origin}
+              requestId={permissionsRequest.requestId}
+              onAccept={onAcceptPermissionRequest}
+              onReject={onRejectPermissionRequest}
+              permissions={permissionsRequest.request}
+            />
+          )
+        }
+      />
     </>
   )
 }

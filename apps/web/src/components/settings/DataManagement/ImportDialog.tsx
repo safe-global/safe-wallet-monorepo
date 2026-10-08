@@ -1,9 +1,6 @@
 import { undeployedSafesSlice } from '@/features/counterfactual/store'
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'
 
-import ModalDialog from '@/components/common/ModalDialog'
 import { useAppDispatch } from '@/store'
 import { trackEvent, SETTINGS_EVENTS, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { addedSafesSlice } from '@/store/addedSafesSlice'
@@ -12,12 +9,10 @@ import { safeAppsSlice } from '@/store/safeAppsSlice'
 import { settingsSlice } from '@/store/settingsSlice'
 import { FileListCard } from '@/components/settings/DataManagement/FileListCard'
 import { useGlobalImportJsonParser } from '@/components/settings/DataManagement/useGlobalImportFileParser'
-import FileIcon from '@/public/images/settings/data/file.svg'
 import { ImportFileUpload } from '@/components/settings/DataManagement/ImportFileUpload'
 import { showNotification } from '@/store/notificationsSlice'
 import { visitedSafesSlice } from '@/store/visitedSafesSlice'
-
-import css from './styles.module.css'
+import { ImportDialogView } from '@views/components/settings/DataManagement/ImportDialogView'
 
 export const ImportDialog = ({
   onClose,
@@ -93,52 +88,26 @@ export const ImportDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Data import" hideChainIndicator>
-      <div className="p-6">
-        {!jsonData || !fileName ? (
-          <div className="mt-4">
-            <ImportFileUpload setFileName={setFileName} setJsonData={setJsonData} />
-          </div>
-        ) : (
-          <>
-            <FileListCard
-              avatar={
-                <div className="rounded">
-                  <FileIcon className="block size-4 fill-none" />
-                </div>
-              }
-              title={<b>{fileName}</b>}
-              className={css.header}
-              addedSafes={addedSafes}
-              addressBook={addressBook}
-              settings={settings}
-              safeApps={safeApps}
-              visitedSafes={visitedSafes}
-              undeployedSafes={undeployedSafes}
-              error={error}
-              showPreview
-            />
-            {!isDisabled && (
-              <Alert variant="warning" outlined={false}>
-                <AlertSeverityIcon variant="warning" />
-                <AlertTitle className="font-bold">Overwrite your current data?</AlertTitle>
-                <AlertDescription>
-                  This action will overwrite your currently added Safe accounts, address book and settings with those
-                  from the imported file.
-                </AlertDescription>
-              </Alert>
-            )}
-          </>
-        )}
-      </div>
-      <div className="flex justify-between gap-2 p-6 pt-0">
-        <Button data-testid="dialog-cancel-btn" variant="outline" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button data-testid="dialog-import-btn" onClick={handleImport} disabled={isDisabled}>
-          Import
-        </Button>
-      </div>
-    </ModalDialog>
+    <ImportDialogView
+      showUpload={!jsonData || !fileName}
+      fileName={fileName}
+      isDisabled={isDisabled}
+      upload={<ImportFileUpload setFileName={setFileName} setJsonData={setJsonData} />}
+      renderFileList={(headerProps) => (
+        <FileListCard
+          {...headerProps}
+          addedSafes={addedSafes}
+          addressBook={addressBook}
+          settings={settings}
+          safeApps={safeApps}
+          visitedSafes={visitedSafes}
+          undeployedSafes={undeployedSafes}
+          error={error}
+          showPreview
+        />
+      )}
+      onClose={handleClose}
+      onImport={handleImport}
+    />
   )
 }

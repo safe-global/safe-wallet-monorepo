@@ -2,6 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import { useMemo } from 'react'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
 import { FallbackHandlerWarning } from '@/components/settings/FallbackHandler'
+import { UntrustedFallbackHandlerTxAlertView } from '@views/components/tx/confirmation-views/SettingsChange/UntrustedFallbackHandlerTxAlertView'
 
 export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txData']): boolean => {
   // multiSend method receives one parameter `transactions`
@@ -26,21 +27,8 @@ export const useSetsUntrustedFallbackHandler = (txData: TransactionDetails['txDa
 }
 
 export const UntrustedFallbackHandlerTxText = ({ isTxExecuted = false }: { isTxExecuted?: boolean }) => (
-  <>
-    <FallbackHandlerWarning
-      message={
-        <>
-          This transaction {isTxExecuted ? 'has set' : 'sets'} an <b>unofficial</b> fallback handler.
-        </>
-      }
-      txBuilderLinkPrefix={isTxExecuted ? 'It can be altered via the' : ''}
-    />
-    {!isTxExecuted && (
-      <>
-        <br />
-        <b>Proceed with caution:</b> ensure the fallback handler address is trusted and secure. If unsure, do not
-        proceed.
-      </>
-    )}
-  </>
+  <UntrustedFallbackHandlerTxAlertView
+    isTxExecuted={isTxExecuted}
+    renderWarning={(props) => <FallbackHandlerWarning {...props} />}
+  />
 )

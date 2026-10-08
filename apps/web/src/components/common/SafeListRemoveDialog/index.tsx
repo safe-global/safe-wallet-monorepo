@@ -1,4 +1,3 @@
-import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
@@ -12,6 +11,7 @@ import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { removeSafe, removeUndeployedSafe } from '@/store/slices'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
+import { SafeListRemoveDialogView } from '@views/components/common/SafeListRemoveDialog/SafeListRemoveDialogView'
 
 const SafeListRemoveDialog = ({
   handleClose,
@@ -44,23 +44,11 @@ const SafeListRemoveDialog = ({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Delete entry" chainId={chainId}>
-      <div className="p-6">
-        <Typography>
-          Are you sure you want to remove the <b>{safe}</b> account?
-        </Typography>
-      </div>
-
-      <DialogActions
-        className="p-4 pt-2"
-        onCancel={handleClose}
-        cancelTestId="cancel-btn"
-        confirmLabel="Delete"
-        confirmTestId="delete-btn"
-        confirmDestructive
-        onConfirm={handleConfirm}
-      />
-    </ModalDialog>
+    <SafeListRemoveDialogView
+      safe={safe}
+      renderModal={(props) => <ModalDialog open onClose={handleClose} chainId={chainId} {...props} />}
+      renderActions={(props) => <DialogActions onCancel={handleClose} onConfirm={handleConfirm} {...props} />}
+    />
   )
 }
 

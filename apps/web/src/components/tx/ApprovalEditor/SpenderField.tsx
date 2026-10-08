@@ -1,8 +1,4 @@
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { Typography } from '@/components/ui/typography'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
-
-import css from './styles.module.css'
 import useChainId from '@/hooks/useChainId'
 import {
   useContractsGetContractV1Query as useGetContractQuery,
@@ -10,6 +6,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/contracts'
 import { isAddress } from 'ethers'
 import { useEffect, useState } from 'react'
+import { SpenderFieldView } from '@views/components/tx/ApprovalEditor/SpenderFieldView'
 
 export const SpenderField = ({ address }: { address: string }) => {
   const chainId = useChainId()
@@ -27,20 +24,11 @@ export const SpenderField = ({ address }: { address: string }) => {
   const isSmallScreen = useIsBelowMd()
 
   return (
-    <div className={`${css.approvalField} flex flex-row items-center justify-between gap-4`}>
-      <Typography variant="paragraph-small" className="text-muted-foreground">
-        Spender
-      </Typography>
-      <div className="overflow-hidden">
-        <EthHashInfo
-          avatarSize={24}
-          address={address}
-          name={spendingContract?.displayName || spendingContract?.name}
-          customAvatar={spendingContract?.logoUri}
-          shortAddress={isSmallScreen}
-          hasExplorer
-        />
-      </div>
-    </div>
+    <SpenderFieldView
+      address={address}
+      name={spendingContract?.displayName || spendingContract?.name}
+      customAvatar={spendingContract?.logoUri}
+      shortAddress={isSmallScreen}
+    />
   )
 }

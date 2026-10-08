@@ -1,0 +1,150 @@
+import { type ComponentProps, type KeyboardEvent, type ReactElement, type ReactNode } from 'react'
+import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { cn } from '@/utils/cn'
+
+import css from './styles.module.css'
+
+export type ActionType = 'created' | 'signed' | 'executed' | 'confirmed' | 'pending' | 'expired'
+
+export const ACTION_ICONS: Record<ActionType, LucideIcon> = {
+  created: Plus,
+  signed: PenLine,
+  executed: Check,
+  confirmed: Check,
+  pending: Clock,
+  expired: CircleAlert,
+}
+
+const auditDateFormatter = new Intl.DateTimeFormat(undefined, {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+})
+
+export const formatAuditDateTime = (ts: number): string => auditDateFormatter.format(new Date(ts))
+
+/**
+ * Wraps a header and its rows, and is the container their breakpoint resolves against — so the log
+ * reflows on its own width, not the viewport's. Every audit log must go through it.
+ */
+export const AuditLogView = ({ children, className, ...props }: ComponentProps<'div'>): ReactElement => (
+  <div className={cn(css.auditLog, className)} {...props}>
+    {children}
+  </div>
+)
+
+export type AuditLogHeaderViewProps = { chip?: ReactNode; actions?: ReactNode }
+
+export const AuditLogHeaderView = ({ chip, actions }: AuditLogHeaderViewProps): ReactElement => (
+  <>
+    <div className="mb-2 flex items-center gap-2">
+      <Typography variant="paragraph-small" className="font-bold tracking-[0.05em] uppercase">
+        Audit log
+      </Typography>
+      {chip}
+      {actions && <div className="ml-auto flex items-center gap-1">{actions}</div>}
+    </div>
+    <Separator bleed="6" className="mb-4" />
+  </>
+)
+
+export type AuditRowViewProps = {
+  label: string
+  actionType: ActionType
+  address?: string
+  name?: string | null
+  /** Actor label (e.g. a service name, optionally linked) when there is no address to copy. */
+  actor?: ReactNode
+  timestamp?: number | null
+  isLast?: boolean
+  /** CSS color for the timeline icon (e.g. 'var(--color-error-main)'); defaults to primary. */
+  iconColor?: string
+  copied: boolean
+  onCopy: () => void
+}
+
+export const AuditRowView = ({
+  label,
+  actionType,
+  address,
+  name,
+  actor,
+  timestamp,
+  isLast,
+  iconColor,
+  copied,
+  onCopy,
+}: AuditRowViewProps): ReactElement => {
+  const displayText = address ? name || shortenAddress(address) : undefined
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      onCopy()
+    }
+  }
+
+  const ActionIcon = ACTION_ICONS[actionType]
+  const showActor = displayText && address
+  const showDash = !showActor && !actor && !isLast
+
+  return (
+    <div className={css.auditRow}>
+      {/* Column 1: Timeline icon with vertical connector */}
+      <div className={css.timelineCol}>
+        <div className={css.timelineIcon}>
+          <ActionIcon
+            className="size-3.5 text-[var(--color-primary-main)]"
+            style={iconColor ? { color: iconColor } : undefined}
+          />
+        </div>
+        {!isLast && <div className={css.timelineLine} />}
+      </div>
+
+      {/* Action label */}
+      <Typography variant="paragraph-small" className={`${css.label} truncate font-semibold leading-[1.4]`}>
+        {label}
+      </Typography>
+
+      {/* Actor / origin, beneath the label */}
+      {(showActor || actor || showDash) && (
+        <div className={css.actorRow}>
+          {showActor ? (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <div className={css.actorCopy} onClick={onCopy} onKeyDown={handleKeyDown} role="button" tabIndex={0}>
+                    <Typography variant="paragraph-mini" className={`${css.actorText} text-muted-foreground`}>
+                      By {displayText}
+                    </Typography>
+                  </div>
+                }
+              />
+              <TooltipContent side="top">{copied ? 'Copied' : 'Click to copy address'}</TooltipContent>
+            </Tooltip>
+          ) : actor ? (
+            <Typography variant="paragraph-mini" className="text-muted-foreground">
+              By {actor}
+            </Typography>
+          ) : (
+            <Typography variant="paragraph-mini" className="text-muted-foreground">
+              —
+            </Typography>
+          )}
+        </div>
+      )}
+
+      {/* Timestamp — beside the label, or beneath both on narrow panels */}
+      <Typography variant="paragraph-mini" className={`${css.timestamp} text-muted-foreground`}>
+        {timestamp != null ? formatAuditDateTime(timestamp) : ''}
+      </Typography>
+    </div>
+  )
+}

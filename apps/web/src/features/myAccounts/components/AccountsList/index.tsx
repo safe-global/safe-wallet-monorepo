@@ -4,14 +4,13 @@ import CurrentSafe from '../CurrentSafe'
 import ConnectWalletPrompt from '../ConnectWalletPrompt'
 import { type AllSafeItems, type AllSafeItemsGrouped, getComparator } from '@/hooks/safes'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
-import MigrationPrompt from '@views/features/myAccounts/components/MigrationPrompt'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useMemo, useCallback } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { AccountsListView } from '@views/features/myAccounts/components/AccountsList/AccountsListView'
 
 const AccountsList = ({
   searchQuery,
@@ -56,27 +55,14 @@ const AccountsList = ({
   }
 
   return (
-    <>
-      {/* Security check prompt for users with safes but none pinned */}
-      {migration.shouldShowPrompt && <MigrationPrompt onProceed={handleMigrationProceed} />}
-
-      <CurrentSafe allSafes={allSafes} onLinkClick={onLinkClick} />
-      <PinnedSafes allSafes={allSafes} onLinkClick={onLinkClick} onOpenSelectionModal={modal.open} />
-
-      {!migration.hasPinnedSafes && !migration.shouldShowPrompt && (
-        <Typography
-          data-testid="empty-safe-list"
-          color="muted"
-          variant="paragraph-small"
-          align="center"
-          className="py-6"
-        >
-          You don&apos;t have any safes yet
-        </Typography>
-      )}
-
-      <TrustedSafesModal modal={modal} />
-    </>
+    <AccountsListView
+      showMigrationPrompt={migration.shouldShowPrompt}
+      onMigrationProceed={handleMigrationProceed}
+      showEmptyState={!migration.hasPinnedSafes && !migration.shouldShowPrompt}
+      currentSafe={<CurrentSafe allSafes={allSafes} onLinkClick={onLinkClick} />}
+      pinnedSafes={<PinnedSafes allSafes={allSafes} onLinkClick={onLinkClick} onOpenSelectionModal={modal.open} />}
+      trustedSafesModal={<TrustedSafesModal modal={modal} />}
+    />
   )
 }
 

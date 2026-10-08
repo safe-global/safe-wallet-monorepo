@@ -1,41 +1,12 @@
 import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react'
-import { Search } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { InputGroupAddon } from '@/components/ui/input-group'
-import {
-  Combobox,
-  ComboboxCollection,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxGroup,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxLabel,
-  ComboboxList,
-  useComboboxAnchor,
-} from '@/components/ui/combobox'
-import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
-import { matchesTokenQuery } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
-import TokenOptionRow from './TokenOptionRow'
-import DisabledTokenOption from './DisabledTokenOption'
+import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 import {
-  TokenGroupError,
-  TokenGroupLoading,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
-import {
-  BALANCES_LOAD_ERROR_TEXT,
-  HELD_GROUP_LABEL,
-  NO_TOKENS_FOUND_TEXT,
-  POPULAR_GROUP_LABEL,
-  POPULAR_LOAD_ERROR_TEXT,
-  TOKEN_FIELD_ICON_SIZE,
-  TOKEN_SELECTOR_LABEL,
-  TOKEN_SELECTOR_PLACEHOLDER,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+  TokenSelectorView,
+  type TokenGroup,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenSelectorView'
 
 export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */
@@ -58,13 +29,6 @@ export type TokenSelectorProps = {
   'data-testid'?: string
 }
 
-type TokenGroup = { value: TokenOptionGroup; items: TokenOption[] }
-
-const GROUP_LABELS: Record<TokenOptionGroup, string> = {
-  held: HELD_GROUP_LABEL,
-  popular: POPULAR_GROUP_LABEL,
-}
-
 /** A `value` the current list does not know (edit flow, or a table change). Renders as its address. */
 const unknownTokenOption = (address: string): TokenOption => ({
   address,
@@ -74,28 +38,10 @@ const unknownTokenOption = (address: string): TokenOption => ({
   group: 'popular',
 })
 
-const isSameOption = (a: TokenOption, b: TokenOption): boolean => sameAddress(a.address, b.address)
-
 /** Search only: typing an address that is not in the list selects nothing. */
-const TokenSelector = ({
-  value,
-  onChange,
-  excludeAddresses,
-  disabledAddresses,
-  disabledAddressReason,
-  disabled = false,
-  label = TOKEN_SELECTOR_LABEL,
-  placeholder = TOKEN_SELECTOR_PLACEHOLDER,
-  error = false,
-  helperText,
-  name,
-  id,
-  'data-testid': testId = 'spending-limit-token-selector',
-}: TokenSelectorProps) => {
+const TokenSelector = ({ value, onChange, excludeAddresses, id, ...props }: TokenSelectorProps) => {
   const generatedId = useId()
   const fieldId = id ?? generatedId
-  // Base UI anchors the popup to the <input>; anchoring to the InputGroup makes it match the visible field.
-  const fieldAnchor = useComboboxAnchor()
   const extraTokens = useExistingLimitTokens()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
     useSpendingLimitTokenOptions(extraTokens)
@@ -139,95 +85,20 @@ const TokenSelector = ({
   }, [identityKey, value, onChange])
 
   return (
-    /* `Field` rather than hand-rolled spacing, so this control and a `NumberField` beside it line up. */
-    <Field data-invalid={error || undefined} className="w-full">
-      <FieldLabel htmlFor={fieldId} className={error ? 'text-destructive' : undefined}>
-        {label}
-      </FieldLabel>
-
-      <Combobox<TokenOption>
-        items={groups}
-        value={selectedOption}
-        onValueChange={(next) => onChange(next?.address)}
-        itemToStringLabel={tokenOptionLabel}
-        itemToStringValue={(option) => option.address}
-        isItemEqualToValue={isSameOption}
-        filter={(item, query) => matchesTokenQuery(item, query)}
-        disabled={disabled || !hasSafe}
-        name={name}
-        openOnInputClick
-        autoHighlight
-      >
-        <div ref={fieldAnchor} className="w-full">
-          <ComboboxInput
-            id={fieldId}
-            placeholder={placeholder}
-            autoComplete="off"
-            spellCheck={false}
-            aria-label={label}
-            disabled={disabled || !hasSafe}
-            className="w-full"
-            data-testid={testId}
-          >
-            <InputGroupAddon align="inline-start">
-              {selectedOption ? (
-                <TokenIcon
-                  logoUri={selectedOption.logoUri}
-                  tokenSymbol={tokenOptionLabel(selectedOption)}
-                  size={TOKEN_FIELD_ICON_SIZE}
-                />
-              ) : (
-                <Search className="text-muted-foreground size-4" />
-              )}
-            </InputGroupAddon>
-          </ComboboxInput>
-        </div>
-
-        <ComboboxContent anchor={fieldAnchor}>
-          {isLoading && <TokenGroupLoading label={HELD_GROUP_LABEL} data-testid="held-tokens-loading" />}
-          {isError && (
-            <TokenGroupError
-              label={HELD_GROUP_LABEL}
-              message={BALANCES_LOAD_ERROR_TEXT}
-              onRetry={refetch}
-              data-testid="held-tokens-error"
-            />
-          )}
-          <ComboboxList>
-            {(group: TokenGroup) => (
-              <ComboboxGroup key={group.value} items={group.items}>
-                <ComboboxLabel>{GROUP_LABELS[group.value]}</ComboboxLabel>
-                <ComboboxCollection>
-                  {(option: TokenOption) =>
-                    disabledAddresses?.some((address) => sameAddress(address, option.address)) ? (
-                      <DisabledTokenOption key={option.address} option={option} reason={disabledAddressReason} />
-                    ) : (
-                      <ComboboxItem key={option.address} value={option} data-testid="token-option">
-                        <TokenOptionRow option={option} />
-                      </ComboboxItem>
-                    )
-                  }
-                </ComboboxCollection>
-              </ComboboxGroup>
-            )}
-          </ComboboxList>
-          {isPopularLoading && <TokenGroupLoading label={POPULAR_GROUP_LABEL} data-testid="popular-tokens-loading" />}
-          {isPopularError && (
-            <TokenGroupError
-              label={POPULAR_GROUP_LABEL}
-              message={POPULAR_LOAD_ERROR_TEXT}
-              onRetry={refetchPopular}
-              data-testid="popular-tokens-error"
-            />
-          )}
-          {!isLoading && !isPopularLoading && <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>}
-        </ComboboxContent>
-      </Combobox>
-
-      {helperText != null && (
-        <FieldDescription className={error ? 'text-destructive' : undefined}>{helperText}</FieldDescription>
-      )}
-    </Field>
+    <TokenSelectorView
+      {...props}
+      fieldId={fieldId}
+      groups={groups}
+      selectedOption={selectedOption}
+      onChange={onChange}
+      hasSafe={hasSafe}
+      isLoading={isLoading}
+      isError={isError}
+      onRetry={refetch}
+      isPopularLoading={isPopularLoading}
+      isPopularError={isPopularError}
+      onRetryPopular={refetchPopular}
+    />
   )
 }
 

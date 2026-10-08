@@ -5,6 +5,7 @@ import SendToBlock from '@/components/tx/SendToBlock'
 import type { TokenTransferParams } from '.'
 import { safeParseUnits } from '@safe-global/utils/utils/formatters'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ReviewRecipientRowView } from '@views/components/tx-flow/flows/TokenTransfer/ReviewRecipientRowView'
 
 const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; name: string }) => {
   const [balances] = useTrustedTokenBalances()
@@ -20,17 +21,19 @@ const ReviewRecipientRow = ({ params, name }: { params: TokenTransferParams; nam
   )
 
   return (
-    <div className="flex flex-col gap-4">
-      {token && (
-        <SendAmountBlock
-          amountInWei={amountInWei}
-          tokenInfo={token.tokenInfo}
-          fiatConversion={token.fiatConversion}
-          compact
-        />
-      )}
-      <SendToBlock address={params.recipient} name={name} avatarSize={32} />
-    </div>
+    <ReviewRecipientRowView
+      amountBlock={
+        token && (
+          <SendAmountBlock
+            amountInWei={amountInWei}
+            tokenInfo={token.tokenInfo}
+            fiatConversion={token.fiatConversion}
+            compact
+          />
+        )
+      }
+      sendToBlock={<SendToBlock address={params.recipient} name={name} avatarSize={32} />}
+    />
   )
 }
 

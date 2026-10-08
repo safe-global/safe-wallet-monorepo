@@ -2,10 +2,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { useMemo, useContext } from 'react'
 import type { ReactElement } from 'react'
-import MinusIcon from '@/public/images/common/minus.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
-import FieldsGrid from '@views/components/tx/FieldsGrid'
 import { getNewSafeSetup } from './get-new-safe-setup'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
@@ -17,6 +14,10 @@ import type { TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
+import {
+  ManageSignersActionsView,
+  ManageSignersView,
+} from '@views/components/tx/confirmation-views/ManageSigners/ManageSignersView'
 
 type FlowData = ManageSignersForm | AddOwnerFlowProps | ReplaceOwnerFlowProps
 function extractSignerNames(data?: FlowData): Record<string, string> {
@@ -58,15 +59,23 @@ export function ManageSigners({
   }, [txInfo, txData, safe, signerNames])
 
   return (
-    <div className="flex flex-col gap-6">
-      <ChangeSignerSetupWarning />
-
-      <Actions newOwners={newOwners} />
-
-      <Signers owners={newOwners} />
-
-      <Threshold owners={newOwners} threshold={newThreshold} />
-    </div>
+    <ManageSignersView
+      warning={<ChangeSignerSetupWarning />}
+      actions={<Actions newOwners={newOwners} />}
+      signers={newOwners.map(({ value, name }) => (
+        <NamedAddressInfo
+          avatarSize={32}
+          key={value}
+          address={value}
+          shortAddress={false}
+          showCopyButton
+          hasExplorer
+          name={name}
+        />
+      ))}
+      ownersCount={newOwners.length}
+      threshold={newThreshold}
+    />
   )
 }
 
@@ -91,48 +100,10 @@ function Actions({ newOwners }: { newOwners: Array<AddressInfo> }): ReactElement
   }
 
   return (
-    <FieldsGrid title="Actions">
-      {removedOwners.length > 0 && (
-        <OwnerList
-          owners={removedOwners}
-          title={`Remove owner${maybePlural(removedOwners)}`}
-          icon={MinusIcon}
-          className="mb-4 bg-[var(--color-warning-background)]"
-        />
-      )}
-
-      {addedOwners.length > 0 && <OwnerList owners={addedOwners} />}
-    </FieldsGrid>
-  )
-}
-
-function Signers({ owners }: { owners: Array<AddressInfo> }): ReactElement {
-  return (
-    <FieldsGrid title="Signers">
-      <div className="flex flex-col gap-4 p-[var(--space-2)] text-sm">
-        {owners.map(({ value, name }) => (
-          <NamedAddressInfo
-            avatarSize={32}
-            key={value}
-            address={value}
-            shortAddress={false}
-            showCopyButton
-            hasExplorer
-            name={name}
-          />
-        ))}
-      </div>
-    </FieldsGrid>
-  )
-}
-
-function Threshold({ owners, threshold }: { owners: Array<AddressInfo>; threshold: number }): ReactElement {
-  return (
-    <FieldsGrid title="Threshold">
-      <span className="rounded-md bg-[var(--color-background-main)] px-2 py-1 font-bold">
-        {threshold} of {owners.length} signer{maybePlural(owners)}
-      </span>{' '}
-      required to confirm new transactions
-    </FieldsGrid>
+    <ManageSignersActionsView
+      addedOwners={addedOwners}
+      removedOwners={removedOwners}
+      renderOwnerList={(props) => <OwnerList {...props} />}
+    />
   )
 }

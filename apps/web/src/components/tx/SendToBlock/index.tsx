@@ -1,9 +1,9 @@
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import FieldsGrid from '@views/components/tx/FieldsGrid'
+import { SendToBlockView } from '@views/components/tx/SendToBlock/SendToBlockView'
 
 const SendToBlock = ({
   address,
-  title = 'Recipient',
+  title,
   customAvatar,
   avatarSize,
   name,
@@ -15,8 +15,9 @@ const SendToBlock = ({
   avatarSize?: number
 }) => {
   return (
-    <FieldsGrid title={title}>
-      <div className="text-sm leading-5">
+    <SendToBlockView
+      title={title}
+      addressInfo={
         <NamedAddressInfo
           address={address}
           name={name}
@@ -27,8 +28,8 @@ const SendToBlock = ({
           avatarSize={avatarSize}
           customAvatar={customAvatar}
         />
-      </div>
-    </FieldsGrid>
+      }
+    />
   )
 }
 

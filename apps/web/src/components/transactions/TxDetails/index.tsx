@@ -1,7 +1,6 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
-import { Spinner } from '@/components/ui/spinner'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -22,17 +21,12 @@ import {
   isBridgeOrderTxInfo,
   isLifiSwapTxInfo,
 } from '@/utils/transaction-guards'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import classNames from 'classnames'
-import css from './styles.module.css'
-import { Card } from '@/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'
 import SignTxButton from '@/components/transactions/SignTxButton'
 import RejectTxButton from '@/components/transactions/RejectTxButton'
-import { UnsignedWarning } from '@/components/transactions/Warning'
 import Multisend from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsPending from '@/hooks/useIsPending'
@@ -48,6 +42,8 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { TxDetailsBlockView, TxDetailsView } from '@views/components/transactions/TxDetails/TxDetailsView'
+import { ParsingErrorView } from '@views/components/transactions/TxDetails/TxData/TxDataView'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -67,7 +63,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
   // Used to check if the decoded data was rendered inside the TxData component
   // If it was, we hide the decoded data in the Summary to avoid showing it twice
-  const decodedDataRef = useRef(null)
+  const decodedDataRef = useRef<HTMLDivElement>(null)
   const [isDecodedDataVisible, setIsDecodedDataVisible] = useState(false)
 
   useEffect(() => {
@@ -117,122 +113,96 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
     !!txDetails.executedAt
 
   return (
-    <>
-      {/* /Details */}
-      <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
-        <div className={css.txNote}>
-          <txNotes.TxNote txDetails={txDetails} />
-        </div>
-
-        <div className={css.detailsWrapper}>
-          {isQueue && (
-            <div className={css.inlineSimulation}>
-              <QueuedTxSimulation transaction={txDetails} />
-            </div>
-          )}
-
-          <div className={css.txData}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-              <TxData
-                txData={txDetails.txData}
-                txInfo={txDetails.txInfo}
-                txDetails={txDetails}
-                trusted={isTrustedTransfer}
-                imitation={isImitationTransaction}
-              >
-                <div ref={decodedDataRef}>
-                  <DecodedData
-                    txData={txDetails.txData}
-                    toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
-                    isWarningEnabled
-                  />
-                </div>
-              </TxData>
-            </ObservabilityErrorBoundary>
-          </div>
-        </div>
-
-        {/* Module information*/}
-        {moduleAddress && !showAuditLog && (
-          <div className={css.txModule}>
-            <InfoDetails title="Executed via module:">
-              <NamedAddressInfo
-                address={moduleAddress.value}
-                name={moduleAddressInfo?.name || moduleAddress.name}
-                customAvatar={moduleAddressInfo?.logoUri || moduleAddress.logoUri}
-                shortAddress={false}
-                showCopyButton
-                hasExplorer
-              />
-            </InfoDetails>
-          </div>
-        )}
-
-        <div className={css.txSummary}>
-          {isUntrusted && !isPending && <UnsignedWarning />}
-          <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-            <Summary
-              txDetails={txDetails}
-              txData={txDetails.txData}
-              txInfo={txDetails.txInfo}
-              showMultisend={false}
-              showDecodedData={!isDecodedDataVisible}
-              showAuditLogFields={!showAuditLog}
-            />
-          </ObservabilityErrorBoundary>
-        </div>
-
-        {(isMultiSendTxInfo(txDetails.txInfo) ||
+    <TxDetailsBlockView
+      isUnsigned={isUnsigned}
+      txNote={<txNotes.TxNote txDetails={txDetails} />}
+      simulation={isQueue && <QueuedTxSimulation transaction={txDetails} />}
+      renderTxData={(children) => (
+        <ObservabilityErrorBoundary fallback={<ParsingErrorView />}>
+          <TxData
+            txData={txDetails.txData}
+            txInfo={txDetails.txInfo}
+            txDetails={txDetails}
+            trusted={isTrustedTransfer}
+            imitation={isImitationTransaction}
+          >
+            {children}
+          </TxData>
+        </ObservabilityErrorBoundary>
+      )}
+      decodedDataRef={decodedDataRef}
+      decodedData={
+        <DecodedData
+          txData={txDetails.txData}
+          toInfo={isCustomTxInfo(txDetails.txInfo) ? txDetails.txInfo.to : txDetails.txData?.to}
+          isWarningEnabled
+        />
+      }
+      moduleAddressInfo={
+        moduleAddress &&
+        !showAuditLog && (
+          <NamedAddressInfo
+            address={moduleAddress.value}
+            name={moduleAddressInfo?.name || moduleAddress.name}
+            customAvatar={moduleAddressInfo?.logoUri || moduleAddress.logoUri}
+            shortAddress={false}
+            showCopyButton
+            hasExplorer
+          />
+        )
+      }
+      showUnsignedWarning={isUntrusted && !isPending}
+      summary={
+        <ObservabilityErrorBoundary fallback={<ParsingErrorView />}>
+          <Summary
+            txDetails={txDetails}
+            txData={txDetails.txData}
+            txInfo={txDetails.txInfo}
+            showMultisend={false}
+            showDecodedData={!isDecodedDataVisible}
+            showAuditLogFields={!showAuditLog}
+          />
+        </ObservabilityErrorBoundary>
+      }
+      multisend={
+        (isMultiSendTxInfo(txDetails.txInfo) ||
           isOrderTxInfo(txDetails.txInfo) ||
           isBridgeOrderTxInfo(txDetails.txInfo) ||
           isLifiSwapTxInfo(txDetails.txInfo)) && (
-          <div className={css.multiSend}>
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-              <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />
-            </ObservabilityErrorBoundary>
-          </div>
-        )}
-      </div>
-      {/* Signers */}
-      {(!isUnsigned || proposer) && (
-        <div className={css.txSigners}>
-          <TxSigners
-            txDetails={txDetails}
-            txSummary={txSummary}
-            isTxFromProposer={isTxFromProposer}
-            proposer={proposer}
-            isExpired={expiredSwap}
-          />
-
-          {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
-
-          {isQueue && (
-            <div className={css.buttons}>
-              {isTxFromProposer ? (
-                <>
-                  {!expiredSwap &&
-                    (awaitingExecution ? (
-                      <ExecuteTxButton txSummary={txSummary} />
-                    ) : (
-                      <SignTxButton txSummary={txSummary} />
-                    ))}
-                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
-                </>
-              ) : (
-                <>
-                  {awaitingExecution ? (
-                    <ExecuteTxButton txSummary={txSummary} />
-                  ) : (
-                    <SignTxButton txSummary={txSummary} />
-                  )}
-                  <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </>
+          <ObservabilityErrorBoundary fallback={<ParsingErrorView />}>
+            <Multisend txData={txDetails.txData} isExecuted={!!txDetails.executedAt} />
+          </ObservabilityErrorBoundary>
+        )
+      }
+      showSigners={!isUnsigned || !!proposer}
+      txSigners={
+        <TxSigners
+          txDetails={txDetails}
+          txSummary={txSummary}
+          isTxFromProposer={isTxFromProposer}
+          proposer={proposer}
+          isExpired={expiredSwap}
+        />
+      }
+      securitySection={
+        isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />
+      }
+      buttons={
+        isQueue &&
+        (isTxFromProposer ? (
+          <>
+            {!expiredSwap &&
+              (awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />)}
+            <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+          </>
+        ) : (
+          <>
+            {awaitingExecution ? <ExecuteTxButton txSummary={txSummary} /> : <SignTxButton txSummary={txSummary} />}
+            <RejectTxButton txSummary={txSummary} safeTxHash={safeTxHash} proposer={proposer} />
+          </>
+        ))
+      }
+    />
   )
 }
 
@@ -267,28 +237,13 @@ const TxDetails = ({
   }, [safe.txQueuedTag, refetch, txDetails, isUninitialized])
 
   return (
-    <Card
-      size={contrastSurface ? 'none' : 'default'}
-      radius={contrastSurface ? 'none' : 'lg'}
-      // eslint-disable-next-line no-restricted-syntax -- contrast variant clears the surface (bg-transparent) so css.containerContrast can paint it; nested-surface token
-      className={classNames(css.container, contrastSurface && 'bg-transparent', {
-        [css.containerContrast]: contrastSurface,
-      })}
-    >
-      {txDetailsData ? (
-        <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} />
-      ) : loading ? (
-        <div className={css.loading}>
-          <Spinner className="size-10" />
-        </div>
-      ) : (
-        error && (
-          <div className={css.error}>
-            <ErrorMessage error={asError(error)}>Couldn&apos;t load the transaction details</ErrorMessage>
-          </div>
-        )
-      )}
-    </Card>
+    <TxDetailsView
+      contrastSurface={contrastSurface}
+      block={txDetailsData && <TxDetailsBlock txSummary={txSummary} txDetails={txDetailsData} />}
+      loading={loading}
+      hasError={!!error}
+      renderErrorMessage={(children) => <ErrorMessage error={asError(error)}>{children}</ErrorMessage>}
+    />
   )
 }
 

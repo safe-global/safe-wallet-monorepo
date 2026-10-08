@@ -3,30 +3,13 @@ import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import Approvals from '@/components/tx/ApprovalEditor/Approvals'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import { decodeSafeTxToBaseTransactions } from '@/utils/transactions'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
 import { type SafeTransaction } from '@safe-global/types-kit'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useContext } from 'react'
 import { ApprovalEditorForm } from './ApprovalEditorForm'
 import { useApprovalInfos } from './hooks/useApprovalInfos'
-import css from './styles.module.css'
 import { updateApprovalTxs } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
-
-const Title = ({ isErc721 }: { isErc721: boolean }) => {
-  const title = 'Allow access to tokens?'
-  const subtitle = isErc721
-    ? 'This allows the spender to transfer the specified token.'
-    : 'This allows the spender to spend the specified amount of your tokens.'
-
-  return (
-    <div>
-      <Typography className="font-bold">{title}</Typography>
-      <Typography variant="paragraph-small">{subtitle}</Typography>
-    </div>
-  )
-}
+import { ApprovalEditorView } from '@views/components/tx/ApprovalEditor/ApprovalEditorView'
 
 const ApprovalEditor = ({
   safeTransaction,
@@ -65,21 +48,19 @@ const ApprovalEditor = ({
     (safeTransaction && safeTransaction.signatures.size > 0) || safeMessage !== undefined || isErc721Approval
 
   return (
-    <div className={`${css.container} mb-2 flex flex-col gap-4`}>
-      <Title isErc721={isErc721Approval} />
-      {error ? (
-        <Alert variant="destructive">
-          <AlertSeverityIcon variant="destructive" />
-          <AlertDescription>Error while decoding approval transactions.</AlertDescription>
-        </Alert>
-      ) : loading || !readableApprovals ? (
-        <Skeleton className="h-[100px] w-full" data-testid="approval-editor-loading" />
-      ) : isReadOnly ? (
-        <Approvals approvalInfos={readableApprovals} />
-      ) : (
-        <ApprovalEditorForm approvalInfos={readableApprovals} updateApprovals={updateApprovals} />
-      )}
-    </div>
+    <ApprovalEditorView
+      isErc721={isErc721Approval}
+      hasError={!!error}
+      isLoading={loading || !readableApprovals}
+      content={
+        readableApprovals &&
+        (isReadOnly ? (
+          <Approvals approvalInfos={readableApprovals} />
+        ) : (
+          <ApprovalEditorForm approvalInfos={readableApprovals} updateApprovals={updateApprovals} />
+        ))
+      }
+    />
   )
 }
 

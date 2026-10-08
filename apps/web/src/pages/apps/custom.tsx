@@ -9,6 +9,7 @@ import { RemoveCustomAppModal } from '@/components/safe-apps/RemoveCustomAppModa
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
+import { CustomSafeAppsView } from '@views/pages/apps/CustomSafeAppsView'
 
 const CustomSafeApps: NextPage = () => {
   // TODO: create a custom hook instead of use useSafeApps
@@ -35,15 +36,17 @@ const CustomSafeApps: NextPage = () => {
 
       <SafeAppsHeader />
 
-      <main>
-        <SafeAppList
-          title="Custom apps"
-          safeAppsList={customSafeApps}
-          addCustomApp={addCustomApp}
-          removeCustomApp={openRemoveCustomAppModal}
-          eventLabel={SAFE_APPS_LABELS.apps_custom}
-        />
-      </main>
+      <CustomSafeAppsView
+        renderAppList={({ title }) => (
+          <SafeAppList
+            title={title}
+            safeAppsList={customSafeApps}
+            addCustomApp={addCustomApp}
+            removeCustomApp={openRemoveCustomAppModal}
+            eventLabel={SAFE_APPS_LABELS.apps_custom}
+          />
+        )}
+      />
 
       {/* remove custom safe app modal */}
       {customSafeAppToRemove && (

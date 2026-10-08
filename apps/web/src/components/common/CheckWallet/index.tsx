@@ -6,8 +6,8 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useConnectWallet from '../ConnectWallet/useConnectWallet'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { CheckWalletView, type CheckWalletReason } from '@views/components/common/CheckWallet/CheckWalletView'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 
 export type CheckWalletProps = {
@@ -18,13 +18,6 @@ export type CheckWalletProps = {
   checkNetwork?: boolean
   allowUndeployedSafe?: boolean
   allowProposer?: boolean
-}
-
-enum Message {
-  WalletNotConnected = 'Please connect your wallet',
-  SDKNotInitialized = 'Still loading. Try again in a moment.',
-  NotSafeOwner = 'Your connected wallet is not a signer of this Safe account',
-  SafeNotActivated = 'You need to activate the Safe before transacting',
 }
 
 const CheckWallet = ({
@@ -50,16 +43,16 @@ const CheckWallet = ({
 
   const isUndeployedSafe = !safe.deployed
 
-  const message = useMemo(() => {
+  const reason = useMemo((): CheckWalletReason | undefined => {
     if (!wallet) {
-      return Message.WalletNotConnected
+      return 'walletNotConnected'
     }
     if (!sdk && safeLoaded) {
-      return Message.SDKNotInitialized
+      return 'sdkNotInitialized'
     }
 
     if (isUndeployedSafe && !allowUndeployedSafe) {
-      return Message.SafeNotActivated
+      return 'safeNotActivated'
     }
 
     if (
@@ -69,11 +62,11 @@ const CheckWallet = ({
       !isNestedSafeOwner &&
       (!isOnlySpendingLimit || !allowSpendingLimit)
     ) {
-      return Message.NotSafeOwner
+      return 'notSafeOwner'
     }
 
     if (!allowProposer && isProposer && !isSafeOwner && !isNestedSafeOwner) {
-      return Message.NotSafeOwner
+      return 'notSafeOwner'
     }
   }, [
     allowNonOwner,
@@ -91,24 +84,17 @@ const CheckWallet = ({
   ])
 
   if (checkNetwork && isWrongChain) return children(false)
-  if (!message) return children(true)
+  if (!reason) return children(true)
   if (noTooltip) return children(false)
 
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span
-            data-testid="check-wallet-tooltip-trigger"
-            aria-label={message}
-            onClick={wallet ? undefined : connectWallet}
-          />
-        }
-      >
-        {children(false)}
-      </TooltipTrigger>
-      <TooltipContent>{message}</TooltipContent>
-    </Tooltip>
+    <CheckWalletView
+      reason={reason}
+      onTriggerClick={wallet ? undefined : connectWallet}
+      testId="check-wallet-tooltip-trigger"
+    >
+      {children(false)}
+    </CheckWalletView>
   )
 }
 

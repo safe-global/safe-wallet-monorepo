@@ -1,41 +1,32 @@
 import { type ApprovalInfo } from '@/components/tx/ApprovalEditor/hooks/useApprovalInfos'
-import css from './styles.module.css'
 import ApprovalItem from '@/components/tx/ApprovalEditor/ApprovalItem'
 import groupBy from 'lodash/groupBy'
 import { useMemo } from 'react'
 import { SpenderField } from './SpenderField'
+import { ApprovalsView } from '@views/components/tx/ApprovalEditor/ApprovalsView'
 
 const Approvals = ({ approvalInfos }: { approvalInfos: ApprovalInfo[] }) => {
   const groupedApprovals = useMemo(() => groupBy(approvalInfos, (approval) => approval.spender), [approvalInfos])
 
-  return (
-    <ul className={css.approvalsList}>
-      {Object.entries(groupedApprovals).map(([spender, approvals]) => (
-        <div key={spender} className="flex flex-col gap-4">
-          <SpenderField address={spender} />
-          {approvals.map((tx) => {
-            if (!tx.tokenInfo) return <></>
+  const groups = Object.entries(groupedApprovals).map(([spender, approvals]) => ({
+    spender,
+    spenderField: <SpenderField address={spender} />,
+    items: approvals.map((tx) => ({
+      key: tx.tokenAddress + tx.spender,
+      isZeroValue: !!tx.tokenInfo && BigInt(0) === BigInt(tx.amount),
+      content: tx.tokenInfo ? (
+        <ApprovalItem
+          spender={tx.spender}
+          method={tx.method}
+          amount={tx.amountFormatted}
+          rawAmount={tx.amount}
+          tokenInfo={tx.tokenInfo}
+        />
+      ) : undefined,
+    })),
+  }))
 
-            return (
-              <li
-                key={tx.tokenAddress + tx.spender}
-                className={`flex w-full ${BigInt(0) === BigInt(tx.amount) ? css.zeroValueApproval : ''}`}
-                data-testid="approval-item"
-              >
-                <ApprovalItem
-                  spender={tx.spender}
-                  method={tx.method}
-                  amount={tx.amountFormatted}
-                  rawAmount={tx.amount}
-                  tokenInfo={tx.tokenInfo}
-                />
-              </li>
-            )
-          })}
-        </div>
-      ))}
-    </ul>
-  )
+  return <ApprovalsView groups={groups} />
 }
 
 export default Approvals

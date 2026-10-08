@@ -1,24 +1,9 @@
-import type { ComponentProps } from 'react'
-import { ArrowDownUp, ChevronDown } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { OrderByOption, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { cn } from '@/utils/cn'
-
-const labels: Record<OrderByOption, string> = {
-  [OrderByOption.NAME]: 'Name',
-  [OrderByOption.LAST_VISITED]: 'Last visited',
-  [OrderByOption.MANUAL]: 'Manual',
-}
+import { type OrderByOption, selectOrderByPreference, setOrderByPreference } from '@/store/orderByPreferenceSlice'
+import {
+  SafeListSortToggleView,
+  type SafeListSortToggleViewProps,
+} from '@views/components/common/SafeListSortToggle/SafeListSortToggleView'
 
 /**
  * Sort control for the Safe lists (account selector dropdown + All accounts modal).
@@ -32,51 +17,21 @@ const labels: Record<OrderByOption, string> = {
  */
 const SafeListSortToggle = ({
   className,
-  size = 'default',
+  size,
 }: {
   className?: string
-  size?: ComponentProps<typeof Button>['size']
+  size?: SafeListSortToggleViewProps['size']
 }) => {
   const dispatch = useAppDispatch()
   const { orderBy } = useAppSelector(selectOrderByPreference)
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            variant="outline"
-            size={size}
-            className={cn(
-              'w-[160px] shrink-0 justify-between gap-1.5 border-border shadow-none text-foreground hover:bg-muted aria-expanded:bg-muted',
-              className,
-            )}
-            data-testid="safe-list-sort-toggle"
-          />
-        }
-      >
-        <span className="flex items-center gap-1.5 whitespace-nowrap">
-          <ArrowDownUp className="size-4 shrink-0" />
-          {labels[orderBy]}
-        </span>
-        <ChevronDown className="size-4 shrink-0 opacity-60" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={orderBy}
-            onValueChange={(value) => dispatch(setOrderByPreference({ orderBy: value as OrderByOption }))}
-          >
-            <DropdownMenuRadioItem value={OrderByOption.NAME}>{labels[OrderByOption.NAME]}</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={OrderByOption.LAST_VISITED}>
-              {labels[OrderByOption.LAST_VISITED]}
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value={OrderByOption.MANUAL}>{labels[OrderByOption.MANUAL]}</DropdownMenuRadioItem>
-          </DropdownMenuRadioGroup>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <SafeListSortToggleView
+      orderBy={orderBy}
+      onOrderByChange={(value) => dispatch(setOrderByPreference({ orderBy: value as OrderByOption }))}
+      triggerClassName={className}
+      size={size}
+    />
   )
 }
 

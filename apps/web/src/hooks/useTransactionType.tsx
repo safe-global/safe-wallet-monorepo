@@ -15,10 +15,8 @@ import {
 import useAddressBook from './useAddressBook'
 import type { AddressBook } from '@/store/addressBookSlice'
 import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
-import { ICON_STROKE } from '@/components/common/iconStroke'
-import { cn } from '@/utils/cn'
+import { txIcon } from '@views/hooks/TxIconView'
 import {
-  type LucideIcon,
   ArrowDownLeft,
   ArrowUpRight,
   CircleX,
@@ -31,10 +29,6 @@ import {
   Settings,
   TrendingUp,
 } from 'lucide-react'
-
-const TxIcon = ({ icon: Icon, className }: { icon: LucideIcon; className?: string }) => (
-  <Icon className={cn('size-4', className)} strokeWidth={ICON_STROKE} />
-)
 
 const getTxTo = ({ txInfo }: Pick<Transaction, 'txInfo'>): AddressInfo | undefined => {
   switch (txInfo.type) {
@@ -65,7 +59,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
   switch (tx.txInfo.type) {
     case TransactionInfoType.CREATION: {
       return {
-        icon: toAddress?.logoUri || <TxIcon icon={Settings} />,
+        icon: toAddress?.logoUri || txIcon(Settings),
         text: 'Safe account created',
       }
     }
@@ -74,11 +68,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
       const isSendTx = isOutgoingTransfer(tx.txInfo)
 
       return {
-        icon: isSendTx ? (
-          <TxIcon icon={ArrowUpRight} className="text-destructive" />
-        ) : (
-          <TxIcon icon={ArrowDownLeft} className="text-accent-success" />
-        ),
+        icon: isSendTx ? txIcon(ArrowUpRight, 'destructive') : txIcon(ArrowDownLeft, 'success'),
         text: isSendTx ? (isTxQueued(tx.txStatus) ? 'Send' : 'Sent') : 'Received',
       }
     }
@@ -88,7 +78,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
       const isDeleteGuard = tx.txInfo.settingsInfo?.type === SettingsInfoType.DELETE_GUARD
 
       return {
-        icon: <TxIcon icon={Settings} />,
+        icon: txIcon(Settings),
         text: isDeleteGuard ? 'deleteGuard' : tx.txInfo.dataDecoded.method,
       }
     }
@@ -97,45 +87,45 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
       const altText = orderClass === 'limit' ? 'Limit order' : 'Swap order'
 
       return {
-        icon: <TxIcon icon={Repeat} className="size-3.5" />,
+        icon: txIcon(Repeat, 'small'),
         text: altText,
       }
     }
     case TransactionInfoType.TWAP_ORDER: {
       return {
-        icon: <TxIcon icon={Repeat} className="size-3.5" />,
+        icon: txIcon(Repeat, 'small'),
         text: TWAP_ORDER_TITLE,
       }
     }
     case TransactionInfoType.NATIVE_STAKING_DEPOSIT: {
       return {
-        icon: <TxIcon icon={Database} />,
+        icon: txIcon(Database),
         text: 'Stake',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_VALIDATORS_EXIT: {
       return {
-        icon: <TxIcon icon={Database} />,
+        icon: txIcon(Database),
         text: 'Withdraw request',
       }
     }
     case TransactionInfoType.NATIVE_STAKING_WITHDRAW: {
       return {
-        icon: <TxIcon icon={Database} />,
+        icon: txIcon(Database),
         text: 'Claim',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultDeposit': {
       return {
-        icon: <TxIcon icon={TrendingUp} />,
+        icon: txIcon(TrendingUp),
         text: 'Deposit',
       }
     }
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'VaultRedeem': {
       return {
-        icon: <TxIcon icon={TrendingUp} />,
+        icon: txIcon(TrendingUp),
         text: 'Withdraw',
       }
     }
@@ -143,7 +133,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'SwapAndBridge': {
       return {
-        icon: <TxIcon icon={SendToBack} />,
+        icon: txIcon(SendToBack),
         text: 'Bridge',
       }
     }
@@ -151,7 +141,7 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     // @ts-ignore TODO: Add types to old SDK or switch to auto-generated
     case 'Swap': {
       return {
-        icon: <TxIcon icon={Repeat} className="size-3.5" />,
+        icon: txIcon(Repeat, 'small'),
         text: 'Swap',
       }
     }
@@ -159,47 +149,47 @@ export const getTransactionType = (tx: Transaction, addressBook: AddressBook): T
     case TransactionInfoType.CUSTOM: {
       if (tx.safeAppInfo) {
         return {
-          icon: tx.safeAppInfo.logoUri || <TxIcon icon={Code} />,
+          icon: tx.safeAppInfo.logoUri || txIcon(Code),
           text: tx.safeAppInfo.name,
         }
       }
 
       if (isMultiSendTxInfo(tx.txInfo)) {
         return {
-          icon: <TxIcon icon={Layers} />,
+          icon: txIcon(Layers),
           text: 'Batch',
         }
       }
 
       if (isModuleExecutionInfo(tx.executionInfo)) {
         return {
-          icon: toAddress?.logoUri || <TxIcon icon={Code} />,
+          icon: toAddress?.logoUri || txIcon(Code),
           text: toAddress?.name || 'Contract interaction',
         }
       }
 
       if (isCancellationTxInfo(tx.txInfo)) {
         return {
-          icon: <TxIcon icon={CircleX} className="text-destructive" />,
+          icon: txIcon(CircleX, 'destructive'),
           text: 'On-chain rejection',
         }
       }
 
       if (isNestedConfirmationTxInfo(tx.txInfo)) {
         return {
-          icon: <TxIcon icon={GitMerge} />,
+          icon: txIcon(GitMerge),
           text: `Nested Safe${addressBookName ? `: ${addressBookName}` : ''}`,
         }
       }
 
       return {
-        icon: toAddress?.logoUri || <TxIcon icon={Code} />,
+        icon: toAddress?.logoUri || txIcon(Code),
         text: addressBookName || toAddress?.name || 'Contract interaction',
       }
     }
     default: {
       return {
-        icon: <TxIcon icon={Code} />,
+        icon: txIcon(Code),
         text: addressBookName || 'Contract interaction',
       }
     }

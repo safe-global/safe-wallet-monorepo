@@ -1,7 +1,5 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
-import DeleteIcon from '@/public/images/common/delete.svg'
-import { Button } from '@/components/ui/button'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
 import type { MultiTokenTransferParams, TokenTransferParams } from '@views/components/tx-flow/flows/TokenTransfer/types'
@@ -19,16 +17,13 @@ import { selectSpendingLimits } from '@/features/spending-limits'
 import { useAppSelector } from '@/store'
 import { useVisibleTokens } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { X } from 'lucide-react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useResolvedGasToken, type FeePreviewTx } from '@/features/gtf'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
+import { RecipientRowView } from '@views/components/tx-flow/flows/TokenTransfer/RecipientRow/RecipientRowView'
 
 const getFieldName = (
   field: keyof TokenTransferParams,
@@ -112,68 +107,29 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
   }, [setNonceNeeded, isSpendingLimitType, spendingLimitAmount])
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-col gap-4">
-        <div className="w-full">
-          <AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />
-        </div>
-
-        <div className="w-full">
-          <TokenAmountInput
-            fieldArray={fieldArray}
-            balances={isSpendingLimitType ? spendingLimitBalances : balancesItems}
-            selectedToken={selectedToken}
-            maxAmount={maxAmount}
-            deps={[MultiTokenTransferFields.recipients]}
-            defaultTokenAddress={tokenAddress}
-            onMaxClick={() => setMaxPressed(true)}
-          />
-        </div>
-
-        {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
-            <AlertSeverityIcon variant="info" />
-            <AlertDescription className="flex w-full items-center justify-between gap-2">
-              <span>
-                Your max send amount accounts for fees paid in {selectedToken?.tokenInfo.symbol}. This updates if fees
-                change.
-              </span>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Dismiss fee banner"
-                onClick={() => setMaxPressed(false)}
-              >
-                <X className="size-4" />
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {!disableSpendingLimit && canCreateSpendingLimitTxWithToken && (
-          <div className="w-full">
-            <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
-          </div>
-        )}
-      </div>
-
-      {removable && (
-        <div>
-          <Track {...MODALS_EVENTS.REMOVE_RECIPIENT}>
-            <Button
-              data-testid="remove-recipient-btn"
-              onClick={onRemove}
-              aria-label="Remove recipient"
-              variant="ghost"
-              size="lg"
-            >
-              <DeleteIcon className="size-4" />
-              Remove recipient
-            </Button>
-          </Track>
-        </div>
-      )}
-    </div>
+    <RecipientRowView
+      addressInput={<AddressBookInput name={recipientFieldName} canAdd={isAddressValid} />}
+      tokenAmountInput={
+        <TokenAmountInput
+          fieldArray={fieldArray}
+          balances={isSpendingLimitType ? spendingLimitBalances : balancesItems}
+          selectedToken={selectedToken}
+          maxAmount={maxAmount}
+          deps={[MultiTokenTransferFields.recipients]}
+          defaultTokenAddress={tokenAddress}
+          onMaxClick={() => setMaxPressed(true)}
+        />
+      }
+      showFeeBanner={showFeeBanner}
+      feeTokenSymbol={selectedToken?.tokenInfo.symbol}
+      onDismissFeeBanner={() => setMaxPressed(false)}
+      showSpendingLimit={!disableSpendingLimit && canCreateSpendingLimitTxWithToken}
+      spendingLimitRow={
+        <SpendingLimitRow availableAmount={spendingLimitAmount} selectedToken={selectedToken?.tokenInfo} />
+      }
+      removable={removable}
+      onRemove={onRemove}
+    />
   )
 }
 

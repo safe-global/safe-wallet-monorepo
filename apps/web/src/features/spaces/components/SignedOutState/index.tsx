@@ -1,10 +1,8 @@
-import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
+import { SignedOutStateView } from '@views/features/spaces/components/SignedOutState/SignedOutStateView'
 
 interface SignedOutStateProps {
   afterSignIn?: () => void
@@ -16,25 +14,11 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
   const isDarkMode = useDarkMode()
 
   return (
-    <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-      <div className={css.content}>
-        <div className={cn('text-center', css.contentWrapper)}>
-          <div className={css.contentInner}>
-            <Typography variant="paragraph-bold" className="mb-4">
-              Sign in to see content
-            </Typography>
-
-            <Typography color="muted" className="mb-4">
-              To view and interact with Workspaces, you need to sign in with the wallet, that is a member of the
-              Workspace
-              {!$isDisabled && ', or sign in with email'}. Sign in to continue.
-            </Typography>
-
-            <SignInOptions afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />
-          </div>
-        </div>
-      </div>
-    </div>
+    <SignedOutStateView
+      isDarkMode={isDarkMode}
+      isEmailSignInEnabled={!$isDisabled}
+      signInOptions={<SignInOptions afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />}
+    />
   )
 }
 

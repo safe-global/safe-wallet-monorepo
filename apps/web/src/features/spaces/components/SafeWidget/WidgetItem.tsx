@@ -1,39 +1,12 @@
-import type { ReactElement, ReactNode } from 'react'
+import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { WidgetItemView, type WidgetItemViewProps } from '@views/features/spaces/components/SafeWidget/WidgetItemView'
 
-interface WidgetItemProps {
-  label: string | ReactNode
-  info: string | ReactNode
-  /** Optional second line (e.g. amount + recipient); can wrap so full text is visible. */
-  description?: string | ReactNode
+interface WidgetItemProps extends WidgetItemViewProps {
   href?: string
-  onClick?: () => void
-  startNode?: ReactNode
-  featuredNode?: ReactNode
-  actionNode?: ReactNode
-  highlighted?: boolean
-  className?: string
-  /** Cypress: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
-  testId?: string
-  fixedActionWidth?: boolean
 }
 
-const WidgetItem = ({
-  label,
-  info,
-  description,
-  href,
-  onClick,
-  startNode,
-  featuredNode,
-  actionNode,
-  highlighted = false,
-  className,
-  testId,
-  fixedActionWidth = false,
-}: WidgetItemProps): ReactElement => {
+const WidgetItem = ({ href, onClick, ...props }: WidgetItemProps): ReactElement => {
   const router = useRouter()
 
   const handleClick =
@@ -44,60 +17,7 @@ const WidgetItem = ({
         }
       : undefined
 
-  return (
-    <div
-      data-slot="widget-item"
-      data-testid={testId}
-      role={handleClick ? 'button' : undefined}
-      tabIndex={handleClick ? 0 : undefined}
-      onClick={handleClick}
-      onKeyDown={handleClick ? (e) => e.key === 'Enter' && handleClick() : undefined}
-      className={cn(
-        'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6',
-        handleClick && 'cursor-pointer transition-colors hover:bg-muted/50',
-        highlighted && 'bg-background',
-        className,
-      )}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-4">
-        {startNode}
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden">
-          {typeof label === 'string' ? (
-            <Typography variant="paragraph-medium" className="overflow-hidden whitespace-nowrap">
-              {label}
-            </Typography>
-          ) : (
-            label
-          )}
-          {typeof description === 'string' ? (
-            <Typography variant="paragraph-small" color="muted" className="break-words">
-              {description}
-            </Typography>
-          ) : (
-            description
-          )}
-          {typeof info === 'string' ? (
-            <Typography variant="paragraph-mini" color="muted" className="overflow-hidden whitespace-nowrap">
-              {info}
-            </Typography>
-          ) : (
-            info
-          )}
-        </div>
-      </div>
-
-      {(featuredNode || actionNode) && (
-        <div className="ml-auto flex shrink-0 items-center gap-4">
-          {featuredNode && <div className="flex items-center justify-center">{featuredNode}</div>}
-          {actionNode && (
-            <div className={cn('flex flex-col items-center gap-2', fixedActionWidth ? 'w-36' : 'min-w-16')}>
-              {actionNode}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
+  return <WidgetItemView {...props} onClick={handleClick} />
 }
 
 export { WidgetItem }

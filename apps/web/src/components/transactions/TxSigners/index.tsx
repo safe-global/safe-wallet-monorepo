@@ -1,11 +1,6 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import { Copy } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditRow, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -15,8 +10,6 @@ import {
   isModuleDetailedExecutionInfo,
   isMultisigDetailedExecutionInfo,
 } from '@/utils/transaction-guards'
-import ExplorerFallbackIcon from '@/public/images/common/link.svg'
-import HashIcon from '@/public/images/common/hash.svg'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useTransactionStatus from '@/hooks/useTransactionStatus'
@@ -29,17 +22,16 @@ import { useLoadFeature } from '@/features/__core__'
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import ExplorerButton from '@/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-
-const WAITING_STATUSES = new Set([
-  'Awaiting confirmations',
-  'Awaiting execution',
-  'Needs your confirmation',
-  'Awaiting review',
-])
-const shortenAuditStatus = (status: string): string => (WAITING_STATUSES.has(status) ? 'Waiting' : status)
+import {
+  CopyTxHashButtonView,
+  TxAuditLogActionsView,
+  TxSignersExecutedView,
+  TxSignersModuleView,
+  TxSignersView,
+  type TxSignersAuditRowProps,
+} from '@views/components/transactions/TxSigners/TxSignersView'
 
 type TxSignersProps = {
   txDetails: TransactionDetails
@@ -52,52 +44,7 @@ type TxSignersProps = {
 const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   const [copied, handleCopy] = useCopyToClipboard(txHash)
 
-  if (!txHash) {
-    return (
-      <Tooltip>
-        {/* A disabled button receives neither pointer nor focus events, so the tooltip has to hang
-            off a wrapper or the hint is unreachable by every input method. */}
-        <TooltipTrigger
-          render={
-            <span tabIndex={0}>
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-inherit"
-                disabled
-                aria-label="Copy transaction hash"
-              >
-                <HashIcon className="size-4" />
-              </Button>
-            </span>
-          }
-        />
-        <TooltipContent side="top">Available after execution</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            data-testid="copy-tx-hash-btn"
-            variant="ghost"
-            size="icon-xs"
-            className="text-inherit"
-            onClick={handleCopy}
-            // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
-            // all, so an icon-only trigger needs its own name or it announces as just "button".
-            aria-label="Copy transaction hash"
-          >
-            <HashIcon className="size-4" />
-          </Button>
-        }
-      />
-      <TooltipContent side="top">{copied ? 'Copied' : 'Copy transaction hash'}</TooltipContent>
-    </Tooltip>
-  )
+  return <CopyTxHashButtonView txHash={txHash} copied={copied} onCopy={handleCopy} />
 }
 
 const TxAuditLogActions = ({
@@ -109,40 +56,18 @@ const TxAuditLogActions = ({
   txHash?: string | null
   explorerLink?: { title: string; href: string }
 }) => (
-  <>
-    <CopyTxHashButton txHash={txHash} />
-    {/* No Tooltip of its own: TxShareLinkWrapper wraps this in CopyTooltip, which already supplies a
-        TooltipTrigger and its own "Copy the transaction URL" content. A second one nested inside
-        opened two tooltips at once on hover. The aria-label carries the accessible name. */}
-    <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
-      <Button
-        data-testid="share-tx-link-btn"
-        variant="ghost"
-        size="icon-xs"
-        className="text-inherit"
-        aria-label="Copy transaction link"
-      >
-        <Copy className="size-4" />
-      </Button>
-    </TxShareLinkWrapper>
-    {explorerLink ? (
-      <ExplorerButton {...explorerLink} isCompact />
-    ) : (
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <span tabIndex={0}>
-              <Button variant="ghost" size="icon-xs" disabled aria-label="View on block explorer">
-                <ExplorerFallbackIcon className="size-4" />
-              </Button>
-            </span>
-          }
-        />
-        <TooltipContent side="top">Available after execution</TooltipContent>
-      </Tooltip>
+  <TxAuditLogActionsView
+    copyTxHashButton={<CopyTxHashButton txHash={txHash} />}
+    renderShareLink={(children) => (
+      <TxShareLinkWrapper id={txId} eventLabel={CopyDeeplinkLabels.shareBlock}>
+        {children}
+      </TxShareLinkWrapper>
     )}
-  </>
+    explorerLink={explorerLink}
+  />
 )
+
+const renderAuditRow = (props: TxSignersAuditRowProps) => <AuditRow {...props} />
 
 const TxSigners = ({
   txDetails,
@@ -158,7 +83,7 @@ const TxSigners = ({
   const { safe } = useSafeInfo()
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
-  const safenet = useLoadFeature(SafenetChecksFeature)
+  const { SafenetAuditRow } = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
@@ -193,19 +118,12 @@ const TxSigners = ({
     if (!txDetails.executedAt) return null
 
     return (
-      <AuditLog data-testid="transaction-actions-list">
-        <AuditLogHeader
-          actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
-        />
-        <AuditRow
-          label="Executed"
-          actionType="executed"
-          address={onChainFrom}
-          name={resolveName(onChainFrom)}
-          timestamp={txDetails.executedAt}
-          isLast
-        />
-      </AuditLog>
+      <TxSignersExecutedView
+        actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
+        renderAuditRow={renderAuditRow}
+        executedAt={txDetails.executedAt}
+        executor={{ address: onChainFrom, name: resolveName(onChainFrom) }}
+      />
     )
   }
 
@@ -216,28 +134,13 @@ const TxSigners = ({
     const moduleName = detailedExecutionInfo.address.name?.replace(/([a-z])([A-Z])/g, '$1 $2')
 
     return (
-      <AuditLog data-testid="transaction-actions-list">
-        <AuditLogHeader
-          actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
-        />
-
-        <AuditRow
-          label="Created"
-          actionType="created"
-          address={onChainFrom}
-          name={resolveName(onChainFrom)}
-          timestamp={txDetails.executedAt}
-        />
-
-        <AuditRow
-          label="Executed"
-          actionType="executed"
-          address={moduleAddress}
-          name={resolveName(moduleAddress, moduleName)}
-          timestamp={txDetails.executedAt}
-          isLast
-        />
-      </AuditLog>
+      <TxSignersModuleView
+        actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
+        renderAuditRow={renderAuditRow}
+        executedAt={txDetails.executedAt}
+        creator={{ address: onChainFrom, name: resolveName(onChainFrom) }}
+        module={{ address: moduleAddress, name: resolveName(moduleAddress, moduleName) }}
+      />
     )
   }
 
@@ -252,100 +155,44 @@ const TxSigners = ({
 
   const isCancellation = isCancellationTxInfo(txInfo)
 
-  const creationLabel = isTxFromProposer ? 'Proposed' : 'Created'
-  const signingLabel = (idx: number) => `Signed (${idx + 1}/${confirmationsRequired})`
-
-  const executionStatus = executor
-    ? 'Executed'
-    : isPending
-      ? txStatus
-      : shortenAuditStatus(isTxFromProposer && !isConfirmed ? 'Awaiting review' : txStatus)
-
   const showExecutionRow = isConfirmed || !!executor || txDetails.txStatus !== 'AWAITING_CONFIRMATIONS'
 
   return (
-    <AuditLog data-testid="transaction-actions-list">
-      <AuditLogHeader
-        chip={
-          <TxConfirmations
-            submittedConfirmations={confirmations.length}
-            requiredConfirmations={confirmationsRequired}
-          />
-        }
-        actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
-      />
-
-      <AuditRow
-        label={creationLabel}
-        actionType="created"
-        address={proposer}
-        name={resolveName(proposer, multisigInfo.proposer?.name || multisigInfo.proposedByDelegate?.name)}
-        timestamp={submittedAt}
-        isLast={confirmations.length === 0 && !showsSafenetRow && !showExecutionRow}
-      />
-
-      {confirmations.map(({ signer, submittedAt: signedAt }, idx) => (
-        <AuditRow
-          key={signer.value}
-          label={signingLabel(idx)}
-          actionType="signed"
-          address={signer.value}
-          name={resolveName(signer.value, signer.name)}
-          timestamp={signedAt}
-          isLast={idx === confirmations.length - 1 && !showsSafenetRow && !showExecutionRow}
+    <TxSignersView
+      actions={<TxAuditLogActions txId={txId} txHash={txDetails.txHash} explorerLink={explorerLink} />}
+      renderAuditRow={renderAuditRow}
+      executedAt={txDetails.executedAt}
+      isTxFromProposer={isTxFromProposer}
+      isExpired={isExpired}
+      isCancellation={isCancellation}
+      isConfirmed={isConfirmed}
+      isPending={isPending}
+      txStatus={txStatus}
+      proposer={{
+        address: proposer,
+        name: resolveName(proposer, multisigInfo.proposer?.name || multisigInfo.proposedByDelegate?.name),
+      }}
+      submittedAt={submittedAt}
+      confirmationsRequired={confirmationsRequired}
+      confirmations={confirmations.map(({ signer, submittedAt: signedAt }) => ({
+        address: signer.value,
+        name: resolveName(signer.value, signer.name),
+        submittedAt: signedAt,
+      }))}
+      hasExecutor={!!executor}
+      executor={{ address: executor?.value, name: resolveName(executor?.value, executor?.name) }}
+      showsSafenetRow={showsSafenetRow}
+      showExecutionRow={showExecutionRow}
+      safenetRow={
+        // Safenet check step (PRD: between the signatures and execution); stubbed to null while the flag is off.
+        <SafenetAuditRow
+          safeTxHash={multisigInfo.safeTxHash}
+          chainId={safe.chainId}
+          timestampMs={submittedAt}
+          isLast={!showExecutionRow}
         />
-      ))}
-
-      {/* Safenet check step (PRD: between the signatures and execution). The
-          feature registry stubs this to null while the flag is off; the row
-          itself renders nothing unless a check was observed for this hash. */}
-      <safenet.SafenetAuditRow
-        safeTxHash={multisigInfo.safeTxHash}
-        chainId={safe.chainId}
-        timestampMs={submittedAt}
-        isLast={!showExecutionRow}
-      />
-
-      {showExecutionRow && (
-        <AuditRow
-          label={executionStatus}
-          actionType="executed"
-          address={executor?.value}
-          name={resolveName(executor?.value, executor?.name)}
-          timestamp={txDetails.executedAt}
-          isLast
-        />
-      )}
-
-      {confirmationsNeeded > 0 && !executor && !isExpired && (
-        <Alert variant="info" className="mt-4">
-          <AlertSeverityIcon variant="info" />
-          <AlertDescription>
-            {isCancellation
-              ? 'Cancellation can be executed once the required approvals are collected.'
-              : 'Can be executed once the threshold is reached.'}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {isTxFromProposer && !executor && !isExpired && (
-        <Alert variant="info" className="mt-4">
-          <AlertSeverityIcon variant="info" />
-          <AlertDescription>
-            {isCancellation
-              ? 'This on-chain rejection was initiated by a proposer. Please review and approve or dismiss it.'
-              : 'This transaction was created by a proposer. Please review and either confirm or reject it.'}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {isExpired && !executor && (
-        <Alert variant="warning" outlined={false} className="mt-4">
-          <AlertSeverityIcon variant="warning" />
-          <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
-        </Alert>
-      )}
-    </AuditLog>
+      }
+    />
   )
 }
 

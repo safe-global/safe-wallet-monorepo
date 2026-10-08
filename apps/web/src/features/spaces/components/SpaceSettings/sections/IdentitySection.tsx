@@ -6,16 +6,10 @@ import { useIsAdmin } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
-import SpaceSettingsSection, {
-  SpaceSettingsSectionTitle,
-} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { IdentitySectionView } from '@views/features/spaces/components/SpaceSettings/sections/IdentitySectionView'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
@@ -71,42 +65,19 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
   }
 
   return (
-    <SpaceSettingsSection>
-      <SpaceSettingsSectionTitle>Identity</SpaceSettingsSectionTitle>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="space-name" className="text-muted-foreground">
-          Workspace name
-        </Label>
-        <div className="flex items-center gap-3">
-          <InitialsAvatar name={space?.name ?? '?'} size="large" />
-          <Input
-            id="space-name"
-            data-testid="space-name-input"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onBlur={() => setName(sanitizeName(name))}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && canSave) {
-                e.preventDefault()
-                handleSave()
-              }
-            }}
-            disabled={!isAdmin}
-            error={error ?? displayError}
-            className="max-w-md"
-          />
-          {canCancel && (
-            <Button variant="outline" onClick={handleCancel} data-testid="space-cancel-button">
-              Cancel
-            </Button>
-          )}
-          <Button onClick={handleSave} disabled={!canSave} data-testid="space-save-button">
-            {isSaving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
-      </div>
-    </SpaceSettingsSection>
+    <IdentitySectionView
+      spaceName={space?.name}
+      name={name}
+      onNameChange={setName}
+      onNameBlur={() => setName(sanitizeName(name))}
+      isAdmin={isAdmin}
+      error={error ?? displayError}
+      canSave={canSave}
+      canCancel={canCancel}
+      isSaving={isSaving}
+      onSave={handleSave}
+      onCancel={handleCancel}
+    />
   )
 }
 

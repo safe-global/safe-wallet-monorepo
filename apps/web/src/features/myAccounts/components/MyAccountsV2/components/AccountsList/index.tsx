@@ -11,9 +11,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useAppSelector } from '@/store'
 import { OrderByOption, selectOrderByPreference, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
-import { Typography } from '@/components/ui/typography'
+import { AccountsListView } from '@views/features/myAccounts/components/MyAccountsV2/components/AccountsList/AccountsListView'
 
 import SafeAccountsTable from '../../../SafeAccountsTable'
 
@@ -68,48 +67,48 @@ const AccountsList = ({ searchQuery, safes, onLinkClick }: AccountsListProps) =>
 
   if (searchQuery) {
     return (
-      <>
-        <Typography variant="paragraph-small" color="muted" className="block mb-2">
-          Found {filteredSafes.length} result{maybePlural(filteredSafes)}
-        </Typography>
-        <SafeAccountsTable
-          items={filteredSafes}
-          onLinkClick={onLinkClick}
-          sortableColumns={orderBy === OrderByOption.NAME}
-        />
-      </>
+      <AccountsListView
+        isSearching
+        resultCount={filteredSafes.length}
+        searchResults={
+          <SafeAccountsTable
+            items={filteredSafes}
+            onLinkClick={onLinkClick}
+            sortableColumns={orderBy === OrderByOption.NAME}
+          />
+        }
+        showCurrentSafe={false}
+        currentSafeTable={null}
+        showPinnedSafes={false}
+        pinnedSafesTable={null}
+      />
     )
   }
 
   const showCurrentSafe = safeAddress && currentSafeItem && !currentSafeInList?.isPinned
 
   return (
-    <>
-      {showCurrentSafe && (
-        <section data-testid="current-safe-section" className="mb-6">
-          <Typography variant="paragraph-small-bold" className="block mb-2">
-            Current Safe account
-          </Typography>
-          <SafeAccountsTable items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />
-        </section>
-      )}
-
-      {pinnedSafes.length > 0 && (
-        <section data-testid="pinned-accounts">
-          <SafeAccountsTable
-            items={pinnedSafes}
-            onLinkClick={onLinkClick}
-            sortableColumns={orderBy === OrderByOption.NAME}
-            // Always reorderable: dragging saves the displayed order and switches the sort mode to
-            // Manual, which then owns the order.
-            reorder={{ onReorder: saveManualOrder }}
-          />
-        </section>
-      )}
-    </>
+    <AccountsListView
+      isSearching={false}
+      resultCount={filteredSafes.length}
+      searchResults={null}
+      showCurrentSafe={!!showCurrentSafe}
+      currentSafeTable={
+        <SafeAccountsTable items={currentSafeItem ? [currentSafeItem] : []} onLinkClick={onLinkClick} />
+      }
+      showPinnedSafes={pinnedSafes.length > 0}
+      pinnedSafesTable={
+        <SafeAccountsTable
+          items={pinnedSafes}
+          onLinkClick={onLinkClick}
+          sortableColumns={orderBy === OrderByOption.NAME}
+          // Always reorderable: dragging saves the displayed order and switches the sort mode to Manual.
+          reorder={{ onReorder: saveManualOrder }}
+        />
+      }
+    />
   )
 }
 
-// Memoised so opening the "Manage my account list" modal (state lives in the parent) doesn't
-// re-render the full pinned-accounts table — a costly synchronous pass with hundreds of rows.
+// Memoised so opening the "Manage my account list" modal (state lives in the parent) doesn't re-render the full table.
 export default memo(AccountsList)

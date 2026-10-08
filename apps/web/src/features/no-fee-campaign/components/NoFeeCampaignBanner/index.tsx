@@ -5,7 +5,11 @@ import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { Link } from '@/components/ui/link'
+import type { AnalyticsEvent } from '@/services/analytics'
+import { NoFeeCampaignBannerView } from '@views/features/no-fee-campaign/components/NoFeeCampaignBanner/NoFeeCampaignBannerView'
+
+const TRACKING_EVENTS: AnalyticsEvent = { category: 'overview', action: 'open_no_fee_campaign_new_tx' }
+const TRACK_HIDE_PROPS: AnalyticsEvent = { category: 'overview', action: 'hide_no_fee_campaign_banner' }
 
 const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   const { setTxFlow } = useContext(TxModalContext)
@@ -19,31 +23,17 @@ const NoFeeCampaignBanner = ({ onDismiss }: { onDismiss: () => void }) => {
   }
 
   return (
-    <PromoBanner
-      title="Enjoy Free January"
-      description={
-        <>
-          No-Fee for Ethena USDe holders on Ethereum Mainnet, this January!{' '}
-          <Link
-            href="https://help.safe.global/articles/9605526657-no-fee-january-campaign"
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="inherit"
-            className="font-bold underline"
-          >
-            Learn more
-          </Link>
-        </>
-      }
-      ctaLabel="New transaction"
-      onCtaClick={handleNewTransaction}
-      ctaVariant="contained"
-      ctaDisabled={ctaDisabled}
-      imageSrc="/images/common/no-fee-campaign/Cards_USDe.svg"
-      imageAlt="USDe logo"
-      trackingEvents={{ category: 'overview', action: 'open_no_fee_campaign_new_tx' }}
-      trackHideProps={{ category: 'overview', action: 'hide_no_fee_campaign_banner' }}
-      onDismiss={onDismiss}
+    <NoFeeCampaignBannerView
+      renderPromoBanner={(props) => (
+        <PromoBanner
+          {...props}
+          onCtaClick={handleNewTransaction}
+          ctaDisabled={ctaDisabled}
+          trackingEvents={TRACKING_EVENTS}
+          trackHideProps={TRACK_HIDE_PROPS}
+          onDismiss={onDismiss}
+        />
+      )}
     />
   )
 }

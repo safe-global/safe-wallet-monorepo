@@ -1,8 +1,7 @@
 import type { ReactNode } from 'react'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { type ContactSource } from '@/hooks/useAllAddressBooks'
-import css from '../AccountItems/styles.module.css'
-import { cn } from '@/utils/cn'
+import { AccountItemInfoView } from '@views/features/myAccounts/components/AccountItem/AccountItemInfoView'
 
 export interface AccountItemInfoProps {
   address: string
@@ -40,11 +39,12 @@ function AccountItemInfo({
   'data-testid': testId,
 }: AccountItemInfoProps) {
   return (
-    <div className={css.accountItemInfo} data-testid={testId}>
-      <div className={cn(css.safeAddress, 'text-sm leading-5', monospace && 'font-mono')}>
-        {chainName ? (
-          <span className="text-muted-foreground text-[length:inherit]">{chainName}</span>
-        ) : (
+    <AccountItemInfoView
+      chainName={chainName}
+      monospace={monospace}
+      testId={testId}
+      addressInfo={
+        !chainName && (
           <NamedAddressInfo
             address={address}
             name={name}
@@ -60,10 +60,11 @@ function AccountItemInfo({
             hasExplorer={hasExplorer}
             highlight4bytes={highlight4bytes}
           />
-        )}
-      </div>
-      {children && <div className={css.accountItemInfoChips}>{children}</div>}
-    </div>
+        )
+      }
+    >
+      {children}
+    </AccountItemInfoView>
   )
 }
 

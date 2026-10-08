@@ -1,4 +1,3 @@
-import { Skeleton } from '@/components/ui/skeleton'
 import { useRouter } from 'next/router'
 import { useContext, useCallback, useState } from 'react'
 import { useAppSelector } from '@/store'
@@ -11,11 +10,13 @@ import { AppRoutes } from '@/config/routes'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
-import { MoreVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { DashboardHeader } from './DashboardHeader'
 import QrModal from '@/components/common/QrCodeButton/QrModal'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import {
+  AggregatedBalancesView,
+  AggregatedBalanceSkeletonView,
+} from '@views/features/spaces/components/Dashboard/AggregatedBalancesView'
 
 const AggregatedBalance = ({
   safeItems,
@@ -53,7 +54,7 @@ const AggregatedBalance = ({
     })
   }, [router])
 
-  if (isLoading) return <AggregatedBalanceSkeleton />
+  if (isLoading) return <AggregatedBalanceSkeletonView />
 
   const isDimmed = safeItems.length === 0 || accountsLoading
   const formattedValue = formatCurrencyPrecise(aggregatedBalance, currency)
@@ -86,8 +87,9 @@ const AggregatedBalance = ({
   }
 
   return (
-    <>
-      <div className={isDimmed ? 'opacity-50' : undefined}>
+    <AggregatedBalancesView
+      isDimmed={isDimmed}
+      renderHeader={({ otherActions }) => (
         <DashboardHeader
           value={formattedValue}
           noAssets={isDimmed}
@@ -95,28 +97,11 @@ const AggregatedBalance = ({
           onReceive={handleReceive}
           onSwap={handleSwap}
           onBuildTransaction={handleBuildTransaction}
-          otherActions={
-            <Button variant="ghost" size="sm" className="text-muted-foreground">
-              <MoreVertical className="size-4 text-foreground" />
-              Customize
-            </Button>
-          }
+          otherActions={otherActions}
         />
-      </div>
-      {isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
-    </>
-  )
-}
-
-const AggregatedBalanceSkeleton = () => {
-  return (
-    <div className="mb-4 flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-[30px] w-[200px]" />
-      </div>
-      <Skeleton className="h-9 w-[400px]" />
-    </div>
+      )}
+      receiveModal={isReceiveModalOpen && <QrModal onClose={handleReceiveClose} />}
+    />
   )
 }
 

@@ -3,14 +3,9 @@ import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin, useSpaceDeletionGuard } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
-import SpaceSettingsSection, {
-  SpaceSettingsSectionTitle,
-} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+import { DangerZoneSectionView } from '@views/features/spaces/components/SpaceSettings/sections/DangerZoneSectionView'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -20,73 +15,28 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
   const isLastActiveAdmin = useIsLastActiveAdmin()
   const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isAdmin ? (space?.uuid ?? null) : null)
 
-  const deleteButton = (
-    <Button
-      variant="destructive"
-      data-testid="space-delete-button"
-      disabled={isDeletionBlocked}
-      onClick={() => {
+  return (
+    <DangerZoneSectionView
+      isAdmin={isAdmin}
+      isActiveMember={isActiveMember}
+      isLastActiveAdmin={isLastActiveAdmin}
+      isDeletionBlocked={isDeletionBlocked}
+      blockedReason={blockedReason}
+      onDelete={() => {
         setDeleteOpen(true)
         trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
       }}
-    >
-      Delete Workspace
-    </Button>
-  )
-
-  return (
-    <SpaceSettingsSection>
-      <SpaceSettingsSectionTitle>Manage Workspace</SpaceSettingsSectionTitle>
-
-      <div
-        className={cn('flex items-center justify-start gap-6 py-4 first:pt-0', isAdmin && 'border-b border-border/60')}
-      >
-        {isLastActiveAdmin ? (
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <span tabIndex={0}>
-                  <Button variant="destructive" data-testid="space-leave-button" disabled>
-                    Leave Workspace
-                  </Button>
-                </span>
-              }
-            />
-            <TooltipContent side="top">You are the last active admin and cannot leave the Workspace.</TooltipContent>
-          </Tooltip>
-        ) : (
-          <Button
-            variant="destructive"
-            data-testid="space-leave-button"
-            disabled={!isActiveMember}
-            onClick={() => {
-              setLeaveOpen(true)
-              trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
-            }}
-          >
-            Leave Workspace
-          </Button>
-        )}
-      </div>
-
-      {isAdmin && (
-        <div className="flex items-center justify-start gap-6 py-4 last:pb-0">
-          {blockedReason ? (
-            <Tooltip>
-              <TooltipTrigger render={<span tabIndex={0}>{deleteButton}</span>} />
-              <TooltipContent side="top" data-testid="space-delete-blocked-tooltip">
-                {blockedReason}
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            deleteButton
-          )}
-        </div>
-      )}
-
-      {deleteOpen && <DeleteSpaceDialog space={space} onClose={() => setDeleteOpen(false)} />}
-      {leaveOpen && <LeaveSpaceDialog space={space} onClose={() => setLeaveOpen(false)} />}
-    </SpaceSettingsSection>
+      onLeave={() => {
+        setLeaveOpen(true)
+        trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
+      }}
+      dialogs={
+        <>
+          {deleteOpen && <DeleteSpaceDialog space={space} onClose={() => setDeleteOpen(false)} />}
+          {leaveOpen && <LeaveSpaceDialog space={space} onClose={() => setLeaveOpen(false)} />}
+        </>
+      }
+    />
   )
 }
 

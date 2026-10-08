@@ -1,7 +1,3 @@
-import ModalDialog from '@/components/common/ModalDialog'
-import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import {
   type MemberDto,
@@ -20,7 +16,6 @@ import {
 } from '@/features/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
 import { showNotification } from '@/store/notificationsSlice'
@@ -32,6 +27,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { capitalize } from '@safe-global/utils/utils/formatters'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { EditMemberDialogView } from '@views/features/spaces/components/MembersList/EditMemberDialogView'
 
 type MemberField = {
   name: string
@@ -147,38 +143,24 @@ const EditMemberDialog = ({ member, handleClose }: { member: MemberDto; handleCl
   })
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Edit member" hideChainIndicator>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <div className="p-6">
-              <Typography variant="paragraph" className="mb-4">
-                Edit <b>{displayName}</b> in this Workspace.
-              </Typography>
-
-              <MemberInfoForm
-                isEdit
-                disableName={!canEditName}
-                disableRole={disableRole}
-                nameMaxLength={MEMBER_ALIAS_MAX_LENGTH}
-              />
-              {error && <ErrorMessage>{error}</ErrorMessage>}
-            </div>
-
-            <DialogActions
-              className="px-6 pb-6"
-              onCancel={handleClose}
-              cancelTestId="cancel-btn"
-              confirmLabel="Update"
-              confirmType="submit"
-              confirmDestructive
-              confirmDisabled={!canSubmit}
-              confirmTestId="delete-btn"
-            />
-          </form>
-        </FormProvider>
-      </div>
-    </ModalDialog>
+    <FormProvider {...methods}>
+      <EditMemberDialogView
+        onClose={handleClose}
+        isDarkMode={isDarkMode}
+        onSubmit={onSubmit}
+        displayName={displayName}
+        memberInfoForm={
+          <MemberInfoForm
+            isEdit
+            disableName={!canEditName}
+            disableRole={disableRole}
+            nameMaxLength={MEMBER_ALIAS_MAX_LENGTH}
+          />
+        }
+        error={error}
+        canSubmit={canSubmit}
+      />
+    </FormProvider>
   )
 }
 

@@ -1,7 +1,4 @@
 import StatusStepper from './StatusStepper'
-import classnames from 'classnames'
-import NextLink from 'next/link'
-import css from './styles.module.css'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
@@ -18,14 +15,11 @@ import { getTxLink } from '@/utils/tx-link'
 import useTxDetails from '@/hooks/useTxDetails'
 import { usePredictSafeAddressFromTxDetails } from '@/hooks/usePredictSafeAddressFromTxDetails'
 import { AppRoutes } from '@/config/routes'
-import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
-import Track from '@/components/common/Track'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
 import type { ReactElement } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { SuccessScreenView } from '@views/components/tx-flow/flows/SuccessScreen/SuccessScreenView'
 
 interface ContentProps {
   /** The ID assigned to the transaction in the client-gateway */
@@ -111,70 +105,24 @@ const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
-      <div className={css.row}>
-        <LoadingSpinner status={spinnerStatus} />
-        {StatusComponent}
-      </div>
-
-      {!error && (
-        <>
-          <Separator />
-          <div className={css.row}>
-            <StatusStepper status={status} txHash={localTxHash} />
-          </div>
-        </>
-      )}
-
-      <Separator />
-
-      <div className={classnames(css.row, css.buttons)}>
-        {isSwapOrder && (
-          <Button data-testid="finish-transaction-btn" variant="outline" size="sm" onClick={onClose}>
-            Back to swaps
-          </Button>
-        )}
-
-        {txLink && (
-          <Button
-            data-testid="view-transaction-btn"
-            variant={isSwapOrder ? 'default' : 'outline'}
-            size="sm"
-            onClick={onClose}
-            render={<NextLink {...txLink} target="_blank" rel="noreferrer" />}
-          >
-            View transaction
-          </Button>
-        )}
-
-        {!isSwapOrder &&
-          (predictedSafeAddress ? (
-            <Track {...NESTED_SAFE_EVENTS.OPEN_NESTED_SAFE} label={NESTED_SAFE_LABELS.success_screen}>
-              <Button
-                data-testid="open-nested-safe-btn"
-                variant="default"
-                size="sm"
-                onClick={onClose}
-                disabled={!isSuccess}
-                render={
-                  <NextLink
-                    href={{
-                      pathname: AppRoutes.home,
-                      query: withSpaceId({ safe: `${chain?.shortName}:${predictedSafeAddress}` }, spaceId),
-                    }}
-                  />
-                }
-              >
-                Go to Nested Safe
-              </Button>
-            </Track>
-          ) : (
-            <Button data-testid="finish-transaction-btn" variant="default" size="sm" onClick={onClose}>
-              Finish
-            </Button>
-          ))}
-      </div>
-    </div>
+    <SuccessScreenView
+      spinner={<LoadingSpinner status={spinnerStatus} />}
+      statusComponent={StatusComponent}
+      stepper={<StatusStepper status={status} txHash={localTxHash} />}
+      error={error}
+      isSwapOrder={isSwapOrder}
+      txLink={txLink}
+      nestedSafeHref={
+        predictedSafeAddress
+          ? {
+              pathname: AppRoutes.home,
+              query: withSpaceId({ safe: `${chain?.shortName}:${predictedSafeAddress}` }, spaceId),
+            }
+          : undefined
+      }
+      isSuccess={isSuccess}
+      onClose={onClose}
+    />
   )
 }
 

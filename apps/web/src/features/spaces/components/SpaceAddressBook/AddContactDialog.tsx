@@ -1,11 +1,5 @@
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
-import ModalDialog from '@/components/common/ModalDialog'
-import DialogActions from '@/components/common/DialogActions'
 import { useState, type ReactNode } from 'react'
 import AddressInput from '@/components/common/AddressInput'
 import NameInput from '@/components/common/NameInput'
@@ -21,6 +15,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { AddContactDialogView } from '@views/features/spaces/components/SpaceAddressBook/AddContactDialogView'
 
 export type ContactField = {
   name: string
@@ -35,8 +30,10 @@ export type AddContactItem = {
 }
 
 type AddContactDialogProps = {
-  triggerLabel: string
-  dialogTitle: string
+  /** Defaults to "Add contact". */
+  triggerLabel?: string
+  /** Defaults to "Add contact". */
+  dialogTitle?: string
   submitLabel?: string
   intro?: ReactNode
   successMessage: string
@@ -50,7 +47,7 @@ type AddContactDialogProps = {
 const AddContactDialog = ({
   triggerLabel,
   dialogTitle,
-  submitLabel = 'Add contact',
+  submitLabel,
   intro,
   successMessage,
   successGroupKey,
@@ -140,76 +137,40 @@ const AddContactDialog = ({
   })
 
   return (
-    <>
-      <Button size="action" onClick={handleOpen}>
-        <Plus className="size-4 mr-1 text-green-500" />
-        {triggerLabel}
-      </Button>
-      <ModalDialog open={open} onClose={handleClose} dialogTitle={dialogTitle} hideChainIndicator>
-        <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-          <FormProvider {...methods}>
-            <form onSubmit={onSubmit}>
-              <div className="px-6 py-4">
-                <div className="flex flex-col gap-6">
-                  {intro && <p className="text-muted-foreground text-sm">{intro}</p>}
-
-                  {/* `hero` (66px) to match the AddressInput below, whose wrapper is min-height
-                      66px — the default h-9 left the two fields visibly uneven. */}
-                  <NameInput
-                    name="name"
-                    label="Name"
-                    required
-                    validateCharset={validateCharset}
-                    minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
-                    maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
-                    inputSize="hero"
-                  />
-                  <AddressInput name="address" label="Address or ENS" required showPrefix={false} chain={ensChain} />
-
-                  <div>
-                    <p className="mb-1 inline-flex items-center gap-1 text-sm font-bold">Select networks</p>
-                    <p className="text-muted-foreground mb-2 text-sm">
-                      Add contact on all networks or only on specific ones of your choice.
-                    </p>
-                    <Controller
-                      name="networks"
-                      control={control}
-                      render={({ field }) => (
-                        <NetworkMultiSelectorInput
-                          name="networks"
-                          showSelectAll
-                          value={field.value || []}
-                          error={!!errors.networks}
-                          helperText={errors.networks ? 'Select at least one network' : ''}
-                        />
-                      )}
-                      rules={{ required: true }}
-                    />
-                  </div>
-                </div>
-
-                {error && (
-                  <Alert variant="destructive" className="mt-4">
-                    <AlertSeverityIcon variant="destructive" />
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
-              <DialogActions
-                className="p-4 pt-0"
-                onCancel={handleClose}
-                cancelTestId="cancel-btn"
-                confirmType="submit"
-                confirmLabel={submitLabel}
-                confirmDisabled={!formState.isValid || isSubmitting}
-                confirmLoading={isSubmitting}
-              />
-            </form>
-          </FormProvider>
-        </div>
-      </ModalDialog>
-    </>
+    <FormProvider {...methods}>
+      <AddContactDialogView
+        open={open}
+        onOpen={handleOpen}
+        onClose={handleClose}
+        triggerLabel={triggerLabel}
+        dialogTitle={dialogTitle}
+        submitLabel={submitLabel}
+        intro={intro}
+        isDarkMode={isDarkMode}
+        onSubmit={onSubmit}
+        error={error}
+        hasNetworksError={!!errors.networks}
+        confirmDisabled={!formState.isValid || isSubmitting}
+        isSubmitting={isSubmitting}
+        renderNameInput={(props) => (
+          <NameInput
+            {...props}
+            validateCharset={validateCharset}
+            minLength={validateCharset ? NAME_MIN_LENGTH : undefined}
+            maxLength={validateCharset ? ADDRESS_BOOK_NAME_MAX_LENGTH : undefined}
+          />
+        )}
+        renderAddressInput={(props) => <AddressInput {...props} showPrefix={false} chain={ensChain} />}
+        renderNetworksInput={(props) => (
+          <Controller
+            name="networks"
+            control={control}
+            render={({ field }) => <NetworkMultiSelectorInput {...props} value={field.value || []} />}
+            rules={{ required: true }}
+          />
+        )}
+      />
+    </FormProvider>
   )
 }
 

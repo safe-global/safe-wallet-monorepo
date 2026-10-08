@@ -1,9 +1,4 @@
-import NextLink, { type LinkProps } from 'next/link'
-import { Lock } from 'lucide-react'
-import { highlightSafePro } from '@/components/common/ProHighlight'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import type { LinkProps } from 'next/link'
 import {
   MixpanelEventParams,
   PlanSelectionEntryPoint,
@@ -13,6 +8,7 @@ import {
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '@/features/spaces'
+import { SafeProLockView } from '@views/components/common/SafeProLock/SafeProLockView'
 
 /** Safe Pro upsell replacing an add-policy action (proposer, spending limit) when `usePlanGate` requires an upgrade. */
 const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps['href']; feature: UpgradeFeature }) => {
@@ -23,27 +19,16 @@ const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps[
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, prompt)
 
   return (
-    <Alert variant="subtle" data-testid="safe-pro-lock">
-      <Lock />
-      <AlertTitle>
-        <Typography variant="paragraph-bold">{highlightSafePro(title)}</Typography>
-      </AlertTitle>
-      <AlertDescription>
-        <Typography>Existing ones stay active.</Typography>
-        <Button
-          size="action"
-          render={<NextLink href={href} />}
-          onClick={() =>
-            trackPlanSelectionStarted({
-              [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
-              ...prompt,
-            })
-          }
-        >
-          Explore Safe Pro
-        </Button>
-      </AlertDescription>
-    </Alert>
+    <SafeProLockView
+      title={title}
+      href={href}
+      onExplore={() =>
+        trackPlanSelectionStarted({
+          [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
+          ...prompt,
+        })
+      }
+    />
   )
 }
 

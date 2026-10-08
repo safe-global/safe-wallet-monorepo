@@ -1,23 +1,19 @@
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Separator } from '@/components/ui/separator'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import { trackError, Errors } from '@/services/exceptions'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useAlreadySigned, useTxActions } from '@/components/tx/shared/hooks'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { SignFormView } from '@views/components/tx-flow/actions/Sign/SignFormView'
 
 export const SignForm = ({
   safeTx,
@@ -116,33 +112,18 @@ export const SignForm = ({
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <div className="flex flex-col gap-6">
-      {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
-
-      {cannotPropose && <NonOwnerError />}
-
-      <div>
-        <Separator bleed="6" />
-
-        {/* Submit button */}
-        <TxCardActions>
-          <form onSubmit={handleSubmit}>
-            <CheckWallet checkNetwork={!submitDisabled}>
-              {(isOk) => (
-                <SplitMenuButton
-                  selected={slotId}
-                  onChange={({ id }) => handleOptionChange(id)}
-                  options={options}
-                  disabled={!isOk || submitDisabled}
-                  loading={isSubmitLoading}
-                  tooltip={isOk ? tooltip : undefined}
-                />
-              )}
-            </CheckWallet>
-          </form>
-        </TxCardActions>
-      </div>
-    </div>
+    <SignFormView
+      onSubmit={handleSubmit}
+      hasSigned={hasSigned}
+      cannotPropose={cannotPropose}
+      renderCheckWallet={(render) => <CheckWallet checkNetwork={!submitDisabled}>{render}</CheckWallet>}
+      slotId={slotId}
+      onOptionChange={handleOptionChange}
+      options={options}
+      submitDisabled={submitDisabled}
+      isSubmitLoading={isSubmitLoading}
+      tooltip={tooltip}
+    />
   )
 }
 

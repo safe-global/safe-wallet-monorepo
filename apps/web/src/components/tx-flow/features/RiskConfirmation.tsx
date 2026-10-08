@@ -1,13 +1,8 @@
 import { useContext } from 'react'
 import { SlotName, withSlot } from '../slots'
-import { Card } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { RiskConfirmationView } from '@views/components/tx-flow/features/RiskConfirmationView'
 
 export const RiskConfirmation = () => {
   const { needsRiskConfirmation, isRiskConfirmed, setIsRiskConfirmed } = useSafeShield()
@@ -25,20 +20,11 @@ export const RiskConfirmation = () => {
   }
 
   return (
-    <Card size="none" surface="sunken">
-      <Track {...MODALS_EVENTS.ACCEPT_RISK}>
-        <Label
-          htmlFor="risk-confirmation"
-          data-testid="risk-confirmation-checkbox"
-          className="cursor-pointer gap-3 px-2 py-2"
-        >
-          <Checkbox id="risk-confirmation" checked={isRiskConfirmed} onCheckedChange={toggleConfirmation} />
-          <Typography variant="paragraph-small" data-testid="risk-confirmation-text">
-            I understand the risks and would like to proceed with this {isTransaction ? 'transaction' : 'message'}.
-          </Typography>
-        </Label>
-      </Track>
-    </Card>
+    <RiskConfirmationView
+      isTransaction={isTransaction}
+      isRiskConfirmed={isRiskConfirmed}
+      onToggleConfirmation={toggleConfirmation}
+    />
   )
 }
 

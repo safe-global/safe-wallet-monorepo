@@ -1,15 +1,11 @@
 import { type ReactElement, useContext, useEffect } from 'react'
-import { Typography } from '@/components/ui/typography'
 import useChainId from '@/hooks/useChainId'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-
-const SIGN_TEXT = 'Sign this transaction.'
-const EXECUTE_TEXT = 'Submit the form to execute this transaction.'
-const SIGN_EXECUTE_TEXT = 'Sign or immediately execute this transaction.'
+import { ConfirmProposedTxView } from '@views/components/tx-flow/flows/ConfirmTx/ConfirmProposedTxView'
 
 const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): ReactElement => {
   const chainId = useChainId()
@@ -28,11 +24,9 @@ const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): Reac
     }
   }, [txId, chainId, setSafeTx, setSafeTxError])
 
-  const text = !onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
-
   return (
     <ReviewTransaction {...props}>
-      <Typography className="mb-2">{text}</Typography>
+      <ConfirmProposedTxView onlyExecute={onlyExecute} isExecutable={isExecutable} />
       {children}
     </ReviewTransaction>
   )

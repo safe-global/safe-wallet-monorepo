@@ -1,11 +1,10 @@
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import type { SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { AddressInfo, SettingsChangeTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ComponentProps, ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
-import { ThresholdWarning } from '@/components/transactions/Warning'
 import { UntrustedFallbackHandlerWarning } from '@/components/transactions/Warning'
 import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackHandler'
+import { SettingsChangeTxInfoView } from '@views/components/transactions/TxDetails/TxData/SettingsChange/SettingsChangeTxInfoView'
 
 type SettingsChangeTxInfoProps = {
   settingsInfo: SettingsChangeTransaction['settingsInfo']
@@ -17,6 +16,15 @@ const addressInfoProps: Pick<ComponentProps<typeof EthHashInfo>, 'shortAddress' 
   showCopyButton: true,
   hasExplorer: true,
 }
+
+const renderAddress = (addressInfo: AddressInfo) => (
+  <EthHashInfo
+    address={addressInfo.value}
+    name={addressInfo?.name}
+    customAvatar={addressInfo?.logoUri}
+    {...addressInfoProps}
+  />
+)
 
 const SettingsChangeTxInfo = ({
   settingsInfo,
@@ -30,118 +38,15 @@ const SettingsChangeTxInfo = ({
     return null
   }
 
-  switch (settingsInfo.type) {
-    case SettingsInfoType.SET_FALLBACK_HANDLER: {
-      return (
-        <>
-          <InfoDetails title="Set fallback handler:">
-            <EthHashInfo
-              address={settingsInfo.handler.value}
-              name={settingsInfo.handler?.name}
-              customAvatar={settingsInfo.handler?.logoUri}
-              {...addressInfoProps}
-            />
-          </InfoDetails>
-          {isUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />}
-        </>
-      )
-    }
-    case SettingsInfoType.ADD_OWNER:
-    case SettingsInfoType.REMOVE_OWNER: {
-      const title = settingsInfo.type === SettingsInfoType.ADD_OWNER ? 'Add signer:' : 'Remove signer:'
-      return (
-        <>
-          <ThresholdWarning />
-          <InfoDetails datatestid="owner-action" title={title}>
-            <EthHashInfo
-              address={settingsInfo.owner.value}
-              name={settingsInfo.owner?.name}
-              customAvatar={settingsInfo.owner?.logoUri}
-              {...addressInfoProps}
-            />
-            <InfoDetails datatestid="required-confirmations" title="Required confirmations for new transactions:">
-              {settingsInfo.threshold}
-            </InfoDetails>
-          </InfoDetails>
-        </>
-      )
-    }
-    case SettingsInfoType.SWAP_OWNER: {
-      return (
-        <InfoDetails datatestid="swap-owner" title="Swap signer:">
-          <InfoDetails datatestid="old-owner" title="Old signer">
-            <EthHashInfo
-              address={settingsInfo.oldOwner.value}
-              name={settingsInfo.oldOwner?.name}
-              customAvatar={settingsInfo.oldOwner?.logoUri}
-              {...addressInfoProps}
-            />
-          </InfoDetails>
-          <InfoDetails datatestid="new-owner" title="New signer">
-            <EthHashInfo
-              address={settingsInfo.newOwner.value}
-              name={settingsInfo.newOwner?.name}
-              customAvatar={settingsInfo.newOwner?.logoUri}
-              {...addressInfoProps}
-            />
-          </InfoDetails>
-        </InfoDetails>
-      )
-    }
-    case SettingsInfoType.CHANGE_THRESHOLD: {
-      return (
-        <>
-          <ThresholdWarning />
-          <InfoDetails datatestid="required-confirmations" title="Required confirmations for new transactions:">
-            {settingsInfo.threshold}
-          </InfoDetails>
-        </>
-      )
-    }
-    case SettingsInfoType.CHANGE_IMPLEMENTATION: {
-      return (
-        <InfoDetails title="Change implementation:">
-          <EthHashInfo
-            address={settingsInfo.implementation.value}
-            name={settingsInfo.implementation?.name}
-            customAvatar={settingsInfo.implementation?.logoUri}
-            {...addressInfoProps}
-          />
-        </InfoDetails>
-      )
-    }
-    case SettingsInfoType.ENABLE_MODULE:
-    case SettingsInfoType.DISABLE_MODULE: {
-      const title = settingsInfo.type === SettingsInfoType.ENABLE_MODULE ? 'Enable module:' : 'Disable module:'
-      return (
-        <InfoDetails datatestid="module-action" title={title}>
-          <EthHashInfo
-            address={settingsInfo.module.value}
-            name={settingsInfo.module?.name}
-            customAvatar={settingsInfo.module?.logoUri}
-            {...addressInfoProps}
-          />
-        </InfoDetails>
-      )
-    }
-    case SettingsInfoType.SET_GUARD: {
-      return (
-        <InfoDetails title="Set guard:">
-          <EthHashInfo
-            address={settingsInfo.guard.value}
-            name={settingsInfo.guard?.name}
-            customAvatar={settingsInfo.guard?.logoUri}
-            {...addressInfoProps}
-          />
-        </InfoDetails>
-      )
-    }
-    case SettingsInfoType.DELETE_GUARD: {
-      return <InfoDetails title="Delete guard" />
-    }
-    default:
-      return <></>
-  }
+  return (
+    <SettingsChangeTxInfoView
+      settingsInfo={settingsInfo}
+      renderAddress={renderAddress}
+      untrustedFallbackHandlerWarning={
+        isUntrustedFallbackHandler && <UntrustedFallbackHandlerWarning isTxExecuted={isTxExecuted} />
+      }
+    />
+  )
 }
 
 export default SettingsChangeTxInfo

@@ -3,8 +3,6 @@ import { useIsExpiredSwap } from '@/features/swap'
 import useIsPending from '@/hooks/useIsPending'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement, useContext } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
@@ -15,6 +13,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { TxModalContext } from '@/components/tx-flow'
 import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { ExecuteTxButtonView } from '@views/components/transactions/ExecuteTxButton/ExecuteTxButtonView'
 
 const ExecuteTxButton = ({
   txSummary,
@@ -53,34 +52,17 @@ const ExecuteTxButton = ({
 
   return (
     <CheckWallet allowNonOwner>
-      {(isOk) => {
-        const button = (
-          <span>
-            <Button
-              data-testid="execute-tx-btn"
-              onClick={onClick}
-              onMouseEnter={onMouseEnter}
-              onMouseLeave={onMouseLeave}
-              variant="default"
-              disabled={!isOk || isDisabled}
-              // `default` rather than `sm` in a queue row: this is the row's primary action, so it gets
-              // the app's standard 36px control height instead of the 32px small one.
-              size={compact ? 'default' : 'action'}
-            >
-              Execute
-            </Button>
-          </span>
-        )
-
-        return isOk && !isNext ? (
-          <Tooltip>
-            <TooltipTrigger render={button} />
-            <TooltipContent>You must execute the transaction with the lowest nonce first</TooltipContent>
-          </Tooltip>
-        ) : (
-          button
-        )
-      }}
+      {(isOk) => (
+        <ExecuteTxButtonView
+          isOk={isOk}
+          isNext={isNext}
+          isDisabled={isDisabled}
+          compact={compact}
+          onClick={onClick}
+          onMouseEnter={onMouseEnter}
+          onMouseLeave={onMouseLeave}
+        />
+      )}
     </CheckWallet>
   )
 }

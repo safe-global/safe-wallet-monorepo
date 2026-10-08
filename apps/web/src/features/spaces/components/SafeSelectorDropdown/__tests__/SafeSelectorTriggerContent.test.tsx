@@ -21,7 +21,10 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: jest.fn(() => ''),
 }))
 
-jest.mock('../components/SafeBalanceBlock', () => ({ __esModule: true, default: () => null }))
+jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/SafeBalanceBlock', () => ({
+  __esModule: true,
+  default: () => null,
+}))
 jest.mock('@/components/common/AccountRow/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/common/AccountRow/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => ({ __esModule: true, default: () => null }))

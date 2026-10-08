@@ -133,11 +133,103 @@ function compile(source, file) {
   return { outputText, required }
 }
 
+// Browser and host globals that do not exist inside a view compartment (see src/sandbox/runtime.ts).
+const HOST_GLOBALS = new Set([
+  'window',
+  'document',
+  'globalThis',
+  'self',
+  'fetch',
+  'localStorage',
+  'sessionStorage',
+  'navigator',
+  'location',
+  'history',
+  'setTimeout',
+  'setInterval',
+  'clearTimeout',
+  'clearInterval',
+  'requestAnimationFrame',
+  'cancelAnimationFrame',
+  'queueMicrotask',
+  'XMLHttpRequest',
+  'WebSocket',
+  'process',
+  'ResizeObserver',
+  'IntersectionObserver',
+  'MutationObserver',
+  'matchMedia',
+  'getComputedStyle',
+  'HTMLElement',
+  'HTMLInputElement',
+  'Element',
+  'Node',
+  'Event',
+  'CustomEvent',
+  'crypto',
+  'atob',
+  'btoa',
+  'URL',
+  'URLSearchParams',
+  'Blob',
+  'FileReader',
+  'alert',
+  'confirm',
+  'open',
+  'performance',
+  'structuredClone',
+])
+
+function hostGlobalUses(source, file) {
+  const sf = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const declared = new Set()
+  const found = []
+  const collect = (node) => {
+    if (
+      (ts.isVariableDeclaration(node) || ts.isParameter(node) || ts.isBindingElement(node)) &&
+      ts.isIdentifier(node.name)
+    )
+      declared.add(node.name.text)
+    if ((ts.isFunctionDeclaration(node) || ts.isImportSpecifier(node) || ts.isImportClause(node)) && node.name)
+      declared.add(node.name.text)
+    if (ts.isNamespaceImport(node)) declared.add(node.name.text)
+    ts.forEachChild(node, collect)
+  }
+  collect(sf)
+  const visit = (node) => {
+    if (ts.isIdentifier(node) && HOST_GLOBALS.has(node.text) && !declared.has(node.text)) {
+      const p = node.parent
+      const isName =
+        (ts.isPropertyAccessExpression(p) && p.name === node) ||
+        (ts.isPropertyAssignment(p) && p.name === node) ||
+        ts.isPropertySignature(p) ||
+        ts.isJsxAttribute(p) ||
+        ts.isTypeReferenceNode(p) ||
+        ts.isQualifiedName(p) ||
+        (ts.isMethodDeclaration(p) && p.name === node)
+      const inType = (() => {
+        for (let q = p; q; q = q.parent) if (ts.isTypeNode(q)) return true
+        return false
+      })()
+      if (!isName && !inType) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart())
+        found.push(
+          `${path.relative(VIEW_SRC, file)}:${line + 1} uses "${node.text}", which views do not have; pass what you need in as a prop`,
+        )
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sf)
+  return found
+}
+
 /** Returns the policy violations of one view module, without throwing. */
 function checkViewFile(file) {
-  const { required } = compile(fs.readFileSync(file, 'utf8'), file)
+  const source = fs.readFileSync(file, 'utf8')
+  const { required } = compile(source, file)
   const policy = readPolicy()
-  const errors = []
+  const errors = hostGlobalUses(source, file)
   for (const spec of required) {
     try {
       checkPolicy(file, spec, policy)

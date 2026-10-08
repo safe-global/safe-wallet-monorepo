@@ -1,14 +1,12 @@
 import { useState, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
 import type { SafeAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
-import { SeverityIcon } from '../SeverityIcon'
 import { AddTrustedSafeDialog, useSimilarAddressDetection } from '@/features/myAccounts'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
+import { UntrustedSafeWarningView } from '@views/features/safe-shield/components/UntrustedSafeWarning/UntrustedSafeWarningView'
 
 type UntrustedSafeWarningProps = {
   safeAnalysis: SafeAnalysisResult
@@ -44,39 +42,26 @@ const UntrustedSafeWarning = ({ safeAnalysis, onAddToTrustedList }: UntrustedSaf
   }
 
   return (
-    <>
-      <div data-testid="untrusted-safe-warning" className="p-3">
-        <div className="rounded-[4px] bg-[var(--color-background-main)] p-4">
-          <div className="flex flex-row items-start gap-2">
-            <SeverityIcon severity={safeAnalysis.severity} />
-            <div className="flex flex-1 flex-col gap-2">
-              <Typography variant="paragraph-small-medium" className="text-[var(--color-primary-light)]">
-                {safeAnalysis.title}
-              </Typography>
-              <Typography variant="paragraph-small" className="text-[var(--color-text-secondary)]">
-                {safeAnalysis.description}
-              </Typography>
-              <Button variant="outline" onClick={handleOpenConfirmDialog} className="mt-2 self-start">
-                Add to my accounts
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {safeAddress && (
-        <AddTrustedSafeDialog
-          open={isConfirmDialogOpen}
-          safeAddress={safeAddress}
-          safeName={safeName}
-          chainId={chainId}
-          hasSimilarAddress={hasSimilarAddress}
-          similarAddresses={similarAddresses}
-          onConfirm={handleConfirmAddToTrustedList}
-          onCancel={handleCloseConfirmDialog}
-        />
-      )}
-    </>
+    <UntrustedSafeWarningView
+      severity={safeAnalysis.severity}
+      title={safeAnalysis.title}
+      description={safeAnalysis.description}
+      onAddClick={handleOpenConfirmDialog}
+      dialog={
+        safeAddress && (
+          <AddTrustedSafeDialog
+            open={isConfirmDialogOpen}
+            safeAddress={safeAddress}
+            safeName={safeName}
+            chainId={chainId}
+            hasSimilarAddress={hasSimilarAddress}
+            similarAddresses={similarAddresses}
+            onConfirm={handleConfirmAddToTrustedList}
+            onCancel={handleCloseConfirmDialog}
+          />
+        )
+      }
+    />
   )
 }
 

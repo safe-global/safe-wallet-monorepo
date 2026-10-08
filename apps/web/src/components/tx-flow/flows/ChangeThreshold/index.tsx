@@ -8,6 +8,7 @@ import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ReviewChangeThreshold from './ReviewChangeThreshold'
+import { CHANGE_THRESHOLD_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/ChangeThreshold/copy'
 
 export enum ChangeThresholdFlowFieldNames {
   threshold = 'threshold',
@@ -32,11 +33,11 @@ const ChangeThresholdFlow = () => {
     <TxFlow
       initialData={{ threshold }}
       icon={SaveAddressIcon}
-      subtitle="Change threshold"
+      subtitle={COPY.subtitle}
       eventCategory={TxFlowType.CHANGE_THRESHOLD}
       ReviewTransactionComponent={ReviewThresholdStep}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <ChooseThreshold />
       </TxFlowStep>
     </TxFlow>

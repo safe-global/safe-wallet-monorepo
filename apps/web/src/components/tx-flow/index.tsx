@@ -1,19 +1,9 @@
 import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
-import TxModalDialog from '@/components/common/TxModalDialog'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'
+import { TxFlowView } from '@views/components/tx-flow/TxFlowView'
 
 const noop = () => {}
 
@@ -117,39 +107,21 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
     <TxModalContext.Provider value={{ txFlow, setTxFlow, setFullWidth }}>
       {children}
 
-      <TxModalDialog open={!!txFlow} onClose={handleModalClose} fullWidth={fullWidth}>
-        {txFlow}
-      </TxModalDialog>
-
-      <AlertDialog
-        open={!!pendingDiscard}
-        onOpenChange={(nextOpen) => {
+      <TxFlowView
+        txFlow={txFlow}
+        open={!!txFlow}
+        onClose={handleModalClose}
+        fullWidth={fullWidth}
+        isDiscardDialogOpen={!!pendingDiscard}
+        onDiscardDialogOpenChange={(nextOpen) => {
           if (!nextOpen) setPendingDiscard(null)
         }}
-      >
-        {/* The tx dialog is z-index 1300 below 900px, which would paint over AlertDialogContent's
-            own z-50 — this is exactly the nested-overlay case that token exists for. */}
-        <AlertDialogContent size="sm" className="z-[var(--z-nested-overlay)]">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Discard this transaction?</AlertDialogTitle>
-            <AlertDialogDescription>Closing this window will discard your current progress.</AlertDialogDescription>
-          </AlertDialogHeader>
-
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep editing</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={() => {
-                const discard = pendingDiscard
-                setPendingDiscard(null)
-                discard?.()
-              }}
-            >
-              Discard
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        onDiscard={() => {
+          const discard = pendingDiscard
+          setPendingDiscard(null)
+          discard?.()
+        }}
+      />
     </TxModalContext.Provider>
   )
 }

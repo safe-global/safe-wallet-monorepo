@@ -1,9 +1,4 @@
-import { RotateCw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SelectContent, SelectItem } from '@/components/ui/select'
-import { SearchInput } from '@/components/ui/search-input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Button } from '@/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -11,7 +6,7 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
-import { cn } from '@/utils/cn'
+import { SafeDropdownContainerView } from '@views/features/spaces/components/SafeSelectorDropdown/components/SafeDropdownContainerView'
 import { matchesSafeSearch } from '@views/features/spaces/components/SafeSelectorDropdown/utils'
 import type { SafeItemData, SafeRenameTarget } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
@@ -41,40 +36,6 @@ export interface SafeDropdownContainerProps {
    */
   onReorder?: (orderedAddresses: string[]) => void
 }
-
-function SafeItemSkeleton() {
-  return (
-    <div className="flex items-center gap-3 px-3 py-3">
-      <Skeleton className="size-8 shrink-0 rounded-full" />
-      <div className="flex flex-1 flex-col gap-1.5">
-        <Skeleton className="h-3.5 w-24 rounded" />
-        <Skeleton className="h-3 w-32 rounded" />
-      </div>
-      <Skeleton className="size-6 shrink-0 rounded-full" />
-      <div className="flex flex-col items-end gap-1.5">
-        <Skeleton className="h-3.5 w-14 rounded" />
-        <Skeleton className="h-3 w-10 rounded" />
-      </div>
-    </div>
-  )
-}
-
-function DropdownContentError({ onRetry }: { onRetry?: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-2 px-4 py-8">
-      <p className="text-sm font-semibold">Unable to load accounts</p>
-      <p className="text-xs text-muted-foreground">Try to reload page.</p>
-      {onRetry && (
-        <Button variant="outline" size="sm" onClick={onRetry} className="mt-1">
-          <RotateCw className="size-3.5" />
-          Reload
-        </Button>
-      )}
-    </div>
-  )
-}
-
-const SKELETON_COUNT = 4
 
 const SafeDropdownContainer = ({
   items,
@@ -145,165 +106,57 @@ const SafeDropdownContainer = ({
     area.scrollTop += offset - (area.clientHeight - current.offsetHeight) / 2
   }, [selectedItemId, isLoading, query, items.length])
 
-  const renderContent = () => {
-    if (isError) {
-      return <DropdownContentError onRetry={onRetry} />
-    }
-
-    if (isLoading && filteredItems.length === 0 && !query) {
-      return Array.from({ length: SKELETON_COUNT }, (_, i) => <SafeItemSkeleton key={i} />)
-    }
-
-    const emptyText = (
-      <p className="px-4 py-6 text-center text-sm text-muted-foreground" data-testid="dropdown-empty">
-        {query ? 'No safes match your search' : wallet ? 'No safes yet' : 'Connect a wallet to find your Safe accounts'}
-      </p>
-    )
-
-    if (items.length === 0) {
-      // With no safes to search through at all, "no matches" would be misleading — keep the
-      // tab's CTA (sign in to a workspace / connect a wallet) even while a query is typed.
-      if (emptyStateOverride) {
-        return (
-          <div data-testid="dropdown-empty-override">
-            {typeof emptyStateOverride === 'function' ? emptyStateOverride(closeDropdown) : emptyStateOverride}
-          </div>
-        )
-      }
-      return emptyText
-    }
-
-    return (
-      <>
-        {renderRows()}
-        {filteredItems.length === 0 && emptyText}
-      </>
-    )
-  }
-
-  const renderRows = () => {
-    // Manual sort turns the list into a drag-to-reorder list, with dragging disabled while searching
-    // (a drop would persist a partial order). Selecting a row navigates and closes, like the Select rows.
-    if (onReorder) {
-      return (
-        <ReorderableSafeList
-          items={items}
-          hiddenIds={hiddenIds}
-          selectedItemId={selectedItemId}
-          onSelect={(itemId) => {
-            onItemSelect?.(itemId)
-            closeDropdown()
-          }}
-          onRename={handleRename}
-          onReorder={onReorder}
-          isDragDisabled={Boolean(query)}
-        />
-      )
-    }
-
-    return items.map((item) => {
-      if (item.chains.length > 1) {
-        return (
-          <MultiChainSafeItemRow
-            key={item.id}
-            item={item}
-            onRename={handleRename}
-            isSelected={item.id === selectedItemId}
-            hidden={hiddenIds.has(item.id)}
-          />
-        )
-      }
-      return (
-        <SelectItem
-          key={item.id}
-          value={item.id}
-          hidden={hiddenIds.has(item.id)}
-          // Scroll anchor for the open-to-current-safe behaviour (see the scroll-to-current effect).
-          data-current-safe={item.id === selectedItemId ? 'true' : undefined}
-          // hover/focus:bg-muted is the grey highlight; data-selected keeps the open safe green, and
-          // [&[data-selected]:hover/focus] deepens it (wins by specificity). [&>div]:min-w-0/shrink let the name column truncate; [&>span.absolute]:hidden
-          // drops the built-in checkmark that would overlap the balance column.
-          // `hidden` class too: SelectItem's own `flex` utility overrides the [hidden] attribute.
-          className={cn(
-            'group/row h-auto py-3 px-3 rounded-lg my-0.5 cursor-pointer hover:bg-muted focus:bg-muted data-[selected]:bg-sidebar-accent [&[data-selected]:hover]:bg-[var(--color-background-light-hover)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>div]:min-w-0 [&>div]:shrink [&>span.absolute]:hidden',
-            hiddenIds.has(item.id) && 'hidden',
-          )}
-        >
-          <SafeItem {...item} onRename={handleRename} />
-        </SelectItem>
-      )
-    })
-  }
-
   return (
-    <SelectContent
-      align="start"
-      side="bottom"
-      alignItemWithTrigger={false}
-      showBackdrop
-      // outline-hidden: base-ui focuses the popup on open; typing in the search field makes that
-      // :focus-visible and would otherwise draw the browser's blue outline around the whole popup.
-      // The shared select-list's padding and scrollbar gutter are dropped: the scroll area below owns
-      // both, and the list's extra 12px+ pushed the rows' balance column into a horizontal scroll.
-      className="w-[543px] max-w-[calc(100vw-2rem)] overflow-hidden bg-card border-0 ring-0 outline-hidden rounded-lg [&_[data-slot=select-scroll-down-button]]:hidden [&_[data-slot=select-scroll-up-button]]:hidden [&_[data-slot=select-list]]:p-0 [&_[data-slot=select-list]]:[scrollbar-gutter:auto]"
-      sideOffset={20}
-      alignOffset={9}
-      collisionAvoidance={{ side: 'none', align: 'shift' }}
-    >
-      {/* Fallback to 44rem: until base-ui sets --available-height the clamp must still apply, else the
-          list expands to full height, measures as non-overflowing, and the scroll-hint fade is missed. */}
-      <div className="flex max-h-[min(44rem,var(--available-height,44rem))] flex-col">
-        {(header || showSearch) && (
-          <div className="shrink-0 bg-card">
-            {showSearch && (
-              <div className="flex items-center gap-2 px-2 py-2">
-                <SearchInput
-                  variant="surface"
-                  className="flex-1 shadow-xs"
-                  placeholder="by name, address or network"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  // Stop keystrokes reaching base-ui Select's typeahead, which would hijack typing.
-                  // Trade-off: arrows/Enter stay in the input (no list nav); Escape still closes.
-                  onKeyDown={(e) => {
-                    if (e.key !== 'Escape') e.stopPropagation()
-                  }}
-                  autoComplete="off"
-                  data-testid="safe-dropdown-search-input"
-                />
-                <SafeListSortToggle />
-              </div>
-            )}
-            {header}
-          </div>
-        )}
-
-        <div
-          ref={attachScrollArea}
-          data-testid="dropdown-scroll-area"
-          className="min-h-0 flex-1 overflow-y-auto overflow-x-auto overscroll-y-none px-2 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border"
-        >
-          {/* Below 575px (the 543px popup + its 2rem viewport margin) the popup shrinks: rows then keep
-              their 527px layout and scroll horizontally. Wider, they fill the popup — no scroll. */}
-          <div className={cn(showRows && 'max-[575px]:min-w-[527px]')}>{renderContent()}</div>
-        </div>
-
-        {footer && (
-          <div className="relative shrink-0 bg-card">
-            {showScrollHint && (
-              <div
-                data-testid="scroll-hint"
-                aria-hidden
-                // Fade the last visible row into the dropdown background. `card` isn't a :root color
-                // token (so `to-card` renders transparent) — reference the paper var it resolves to.
-                className="pointer-events-none absolute inset-x-0 -top-16 h-16 bg-gradient-to-b from-transparent to-[var(--color-background-paper)]"
-              />
-            )}
-            {typeof footer === 'function' ? footer(closeDropdown) : footer}
-          </div>
-        )}
-      </div>
-    </SelectContent>
+    <SafeDropdownContainerView
+      items={items}
+      selectedItemId={selectedItemId}
+      hiddenIds={hiddenIds}
+      isLoading={isLoading}
+      isError={isError}
+      onRetry={onRetry}
+      header={header}
+      footer={footer}
+      emptyStateOverride={emptyStateOverride}
+      closeDropdown={closeDropdown}
+      search={search}
+      onSearchChange={setSearch}
+      hasQuery={Boolean(query)}
+      hasWallet={Boolean(wallet)}
+      hasMatches={filteredItems.length > 0}
+      showSearch={showSearch}
+      showRows={showRows}
+      showScrollHint={showScrollHint}
+      scrollAreaRef={attachScrollArea}
+      sortToggle={<SafeListSortToggle />}
+      // Manual sort turns the list into a drag-to-reorder list, with dragging disabled while searching
+      // (a drop would persist a partial order). Selecting a row navigates and closes, like the Select rows.
+      reorderList={
+        onReorder ? (
+          <ReorderableSafeList
+            items={items}
+            hiddenIds={hiddenIds}
+            selectedItemId={selectedItemId}
+            onSelect={(itemId) => {
+              onItemSelect?.(itemId)
+              closeDropdown()
+            }}
+            onRename={handleRename}
+            onReorder={onReorder}
+            isDragDisabled={Boolean(query)}
+          />
+        ) : undefined
+      }
+      renderSafeItem={(item) => <SafeItem {...item} onRename={handleRename} />}
+      renderMultiChainRow={(item) => (
+        <MultiChainSafeItemRow
+          key={item.id}
+          item={item}
+          onRename={handleRename}
+          isSelected={item.id === selectedItemId}
+          hidden={hiddenIds.has(item.id)}
+        />
+      )}
+    />
   )
 }
 

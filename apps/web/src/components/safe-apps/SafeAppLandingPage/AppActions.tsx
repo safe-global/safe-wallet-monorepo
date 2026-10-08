@@ -1,11 +1,6 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useEffect, useMemo, useState } from 'react'
-import Link from 'next/link'
 import type { UrlObject } from 'url'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useAppSelector } from '@/store'
@@ -17,8 +12,7 @@ import SafeIcon from '@/components/common/SafeIcon'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { AppRoutes } from '@/config/routes'
 import useOwnedSafes from '@/hooks/useOwnedSafes'
-import { CTA_BUTTON_WIDTH, CTA_HEIGHT } from '@/components/safe-apps/SafeAppLandingPage/constants'
-import CreateNewSafeSVG from '@/public/images/open/safe-creation.svg'
+import { AppActionsView, type AppActionsViewProps } from '@views/components/safe-apps/SafeAppLandingPage/AppActionsView'
 
 type Props = {
   appUrl: string
@@ -55,84 +49,50 @@ const AppActions = ({ wallet, onConnectWallet, chain, appUrl, app }: Props): Rea
   const hasSafes = compatibleSafes.length > 0
   const shouldCreateSafe = hasWallet && !hasSafes
 
-  let button: React.ReactNode
+  let cta: AppActionsViewProps['cta']
+  let useAppHref: UrlObject | undefined
+  let createSafeHref: UrlObject | undefined
   switch (true) {
     case hasWallet && hasSafes && !!safeToUse:
       const safe = `${safeToUse?.shortName}:${safeToUse?.address}`
-      const href: UrlObject = {
+      useAppHref = {
         pathname: AppRoutes.apps.open,
         // eslint-disable-next-line no-restricted-syntax -- The shared Safe App page picks one of the user's Safes and has no Workspace
         query: { safe, appUrl },
       }
-
-      button = (
-        <Button style={{ width: CTA_BUTTON_WIDTH }} disabled={!safeToUse} render={<Link href={href} />}>
-          Use app
-        </Button>
-      )
+      cta = 'use'
       break
     case shouldCreateSafe:
       const redirect = `${AppRoutes.apps.index}?appUrl=${appUrl}`
-      const createSafeHrefWithRedirect: UrlObject = {
+      createSafeHref = {
         pathname: AppRoutes.newSafe.create,
         query: { safeViewRedirectURL: redirect, chain: chain.shortName },
       }
-      button = (
-        <Button style={{ width: CTA_BUTTON_WIDTH }} render={<Link href={createSafeHrefWithRedirect} />}>
-          Create new Safe account
-        </Button>
-      )
+      cta = 'create'
       break
     default:
-      button = (
-        <Button onClick={onConnectWallet} style={{ width: CTA_BUTTON_WIDTH }}>
-          Connect wallet
-        </Button>
-      )
-  }
-  let body: React.ReactNode
-  if (hasWallet && hasSafes) {
-    body = (
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="safe-select-label">Select a Safe account</Label>
-        <Select
-          value={safeToUse?.address || ''}
-          onValueChange={(value) => {
-            const safeToUse = compatibleSafes.find(({ address }) => address === value)
-            setSafeToUse(safeToUse)
-          }}
-        >
-          <SelectTrigger id="safe-select-label" className="min-h-[56px] w-[311px]">
-            <SelectValue placeholder="Select a Safe account" />
-          </SelectTrigger>
-          <SelectContent>
-            {compatibleSafes.map(({ address, chainId, shortName }) => (
-              <SelectItem key={`${chainId}:${address}`} value={address}>
-                <div className="flex items-center gap-2">
-                  <SafeIcon address={address} />
-
-                  <div className="flex-1">
-                    <Typography variant="paragraph-small">{addressBook?.[chainId]?.[address]}</Typography>
-
-                    <EthHashInfo address={address} showAvatar={false} showName={false} prefix={shortName} />
-                  </div>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    )
-  } else {
-    body = <CreateNewSafeSVG alt="An icon of a physical safe with a plus sign" />
+      cta = 'connect'
   }
 
   return (
-    <div className="flex flex-col items-center justify-between font-bold" style={{ height: CTA_HEIGHT }}>
-      <Typography variant="paragraph-bold">Use the App with your Safe account</Typography>
-      {body}
-      {button}
-    </div>
+    <AppActionsView
+      cta={cta}
+      useAppHref={useAppHref}
+      createSafeHref={createSafeHref}
+      isUseAppDisabled={!safeToUse}
+      onConnectWallet={onConnectWallet}
+      showSafeSelect={hasWallet && hasSafes}
+      selectedSafeAddress={safeToUse?.address || ''}
+      compatibleSafes={compatibleSafes.map((safe) => ({ ...safe, name: addressBook?.[safe.chainId]?.[safe.address] }))}
+      onSelectSafe={(value) => {
+        const safeToUse = compatibleSafes.find(({ address }) => address === value)
+        setSafeToUse(safeToUse)
+      }}
+      renderSafeIcon={(address) => <SafeIcon address={address} />}
+      renderAddress={({ address, prefix }) => (
+        <EthHashInfo address={address} showAvatar={false} showName={false} prefix={prefix} />
+      )}
+    />
   )
 }
 

@@ -1,16 +1,12 @@
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
 import { useCSVDownloader } from 'react-papaparse'
 import type { SyntheticEvent } from 'react'
 import { useMemo, type ReactElement } from 'react'
 
-import ModalDialog from '@/components/common/ModalDialog'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
 import { useAppSelector } from '@/store'
 import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
-import ExternalLink from '@/components/common/ExternalLink'
 import madProps from '@/utils/mad-props'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { ExportDialogView } from '@views/components/address-book/ExportDialog/ExportDialogView'
 
 const COL_1 = 'address'
 const COL_2 = 'name'
@@ -59,37 +55,14 @@ function ExportDialog({
   }
 
   return (
-    <ModalDialog open onClose={handleClose} dialogTitle="Export address book" hideChainIndicator>
-      <div className="p-6">
-        <Typography data-testid="export-summary">
-          You&apos;re about to export a CSV file with{' '}
-          <b>
-            {length} address book {length === 1 ? 'entry' : 'entries'}
-          </b>
-          .
-        </Typography>
-
-        <Typography className="mt-2">
-          <ExternalLink
-            href={HelpCenterArticle.ADDRESS_BOOK_DATA}
-            title="Learn about the address book import and export"
-          >
-            Learn about the address book import and export
-          </ExternalLink>
-        </Typography>
-      </div>
-
-      <div className="flex items-center justify-between gap-2 p-6 pt-2">
-        <Button variant="ghost" onClick={handleClose}>
-          Cancel
-        </Button>
-        <CSVDownloader filename={filename} bom config={{ delimiter: ',' }} data={csvData} style={{ order: 2 }}>
-          <Button data-testid="export-modal-btn" onClick={onSubmit}>
-            Export
-          </Button>
-        </CSVDownloader>
-      </div>
-    </ModalDialog>
+    <ExportDialogView
+      length={length}
+      onClose={handleClose}
+      onExport={onSubmit}
+      renderDownloader={(props) => (
+        <CSVDownloader filename={filename} bom config={{ delimiter: ',' }} data={csvData} {...props} />
+      )}
+    />
   )
 }
 

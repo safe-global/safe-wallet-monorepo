@@ -1,7 +1,3 @@
-import { ChevronRight } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useState, useMemo, type ReactElement } from 'react'
@@ -17,8 +13,11 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import WarningIcon from '@/public/images/notifications/warning.svg'
 import { SimilarityGroupContainer } from '@views/components/nested-safes/NestedSafesList/SimilarityGroupContainer'
+import {
+  NestedSafesListView,
+  NestedSafeWarningIconView,
+} from '@views/components/nested-safes/NestedSafesList/NestedSafesListView'
 
 const MAX_NESTED_SAFES = 5
 
@@ -57,18 +56,7 @@ function NestedSafeItem({
 
   if (!$isReady) return null
 
-  const warningIcon = showWarning ? (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <span className="ml-2 inline-flex shrink-0">
-            <WarningIcon className="size-5 text-[var(--color-warning-main)]" data-testid="suspicious-safe-warning" />
-          </span>
-        }
-      />
-      <TooltipContent>This Safe was not created by the parent Safe or its signers</TooltipContent>
-    </Tooltip>
-  ) : null
+  const warningIcon = showWarning ? <NestedSafeWarningIconView /> : null
 
   if (isManageMode) {
     return (
@@ -212,8 +200,7 @@ export function NestedSafesList({
   // In manage mode with grouped safes, render groups first then ungrouped
   if (isManageMode && groupedSafes) {
     return (
-      <ul className="m-0 flex list-none flex-col items-stretch gap-1 p-0">
-        {/* Render similarity groups first */}
+      <NestedSafesListView>
         {groupedSafes.groups.map((group) => (
           <SimilarityGroupContainer key={group.key}>
             {group.safes.map((safe) => {
@@ -223,32 +210,20 @@ export function NestedSafesList({
           </SimilarityGroupContainer>
         ))}
 
-        {/* Render ungrouped safes */}
         {groupedSafes.ungrouped.map((safe) => {
           const safeItem = toSafeItem(safe)
           return safeItem ? renderSafeItem(safeItem) : null
         })}
-      </ul>
+      </NestedSafesListView>
     )
   }
 
-  // Default rendering (non-manage mode or manage mode without grouping)
   return (
-    <ul className="m-0 flex list-none flex-col items-stretch gap-1 p-0">
+    <NestedSafesListView
+      showShowAll={safeItems.length > MAX_NESTED_SAFES && !showAll && !isManageMode}
+      onShowAll={onShowAll}
+    >
       {nestedSafesToShow.map((safeItem) => renderSafeItem(safeItem))}
-      {safeItems.length > MAX_NESTED_SAFES && !showAll && !isManageMode && (
-        <Track {...NESTED_SAFE_EVENTS.SHOW_ALL}>
-          <Typography
-            variant="paragraph-mini-bold"
-            color="muted"
-            className="flex cursor-pointer items-center justify-center py-2 uppercase"
-            onClick={onShowAll}
-          >
-            Show all nested Safes
-            <ChevronRight className="ml-2 size-3 rotate-90 text-[var(--color-border-main)]" />
-          </Typography>
-        </Track>
-      )}
-    </ul>
+    </NestedSafesListView>
   )
 }

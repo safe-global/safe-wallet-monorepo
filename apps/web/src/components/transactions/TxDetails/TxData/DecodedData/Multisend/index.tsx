@@ -3,13 +3,14 @@ import { Operation } from '@safe-global/store/gateway/types'
 import { useState, useEffect } from 'react'
 import type { Dispatch, ReactElement, SetStateAction, SyntheticEvent } from 'react'
 import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import css from './styles.module.css'
-import classnames from 'classnames'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 import { multiSendDefaultsToSelf, resolveMultiSendToAddress } from '@safe-global/utils/utils/multiSend'
+import {
+  MultisendActionsHeaderView,
+  MultisendView,
+  type MultisendItemProps,
+} from '@views/components/transactions/TxDetails/TxData/DecodedData/Multisend/MultisendView'
 
 type MultisendProps = {
   txData?: TransactionData | null
@@ -24,7 +25,7 @@ export const MultisendActionsHeader = ({
   setOpen,
   amount,
   compact = false,
-  title = 'All actions',
+  title,
 }: {
   setOpen: Dispatch<SetStateAction<Record<number, boolean> | undefined>>
   amount: number
@@ -36,17 +37,12 @@ export const MultisendActionsHeader = ({
   }
 
   return (
-    <div data-testid="all-actions" className={classnames(css.actionsHeader, { [css.compactHeader]: compact })}>
-      <span className="text-base">{title}</span>
-      <div className="flex flex-row">
-        <Button data-testid="expande-all-btn" onClick={onClickAll(true)} variant="ghost" size="xs">
-          Expand all
-        </Button>
-        <Button data-testid="collapse-all-btn" onClick={onClickAll(false)} variant="ghost" size="xs">
-          Collapse all
-        </Button>
-      </div>
-    </div>
+    <MultisendActionsHeaderView
+      onExpandAll={onClickAll(true)}
+      onCollapseAll={onClickAll(false)}
+      compact={compact}
+      title={title}
+    />
   )
 }
 
@@ -77,7 +73,7 @@ const Multisend = ({
 
   if (!multiSendTransactions) return null
 
-  const actionItems =
+  const renderItems = ({ variant, radius }: MultisendItemProps) =>
     Array.isArray(multiSendTransactions) &&
     multiSendTransactions.map(({ dataDecoded, data, value, to: rawTo, operation }, index) => {
       const to = defaultsToSelf ? resolveMultiSendToAddress(rawTo, safeAddress) : rawTo
@@ -101,8 +97,8 @@ const Multisend = ({
           }}
           txData={txData}
           actionTitle={`${index + 1}`}
-          variant={compact ? 'outlined' : 'elevation'}
-          radius="none"
+          variant={variant}
+          radius={radius}
           expanded={openMap?.[index] ?? false}
           onChange={onChange}
           isExecuted={isExecuted}
@@ -111,28 +107,17 @@ const Multisend = ({
     })
 
   return (
-    <>
-      <MultisendActionsHeader
-        setOpen={setOpenMap}
-        amount={Array.isArray(multiSendTransactions) ? multiSendTransactions.length : 0}
-        compact={compact}
-      />
-
-      {compact ? (
-        <Card variant="muted" size="none">
-          <CardContent>
-            {/* Same padding-outside / clipping-inside pair as ExecuteBatch's DecodedTxs, which renders
-                this identical block: 8px = the card's 16px less the 8px inset, so the white action
-                rows stay concentric with the grey card's curve. */}
-            <div className="p-2">
-              <div className="flex flex-col divide-y divide-border overflow-hidden rounded-sm">{actionItems}</div>
-            </div>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col divide-y divide-border">{actionItems}</div>
-      )}
-    </>
+    <MultisendView
+      header={
+        <MultisendActionsHeader
+          setOpen={setOpenMap}
+          amount={Array.isArray(multiSendTransactions) ? multiSendTransactions.length : 0}
+          compact={compact}
+        />
+      }
+      compact={compact}
+      renderItems={renderItems}
+    />
   )
 }
 

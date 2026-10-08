@@ -7,26 +7,14 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { StartTimeValue } from '@safe-global/store/gateway/types'
 import OrderId from '../OrderId'
-import { formatDateTime, formatTimeInWords, getPeriod } from '@safe-global/utils/utils/date'
-import { Fragment, type ReactElement } from 'react'
-import { DataRow } from '@/components/common/Table/DataRow'
-import { DataTable } from '@/components/common/Table/DataTable'
+import { type ReactElement } from 'react'
 import { compareAsc } from 'date-fns'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
-import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { getLimitPrice, getOrderClass, getSlippageInPercent } from '../../helpers/utils'
-import SwapTokens from '../SwapTokens'
-import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import css from './styles.module.css'
 import NamedAddress from '@/components/common/NamedAddressInfo'
-import { PartDuration } from '@views/features/swap/components/SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '@views/features/swap/components/SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '@views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
 import { isSettingTwapFallbackHandler } from '../../helpers/utils'
-import { TwapFallbackHandlerWarning } from '@views/features/swap/components/TwapFallbackHandlerWarning'
+import { SwapOrderConfirmationViewView } from '@views/features/swap/components/SwapOrderConfirmationView/SwapOrderConfirmationViewView'
 
 type SwapOrderProps = {
   order: SwapOrderTransactionInfo | SwapTransferTransactionInfo | TwapOrderTransactionInfo
@@ -35,7 +23,7 @@ type SwapOrderProps = {
 }
 
 const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
-  const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, receiver } = order
+  const { owner, validUntil, receiver } = order
 
   const isTwapOrder = order.type === TransactionInfoType.TWAP_ORDER
 
@@ -45,119 +33,31 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
   const now = new Date()
 
   const slippage = getSlippageInPercent(order)
-  const isSellOrder = kind === 'sell'
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
   const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
 
   return (
-    <>
-      {isChangingFallbackHandler && <TwapFallbackHandlerWarning />}
-
-      <DataTable
-        header="Order details"
-        rows={[
-          <div key="amount" className={css.amount}>
-            <SwapTokens
-              first={{
-                value: sellAmount,
-                label: isSellOrder ? 'Sell' : 'For at most',
-                tokenInfo: sellToken,
-              }}
-              second={{
-                value: buyAmount,
-                label: isSellOrder ? 'For at least' : 'Buy exactly',
-                tokenInfo: buyToken,
-              }}
-            />
-          </div>,
-
-          <DataRow datatestid="limit-price" key="Limit price" title="Limit price">
-            1 {buyToken.symbol} = {formatAmount(limitPrice)} {sellToken.symbol}
-          </DataRow>,
-
-          compareAsc(now, expires) !== 1 ? (
-            <DataRow datatestid="expiry" key="Expiry" title="Expiry">
-              <Typography>
-                <span className="font-bold">{formatTimeInWords(validUntil * 1000)}</span> (
-                {formatDateTime(validUntil * 1000)})
-              </Typography>
-            </DataRow>
-          ) : (
-            <DataRow key="Expiry" title="Expiry">
-              {formatDateTime(validUntil * 1000)}
-            </DataRow>
-          ),
-          orderClass !== 'limit' ? (
-            <DataRow datatestid="slippage" key="Slippage" title="Slippage">
-              {slippage}%
-            </DataRow>
-          ) : (
-            <Fragment key="none" />
-          ),
-          !isTwapOrder ? (
-            <DataRow datatestid="order-id" key="Order ID" title="Order ID">
-              <OrderId orderId={order.uid} href={explorerUrl!} />
-            </DataRow>
-          ) : (
-            <Fragment key="no-order-id" />
-          ),
-          <OrderFeeConfirmationView
-            key="SurplusFee"
-            order={order as { fullAppData?: Record<string, unknown> | null }}
-          />,
-          <DataRow datatestid="interact-wth" key="Interact with" title="Interact with">
-            <NamedAddress address={settlementContract} onlyName hasExplorer shortAddress={false} avatarSize={24} />
-          </DataRow>,
-          receiver && owner !== receiver ? (
-            <Fragment key="recipient-block">
-              <DataRow datatestid="recipient" key="recipient-address" title="Recipient">
-                <EthHashInfo address={receiver} hasExplorer={true} avatarSize={24} />
-              </DataRow>
-              <div key="recipient">
-                <Alert data-testid="recipient-alert" variant="warning" outlined={false}>
-                  <AlertIcon />
-                  <AlertDescription>
-                    <Typography variant="paragraph-small">
-                      <Typography variant="paragraph-small-bold" className="inline">
-                        Order recipient address differs from order owner.
-                      </Typography>{' '}
-                      Double check the address to prevent fund loss.
-                    </Typography>
-                  </AlertDescription>
-                </Alert>
-              </div>
-            </Fragment>
-          ) : (
-            <Fragment key="no-recipient" />
-          ),
-        ]}
-      />
-
-      {isTwapOrder && (
-        <div className={css.partsBlock}>
-          <DataTable
-            rows={[
-              <Typography key="title" variant="paragraph" className={css.partsBlockTitle}>
-                <strong>
-                  Order will be split in{' '}
-                  <span className={css.numberOfPartsLabel}>{order.numberOfParts} equal parts</span>
-                </strong>
-              </Typography>,
-              <PartSellAmount order={order} addonText="per part" key="sell_part" />,
-              <PartBuyAmount order={order} addonText="per part" key="buy_part" />,
-              <DataRow title="Start time" key="Start time">
-                {order.startTime.startType === StartTimeValue.AT_MINING_TIME && 'Now'}
-                {order.startTime.startType === StartTimeValue.AT_EPOCH && `At block number: ${order.startTime.epoch}`}
-              </DataRow>,
-              <PartDuration order={order} key="part_duration" />,
-              <DataRow title="Total duration" key="total_duration">
-                {getPeriod(+order.timeBetweenParts * +order.numberOfParts)}
-              </DataRow>,
-            ]}
-          />
-        </div>
-      )}
-    </>
+    <SwapOrderConfirmationViewView
+      order={order}
+      limitPrice={limitPrice}
+      isNotExpired={compareAsc(now, expires) !== 1}
+      showSlippage={orderClass !== 'limit'}
+      slippage={slippage}
+      showFallbackHandlerWarning={!!isChangingFallbackHandler}
+      showRecipient={!!receiver && owner !== receiver}
+      isStartAtMiningTime={isTwapOrder && order.startTime.startType === StartTimeValue.AT_MINING_TIME}
+      startEpoch={
+        isTwapOrder && order.startTime.startType === StartTimeValue.AT_EPOCH ? order.startTime.epoch : undefined
+      }
+      orderId={!isTwapOrder && <OrderId orderId={order.uid} href={explorerUrl!} />}
+      feeRow={
+        <OrderFeeConfirmationView key="SurplusFee" order={order as { fullAppData?: Record<string, unknown> | null }} />
+      }
+      interactWith={
+        <NamedAddress address={settlementContract} onlyName hasExplorer shortAddress={false} avatarSize={24} />
+      }
+      recipient={receiver && <EthHashInfo address={receiver} hasExplorer={true} avatarSize={24} />}
+    />
   )
 }
 

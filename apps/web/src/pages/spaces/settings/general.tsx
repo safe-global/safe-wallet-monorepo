@@ -3,11 +3,14 @@ import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
 import { SpacesFeature, useCurrentSpaceId, useFeatureFlagRedirect } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
+import { PageMainView } from '@views/pages/PageMainView'
+
+const ACTIVE_PAGE = 'general'
 
 export default function SpaceSettingsGeneralPage() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const spaces = useLoadFeature(SpacesFeature)
+  const { SpaceSettingsPage: FeatureSpaceSettingsPage } = useLoadFeature(SpacesFeature)
   useFeatureFlagRedirect()
 
   if (!router.isReady || !spaceId) return null
@@ -18,9 +21,9 @@ export default function SpaceSettingsGeneralPage() {
         <title>{`${BRAND_NAME} – Settings – General`}</title>
       </Head>
 
-      <main>
-        <spaces.SpaceSettingsPage spaceId={spaceId} activePage="general" />
-      </main>
+      <PageMainView>
+        <FeatureSpaceSettingsPage spaceId={spaceId} activePage={ACTIVE_PAGE} />
+      </PageMainView>
     </>
   )
 }

@@ -11,8 +11,8 @@
  * IMPORTANT: Hooks are NOT in the contract - exported directly from index.ts
  */
 
-import type AccountItemButton from './components/AccountItem/AccountItemButton'
-import type AccountItemLink from './components/AccountItem/AccountItemLink'
+import type AccountItemButton from '@views/features/myAccounts/components/AccountItem/AccountItemButton'
+import type AccountItemLink from '@views/features/myAccounts/components/AccountItem/AccountItemLink'
 import type AccountItemCheckbox from '@views/features/myAccounts/components/AccountItem/AccountItemCheckbox'
 import type AccountItemIcon from './components/AccountItem/AccountItemIcon'
 import type AccountItemInfo from './components/AccountItem/AccountItemInfo'
@@ -21,7 +21,7 @@ import type AccountItemBalance from './components/AccountItem/AccountItemBalance
 import type AccountItemPinButton from './components/AccountItem/AccountItemPinButton'
 import type AccountItemContextMenu from './components/AccountItem/AccountItemContextMenu'
 import type AccountItemGroup from '@views/features/myAccounts/components/AccountItem/AccountItemGroup'
-import type AccountItemStatusChip from './components/AccountItem/AccountItemStatusChip'
+import type AccountItemStatusChip from '@views/features/myAccounts/components/AccountItem/AccountItemStatusChip'
 import type AccountItemQueueActions from './components/AccountItem/AccountItemQueueActions'
 import type AccountItemContent from '@views/features/myAccounts/components/AccountItem/AccountItemContent'
 import type SafesList from './components/SafesList'

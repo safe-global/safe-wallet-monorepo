@@ -1,9 +1,8 @@
 import type { ReactElement } from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { SCROLL_AREA } from '@/utils/styles'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import SecurityDrawerChecks from './tabs/SecurityDrawerChecks'
 import SecurityDrawerDetails from './tabs/SecurityDrawerDetails'
+import { SecurityDrawerContentView } from '@views/features/spaces/components/SecurityHub/components/SecurityReportDrawer/SecurityDrawerContentView'
 
 type SecurityDrawerContentProps = {
   scanContext: ScanContext | null
@@ -14,7 +13,6 @@ type SecurityDrawerContentProps = {
   onHnSignupClick?: () => void
 }
 
-/** Tabbed body of the drawer — "Checks" (scan results) and "Details" (placeholder). */
 const SecurityDrawerContent = ({
   scanContext,
   results,
@@ -23,30 +21,19 @@ const SecurityDrawerContent = ({
   safeQueryParam,
   onHnSignupClick,
 }: SecurityDrawerContentProps): ReactElement => (
-  <Tabs defaultValue="checks" className="flex min-h-0 flex-1 flex-col gap-4">
-    {/* eslint-disable-next-line no-restricted-syntax -- gap-2 spaces this 2-tab drawer switch; no TabsList variant provides this gap */}
-    <TabsList className="w-fit gap-2">
-      <TabsTrigger value="checks">Checks</TabsTrigger>
-      <TabsTrigger value="details">Details</TabsTrigger>
-    </TabsList>
-
-    <div className={SCROLL_AREA}>
-      <TabsContent value="checks">
-        <SecurityDrawerChecks
-          scanContext={scanContext}
-          results={results}
-          isComplete={isComplete}
-          lastScannedAt={lastScannedAt}
-          safeQueryParam={safeQueryParam}
-          onHnSignupClick={onHnSignupClick}
-        />
-      </TabsContent>
-
-      <TabsContent value="details">
-        <SecurityDrawerDetails scanContext={scanContext} lastScannedAt={lastScannedAt} />
-      </TabsContent>
-    </div>
-  </Tabs>
+  <SecurityDrawerContentView
+    checks={
+      <SecurityDrawerChecks
+        scanContext={scanContext}
+        results={results}
+        isComplete={isComplete}
+        lastScannedAt={lastScannedAt}
+        safeQueryParam={safeQueryParam}
+        onHnSignupClick={onHnSignupClick}
+      />
+    }
+    details={<SecurityDrawerDetails scanContext={scanContext} lastScannedAt={lastScannedAt} />}
+  />
 )
 
 export default SecurityDrawerContent

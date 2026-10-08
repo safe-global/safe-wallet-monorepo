@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { jsx, jsxs } from 'react/jsx-runtime'
+import policy from '../../sandbox/policy.json'
 
 type Fn = (...args: unknown[]) => unknown
 type Obj = Record<PropertyKey, unknown>
@@ -86,7 +87,10 @@ const urlToken = (url: string): object => {
 }
 
 const isSameOriginUrlObject = (url: object): boolean => {
-  const { protocol, host, hostname, href, pathname } = url as Obj
+  const { protocol, host, hostname, href } = url as Obj
+  const rawPathname = (url as Obj).pathname
+  // A pathname the view got from its props arrives as a token; the trusted string behind it decides.
+  const pathname = isObjectLike(rawPathname) && toTrusted.has(rawPathname) ? toTrusted.get(rawPathname) : rawPathname
   return (
     protocol === undefined &&
     host === undefined &&
@@ -95,6 +99,21 @@ const isSameOriginUrlObject = (url: object): boolean => {
     (pathname === undefined || (typeof pathname === 'string' && isSafeLiteralUrl(pathname)))
   )
 }
+
+const isOnHost = (url: string, hosts: string[]): boolean => {
+  try {
+    const { protocol, hostname } = new URL(url)
+    return protocol === 'https:' && hosts.some((h) => hostname === h || hostname.endsWith(`.${h}`))
+  } catch {
+    return false
+  }
+}
+
+// A link only leaves the app on a click; images and other resources load by themselves, so their hosts are listed separately.
+const isAllowedUrl = (key: string, url: string): boolean =>
+  key === 'href'
+    ? isOnHost(url, policy.linkHosts)
+    : isOnHost(url, policy.assetHosts) || (key === 'src' && url.startsWith('data:image/'))
 
 const isSafeLiteralUrl = (url: string): boolean =>
   url.startsWith('#') || url.startsWith('?') || (url.startsWith('/') && !url.startsWith('//'))
@@ -200,7 +219,7 @@ export function inbound(value: unknown): unknown {
     const element = viewElements.has(value)
       ? value
       : React.createElement(Opaque, {
-          key: (value as Obj).key as string | null,
+          ...((value as Obj).key != null && { key: (value as Obj).key as string }),
           [OPAQUE_KEY]: opaqueToken(value, 'Element'),
         })
     viewElements.add(element)
@@ -258,6 +277,11 @@ const sanitizeStyle = (style: unknown): unknown => {
   return clean
 }
 
+const warnDropped = (key: string, value: unknown) =>
+  console.warn(
+    `[sandbox] a view set ${key} to ${JSON.stringify(value)}; views may only link to paths, hosts in the policy, or values passed in`,
+  )
+
 const sanitizeProps = (type: unknown, props: Obj | null | undefined): Obj => {
   const isHost = typeof type === 'string'
   const clean: Obj = {}
@@ -266,12 +290,14 @@ const sanitizeProps = (type: unknown, props: Obj | null | undefined): Obj => {
     if (key === 'dangerouslySetInnerHTML') continue
     if (URL_PROPS.has(key)) {
       if (typeof value === 'string') {
-        if (isSafeLiteralUrl(value)) clean[key] = value
+        if (isSafeLiteralUrl(value) || isAllowedUrl(key, value)) clean[key] = value
+        else warnDropped(key, value)
         continue
       }
       const real = isObjectLike(value) ? toTrusted.get(value) : undefined
       if (typeof real === 'string' || (isObjectLike(real) && !toTrusted.has(real))) clean[key] = real
       else if (isObjectLike(value) && isSameOriginUrlObject(value)) clean[key] = outbound(value)
+      else if (value !== undefined) warnDropped(key, value)
       continue
     }
     if (ELEMENT_TYPE_PROPS.has(key) && typeof value === 'string' && HOST_DENY.has(value)) continue

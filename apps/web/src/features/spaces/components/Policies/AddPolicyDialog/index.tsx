@@ -1,16 +1,12 @@
 import { type ReactElement } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { ADD_POLICY_DISMISSED_LABEL, POLICY_EVENTS } from '@/services/analytics/events/policies'
-import { cn } from '@/utils/cn'
-import AddPolicyOptionButton from '@views/features/spaces/components/Policies/AddPolicyDialog/AddPolicyOptionButton'
 import {
   ADD_POLICY_OPTIONS,
   type AddPolicyId,
   type AddPolicyOption,
 } from '@views/features/spaces/components/Policies/AddPolicyDialog/options'
-
-const SINGLE_COLUMN_MAX = 3
+import { AddPolicyDialogView } from '@views/features/spaces/components/Policies/AddPolicyDialog/AddPolicyDialogView'
 
 export interface AddPolicyDialogProps {
   open: boolean
@@ -25,8 +21,6 @@ const AddPolicyDialog = ({
   onSelect,
   options = ADD_POLICY_OPTIONS,
 }: AddPolicyDialogProps): ReactElement => {
-  const isTwoColumn = options.length > SINGLE_COLUMN_MAX
-
   const handleOpenChange = (nextOpen: boolean) => {
     if (!nextOpen) {
       trackEvent(
@@ -45,26 +39,7 @@ const AddPolicyDialog = ({
     onSelect?.(id)
   }
 
-  return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent size={isTwoColumn ? 'sm' : 'xs'} data-testid="add-policy-dialog">
-        <DialogHeader>
-          <DialogTitle className="text-xl leading-6 font-semibold">Add policy</DialogTitle>
-        </DialogHeader>
-
-        <div
-          data-testid="add-policy-options"
-          className={cn('grid gap-3 px-4 pb-4', {
-            'sm:grid-cols-2': isTwoColumn,
-          })}
-        >
-          {options.map((option) => (
-            <AddPolicyOptionButton key={option.id} {...option} onClick={() => handleSelect(option.id)} />
-          ))}
-        </div>
-      </DialogContent>
-    </Dialog>
-  )
+  return <AddPolicyDialogView open={open} onOpenChange={handleOpenChange} onSelect={handleSelect} options={options} />
 }
 
 export default AddPolicyDialog

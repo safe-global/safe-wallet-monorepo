@@ -1,29 +1,25 @@
 import { type ReactNode, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
+import { isAddress } from 'ethers'
+import type { SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import {
-  EvidenceList,
-  Row,
-  buildExpanded,
+  annotateEvidence,
   isPassingStatus,
   makeBuildCta,
   sortBySeverity,
+  type Cta,
   type SectionRow,
 } from '../primitives'
 import {
   GRADE_TONE,
   resolveStatusTone,
-  SeverityIcon,
   type SeverityTone,
 } from '@views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import {
-  VULNERABLE_MODULE_INTRO,
-  ZODIAC_VULNERABILITY_CTA,
-  getModuleRowContent,
-} from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
+  SecurityCheckRowView,
+  type SecurityCheckKind,
+} from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/SecurityCheckRowView'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
@@ -114,241 +110,122 @@ export const useSecurityChecks = (
     const showModuleSummary = activeModules.length > 2 && !modulesExpanded && !isVulnerable
 
     const items: SectionRow[] = []
-    const iconFor = (r: ScanResult) => <SeverityIcon tone={rowTone(r.status, r.severity)} />
-    const toneFor = (r: ScanResult) => rowTone(r.status, r.severity)
-    // Surface the remediation as the row subtitle for failing checks (passing rows need no action).
-    const subtitleFor = (r: ScanResult) => (!isPassingStatus(r.status) && r.remediation ? r.remediation : undefined)
+    const checkRow = (
+      key: string,
+      check: SecurityCheckKind,
+      result: ScanResult,
+      cta: Cta | null,
+      extra: { hnSignup?: { labelOverride?: string; onClick: () => void } } = {},
+    ): SectionRow => ({
+      key,
+      severity: result.severity,
+      isPassing: isPassingStatus(result.status),
+      node: (
+        <SecurityCheckRowView
+          spec={{
+            kind: 'check',
+            check,
+            result,
+            evidence: annotateEvidence(result.evidence),
+            tone: rowTone(result.status, result.severity),
+            cta,
+            hnSignup: extra.hnSignup,
+            threshold: scanContext.threshold,
+            hasGuard,
+            hasFallback,
+            queuedTxCount: scanContext.queuedTxCount,
+          }}
+        />
+      ),
+    })
 
     const accountSetupResult = results['account_setup']
     if (accountSetupResult) {
-      const ok = isPassingStatus(accountSetupResult.status)
-      const title = ok
-        ? 'Signing threshold is strong'
-        : scanContext.threshold === 1
-          ? 'Single signer controls this Safe'
-          : 'Signing threshold is low'
-      items.push({
-        key: 'threshold',
-        severity: accountSetupResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(accountSetupResult)}
-            accentTone={toneFor(accountSetupResult)}
-            subtitle={subtitleFor(accountSetupResult)}
-            title={title}
-            expandedContent={buildExpanded(
-              accountSetupResult,
-              buildCta('account_setup', accountSetupResult, safeQueryParam),
-            )}
-          />
+      items.push(
+        checkRow(
+          'threshold',
+          'threshold',
+          accountSetupResult,
+          buildCta('account_setup', accountSetupResult, safeQueryParam),
         ),
-      })
+      )
     }
 
     const multichainResult = results['multichain_setup']
     if (multichainResult && multichainResult.status !== 'not_applicable') {
-      const ok = isPassingStatus(multichainResult.status)
-      const title = ok ? 'Signers are consistent across networks' : 'Signers differ across networks'
-      items.push({
-        key: 'multichain',
-        severity: multichainResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(multichainResult)}
-            accentTone={toneFor(multichainResult)}
-            subtitle={subtitleFor(multichainResult)}
-            title={title}
-            expandedContent={buildExpanded(
-              multichainResult,
-              buildCta('multichain_setup', multichainResult, safeQueryParam),
-            )}
-          />
+      items.push(
+        checkRow(
+          'multichain',
+          'multichain',
+          multichainResult,
+          buildCta('multichain_setup', multichainResult, safeQueryParam),
         ),
-      })
+      )
     }
 
     const recoveryResult = results['recovery']
     if (recoveryResult) {
-      const ok = isPassingStatus(recoveryResult.status)
-      const title =
-        recoveryResult.status === 'clear'
-          ? 'Recovery is configured'
-          : recoveryResult.status === 'not_applicable'
-            ? 'Recovery not available on this network'
-            : 'Recovery is not configured'
-      items.push({
-        key: 'recovery',
-        severity: recoveryResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(recoveryResult)}
-            accentTone={toneFor(recoveryResult)}
-            subtitle={subtitleFor(recoveryResult)}
-            title={title}
-            expandedContent={buildExpanded(recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam))}
-          />
-        ),
-      })
+      items.push(checkRow('recovery', 'recovery', recoveryResult, buildCta('recovery', recoveryResult, safeQueryParam)))
     }
 
     const versionResult = results['contract_version']
     if (versionResult) {
-      const ok = isPassingStatus(versionResult.status)
-      const title = ok ? 'Contract version is up to date' : 'Contract version is outdated'
-      items.push({
-        key: 'version',
-        severity: versionResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(versionResult)}
-            accentTone={toneFor(versionResult)}
-            subtitle={subtitleFor(versionResult)}
-            title={title}
-            expandedContent={buildExpanded(versionResult, buildCta('contract_version', versionResult, safeQueryParam))}
-          />
-        ),
-      })
+      items.push(
+        checkRow('version', 'version', versionResult, buildCta('contract_version', versionResult, safeQueryParam)),
+      )
     }
 
     const factoryResult = results['factory_validation']
     if (factoryResult) {
-      const ok = isPassingStatus(factoryResult.status)
-      const title =
-        factoryResult.status === 'clear'
-          ? 'Deployed via official Safe factory'
-          : factoryResult.status === 'inconclusive'
-            ? 'Deployment origin not yet verified'
-            : 'Deployed from an unrecognized source'
-      items.push({
-        key: 'factory',
-        severity: factoryResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(factoryResult)}
-            accentTone={toneFor(factoryResult)}
-            subtitle={subtitleFor(factoryResult)}
-            title={title}
-            expandedContent={buildExpanded(
-              factoryResult,
-              buildCta('factory_validation', factoryResult, safeQueryParam),
-            )}
-          />
-        ),
-      })
+      items.push(
+        checkRow('factory', 'factory', factoryResult, buildCta('factory_validation', factoryResult, safeQueryParam)),
+      )
     }
 
     const guardResult = results['guard']
     if (guardResult) {
       const ok = isPassingStatus(guardResult.status)
-      const title = ok
-        ? hasGuard
-          ? 'Transaction guard is active'
-          : 'No unsupported guard installed'
-        : hasGuard
-          ? 'Transaction guard is unverified'
-          : 'Transaction guard is recommended'
       // A partner-tagged, actionable guard result opens the Hypernative signup flow in place of a
       // deep-link. Passing results already get no CTA (buildCta returns null), so this only fires
       // for the Tier-3 nudge (no guard, high-value, Hypernative chain).
-      const guardCta =
-        !ok && guardResult.partner === 'hypernative' && onHnSignupClick
-          ? { label: guardResult.ctaLabelOverride || 'Set up protection', onClick: onHnSignupClick }
-          : buildCta('guard', guardResult, safeQueryParam)
-      items.push({
-        key: 'guard',
-        severity: guardResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(guardResult)}
-            accentTone={toneFor(guardResult)}
-            subtitle={subtitleFor(guardResult)}
-            title={title}
-            expandedContent={buildExpanded(guardResult, guardCta)}
-          />
+      const isHnNudge = !ok && guardResult.partner === 'hypernative' && onHnSignupClick
+      items.push(
+        checkRow(
+          'guard',
+          'guard',
+          guardResult,
+          isHnNudge ? null : buildCta('guard', guardResult, safeQueryParam),
+          isHnNudge ? { hnSignup: { labelOverride: guardResult.ctaLabelOverride, onClick: isHnNudge } } : {},
         ),
-      })
+      )
     }
 
     const fallbackResult = results['fallback_handler']
     if (fallbackResult) {
-      const ok = isPassingStatus(fallbackResult.status)
-      // Scanner emits a human label like "Official Safe fallback handler" / "CoW Protocol TWAP handler"
-      // in evidence — reuse it directly so the title auto-matches each variant.
-      const handlerLabel = fallbackResult.evidence?.find(
-        (e): e is { label: string; value: string } => typeof e !== 'string' && e.label === 'Status',
-      )?.value
-      const title = ok
-        ? hasFallback
-          ? handlerLabel || 'Fallback handler is active'
-          : 'No fallback handler in use'
-        : 'Fallback handler is unverified'
-      items.push({
-        key: 'fallback',
-        severity: fallbackResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(fallbackResult)}
-            accentTone={toneFor(fallbackResult)}
-            subtitle={subtitleFor(fallbackResult)}
-            title={title}
-            expandedContent={buildExpanded(
-              fallbackResult,
-              buildCta('fallback_handler', fallbackResult, safeQueryParam),
-            )}
-          />
-        ),
-      })
+      items.push(
+        checkRow('fallback', 'fallback', fallbackResult, buildCta('fallback_handler', fallbackResult, safeQueryParam)),
+      )
     }
 
     const modulesResult = results['modules']
     if (modulesResult) {
       if (activeModules.length === 0) {
-        items.push({
-          key: 'modules-empty',
-          severity: modulesResult.severity,
-          isPassing: isPassingStatus(modulesResult.status),
-          node: (
-            <Row
-              leadIcon={iconFor(modulesResult)}
-              accentTone={toneFor(modulesResult)}
-              subtitle={subtitleFor(modulesResult)}
-              title="No unsupported module installed"
-              expandedContent={buildExpanded(modulesResult, buildCta('modules', modulesResult, safeQueryParam))}
-            />
-          ),
-        })
+        items.push(
+          checkRow('modules-empty', 'modules-empty', modulesResult, buildCta('modules', modulesResult, safeQueryParam)),
+        )
       } else if (showModuleSummary) {
-        // Collapsed summary row — not expandable, acts as a gateway to per-module rows.
         items.push({
           key: 'modules-summary',
           severity: modulesResult.severity,
           isPassing: isPassingStatus(modulesResult.status),
           node: (
-            <Row
-              leadIcon={iconFor(modulesResult)}
-              accentTone={toneFor(modulesResult)}
-              title={`Modules & Extensions · ${activeModules.length} installed`}
-              trailing={
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setModulesExpanded(true)
-                  }}
-                  // eslint-disable-next-line no-restricted-syntax -- inline text toggle: auto-height, no padding
-                  className="h-auto min-w-0 p-0 text-[0.7rem] font-semibold normal-case"
-                >
-                  View all
-                </Button>
-              }
+            <SecurityCheckRowView
+              spec={{
+                kind: 'modulesSummary',
+                tone: rowTone(modulesResult.status, modulesResult.severity),
+                count: activeModules.length,
+                onViewAll: () => setModulesExpanded(true),
+              }}
             />
           ),
         })
@@ -362,14 +239,7 @@ export const useSecurityChecks = (
             key: 'modules-vulnerable-nested',
             severity,
             isPassing: false,
-            node: (
-              <Row
-                leadIcon={<SeverityIcon tone={rowTone('issue', severity)} />}
-                accentTone={rowTone('issue', severity)}
-                title="Vulnerable module detected"
-                expandedContent={<EvidenceList intro={VULNERABLE_MODULE_INTRO} cta={ZODIAC_VULNERABILITY_CTA} />}
-              />
-            ),
+            node: <SecurityCheckRowView spec={{ kind: 'vulnerableNested', tone: rowTone('issue', severity) }} />,
           })
         }
         activeModules.forEach((mod) => {
@@ -377,27 +247,23 @@ export const useSecurityChecks = (
           const trusted = !vulnerable && isKnownModuleByName(mod.name)
           const severity: SecurityGrade = vulnerable ? 'Critical' : trusted ? 'Low' : 'High'
           const status: ScanResult['status'] = trusted ? 'clear' : 'issue'
-          // Identify which module each row is so multiple flagged modules aren't indistinguishable.
-          const title = vulnerable
-            ? `Vulnerable module · ${mod.name || shortenAddress(mod.value)}`
-            : trusted
-              ? `Recognized module · ${mod.name || shortenAddress(mod.value)}`
-              : 'Unrecognized module detected'
-          const perModuleEvidence: EvidenceItem[] = [
-            { label: 'Address', value: mod.value },
-            ...(mod.name ? [{ label: 'Name', value: mod.name }] : []),
-          ]
-          const { intro, cta } = getModuleRowContent({ vulnerable, trusted }, modulesCta)
           items.push({
             key: `module-${mod.value}`,
             severity,
             isPassing: trusted,
             node: (
-              <Row
-                leadIcon={<SeverityIcon tone={rowTone(status, severity)} />}
-                accentTone={rowTone(status, severity)}
-                title={title}
-                expandedContent={<EvidenceList intro={intro} evidence={perModuleEvidence} cta={cta} />}
+              <SecurityCheckRowView
+                spec={{
+                  kind: 'module',
+                  tone: rowTone(status, severity),
+                  address: mod.value,
+                  name: mod.name ?? undefined,
+                  addressIsAddress: isAddress(mod.value),
+                  nameIsAddress: Boolean(mod.name) && isAddress(mod.name ?? ''),
+                  vulnerable,
+                  trusted,
+                  modulesCta,
+                }}
               />
             ),
           })
@@ -407,50 +273,19 @@ export const useSecurityChecks = (
 
     const scanningResult = results['transaction_scanning']
     if (scanningResult) {
-      const ok = isPassingStatus(scanningResult.status)
-      const title = ok ? 'Transaction scanning is enabled' : 'Transaction scanning is disabled'
-      items.push({
-        key: 'scanning',
-        severity: scanningResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(scanningResult)}
-            accentTone={toneFor(scanningResult)}
-            subtitle={subtitleFor(scanningResult)}
-            title={title}
-            expandedContent={buildExpanded(
-              scanningResult,
-              buildCta('transaction_scanning', scanningResult, safeQueryParam),
-            )}
-          />
+      items.push(
+        checkRow(
+          'scanning',
+          'scanning',
+          scanningResult,
+          buildCta('transaction_scanning', scanningResult, safeQueryParam),
         ),
-      })
+      )
     }
 
     const pendingResult = results['pending_tx']
     if (pendingResult) {
-      const ok = isPassingStatus(pendingResult.status)
-      const queued = scanContext.queuedTxCount
-      const title = ok
-        ? queued > 0
-          ? 'Queue is up to date'
-          : 'No pending transactions'
-        : 'Pending transactions are stale'
-      items.push({
-        key: 'pending',
-        severity: pendingResult.severity,
-        isPassing: ok,
-        node: (
-          <Row
-            leadIcon={iconFor(pendingResult)}
-            accentTone={toneFor(pendingResult)}
-            subtitle={subtitleFor(pendingResult)}
-            title={title}
-            expandedContent={buildExpanded(pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam))}
-          />
-        ),
-      })
+      items.push(checkRow('pending', 'pending', pendingResult, buildCta('pending_tx', pendingResult, safeQueryParam)))
     }
 
     return {

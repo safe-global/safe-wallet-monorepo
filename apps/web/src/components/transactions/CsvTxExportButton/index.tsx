@@ -1,19 +1,15 @@
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
 import { useCsvExportGetExportStatusV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import type { ReactElement } from 'react'
 import { useEffect, useRef, useState } from 'react'
-import ExportIcon from '@/public/images/common/export.svg'
 import CsvTxExportModal from '../CsvTxExportModal'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
-import { Chip } from '@/components/common/Chip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import OnlyOwnerOrProposer from '@/components/common/OnlyOwnerOrProposer'
 import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
+import { CsvTxExportButtonView } from '@views/components/transactions/CsvTxExportButton/CsvTxExportButtonView'
 
 const getCsvExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)
@@ -42,10 +38,6 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
     { jobId: exportJobId as string },
     { skip: !exportJobId, pollingInterval: 2000 },
   )
-
-  const chipStyles = isDarkMode
-    ? { backgroundColor: 'static.main', color: 'secondary.main' }
-    : { backgroundColor: 'secondary.main', color: 'static.main' }
 
   const onClick = () => {
     setOpenExportModal(true)
@@ -128,41 +120,24 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
   }, [exportStatus, error, dispatch])
 
   return (
-    <>
-      <OnboardingTooltip
-        widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING}
-        iconShown={false}
-        placement="bottom-end"
-        titleProps={{ flexDirection: 'column', alignItems: 'flex-end', maxWidth: 263 }}
-        text={
-          <div className="mt-2">
-            <Chip sx={{ borderRadius: 1, ...chipStyles }} fontWeight="normal" />
-            <Typography className="block mt-2" variant="paragraph-small">
-              Export your transaction history for financial reporting.
-            </Typography>
-          </div>
-        }
-      >
-        <div>
-          <OnlyOwnerOrProposer placement="top">
-            {(isOk) => (
-              <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
-                {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
-                {exportJobId ? 'Exporting' : 'Export'}
-              </Button>
-            )}
-          </OnlyOwnerOrProposer>
-        </div>
-      </OnboardingTooltip>
-
-      {openExportModal && (
-        <CsvTxExportModal
-          onClose={() => setOpenExportModal(false)}
-          hasActiveFilter={hasActiveFilter}
-          onExport={(job) => setExportJobId(job.id)}
-        />
+    <CsvTxExportButtonView
+      isDarkMode={isDarkMode}
+      isExporting={!!exportJobId}
+      onClick={onClick}
+      renderOnboardingTooltip={(props) => (
+        <OnboardingTooltip widgetLocalStorageId={LS_CSVEXPORT_ONBOARDING} {...props} />
       )}
-    </>
+      renderOnlyOwnerOrProposer={(props) => <OnlyOwnerOrProposer {...props} />}
+      exportModal={
+        openExportModal && (
+          <CsvTxExportModal
+            onClose={() => setOpenExportModal(false)}
+            hasActiveFilter={hasActiveFilter}
+            onExport={(job) => setExportJobId(job.id)}
+          />
+        )
+      }
+    />
   )
 }
 

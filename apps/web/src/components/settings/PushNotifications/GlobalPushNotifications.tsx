@@ -1,15 +1,9 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
-import { Typography } from '@/components/ui/typography'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
-import { List, ListItem } from '@/components/ui/list'
 import mapValues from 'lodash/mapValues'
 import difference from 'lodash/difference'
 import pickBy from 'lodash/pickBy'
-import { Fragment, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactElement } from 'react'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
@@ -25,15 +19,16 @@ import type { NotifiableSafes } from './logic'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import CheckWalletWithPermission from '@/components/common/CheckWalletWithPermission'
 import { Permission } from '@/permissions/config'
-import { clickOnEnterOrSpace } from '@/utils/keyboard'
 
-import css from './styles.module.css'
 import { useAllOwnedSafes } from '@/hooks/safes'
 import useWallet from '@/hooks/wallets/useWallet'
 import { selectAllAddedSafes, type AddedSafesState } from '@/store/addedSafesSlice'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useNotificationsRenewal } from './hooks/useNotificationsRenewal'
 import type { UndeployedSafesState } from '@safe-global/utils/features/counterfactual/store/types'
+import {
+  GlobalPushNotificationsView,
+  type NotifiableChainItem,
+} from '@views/components/settings/PushNotifications/GlobalPushNotificationsView'
 
 // UI logic
 
@@ -371,146 +366,74 @@ export const GlobalPushNotifications = (): ReactElement | null => {
     setIsLoading(false)
   }
 
-  if (totalNotifiableSafes === 0) {
-    return (
-      <Typography className="text-muted-foreground">{address ? 'No owned Safes' : 'No wallet connected'}</Typography>
-    )
-  }
+  const chainItems: NotifiableChainItem[] = Object.entries(notifiableSafes).map(([chainId, safeAddresses]) => {
+    const chain = chains.configs?.find((chain) => chain.chainId === chainId)
+
+    const isChainSelected = safeAddresses.every((address) => {
+      return selectedSafes[chainId]?.includes(address)
+    })
+
+    const onSelectChain = () => {
+      setSelectedSafes((prev) => {
+        return {
+          ...prev,
+          [chainId]: isChainSelected ? [] : safeAddresses,
+        }
+      })
+    }
+
+    return {
+      chainId,
+      chainName: chain?.chainName,
+      isChainSelected,
+      onSelectChain,
+      safes: safeAddresses.map((safeAddress) => {
+        const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
+
+        const onSelectSafe = () => {
+          setSelectedSafes((prev) => {
+            return {
+              ...prev,
+              [chainId]: isSafeSelected
+                ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
+                : [...(prev[chainId] ?? []), safeAddress],
+            }
+          })
+        }
+
+        return {
+          address: safeAddress,
+          isSelected: isSafeSelected,
+          onSelect: onSelectSafe,
+          addressInfo: (
+            <EthHashInfo
+              avatarSize={36}
+              prefix={chain?.shortName}
+              address={safeAddress || ''}
+              shortAddress={false}
+              showName={true}
+              chainId={chainId}
+            />
+          ),
+        }
+      }),
+    }
+  })
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
-        <Typography variant="h4" className="inline">
-          My Safes Accounts ({totalNotifiableSafes})
-        </Typography>
-
-        <div className="flex items-center">
-          {totalSignaturesRequired > 0 && (
-            <Typography className="mr-4 inline text-right">
-              We&apos;ll ask you to verify ownership of each Safe account with your signature per chain{' '}
-              {totalSignaturesRequired} time{maybePlural(totalSignaturesRequired)}
-            </Typography>
-          )}
-
-          <CheckWalletWithPermission permission={Permission.EnablePushNotifications}>
-            {(isOk) => (
-              <Button disabled={!canSave || !isOk || isLoading} onClick={onSave}>
-                {isLoading ? <Spinner className="size-5" /> : 'Save'}
-              </Button>
-            )}
-          </CheckWalletWithPermission>
-        </div>
-      </div>
-
-      <List className="rounded-lg border border-border bg-card">
-        <ListItem className="block p-0">
-          <div
-            role="button"
-            tabIndex={0}
-            className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
-            onClick={onSelectAll}
-            onKeyDown={clickOnEnterOrSpace}
-          >
-            <span className={css.icon}>
-              <Checkbox checked={isAllSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
-            </span>
-            <Typography variant="paragraph-bold">Select all</Typography>
-          </div>
-        </ListItem>
-
-        <ListItem aria-hidden className="p-0">
-          <Separator />
-        </ListItem>
-
-        {Object.entries(notifiableSafes).map(([chainId, safeAddresses], i, arr) => {
-          if (safeAddresses.length === 0) return
-          const chain = chains.configs?.find((chain) => chain.chainId === chainId)
-
-          const isChainSelected = safeAddresses.every((address) => {
-            return selectedSafes[chainId]?.includes(address)
-          })
-
-          const onSelectChain = () => {
-            setSelectedSafes((prev) => {
-              return {
-                ...prev,
-                [chainId]: isChainSelected ? [] : safeAddresses,
-              }
-            })
-          }
-
-          return (
-            <Fragment key={chainId}>
-              <ListItem className="block p-0">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  className={`${css.item} flex w-full cursor-pointer items-center gap-3 py-2 text-left`}
-                  onClick={onSelectChain}
-                  onKeyDown={clickOnEnterOrSpace}
-                >
-                  <span className={css.icon}>
-                    <Checkbox checked={isChainSelected} aria-hidden tabIndex={-1} className="pointer-events-none" />
-                  </span>
-                  <Typography variant="paragraph-bold">{`${chain?.chainName} Safe accounts`}</Typography>
-                </div>
-
-                <List className={css.item}>
-                  {safeAddresses.map((safeAddress) => {
-                    const isSafeSelected = selectedSafes[chainId]?.includes(safeAddress) ?? false
-
-                    const onSelectSafe = () => {
-                      setSelectedSafes((prev) => {
-                        return {
-                          ...prev,
-                          [chainId]: isSafeSelected
-                            ? prev[chainId]?.filter((addr) => !sameAddress(addr, safeAddress))
-                            : [...(prev[chainId] ?? []), safeAddress],
-                        }
-                      })
-                    }
-
-                    return (
-                      <ListItem key={safeAddress} className="p-0">
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          className="flex w-full cursor-pointer items-center gap-3 py-0.5 pl-14 text-left"
-                          onClick={onSelectSafe}
-                          onKeyDown={clickOnEnterOrSpace}
-                        >
-                          <span className={css.icon}>
-                            <Checkbox
-                              checked={isSafeSelected}
-                              aria-hidden
-                              tabIndex={-1}
-                              className="pointer-events-none"
-                            />
-                          </span>
-                          <EthHashInfo
-                            avatarSize={36}
-                            prefix={chain?.shortName}
-                            address={safeAddress || ''}
-                            shortAddress={false}
-                            showName={true}
-                            chainId={chainId}
-                          />
-                        </div>
-                      </ListItem>
-                    )
-                  })}
-                </List>
-              </ListItem>
-
-              {i !== arr.length - 1 ? (
-                <ListItem aria-hidden className="p-0">
-                  <Separator />
-                </ListItem>
-              ) : null}
-            </Fragment>
-          )
-        })}
-      </List>
-    </div>
+    <GlobalPushNotificationsView
+      hasAddress={!!address}
+      totalNotifiableSafes={totalNotifiableSafes}
+      totalSignaturesRequired={totalSignaturesRequired}
+      renderCheckWallet={(render) => (
+        <CheckWalletWithPermission permission={Permission.EnablePushNotifications}>{render}</CheckWalletWithPermission>
+      )}
+      canSave={canSave}
+      isLoading={isLoading}
+      onSave={onSave}
+      isAllSelected={isAllSelected}
+      onSelectAll={onSelectAll}
+      chains={chainItems}
+    />
   )
 }

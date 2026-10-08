@@ -1,8 +1,5 @@
-import { Skeleton } from '@/components/ui/skeleton'
 import FiatValue from '@/components/common/FiatValue'
-import { Typography } from '@/components/ui/typography'
-import css from '../AccountItems/styles.module.css'
-import { cn } from '@/utils/cn'
+import { AccountItemBalanceView } from '@views/features/myAccounts/components/AccountItem/AccountItemBalanceView'
 
 export interface AccountItemBalanceProps {
   fiatTotal?: string | number
@@ -24,15 +21,12 @@ function AccountItemBalance({
   }
 
   return (
-    <div className={cn(css.accountItemBalance, className)} data-testid={testId}>
-      {fiatTotal !== undefined ? (
-        <Typography variant="paragraph-small-bold">
-          <FiatValue value={fiatTotal} />
-        </Typography>
-      ) : isLoading ? (
-        <Skeleton className="h-4 w-[60px]" />
-      ) : null}
-    </div>
+    <AccountItemBalanceView
+      fiatValue={fiatTotal !== undefined ? <FiatValue value={fiatTotal} /> : undefined}
+      isLoading={isLoading}
+      balanceClassName={className}
+      testId={testId}
+    />
   )
 }
 

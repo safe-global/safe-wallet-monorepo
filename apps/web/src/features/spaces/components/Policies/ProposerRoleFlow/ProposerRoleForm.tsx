@@ -3,12 +3,7 @@ import { FormProvider, useForm, useWatch, type Validate } from 'react-hook-form'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
-import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
@@ -20,13 +15,7 @@ import {
 } from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
-import {
-  GRANT_INFO_DESCRIPTION,
-  GRANT_INFO_TITLE,
-  PROPOSER_FIELD_HELPER,
-  PROPOSER_NAME_HELPER,
-  PROPOSER_NAME_WORKSPACE_HELPER,
-} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+import { ProposerRoleFormView } from '@views/features/spaces/components/Policies/ProposerRoleFlow/ProposerRoleFormView'
 
 export type ProposerRoleFormValues = {
   proposer: string
@@ -98,79 +87,47 @@ const ProposerRoleForm = ({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)}>
-        <TxCard>
-          <div className="flex flex-col gap-6">
-            <Alert variant="info" className="px-3 py-3 *:data-[slot=alert-description]:text-muted-foreground">
-              <AlertSeverityIcon variant="info" />
-              <AlertTitle className="text-sm font-normal">{GRANT_INFO_TITLE}</AlertTitle>
-              <AlertDescription>{GRANT_INFO_DESCRIPTION}</AlertDescription>
-            </Alert>
-
-            <SafeAccountSelector
-              accounts={accountOptions}
-              signersOnly={safeAccounts.signersOnly}
-              value={safeAccount}
-              onChange={onSafeAccountChange}
-              isLoading={safeAccounts.isLoading}
-              isError={safeAccounts.isError}
-              onRetry={safeAccounts.refetch}
-              hasWallet={safeAccounts.hasWallet}
-              notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
-            />
-
-            {parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
-
-            <div className="flex flex-col gap-1">
-              <AddressBookInput
-                name="proposer"
-                label="Proposer"
-                required
-                focused={false}
-                validate={validateProposer}
-                excludeAddresses={selectedSafe ? [selectedSafe.address] : undefined}
-              />
-
-              <Typography variant="paragraph-mini" color="muted">
-                {PROPOSER_FIELD_HELPER}
-              </Typography>
-            </div>
-
-            {!isWorkspaceContact && (
-              <NameInput
-                className="gap-1"
-                name="name"
-                label="Proposer name"
-                placeholder="Type name here"
-                helperText={
-                  <Typography variant="paragraph-mini" color="muted">
-                    {isAdmin ? PROPOSER_NAME_WORKSPACE_HELPER : PROPOSER_NAME_HELPER}
-                  </Typography>
-                }
-                inputSize="hero"
-                validateCharset
-                minLength={NAME_MIN_LENGTH}
-                maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
-              />
-            )}
-
-            <NetworkWarning action="sign" />
-
-            {errorMessage}
-          </div>
-
-          <TxCardActions>
-            <DialogActions
-              confirmLabel="Submit"
-              confirmType="submit"
-              confirmTestId="submit-proposer-btn"
-              confirmLoading={isSubmitting}
-              confirmDisabled={!canSubmit}
-              confirmCheckWallet={{ checkNetwork: !isSubmitting, allowProposer: false }}
-            />
-          </TxCardActions>
-        </TxCard>
-      </form>
+      <ProposerRoleFormView
+        onSubmit={methods.handleSubmit(onSubmit)}
+        safeAccountSelector={
+          <SafeAccountSelector
+            accounts={accountOptions}
+            signersOnly={safeAccounts.signersOnly}
+            value={safeAccount}
+            onChange={onSafeAccountChange}
+            isLoading={safeAccounts.isLoading}
+            isError={safeAccounts.isError}
+            onRetry={safeAccounts.refetch}
+            hasWallet={safeAccounts.hasWallet}
+            notice={{ title: NESTED_SAFES_NOTICE_TITLE, description: getNestedSafesNoticeText('proposers') }}
+          />
+        }
+        parentSafeWalletNotice={parentSafeWallet && <ParentSafeWalletNotice {...parentSafeWallet} />}
+        renderProposerInput={({ label }) => (
+          <AddressBookInput
+            name="proposer"
+            label={label}
+            required
+            focused={false}
+            validate={validateProposer}
+            excludeAddresses={selectedSafe ? [selectedSafe.address] : undefined}
+          />
+        )}
+        showNameInput={!isWorkspaceContact}
+        renderNameInput={(nameInputProps) => (
+          <NameInput
+            {...nameInputProps}
+            name="name"
+            validateCharset
+            minLength={NAME_MIN_LENGTH}
+            maxLength={ADDRESS_BOOK_NAME_MAX_LENGTH}
+          />
+        )}
+        isAdmin={isAdmin}
+        errorMessage={errorMessage}
+        isSubmitting={isSubmitting}
+        canSubmit={canSubmit}
+      />
     </FormProvider>
   )
 }

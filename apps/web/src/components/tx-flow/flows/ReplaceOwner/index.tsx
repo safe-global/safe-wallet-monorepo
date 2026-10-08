@@ -8,6 +8,7 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { REPLACE_OWNER_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/ReplaceOwner/copy'
 
 type Owner = {
   address: string
@@ -51,10 +52,10 @@ const ReplaceOwnerFlow = ({ address }: { address: string }) => {
       initialData={defaultValues}
       eventCategory={TxFlowType.REPLACE_OWNER}
       icon={SaveAddressIcon}
-      subtitle="Replace signer"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewOwnerStep}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <ChooseOwnerStep />
       </TxFlowStep>
     </TxFlow>

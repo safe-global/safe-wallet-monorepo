@@ -1,0 +1,46 @@
+import ModalDialog from '@/components/common/ModalDialog'
+import CSVAirdropLogo from '@/public/images/apps/csv-airdrop-app-logo.svg'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import Link from 'next/link'
+import type { ReactElement } from 'react'
+import type { UrlObject } from 'url'
+
+export type CSVAirdropAppModalViewProps = {
+  onClose: () => void
+  appHref?: UrlObject
+}
+
+export const CSVAirdropAppModalView = ({ onClose, appHref }: CSVAirdropAppModalViewProps): ReactElement => {
+  return (
+    <ModalDialog
+      data-testid="csvairdrop-dialog"
+      open
+      onClose={onClose}
+      dialogTitle="Limit reached"
+      hideChainIndicator
+      maxWidth="xs"
+      forceBackdrop
+    >
+      <div className="mt-6 px-6 pb-5 text-center">
+        <div>
+          <CSVAirdropLogo className="mx-auto" />
+          <Typography variant="paragraph-bold" className="mt-4 mb-4">
+            Use CSV Airdrop
+          </Typography>
+          <Typography variant="paragraph-small" className="block">
+            You&apos;ve reached the limit of 5 recipients. To add more use CSV Airdrop, where you can simply upload you
+            CSV file and send to endless number of recipients.
+          </Typography>
+        </div>
+      </div>
+      {appHref && (
+        <div className="block p-2 text-center">
+          <Button data-testid="open-app-btn" render={<Link href={appHref} />}>
+            Open CSV Airdrop
+          </Button>
+        </div>
+      )}
+    </ModalDialog>
+  )
+}

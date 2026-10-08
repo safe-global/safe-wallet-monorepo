@@ -1,16 +1,14 @@
-import GoogleIcon from '@/public/images/common/google.svg'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OidcConnection } from '../../constants'
-import OidcSignInButton from '../OidcSignInButton'
+import { useOidcSignIn } from '../OidcSignInButton'
+import { GoogleSignInButtonView } from '@views/features/oidc-auth/components/GoogleSignInButton/GoogleSignInButtonView'
 
-const GoogleSignInButton = () => (
-  <OidcSignInButton
-    connection={OidcConnection.GOOGLE}
-    label="Continue with Google"
-    icon={<GoogleIcon />}
-    analyticsEvent={SPACE_EVENTS.GOOGLE_SIGN_IN}
-    testId="google-login-btn"
-  />
-)
+const GoogleSignInButton = () => {
+  const { isOidcAuthEnabled, handleClick } = useOidcSignIn(OidcConnection.GOOGLE, SPACE_EVENTS.GOOGLE_SIGN_IN)
+
+  if (!isOidcAuthEnabled) return null
+
+  return <GoogleSignInButtonView onClick={handleClick} />
+}
 
 export default GoogleSignInButton

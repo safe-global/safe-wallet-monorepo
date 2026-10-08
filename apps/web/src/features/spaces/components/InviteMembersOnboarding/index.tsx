@@ -1,9 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import {
   OnboardingLayout,
   StepCounter,
@@ -18,9 +14,13 @@ import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
 import { MemberRole } from '../../hooks/useSpaceMembers'
+import {
+  InviteMembersOnboardingFooterView,
+  InviteMembersOnboardingView,
+} from '@views/features/spaces/components/InviteMembersOnboarding/InviteMembersOnboardingView'
 
 const ONBOARDING_STEP = 3
-const FORM_ID = 'invite-members-form'
+const SIDE_PANEL_HIGHLIGHT = 'accounts'
 
 const InviteMembersOnboarding = (): ReactElement => {
   const totalSteps = useOnboardingStepCount()
@@ -38,76 +38,37 @@ const InviteMembersOnboarding = (): ReactElement => {
   const balanceSafes = useMemo(() => flattenSafeItems(spaceSafes), [spaceSafes])
 
   const main = (
-    <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-      <StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />
-
-      <div className="flex flex-col gap-2">
-        <Typography variant="h2">Invite your team</Typography>
-        <Typography variant="paragraph" color="muted">
-          Add people to collaborate on this Workspace.
-        </Typography>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        {fields.map((field, index) => (
-          <MemberInviteRow
-            key={field.id}
-            index={index}
-            control={control}
-            register={register}
-            errors={formState.errors}
-            setValue={setValue}
-            trigger={trigger}
-            canRemove={fields.length > 1}
-            onRemove={() => {
-              remove(index)
-              setTimeout(() => trigger('members'), 0)
-            }}
-          />
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => append({ identifier: '', role: MemberRole.MEMBER })}
-        className="flex cursor-pointer items-center justify-center gap-2"
-        data-testid="add-another-member"
-      >
-        <Plus className="size-4" />
-        <Typography variant="paragraph-small-medium">Add another</Typography>
-      </button>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertSeverityIcon variant="destructive" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-    </form>
+    <InviteMembersOnboardingView
+      onSubmit={onSubmit}
+      stepCounter={<StepCounter currentStep={ONBOARDING_STEP} totalSteps={totalSteps} />}
+      rows={fields.map((field, index) => (
+        <MemberInviteRow
+          key={field.id}
+          index={index}
+          control={control}
+          register={register}
+          errors={formState.errors}
+          setValue={setValue}
+          trigger={trigger}
+          canRemove={fields.length > 1}
+          onRemove={() => {
+            remove(index)
+            setTimeout(() => trigger('members'), 0)
+          }}
+        />
+      ))}
+      onAddAnother={() => append({ identifier: '', role: MemberRole.MEMBER })}
+      error={error}
+    />
   )
 
   const footer = (
-    <div className="flex flex-col gap-3">
-      <OnboardingFooter
-        onBack={goBack}
-        backDisabled={isSubmitting}
-        continueLabel="Next"
-        continueType="submit"
-        continueForm={FORM_ID}
-        continueDisabled={!formState.isValid || isSubmitting}
-        continueLoading={isSubmitting}
-        continueTestId="invite-members-continue-button"
-      />
-      <button
-        data-testid="invite-members-skip-button"
-        type="button"
-        onClick={redirectToNextStep}
-        disabled={isSubmitting}
-        className="cursor-pointer text-sm font-semibold text-foreground underline-offset-4 hover:underline disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Skip, invite later
-      </button>
-    </div>
+    <InviteMembersOnboardingFooterView
+      onBack={goBack}
+      onSkip={redirectToNextStep}
+      isSubmitting={isSubmitting}
+      isValid={formState.isValid}
+    />
   )
 
   return (
@@ -117,7 +78,7 @@ const InviteMembersOnboarding = (): ReactElement => {
       sidePanel={
         <SafeAppMockup
           name={space?.name ?? ''}
-          highlight="accounts"
+          highlight={SIDE_PANEL_HIGHLIGHT}
           accounts={sidePanelAccounts}
           balanceSafes={balanceSafes}
         />

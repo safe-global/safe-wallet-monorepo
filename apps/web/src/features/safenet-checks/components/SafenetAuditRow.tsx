@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
-import ExternalLink from '@/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useChain } from '@/hooks/useChains'
 import {
@@ -12,6 +11,7 @@ import {
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
 import { STATUS_PRESENTATION } from '../statusPresentation'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { SafenetAuditRowView } from '@views/features/safenet-checks/components/SafenetAuditRowView'
 
 const STEP_ICON: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, ActionType> = {
   [CheckStatus.SUBMITTED]: 'pending',
@@ -75,28 +75,17 @@ export const SafenetAuditRow = ({
   const isVerified = publicStatus === CheckStatus.BENIGN && attested !== undefined
 
   return (
-    // The row appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
-      <AuditRow
-        label={STATUS_PRESENTATION[publicStatus].label}
-        actionType={STEP_ICON[publicStatus]}
-        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
-        actor={
-          // Theme-default link color, matching the sibling rows.
-          isVerified ? (
-            <ExternalLink data-testid="safenet-attestation-link" href={href} noIcon>
-              Safenet
-            </ExternalLink>
-          ) : (
-            'Safenet'
-          )
-        }
-        isLast={isLast}
-        // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot.attestedAtMs ?? null}
-      />
-    </div>
+    <SafenetAuditRowView
+      label={STATUS_PRESENTATION[publicStatus].label}
+      actionType={STEP_ICON[publicStatus]}
+      iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
+      isVerified={isVerified}
+      href={href}
+      isLast={isLast}
+      // Null while running or when the header read failed — column stays empty.
+      timestamp={snapshot.attestedAtMs ?? null}
+      renderAuditRow={(props) => <AuditRow {...props} />}
+    />
   )
 }
 

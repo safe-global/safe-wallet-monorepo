@@ -13,7 +13,7 @@ import ExportIcon from '@/public/images/common/export.svg'
 
 export type SpaceAddressBookCta = {
   spaceName?: string
-  href: { pathname: string; query: { spaceId?: string } }
+  href: { pathname: string; query: { spaceId?: string | null } }
 }
 
 export type AddressBookHeaderViewProps = {

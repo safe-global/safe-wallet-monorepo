@@ -1,10 +1,8 @@
-import { type ComponentProps, type ReactNode, useId } from 'react'
+import { type ReactNode, useId } from 'react'
 import get from 'lodash/get'
 import { Controller, type FieldError, useFormContext } from 'react-hook-form'
 import { getNameValidationDisplay, sanitizeName, validateName } from '@safe-global/utils/validation/names'
-import { Field, FieldDescription, FieldError as FieldErrorText, FieldLabel } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
+import { NameInputView, type NameInputViewProps } from '@views/components/common/NameInput/NameInputView'
 
 type NameInputProps = {
   name: string
@@ -21,9 +19,9 @@ type NameInputProps = {
   validateCharset?: boolean
   minLength?: number
   maxLength?: number
-  inputSize?: ComponentProps<typeof Input>['inputSize']
-  variant?: ComponentProps<typeof Input>['variant']
-  errorPlacement?: ComponentProps<typeof Field>['errorPlacement']
+  inputSize?: NameInputViewProps['inputSize']
+  variant?: NameInputViewProps['variant']
+  errorPlacement?: NameInputViewProps['errorPlacement']
   InputProps?: {
     endAdornment?: ReactNode
     startAdornment?: ReactNode
@@ -62,8 +60,6 @@ const NameInput = ({
 
   const validationDisplay =
     validateCharset && fieldError?.message ? getNameValidationDisplay(fieldError.message) : undefined
-  const legacyLabel = fieldError?.type === 'maxLength' ? 'Maximum 50 symbols' : fieldError?.message || label
-  const resolvedLabel = validateCharset ? label : legacyLabel
   const tooltip = validationDisplay?.tooltip
   const resolvedHelperText = validateCharset ? (validationDisplay?.label ?? helperText) : helperText
 
@@ -73,8 +69,6 @@ const NameInput = ({
   // a bare Input across renders — that remounts the input element, dropping focus and in-flight
   // keystrokes mid-typing. An addon-less InputGroup renders identically to a bare Input.
   const hasAdornment = Boolean(InputProps && ('endAdornment' in InputProps || 'startAdornment' in InputProps))
-
-  const resolvedPlaceholder = placeholder ?? (required ? undefined : 'Optional')
 
   return (
     <Controller
@@ -102,7 +96,6 @@ const NameInput = ({
           ref,
           name: fieldName,
           value: value ?? '',
-          placeholder: resolvedPlaceholder,
           disabled,
           readOnly,
           required,
@@ -119,36 +112,26 @@ const NameInput = ({
           onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation(),
         }
 
-        const inputControl = hasAdornment ? (
-          <InputGroup inputSize={inputSize} variant={variant} className={InputProps?.className}>
-            {startAdornment && <InputGroupAddon align="inline-start">{startAdornment}</InputGroupAddon>}
-            <InputGroupInput {...inputProps} />
-            {endAdornment && <InputGroupAddon align="inline-end">{endAdornment}</InputGroupAddon>}
-          </InputGroup>
-        ) : (
-          <Input inputSize={inputSize} variant={variant} className={InputProps?.className} {...inputProps} />
-        )
-
         return (
-          <Field className={className} errorPlacement={errorPlacement} data-invalid={Boolean(fieldError) || undefined}>
-            {resolvedLabel != null && resolvedLabel !== '' && (
-              <FieldLabel htmlFor={id} className={fieldError ? 'text-destructive' : undefined}>
-                {resolvedLabel}
-              </FieldLabel>
-            )}
-
-            {inputControl}
-
-            {resolvedHelperText ? (
-              // In `validateCharset` mode the validation message lands here rather than in the label,
-              // so it has to go through the error slot to read as a failure and not as a hint.
-              fieldError ? (
-                <FieldErrorText id={helperTextId}>{resolvedHelperText}</FieldErrorText>
-              ) : (
-                <FieldDescription id={helperTextId}>{resolvedHelperText}</FieldDescription>
-              )
-            ) : null}
-          </Field>
+          <NameInputView
+            id={id}
+            label={label}
+            placeholder={placeholder}
+            required={required}
+            validateCharset={validateCharset}
+            fieldError={fieldError}
+            helperText={resolvedHelperText}
+            helperTextId={helperTextId}
+            inputProps={inputProps}
+            hasAdornment={hasAdornment}
+            startAdornment={startAdornment}
+            endAdornment={endAdornment}
+            inputClassName={InputProps?.className}
+            inputSize={inputSize}
+            variant={variant}
+            fieldClassName={className}
+            errorPlacement={errorPlacement}
+          />
         )
       }}
     />

@@ -1,29 +1,19 @@
 import { useForm, FormProvider, useFieldArray, Controller } from 'react-hook-form'
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
-import AddIcon from '@/public/images/common/add.svg'
-import DeleteIcon from '@/public/images/common/delete.svg'
 import { RecoverAccountFlowFields } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
-import { TOOLTIP_TITLES } from '@views/components/tx-flow/common/constants'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotReserved, validateThreshold } from '@safe-global/utils/utils/validation'
 import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import type { RecoverAccountFlowProps } from '.'
 import { type AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-
-import commonCss from '@/components/tx-flow/common/styles.module.css'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  RecoverAccountFlowSetupView,
+  RecoverAccountThresholdSelectView,
+} from '@views/components/tx-flow/flows/RecoverAccount/RecoverAccountFlowSetupView'
 
 export function _isSameSetup({
   oldOwners,
@@ -112,124 +102,37 @@ export function RecoverAccountFlowSetup({
 
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={formMethods.handleSubmit(onSubmit)} className={commonCss.form}>
-        <TxCard>
-          <div>
-            <Typography variant="h4" className="mb-2">
-              Add signer(s)
-            </Typography>
-
-            <Typography variant="paragraph-small" className="mb-2 block">
-              Set the new signer wallet(s) of this Safe account and how many need to confirm a transaction before it can
-              be executed.
-            </Typography>
-          </div>
-
-          <div className="flex flex-col gap-6">
-            {fields.map((field, index) => (
-              <div className="flex items-center gap-6" key={index}>
-                <div className="flex-1">
-                  <AddressBookInput
-                    label={`Signer ${index + 1}`}
-                    name={`${RecoverAccountFlowFields.owners}.${index}.value`}
-                    required
-                    fullWidth
-                    key={field.id}
-                    validate={(value) => _validateNewOwner({ value, safeAddress, newOwners })}
-                  />
-                </div>
-
-                <div className="flex items-center justify-center">
-                  {index > 0 && (
-                    <Button variant="ghost" size="icon" data-testid="remove-signer-btn" onClick={() => remove(index)}>
-                      <DeleteIcon className="size-4" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <Button variant="ghost" onClick={() => append({ value: '' })} className="my-2 self-start">
-            <AddIcon className="size-4" />
-            Add new signer
-          </Button>
-
-          <Separator bleed="6" />
-
-          <div>
-            <Typography variant="h4" className="mb-2">
-              Threshold
-              <Tooltip>
-                <TooltipTrigger render={<span />}>
-                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
-                </TooltipTrigger>
-                <TooltipContent>{TOOLTIP_TITLES.THRESHOLD}</TooltipContent>
-              </Tooltip>
-            </Typography>
-
-            <Typography variant="paragraph-small" className="mb-2 block">
-              After recovery, Safe account transactions will require:
-            </Typography>
-          </div>
-
-          <div className="mb-2 flex flex-row items-center gap-4">
-            <div>
-              <Controller
-                control={formMethods.control}
-                name={RecoverAccountFlowFields.threshold}
-                rules={{ validate: (value) => validateThreshold(value, fields.length) }}
-                render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger aria-invalid={!!thresholdError} data-testid="recovery-threshold-select">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {fields.map((_, index) => {
-                        const value = index + 1
-                        return (
-                          <SelectItem key={index} value={String(value)}>
-                            {value}
-                          </SelectItem>
-                        )
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
+      <RecoverAccountFlowSetupView
+        onSubmit={formMethods.handleSubmit(onSubmit)}
+        signerCount={fields.length}
+        renderSignerInput={(index, props) => (
+          <AddressBookInput
+            {...props}
+            name={`${RecoverAccountFlowFields.owners}.${index}.value`}
+            key={fields[index].id}
+            validate={(value) => _validateNewOwner({ value, safeAddress, newOwners })}
+          />
+        )}
+        onRemoveSigner={remove}
+        onAddSigner={() => append({ value: '' })}
+        thresholdSelect={
+          <Controller
+            control={formMethods.control}
+            name={RecoverAccountFlowFields.threshold}
+            rules={{ validate: (value) => validateThreshold(value, fields.length) }}
+            render={({ field }) => (
+              <RecoverAccountThresholdSelectView
+                value={field.value}
+                onValueChange={field.onChange}
+                signerCount={fields.length}
+                hasError={!!thresholdError}
               />
-            </div>
-
-            <div>
-              <Typography>
-                out of {fields.length} signer{maybePlural(fields)}
-              </Typography>
-            </div>
-          </div>
-
-          {thresholdError && <Typography className="mb-2 text-destructive">{thresholdError}</Typography>}
-
-          {isSameSetup && (
-            <Alert variant="destructive" className="border-0">
-              <AlertSeverityIcon variant="destructive" />
-              <AlertDescription>The proposed Account setup is the same as the current one.</AlertDescription>
-            </Alert>
-          )}
-
-          <Separator bleed="6" />
-
-          <TxCardActions className="!mt-0">
-            <Button
-              data-testid="next-btn"
-              variant="default"
-              type="submit"
-              className="mt-2"
-              disabled={isSameSetup || !!thresholdError}
-            >
-              Next
-            </Button>
-          </TxCardActions>
-        </TxCard>
-      </form>
+            )}
+          />
+        }
+        thresholdError={thresholdError}
+        isSameSetup={isSameSetup}
+      />
     </FormProvider>
   )
 }

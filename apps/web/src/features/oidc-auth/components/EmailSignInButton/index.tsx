@@ -1,16 +1,14 @@
-import { Mail } from 'lucide-react'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { OidcConnection } from '../../constants'
-import OidcSignInButton from '../OidcSignInButton'
+import { useOidcSignIn } from '../OidcSignInButton'
+import { EmailSignInButtonView } from '@views/features/oidc-auth/components/EmailSignInButton/EmailSignInButtonView'
 
-const EmailSignInButton = () => (
-  <OidcSignInButton
-    connection={OidcConnection.EMAIL}
-    label="Continue with email"
-    icon={<Mail size={18} />}
-    analyticsEvent={SPACE_EVENTS.EMAIL_SIGN_IN}
-    testId="email-login-btn"
-  />
-)
+const EmailSignInButton = () => {
+  const { isOidcAuthEnabled, handleClick } = useOidcSignIn(OidcConnection.EMAIL, SPACE_EVENTS.EMAIL_SIGN_IN)
+
+  if (!isOidcAuthEnabled) return null
+
+  return <EmailSignInButtonView onClick={handleClick} />
+}
 
 export default EmailSignInButton

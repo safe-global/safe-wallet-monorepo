@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
-import { ChevronRight, Settings2, UserRoundPlus, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { SafeSelectorDropdown, useCurrentSpaceId } from '@/features/spaces'
 import type { SafeItemData, SafeRenameTarget } from '@/features/spaces'
@@ -18,9 +17,6 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAddressBookWriteScope } from '@/features/spaces'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import { useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
@@ -31,6 +27,14 @@ import { useSpaceSafeSelectorItems, type DropdownTab } from './hooks/useSpaceSaf
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'
 import SpaceChainSelector from './SpaceChainSelector'
 import SpaceNestedSafesButton from './SpaceNestedSafesButton'
+import {
+  ConnectWalletBody,
+  DropdownTabs,
+  ManageTrustedFooter,
+  NoTrustedAccountsBody,
+  SignInWorkspaceCta,
+  SpaceSafeBarView,
+} from '@views/components/common/SpaceSafeBar/SpaceSafeBarView'
 
 const HIDDEN_ROUTES = [
   AppRoutes.welcome.accounts,
@@ -45,106 +49,6 @@ const HIDDEN_ROUTES = [
   AppRoutes['404'],
   AppRoutes['_offline'],
 ]
-
-function DropdownTabs({
-  activeTab,
-  onSelect,
-  workspaceLabel,
-  localLabel,
-}: {
-  activeTab: DropdownTab
-  onSelect: (tab: DropdownTab) => void
-  workspaceLabel: string
-  localLabel: string
-}) {
-  const tabClass = (tab: DropdownTab) =>
-    cn(
-      'min-w-0 flex-1 truncate rounded-[9.5px] px-2 py-1 text-sm font-medium transition-colors',
-      activeTab === tab ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground',
-    )
-  return (
-    <div className="flex items-center mx-2 mb-2 p-1 gap-1 rounded-md bg-muted">
-      <button
-        type="button"
-        className={tabClass('workspace')}
-        onClick={() => onSelect('workspace')}
-        data-testid="dropdown-tab-workspace"
-      >
-        {workspaceLabel}
-      </button>
-      <button
-        type="button"
-        className={tabClass('local')}
-        onClick={() => onSelect('local')}
-        data-testid="dropdown-tab-local"
-      >
-        {localLabel}
-      </button>
-    </div>
-  )
-}
-
-function SignInWorkspaceCta({ label, onSignIn }: { label: string; onSignIn: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-3 px-4 py-8 text-center" data-testid="dropdown-signin-cta">
-      <p className="text-sm text-muted-foreground">
-        Sign in to a Workspace to collaborate on Safe accounts with your team.
-      </p>
-      <Button variant="secondary" size="sm" onClick={onSignIn} data-testid="dropdown-signin-btn">
-        {label}
-      </Button>
-    </div>
-  )
-}
-
-function ConnectWalletBody({ onConnect }: { onConnect: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-4 px-4 py-6 text-center" data-testid="dropdown-connect-cta">
-      <Typography variant="paragraph-small-medium" className="max-w-[336px]">
-        Connect your wallet to access existing accounts or add new ones.
-      </Typography>
-      <Button variant="outline" size="sm" onClick={onConnect} data-testid="dropdown-connect-wallet-body-btn">
-        <Wallet className="size-4" /> Connect wallet
-      </Button>
-    </div>
-  )
-}
-
-function NoTrustedAccountsBody({ onManage }: { onManage: () => void }) {
-  return (
-    <div className="flex flex-col items-center gap-4 px-4 py-6 text-center" data-testid="dropdown-no-trusted">
-      <div className="flex flex-col items-center gap-1">
-        <Typography variant="paragraph-small-medium">No accounts yet</Typography>
-        <Typography variant="paragraph-mini" color="muted" className="max-w-[336px]">
-          Manage your list to add or remove accounts.
-        </Typography>
-      </div>
-      <Button variant="outline" size="sm" onClick={onManage} data-testid="dropdown-manage-list-btn">
-        <Settings2 className="size-4" /> Manage list
-      </Button>
-    </div>
-  )
-}
-
-function ManageTrustedFooter({ onManage }: { onManage: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onManage}
-      data-testid="dropdown-manage-trusted-btn"
-      className="flex w-full cursor-pointer items-center gap-3 border-t border-border px-4 py-3 text-left transition-colors hover:bg-muted/30"
-    >
-      <UserRoundPlus className="size-4 shrink-0 text-muted-foreground" />
-      <span className="flex min-w-0 flex-1 flex-col">
-        <Typography variant="paragraph-small-medium">Manage list</Typography>
-        <Typography variant="paragraph-mini" color="muted">
-          Add or remove accounts from this list
-        </Typography>
-      </span>
-      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-    </button>
-  )
-}
 
 function SpaceSafeBar() {
   const pathname = usePathname()
@@ -227,18 +131,14 @@ function SpaceSafeBar() {
       ? (order: string[]) => dispatch(setManualOrder({ scope: reorderScope, order }))
       : undefined
 
-  // Only surface the space name when the current safe belongs to the Workspace of the URL.
-  const workspaceLabel = isInSpaceContext
-    ? `${space?.name ?? 'Workspace'} (${countMatches(workspaceItems)})`
-    : 'Workspace'
-  const localLabel = `My accounts (${countMatches(localItems)})`
-
   const dropdownHeader = (
     <DropdownTabs
       activeTab={activeTab}
       onSelect={setSelectedTab}
-      workspaceLabel={workspaceLabel}
-      localLabel={localLabel}
+      isInSpaceContext={isInSpaceContext}
+      spaceName={space?.name}
+      workspaceCount={countMatches(workspaceItems)}
+      localCount={countMatches(localItems)}
     />
   )
 
@@ -259,7 +159,7 @@ function SpaceSafeBar() {
   const emptyStateOverride =
     activeTab === 'workspace' && !isInSpaceContext ? (
       <SignInWorkspaceCta
-        label={isSignedIn ? 'View Workspaces' : 'Sign in'}
+        isSignedIn={isSignedIn}
         onSignIn={() => router.push({ pathname: AppRoutes.welcome.spaces })}
       />
     ) : activeTab === 'local' && !hasWallet ? (
@@ -285,18 +185,9 @@ function SpaceSafeBar() {
     ) : undefined
 
   return (
-    <div
-      data-testid="safe-level-navigation"
-      // While the safe-selector dropdown is open its backdrop dims the page; the bar lifts itself
-      // above that backdrop so it stays lit (the topbar drops its stacking context — see
-      // PageLayout's .topbarAboveOverlay).
-      className={cn('flex max-[899px]:justify-end', isAboveOverlay && 'relative z-[calc(var(--z-overlay)+1)]')}
-    >
-      {/* One pill: safe selector + nested safes + network selector render as muted chips
-          sharing a single white card (see Figma topbar). */}
-      <div className="flex flex-wrap items-stretch gap-2 rounded-xl bg-card p-2 shadow-[0px_4px_20px_0px_rgba(0,0,0,0.03)]">
-        {/* The selector is `w-full` below sm, so it claims the first row on its own and the
-            nested/network chips wrap underneath it — the address stays on top at every width. */}
+    <SpaceSafeBarView
+      isAboveOverlay={isAboveOverlay}
+      selector={
         <SafeSelectorDropdown
           items={unionItems}
           listItems={listItems}
@@ -314,24 +205,24 @@ function SpaceSafeBar() {
           onReorder={handleReorder}
           keepOpen={renameTarget !== null}
         />
-        <SpaceNestedSafesButton />
-        <SpaceChainSelector isLoading={showSelectorSkeleton} />
-      </div>
-      <TrustedSafesModal modal={trustedSafesModal} />
-      {renameTarget && (
-        <EntryDialog
-          handleClose={() => setRenameTarget(null)}
-          defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
-          chainIds={renameTarget.chainIds}
-          scope={renameScope}
-          disableAddressInput
-          // Above the safe-selector popup (shadcn --z-overlay) so the rename dialog layers on
-          // top of the open dropdown instead of behind it.
-          className="z-[var(--z-nested-overlay)]"
-          overlayClassName="z-[var(--z-nested-overlay)]"
-        />
-      )}
-    </div>
+      }
+      nestedSafesButton={<SpaceNestedSafesButton />}
+      chainSelector={<SpaceChainSelector isLoading={showSelectorSkeleton} />}
+      trustedSafesModal={<TrustedSafesModal modal={trustedSafesModal} />}
+      renameDialogOpen={renameTarget !== null}
+      renderRenameDialog={(layer) =>
+        renameTarget && (
+          <EntryDialog
+            handleClose={() => setRenameTarget(null)}
+            defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
+            chainIds={renameTarget.chainIds}
+            scope={renameScope}
+            disableAddressInput
+            {...layer}
+          />
+        )
+      }
+    />
   )
 }
 

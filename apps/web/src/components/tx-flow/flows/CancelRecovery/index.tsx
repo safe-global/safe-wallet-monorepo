@@ -6,8 +6,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-
-const TITLE = 'Cancel Account recovery'
+import { CANCEL_RECOVERY_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/CancelRecovery/copy'
 
 type CancelRecoveryFlowProps = {
   recovery: RecoveryQueueItem
@@ -24,12 +23,12 @@ function CancelRecoveryFlow({ recovery }: CancelRecoveryFlowProps): ReactElement
 
   return (
     <TxFlow
-      subtitle={TITLE}
+      subtitle={COPY.title}
       eventCategory={TxFlowType.CANCEL_RECOVERY}
       isBatchable={false}
       ReviewTransactionComponent={ReviewTransactionComponent}
     >
-      <TxFlowStep title={TITLE} subtitle="" hideNonce>
+      <TxFlowStep title={COPY.title} subtitle={COPY.stepSubtitle} hideNonce>
         <CancelRecoveryOverview />
       </TxFlowStep>
     </TxFlow>

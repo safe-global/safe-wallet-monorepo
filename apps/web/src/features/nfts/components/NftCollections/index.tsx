@@ -1,8 +1,6 @@
 import { type SyntheticEvent, type ReactElement, useCallback, useEffect, useMemo, useState, useContext } from 'react'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import PagePlaceholder from '@/components/common/PagePlaceholder'
-import NftIcon from '@/public/images/common/nft.svg'
 import useCollectibles from '@/hooks/useCollectibles'
 import InfiniteScroll from '@/components/common/InfiniteScroll'
 import { NFT_EVENTS } from '@/services/analytics/events/nfts'
@@ -12,6 +10,7 @@ import NftSendForm from '../NftSendForm'
 import NftPreviewModal from '../NftPreviewModal'
 import { TxModalContext } from '@/components/tx-flow'
 import { NftTransferFlow } from '@/components/tx-flow/flows'
+import { NftCollectionsView } from '@views/features/nfts/components/NftCollections/NftCollectionsView'
 
 const NftCollections = (): ReactElement => {
   const { nfts, error, isInitialLoading, isFetchingNextPage, hasNextPage, loadMore } = useCollectibles()
@@ -47,39 +46,26 @@ const NftCollections = (): ReactElement => {
     setSelectedNfts((prevSelected) => prevSelected.filter((item) => nftKeys.has(`${item.address}-${item.id}`)))
   }, [nftKeys])
 
-  // No NFTs to display
-  if (!isInitialLoading && nfts.length === 0) {
-    return <PagePlaceholder img={<NftIcon />} text="No NFTs available or none detected" />
-  }
-
   return (
-    <>
-      {error ? (
-        /* Loading error */
-        <ErrorMessage error={error}>Failed to load NFTs</ErrorMessage>
-      ) : (
-        /* NFTs */
-        <form onSubmit={onSendSubmit}>
-          {/* Batch send form */}
-          <NftSendForm selectedNfts={selectedNfts} />
-
-          {/* NFTs table */}
-          <NftGrid
-            nfts={nfts}
-            selectedNfts={selectedNfts}
-            setSelectedNfts={setSelectedNfts}
-            onPreview={onPreview}
-            isLoading={isInitialLoading || isFetchingNextPage}
-          >
-            {/* Infinite scroll at the bottom of the table */}
-            {hasNextPage ? <InfiniteScroll onLoadMore={loadMore} /> : null}
-          </NftGrid>
-        </form>
-      )}
-
-      {/* NFT preview */}
-      <NftPreviewModal onClose={() => setPreviewNft(undefined)} nft={previewNft} />
-    </>
+    <NftCollectionsView
+      isEmpty={!isInitialLoading && nfts.length === 0}
+      hasError={!!error}
+      renderErrorMessage={(message) => <ErrorMessage error={error}>{message}</ErrorMessage>}
+      onSendSubmit={onSendSubmit}
+      sendForm={<NftSendForm selectedNfts={selectedNfts} />}
+      grid={
+        <NftGrid
+          nfts={nfts}
+          selectedNfts={selectedNfts}
+          setSelectedNfts={setSelectedNfts}
+          onPreview={onPreview}
+          isLoading={isInitialLoading || isFetchingNextPage}
+        >
+          {hasNextPage ? <InfiniteScroll onLoadMore={loadMore} /> : null}
+        </NftGrid>
+      }
+      previewModal={<NftPreviewModal onClose={() => setPreviewNft(undefined)} nft={previewNft} />}
+    />
   )
 }
 

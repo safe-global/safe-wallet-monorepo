@@ -8,13 +8,11 @@ import type {
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
-import { SafeShieldAnalysisEmpty } from '@views/features/safe-shield/components/SafeShieldContent/SafeShieldAnalysisEmpty'
 import { AnalysisGroupCard } from '../AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
-import { LockedCheckRow } from '@views/features/safe-shield/components/LockedCheckRow'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
@@ -27,6 +25,7 @@ import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hyper
 import { SafenetChecksFeature } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import { SafeShieldContentView } from '@views/features/safe-shield/components/SafeShieldContent/SafeShieldContentView'
 
 export const SafeShieldContent = ({
   recipient,
@@ -63,6 +62,8 @@ export const SafeShieldContent = ({
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const { HnInfoCard, HnCustomChecksCard } = hn
+  const { SafenetChecksSection } = safenet
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
   const [contractResults = {}, _contractError, contractLoading = false] = contract
@@ -111,20 +112,18 @@ export const SafeShieldContent = ({
   )
 
   return (
-    <div className="px-1 pb-1">
-      {/* overflow-hidden clips the last analysis row's square background to the rounded corners;
-          rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
-          keeps this curve concentric with the outer one. */}
-      <div className="relative overflow-hidden rounded-b-md">
-        {showHypernativeInfo && (
-          <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
-        )}
-
-        {isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />}
-
-        {shouldShowContent && !loading && allEmpty && !hypernativeAuth && <SafeShieldAnalysisEmpty />}
-
-        <div data-testid="open-checks-list">
+    <SafeShieldContentView
+      hnInfoCard={
+        showHypernativeInfo && (
+          <HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+        )
+      }
+      loading={
+        isLoadingVisible && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={isLoadingVisible} />
+      }
+      showEmpty={shouldShowContent && !loading && allEmpty && !hypernativeAuth}
+      openChecks={
+        <>
           {/* Untrusted Safe warning - shown at top when Safe is not pinned */}
           {safeAnalysis && onAddToTrustedList && (
             <UntrustedSafeWarning safeAnalysis={safeAnalysis} onAddToTrustedList={onAddToTrustedList} />
@@ -151,14 +150,14 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          <hn.HnCustomChecksCard
+          <HnCustomChecksCard
             threat={threat}
             delay={threatAnalysisDelay}
             highlightedSeverity={highlightedSeverity}
             hypernativeAuth={hypernativeAuth}
           />
 
-          {shouldShowContent && <safenet.SafenetChecksSection />}
+          {shouldShowContent && <SafenetChecksSection />}
 
           {!isSafePro && !contractLoading && !threatLoading && (
             <TenderlySimulation
@@ -167,46 +166,37 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
-        </div>
-
-        {showProSection && (
-          <div className="mt-1 flex flex-col rounded-md bg-muted" data-testid="pro-checks-section">
-            <ProChecksRow hasProFeatures={hasProFeatures} />
-            <div className="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary">
-              {hasProFeatures ? (
-                <AnalysisGroupCard
-                  data-testid="recipient-analysis-group-card"
-                  delay={recipientDelay}
-                  data={recipientResults}
-                  highlightedSeverity={highlightedSeverity}
-                  analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
-                />
-              ) : (
-                <LockedCheckRow data-testid="recipient-analysis-locked">Known recipient</LockedCheckRow>
-              )}
-
-              {hasProFeatures && contractCard}
-              {!hasProFeatures && isContractCall(safeTx) && (
-                <LockedCheckRow data-testid="contract-analysis-locked">Known contract</LockedCheckRow>
-              )}
-
-              {hasProFeatures && deadlockCard}
-
-              {!contractLoading && !threatLoading && (hasProFeatures || hasOwnTenderly) && (
-                <TenderlySimulation
-                  safeTx={safeTx}
-                  delay={simulationAnalysisDelay}
-                  highlightedSeverity={highlightedSeverity}
-                  autoRun={hasProFeatures}
-                />
-              )}
-              {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
-            </div>
-          </div>
-        )}
-
-        {shouldShowContent && <HypernativeLoginLine hypernativeAuth={hypernativeAuth} />}
-      </div>
-    </div>
+        </>
+      }
+      showProSection={showProSection}
+      proChecksRow={<ProChecksRow hasProFeatures={hasProFeatures} />}
+      hasProFeatures={hasProFeatures}
+      isContractCall={isContractCall(safeTx)}
+      proRecipientCard={
+        <AnalysisGroupCard
+          data-testid="recipient-analysis-group-card"
+          delay={recipientDelay}
+          data={recipientResults}
+          highlightedSeverity={highlightedSeverity}
+          analyticsEvent={SAFE_SHIELD_EVENTS.RECIPIENT_DECODED}
+        />
+      }
+      proContractCard={contractCard}
+      proDeadlockCard={deadlockCard}
+      proSimulation={
+        !contractLoading &&
+        !threatLoading &&
+        (hasProFeatures || hasOwnTenderly) && (
+          <TenderlySimulation
+            safeTx={safeTx}
+            delay={simulationAnalysisDelay}
+            highlightedSeverity={highlightedSeverity}
+            autoRun={hasProFeatures}
+          />
+        )
+      }
+      simulationLocked={!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
+      hypernativeLoginLine={shouldShowContent && <HypernativeLoginLine hypernativeAuth={hypernativeAuth} />}
+    />
   )
 }

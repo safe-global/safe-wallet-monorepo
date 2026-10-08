@@ -1,12 +1,13 @@
 import type { ReactNode } from 'react'
-import React, { type ReactElement, type SyntheticEvent, useCallback, useState } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import React, { type ReactElement } from 'react'
 import ConfirmCopyModal from './ConfirmCopyModal'
+import useCopyTooltip from './useCopyTooltip'
+import { CopyTooltipView } from '@views/components/common/CopyTooltip/CopyTooltipView'
 
 const CopyTooltip = ({
   text,
   children,
-  initialToolTipText = 'Copy to clipboard',
+  initialToolTipText,
   onCopy,
   dialogContent,
 }: {
@@ -16,60 +17,29 @@ const CopyTooltip = ({
   onCopy?: () => void
   dialogContent?: ReactElement
 }): ReactElement => {
-  const [tooltipText, setTooltipText] = useState(initialToolTipText)
-  const [showTooltip, setShowTooltip] = useState(false)
-  const [isCopyEnabled, setIsCopyEnabled] = useState(true)
-  const [showConfirmation, setShowConfirmation] = useState(false)
-
-  const handleCopy = useCallback(
-    (e: SyntheticEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-
-      if (dialogContent && !showConfirmation) {
-        setShowConfirmation(true)
-        return
-      }
-      let timeout: NodeJS.Timeout | undefined
-
-      try {
-        navigator.clipboard.writeText(text).then(() => setTooltipText('Copied'))
-        setShowConfirmation(false)
-        setShowTooltip(true)
-        timeout = setTimeout(() => {
-          if (isCopyEnabled) {
-            setShowTooltip(false)
-            setTooltipText(initialToolTipText)
-          }
-        }, 750)
-        onCopy?.()
-      } catch (err) {
-        setIsCopyEnabled(false)
-        setTooltipText('Copying is disabled in your browser')
-      }
-
-      return () => clearTimeout(timeout)
-    },
-    [dialogContent, showConfirmation, text, onCopy, isCopyEnabled, initialToolTipText],
-  )
+  const { status, showTooltip, setShowTooltip, showConfirmation, closeConfirmation, handleCopy } = useCopyTooltip({
+    text,
+    onCopy,
+    needsConfirmation: !!dialogContent,
+  })
 
   return (
-    <>
-      <Tooltip open={showTooltip} onOpenChange={setShowTooltip}>
-        {/* The tooltip alone is not an accessible name — keep the copy affordance labelled. */}
-        <TooltipTrigger
-          render={<span className="inline-flex cursor-pointer" aria-label={initialToolTipText} onClick={handleCopy} />}
-        >
-          {children}
-        </TooltipTrigger>
-        <TooltipContent side="top">{tooltipText}</TooltipContent>
-      </Tooltip>
-      {dialogContent !== undefined && (
-        <ConfirmCopyModal onClose={() => setShowConfirmation(false)} onCopy={handleCopy} open={showConfirmation}>
-          {dialogContent}
-        </ConfirmCopyModal>
-      )}
-    </>
+    <CopyTooltipView
+      status={status}
+      initialToolTipText={initialToolTipText}
+      showTooltip={showTooltip}
+      onShowTooltipChange={setShowTooltip}
+      onCopy={handleCopy}
+      dialog={
+        dialogContent !== undefined ? (
+          <ConfirmCopyModal onClose={closeConfirmation} onCopy={handleCopy} open={showConfirmation}>
+            {dialogContent}
+          </ConfirmCopyModal>
+        ) : undefined
+      }
+    >
+      {children}
+    </CopyTooltipView>
   )
 }
 

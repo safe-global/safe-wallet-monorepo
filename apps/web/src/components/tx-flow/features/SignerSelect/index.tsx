@@ -4,6 +4,7 @@ import { SlotName, withSlot } from '../../slots'
 import { SignerForm } from './SignerForm'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
+import { SignerSelectView } from '@views/components/tx-flow/features/SignerSelect/SignerSelectView'
 
 const useShouldRegisterSlot = () => {
   const { connectedWallet } = useWalletContext() ?? {}
@@ -15,9 +16,9 @@ const SignerSelectSlot = withSlot({
   Component: () => {
     const { willExecute, txId } = useContext(TxFlowContext)
     return (
-      <div className="mt-6 flex flex-col gap-4">
+      <SignerSelectView>
         <SignerForm willExecute={willExecute} txId={txId} />
-      </div>
+      </SignerSelectView>
     )
   },
   slotName: SlotName.Main,

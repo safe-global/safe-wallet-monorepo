@@ -1,13 +1,11 @@
 import { useContext, type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { resolvePresentation } from '../statusPresentation'
+import { SafenetChecksSectionView } from '@views/features/safenet-checks/components/SafenetChecksSectionView'
 
 /**
  * Safenet check state as a section in the Safe Shield widget. Subscribes only
@@ -34,26 +32,14 @@ export const SafenetChecksSection = (): ReactElement | null => {
   if (!content) return null
 
   return (
-    // The section appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div
-      data-testid="safenet-checks-section"
-      data-status={publicStatus}
-      data-reason={unavailableReason}
-      className="animate-in fade-in slide-in-from-top-1 p-4 duration-300"
-    >
-      <div className="flex items-start gap-2">
-        <SeverityIcon severity={content.severity} muted={content.muted} />
-        <div className="flex flex-1 flex-col gap-1">
-          <Typography variant="paragraph-small" className="font-bold leading-4">
-            {content.label}
-          </Typography>
-          <Typography variant="paragraph-small" className="text-muted-foreground">
-            {content.copy}
-          </Typography>
-        </div>
-      </div>
-    </div>
+    <SafenetChecksSectionView
+      status={publicStatus}
+      reason={unavailableReason}
+      severity={content.severity}
+      muted={content.muted}
+      label={content.label}
+      copy={content.copy}
+    />
   )
 }
 

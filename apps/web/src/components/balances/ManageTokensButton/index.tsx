@@ -1,9 +1,7 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import { ManageTokensButtonView } from '@views/components/balances/ManageTokensButton/ManageTokensButtonView'
 
 interface ManageTokensButtonProps {
   onHideTokens?: () => void
@@ -37,21 +35,17 @@ const ManageTokensButton = forwardRef<ManageTokensButtonHandle, ManageTokensButt
     }
 
     return (
-      <DropdownMenu open={open} onOpenChange={handleOpenChange}>
-        <DropdownMenuTrigger
-          render={
-            <Button variant="outline" size="sm" data-testid="manage-tokens-button">
-              <SettingsIcon className="size-4 sm:mr-2" />
-              <span className="hidden sm:inline">Manage tokens</span>
-            </Button>
-          }
-        />
-        <ManageTokensMenu
-          onClose={handleClose}
-          onHideTokens={onHideTokens}
-          _hasDefaultTokenlist={_hasDefaultTokenlist}
-        />
-      </DropdownMenu>
+      <ManageTokensButtonView
+        open={open}
+        onOpenChange={handleOpenChange}
+        menu={
+          <ManageTokensMenu
+            onClose={handleClose}
+            onHideTokens={onHideTokens}
+            _hasDefaultTokenlist={_hasDefaultTokenlist}
+          />
+        }
+      />
     )
   },
 )

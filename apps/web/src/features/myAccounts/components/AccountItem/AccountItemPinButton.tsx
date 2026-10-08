@@ -1,13 +1,9 @@
 import type { MouseEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
 import { useSingleChainPinActions } from '../../hooks/useSingleChainPinActions'
 import { usePinActions } from '../../hooks/usePinActions'
-import BookmarkIcon from '@/public/images/apps/bookmark.svg'
-import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview, AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { AccountItemPinButtonView } from '@views/features/myAccounts/components/AccountItem/AccountItemPinButtonView'
 
 type SingleChainProps = {
   safeItem: SafeItem
@@ -71,28 +67,7 @@ function AccountItemPinButton(props: AccountItemPinButtonProps) {
     }
   }
 
-  const PinIcon = isPinned ? BookmarkedIcon : BookmarkIcon
-
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            data-testid="bookmark-icon"
-            variant="ghost"
-            size="icon"
-            onClick={handleClick}
-            aria-label={isPinned ? 'Remove from my accounts' : 'Add to my accounts'}
-          >
-            <PinIcon
-              className={cn('size-4', isPinned ? 'fill-current text-primary' : 'text-[var(--color-border-main)]')}
-            />
-          </Button>
-        }
-      />
-      <TooltipContent>{isPinned ? 'Remove from my accounts' : 'Add to my accounts'}</TooltipContent>
-    </Tooltip>
-  )
+  return <AccountItemPinButtonView isPinned={isPinned} onClick={handleClick} />
 }
 
 export default AccountItemPinButton

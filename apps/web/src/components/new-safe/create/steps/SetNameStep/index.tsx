@@ -1,19 +1,11 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
 import { FormProvider, useForm, useWatch } from 'react-hook-form'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
 
-import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
 import { getNewSafeReturnUrl } from '@/components/new-safe/getReturnUrl'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import ExternalLink from '@/components/common/ExternalLink'
-import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import { useRouter } from 'next/router'
 import NoWalletConnectedWarning from '../../NoWalletConnectedWarning'
 import { type SafeVersion } from '@safe-global/types-kit'
@@ -25,6 +17,7 @@ import type { CreateSafeInfoItem } from '../../CreateSafeInfos'
 import { SafeCreationNetworkInput } from '@/features/multichain'
 import useWallet from '@/hooks/wallets/useWallet'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { SetNameStepView } from '@views/components/new-safe/create/steps/SetNameStep/SetNameStepView'
 
 type SetNameStepForm = {
   name: string
@@ -115,72 +108,17 @@ function SetNameStep({
 
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={handleSubmit(onFormSubmit)} id={SET_NAME_STEP_FORM_ID}>
-        <div className={layoutCss.row}>
-          <div className="grid grid-cols-12 gap-2">
-            <div className="col-span-12">
-              <NameInput
-                inputSize="hero"
-                name={SetNameStepFields.name}
-                label={errors?.[SetNameStepFields.name]?.message || 'Name'}
-                placeholder={fallbackName}
-                className="[&_label]:text-base [&_label]:font-semibold"
-                InputLabelProps={{ shrink: true }}
-                InputProps={{
-                  endAdornment: (
-                    <Tooltip>
-                      <TooltipTrigger
-                        render={
-                          <span className="flex items-center">
-                            <InfoIcon className="size-5" />
-                          </span>
-                        }
-                      />
-                      <TooltipContent>
-                        This name is stored locally and will never be shared with us or any third parties.
-                      </TooltipContent>
-                    </Tooltip>
-                  ),
-                }}
-              />
-            </div>
-
-            <div className="col-span-12">
-              <Typography variant="paragraph-bold" className="mt-4 inline-flex items-center gap-2">
-                Select networks
-              </Typography>
-              <Typography variant="paragraph-small" className="mb-4 block">
-                Choose which networks you want your account to be active on. You can add more networks later.{' '}
-              </Typography>
-              <SafeCreationNetworkInput isAdvancedFlow={isAdvancedFlow} name={SetNameStepFields.networks} />
-            </div>
-          </div>
-          <Typography variant="paragraph-small" className="mt-4 block">
-            By continuing, you agree to our{' '}
-            <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-              terms of use
-            </ExternalLink>{' '}
-            and{' '}
-            <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
-              privacy policy
-            </ExternalLink>
-            .
-          </Typography>
-
-          <NoWalletConnectedWarning />
-        </div>
-        <Separator />
-        <div className={layoutCss.row}>
-          <div className="flex flex-row justify-between gap-6">
-            <Button data-testid="cancel-btn" variant="outline" onClick={onCancel} size="lg">
-              Cancel
-            </Button>
-            <Button data-testid="next-btn" type="submit" variant="default" size="lg" disabled={isDisabled}>
-              Next
-            </Button>
-          </div>
-        </div>
-      </form>
+      <SetNameStepView
+        formId={SET_NAME_STEP_FORM_ID}
+        onSubmit={handleSubmit(onFormSubmit)}
+        onCancel={onCancel}
+        isDisabled={isDisabled}
+        nameError={errors?.[SetNameStepFields.name]?.message}
+        fallbackName={fallbackName}
+        renderNameInput={(props) => <NameInput name={SetNameStepFields.name} {...props} />}
+        networkInput={<SafeCreationNetworkInput isAdvancedFlow={isAdvancedFlow} name={SetNameStepFields.networks} />}
+        noWalletConnectedWarning={<NoWalletConnectedWarning />}
+      />
     </FormProvider>
   )
 }

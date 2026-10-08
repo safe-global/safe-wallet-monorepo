@@ -11,7 +11,7 @@ jest.mock('@/services/analytics', () => ({
   },
   OVERVIEW_LABELS: { top_bar: 'top_bar' },
 }))
-jest.mock('../ChainLogo', () => ({
+jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/ChainLogo', () => ({
   __esModule: true,
   default: ({ chainId }: { chainId: string }) => <span data-testid="chain-logo" data-chain-id={chainId} />,
 }))

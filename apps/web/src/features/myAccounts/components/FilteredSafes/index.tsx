@@ -1,10 +1,9 @@
 import SafesList from '../SafesList'
 import { type AllSafeItems, useSafesSearch } from '@/hooks/safes'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import { trackEvent } from '@/services/analytics'
-import { Typography } from '@/components/ui/typography'
 import { useEffect } from 'react'
+import { FilteredSafesView } from '@views/features/myAccounts/components/FilteredSafes/FilteredSafesView'
 
 const FilteredSafes = ({
   searchQuery,
@@ -24,14 +23,10 @@ const FilteredSafes = ({
   }, [searchQuery])
 
   return (
-    <>
-      <Typography variant="paragraph" color="muted" className="mb-4">
-        Found {filteredSafes.length} result{maybePlural(filteredSafes)}
-      </Typography>
-      <div className="mt-2">
-        <SafesList safes={filteredSafes} onLinkClick={onLinkClick} />
-      </div>
-    </>
+    <FilteredSafesView
+      resultCount={filteredSafes.length}
+      safesList={<SafesList safes={filteredSafes} onLinkClick={onLinkClick} />}
+    />
   )
 }
 

@@ -1,9 +1,6 @@
 import { type ReactElement } from 'react'
 import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/types'
-import SectionPanel from './SectionPanel'
-import SafeGradeChip, {
-  SAFE_GRADE_LABEL,
-} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
+import { SecurityChecksSectionView } from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/SecurityChecksSectionView'
 import { useSecurityChecks } from './hooks/useSecurityChecks'
 
 export type SecurityChecksSectionProps = {
@@ -33,18 +30,7 @@ const SecurityChecksSection = ({
     rows: grade === 'passing' ? passingRows : failingRows.filter((row) => row.grade === grade),
   })).filter((group) => group.rows.length > 0)
 
-  return (
-    <div>
-      {groups.map(({ grade, rows }, idx) => (
-        <div key={grade}>
-          <div className="mb-2">
-            <SafeGradeChip grade={grade} label={`${SAFE_GRADE_LABEL[grade]} · ${rows.length}`} />
-          </div>
-          <SectionPanel rows={rows} baseDelay={0.08 + idx * 0.04} />
-        </div>
-      ))}
-    </div>
-  )
+  return <SecurityChecksSectionView groups={groups} />
 }
 
 export default SecurityChecksSection

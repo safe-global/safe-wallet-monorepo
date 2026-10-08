@@ -2,11 +2,7 @@ import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, u
 import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import css from './styles.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ContactSource } from '@/hooks/useAllAddressBooks'
@@ -19,6 +15,7 @@ import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
 import { useAnchoredList } from './useAnchoredList'
 import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
+import { AddressBookInputView, RecipientListView } from '@views/components/common/AddressBookInput/AddressBookInputView'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
 
@@ -223,9 +220,44 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
     }
   }
 
+  const list =
+    showList &&
+    createPortal(
+      <RecipientListView
+        listRef={listRef}
+        listId={listId}
+        listStyle={listStyle}
+        groups={groupedEntries.map(([source, entries]) => ({
+          key: source,
+          header: <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />,
+          options: entries.map((entry) => {
+            const index = optionIndexes.get(entry) ?? -1
+
+            return {
+              key: entry.label,
+              id: optionId(index),
+              isActive: index === activeIndex,
+              onSelect: () => onSelectOption(entry),
+              content: (
+                <RecipientOption
+                  contact={entry.contact}
+                  prefix={prefix}
+                  memberName={resolveMemberName(entry.contact.createdByUserId)}
+                  resolveName={(address) => resolveSafeName(address, chainId)}
+                />
+              ),
+            }
+          }),
+        }))}
+      />,
+      portalContainer ?? document.body,
+    )
+
   return (
-    <>
-      <div ref={wrapperRef} className={css.wrapper} onInput={onUserInput}>
+    <AddressBookInputView
+      wrapperRef={wrapperRef}
+      onUserInput={onUserInput}
+      renderInput={(combobox) => (
         <AddressInput
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
@@ -235,89 +267,26 @@ const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressB
           isAutocompleteOpen={open}
           onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
           onEdit={() => setOpen(true)}
-          role="combobox"
+          {...combobox}
           aria-expanded={showList}
-          aria-autocomplete="list"
           aria-controls={showList ? listId : undefined}
           aria-activedescendant={showList && activeIndex >= 0 ? optionId(activeIndex) : undefined}
           onKeyDown={onKeyDown}
           onMouseDown={() => setOpen(hasVisibleOptions)}
         />
-
-        {showList &&
-          createPortal(
-            <ul
-              ref={listRef}
-              className={cn(
-                'bg-popover text-popover-foreground ring-foreground/10 rounded-lg shadow-lg ring-1',
-                // Slim scrollbar, matching SafeDropdownContainer; the OS default reads as a second
-                // UI element inside a small panel.
-                '[scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar]:w-1.5',
-                css.options,
-              )}
-              role="listbox"
-              id={listId}
-              style={listStyle}
-            >
-              {groupedEntries.map(([source, entries]) => (
-                <li key={source}>
-                  <RecipientGroupHeader source={source} workspaceName={workspaceName} count={entries.length} />
-                  <ul className={css.groupList}>
-                    {entries.map((entry) => {
-                      const index = optionIndexes.get(entry) ?? -1
-
-                      return (
-                        <li
-                          key={entry.label}
-                          id={optionId(index)}
-                          data-testid="address-item"
-                          role="option"
-                          aria-selected={index === activeIndex}
-                          className={css.option}
-                          ref={(node) => {
-                            if (index === activeIndex) node?.scrollIntoView({ block: 'nearest' })
-                          }}
-                          // Keep input focus on press so the click lands before blur removes the option
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => onSelectOption(entry)}
-                        >
-                          <RecipientOption
-                            contact={entry.contact}
-                            prefix={prefix}
-                            memberName={resolveMemberName(entry.contact.createdByUserId)}
-                            resolveName={(address) => resolveSafeName(address, chainId)}
-                          />
-                        </li>
-                      )
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>,
-            portalContainer ?? document.body,
-          )}
-      </div>
-
-      {canAdd && !isInAddressBook ? (
-        <Typography variant="paragraph-small" className={css.unknownAddress}>
-          <InfoIcon className="size-4" />
-          <span>
-            This is an unknown address. You can{' '}
-            <a role="button" onClick={onAddressBookClick}>
-              add it to your address book
-            </a>
-            .
-          </span>
-        </Typography>
-      ) : null}
-
-      {openAddressBook && (
-        <EntryDialog
-          handleClose={() => setOpenAddressBook(false)}
-          defaultValues={{ name: '', address: addressValue }}
-        />
       )}
-    </>
+      list={list}
+      showUnknownAddress={!!canAdd && !isInAddressBook}
+      onAddToAddressBook={onAddressBookClick}
+      entryDialog={
+        openAddressBook && (
+          <EntryDialog
+            handleClose={() => setOpenAddressBook(false)}
+            defaultValues={{ name: '', address: addressValue }}
+          />
+        )
+      }
+    />
   )
 }
 

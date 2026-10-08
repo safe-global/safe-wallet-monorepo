@@ -1,4 +1,3 @@
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { getPeerName } from '../../services/utils'
 import { WalletConnectContext } from '../WalletConnectContext'
 import { WCLoadingState } from '../../types'
@@ -6,13 +5,12 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { List, ListItem } from '@/components/ui/list'
-import { cn } from '@/utils/cn'
 import type { SessionTypes } from '@walletconnect/types'
 import { useCallback, useContext } from 'react'
-import css from './styles.module.css'
+import {
+  WcSessionListItemView,
+  WcSessionListView,
+} from '@views/features/walletconnect/components/WcSessionList/WcSessionListView'
 import WcNoSessions from './WcNoSessions'
 
 type WcSesstionListProps = {
@@ -22,13 +20,8 @@ type WcSesstionListProps = {
 const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
   const { walletConnect, setError, loading, setLoading } = useContext(WalletConnectContext)
 
-  const MAX_NAME_LENGTH = 23
   const { safeLoaded } = useSafeInfo()
-  let name = getPeerName(session.peer) || 'Unknown dApp'
-
-  if (name.length > MAX_NAME_LENGTH + 1) {
-    name = `${name.slice(0, MAX_NAME_LENGTH)}…`
-  }
+  const peerName = getPeerName(session.peer)
 
   const onDisconnect = useCallback(async () => {
     if (!walletConnect) return
@@ -49,29 +42,14 @@ const WcSessionListItem = ({ session }: { session: SessionTypes.Struct }) => {
   }, [walletConnect, session, setLoading, setError])
 
   return (
-    <ListItem className={`px-4 ${css.sessionListItem}`}>
-      {session.peer.metadata.icons[0] && (
-        <div className={`flex pr-1 ${css.sessionListAvatar}`}>
-          <SafeAppIconCard src={session.peer.metadata.icons[0]} alt="icon" width={20} height={20} />
-        </div>
-      )}
-
-      <span className={cn('flex-1 truncate text-sm', safeLoaded ? 'text-foreground' : 'text-muted-foreground')}>
-        {name}
-      </span>
-
-      <div className={css.sessionListSecondaryAction}>
-        <Button
-          variant="destructive"
-          onClick={onDisconnect}
-          // eslint-disable-next-line no-restricted-syntax -- faithful css-module port, pixel-identical; bespoke values have no variant
-          className="py-[var(--space-1)] px-[var(--space-2)]"
-          disabled={!!loading}
-        >
-          {loading === WCLoadingState.DISCONNECT ? <Spinner className="size-5" /> : 'Disconnect'}
-        </Button>
-      </div>
-    </ListItem>
+    <WcSessionListItemView
+      peerName={peerName}
+      icon={session.peer.metadata.icons[0]}
+      safeLoaded={safeLoaded}
+      isLoading={!!loading}
+      isDisconnecting={loading === WCLoadingState.DISCONNECT}
+      onDisconnect={onDisconnect}
+    />
   )
 }
 
@@ -81,11 +59,11 @@ const WcSessionList = ({ sessions }: WcSesstionListProps) => {
   }
 
   return (
-    <List className={css.sessionList}>
+    <WcSessionListView>
       {Object.values(sessions).map((session) => (
         <WcSessionListItem key={session.topic} session={session} />
       ))}
-    </List>
+    </WcSessionListView>
   )
 }
 

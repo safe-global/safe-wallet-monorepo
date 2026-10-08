@@ -1,7 +1,6 @@
 import type { ComponentProps } from 'react'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { WelcomeContentCardView } from '@views/components/common/WelcomeContentCard/WelcomeContentCardView'
 
 /**
  * White rounded surface that lifts the welcome Accounts and Workspaces tab content
@@ -12,17 +11,9 @@ const WelcomeContentCard = ({ className, children, ...props }: ComponentProps<'d
   const isDarkMode = useDarkMode()
 
   return (
-    <ShadcnProvider dark={isDarkMode}>
-      <div
-        className={cn(
-          'rounded-3xl bg-card p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]',
-          className,
-        )}
-        {...props}
-      >
-        {children}
-      </div>
-    </ShadcnProvider>
+    <WelcomeContentCardView isDarkMode={isDarkMode} cardClassName={className} {...props}>
+      {children}
+    </WelcomeContentCardView>
   )
 }
 

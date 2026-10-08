@@ -1,20 +1,13 @@
 import CheckWallet from '@/components/common/CheckWallet'
-import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import { useSpendingLimit } from '@/features/spending-limits'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
-import EarnIcon from '@/public/images/common/earn.svg'
-import { EARN_EVENTS } from '@/services/analytics/events/earn'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useCurrentChain } from '@/hooks/useChains'
-import css from './styles.module.css'
-import classnames from 'classnames'
-import assetActionCss from '@/components/common/AssetActionButton/styles.module.css'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { EarnButtonProps } from '../../types'
+import { EarnButtonView } from '@views/features/earn/components/EarnButton/EarnButtonView'
 
 const EarnButton = (props: EarnButtonProps): ReactElement => {
   const { tokenInfo, trackingLabel, compact = true, onlyIcon = false } = props
@@ -33,55 +26,15 @@ const EarnButton = (props: EarnButtonProps): ReactElement => {
   }
 
   return (
-    <CheckWallet allowSpendingLimit={!!spendingLimit}>
-      {(isOk) => (
-        <Track
-          {...EARN_EVENTS.EARN_VIEWED}
-          mixpanelParams={{
-            [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
-          }}
-        >
-          {onlyIcon ? (
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <span>
-                    <Button
-                      variant="ghost"
-                      size="icon-sm"
-                      data-testid="earn-btn"
-                      aria-label="Earn"
-                      onClick={onEarnClick}
-                      disabled={!isOk}
-                      className={assetActionCss.assetActionIconButton}
-                    >
-                      <EarnIcon />
-                    </Button>
-                  </span>
-                }
-              />
-              {isOk && <TooltipContent>Earn</TooltipContent>}
-            </Tooltip>
-          ) : (
-            <Button
-              className={classnames('gap-1', {
-                [css.button]: compact,
-                [css.buttonDisabled]: !isOk,
-              })}
-              data-testid="earn-btn"
-              aria-label="Earn"
-              variant={compact ? 'ghost' : 'surface'}
-              size="sm"
-              onClick={onEarnClick}
-              disabled={!isOk}
-            >
-              <EarnIcon />
-              Earn
-            </Button>
-          )}
-        </Track>
-      )}
-    </CheckWallet>
+    <EarnButtonView
+      mixpanelParams={{
+        [MixpanelEventParams.ENTRY_POINT]: trackingLabel,
+      }}
+      compact={compact}
+      onlyIcon={onlyIcon}
+      onEarnClick={onEarnClick}
+      checkWallet={(render) => <CheckWallet allowSpendingLimit={!!spendingLimit}>{render}</CheckWallet>}
+    />
   )
 }
 

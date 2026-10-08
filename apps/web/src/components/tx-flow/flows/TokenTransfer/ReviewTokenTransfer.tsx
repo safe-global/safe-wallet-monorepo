@@ -5,11 +5,10 @@ import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
 import type { MultiTokenTransferParams } from '.'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import { Fragment } from 'react'
-import { Separator } from '@/components/ui/separator'
 import ReviewRecipientRow from './ReviewRecipientRow'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { ReviewTokenTransferView } from '@views/components/tx-flow/flows/TokenTransfer/ReviewTokenTransferView'
 
 const ReviewTokenTransfer = ({
   params,
@@ -53,18 +52,10 @@ const ReviewTokenTransfer = ({
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
-      {recipients.length > 1 && (
-        <div className="flex flex-col gap-4">
-          {recipients.map((recipient, index) => (
-            <Fragment key={`${recipient.recipient}_${index}`}>
-              {index > 0 && <Separator />}
-              <ReviewRecipientRow params={recipient} name={`Recipient ${index + 1}`} />
-            </Fragment>
-          ))}
-        </div>
-      )}
-
-      {recipients.length > 1 && <Separator />}
+      <ReviewTokenTransferView
+        recipients={recipients}
+        renderRecipientRow={(recipient, name) => <ReviewRecipientRow params={recipient} name={name} />}
+      />
 
       {children}
     </ReviewTransaction>

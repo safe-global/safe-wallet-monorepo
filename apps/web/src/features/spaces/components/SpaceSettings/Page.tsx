@@ -3,6 +3,8 @@ import AuthState from '../AuthState'
 import SpaceSettings from './index'
 import { type SettingsPageKey } from './SettingsRail'
 
+const ADDRESS_BOOK_SOURCE = 'spaceOnly'
+
 export default function SpaceSettingsPage({
   spaceId,
   activePage = 'general',
@@ -12,7 +14,7 @@ export default function SpaceSettingsPage({
 }) {
   return (
     <AuthState spaceId={spaceId}>
-      <AddressBookSourceProvider source="spaceOnly">
+      <AddressBookSourceProvider source={ADDRESS_BOOK_SOURCE}>
         <SpaceSettings activePage={activePage} />
       </AddressBookSourceProvider>
     </AuthState>

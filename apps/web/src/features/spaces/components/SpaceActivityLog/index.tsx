@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import useGetSpaceAuditLog, { type SpaceAuditLogQueryArgs } from '../../hooks/useGetSpaceAuditLog'
@@ -11,6 +9,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuditEventRow from './AuditEventRow'
 import ActivityLogFilters, { type ActivityLogFilterState, EMPTY_FILTERS } from './ActivityLogFilters'
+import { SpaceActivityLogView } from '@views/features/spaces/components/SpaceActivityLog/SpaceActivityLogView'
 
 function getCursor(pageUrl: string | null | undefined): string | undefined {
   if (!pageUrl) return undefined
@@ -41,22 +40,6 @@ function AuditLogPageFetcher({
   }, [currentData, onPage, pageIndex])
 
   return null
-}
-
-function LoadingSkeleton() {
-  return (
-    <div data-testid="activity-log-loading" className="flex flex-col gap-4 py-3">
-      {Array.from({ length: 3 }, (_, i) => (
-        <div key={i} className="flex items-center gap-3">
-          <Skeleton className="size-8 rounded-full" />
-          <div className="flex-1 space-y-1.5">
-            <Skeleton className="h-4 w-2/3" />
-            <Skeleton className="h-3 w-24" />
-          </div>
-        </div>
-      ))}
-    </div>
-  )
 }
 
 const FILTER_SOURCE: Record<keyof ActivityLogFilterState, string> = {
@@ -141,10 +124,9 @@ function SpaceActivityLog() {
   const isFiltered = Boolean(filters.actorUserId || filters.createdAtGte || filters.createdAtLte)
 
   return (
-    <div data-testid="space-activity-log">
-      <ActivityLogFilters filters={filters} onFiltersChange={handleFiltersChange} />
-
-      {extraCursors.map((cursor, index) => (
+    <SpaceActivityLogView
+      filters={<ActivityLogFilters filters={filters} onFiltersChange={handleFiltersChange} />}
+      pageFetchers={extraCursors.map((cursor, index) => (
         <AuditLogPageFetcher
           key={`${index}:${cursor}`}
           args={{ ...queryArgs, cursor }}
@@ -152,39 +134,15 @@ function SpaceActivityLog() {
           onPage={onPage}
         />
       ))}
-
-      <div className="bg-card rounded-lg px-4">
-        {isLoading ? (
-          <LoadingSkeleton />
-        ) : isError ? (
-          <p className="text-muted-foreground py-4 text-sm">Could not load activity.</p>
-        ) : events.length === 0 ? (
-          <p className="text-muted-foreground py-4 text-sm">{isFiltered ? 'No results' : 'No activity yet.'}</p>
-        ) : (
-          <>
-            <div>
-              {events.map((event) => (
-                <AuditEventRow key={event.id} event={event} />
-              ))}
-            </div>
-
-            {(nextCursor || isLoadingMore) && (
-              <div className="py-3 text-center">
-                <Button
-                  data-testid="activity-log-load-more"
-                  variant="outline"
-                  size="sm"
-                  disabled={isLoadingMore}
-                  onClick={onLoadMore}
-                >
-                  {isLoadingMore ? 'Loading…' : 'Load more'}
-                </Button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+      events={events}
+      renderEvent={(event) => <AuditEventRow key={event.id} event={event} />}
+      isLoading={isLoading}
+      isError={isError}
+      isFiltered={isFiltered}
+      hasMore={Boolean(nextCursor)}
+      isLoadingMore={isLoadingMore}
+      onLoadMore={onLoadMore}
+    />
   )
 }
 

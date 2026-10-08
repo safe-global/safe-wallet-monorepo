@@ -1,8 +1,6 @@
 import { useContext, useEffect, useState, type ReactElement } from 'react'
-import classnames from 'classnames'
 import Topbar from '@/components/common/Header/Topbar'
 import SafeLogo from '@/components/common/SafeLogo'
-import css from './styles.module.css'
 import SafeLoadingError from '../SafeLoadingError'
 import Footer from '../Footer'
 import SideDrawer from './SideDrawer'
@@ -19,6 +17,7 @@ import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/
 import { useKeyboardObserver } from '@/hooks/useKeyboardObserver'
 import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useCssHeightVar } from '@/hooks/useCssHeightVar'
+import { PageLayoutView } from '@views/components/common/PageLayout/PageLayoutView'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
@@ -77,60 +76,37 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
   return (
     <>
-      {isStaticPage && (
-        <div className="px-6 py-4">
-          <SafeLogo />
-        </div>
-      )}
-
-      {isSidebarRoute ? (
-        <SideDrawer
-          isOpen={isSidebarVisible}
-          onToggle={setSidebarOpen}
-          onSidebarOpenChange={setSidebarExpanded}
-          isSidebarExpanded={isSidebarExpanded}
-        />
-      ) : null}
-
-      <div
-        className={classnames(css.main, {
-          [css.mainNoSidebar]: !isSidebarVisible || !isSidebarRoute,
-          [css.mainAnimated]: isSidebarRoute && isAnimated,
-          [css.mainNoHeader]: hideHeader,
-          [css.mainSpace]: !hideHeader,
-          [css.mainSidebarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
-        })}
+      <PageLayoutView
+        isStaticPage={isStaticPage}
+        logo={<SafeLogo />}
+        sideDrawer={
+          isSidebarRoute ? (
+            <SideDrawer
+              isOpen={isSidebarVisible}
+              onToggle={setSidebarOpen}
+              onSidebarOpenChange={setSidebarExpanded}
+              isSidebarExpanded={isSidebarExpanded}
+            />
+          ) : null
+        }
+        isSidebarRoute={isSidebarRoute}
+        isSidebarVisible={isSidebarVisible}
+        isSidebarExpanded={isSidebarExpanded}
+        isAnimated={isAnimated}
+        hideHeader={hideHeader}
+        topbarRef={setTopbarNode}
+        isTopbarElevated={isTopbarElevated}
+        isTopbarAboveOverlay={isTopbarAboveOverlay}
+        topbar={<Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />}
+        isWelcomeListRoute={isWelcomeListRoute}
+        isOnboardingRoute={isOnboardingRoute}
+        breadcrumbs={parentSafe && <Breadcrumbs />}
+        wrapContent={(content) => <SafeLoadingError>{content}</SafeLoadingError>}
+        batchSidebar={<BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />}
+        footer={<Footer />}
       >
-        {!hideHeader && (
-          <div
-            ref={setTopbarNode}
-            className={classnames(css.topbar, {
-              [css.topbarElevated]: isTopbarElevated,
-              [css.topbarAboveOverlay]: isTopbarAboveOverlay,
-              // The topbar is absolutely positioned, so it can't inherit `.main`'s sidebar
-              // offset — it has to reproduce it. Keep these conditions identical to the
-              // `mainNoSidebar` / `mainSidebarCollapsed` ones below or the header drifts out
-              // of alignment with the page content underneath it.
-              [css.topbarNoSidebar]: !isSidebarVisible || !isSidebarRoute,
-              [css.topbarCollapsed]: isSidebarRoute && isSidebarVisible && !isSidebarExpanded,
-            })}
-          >
-            <Topbar onMenuToggle={menuToggleHandler} onBatchToggle={setBatchOpen} />
-          </div>
-        )}
-
-        <div className={classnames(css.content, { [css.welcomeGlow]: isWelcomeListRoute })}>
-          <SafeLoadingError>
-            {!hideHeader && parentSafe && <Breadcrumbs />}
-
-            {isOnboardingRoute ? <div className={css.onboardingMotion}>{children}</div> : children}
-          </SafeLoadingError>
-        </div>
-
-        <BatchSidebar isOpen={isBatchOpen} onToggle={setBatchOpen} />
-
-        <Footer />
-      </div>
+        {children}
+      </PageLayoutView>
 
       <SelectSafeModal />
       <SafeWorkspaceSignInDialog />

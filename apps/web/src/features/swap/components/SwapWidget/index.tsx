@@ -13,13 +13,10 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useCustomAppCommunicator } from '@/hooks/safe-apps/useCustomAppCommunicator'
 import { useAppDispatch, useAppSelector } from '@/store'
 
-import css from '../../styles.module.css'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useSwapConsent from '../../useSwapConsent'
-import Disclaimer from '@/components/common/Disclaimer'
-import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import { selectSwapParams, setSwapParams } from '../../store/swapParamsSlice'
 import { setSwapOrder } from '@/store/swapOrderSlice'
 import useChainId from '@/hooks/useChainId'
@@ -34,6 +31,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { parseCowSupportedChainId } from '../../helpers/cowSupportedChainId'
 import lightPalette from '@safe-global/theme/palettes/light'
 import darkPalette from '@safe-global/theme/palettes/dark'
+import { SwapWidgetView } from '@views/features/swap/components/SwapWidget/SwapWidgetView'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 
@@ -275,24 +273,22 @@ const SwapWidget = ({ sell }: Params) => {
   useCustomAppCommunicator(iframeRef, appData, chain)
 
   if (blockedAddress) {
-    return <BlockedAddress address={blockedAddress} featureTitle="embedded swaps feature with CoW Swap" />
-  }
-
-  if (!isConsentAccepted) {
     return (
-      <Disclaimer
-        title="Note"
-        content={<WidgetDisclaimer widgetName="CoW Swap Widget" />}
+      <SwapWidgetView
+        renderBlockedAddress={(featureTitle) => <BlockedAddress address={blockedAddress} featureTitle={featureTitle} />}
+        isConsentAccepted={isConsentAccepted}
         onAccept={onAccept}
-        buttonText="Continue"
+        widget={null}
       />
     )
   }
 
   return (
-    <div className={css.swapWidget} id="swapWidget">
-      <CowSwapWidget params={params} listeners={listeners} />
-    </div>
+    <SwapWidgetView
+      isConsentAccepted={isConsentAccepted}
+      onAccept={onAccept}
+      widget={<CowSwapWidget params={params} listeners={listeners} />}
+    />
   )
 }
 

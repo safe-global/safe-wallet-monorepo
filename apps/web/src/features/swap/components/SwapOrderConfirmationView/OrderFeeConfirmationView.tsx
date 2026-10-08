@@ -3,11 +3,8 @@ import type {
   TwapOrderTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
-import { DataRow } from '@/components/common/Table/DataRow'
 import { BRAND_NAME } from '@/config/constants'
-import { HelpIconTooltip } from '@views/features/swap/components/HelpIconTooltip'
-import { Link } from '@/components/ui/link'
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { OrderFeeConfirmationViewView } from '@views/features/swap/components/SwapOrderConfirmationView/OrderFeeConfirmationViewView'
 
 export const OrderFeeConfirmationView = ({
   order,
@@ -20,28 +17,5 @@ export const OrderFeeConfirmationView = ({
     return null
   }
 
-  const title = (
-    <>
-      Widget fee{' '}
-      <HelpIconTooltip
-        title={
-          <>
-            The tiered widget fee incurred here is charged by CoW Protocol for the operation of this widget. The fee is
-            automatically calculated into this quote. Part of the fee will contribute to a license fee that supports the
-            Safe Community. Neither the Safe Ecosystem Foundation nor {`${BRAND_NAME}`} operate the CoW Swap Widget
-            and/or CoW Swap.
-            <Link href={HelpCenterArticle.SWAP_WIDGET_FEES} target="_blank" rel="noopener noreferrer">
-              Learn more
-            </Link>
-          </>
-        }
-      />
-    </>
-  )
-
-  return (
-    <DataRow datatestid="widget-fee" title={title} key="widget_fee">
-      {Number(bps) / 100} %
-    </DataRow>
-  )
+  return <OrderFeeConfirmationViewView bps={bps} brandName={BRAND_NAME} />
 }

@@ -2,25 +2,18 @@ import { useSpacesCreateV1Mutation } from '@safe-global/store/gateway/AUTO_GENER
 import { useRouter } from 'next/router'
 import { type ReactElement, useState } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import SpaceIcon from '@/public/images/spaces/space.svg'
-import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
-import { PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import { SpaceCreationModalView } from '@views/features/spaces/components/SpaceCreationModal/SpaceCreationModalView'
 
 function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement {
   const [error, setError] = useState<string>()
@@ -66,59 +59,28 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
   })
 
   return (
-    <ModalDialog
-      open
-      onClose={onClose}
-      dialogTitle={
-        <>
-          <SpaceIcon className="mr-2 size-6 fill-none" />
-          Create Workspace
-        </>
-      }
-      hideChainIndicator
-    >
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <FormProvider {...methods}>
-          <form onSubmit={onSubmit}>
-            <div className="px-6 py-4">
-              <div className="mb-4">
-                <NameInput
-                  data-testid="space-name-input"
-                  label="Name"
-                  autoFocus
-                  name="name"
-                  required
-                  validateCharset
-                  minLength={NAME_MIN_LENGTH}
-                  maxLength={SPACE_NAME_MAX_LENGTH}
-                />
-              </div>
-              <Typography variant="paragraph-small" color="muted">
-                How is my data processed? Read our <ExternalLink href={PRIVACY_URL}>privacy policy</ExternalLink>
-              </Typography>
-
-              {error && (
-                <Alert variant="destructive" className="mt-4">
-                  <AlertSeverityIcon variant="destructive" />
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-
-            <DialogActions
-              className="p-4 pt-0"
-              onCancel={onClose}
-              cancelTestId="cancel-btn"
-              confirmLabel="Create Workspace"
-              confirmType="submit"
-              confirmDisabled={!formState.isValid || isSubmitting}
-              confirmLoading={isSubmitting}
-              confirmTestId="create-space-modal-button"
-            />
-          </form>
-        </FormProvider>
-      </div>
-    </ModalDialog>
+    <FormProvider {...methods}>
+      <SpaceCreationModalView
+        isDarkMode={isDarkMode}
+        error={error}
+        isValid={formState.isValid}
+        isSubmitting={isSubmitting}
+        onClose={onClose}
+        onSubmit={onSubmit}
+        renderNameInput={(label) => (
+          <NameInput
+            data-testid="space-name-input"
+            label={label}
+            autoFocus
+            name="name"
+            required
+            validateCharset
+            minLength={NAME_MIN_LENGTH}
+            maxLength={SPACE_NAME_MAX_LENGTH}
+          />
+        )}
+      />
+    </FormProvider>
   )
 }
 

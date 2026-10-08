@@ -3,7 +3,7 @@ import { StatusGroup, type ThreatAnalysisResults, type Severity } from '@safe-gl
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { AnalysisGroupCardDisabled } from '@/features/safe-shield'
+import { HnCustomChecksCardLoginRequiredView } from '@views/features/hypernative/components/HnCustomChecksCard/HnCustomChecksCardView'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
 import { HnViewMoreOnHypernativeRow } from '../HnViewMoreOnHypernativeRow'
 import { useSafeShieldAssessmentUrl } from '../../hooks/useSafeShieldAssessmentUrl'
@@ -43,11 +43,7 @@ export const HnCustomChecksCard = ({
   }, [threatResults])
 
   if (requiresHypernativeLogin) {
-    return (
-      <AnalysisGroupCardDisabled data-testid="custom-checks-analysis-group-card">
-        Custom checks
-      </AnalysisGroupCardDisabled>
-    )
+    return <HnCustomChecksCardLoginRequiredView />
   }
 
   if (!threatResults?.CUSTOM_CHECKS || threatResults.CUSTOM_CHECKS.length === 0) {

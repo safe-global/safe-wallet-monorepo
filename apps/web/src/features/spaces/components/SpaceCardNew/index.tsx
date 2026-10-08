@@ -1,41 +1,10 @@
-import { AppRoutes } from '@/config/routes'
-import Link from 'next/link'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/utils/colors'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import SpaceContextMenuNew from './SpaceContextMenuNew'
+import { SpaceCardNewView, SpaceSummaryNew } from '@views/features/spaces/components/SpaceCardNew/SpaceCardNewView'
 
-export const SpaceSummaryNew = ({
-  name,
-  numberOfAccounts,
-  numberOfMembers,
-}: {
-  name: string
-  numberOfAccounts: number
-  numberOfMembers: number
-}) => {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <Typography variant="paragraph-small-medium">{name}</Typography>
-
-      <div className="mt-0.5 flex items-center gap-2">
-        <Typography variant="paragraph-mini" color="muted">
-          {numberOfAccounts} Account{maybePlural(numberOfAccounts)}
-        </Typography>
-
-        <div className="bg-border size-0.5 rounded-full" />
-
-        <Typography variant="paragraph-mini" color="muted">
-          {numberOfMembers} Member{maybePlural(numberOfMembers)}
-        </Typography>
-      </div>
-    </div>
-  )
-}
+export { SpaceSummaryNew }
 
 // TODO(spaces): staged successor to SpaceCard for the Spaces redesign — not yet wired into
 // SpacesList. Kept in sync with BE changes (UUID #8020, memberCount #8150).
@@ -44,37 +13,18 @@ const SpaceCardNew = ({ space, isLink = true }: { space: GetSpaceResponse; isLin
   const isAdmin = useIsAdmin(uuid)
 
   const logoColor = getDeterministicColor(name)
-  const logoLetter = name.slice(0, 1).toUpperCase()
 
   return (
-    <Card
-      data-testid="space-card-new"
-      // eslint-disable-next-line no-restricted-syntax -- bespoke 3-col card grid: tight gap-2 + p-4 padding (no CardContent slot); not a Card size
-      className="relative grid grid-cols-[auto_1fr_auto] grid-rows-[auto_auto] gap-2 p-4"
-      size="sm"
-    >
-      {isLink && (
-        <Link
-          className="absolute left-0 top-0 size-full"
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: uuid } }}
-          aria-label={`Go to ${name}`}
-        />
-      )}
-
-      <Avatar size="default" className="col-span-2 shrink-0 rounded-[6px] ring-2 ring-border">
-        <AvatarFallback style={{ backgroundColor: logoColor }} className="rounded-[6px] text-white font-bold">
-          {logoLetter}
-        </AvatarFallback>
-      </Avatar>
-
-      <SpaceSummaryNew name={name} numberOfAccounts={safeCount} numberOfMembers={memberCount} />
-
-      {isAdmin && (
-        <div className="relative z-10 col-start-3 flex items-start">
-          <SpaceContextMenuNew space={space} />
-        </div>
-      )}
-    </Card>
+    <SpaceCardNewView
+      uuid={uuid}
+      name={name}
+      safeCount={safeCount}
+      memberCount={memberCount}
+      isLink={isLink}
+      logoColor={logoColor}
+      isAdmin={isAdmin}
+      contextMenu={<SpaceContextMenuNew space={space} />}
+    />
   )
 }
 

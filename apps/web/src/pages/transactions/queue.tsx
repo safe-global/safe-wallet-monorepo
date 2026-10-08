@@ -16,11 +16,12 @@ import {
   HypernativeFeature,
   useHnQueueAssessment,
 } from '@/features/hypernative'
+import { TxListMainView } from '@views/pages/transactions/TxListMainView'
 
 const Queue: NextPage = () => {
   const { RecoveryList } = useLoadFeature(RecoveryFeature)
   const showPending = useShowUnsignedQueue()
-  const hn = useLoadFeature(HypernativeFeature)
+  const { HnLoginCard } = useLoadFeature(HypernativeFeature)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
   const { setPages: setQueuePages } = useHnQueueAssessment()
@@ -38,26 +39,24 @@ const Queue: NextPage = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {showHnLoginCard && <hn.HnLoginCard />}
+          {showHnLoginCard && <HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 
-        <main>
-          <div className="mb-8">
-            <RecoveryList />
+        <TxListMainView>
+          <RecoveryList />
 
-            {/* Pending unsigned transactions */}
-            {showPending && (
-              <PaginatedTxns
-                useTxns={usePendingTxsQueue}
-                onPagesChange={(pages) => setQueuePages(pages, pendingSourceId)}
-              />
-            )}
+          {/* Pending unsigned transactions */}
+          {showPending && (
+            <PaginatedTxns
+              useTxns={usePendingTxsQueue}
+              onPagesChange={(pages) => setQueuePages(pages, pendingSourceId)}
+            />
+          )}
 
-            {/* The main queue of signed transactions */}
-            <PaginatedTxns useTxns={useTxQueue} onPagesChange={(pages) => setQueuePages(pages, queueSourceId)} />
-          </div>
-        </main>
+          {/* The main queue of signed transactions */}
+          <PaginatedTxns useTxns={useTxQueue} onPagesChange={(pages) => setQueuePages(pages, queueSourceId)} />
+        </TxListMainView>
       </BatchExecuteHoverProvider>
     </>
   )

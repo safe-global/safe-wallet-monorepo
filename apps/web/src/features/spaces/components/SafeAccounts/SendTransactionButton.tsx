@@ -1,9 +1,6 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useContext } from 'react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useRouter } from 'next/router'
-import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
@@ -14,6 +11,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { trackEvent } from '@/services/analytics'
 import { gtmSetSafeAddress } from '@/services/analytics/gtm'
+import { SendTransactionButtonView } from '@views/features/spaces/components/SafeAccounts/SendTransactionButtonView'
 
 const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
   const router = useRouter()
@@ -59,24 +57,7 @@ const SendTransactionButton = ({ safe }: { safe: SafeOverview }) => {
     setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
   }
 
-  return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex" />}>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onNewTxClick}
-          disabled={!canSend}
-          aria-label="Send tokens"
-          // eslint-disable-next-line no-restricted-syntax -- filled icon action on space-account row; pending a variant
-          className="mx-1 rounded-sm bg-[var(--color-background-main)] [&_svg_path]:fill-foreground disabled:[&_svg_path]:fill-[var(--color-border-main)]"
-        >
-          <ArrowOutwardIcon />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{canSend ? 'Send tokens' : 'You are not a signer of this Safe account'}</TooltipContent>
-    </Tooltip>
-  )
+  return <SendTransactionButtonView canSend={canSend} onClick={onNewTxClick} />
 }
 
 export default SendTransactionButton

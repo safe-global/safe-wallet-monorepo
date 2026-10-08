@@ -1,9 +1,5 @@
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { ContractVersion } from '@/components/settings/ContractVersion'
 import { OwnerList } from '@/components/settings/owner/OwnerList'
 import { RequiredConfirmation } from '@/components/settings/RequiredConfirmations'
@@ -15,6 +11,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
+import { SetupView } from '@views/pages/settings/SetupView'
 
 const Setup: NextPage = () => {
   const { safe, safeLoaded } = useSafeInfo()
@@ -31,65 +28,20 @@ const Setup: NextPage = () => {
 
       <SettingsHeader />
 
-      <main>
-        <div data-testid="setup-section" className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="flex flex-col justify-between gap-6 lg:flex-row">
-            <div className="lg:w-1/5 lg:shrink-0">
-              <Typography variant="h4" className="font-bold">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <span>
-                        Safe account nonce
-                        <InfoIcon className="ml-1 inline size-5 align-middle text-[var(--color-border-main)]" />
-                      </span>
-                    }
-                  />
-                  <TooltipContent>
-                    For security reasons, transactions made with a Safe account need to be executed in order. The nonce
-                    shows you which transaction will be executed next. You can find the nonce for a transaction in the
-                    transaction details.
-                  </TooltipContent>
-                </Tooltip>
-              </Typography>
-
-              {/* as="div": the Skeleton renders a div, which is invalid inside the default <p> */}
-              <Typography as="div" className="pt-2">
-                Current nonce: {safeLoaded ? <b>{nonce}</b> : <Skeleton className="inline-block h-4 w-[30px]" />}
-              </Typography>
-            </div>
-
-            <div className="lg:min-w-0 lg:flex-1">
-              <ContractVersion />
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-4 rounded-lg bg-[var(--color-background-paper)] p-8">
-          <div className="flex flex-col justify-between gap-6 lg:flex-row">
-            <div className="lg:w-1/5 lg:shrink-0">
-              <Typography variant="h4" className="font-bold">
-                Members
-              </Typography>
-            </div>
-
-            <div className="lg:min-w-0 lg:flex-1">
-              <div className="flex flex-col gap-4">
-                <OwnerList />
-                <ProposersList />
-              </div>
-            </div>
-          </div>
-
-          <RequiredConfirmation threshold={threshold} owners={ownerLength} />
-        </div>
-
+      <SetupView
+        safeLoaded={safeLoaded}
+        nonce={nonce}
+        contractVersion={<ContractVersion />}
+        ownerList={<OwnerList />}
+        proposersList={<ProposersList />}
+        requiredConfirmation={<RequiredConfirmation threshold={threshold} owners={ownerLength} />}
+      >
         <SpendingLimitsSettings />
 
         <NestedSafesList />
 
         <FeeTokenPreference />
-      </main>
+      </SetupView>
     </>
   )
 }

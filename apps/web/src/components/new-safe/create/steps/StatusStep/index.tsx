@@ -5,20 +5,16 @@ import { getRedirect } from '@/components/new-safe/create/logic'
 import StatusMessage from '@/components/new-safe/create/steps/StatusStep/StatusMessage'
 import useUndeployedSafe from '@/components/new-safe/create/steps/StatusStep/useUndeployedSafe'
 import { lightPalette } from '@safe-global/theme/palettes'
-import { AppRoutes } from '@/config/routes'
 import { safeCreationPendingStatuses } from '@/features/counterfactual'
 import { SafeCreationEvent, safeCreationSubscribe, isPredictedSafeProps } from '@/features/counterfactual/services'
 import { useCurrentChain } from '@/hooks/useChains'
-import Rocket from '@/public/images/common/rocket.svg'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { useAddNewSafeToUrlSpace } from '@/features/spaces'
 import { getNewSafeHomeUrl } from '../ReviewStep/utils'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
+import { CreateSafeStatusView } from '@views/components/new-safe/create/steps/StatusStep/CreateSafeStatusView'
 
 const SPEED_UP_THRESHOLD_IN_SECONDS = 15
 
@@ -96,31 +92,12 @@ export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: Ste
   }
 
   return (
-    <div className="bg-card text-card-foreground overflow-hidden rounded-xl text-center">
-      <div className="p-4 sm:p-16">
-        <StatusMessage status={status} isError={isError} pendingSafe={pendingSafe} />
-
-        {counter && counter > SPEED_UP_THRESHOLD_IN_SECONDS && !isError && (
-          <Alert variant="warning" outlined={false} className="mt-10">
-            <Rocket />
-            <AlertTitle className="text-left font-bold">Transaction is taking too long</AlertTitle>
-            <AlertDescription className="text-left">
-              Try to speed it up with better gas parameters in your wallet.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {isError && (
-          <div className="flex flex-row justify-center gap-4">
-            <Button variant="outline" onClick={onCancel} render={<Link href={AppRoutes.index} />}>
-              Go to homepage
-            </Button>
-            <Button variant="default" onClick={tryAgain}>
-              Try again
-            </Button>
-          </div>
-        )}
-      </div>
-    </div>
+    <CreateSafeStatusView
+      statusMessage={<StatusMessage status={status} isError={isError} pendingSafe={pendingSafe} />}
+      showSpeedUpWarning={counter && counter > SPEED_UP_THRESHOLD_IN_SECONDS && !isError}
+      isError={isError}
+      onCancel={onCancel}
+      onTryAgain={tryAgain}
+    />
   )
 }

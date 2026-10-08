@@ -1,19 +1,12 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
 import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveryProposalTransactions } from '../../services/transaction'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import TxSubmitError from '@/components/tx/TxSubmitError'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
 import { dispatchRecoveryProposal } from '../../services/recovery-sender'
@@ -25,7 +18,6 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '@/components/tx-flow'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
-import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import useRecovery from '../../hooks/useRecovery'
 import { useIsValidRecoveryExecTransactionFromModule } from '../../hooks/useIsValidRecoveryExecution'
 import { isWalletRejection } from '@/utils/wallets'
@@ -39,6 +31,7 @@ import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { RecoverAccountReviewView } from '@views/features/recovery/components/RecoverAccountReview/RecoverAccountReviewView'
 
 type RecoverAccountReviewProps = {
   threshold: string
@@ -127,69 +120,35 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
   const submitDisabled = !safeTx || !isSubmittable || !recovery
 
   return (
-    <>
-      <TxCard>
-        <Typography className="mb-2">
-          This transaction will reset the Account setup, changing the signers
-          {newThreshold !== safe.threshold ? ' and threshold' : ''}.
-        </Typography>
+    <RecoverAccountReviewView
+      threshold={threshold}
+      ownersCount={owners.length}
+      isThresholdChanged={newThreshold !== safe.threshold}
+      recoveryDelay={recovery?.delay}
+      isSubmittable={isSubmittable}
+      submitDisabled={submitDisabled}
+      onSubmit={onSubmit}
+      ownerList={<OwnerList owners={newOwners} />}
+      summary={txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
+      balanceChanges={<BalanceChanges />}
+      errors={
+        <>
+          {safeTxError && <TxCheckError error={safeTxError} />}
 
-        <OwnerList owners={newOwners} />
+          {executionValidationError && <TxCheckError error={executionValidationError} />}
 
-        <Separator bleed="6" className="mt-4" />
+          {submitError && <TxSubmitError error={submitError} />}
 
-        <div className="my-2">
-          <Typography variant="paragraph-small" color="muted" className="block mb-2">
-            After recovery, Safe account transactions will require:
-          </Typography>
-          <Typography>
-            <b>{threshold}</b> out of <b>{owners.length} signers.</b>
-          </Typography>
-        </div>
-
-        <Separator bleed="6" />
-
-        {txPreview && <Summary safeTxData={safeTx?.data} {...txPreview} />}
-
-        <BalanceChanges />
-
-        <Separator className="mx-[calc(-1*var(--space-3))] mt-4" />
-
-        <ConfirmationTitle variant={ConfirmationTitleTypes.execute} />
-
-        {safeTxError && <TxCheckError error={safeTxError} />}
-
-        {executionValidationError && <TxCheckError error={executionValidationError} />}
-
-        {submitError && <TxSubmitError error={submitError} />}
-
-        <NetworkWarning />
-
-        {recovery?.delay !== undefined && (
-          <ErrorMessage level="info">
-            Recovery will be{' '}
-            {recovery.delay === 0n
-              ? 'immediately possible'
-              : `possible in ${getDetailedPeriod(Number(recovery.delay))}`}{' '}
-            after this transaction is executed.
-          </ErrorMessage>
-        )}
-
-        {isRejectedByUser && <WalletRejectionError />}
-
-        <Separator bleed="6" />
-
-        <TxCardActions>
-          <CheckWallet allowNonOwner checkNetwork>
-            {(isOk) => (
-              <Button data-testid="execute-btn" variant="default" disabled={!isOk || submitDisabled} onClick={onSubmit}>
-                {!isSubmittable ? <Spinner className="size-5" /> : 'Execute'}
-              </Button>
-            )}
-          </CheckWallet>
-        </TxCardActions>
-      </TxCard>
-    </>
+          <NetworkWarning />
+        </>
+      }
+      walletRejection={!!isRejectedByUser && <WalletRejectionError />}
+      renderCheckWallet={(children) => (
+        <CheckWallet allowNonOwner checkNetwork>
+          {children}
+        </CheckWallet>
+      )}
+    />
   )
 }
 

@@ -1,11 +1,9 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { ChevronUp as ExpandLessIcon, ChevronDown as ExpandMoreIcon } from 'lucide-react'
 import { useForm, FormProvider, Controller } from 'react-hook-form'
 import { useContext, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
@@ -13,33 +11,21 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { RecovererWarning } from './RecovererSmartContractWarning'
-import ExternalLink from '@/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
-import { TOOLTIP_TITLES } from '@views/components/tx-flow/common/constants'
-import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
-import css from './styles.module.css'
-import NumberField from '@/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
-import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import { isSmartContractWallet } from '@/utils/wallets'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
-import { Typography } from '@/components/ui/typography'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+import {
+  CustomDelayFieldView,
+  RecoveryPeriodSelectView,
+  UpsertRecoveryFlowSettingsView,
+} from '@views/components/tx-flow/flows/UpsertRecovery/UpsertRecoveryFlowSettingsView'
 
 enum AddressType {
   EOA = 'EOA',
@@ -140,182 +126,70 @@ export function UpsertRecoveryFlowSettings({ delayModifier }: { delayModifier?: 
   }
 
   return (
-    <TxCard>
-      <FormProvider {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(handleSubmit)}>
-          <Alert variant="warning" outlined={false}>
-            <AlertSeverityIcon variant="warning" />
-            <AlertDescription>
-              Your Recoverer will be able to reset your Account setup. Only select an address that you trust.{' '}
-              <Track {...RECOVERY_EVENTS.LEARN_MORE} label="recover-setup-flow">
-                <ExternalLink href={HelpCenterArticle.RECOVERY} title={HelperCenterArticleTitles.RECOVERY}>
-                  Learn more
-                </ExternalLink>
-              </Track>
-            </AlertDescription>
-          </Alert>
-
-          <div className="my-4">
-            <Typography variant="h4" className="mb-2">
-              Trusted Recoverer
-            </Typography>
-
-            <Typography variant="paragraph-small" className="block">
-              Choose a Recoverer, such as a hardware wallet or a Safe account controlled by family or friends, that can
-              initiate the recovery process in the future.
-            </Typography>
-          </div>
-
-          <div className="mb-4 w-full">
-            <AddressBookInput
-              label="Recoverer address or ENS"
-              name={UpsertRecoveryFlowFields.recoverer}
-              required
-              fullWidth
-              validate={validateRecoverer}
-            />
-            <RecovererWarning />
-          </div>
-
-          <div className="mb-4">
-            <Typography variant="h4" className="mb-2">
-              Review window
-              <Tooltip>
-                <TooltipTrigger render={<span />}>
-                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
-                </TooltipTrigger>
-                <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
-              </Tooltip>
-            </Typography>
-
-            <Typography variant="paragraph-small" className="block">
-              The recovery proposal will be available for execution after this period of time. You can cancel any
-              recovery proposal when it is not needed or wanted during this period.
-            </Typography>
-          </div>
-
-          <div className="my-4">
-            <Controller
-              control={formMethods.control}
-              name={UpsertRecoveryFlowFields.selectedDelay}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange} items={delayItems}>
-                  <SelectTrigger data-testid="recovery-delay-select" className="w-[55%] max-w-[240px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {periods.delay.map(({ label, value }, index) => (
-                      <SelectItem key={index} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-
-            <div className="flex max-w-[180px] min-w-[140px] flex-1 gap-4">
-              {isCustomDelaySelected(selectedDelay) && (
-                <>
-                  <Controller
-                    control={formMethods.control}
-                    name={UpsertRecoveryFlowFields.customDelay}
-                    rules={{ validate: validateCustomDelay }}
-                    render={({ field, fieldState }) => (
-                      <NumberField
-                        label={fieldState.error?.message}
-                        error={!!fieldState.error}
-                        {...field}
-                        required
-                        placeholder="E.g. 100"
-                      />
-                    )}
-                  />
-                  <Typography className="my-auto">days.</Typography>
-                </>
-              )}
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <Typography
-              data-testid="advanced-btn"
-              variant="paragraph-small"
-              onClick={onShowAdvanced}
-              onKeyDown={clickOnEnterOrSpace}
-              role="button"
-              tabIndex={0}
-              aria-expanded={showAdvanced}
-              className={css.advanced}
-            >
-              Advanced {showAdvanced ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </Typography>
-
-            <Collapsible open={showAdvanced}>
-              <CollapsibleContent keepMounted>
-                <div>
-                  <Typography variant="h4" className="mb-2">
-                    Proposal expiry
-                    <Tooltip>
-                      <TooltipTrigger render={<span />}>
-                        <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
-                      </TooltipTrigger>
-                      <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
-                    </Tooltip>
-                  </Typography>
-
-                  <Typography variant="paragraph-small" className="mb-4 block">
-                    Set a period of time after which the recovery proposal will expire and can no longer be executed.
-                  </Typography>
-                </div>
-
-                <Controller
-                  control={formMethods.control}
-                  name={UpsertRecoveryFlowFields.expiry}
-                  // Don't reset value if advanced section is collapsed
-                  shouldUnregister={false}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange} items={expirationItems}>
-                      <SelectTrigger data-testid="recovery-expiry-select" className="w-[55%] max-w-[240px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {periods.expiration.map(({ label, value }, index) => (
-                          <SelectItem key={index} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-          </div>
-
-          <Separator bleed="6" />
-
-          <Card data-testid="warning-section" size="none" surface="sunken" className="my-4">
-            <Label htmlFor="recovery-understands-risk" className="cursor-pointer gap-3 px-2 py-2 font-normal">
-              <Checkbox
-                id="recovery-understands-risk"
-                checked={understandsRisk}
-                onCheckedChange={(checked) => setUnderstandsRisk(checked === true)}
-                className="bg-[var(--color-background-paper)]"
+    <FormProvider {...formMethods}>
+      <UpsertRecoveryFlowSettingsView
+        onSubmit={formMethods.handleSubmit(handleSubmit)}
+        renderRecovererInput={(label) => (
+          <AddressBookInput
+            label={label}
+            name={UpsertRecoveryFlowFields.recoverer}
+            required
+            fullWidth
+            validate={validateRecoverer}
+          />
+        )}
+        recovererWarning={<RecovererWarning />}
+        delaySelect={
+          <Controller
+            control={formMethods.control}
+            name={UpsertRecoveryFlowFields.selectedDelay}
+            render={({ field }) => (
+              <RecoveryPeriodSelectView
+                value={field.value}
+                onValueChange={field.onChange}
+                items={delayItems}
+                options={periods.delay}
+                testId="recovery-delay-select"
               />
-              <Typography variant="paragraph-small">
-                {`I understand that the Recoverer will be able to initiate recovery of this Safe account and that I will only be informed within the ${BRAND_NAME}.`}
-              </Typography>
-            </Label>
-          </Card>
-
-          <TxCardActions>
-            <Button data-testid="next-btn" variant="default" type="submit" disabled={isDisabled}>
-              Next
-            </Button>
-          </TxCardActions>
-        </form>
-      </FormProvider>
-    </TxCard>
+            )}
+          />
+        }
+        isCustomDelay={isCustomDelaySelected(selectedDelay)}
+        customDelayField={
+          <Controller
+            control={formMethods.control}
+            name={UpsertRecoveryFlowFields.customDelay}
+            rules={{ validate: validateCustomDelay }}
+            render={({ field, fieldState }) => (
+              <CustomDelayFieldView errorMessage={fieldState.error?.message} hasError={!!fieldState.error} {...field} />
+            )}
+          />
+        }
+        expirySelect={
+          <Controller
+            control={formMethods.control}
+            name={UpsertRecoveryFlowFields.expiry}
+            // Don't reset value if advanced section is collapsed
+            shouldUnregister={false}
+            render={({ field }) => (
+              <RecoveryPeriodSelectView
+                value={field.value}
+                onValueChange={field.onChange}
+                items={expirationItems}
+                options={periods.expiration}
+                testId="recovery-expiry-select"
+              />
+            )}
+          />
+        }
+        showAdvanced={showAdvanced}
+        onShowAdvanced={onShowAdvanced}
+        onAdvancedKeyDown={clickOnEnterOrSpace}
+        understandsRisk={understandsRisk}
+        onUnderstandsRiskChange={setUnderstandsRisk}
+        brandName={BRAND_NAME}
+        isDisabled={isDisabled}
+      />
+    </FormProvider>
   )
 }

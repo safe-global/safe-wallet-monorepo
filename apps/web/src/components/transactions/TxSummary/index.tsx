@@ -1,24 +1,18 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TxProposalChip } from '@/features/proposers'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { Typography } from '@/components/ui/typography'
 import type { ReactElement } from 'react'
 
-import css from './styles.module.css'
 import DateTime from '@/components/common/DateTime'
 import TxInfo from '@/components/transactions/TxInfo'
 import { isMultisigExecutionInfo, isTxQueued } from '@/utils/transaction-guards'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
-import classNames from 'classnames'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
-import MaliciousTxWarning from '@views/components/transactions/MaliciousTxWarning'
 import QueueActions from './QueueActions'
+import { TxSummaryView } from '@views/components/transactions/TxSummary/TxSummaryView'
 import useIsPending from '@/hooks/useIsPending'
-import TxConfirmations from '@views/components/transactions/TxConfirmations'
 import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { ellipsis } from '@safe-global/utils/utils/formatters'
 import {
   useHnQueueAssessmentResult,
   useShowHypernativeAssessment,
@@ -39,7 +33,7 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
+  const { SafenetQueueStatus } = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const tx = item.transaction
@@ -61,107 +55,38 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const showSafenetStatus = isSafenetEnabled && isQueue && !isBulkGroup && !!safeTxHash
 
   return (
-    <div
-      data-testid="transaction-item"
-      className={classNames(css.gridContainer, {
-        // Top-level queue rows carry the most cells, so they get their own narrow-width template.
-        [css.queue]: isQueue && !isConflictGroup && !isBulkGroup,
-        [css.history]: !isQueue,
-        [css.conflictGroup]: isConflictGroup,
-        [css.bulkGroup]: isBulkGroup,
-        [css.untrusted]: showWarning,
-        [css.withAssessment]: showAssessment,
-        [css.withSafenet]: showSafenetStatus,
-      })}
+    <TxSummaryView
       id={tx.id}
-    >
-      {/* The warning claims the same cell, so the nonce yields to it rather than stacking underneath. */}
-      {nonce !== undefined && !isConflictGroup && !showWarning && (
-        <div data-testid="nonce" className={css.nonce} style={{ gridArea: 'nonce' }}>
-          {nonce}
-        </div>
-      )}
-
-      {showWarning && (
-        <div data-testid="warning" style={{ gridArea: 'nonce' }}>
-          <MaliciousTxWarning withTooltip={!isImitationTransaction} />
-        </div>
-      )}
-
-      <div data-testid="tx-type" className={css.type} style={{ gridArea: 'type' }}>
-        {/* Composed from TxType's icon and text rather than the combined export, so this file owns the
-            label's class and can drop it on phones while keeping the icon. */}
-        <div className={css.typeRow}>
-          <TxTypeIcon tx={tx} />
-          <span className={css.typeLabel}>
-            <TxTypeText tx={tx} />
-          </span>
-        </div>
-
-        {tx.note && (
-          <Typography
-            variant="paragraph-small"
-            className={classNames('text-[var(--color-text-secondary)]', css.note)}
-            title={tx.note}
-          >
-            {ellipsis(tx.note, 25)}
-          </Typography>
-        )}
-      </div>
-
-      <div data-testid="tx-info" className={css.info} style={{ gridArea: 'info' }}>
-        <TxInfo info={tx.txInfo} />
-      </div>
-
-      <div data-testid="tx-date" className={css.date} style={{ gridArea: 'date' }}>
-        <DateTime value={tx.timestamp} />
-      </div>
-
-      {isQueue && executionInfo && (
-        <div style={{ gridArea: 'confirmations' }}>
-          {executionInfo.confirmationsSubmitted > 0 || isPending ? (
-            <TxConfirmations
-              submittedConfirmations={executionInfo.confirmationsSubmitted}
-              requiredConfirmations={executionInfo.confirmationsRequired}
-            />
-          ) : (
-            <TxProposalChip />
-          )}
-        </div>
-      )}
-
-      {showAssessment && safeTxHash && (
-        <div style={{ gridArea: 'assessment' }} className={css.assessment}>
+      isQueue={isQueue}
+      isConflictGroup={isConflictGroup}
+      isBulkGroup={isBulkGroup}
+      showWarning={showWarning}
+      isImitationTransaction={isImitationTransaction}
+      showAssessment={showAssessment}
+      showSafenetStatus={showSafenetStatus}
+      isPending={isPending}
+      expiredSwap={expiredSwap}
+      nonce={nonce}
+      note={tx.note}
+      date={<DateTime value={tx.timestamp} />}
+      confirmations={
+        executionInfo
+          ? { submitted: executionInfo.confirmationsSubmitted, required: executionInfo.confirmationsRequired }
+          : undefined
+      }
+      typeIcon={<TxTypeIcon tx={tx} />}
+      typeText={<TxTypeText tx={tx} />}
+      txInfo={<TxInfo info={tx.txInfo} />}
+      assessment={
+        safeTxHash ? (
           <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
-        </div>
-      )}
-
-      {showSafenetStatus && safeTxHash && (
-        <div style={{ gridArea: 'safenet' }} className={css.safenet}>
-          <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
-        </div>
-      )}
-
-      {!isQueue && (
-        <div className={css.status} style={{ gridArea: 'status' }}>
-          <TxStatusLabel tx={tx} />
-        </div>
-      )}
-
-      {/* A queue row's status takes the action's cell, so pending rows keep the same tracks as the rest. */}
-      {isQueue && (
-        <div className={css.actions} style={{ gridArea: 'actions' }}>
-          {expiredSwap ? (
-            <StatusLabel status="expired" />
-          ) : (
-            <>
-              {isPending && <TxStatusLabel tx={tx} />}
-              <QueueActions tx={tx} />
-            </>
-          )}
-        </div>
-      )}
-    </div>
+        ) : undefined
+      }
+      safenetStatus={safeTxHash ? <SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} /> : undefined}
+      statusLabel={<TxStatusLabel tx={tx} />}
+      queueActions={<QueueActions tx={tx} />}
+      renderSwapStatusLabel={(status) => <StatusLabel status={status} />}
+    />
   )
 }
 

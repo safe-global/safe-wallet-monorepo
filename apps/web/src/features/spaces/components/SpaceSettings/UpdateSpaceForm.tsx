@@ -1,12 +1,11 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
-import ErrorAlert from '@views/features/spaces/components/SpaceSettings/ErrorAlert'
-import { Button } from '@/components/ui/button'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
+import { UpdateSpaceFormView } from '@views/features/spaces/components/SpaceSettings/UpdateSpaceFormView'
 
 const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefined; onClose?: () => void }) => {
   const { handleUpdate, error } = useUpdateSpace(space, onClose)
@@ -30,22 +29,21 @@ const UpdateSpaceForm = ({ space, onClose }: { space: GetSpaceResponse | undefin
 
   return (
     <FormProvider {...formMethods}>
-      <form onSubmit={onSubmit}>
-        <NameInput
-          name="name"
-          label="Workspace name"
-          required
-          validateCharset
-          minLength={NAME_MIN_LENGTH}
-          maxLength={SPACE_NAME_MAX_LENGTH}
-        />
-
-        <ErrorAlert error={error} />
-
-        <Button data-testid="space-save-button" type="submit" className="mt-4" disabled={!canSubmit}>
-          Save
-        </Button>
-      </form>
+      <UpdateSpaceFormView
+        onSubmit={onSubmit}
+        renderNameInput={(label) => (
+          <NameInput
+            name="name"
+            label={label}
+            required
+            validateCharset
+            minLength={NAME_MIN_LENGTH}
+            maxLength={SPACE_NAME_MAX_LENGTH}
+          />
+        )}
+        error={error}
+        canSubmit={canSubmit}
+      />
     </FormProvider>
   )
 }

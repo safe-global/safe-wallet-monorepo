@@ -12,7 +12,7 @@ import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import isEmpty from 'lodash/isEmpty'
 import { HypernativeFeature, type HypernativeAuthStatus, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
-import { AnalysisGroupCardDisabled } from '@views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
+import { ThreatAnalysisView } from '@views/features/safe-shield/components/ThreatAnalysis/ThreatAnalysisView'
 // eslint-disable-next-line no-restricted-imports -- re-exporting this hook from the hypernative barrel closes a hypernative<->safe-shield<->tx-flow module-init cycle (TDZ)
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 
@@ -54,9 +54,7 @@ export const ThreatAnalysis = ({
   }, [threatResults])
 
   if (requiresHypernativeLogin) {
-    return (
-      <AnalysisGroupCardDisabled data-testid="threat-analysis-group-card">Threat analysis</AnalysisGroupCardDisabled>
-    )
+    return <ThreatAnalysisView />
   }
 
   if (!threatResults || !threatData || isEmpty(threatData)) {
@@ -66,11 +64,12 @@ export const ThreatAnalysis = ({
   const isHnPath = Boolean(hypernativeAuth && hn.$isReady)
 
   if (isHnPath) {
+    const { HnAnalysisGroupCard } = hn
     const overflowRow =
       overflow > 0 ? <HnViewMoreOnHypernativeRow overflowCount={overflow} assessmentUrl={assessmentUrl} /> : undefined
 
     return (
-      <hn.HnAnalysisGroupCard
+      <HnAnalysisGroupCard
         data-testid="threat-analysis-group-card"
         data={threatData}
         delay={delay}

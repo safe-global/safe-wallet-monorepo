@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { HnBannerForSettings, HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics'
+import { SecurityLoginView } from '@views/components/settings/SecurityLogin/SecurityLoginView'
 
 const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
 
@@ -14,7 +15,7 @@ const SecurityLogin = () => {
   const hn = useLoadFeature(HypernativeFeature)
 
   return (
-    <div className="flex flex-col gap-4">
+    <SecurityLoginView>
       {/* If guard is active: 
       HnActivatedSettingsBanner shows, 
       HnBannerForSettings doesn't - useBannerVisibility already ensures mutual exclusivity */}
@@ -24,7 +25,7 @@ const SecurityLogin = () => {
       {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
 
       <SecuritySettings />
-    </div>
+    </SecurityLoginView>
   )
 }
 

@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import CopyButton from '@/components/common/CopyButton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { MemberIdentifierView } from '@views/features/spaces/components/MembersList/MemberIdentifierView'
 
 export const getMemberIdentifier = ({ user }: MemberDto) => {
   if (user.email) return { value: user.email, isAddress: false }
@@ -37,43 +35,32 @@ const useFitsFullValue = (value: string) => {
 const IdentifierLabel = ({
   value,
   isAddress,
-  className,
+  wrapperClassName,
 }: {
   value: string
   isAddress: boolean
-  className?: string
+  wrapperClassName?: string
 }) => {
   const { containerRef, measureRef, copyRef, fits } = useFitsFullValue(value)
-  const isShortened = isAddress && !fits
-  const label = isShortened ? shortenAddress(value) : value
 
   return (
-    <span ref={containerRef} className={cn('relative flex min-w-0 items-center gap-1', className)}>
-      {isAddress && fits ? (
-        <span className="block min-w-0 truncate">{label}</span>
-      ) : (
-        <Tooltip>
-          <TooltipTrigger render={<span className="block min-w-0 truncate" />}>{label}</TooltipTrigger>
-          <TooltipContent align="start">{value}</TooltipContent>
-        </Tooltip>
-      )}
-      <span ref={copyRef} className="inline-flex shrink-0">
-        <CopyButton text={value} initialToolTipText={isAddress ? 'Copy address' : 'Copy email'} />
-      </span>
-      <span
-        ref={measureRef}
-        aria-hidden
-        data-value={value}
-        className="invisible absolute top-0 left-0 whitespace-nowrap before:content-[attr(data-value)]"
-      />
-    </span>
+    <MemberIdentifierView
+      value={value}
+      isAddress={isAddress}
+      wrapperClassName={wrapperClassName}
+      fits={fits}
+      containerRef={containerRef}
+      measureRef={measureRef}
+      copyRef={copyRef}
+      renderCopyButton={(props) => <CopyButton {...props} />}
+    />
   )
 }
 
 const MemberIdentifier = ({ member, className }: { member: MemberDto; className?: string }) => {
   const identifier = getMemberIdentifier(member)
   if (!identifier) return null
-  return <IdentifierLabel {...identifier} className={className} />
+  return <IdentifierLabel {...identifier} wrapperClassName={className} />
 }
 
 export default MemberIdentifier

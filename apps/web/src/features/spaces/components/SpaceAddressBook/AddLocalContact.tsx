@@ -1,17 +1,18 @@
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 import AddContactDialog from './AddContactDialog'
+import { LOCAL_CONTACT_COPY } from '@views/features/spaces/components/SpaceAddressBook/AddContactDialogView'
+
+const SUCCESS_GROUP_KEY = 'add-local-contact-success'
 
 const AddLocalContact = () => {
   const dispatch = useAppDispatch()
 
   return (
     <AddContactDialog
-      triggerLabel="Add contact"
-      dialogTitle="Add contact"
-      intro="This contact is stored locally in this browser. You can propose adding it to the shared Workspace address book later."
-      successMessage="Contact added"
-      successGroupKey="add-local-contact-success"
+      intro={LOCAL_CONTACT_COPY.intro}
+      successMessage={LOCAL_CONTACT_COPY.successMessage}
+      successGroupKey={SUCCESS_GROUP_KEY}
       submit={(item) => {
         dispatch(upsertAddressBookEntries({ chainIds: item.chainIds, address: item.address, name: item.name }))
         return Promise.resolve({})

@@ -4,6 +4,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlowType } from '@/services/analytics'
 import { ReviewRemoveModule } from './ReviewRemoveModule'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { REMOVE_MODULE_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/RemoveModule/copy'
 
 export type RemoveModuleFlowProps = {
   address: string
@@ -18,7 +19,7 @@ const RemoveModuleFlow = ({ address }: RemoveModuleFlowProps) => {
   return (
     <TxFlow
       initialData={{ address }}
-      subtitle="Remove module"
+      subtitle={COPY.subtitle}
       eventCategory={TxFlowType.REMOVE_MODULE}
       ReviewTransactionComponent={ReviewRemoveModuleStep}
     />

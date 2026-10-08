@@ -1,28 +1,16 @@
-import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import type { ReactElement, SyntheticEvent } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
 import { closeNotification, readNotification, selectNotifications } from '@/store/notificationsSlice'
-import { Alert, AlertAction, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
-import css from './styles.module.css'
-import NextLink from 'next/link'
-import { ChevronRight, X } from 'lucide-react'
-import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
-import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
-import { cn } from '@/utils/cn'
-
-type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
-
-const alertVariant: Record<NotificationVariant, 'success' | 'info' | 'warning' | 'destructive'> = {
-  success: 'success',
-  info: 'info',
-  warning: 'warning',
-  error: 'destructive',
-}
+import {
+  NotificationLinkView,
+  NotificationsView,
+  ToastView,
+  type NotificationVariant,
+} from '@views/components/common/Notifications/NotificationsView'
 
 export const NotificationLink = ({
   link,
@@ -34,15 +22,6 @@ export const NotificationLink = ({
   if (!link) {
     return null
   }
-
-  const LinkWrapper = ({ children }: React.PropsWithChildren) =>
-    'href' in link ? (
-      <NextLink href={link.href} passHref legacyBehavior>
-        {children}
-      </NextLink>
-    ) : (
-      <div className="flex">{children}</div>
-    )
 
   const handleClick = (event: SyntheticEvent) => {
     if ('onClick' in link) {
@@ -56,19 +35,12 @@ export const NotificationLink = ({
     (typeof link.href === 'string' ? !isRelativeUrl(link.href) : !!(link.href.host || link.href.hostname))
 
   return (
-    <Track {...OVERVIEW_EVENTS.NOTIFICATION_INTERACTION} label={link.title} as="span">
-      <LinkWrapper>
-        <Link
-          className={css.link}
-          variant="inherit"
-          onClick={handleClick}
-          {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
-        >
-          {link.title}
-          <ChevronRight />
-        </Link>
-      </LinkWrapper>
-    </Track>
+    <NotificationLinkView
+      title={link.title}
+      href={'href' in link ? link.href : undefined}
+      isExternal={isExternal}
+      onClick={handleClick}
+    />
   )
 }
 
@@ -144,34 +116,17 @@ const Toast = ({
   const autoHideProps = useAutoHide(getAutoHideDuration(variant, autoHideDurationOverride), onClose)
 
   return (
-    <Alert
-      variant={alertVariant[variant]}
-      outlined={false}
-      className={cn('w-[340px] shadow-lg', variant === 'error' && css.errorToast)}
-      {...autoHideProps}
-    >
-      {icon ? (icon as ReactNode) : <AlertSeverityIcon variant={alertVariant[variant]} />}
-      <AlertAction>
-        <Button variant="ghost" size="icon-xs" aria-label="Close" onClick={handleManualClose}>
-          <X />
-        </Button>
-      </AlertAction>
-      <AlertTitle>{title || message}</AlertTitle>
-
-      {(title || detailedMessage || link) && (
-        <AlertDescription>
-          {title && message}
-
-          {detailedMessage && (
-            <details>
-              <Link render={<summary />}>Details</Link>
-              <pre>{detailedMessage}</pre>
-            </details>
-          )}
-          <NotificationLink link={link} onClick={handleManualClose} />
-        </AlertDescription>
-      )}
-    </Alert>
+    <ToastView
+      variant={variant}
+      title={title}
+      message={message}
+      detailedMessage={detailedMessage}
+      icon={icon}
+      hasLink={!!link}
+      link={<NotificationLink link={link} onClick={handleManualClose} />}
+      autoHideProps={autoHideProps}
+      onClose={handleManualClose}
+    />
   )
 }
 
@@ -210,13 +165,12 @@ const Notifications = (): ReactElement | null => {
   }
 
   return (
-    <div className={css.container}>
-      {visible.map((item) => (
-        <div className={css.row} key={item.id}>
-          <Toast {...item} onClose={() => handleClose(item)} />
-        </div>
-      ))}
-    </div>
+    <NotificationsView
+      toasts={visible.map((item) => ({
+        id: item.id,
+        toast: <Toast {...item} onClose={() => handleClose(item)} />,
+      }))}
+    />
   )
 }
 

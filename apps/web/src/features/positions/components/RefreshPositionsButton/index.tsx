@@ -1,23 +1,13 @@
-import React, { useMemo, useState, useEffect, useCallback } from 'react'
-import { RefreshCwIcon, type LucideProps } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import React, { useState, useEffect, useCallback } from 'react'
 import { trackEvent } from '@/services/analytics'
 import { POSITIONS_EVENTS } from '@/services/analytics/events/positions'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { logError, Errors } from '@/services/exceptions'
 import { useRefetchBalances } from '@/hooks/useRefetchBalances'
-import { cn } from '@/utils/cn'
-import css from './styles.module.css'
+import { RefreshPositionsButtonView } from '@views/features/positions/components/RefreshPositionsButton/RefreshPositionsButtonView'
 
 const COOLDOWN_MS = 30_000
 const MIN_LOADING_MS = 1_000
-
-const RefreshIcon = (props: LucideProps & { isLoading?: boolean }) => {
-  const { isLoading, className, ...iconProps } = props
-
-  return <RefreshCwIcon {...iconProps} className={cn('size-4', isLoading && css.spinning, className)} />
-}
 
 type RefreshPositionsButtonProps = {
   entryPoint?: string
@@ -58,15 +48,6 @@ const RefreshPositionsButton = ({
     return () => clearTimeout(timer)
   }, [cooldownUntil])
 
-  const defaultTooltip = useMemo(() => {
-    if (isOnCooldown) {
-      return 'Refreshed. Please wait 30 seconds'
-    }
-    return shouldUsePortfolioEndpoint ? 'Refresh portfolio data' : 'Refresh positions data'
-  }, [shouldUsePortfolioEndpoint, isOnCooldown])
-
-  const displayTooltip = isOnCooldown ? defaultTooltip : (tooltip ?? defaultTooltip)
-
   const handleRefresh = useCallback(async () => {
     if (isLoading || isOnCooldown) return
 
@@ -95,43 +76,18 @@ const RefreshPositionsButton = ({
 
   const isDisabled = disabled || isLoading || isOnCooldown
 
-  if (!label) {
-    const iconButtonSize = size === 'large' ? 'icon' : size === 'medium' ? 'icon-sm' : 'icon-xs'
-    const iconButton = (
-      <Button variant="ghost" size={iconButtonSize} onClick={handleRefresh} disabled={isDisabled} className={className}>
-        <RefreshIcon isLoading={isLoading} />
-      </Button>
-    )
-
-    if (!displayTooltip) {
-      return iconButton
-    }
-
-    return (
-      <Tooltip>
-        <TooltipTrigger render={<span className="inline-flex" />}>{iconButton}</TooltipTrigger>
-        <TooltipContent>{displayTooltip}</TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  const buttonSize = size === 'large' ? 'lg' : size === 'medium' ? 'default' : 'sm'
-  const button = (
-    <Button variant="ghost" size={buttonSize} onClick={handleRefresh} disabled={isDisabled} className={className}>
-      <RefreshIcon isLoading={isLoading} />
-      {label}
-    </Button>
-  )
-
-  if (!displayTooltip) {
-    return button
-  }
-
   return (
-    <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>{displayTooltip}</TooltipContent>
-    </Tooltip>
+    <RefreshPositionsButtonView
+      tooltip={tooltip}
+      label={label}
+      size={size}
+      buttonClassName={className}
+      isLoading={isLoading}
+      isOnCooldown={isOnCooldown}
+      isDisabled={isDisabled}
+      shouldUsePortfolioEndpoint={shouldUsePortfolioEndpoint}
+      onRefresh={handleRefresh}
+    />
   )
 }
 

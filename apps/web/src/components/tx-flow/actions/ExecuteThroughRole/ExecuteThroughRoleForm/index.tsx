@@ -1,11 +1,7 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
 
-import ErrorMessage from '@/components/tx/ErrorMessage'
-import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getTxOptions } from '@/utils/transactions'
@@ -19,9 +15,6 @@ import AdvancedParams, { useAdvancedParams } from '../../../../tx/AdvancedParams
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 
-import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
-
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
 import { decodeBytes32String } from 'ethers'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -31,19 +24,18 @@ import { assertOnboard, assertWallet } from '@/utils/helpers'
 import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../../slots'
 import { TxFlowContext } from '../../../TxFlowProvider'
 import type { SubmitCallback } from '../../../TxFlow'
+import { ExecuteThroughRoleFormView } from '@views/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/ExecuteThroughRoleFormView'
 
-const RoleChip = ({ children }: { children: string }) => {
-  let humanReadableRoleKey = children
+const decodeRoleKey = (roleKey: string): string => {
+  let humanReadableRoleKey = roleKey
   try {
-    humanReadableRoleKey = decodeBytes32String(children)
+    humanReadableRoleKey = decodeBytes32String(roleKey)
   } catch (e) {}
 
-  return <span className={css.roleChip}>{humanReadableRoleKey}</span>
+  return humanReadableRoleKey
 }
 
 export const ExecuteThroughRoleForm = ({
@@ -154,86 +146,33 @@ export const ExecuteThroughRoleForm = ({
     !txThroughRole || isSubmitLoading || disableSubmit || (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        {!permissionsError && (
-          <>
-            <Typography className="mb-4">
-              Your <RoleChip>{role.roleKey}</RoleChip> role allows you to execute this transaction without the
-              confirmations of other owners.
-            </Typography>
-
-            <div className={commonCss.params}>
-              <AdvancedParams
-                willExecute
-                params={advancedParams}
-                recommendedGasLimit={gasLimit}
-                onFormSubmit={setAdvancedParams}
-                gasLimitError={gasLimitError}
-              />
-            </div>
-          </>
-        )}
-
-        {permissionsError && (
-          <div className="mb-4">
-            <Typography className="mb-4">
-              You are a member of the <RoleChip>{role.roleKey}</RoleChip> role but it does not allow this transaction.
-            </Typography>
-
-            <ErrorMessage>{permissionsError}</ErrorMessage>
-          </div>
-        )}
-
-        <Typography variant="paragraph-mini" className="mb-4 flex gap-[2px] text-muted-foreground">
-          Powered by
-          <img src="/images/transactions/zodiac-roles.svg" width={16} height={16} alt="Zodiac Roles" />
-          <span className={css.zodiac}>Zodiac</span>
-        </Typography>
-
-        {multiSendImpossible && (
-          <div className="mt-2">
-            <ErrorMessage>
-              The current configuration of the Zodiac Roles module does not allow executing multiple transactions in
-              batch.
-            </ErrorMessage>
-          </div>
-        )}
-
-        {!walletCanPay ? (
-          <div className="mt-2">
-            <ErrorMessage level="info">
-              Your connected wallet doesn&apos;t have enough funds to execute this transaction.
-            </ErrorMessage>
-          </div>
-        ) : (
-          gasLimitError && (
-            <div className="mt-2">
-              <TxCheckError error={gasLimitError} />
-            </div>
-          )
-        )}
-
-        <div className="pt-6">
-          <Separator bleed="6" />
-        </div>
-
-        <TxCardActions>
-          {/* Submit button, also available to non-owner role members */}
-          <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
-            {(isOk) => (
-              <SplitMenuButton
-                selected={slotId}
-                onChange={({ id }) => onChange?.(id)}
-                options={options}
-                disabled={!isOk || submitDisabled}
-                loading={isSubmitLoading}
-              />
-            )}
-          </CheckWallet>
-        </TxCardActions>
-      </form>
-    </>
+    <ExecuteThroughRoleFormView
+      onSubmit={handleSubmit}
+      roleKey={decodeRoleKey(role.roleKey)}
+      permissionsError={permissionsError}
+      advancedParams={
+        <AdvancedParams
+          willExecute
+          params={advancedParams}
+          recommendedGasLimit={gasLimit}
+          onFormSubmit={setAdvancedParams}
+          gasLimitError={gasLimitError}
+        />
+      }
+      multiSendImpossible={multiSendImpossible}
+      walletCanPay={walletCanPay}
+      gasLimitError={gasLimitError}
+      renderCheckWallet={(render) => (
+        <CheckWallet allowNonOwner checkNetwork={!submitDisabled}>
+          {render}
+        </CheckWallet>
+      )}
+      slotId={slotId}
+      onChange={onChange}
+      options={options}
+      submitDisabled={submitDisabled}
+      isSubmitLoading={isSubmitLoading}
+    />
   )
 }
 

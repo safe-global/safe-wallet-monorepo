@@ -5,19 +5,11 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { TwapOrderTransactionInfo as SwapTwapOrder } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Fragment } from 'react'
 import OrderId from '../OrderId'
-import StatusLabel from '@views/features/swap/components/StatusLabel'
 import SwapProgress from '../SwapProgress'
 import { capitalize } from '@/hooks/useMnemonicName'
-import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import type { ReactElement } from 'react'
-import { DataRow } from '@/components/common/Table/DataRow'
-import { DataTable } from '@/components/common/Table/DataTable'
 import { compareAsc } from 'date-fns'
-import css from './styles.module.css'
-import { Typography } from '@/components/ui/typography'
-import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import {
   getExecutionPrice,
   getLimitPrice,
@@ -30,11 +22,19 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/utils/transaction-guards'
-import { EmptyRow } from '@/components/common/Table/EmptyRow'
-import { PartDuration } from '@views/features/swap/components/SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '@views/features/swap/components/SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '@views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { SurplusFee } from './rows/SurplusFee'
+import {
+  AmountRowView,
+  ExpiryRowView,
+  FilledRowView,
+  OrderUidRowView,
+  PriceRowView,
+  RecipientRowView,
+  SellOrderView,
+  StatusRowView,
+  SurplusRowView,
+  TwapOrderView,
+} from '@views/features/swap/components/SwapOrder/SwapOrderView'
 
 type SwapOrderProps = {
   txData?: TransactionData | null
@@ -47,32 +47,25 @@ const AmountRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { sellToken, buyToken, sellAmount, buyAmount, kind } = order
   const isSellOrder = kind === 'sell'
   return (
-    <DataRow key="Amount" title="Amount">
-      <div className={`flex ${isSellOrder ? 'flex-col' : 'flex-col-reverse'}`}>
-        <div>
-          <span className={css.value}>
-            {isSellOrder ? 'Sell' : 'For at most'}{' '}
-            <TokenAmount
-              value={sellAmount}
-              decimals={sellToken.decimals}
-              tokenSymbol={sellToken.symbol}
-              logoUri={sellToken.logoUri ?? undefined}
-            />
-          </span>
-        </div>
-        <div>
-          <span className={css.value}>
-            {isSellOrder ? 'for at least' : 'Buy'}{' '}
-            <TokenAmount
-              value={buyAmount}
-              decimals={buyToken.decimals}
-              tokenSymbol={buyToken.symbol}
-              logoUri={buyToken.logoUri ?? undefined}
-            />
-          </span>
-        </div>
-      </div>
-    </DataRow>
+    <AmountRowView
+      isSellOrder={isSellOrder}
+      sellAmount={
+        <TokenAmount
+          value={sellAmount}
+          decimals={sellToken.decimals}
+          tokenSymbol={sellToken.symbol}
+          logoUri={sellToken.logoUri ?? undefined}
+        />
+      }
+      buyAmount={
+        <TokenAmount
+          value={buyAmount}
+          decimals={buyToken.decimals}
+          tokenSymbol={buyToken.symbol}
+          logoUri={buyToken.logoUri ?? undefined}
+        />
+      }
+    />
   )
 }
 
@@ -81,18 +74,14 @@ const PriceRow = ({ order }: { order: OrderTransactionInfo }) => {
   const executionPrice = getExecutionPrice(order)
   const limitPrice = getLimitPrice(order)
 
-  if (status === 'fulfilled') {
-    return (
-      <DataRow key="Execution price" title="Execution price">
-        1 {buyToken.symbol} = {formatAmount(executionPrice)} {sellToken.symbol}
-      </DataRow>
-    )
-  }
-
   return (
-    <DataRow key="Limit price" title="Limit price">
-      1 {buyToken.symbol} = {formatAmount(limitPrice)} {sellToken.symbol}
-    </DataRow>
+    <PriceRowView
+      isFulfilled={status === 'fulfilled'}
+      executionPrice={executionPrice}
+      limitPrice={limitPrice}
+      buyTokenSymbol={buyToken.symbol}
+      sellTokenSymbol={sellToken.symbol}
+    />
   )
 }
 
@@ -101,22 +90,7 @@ const ExpiryRow = ({ order }: { order: OrderTransactionInfo }) => {
   const now = new Date()
   const expires = new Date(validUntil * 1000)
   if (status! == 'fulfilled') {
-    if (compareAsc(now, expires) !== 1) {
-      return (
-        <DataRow key="Expiry" title="Expiry">
-          <Typography>
-            <span className="font-bold">{formatTimeInWords(validUntil * 1000)}</span> (
-            {formatDateTime(validUntil * 1000)})
-          </Typography>
-        </DataRow>
-      )
-    } else {
-      return (
-        <DataRow key="Expiry" title="Expiry">
-          {formatDateTime(validUntil * 1000)}
-        </DataRow>
-      )
-    }
+    return <ExpiryRowView validUntil={validUntil} isNotExpired={compareAsc(now, expires) !== 1} />
   }
 
   return null
@@ -129,11 +103,7 @@ const SurplusRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { sellToken, buyToken } = order
   const isSellOrder = kind === 'sell'
   if (status === 'fulfilled' || isPartiallyFilled) {
-    return (
-      <DataRow key="Surplus" title="Surplus">
-        {formatAmount(surplusPrice)} {isSellOrder ? buyToken.symbol : sellToken.symbol}
-      </DataRow>
-    )
+    return <SurplusRowView surplusPrice={surplusPrice} tokenSymbol={isSellOrder ? buyToken.symbol : sellToken.symbol} />
   }
 
   return null
@@ -142,11 +112,7 @@ const SurplusRow = ({ order }: { order: OrderTransactionInfo }) => {
 const FilledRow = ({ order }: { order: OrderTransactionInfo }) => {
   const orderClass = getOrderClass(order)
   if (['limit', 'twap'].includes(orderClass)) {
-    return (
-      <DataRow title="Filled" key="Filled">
-        <SwapProgress order={order} />
-      </DataRow>
-    )
+    return <FilledRowView progress={<SwapProgress order={order} />} />
   }
 
   return null
@@ -155,11 +121,7 @@ const FilledRow = ({ order }: { order: OrderTransactionInfo }) => {
 const OrderUidRow = ({ order }: { order: OrderTransactionInfo }) => {
   if (isSwapOrderTxInfo(order) || isSwapTransferOrderTxInfo(order)) {
     const { uid, explorerUrl } = order
-    return (
-      <DataRow key="Order ID" title="Order ID">
-        <OrderId orderId={uid} href={explorerUrl} />
-      </DataRow>
-    )
+    return <OrderUidRowView orderId={<OrderId orderId={uid} href={explorerUrl} />} />
   }
   return null
 }
@@ -167,11 +129,7 @@ const OrderUidRow = ({ order }: { order: OrderTransactionInfo }) => {
 const StatusRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { status } = order
   const isPartiallyFilled = isOrderPartiallyFilled(order)
-  return (
-    <DataRow key="Status" title="Status">
-      <StatusLabel status={isPartiallyFilled ? 'partiallyFilled' : status} />
-    </DataRow>
-  )
+  return <StatusRowView status={isPartiallyFilled ? 'partiallyFilled' : status} />
 }
 
 const RecipientRow = ({ order }: { order: OrderTransactionInfo }) => {
@@ -179,11 +137,7 @@ const RecipientRow = ({ order }: { order: OrderTransactionInfo }) => {
   const { receiver } = order
 
   if (receiver && receiver !== safeAddress) {
-    return (
-      <DataRow key="Recipient" title="Recipient">
-        <EthHashInfo address={receiver} showAvatar={false} />
-      </DataRow>
-    )
+    return <RecipientRowView recipient={<EthHashInfo address={receiver} showAvatar={false} />} />
   }
 
   return null
@@ -194,8 +148,8 @@ export const SellOrder = ({ order }: { order: SwapOrderType | SwapTransferTransa
   const orderKindLabel = capitalize(kind)
 
   return (
-    <DataTable
-      header={`${orderKindLabel} order`}
+    <SellOrderView
+      orderKindLabel={orderKindLabel}
       rows={[
         <AmountRow order={order} key="amount-row" />,
         <PriceRow order={order} key="price-row" />,
@@ -221,47 +175,21 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
 
   const isStatusKnown = Number(numberOfParts) <= TWAP_PARTS_STATUS_THRESHOLD
   return (
-    <DataTable
-      header={`${orderKindLabel} order`}
-      rows={[
-        <AmountRow order={order} key="amount-row" />,
-        <PriceRow order={order} key="price-row" />,
-        <SurplusRow order={order} key="surplus-row" />,
-        <RecipientRow order={order} key="recipient-row" />,
-        <SurplusFee order={order} key="fee-row" />,
-        <EmptyRow key="spacer-0" />,
-        <DataRow title="No of parts" key="n_of_parts">
-          {numberOfParts}
-        </DataRow>,
-        <PartSellAmount order={order} key="part_sell_amount" />,
-        <PartBuyAmount order={order} key="part_buy_amount" />,
+    <TwapOrderView
+      order={order}
+      orderKindLabel={orderKindLabel}
+      amountRow={<AmountRow order={order} key="amount-row" />}
+      priceRow={<PriceRow order={order} key="price-row" />}
+      surplusRow={<SurplusRow order={order} key="surplus-row" />}
+      recipientRow={<RecipientRow order={order} key="recipient-row" />}
+      feeRow={<SurplusFee order={order} key="fee-row" />}
+      filledRow={
         order.executedSellAmount !== null && order.executedBuyAmount !== null ? (
           <FilledRow order={order} key="filled-row" />
-        ) : (
-          <Fragment key="filled-row" />
-        ),
-        <PartDuration order={order} key="part_duration" />,
-        <EmptyRow key="spacer-1" />,
-        status !== 'fulfilled' && compareAsc(now, expires) !== 1 ? (
-          <DataRow key="Expiry" title="Expiry">
-            <Typography>
-              <span className="font-bold">{formatTimeInWords(validUntil * 1000)}</span> (
-              {formatDateTime(validUntil * 1000)})
-            </Typography>
-          </DataRow>
-        ) : (
-          <DataRow key="Expired" title="Expired">
-            {formatDateTime(validUntil * 1000)}
-          </DataRow>
-        ),
-        isStatusKnown ? (
-          <DataRow key="Status" title="Status">
-            <StatusLabel status={isPartiallyFilled ? 'partiallyFilled' : status} />
-          </DataRow>
-        ) : (
-          <Fragment key="status" />
-        ),
-      ]}
+        ) : undefined
+      }
+      isNotExpired={status !== 'fulfilled' && compareAsc(now, expires) !== 1}
+      statusLabel={isStatusKnown ? (isPartiallyFilled ? 'partiallyFilled' : status) : undefined}
     />
   )
 }
@@ -276,6 +204,7 @@ const SwapOrder = ({ txInfo }: SwapOrderProps): ReactElement | null => {
   if (isSwapOrderTxInfo(txInfo) || isSwapTransferOrderTxInfo(txInfo)) {
     return <SellOrder order={txInfo} />
   }
+
   return null
 }
 
