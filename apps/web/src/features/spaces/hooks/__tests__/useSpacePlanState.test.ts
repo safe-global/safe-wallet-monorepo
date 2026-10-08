@@ -21,6 +21,11 @@ describe('useSpacePlanState', () => {
     })
   })
 
+  it('reports a Workspace without a plan as tier none', () => {
+    mockUseSpacePlan.mockReturnValue({ status: 'none', tierName: undefined, isLoading: false, isUninitialized: false })
+    expect(renderHook(() => useSpacePlanState('space-1')).result.current?.tier).toBe('none')
+  })
+
   it('is null without a Workspace or while the plan loads', () => {
     mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: true, isUninitialized: false })
     expect(renderHook(() => useSpacePlanState('space-1')).result.current).toBeNull()

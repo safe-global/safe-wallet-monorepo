@@ -1,11 +1,11 @@
-import { useEffect, useRef } from 'react'
 import { ArrowUpRight, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackSafeProBannerClick } from '../../utils/trackSafeProBannerClick'
 import css from './styles.module.css'
@@ -20,12 +20,7 @@ const SafeProSidebarBanner = ({
   /** The footer keeps the banner mounted but invisible while another card holds its slot. */
   isShown?: boolean
 }) => {
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (!isShown || hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: 'sidebar' })
-  }, [isShown])
+  useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: 'sidebar' }, isShown)
 
   return (
     <div

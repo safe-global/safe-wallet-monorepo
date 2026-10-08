@@ -5,6 +5,7 @@ import { trackEvent, type EventLabel } from '@/services/analytics'
 type Props = {
   children: ReactElement
   as?: 'span' | 'div'
+  className?: string
   category: string
   action: string
   label?: EventLabel
@@ -16,7 +17,7 @@ const shouldTrack = (el: HTMLDivElement) => {
   return disabledChildren.length === 0
 }
 
-const Track = ({ children, as: Wrapper = 'span', mixpanelParams, ...trackData }: Props): typeof children => {
+const Track = ({ children, as: Wrapper = 'span', className, mixpanelParams, ...trackData }: Props): typeof children => {
   const el = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const Track = ({ children, as: Wrapper = 'span', mixpanelParams, ...trackData }:
   }
 
   return (
-    <Wrapper data-track={`${trackData.category}: ${trackData.action}`} ref={el}>
+    <Wrapper data-track={`${trackData.category}: ${trackData.action}`} ref={el} className={className}>
       {children}
     </Wrapper>
   )

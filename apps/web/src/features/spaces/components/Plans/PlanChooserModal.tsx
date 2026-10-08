@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,8 @@ import { Typography } from '@/components/ui/typography'
 import { highlightSafePro } from '@/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -76,12 +78,7 @@ export default function PlanChooserModal({
   const { title, subtitle } = chooserCopy(reason, endedAt)
   const trimming = pick && needsTrim(pick.option.seats) ? pick : undefined
   const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.LOCKED_MODAL }
-  const hasTrackedView = useRef(false)
-  useEffect(() => {
-    if (hasTrackedView.current) return
-    hasTrackedView.current = true
-    trackEvent(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
-  }, [])
+  useTrackOnce(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED)
 
   const start = () => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)
 
@@ -121,19 +118,17 @@ export default function PlanChooserModal({
               </div>
 
               {reason === 'payment-failed' ? (
-                <Button
-                  size="lg"
-                  accentIcon
+                <Track
+                  {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+                  mixpanelParams={entry}
+                  as="div"
                   className="self-start"
-                  disabled={isOpeningPortal}
-                  onClick={() => {
-                    start()
-                    void openPortal()
-                  }}
                 >
-                  Update billing details
-                  <ArrowRight />
-                </Button>
+                  <Button size="lg" accentIcon disabled={isOpeningPortal} onClick={() => void openPortal()}>
+                    Update billing details
+                    <ArrowRight />
+                  </Button>
+                </Track>
               ) : isLoading ? (
                 <div className="flex gap-4" data-testid="plan-chooser-skeleton">
                   <Skeleton className="h-105 flex-1 rounded-lg-xl" />
