@@ -91,7 +91,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Validation Tests
   // ========================================
 
-  it('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
+  // The CoW widget now needs a Cloudflare human check before it quotes. Automation cannot pass it.
+  it.skip('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
@@ -159,7 +160,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Order Creation Tests
   // ========================================
 
-  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
+  // The CoW widget now needs a Cloudflare human check before it quotes. Automation cannot pass it.
+  it.skip('Verify order details', { defaultCommandTimeout: 60000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const slippage = swaps.getWidgetFee()
