@@ -13885,7 +13885,7 @@ __metadata:
     js-cookie: "npm:^3.0.7"
     lodash: "npm:^4.18.1"
     lucide-react: "npm:^0.563.0"
-    mixpanel-browser: "npm:^2.66.0"
+    mixpanel-browser: "patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch"
     mockdate: "npm:^3.0.5"
     motion: "npm:^12.34.0"
     msw: "npm:^2.7.3"
@@ -36420,12 +36420,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mixpanel-browser@npm:^2.66.0":
+"mixpanel-browser@npm:2.66.0":
   version: 2.66.0
   resolution: "mixpanel-browser@npm:2.66.0"
   dependencies:
     rrweb: "npm:2.0.0-alpha.18"
   checksum: 10/e968608d9c41e3c8dfdf3ca154e55e483a5f5d4e97533b1698b5153eb247701d8c77825c15a3a7d0dd50e12361828487d8bb61e5b63bce88c4b4c7ad4a39ebc6
+  languageName: node
+  linkType: hard
+
+"mixpanel-browser@patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch":
+  version: 2.66.0
+  resolution: "mixpanel-browser@patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch::version=2.66.0&hash=332e75"
+  dependencies:
+    rrweb: "npm:2.0.0-alpha.18"
+  checksum: 10/8eb0df110b08d5ebd930b6d29a81d576a3919cbf7714fcaf9676242da8ebff0e740523a9c77bb849543e5f5cfc2c6295866146382ad52075038ddf0cfe0d59c8
   languageName: node
   linkType: hard
 
