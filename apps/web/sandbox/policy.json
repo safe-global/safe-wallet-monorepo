@@ -96,6 +96,7 @@
   "linkHosts": [
     "safe.global",
     "github.com",
+    "android.googlesource.com",
     "docs.tenderly.co",
     "safeutils.openzeppelin.com",
     "transaction-decoder.pages.dev",
