@@ -66,6 +66,20 @@ describe('runView', () => {
     expect(screen.getByText('settings')).toHaveAttribute('href', '/settings')
   })
 
+  it('keeps a same-origin URL object written by view code and drops one with a host', () => {
+    const Link = ({ href, children }: { href?: { pathname?: string; host?: string }; children: string }) => (
+      <span data-href={href ? `${href.host ?? ''}${href.pathname}` : 'none'}>{children}</span>
+    )
+    const View = loadView(
+      `import Link from 'next/link'\nexport const View = () => <><Link href={{ pathname: '/home', query: { safe: 'eth:0x1' } }}>own</Link><Link href={{ host: 'example.com', pathname: '/' }}>external</Link></>`,
+      { 'next/link': { __esModule: true, default: Link } },
+    )
+    render(<View />)
+
+    expect(screen.getByText('own')).toHaveAttribute('data-href', '/home')
+    expect(screen.getByText('external')).toHaveAttribute('data-href', 'none')
+  })
+
   it('drops dangerouslySetInnerHTML and url() styles from view code', () => {
     const View = loadView(
       `export const View = () => <div data-testid="root" style={{ color: 'red', backgroundImage: 'url(https://example.com/x.png)' }} dangerouslySetInnerHTML={{ __html: '<b>x</b>' }} />`,

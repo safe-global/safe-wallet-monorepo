@@ -85,6 +85,17 @@ const urlToken = (url: string): object => {
   return token
 }
 
+const isSameOriginUrlObject = (url: object): boolean => {
+  const { protocol, host, hostname, href, pathname } = url as Obj
+  return (
+    protocol === undefined &&
+    host === undefined &&
+    hostname === undefined &&
+    href === undefined &&
+    (pathname === undefined || (typeof pathname === 'string' && isSafeLiteralUrl(pathname)))
+  )
+}
+
 const isSafeLiteralUrl = (url: string): boolean =>
   url.startsWith('#') || url.startsWith('?') || (url.startsWith('/') && !url.startsWith('//'))
 
@@ -259,7 +270,8 @@ const sanitizeProps = (type: unknown, props: Obj | null | undefined): Obj => {
         continue
       }
       const real = isObjectLike(value) ? toTrusted.get(value) : undefined
-      if (typeof real === 'string') clean[key] = real
+      if (typeof real === 'string' || (isObjectLike(real) && !toTrusted.has(real))) clean[key] = real
+      else if (isObjectLike(value) && isSameOriginUrlObject(value)) clean[key] = outbound(value)
       continue
     }
     if (ELEMENT_TYPE_PROPS.has(key) && typeof value === 'string' && HOST_DENY.has(value)) continue
