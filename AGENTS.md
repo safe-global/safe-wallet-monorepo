@@ -12,6 +12,7 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                             |
 | `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E (legacy — maintenance only)                                                |
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md) |
+| `storybook/`           | [storybook/AGENTS.md](storybook/AGENTS.md)                     | Views: everything the web app renders; rules for views vs containers                   |
 | `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | TanStack Router + Vite migration runtime — reuses `apps/web/src`                       |
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                  |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                                                         |

@@ -13,7 +13,12 @@
     "react-resizable-panels",
     "date-fns",
     "next/link",
-    "next/image"
+    "next/image",
+    "motion",
+    "framer-motion",
+    "qrcode.react",
+    "blo",
+    "@date-fns/tz"
   ],
   "modules": [
     "@/utils/cn",
@@ -23,6 +28,10 @@
     "@safe-global/utils/utils/formatters",
     "@safe-global/utils/utils/addresses",
     "@safe-global/utils/utils/formatNumber",
-    "@safe-global/utils/utils/date"
-  ]
+    "@safe-global/utils/utils/date",
+    "@/services/analytics/events/",
+    "@/config/routes",
+    "@safe-global/utils/config/constants"
+  ],
+  "widgets": ["@/components/common/Track"]
 }

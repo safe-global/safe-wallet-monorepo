@@ -8,7 +8,21 @@
 const fs = require('fs')
 const path = require('path')
 const ts = require('typescript')
-const policy = require('./policy.json')
+
+const POLICY_DIR = path.join(__dirname, 'policy.d')
+
+/** policy.json plus every fragment in policy.d/, read on each call so new fragments apply without a restart. */
+function readPolicy() {
+  const parts = [path.join(__dirname, 'policy.json')]
+  if (fs.existsSync(POLICY_DIR))
+    for (const f of fs.readdirSync(POLICY_DIR).sort()) if (f.endsWith('.json')) parts.push(path.join(POLICY_DIR, f))
+  const merged = { packages: [], modules: [], widgets: [] }
+  for (const f of parts) {
+    const p = JSON.parse(fs.readFileSync(f, 'utf8'))
+    for (const key of Object.keys(merged)) merged[key].push(...(p[key] || []))
+  }
+  return merged
+}
 
 const WEB_SRC = path.resolve(__dirname, '../src')
 const VIEW_SRC = path.resolve(__dirname, '../../../storybook/src')
@@ -30,14 +44,16 @@ function resolveLocal(from, specifier) {
 
 const asAlias = (file) => '@/' + path.relative(WEB_SRC, file).replace(/(\/index)?\.(tsx?|js)$/, '')
 
-function checkPolicy(from, specifier) {
+function checkPolicy(from, specifier, policy = readPolicy()) {
   if (RUNTIME_PROVIDED.has(specifier)) return
   if (policy.packages.some((p) => specifier === p || specifier.startsWith(p + '/'))) return
-  if (policy.modules.includes(specifier)) return
+  const trusted = [...policy.modules, ...policy.widgets]
+  const allows = (spec) => trusted.some((t) => (t.endsWith('/') ? spec.startsWith(t) : spec === t))
+  if (allows(specifier)) return
   if (specifier.startsWith('@/public/') && ASSET.test(specifier)) return
   const file = resolveLocal(from, specifier)
   if (file && (file.startsWith(VIEW_SRC + path.sep) || ASSET.test(file))) return
-  if (file && file.startsWith(WEB_SRC + path.sep) && policy.modules.includes(asAlias(file))) return
+  if (file && file.startsWith(WEB_SRC + path.sep) && allows(asAlias(file))) return
   throw new Error(
     `${path.relative(VIEW_SRC, from)} imports "${specifier}", which apps/web/sandbox/policy.json does not allow for view code`,
   )
@@ -102,8 +118,7 @@ function collect(source, file) {
   return { usage, exportsNames, starExports }
 }
 
-module.exports = function viewLoader(source) {
-  const file = this.resourcePath
+function compile(source, file) {
   const { outputText } = ts.transpileModule(source, {
     fileName: file,
     compilerOptions: {
@@ -115,7 +130,29 @@ module.exports = function viewLoader(source) {
     },
   })
   const required = [...new Set([...outputText.matchAll(/require\("([^"]+)"\)/g)].map((m) => m[1]))]
-  for (const spec of required) checkPolicy(file, spec)
+  return { outputText, required }
+}
+
+/** Returns the policy violations of one view module, without throwing. */
+function checkViewFile(file) {
+  const { required } = compile(fs.readFileSync(file, 'utf8'), file)
+  const policy = readPolicy()
+  const errors = []
+  for (const spec of required) {
+    try {
+      checkPolicy(file, spec, policy)
+    } catch (e) {
+      errors.push(e.message)
+    }
+  }
+  return errors
+}
+
+module.exports = function viewLoader(source) {
+  const file = this.resourcePath
+  const { outputText, required } = compile(source, file)
+  const policy = readPolicy()
+  for (const spec of required) checkPolicy(file, spec, policy)
 
   const { usage, exportsNames, starExports } = collect(source, file)
   const lines = [`import { runView as __runView } from '@/sandbox/runtime'`]
@@ -156,3 +193,7 @@ module.exports = function viewLoader(source) {
   for (const spec of starExports) lines.push(`export * from ${JSON.stringify(spec)}`)
   return lines.join('\n') + '\n'
 }
+
+module.exports.checkViewFile = checkViewFile
+module.exports.VIEW_SRC = VIEW_SRC
+module.exports.WEB_SRC = WEB_SRC
