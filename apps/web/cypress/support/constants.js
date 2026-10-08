@@ -312,6 +312,7 @@ export const chainFeatures = {
   staking: 'STAKING',
   earn: 'EARN',
   spaces: 'SPACES',
+  proposerGating: 'PROPOSER_GATING',
 }
 
 export const CURRENT_COOKIE_TERMS_VERSION = Cypress.expose('CURRENT_COOKIE_TERMS_VERSION')

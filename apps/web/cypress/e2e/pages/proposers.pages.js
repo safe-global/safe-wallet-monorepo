@@ -1,3 +1,4 @@
+import * as constants from '../../support/constants'
 import * as main from './main.page'
 import * as addressBook from './address_book.page'
 import * as batch from './batches.pages'
@@ -5,6 +6,8 @@ import * as create_tx from './create_tx.pages'
 
 export const proposersSection = '[data-testid="proposer-section"]'
 const addProposerBtn = '[data-testid="add-proposer-btn"]'
+const safeProLock = '[data-testid="safe-pro-lock"]'
+const addingProposersLockedStr = 'Adding proposers requires Safe Pro'
 
 const deleteProposerBtn = '[data-testid="delete-proposer-btn"]'
 const editProposerBtn = '[data-testid="edit-proposer-btn"]'
@@ -53,6 +56,22 @@ export function verifyProposerInTxActionList(address) {
 }
 export function verifyProposedTxMsgVisible() {
   cy.contains(proposedTxMessage).should('be.visible')
+}
+
+/**
+ * Without a Workspace plan that grants policies, Safe Pro replaces the "Add proposer" button. Specs that test
+ * proposers themselves turn that gate off; call it before the visit.
+ */
+export function disableProposerGating() {
+  main.injectChainFeature({
+    chainId: constants.networkKeys.sepolia,
+    removeFlag: constants.chainFeatures.proposerGating,
+  })
+}
+
+export function verifyAddProposerIsLocked() {
+  cy.get(safeProLock).should('be.visible').and('contain', addingProposersLockedStr)
+  cy.get(addProposerBtn).should('not.exist')
 }
 
 export function clickOnAddProposerBtn() {
