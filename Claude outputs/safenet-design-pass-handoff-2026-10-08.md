@@ -1,6 +1,6 @@
 # Handoff: Safenet design pass (PR #8957)
 
-**Goal:** UI-only Safenet checks design pass on branch `austin/safenet-design-pass`, stacked on Florent’s [#8951](https://github.com/safe-global/safe-wallet-monorepo/pull/8951). Storybook is the source of truth; align copy and components with the [Wallet integration PRD](https://app.notion.com/p/3988180fe57381d2b43dc9b1b3488771) and [design pass feedback](https://app.notion.com/p/3f18180fe573812ea0b9e433420042f8).
+**Goal:** UI-only Safenet checks design pass on branch `austin/safenet-design-pass`, stacked on Florent’s [#8951](https://github.com/safe-global/safe-wallet-monorepo/pull/8951). Storybook is the source of truth; align copy and components with the [Wallet integration PRD](https://app.notion.com/3988180fe57381d2b43dc9b1b3488771) and [design pass feedback](https://app.notion.com/p/3f18180fe573812ea0b9e433420042f8).
 
 **PR:** https://github.com/safe-global/safe-wallet-monorepo/pull/8957  
 **Worktree:** `/Users/austin/Developer/Safe/_worktrees/safe-wallet-monorepo/safenet-design-pass`  
@@ -10,41 +10,50 @@
 
 ## Local setup
 
-| What                                           | How                                                                      |
-| ---------------------------------------------- | ------------------------------------------------------------------------ |
-| Storybook                                      | From repo root: `cd apps/web && yarn storybook` (port **6006**)          |
-| Local Storybook base                           | http://localhost:6006/                                                   |
-| App preview (deployed; stale until push)       | https://austin-safenet-design-pass--walletweb.review.5afe.dev/           |
-| Storybook preview (deployed; stale until push) | https://austin-safenet-design-pass--walletweb.review.5afe.dev/storybook/ |
+| What                         | How                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| Storybook                    | From repo root: `cd apps/web && yarn storybook` (port **6006**)          |
+| Local Storybook base         | http://localhost:6006/                                                   |
+| App preview (deployed)       | https://austin-safenet-design-pass--walletweb.review.5afe.dev/           |
+| Storybook preview (deployed) | https://austin-safenet-design-pass--walletweb.review.5afe.dev/storybook/ |
 
 **Protocol blocker (unchanged):** New Safenet contract (Oct 6); sentinels not on it yet → checks can start but may not finish with a real verdict until Florent/protocol confirms.
 
 ---
 
-## What landed in the local commit (not pushed)
+## Commits on origin (pushed 2026-10-08)
 
-Single design-pass commit on top of `origin/austin/safenet-design-pass` (squashes prior local PRD copy fix with the rest of the pass):
+Two commits ahead of the prior remote tip (`58714338a`):
 
-1. **PRD copy** — Rule text from Florent’s plain-meaning table (`rejectionRules.ts`); no aggregate “malicious threats” headline when cited rules exist.
-2. **Lighter details card** — Starts **collapsed** (no auto-expand on risk). Risks with rules show **only** `FlaggedRuleBlocks`. Removed six-rule `ChecksBlock` grid and sentinel vote summary. Proof links via `SafenetIconLink` (attestation vs explorer by state).
-3. **Queue row chip removed** — Deleted `SafenetQueueStatus`, stories, tests; removed queue cell from `TxSummary` and feature contract.
-4. **Storybook cleanup** — Removed **Queue**, **Transaction flow - Pro rollout off**, split new token/native transfer stories. One **New transaction review** per flow group. Group renamed to **Transaction details** (`pages-safenet-transaction-details--*`).
-5. **Confirm flow** — `SafenetChecksSection` copy/layout; attestation/explorer icon links; secondary timing uses contrast tokens; **no time estimates** in UI.
-6. **Timing helpers removed** — Deleted `checkTiming.ts`, `useCheckTiming.ts`, and related tests (no estimated durations in product copy).
-7. **Storybook preview** — Minor decorator tweaks in `.storybook/preview.tsx` and `.storybook-vite/preview.tsx`.
+| SHA         | Summary                                                                                                                                                                                                                                                                                                                                                    |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `702be1e11` | **feat(safenet): align design pass with PRD and Storybook review** — PRD rule copy; lighter **collapsed** details card (rules-only flagged blocks, icon proof links); queue row chip removed; Storybook trimmed to Active Pro / No Plan / **Transaction details**; confirm-flow copy and contrast tokens; timing helpers removed; no time estimates in UI. |
+| `1f8419506` | **fix(safenet): improve details card secondary text and BENIGN line** — receipt-style meta tokens on the inset card; BENIGN state shows outcome + verified timestamp on one line.                                                                                                                                                                          |
 
 **Intentionally not in this diff:** Auto-expand Safenet card on risk on live tx detail (Notion still mentions “opens on risk”; code **starts collapsed** everywhere).
 
 ---
 
-## Git state (after 2026-10-08 commit)
+## Git state
 
-| Item         | State                                                                               |
-| ------------ | ----------------------------------------------------------------------------------- |
-| Branch       | `austin/safenet-design-pass`                                                        |
-| vs origin    | **1 commit ahead**, **not pushed** (unless Austin asked to push after this handoff) |
-| Working tree | Clean after commit                                                                  |
-| Handoff      | This file — tracked under `Claude outputs/` (not gitignored)                        |
+| Item         | State                                                                        |
+| ------------ | ---------------------------------------------------------------------------- |
+| Branch       | `austin/safenet-design-pass`                                                 |
+| vs origin    | **Pushed** — `origin/austin/safenet-design-pass` includes both commits above |
+| Working tree | Clean                                                                        |
+| Handoff      | This file — tracked under `Claude outputs/`                                  |
+
+---
+
+## Simon feedback — actioned (summary)
+
+- **Storybook scope** — Removed Queue, Pro rollout off, and duplicate new-token/native stories; one **New transaction review** per flow group; **Transaction details** group for tx-detail states.
+- **Details card** — Collapsed by default; flagged rules only (no six-rule grid / sentinel vote summary); attestation vs explorer icon links by state.
+- **Copy** — Rule text from PRD plain-meaning table; no aggregate “malicious threats” headline when rules are cited; no duration estimates in product copy.
+- **Queue** — Safenet queue chip and related stories/tests removed from the tx list row.
+- **Polish (follow-up commit)** — Secondary/meta typography on the details card; BENIGN outcome line layout.
+
+**Notion:** [Design pass feedback](https://app.notion.com/p/3f18180fe573812ea0b9e433420042f8) updated to match trimmed sidebar, transaction-details slug, and collapsed card default.
 
 ---
 
@@ -53,7 +62,7 @@ Single design-pass commit on top of `origin/austin/safenet-design-pass` (squashe
 | Rule           | Detail                                                              |
 | -------------- | ------------------------------------------------------------------- |
 | PRD copy       | User-facing rule text from PRD plain-meaning table only.            |
-| Commits / push | **Only when Austin asks.** No push unless asked.                    |
+| Commits / push | **Only when Austin asks.**                                          |
 | GPG            | Sign via **1Password**; never `--no-gpg-sign`.                      |
 | PR hygiene     | Read dev-comments skill before PR comments/descriptions.            |
 | External text  | Use write-like-austin for PR bodies, Slack, Linear, review replies. |
@@ -117,7 +126,7 @@ Slug pattern: `?path=/story/<group-slug>--<story-slug>`
 - Confirm transaction — `...--confirm-transaction`
 - New transaction review — `...--new-transaction-review`
 
-### Preview (after push + deploy)
+### Preview (after deploy)
 
 Prepend `https://austin-safenet-design-pass--walletweb.review.5afe.dev/storybook/`
 
@@ -126,12 +135,12 @@ https://austin-safenet-design-pass--walletweb.review.5afe.dev/storybook/?path=/s
 
 ---
 
-## Next steps (Simon review)
+## Next steps
 
-1. **Storybook walkthrough** — Sidebar structure above; collapsed details card; no queue chip; Active Pro flows without stray workspace sign-in.
-2. **Design open items** — Progress bar vs spinner + “In progress”; card scope vs History; submitted timing copy; 1/1 Safe “No, later” when Safenet on.
-3. **When Austin asks to push** — Update Notion feedback page (drop Queue / Pro rollout sections, transaction-details slug, note collapsed default).
-4. **Tests** — `cd apps/web && yarn test src/features/safenet-checks` (111 tests in safenet + TxSummary scope as of commit day).
+1. **Simon review** — Walk Storybook (local or preview) using the sidebar above; focus on collapsed details card, confirm flows, and BENIGN / risk copy.
+2. **Preview** — After push, **Web Deploy to dev/staging** (`web-deploy-dev.yml`) runs on PR #8957 and rebuilds branch preview + Storybook (watch PR comment “Branch preview”).
+3. **Design open items** — Progress bar vs spinner; card scope vs History; submitted timing copy; 1/1 Safe “No, later” when Safenet on (see Notion feedback page).
+4. **Tests** — `cd apps/web && yarn test src/features/safenet-checks` (safenet + TxSummary scope).
 
 ---
 
@@ -160,16 +169,14 @@ Read this handoff first:
 Worktree: /Users/austin/Developer/Safe/_worktrees/safe-wallet-monorepo/safenet-design-pass
 Branch: austin/safenet-design-pass
 
-Git: design-pass work is in one local commit ahead of origin (not pushed). Do not push unless I explicitly ask.
+Git: origin is up to date with 702be1e11 (design pass) and 1f8419506 (details card typography / BENIGN line). Do not push unless I explicitly ask.
 
 Top priorities:
-1. Help Simon review in Storybook (localhost:6006) — walk Transaction details and confirm-flow stories using the sidebar in the handoff.
-2. Draft PR #8957 / Notion updates for the trimmed sidebar (no Queue, no Pro rollout, Transaction details slug, collapsed card default).
-3. Resolve open design questions on the Notion feedback page (progress vs spinner, card scope, timing copy).
+1. Support Simon's Storybook review — Transaction details + Active Pro / No Plan confirm flows (sidebar in handoff).
+2. Track remaining open design items on Notion (progress vs spinner, card scope, timing copy).
+3. If I ask for changes, keep PRD table copy only and GPG via 1Password for commits.
 
-Standing rules: PRD table copy only; GPG via 1Password if I ask for commits; no push without my say-so.
-
-Start by summarizing what's in the unpushed commit vs origin, then propose a Simon review checklist story-by-story.
+Start by confirming preview URLs are fresh (PR #8957 web-deploy-dev), then offer a story-by-story review checklist for Simon.
 ```
 
 ---
@@ -185,14 +192,12 @@ Read this handoff first:
 Worktree: /Users/austin/Developer/Safe/_worktrees/safe-wallet-monorepo/safenet-design-pass
 Branch: austin/safenet-design-pass
 
-Git: design-pass work is in one local commit ahead of origin (not pushed). Do not push unless I explicitly ask.
+Git: origin is up to date with 702be1e11 (design pass) and 1f8419506 (details card typography / BENIGN line). Do not push unless I explicitly ask.
 
 Top priorities:
-1. Help Simon review in Storybook (localhost:6006) — walk Transaction details and confirm-flow stories using the sidebar in the handoff.
-2. Draft PR #8957 / Notion updates for the trimmed sidebar (no Queue, no Pro rollout, Transaction details slug, collapsed card default).
-3. Resolve open design questions on the Notion feedback page (progress vs spinner, card scope, timing copy).
+1. Support Simon's Storybook review — Transaction details + Active Pro / No Plan confirm flows (sidebar in handoff).
+2. Track remaining open design items on Notion (progress vs spinner, card scope, timing copy).
+3. If I ask for changes, keep PRD table copy only and GPG via 1Password for commits.
 
-Standing rules: PRD table copy only; GPG via 1Password if I ask for commits; no push without my say-so.
-
-Start by summarizing what's in the unpushed commit vs origin, then propose a Simon review checklist story-by-story.
+Start by confirming preview URLs are fresh (PR #8957 web-deploy-dev), then offer a story-by-story review checklist for Simon.
 ```
