@@ -13,7 +13,7 @@ import type {
   PolicyTokenInfo,
   ProposerPolicy,
   SpendingLimitPolicy,
-} from '@/features/spaces/components/Policies/types'
+} from '@views/features/spaces/components/Policies/types'
 
 export type ResolveTokenInfo = (chainId: string, tokenAddress: string) => PolicyTokenInfo | undefined
 

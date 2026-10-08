@@ -4,7 +4,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
 import { cn } from '@/utils/cn'
 import ChainLogo from './ChainLogo'
-import type { SafeItemDataChain } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemDataChain } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 const MAX_CHAIN_LOGOS = 3
 

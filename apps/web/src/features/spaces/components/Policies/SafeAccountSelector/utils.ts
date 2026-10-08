@@ -4,7 +4,7 @@ import {
   type SafeAccountEntry,
   type SafeAccountGroup,
   type SafeAccountOption,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 /** Same format as the topbar selector's row ids. */
 export const buildSafeAccountId = (chainId: string, address: string): string => `${chainId}:${address}`

@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { useTxFilter } from '@/utils/tx-history-filter'
-import { DateTime } from '@/components/common/DateTime/DateTime'
+import { DateTime } from '@views/components/common/DateTime/DateTime'
 
 const DAYS_THRESHOLD = 60
 

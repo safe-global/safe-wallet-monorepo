@@ -12,7 +12,7 @@ import {
   MODULE_ALREADY_ENABLED_ERROR,
   REVIEW_STEP_TITLE,
   UNKNOWN_MODULE_ERROR,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import ReviewEnableModule, { type EnableModuleFlowData } from '../ReviewEnableModule'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))

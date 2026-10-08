@@ -1,5 +1,5 @@
 import { FlaskConical } from 'lucide-react'
-import type { SidebarDeveloperGroupConfig } from '@/features/spaces/components/Sidebar/types'
+import type { SidebarDeveloperGroupConfig } from '@views/features/spaces/components/Sidebar/types'
 import { useFeatureFlagsItem } from './useFeatureFlagsItem'
 
 /**

@@ -11,7 +11,7 @@ import type {
   OverviewMap,
   SelectedSafe,
   SpaceSafeEntry,
-} from '@/features/spaces/components/SecurityHub/types'
+} from '@views/features/spaces/components/SecurityHub/types'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 

@@ -7,7 +7,7 @@ import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
-import SettingsCard from '@/components/settings/SettingsCard'
+import SettingsCard from '@views/components/settings/SettingsCard'
 import { reloadPage } from '@/utils/navigation'
 
 export enum EnvVariablesField {

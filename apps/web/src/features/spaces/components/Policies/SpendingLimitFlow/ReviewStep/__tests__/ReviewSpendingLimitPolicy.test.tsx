@@ -25,11 +25,11 @@ import {
   EXISTING_LIMITS_LOAD_ERROR,
   EXISTING_LIMIT_IN_POLICY_ERROR,
   REVIEW_STEP_TITLE,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import type { SpendingLimitPolicyFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
 import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
-import { EditModeProvider } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))

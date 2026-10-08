@@ -1,5 +1,5 @@
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { SpaceSummary } from '@/features/spaces/components/SpaceCard'
+import { SpaceSummary } from '@views/features/spaces/components/SpaceCard'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'

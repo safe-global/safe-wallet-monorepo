@@ -7,7 +7,7 @@ import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 type ThemeOption = {
   value: 'light' | 'dark' | 'system'

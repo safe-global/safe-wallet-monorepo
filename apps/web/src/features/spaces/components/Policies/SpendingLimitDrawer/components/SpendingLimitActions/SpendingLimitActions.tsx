@@ -5,8 +5,8 @@ import {
   EDIT_LOCKED_HELPER,
   ENABLE_LOCKED_HELPER,
   TX_LOAD_FAILED_HELPER,
-} from '@/features/spaces/components/Policies/SpendingLimitDrawer/messages'
-import type { SpendingLimitDrawerState } from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
+import type { SpendingLimitDrawerState } from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import { CopyTransactionLink } from '../CopyTransactionLink'
 
 type PendingSpendingLimitActions = {

@@ -2,9 +2,12 @@ import type { ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Card } from '@/components/ui/card'
 import LimitSummaryRow from './LimitSummaryRow'
-import SummaryField from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
-import { LIMITS_LABEL, SPENDER_LABEL } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import type { SpenderSummary } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+import SummaryField from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
+import {
+  LIMITS_LABEL,
+  SPENDER_LABEL,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { SpenderSummary } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 const AVATAR_SIZE = 24
 

@@ -4,7 +4,7 @@ import { SafeCardReadOnly } from '@/features/spaces'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
-import SectionWrapper from '@/features/global-search/components/SearchSection/SectionWrapper'
+import SectionWrapper from '@views/features/global-search/components/SearchSection/SectionWrapper'
 
 const TrustedSafesSection = ({ query, label }: SectionItemProps) => {
   const { allMultiChainSafes, allSingleSafes } = useAllSafesGrouped()

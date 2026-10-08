@@ -18,6 +18,7 @@
     "incremental": true,
     "paths": {
       "@/*": ["./src/*", "../../storybook/src/*"],
+      "@views/*": ["../../storybook/src/*"],
       "@safe-global/safe-apps-sdk/*": ["../../node_modules/@safe-global/safe-apps-sdk/*"],
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],

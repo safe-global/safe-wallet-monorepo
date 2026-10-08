@@ -9,7 +9,7 @@ import {
   getAuditEventDescription,
   getDefaultTargetDisplay,
   getTargetUserId,
-} from '@/features/spaces/components/SpaceActivityLog/auditEventCopy'
+} from '@views/features/spaces/components/SpaceActivityLog/auditEventCopy'
 
 // People resolve as: space member name → wallet address → server label.
 // Shared address-book names are member-editable and are deliberately not

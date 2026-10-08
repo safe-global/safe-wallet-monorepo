@@ -2,7 +2,7 @@ import React, { act } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SafeDropdownContainer from '../SafeDropdownContainer'
-import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 // Resolver is exercised in its own unit test; here we stub it so the component renders without a
 // store. Default behaviour mirrors production: the safe's own name wins, else the address-book name.

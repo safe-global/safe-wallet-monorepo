@@ -14,7 +14,7 @@ import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {

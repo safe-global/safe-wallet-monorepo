@@ -3,20 +3,20 @@ import { Plus } from 'lucide-react'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
 import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import { Button } from '@/components/ui/button'
-import type { SafeAccountEntry } from '@/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SafeAccountEntry } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
-import { useIsEditMode } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import PendingRemovalsCard from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
+import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import PendingRemovalsCard from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
 import { useEditState } from '../EditFlow/useEditState'
 import SafeAccountField from './SafeAccountField'
-import SpenderCallout from '@/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
+import SpenderCallout from '@views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
 import SpenderCard from './SpenderCard'
 import {
   createDefaultFormValues,
   createEmptySpender,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { ADD_SPENDER_LABEL, NEXT_LABEL } from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import { ADD_SPENDER_LABEL, NEXT_LABEL } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export type SpendingLimitPolicyFormProps = {
   defaultValues: SpendingLimitPolicyFormValues

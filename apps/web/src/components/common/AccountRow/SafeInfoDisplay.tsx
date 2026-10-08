@@ -9,12 +9,12 @@ import {
   getSafeDisplayInfo,
   TOOLTIP_DELAY_MS,
   HOVER_ACTION_CLASS,
-} from '@/components/common/AccountRow/utils'
+} from '@views/components/common/AccountRow/utils'
 import CopyAddressButton from './CopyAddressButton'
-import ExplorerLinkButton from '@/components/common/AccountRow/ExplorerLinkButton'
-import FullAddress from '@/components/common/AccountRow/FullAddress'
-import RenameButton from '@/components/common/AccountRow/RenameButton'
-import TruncatedText, { shouldOpenTooltip } from '@/components/common/AccountRow/TruncatedText'
+import ExplorerLinkButton from '@views/components/common/AccountRow/ExplorerLinkButton'
+import FullAddress from '@views/components/common/AccountRow/FullAddress'
+import RenameButton from '@views/components/common/AccountRow/RenameButton'
+import TruncatedText, { shouldOpenTooltip } from '@views/components/common/AccountRow/TruncatedText'
 
 export interface SafeInfoDisplayProps {
   name: string

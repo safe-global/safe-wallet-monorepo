@@ -4,14 +4,14 @@ import { Badge } from '@/components/ui/badge'
 import { Progress, ProgressIndicator, ProgressTrack } from '@/components/ui/progress'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import { CHANGE_BADGE } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import type { PolicyAllowance } from '@/features/spaces/components/Policies/types'
+import { CHANGE_BADGE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { PolicyAllowance } from '@views/features/spaces/components/Policies/types'
 import {
   formatAllowanceAmount,
   formatRemaining,
   formatResetUtc,
   remainingPercent,
-} from '@/features/spaces/components/Policies/SpendingLimitDrawer/format'
+} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 
 const TOKEN_ICON_SIZE = 24
 

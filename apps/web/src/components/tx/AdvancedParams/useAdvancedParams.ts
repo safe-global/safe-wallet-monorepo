@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import useGasPrice from '@/hooks/useGasPrice'
-import { type AdvancedParameters } from '@/components/tx/AdvancedParams/types'
+import { type AdvancedParameters } from '@views/components/tx/AdvancedParams/types'
 import useUserNonce from './useUserNonce'
 
 export const useAdvancedParams = (

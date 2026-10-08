@@ -3,7 +3,7 @@ import { setPendingBannerDismissed } from '../../store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
-import { HnPendingBanner } from '@/features/hypernative/components/HnPendingBanner/HnPendingBanner'
+import { HnPendingBanner } from '@views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
 import type { ReactElement } from 'react'
 
 export interface HnPendingBannerWithDismissalProps extends WithHnSignupFlowProps {

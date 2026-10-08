@@ -5,12 +5,12 @@ import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
-import { createDefaultFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+import { createDefaultFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   CREATE_STEP_TITLE,
   FLOW_HELP_LABEL,
   FLOW_SUBTITLE,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import SpendingLimitFlow from '..'
 
 // A miniature of TxFlow: it shows one step at a time, so the Create step really unmounts when the

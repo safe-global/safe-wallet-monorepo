@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import HubSpotForm from '../HubSpotForm/HubSpotForm'
-import HnSignupLayout from '@/features/hypernative/components/HnSignupFlow/HnSignupLayout'
+import HnSignupLayout from '@views/features/hypernative/components/HnSignupFlow/HnSignupLayout'
 import css from './styles.module.css'
 
 export type HnSignupFormProps = {

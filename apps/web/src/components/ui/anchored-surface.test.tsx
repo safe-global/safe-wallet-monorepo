@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react'
-import { Popover, PopoverContent } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem } from '@/components/ui/select'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { Popover, PopoverContent } from '@views/components/ui/popover'
+import { Select, SelectContent, SelectItem } from '@views/components/ui/select'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem } from '@views/components/ui/dropdown-menu'
 
 /**
  * The edge that makes an anchored panel readable. `--popover` and `--background` are both #ffffff in

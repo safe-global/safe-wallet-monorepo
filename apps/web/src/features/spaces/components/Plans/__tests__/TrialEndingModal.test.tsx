@@ -39,7 +39,7 @@ jest.mock('@/services/local-storage/session', () => ({
     },
   }),
 }))
-jest.mock('@/features/spaces/components/SafeProModals', () => ({
+jest.mock('@views/features/spaces/components/SafeProModals', () => ({
   SafeProNoticeModal: ({
     title,
     body,

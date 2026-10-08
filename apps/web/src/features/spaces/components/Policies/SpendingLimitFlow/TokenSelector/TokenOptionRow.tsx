@@ -2,7 +2,7 @@ import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
-import { TOKEN_ICON_SIZE } from '@/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+import { TOKEN_ICON_SIZE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 /** Shown under the symbol: the name when both exist, the address when only one does. */
 const secondaryLine = (option: TokenOption): string => {

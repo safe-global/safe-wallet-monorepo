@@ -14,7 +14,7 @@ export type {
   SelectedSafe,
   SpaceSafeEntry,
   ChainEntry,
-} from '@/features/spaces/components/SecurityHub/types'
+} from '@views/features/spaces/components/SecurityHub/types'
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).

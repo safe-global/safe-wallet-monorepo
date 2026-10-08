@@ -10,9 +10,9 @@ import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
-} from '@/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
-import type { SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
-import { ScoreGauge } from '@/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
+} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
+import type { SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
+import { ScoreGauge } from '@views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
 import { Button } from '@/components/ui/button'
 
 const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']

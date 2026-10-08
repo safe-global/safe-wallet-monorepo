@@ -30,7 +30,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`

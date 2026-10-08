@@ -2,7 +2,7 @@ import { getAddress } from 'ethers'
 import { renderHook } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { EditModeProvider } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { ExistingSpendingLimitsContext } from '../../ExistingSpendingLimitsProvider'
 import { useExistingLimitTokens } from '../useExistingLimitTokens'
 

@@ -16,7 +16,7 @@ import type {
   ResolvedSidebarGroup,
   SidebarItemConfig,
   SpaceItem,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 import { safeDefiGroup, safeMainNavigation } from './config'
 
 const defaultChainShortName =

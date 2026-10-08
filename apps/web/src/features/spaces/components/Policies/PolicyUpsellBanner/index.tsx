@@ -16,7 +16,7 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../../Plans/planSelection'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import type { PolicyLock } from '@/features/spaces/components/Policies/policyLock'
+import type { PolicyLock } from '@views/features/spaces/components/Policies/policyLock'
 
 type PolicyUpsellBannerProps = Pick<PolicyLock, 'planName' | 'workspaceName' | 'onUpgrade'>
 

@@ -19,13 +19,13 @@ import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
-import { matchesTokenQuery } from '@/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
+import { matchesTokenQuery } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import DisabledTokenOption from './DisabledTokenOption'
 import {
   TokenGroupError,
   TokenGroupLoading,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
 import {
   BALANCES_LOAD_ERROR_TEXT,
   HELD_GROUP_LABEL,
@@ -35,7 +35,7 @@ import {
   TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */

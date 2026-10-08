@@ -5,7 +5,7 @@ import { Typography } from '@/components/ui/typography'
 import {
   PROPOSER_ROLE_DESCRIPTION,
   PROPOSER_ROLE_TITLE,
-} from '@/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 
 const ProposerRoleHeader = () => (
   <div className="flex items-center gap-4">

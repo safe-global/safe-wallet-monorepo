@@ -15,7 +15,7 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
@@ -31,14 +31,14 @@ import {
   limitsPath,
   spenderAddressPath,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   EXISTING_LIMIT_TOOLTIP,
   FREQUENCY_LABEL,
   LIMIT_AMOUNT_LABEL,
   LIMIT_AMOUNT_PLACEHOLDER,
   REMOVE_LIMIT_LABEL,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5

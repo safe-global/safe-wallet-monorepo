@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { motion } from 'framer-motion'
-import { ROW_STAGGER } from '@/features/spaces/components/SecurityHub/components/SecurityChecks/constants'
+import { ROW_STAGGER } from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/constants'
 
 export type SectionPanelProps = {
   rows: { key: string; node: ReactNode }[]

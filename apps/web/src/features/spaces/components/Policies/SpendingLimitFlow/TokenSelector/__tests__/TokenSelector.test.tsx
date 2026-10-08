@@ -16,7 +16,7 @@ import {
   POPULAR_LOAD_ERROR_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 // Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.

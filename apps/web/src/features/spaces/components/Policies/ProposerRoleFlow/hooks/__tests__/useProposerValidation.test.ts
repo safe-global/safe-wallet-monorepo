@@ -15,7 +15,7 @@ import {
   PROPOSER_RESERVED_ERROR,
   PROPOSER_SAFE_ERROR_MESSAGE,
   PROPOSER_SAFE_LOADING_MESSAGE,
-} from '@/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 import { addressIsNotExistingProposer, useProposerValidation } from '../useProposerValidation'
 
 jest.mock('@/hooks/useSafeInfo')

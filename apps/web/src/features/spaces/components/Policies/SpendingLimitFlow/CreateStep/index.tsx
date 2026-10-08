@@ -9,7 +9,7 @@ import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type CreateSpendingLimitPolicyProps = {
   isCalloutDismissed: boolean

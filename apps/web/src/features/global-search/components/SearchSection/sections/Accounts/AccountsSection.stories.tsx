@@ -5,7 +5,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import type { GetSpaceSafeResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { createMockStory } from '@/stories/mocks'
 import type { MockStoryConfig } from '@/stories/mocks/types'
-import { SectionVisibilityProvider } from '@/features/global-search/components/SearchSection/SectionVisibilityContext'
+import { SectionVisibilityProvider } from '@views/features/global-search/components/SearchSection/SectionVisibilityContext'
 import AccountsSection from './AccountsSection'
 
 const SPACE_SAFES_URL = /\/v1\/spaces\/[\w-]+\/safes$/

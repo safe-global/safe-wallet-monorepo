@@ -1,5 +1,5 @@
 import { useCallback, useState, type ReactElement } from 'react'
-import SpendingLimitIcon from '@/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
+import SpendingLimitIcon from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
 import { Info } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import ExternalLink from '@/components/common/ExternalLink'
@@ -14,12 +14,12 @@ import ReviewSpendingLimitPolicy from './ReviewStep'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   CREATE_STEP_TITLE,
   FLOW_HELP_LABEL,
   FLOW_SUBTITLE,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 const trackTxSigned: SubmitCallbackWithData<SpendingLimitPolicyFormValues> = ({ isExecuted = false }) => {
   trackEvent(POLICY_EVENTS.SPENDING_LIMIT_TX_SIGNED, { [MixpanelEventParams.IS_EXECUTED]: isExecuted })

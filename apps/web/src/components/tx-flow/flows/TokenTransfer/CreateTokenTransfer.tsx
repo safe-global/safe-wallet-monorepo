@@ -17,8 +17,8 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '@/components/tx-flow/flows/TokenTransfer/types'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+} from '@views/components/tx-flow/flows/TokenTransfer/types'
+import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'

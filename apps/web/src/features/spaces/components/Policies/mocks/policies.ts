@@ -8,8 +8,8 @@ import type {
   QueuedSpendingLimitPolicy,
   RecoveryPolicy,
   SpendingLimitPolicy,
-} from '@/features/spaces/components/Policies/types'
-import type { Viewer } from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+} from '@views/features/spaces/components/Policies/types'
+import type { Viewer } from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 
 /** Policies as the table renders them. The stories and the unit tests share these; the wire shape is in activePolicies.ts. */
 

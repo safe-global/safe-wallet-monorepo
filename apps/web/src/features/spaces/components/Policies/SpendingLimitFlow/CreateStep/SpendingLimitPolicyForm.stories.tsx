@@ -12,14 +12,14 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../SafeAccountSelector
 import type {
   SafeAccountEntry,
   SafeAccountOption,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */

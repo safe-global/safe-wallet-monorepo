@@ -5,9 +5,9 @@ import SafeAccountSelector from '../../SafeAccountSelector'
 import {
   getNestedSafesNoticeText,
   NESTED_SAFES_NOTICE_TITLE,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/constants'
-import type { SafeAccountEntry } from '@/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import type { SafeAccountEntry } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type SafeAccountFieldProps = {
   accounts: SafeAccountEntry[]

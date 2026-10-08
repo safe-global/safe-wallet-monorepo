@@ -28,7 +28,7 @@ import {
   textToSlots,
   writeDigits,
   type SlotState,
-} from '@/components/common/DatePickerInput/slots'
+} from '@views/components/common/DatePickerInput/slots'
 import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
 
 const DATE_FORMAT = 'dd/MM/yyyy'

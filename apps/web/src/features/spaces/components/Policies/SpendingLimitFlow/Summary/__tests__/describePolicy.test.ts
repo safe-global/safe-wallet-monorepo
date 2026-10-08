@@ -5,11 +5,11 @@ import {
   CALLOUT_DESCRIPTION_PLURAL,
   CALLOUT_DESCRIPTION_SINGULAR,
   EDIT_CALLOUT_NO_CHANGES,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import type {
   LimitSummary,
   SpendingLimitSummaryModel,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,

@@ -8,7 +8,7 @@ import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { usePanelHeader } from '../../SecurityChecks/hooks/usePanelHeader'
 import SecurityChecksSection from '../../SecurityChecks/SecurityChecksSection'
-import { ScoreGauge } from '@/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
+import { ScoreGauge } from '@views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
 
 type SecurityDrawerChecksProps = {
   scanContext: ScanContext | null

@@ -4,7 +4,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 
 import { validateAddress } from '@safe-global/utils/utils/validation'
-import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
+import type { SafeAppDataWithPermissions } from '@views/components/safe-apps/types'
 import { SafeAppsTag } from '@/config/constants'
 
 const validateTransaction = (t: BaseTransaction): boolean => {

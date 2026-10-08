@@ -5,13 +5,13 @@ import {
   isSafeAccountGroup,
   type SafeAccountEntry,
   type SafeAccountOption,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 import type {
   LimitSummaryToken,
   SpendingLimitSummaryModel,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 export type PolicySummarySources = {
   /** The eligible accounts the step-1 selector offered (groups included). */

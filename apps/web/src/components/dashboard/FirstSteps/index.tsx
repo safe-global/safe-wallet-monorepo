@@ -25,10 +25,10 @@ import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
 import { Circle, CircleCheck, CircleCheckBig, Lightbulb, Plus } from 'lucide-react'
 import css from './styles.module.css'
-import { ProgressRing } from '@/components/dashboard/FirstSteps/ProgressRing'
+import { ProgressRing } from '@views/components/dashboard/FirstSteps/ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
-import { calculateProgress } from '@/components/dashboard/FirstSteps/utils'
+import { calculateProgress } from '@views/components/dashboard/FirstSteps/utils'
 
 const StatusCard = ({
   badge,

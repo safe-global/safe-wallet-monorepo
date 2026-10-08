@@ -5,7 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
-import SectionWrapper from '@/features/global-search/components/SearchSection/SectionWrapper'
+import SectionWrapper from '@views/features/global-search/components/SearchSection/SectionWrapper'
 
 const AccountsSection = ({ query, label }: SectionItemProps) => {
   const { allSafes, isLoading } = useSpaceSafes()

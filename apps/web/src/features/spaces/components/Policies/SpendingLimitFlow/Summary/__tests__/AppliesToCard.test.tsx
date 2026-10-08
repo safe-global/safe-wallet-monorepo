@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import AppliesToCard from '../AppliesToCard'
-import { APPLIES_TO_LABEL } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import { APPLIES_TO_LABEL } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { safeAccountOptionBuilder } from '../SpendingLimitSummary.fixtures'
 
 jest.mock('@/components/common/ChainIndicator', () => {

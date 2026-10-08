@@ -5,8 +5,11 @@ import { useChain } from '@/hooks/useChains'
 import useOrigin from '@/hooks/useOrigin'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
-import type { Viewer } from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
-import type { PendingSpendingLimitPolicy, QueuedSpendingLimitPolicy } from '@/features/spaces/components/Policies/types'
+import type { Viewer } from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+import type {
+  PendingSpendingLimitPolicy,
+  QueuedSpendingLimitPolicy,
+} from '@views/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction } from './usePendingPolicyTransaction'
 

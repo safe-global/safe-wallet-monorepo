@@ -169,6 +169,7 @@ export default defineConfig(({ mode }) => {
 
         // Cross-workspace source aliases — reuse apps/web/src verbatim during cutover.
         { find: /^@\/public\/(.*)$/, replacement: path.resolve(webRoot, 'public/$1') },
+        { find: /^@views\/(.*)$/, replacement: path.resolve(storybookRoot, 'src/$1') },
         { find: /^@\/(.*)$/, replacement: '$1', customResolver: (subpath) => resolveWebSource(subpath) },
 
         // Mirror apps/web/tsconfig.json `paths` so reused source resolves shared

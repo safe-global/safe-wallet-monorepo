@@ -19,7 +19,7 @@ import {
   GRID_COLS,
   HIDE_BALANCE,
   ROW_VARIANTS,
-} from '@/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+} from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import {
   formatBalance,
   getAggregateNonPassingCount,
@@ -31,7 +31,7 @@ import {
   type GetSafeSecurityHref,
   type RowSecurity,
 } from './utils'
-import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
+import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 export type MultichainSafeRowProps = {
   safe: SpaceSafeEntry

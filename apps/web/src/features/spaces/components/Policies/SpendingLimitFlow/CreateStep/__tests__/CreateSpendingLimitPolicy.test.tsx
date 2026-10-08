@@ -9,7 +9,7 @@ import {
   createDefaultFormValues,
   createEmptyLimit,
   type SpendingLimitPolicyFormValues,
-} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 import CreateSpendingLimitPolicy from '..'
 

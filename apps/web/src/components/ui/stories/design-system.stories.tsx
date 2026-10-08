@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { useState, type ReactNode } from 'react'
 import { Plus, ArrowUpRight, ArrowDownLeft, Download } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@views/components/ui/button'
 import { Input } from '../input'
-import { Textarea } from '@/components/ui/textarea'
-import { Field, FieldLabel, FieldDescription, FieldError } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@views/components/ui/textarea'
+import { Field, FieldLabel, FieldDescription, FieldError } from '@views/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@views/components/ui/select'
 import { SearchInput } from '../search-input'
-import { Calendar } from '@/components/ui/calendar'
+import { Calendar } from '@views/components/ui/calendar'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import TableCard from '@/components/common/TableCard'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@views/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@views/components/ui/tabs'
 import {
   Dialog,
   DialogTrigger,
@@ -22,9 +22,9 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from '@/components/ui/dialog'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+} from '@views/components/ui/dialog'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@views/components/ui/tooltip'
+import { Typography } from '@views/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import { FormProvider, useForm } from 'react-hook-form'
 import DatePickerInput from '@/components/common/DatePickerInput'

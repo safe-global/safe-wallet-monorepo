@@ -3,7 +3,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import {
   isSafeAccountGroup,
   type SafeAccountOption,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { useEligibleSafeAccounts } from '../../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { useSpendingLimitSafeAccounts } from '../useSpendingLimitSafeAccounts'
 

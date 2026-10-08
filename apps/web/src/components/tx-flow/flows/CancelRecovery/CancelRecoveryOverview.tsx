@@ -5,7 +5,7 @@ import type { ReactElement } from 'react'
 
 import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
 import { TxModalContext } from '../..'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@views/components/tx-flow/common/TxCard'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { Typography } from '@/components/ui/typography'
 import DialogActions from '@/components/common/DialogActions'

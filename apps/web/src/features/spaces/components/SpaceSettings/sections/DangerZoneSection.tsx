@@ -10,7 +10,7 @@ import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)

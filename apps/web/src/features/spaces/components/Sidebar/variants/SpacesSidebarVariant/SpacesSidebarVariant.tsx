@@ -14,11 +14,11 @@ import type {
   SpaceSelectorProps,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
-import { containerVariants, itemVariants } from '@/features/spaces/components/Sidebar/constants'
+import { containerVariants, itemVariants } from '@views/features/spaces/components/Sidebar/constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null

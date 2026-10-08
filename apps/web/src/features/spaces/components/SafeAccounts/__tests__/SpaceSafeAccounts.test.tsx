@@ -94,7 +94,7 @@ jest.mock('../SpaceSafeContextMenu', () => ({
   default: () => null,
 }))
 
-jest.mock('@/features/spaces/components/SafeAccounts/EmptySafeAccounts', () => ({
+jest.mock('@views/features/spaces/components/SafeAccounts/EmptySafeAccounts', () => ({
   __esModule: true,
   default: () => <div data-testid="empty-safe-accounts" />,
 }))

@@ -15,7 +15,7 @@ import { useHasUntrustedFallbackHandler } from '@/hooks/useHasUntrustedFallbackH
 import css from '../TransactionGuards/styles.module.css'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useIsTWAPFallbackHandler } from '@/features/swap'
-import SettingsCard from '@/components/settings/SettingsCard'
+import SettingsCard from '@views/components/settings/SettingsCard'
 
 const FALLBACK_HANDLER_VERSION = '>=1.1.1'
 

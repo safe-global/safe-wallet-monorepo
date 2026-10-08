@@ -15,7 +15,7 @@ import ExpandableTransactionItem, {
   TransactionSkeleton,
 } from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import GroupLabel from '../GroupLabel'
-import TransactionDetailsError from '@/components/transactions/SingleTx/TransactionDetailsError'
+import TransactionDetailsError from '@views/components/transactions/SingleTx/TransactionDetailsError'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useHnQueueAssessment } from '@/features/hypernative'

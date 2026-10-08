@@ -9,7 +9,7 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { AddOwnerFlowProps } from '.'
 import type { ReplaceOwnerFlowProps } from '../ReplaceOwner'
-import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
+import { SettingsChangeContext } from '@views/components/tx-flow/flows/AddOwner/context'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export const ReviewOwner = ({

@@ -2,8 +2,8 @@ import { type ReactElement } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics'
-import SpendingLimitIcon from '@/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
-import { FLOW_SUBTITLE } from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import SpendingLimitIcon from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
+import { FLOW_SUBTITLE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import ReviewEnableModule, { type EnableModuleFlowData } from './ReviewEnableModule'
 
 /** Re-enables the module that still holds an unenforced policy's allowances; the allowances themselves are untouched. */

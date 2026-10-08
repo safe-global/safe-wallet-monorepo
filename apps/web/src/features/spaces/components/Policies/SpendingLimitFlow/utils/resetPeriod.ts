@@ -1,6 +1,6 @@
 import { getResetTimeOptions } from '@/features/spending-limits'
 import type { ResetTimeOption } from '@/features/spending-limits/constants'
-import { ONE_TIME_HELPER_TEXT } from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { ONE_TIME_HELPER_TEXT } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** The helper line under Frequency: `1 day` → "Limit resets every day". */
 export const describeResetPeriod = (option: ResetTimeOption | undefined): string => {

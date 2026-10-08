@@ -8,7 +8,7 @@ import {
   SAFE_ACCOUNT_COLUMNS,
   SELECT_COLUMN,
   type SafeAccountColumnId,
-} from '@/features/myAccounts/components/SafeAccountsTable/columns'
+} from '@views/features/myAccounts/components/SafeAccountsTable/columns'
 import {
   compareGroups,
   getContextMenuChainIds,
@@ -21,7 +21,7 @@ import {
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
-import { orderGroupsBySimilarity } from '@/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
+import { orderGroupsBySimilarity } from '@views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'

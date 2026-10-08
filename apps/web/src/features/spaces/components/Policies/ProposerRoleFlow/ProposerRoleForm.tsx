@@ -17,7 +17,7 @@ import SafeAccountSelector from '../SafeAccountSelector'
 import {
   getNestedSafesNoticeText,
   NESTED_SAFES_NOTICE_TITLE,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/constants'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
@@ -26,7 +26,7 @@ import {
   PROPOSER_FIELD_HELPER,
   PROPOSER_NAME_HELPER,
   PROPOSER_NAME_WORKSPACE_HELPER,
-} from '@/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 
 export type ProposerRoleFormValues = {
   proposer: string

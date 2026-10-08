@@ -6,7 +6,7 @@ import {
   mockProposerPolicy,
   mockSpendingLimitPolicy,
 } from '../../../mocks/policies'
-import type { PolicyTokenInfo } from '@/features/spaces/components/Policies/types'
+import type { PolicyTokenInfo } from '@views/features/spaces/components/Policies/types'
 import PolicyTokens from '../PolicyTokens'
 
 jest.mock('@/components/ui/tooltip', () => ({

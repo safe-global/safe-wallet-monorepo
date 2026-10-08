@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useAutoScanOrchestrator from '../useAutoScanOrchestrator'
-import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
+import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 const autoScanMock = jest.fn()
 let lastServices: unknown = null

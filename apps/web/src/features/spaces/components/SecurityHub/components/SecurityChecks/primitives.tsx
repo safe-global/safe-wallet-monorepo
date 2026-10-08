@@ -13,7 +13,7 @@ import {
   resolveStatusTone,
   SeverityIcon,
   type SeverityTone,
-} from '@/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+} from '@views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 
 /** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */

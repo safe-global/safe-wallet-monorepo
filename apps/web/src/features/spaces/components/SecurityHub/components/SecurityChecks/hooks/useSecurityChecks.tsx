@@ -18,12 +18,12 @@ import {
   resolveStatusTone,
   SeverityIcon,
   type SeverityTone,
-} from '@/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+} from '@views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import {
   VULNERABLE_MODULE_INTRO,
   ZODIAC_VULNERABILITY_CTA,
   getModuleRowContent,
-} from '@/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
+} from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }

@@ -1,6 +1,6 @@
 import type { MultisigTransaction, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import TxListAccordionItem, { TX_LIST_ITEM_VALUE } from '@/components/transactions/TxListItem/TxListAccordionItem'
+import TxListAccordionItem, { TX_LIST_ITEM_VALUE } from '@views/components/transactions/TxListItem/TxListAccordionItem'
 import { Skeleton } from '@/components/ui/skeleton'
 import TxSummary from '@/components/transactions/TxSummary'
 import TxDetails from '@/components/transactions/TxDetails'

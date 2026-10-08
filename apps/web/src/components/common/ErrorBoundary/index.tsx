@@ -7,8 +7,8 @@ import { AppRoutes } from '@/config/routes'
 import WarningIcon from '@/public/images/notifications/warning.svg'
 
 import css from '@/components/common/ErrorBoundary/styles.module.css'
-import CircularIcon from '@/components/common/icons/CircularIcon'
-import ExternalLink from '@/components/common/ExternalLink'
+import CircularIcon from '@views/components/common/icons/CircularIcon'
+import ExternalLink from '@views/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 interface ErrorBoundaryProps {
   error: Error

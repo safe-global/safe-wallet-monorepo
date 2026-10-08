@@ -15,7 +15,7 @@ import type { ComponentType } from 'react'
 import type SwapButton from './components/SwapButton'
 import type SwapOrder from './components/SwapOrder'
 import type SwapOrderConfirmation from './components/SwapOrderConfirmationView'
-import type StatusLabel from '@/features/swap/components/StatusLabel'
+import type StatusLabel from '@views/features/swap/components/StatusLabel'
 import type SwapTokens from './components/SwapTokens'
 
 export interface SwapContract {

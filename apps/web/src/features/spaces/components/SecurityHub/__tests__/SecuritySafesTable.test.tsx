@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../components/SecuritySafesTable/SecuritySafesTable'
-import type { SpaceSafeEntry, SelectedSafe } from '@/features/spaces/components/SecurityHub/types'
+import type { SpaceSafeEntry, SelectedSafe } from '@views/features/spaces/components/SecurityHub/types'
 import type { ScanResult } from '@/features/security/types'
 // Helper: mirrors security.scanKey exactly (address.toLowerCase() + chainId). Inlined to
 // avoid a feature-handle mock setup in tests that don't exercise the security feature directly.

@@ -7,7 +7,7 @@ import type {
   ResolvedSidebarItem,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 

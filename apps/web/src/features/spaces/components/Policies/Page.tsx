@@ -8,7 +8,7 @@ import AuthState from '../AuthState'
 import { usePlanGate } from '../../hooks/usePlanGate'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpacePolicies } from './hooks/useSpacePolicies'
-import type { PolicyId } from '@/features/spaces/components/Policies/PolicyCatalogue/catalogue'
+import type { PolicyId } from '@views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
 import Policies from './index'
 
 const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer']

@@ -10,7 +10,7 @@ import {
   TokenTransferType,
   type MultiTokenTransferParams,
   type TokenTransferParams,
-} from '@/components/tx-flow/flows/TokenTransfer/types'
+} from '@views/components/tx-flow/flows/TokenTransfer/types'
 
 export {
   TokenTransferFields,
@@ -19,7 +19,7 @@ export {
   MultiTokenTransferFields,
   type TokenTransferParams,
   type MultiTokenTransferParams,
-} from '@/components/tx-flow/flows/TokenTransfer/types'
+} from '@views/components/tx-flow/flows/TokenTransfer/types'
 
 type MultiTokenTransferFlowProps = {
   recipients?: Partial<TokenTransferParams>[]

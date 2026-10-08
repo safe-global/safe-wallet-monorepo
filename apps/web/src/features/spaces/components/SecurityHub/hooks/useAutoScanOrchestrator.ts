@@ -4,7 +4,7 @@ import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
 import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
-import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
+import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 

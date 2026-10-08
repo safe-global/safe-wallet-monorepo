@@ -14,7 +14,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import { RecoveryListItemContext } from '@/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+import { RecoveryListItemContext } from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 export default function CancelRecoveryButton({

@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import ChangePlanFlow, { _continueLabelFor, _pickedPrice } from '../ChangePlanFlow'
-import type { CurrentPlan, PlanPick } from '@/features/spaces/components/Plans/types'
+import type { CurrentPlan, PlanPick } from '@views/features/spaces/components/Plans/types'
 
 let mockSafeCount = 3
 jest.mock('../../../hooks/billing/useSeatTrim', () => ({
@@ -55,7 +55,7 @@ jest.mock('../ChangePlanDialog', () => ({
 
 const ENTRY = { 'Entry Point': 'sidebar' }
 
-jest.mock('@/features/spaces/components/SafeProModals', () => ({
+jest.mock('@views/features/spaces/components/SafeProModals', () => ({
   SafeProPlanSwitchedModal: ({
     planName,
     trialEndsAt,

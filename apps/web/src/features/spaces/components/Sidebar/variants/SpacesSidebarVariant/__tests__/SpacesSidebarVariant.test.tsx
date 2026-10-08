@@ -6,7 +6,7 @@ import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
   SpaceItem,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 
 jest.mock('../../SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (

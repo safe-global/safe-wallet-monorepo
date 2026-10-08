@@ -5,7 +5,7 @@ import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
 import type {
   SafeWorkspaceHeaderBackToSpace,
   SafeWorkspaceHeaderAddToWorkspace,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 
 const spaceSelectorDropdownMock = jest.fn()
 

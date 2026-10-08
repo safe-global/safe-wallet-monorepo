@@ -1,6 +1,6 @@
 import type { MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import { deriveSidePanelAccounts, deriveSelectedBalanceSafes, deriveNameByAddress } from '../deriveSelectedAccounts'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '@/features/spaces/components/SelectSafesOnboarding/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@views/features/spaces/components/SelectSafesOnboarding/constants'
 
 const makeSafe = (overrides: Partial<SafeItem> = {}): SafeItem => ({
   chainId: '1',

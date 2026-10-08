@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import { Input, SCRIPT_INJECTION_ERROR } from './input'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldLabel } from '@views/components/ui/field'
 
 // The warning and the validation error share one element, so a regression here silently drops the
 // script-injection warning rather than showing the wrong one.

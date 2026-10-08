@@ -13,7 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import EditMemberDialog from '../../MembersList/EditMemberDialog'
 
 const AccountPage = () => {

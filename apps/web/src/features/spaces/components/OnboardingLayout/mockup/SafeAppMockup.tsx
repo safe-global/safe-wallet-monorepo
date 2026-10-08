@@ -8,12 +8,12 @@ import type { SafeItem } from '@/hooks/safes'
 import MockupSidebar from './MockupSidebar'
 import MockupContent from './MockupContent'
 import { useIsXlViewport } from './useIsXlViewport'
-import type { SafeAppMockupProps } from '@/features/spaces/components/OnboardingLayout/mockup/types'
+import type { SafeAppMockupProps } from '@views/features/spaces/components/OnboardingLayout/mockup/types'
 
 export type {
   SafeAppMockupAccount,
   SafeAppMockupProps,
-} from '@/features/spaces/components/OnboardingLayout/mockup/types'
+} from '@views/features/spaces/components/OnboardingLayout/mockup/types'
 
 const EMPTY_SAFES: SafeItem[] = []
 

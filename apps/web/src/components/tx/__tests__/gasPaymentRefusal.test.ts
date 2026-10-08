@@ -6,7 +6,7 @@ import {
 } from '@safe-global/utils/services/gasPaymentErrors'
 import type { GasPayer } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '../gasPaymentRefusal'
-import { sponsoredQuotaMessage } from '@/components/tx/sponsoredQuotaMessage'
+import { sponsoredQuotaMessage } from '@views/components/tx/sponsoredQuotaMessage'
 
 const UNAVAILABLE =
   "This gas payment option isn't available for this Safe account right now. Choose another gas payment method and execute again."

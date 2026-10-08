@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import SafeRowStats from '../SafeRowStats'
-import type { SafeItemDataChain } from '@/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemDataChain } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('../ChainLogo', () => {
   const Mock = ({ chainId }: { chainId: string }) => <div data-testid={`chain-logo-${chainId}`} />

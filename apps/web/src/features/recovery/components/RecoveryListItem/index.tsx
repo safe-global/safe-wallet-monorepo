@@ -7,7 +7,7 @@ import RecoveryDetails from '../RecoveryDetails'
 import {
   RecoveryListItemContext,
   RecoveryListItemProvider,
-} from '@/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+} from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactElement {

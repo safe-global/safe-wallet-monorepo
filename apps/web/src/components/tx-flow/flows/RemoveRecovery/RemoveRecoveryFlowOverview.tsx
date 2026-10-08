@@ -1,7 +1,7 @@
 import { useContext, type ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
 import type { RecoveryFlowProps } from '.'
 
 import { TxFlowContext } from '../../TxFlowProvider'

@@ -6,11 +6,11 @@ import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 import {
   NestedSafeGrantNotice,
   type NestedSafeGrantNoticeProps,
-} from '@/features/spaces/components/Policies/ProposerDrawer/components/NestedSafeGrantNotice'
+} from '@views/features/spaces/components/Policies/ProposerDrawer/components/NestedSafeGrantNotice'
 import { ProposerOverviewSkeleton } from './components/ProposerOverview'
-import { toPolicyStatus } from '@/features/spaces/components/Policies/ProposerDrawer/utils'
+import { toPolicyStatus } from '@views/features/spaces/components/Policies/ProposerDrawer/utils'
 import { ProposerVariantContent } from './variants'
-import type { ProposerVariantContentProps } from '@/features/spaces/components/Policies/ProposerDrawer/variants/types'
+import type { ProposerVariantContentProps } from '@views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 type ProposerDrawerActionProps = {
   actionLabel: string

@@ -6,8 +6,8 @@ import { BannerType } from '../../hooks/useBannerStorage'
 import { HnPendingBannerWithDismissal } from './HnPendingBannerWithDismissal'
 
 // Export the original pure component for tests and stories
-export { HnPendingBanner } from '@/features/hypernative/components/HnPendingBanner/HnPendingBanner'
-export type { HnPendingBannerProps } from '@/features/hypernative/components/HnPendingBanner/HnPendingBanner'
+export { HnPendingBanner } from '@views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
+export type { HnPendingBannerProps } from '@views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
 
 // Export the composed HOC as default
 // Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)

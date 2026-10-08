@@ -14,7 +14,7 @@ import type {
   SidebarItemConfig,
   SpaceItem,
   SidebarVariantContentProps,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 

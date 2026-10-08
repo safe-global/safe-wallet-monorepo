@@ -23,7 +23,7 @@ import type {
   PlanPick,
   PlanSeatOption,
   PlanTier,
-} from '@/features/spaces/components/Plans/types'
+} from '@views/features/spaces/components/Plans/types'
 
 type Cycle = 'month' | 'year'
 

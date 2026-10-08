@@ -11,7 +11,7 @@ const ruleIn = (root: Root, selector: string): Rule | undefined =>
   root.nodes.find((node): node is Rule => node.type === 'rule' && node.selector === selector)
 
 const STATUS_ROOT = parse('styles.module.css')
-const DIALOG_ROOT = parse('..', '..', '..', 'common', 'TxModalDialog', 'styles.module.css')
+const DIALOG_ROOT = parse('../../../../../../../storybook/src/components/common/TxModalDialog/styles.module.css')
 
 /**
  * `.status::before` draws one absolutely-positioned line down the whole step list, and each

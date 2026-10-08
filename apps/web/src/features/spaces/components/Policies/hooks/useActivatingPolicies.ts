@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { PendingSpendingLimitPolicy, Policy } from '@/features/spaces/components/Policies/types'
+import type { PendingSpendingLimitPolicy, Policy } from '@views/features/spaces/components/Policies/types'
 import { getPendingTxId, isPendingChangeIndexed } from '../utils/mapPendingPolicies'
 
 const HOLD_MS = 5 * 60_000

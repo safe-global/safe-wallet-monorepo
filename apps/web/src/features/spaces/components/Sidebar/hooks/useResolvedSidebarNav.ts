@@ -4,7 +4,7 @@ import type {
   SidebarGroupConfig,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 
 interface NavResolverOptions {
   getLink: (item: SidebarItemConfig) => ResolvedSidebarNavItem['link']

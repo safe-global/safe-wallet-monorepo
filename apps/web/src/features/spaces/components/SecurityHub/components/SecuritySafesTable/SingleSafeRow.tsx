@@ -16,9 +16,9 @@ import {
   GRID_COLS,
   HIDE_BALANCE,
   ROW_VARIANTS,
-} from '@/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+} from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { getNonPassingCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
-import type { SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
+import type { SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 export type SingleSafeRowProps = {
   safe: SpaceSafeEntry

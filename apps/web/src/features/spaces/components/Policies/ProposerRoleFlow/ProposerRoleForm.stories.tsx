@@ -11,7 +11,7 @@ import {
   isSafeAccountGroup,
   type SafeAccountEntry,
   type SafeAccountOption,
-} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import ProposerRoleForm from './ProposerRoleForm'
 

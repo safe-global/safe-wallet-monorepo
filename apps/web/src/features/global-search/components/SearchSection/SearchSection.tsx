@@ -2,7 +2,7 @@ import { sectionItems, type SectionItem } from './sectionItems'
 import {
   SectionVisibilityProvider,
   useSectionVisibility,
-} from '@/features/global-search/components/SearchSection/SectionVisibilityContext'
+} from '@views/features/global-search/components/SearchSection/SectionVisibilityContext'
 
 interface SearchSectionProps {
   query: string

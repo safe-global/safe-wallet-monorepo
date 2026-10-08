@@ -4,7 +4,7 @@ import AddPolicyDialog from './index'
 import {
   ADD_POLICY_OPTIONS,
   RECOVERY_POLICY_OPTION,
-} from '@/features/spaces/components/Policies/AddPolicyDialog/options'
+} from '@views/features/spaces/components/Policies/AddPolicyDialog/options'
 
 const meta = {
   title: 'Features/Spaces/AddPolicyDialog',

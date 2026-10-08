@@ -8,11 +8,11 @@ import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import { useParentSafeWalletNotice } from '../hooks/useParentSafeWalletNotice'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
-import { formatContactLabel } from '@/features/spaces/components/Policies/utils/policyLabel'
+import { formatContactLabel } from '@views/features/spaces/components/Policies/utils/policyLabel'
 import {
   CREATE_POLICY_TITLE,
   PARENT_SAFE_WALLET_COPY,
-} from '@/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 import { useGrantProposer } from './hooks/useGrantProposer'
 import { useProposerValidation } from './hooks/useProposerValidation'
 import ProposerRoleForm, { type ProposerRoleFormValues } from './ProposerRoleForm'

@@ -1,5 +1,5 @@
 import type { PropsWithChildren } from 'react'
-import type { SlotName } from '@/components/tx-flow/slots/SlotProvider'
+import type { SlotName } from '@views/components/tx-flow/slots/SlotProvider'
 import { useRegisterSlot, type UseRegisterSlotProps } from './hooks'
 import type { FEATURES } from '@/utils/featureToggled'
 import { useHasFeature } from '@/hooks/useChains'

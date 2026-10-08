@@ -12,7 +12,7 @@ jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({
   )),
 }))
 
-jest.mock('@/features/hypernative/components/HypernativeLogo', () => ({
+jest.mock('@views/features/hypernative/components/HypernativeLogo', () => ({
   __esModule: true,
   default: () => <div data-testid="hn-logo">HypernativeLogo</div>,
 }))

@@ -6,7 +6,7 @@ import type {
   ResolvedSidebarItem,
   SidebarDeveloperItemConfig,
   SidebarDeveloperItemState,
-} from '@/features/spaces/components/Sidebar/types'
+} from '@views/features/spaces/components/Sidebar/types'
 
 const mockNavItem = jest.fn()
 

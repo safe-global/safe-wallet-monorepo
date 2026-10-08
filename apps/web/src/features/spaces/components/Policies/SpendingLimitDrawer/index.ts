@@ -2,4 +2,4 @@ export { default as SpendingLimitDrawer, type SpendingLimitDrawerProps } from '.
 export type {
   ActiveDrawerPolicy,
   PendingTxOutcome,
-} from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'

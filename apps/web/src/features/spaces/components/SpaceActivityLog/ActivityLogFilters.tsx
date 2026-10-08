@@ -9,7 +9,7 @@ import {
   getDateFilterValidation,
   toDateInputValue,
   toIsoBound,
-} from '@/features/spaces/components/SpaceActivityLog/dateFilters'
+} from '@views/features/spaces/components/SpaceActivityLog/dateFilters'
 
 export type ActivityLogFilterState = {
   actorUserId?: number
