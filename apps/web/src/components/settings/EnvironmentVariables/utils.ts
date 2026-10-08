@@ -17,5 +17,5 @@ export const isTenderlySimulateUrl = (value: string): boolean => {
   } catch {
     return false
   }
-  return url.hostname === 'api.tenderly.co' && url.pathname.endsWith('/simulate')
+  return url.hostname === 'api.tenderly.co' && /\/simulate\/?$/.test(url.pathname)
 }

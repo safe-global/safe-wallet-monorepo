@@ -19,9 +19,9 @@ describe('isTenderlySimulateUrl', () => {
     expect(isTenderlySimulateUrl('https://example.com/api/v1/account/my-org/project/my-project/simulate')).toBe(false)
   })
 
-  it('rejects a simulate path with a trailing slash', () => {
+  it('accepts a simulate path with a trailing slash', () => {
     expect(isTenderlySimulateUrl('https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate/')).toBe(
-      false,
+      true,
     )
   })
 
