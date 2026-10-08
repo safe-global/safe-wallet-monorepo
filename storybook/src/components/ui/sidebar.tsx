@@ -4,7 +4,6 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
   type CSSProperties,
@@ -23,6 +22,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useIsTablet } from '@/hooks/use-tablet'
+import { readSidebarCookie, useSidebarShortcut, writeSidebarCookie } from '@/components/ui/sidebar-state'
 import { PanelRightIcon } from 'lucide-react'
 
 /**
@@ -120,24 +120,7 @@ import { PanelRightIcon } from 'lucide-react'
  * - Keyboard shortcut: Cmd/Ctrl + B to toggle
  */
 
-const SIDEBAR_COOKIE_NAME = 'sidebar_state'
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
 const SIDEBAR_WIDTH = '16rem'
-
-function getSidebarStateFromCookie(fallback: boolean): boolean {
-  if (typeof document === 'undefined') return fallback
-  try {
-    const match = document.cookie.match(
-      new RegExp(`(?:^|; )${SIDEBAR_COOKIE_NAME.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}=([^;]*)`),
-    )
-    const value = match?.[1]?.trim()
-    if (value === 'true') return true
-    if (value === 'false') return false
-  } catch {
-    // ignore - falling back to the default sidebar state
-  }
-  return fallback
-}
 
 const SIDEBAR_WIDTH_MOBILE = '18rem'
 const SIDEBAR_WIDTH_ICON = '3rem'
@@ -207,7 +190,7 @@ function SidebarProvider({
   const isMobile = useIsMobile()
   const isTablet = useIsTablet()
   const initialOpen = useMemo(
-    () => getSidebarStateFromCookie(defaultOpen),
+    () => readSidebarCookie(defaultOpen),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- read cookie only once on mount
     [],
   )
@@ -217,7 +200,7 @@ function SidebarProvider({
     (update: boolean | ((prev: boolean) => boolean)) => {
       setOpenBase((prev) => {
         const next = typeof update === 'function' ? update(prev) : update
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${next}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        writeSidebarCookie(next)
         return next
       })
     },
@@ -229,18 +212,7 @@ function SidebarProvider({
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open)
   }, [isMobile, setOpen, setOpenMobile])
 
-  // Adds a keyboard shortcut to toggle the sidebar.
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === SIDEBAR_KEYBOARD_SHORTCUT && (event.metaKey || event.ctrlKey)) {
-        event.preventDefault()
-        toggleSidebar()
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [toggleSidebar])
+  useSidebarShortcut(SIDEBAR_KEYBOARD_SHORTCUT, toggleSidebar)
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.

@@ -15,6 +15,7 @@ const path = require('path')
 const ts = require('typescript')
 const { checkViewFile, VIEW_SRC, WEB_SRC } = require('./view-loader.cjs')
 
+const WIDGETS = JSON.parse(fs.readFileSync(path.join(__dirname, 'policy.json'), 'utf8')).widgets
 const HEAD_TAGS = new Set(['title', 'meta', 'link'])
 const STYLE_PROPS = new Set(['className', 'style', 'sx'])
 const SKIPPED = /\.(test|stories|spec)\.tsx?$|__tests__|__mocks__|\/mocks\/|\/tests\/|\.d\.ts$/
@@ -44,12 +45,13 @@ function checkContainer(file) {
   const visit = (node) => {
     if (ts.isImportDeclaration(node) && !node.importClause?.isTypeOnly) {
       const spec = node.moduleSpecifier.text
-      if (spec.startsWith('@/components/ui/') && spec !== '@/components/ui/ShadcnProvider')
+      if (spec.startsWith('@/components/ui/') && spec !== '@/components/ui/ShadcnProvider' && !WIDGETS.includes(spec))
         at(node, `imports the design-system primitive "${spec}"; render it from a view instead`)
     }
     if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tag = node.tagName.getText(sf)
-      if (/^[a-z]/.test(tag) && !HEAD_TAGS.has(tag)) at(node, `renders the host element <${tag}>; move it to a view`)
+      if (/^[a-z][\w-]*$/.test(tag) && !HEAD_TAGS.has(tag))
+        at(node, `renders the host element <${tag}>; move it to a view`)
       for (const attr of node.attributes.properties) {
         if (!ts.isJsxAttribute(attr)) continue
         const name = attr.name.getText(sf)
