@@ -5,12 +5,15 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as proposer from '../pages/proposers.pages.js'
 import * as navigation from '../pages/navigation.page.js'
 import proposerData from '../../fixtures/proposers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer3 = walletCredentials.OWNER_3_PRIVATE_KEY
-const addedProposer = walletCredentials.OWNER_3_WALLET_ADDRESS
+let signer, signer3, addedProposer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer3 = walletCredentials.OWNER_3_PRIVATE_KEY
+  addedProposer = walletCredentials.OWNER_3_WALLET_ADDRESS
+})
 const proposerName2 = 'Proposer 2'
 const proposerName = 'Proposer 1'
 const changedProposerName = 'Changed proposer name'

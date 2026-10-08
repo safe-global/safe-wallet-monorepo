@@ -50,7 +50,6 @@ export const timePeriodOptions = {
 }
 
 const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
-const automationOwner = ls.addressBookData.sepoliaAddress2[11155111][constants.DEFAULT_OWNER_ADDRESS]
 
 export const actionNames = {
   enableModule: 'enableModule',
@@ -68,7 +67,10 @@ const invalidCharErrorStr = 'The value must be a number'
 
 export function selectRecipient(recipient) {
   cy.get(addressItem).contains(recipient).click()
-  main.verifyValuesExist(addressBook.addressBookRecipient, [recipient, automationOwner])
+  main.verifyValuesExist(addressBook.addressBookRecipient, [
+    recipient,
+    ls.addressBookData.sepoliaAddress2[11155111][constants.defaultOwnerAddress()],
+  ])
 }
 
 export function verifyOldValuesAreDisplayed() {

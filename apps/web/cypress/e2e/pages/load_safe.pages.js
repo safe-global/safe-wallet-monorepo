@@ -198,7 +198,8 @@ export function inputNameAndAddress(name, address) {
 }
 
 export function inputName(name) {
-  cy.get(main.nameInput).type(name).should('have.value', name)
+  // Without a delay between keystrokes the form does not show the name length error.
+  cy.get(main.nameInput).type(name, { delay: 10 }).should('have.value', name)
 }
 
 export function verifyIncorrectAddressErrorMessage() {

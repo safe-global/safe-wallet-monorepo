@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-import { CURRENT_COOKIE_TERMS_VERSION, DEFAULT_OWNER_ADDRESS } from './constants.js'
+import { CURRENT_COOKIE_TERMS_VERSION, defaultOwnerAddress } from './constants.js'
 import { aliasedStorage, storageFixture } from './fixture.js'
 
 const cookieState = {
@@ -309,10 +309,9 @@ export const addressBookData = {
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
-  sepoliaAddress2: {
-    11155111: {
-      [DEFAULT_OWNER_ADDRESS]: 'Automation owner',
-    },
+  // Getters, because isolated runs set the default owner after this module loads.
+  get sepoliaAddress2() {
+    return { 11155111: { [defaultOwnerAddress()]: 'Automation owner' } }
   },
   dataSet: {
     5: {
@@ -392,24 +391,21 @@ export const addressBookData = {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': 'Undeployed Sepolia',
     },
   },
-  sortingData: {
-    11155111: {
-      [DEFAULT_OWNER_ADDRESS]: 'AA Safe',
-      '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'BB Safe',
-    },
+  get sortingData() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'AA Safe', '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'BB Safe' },
+    }
   },
   autofillData: {
     11155111: {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
     },
   },
-  sameOwnerName: {
-    11155111: {
-      [DEFAULT_OWNER_ADDRESS]: 'Automation owner Sepolia',
-    },
-    1: {
-      [DEFAULT_OWNER_ADDRESS]: 'Automation owner Eth',
-    },
+  get sameOwnerName() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
+      1: { [defaultOwnerAddress()]: 'Automation owner Eth' },
+    }
   },
   safeSchiledAddressBook: {
     137: {

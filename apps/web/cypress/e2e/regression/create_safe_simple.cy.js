@@ -5,9 +5,12 @@ import * as owner from '../pages/owners.pages'
 import * as ls from '../../support/localstorage_data.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Safe creation tests', () => {
   beforeEach(() => {
@@ -30,7 +33,7 @@ describe('Safe creation tests', () => {
 
   it('Verify current connected account is shown as default owner', () => {
     createwallet.clickOnNextBtn()
-    owner.verifyExistingOwnerAddress(0, constants.DEFAULT_OWNER_ADDRESS)
+    owner.verifyExistingOwnerAddress(0, constants.defaultOwnerAddress())
   })
 
   // TODO: Check unit tests
@@ -58,8 +61,8 @@ describe('Safe creation tests', () => {
     createwallet.clickOnNextBtn()
     createwallet.verifySafeNameInSummaryStep(createwallet.walletName)
     createwallet.verifyOwnerNameInSummaryStep(ownerName)
-    createwallet.verifyOwnerAddressInSummaryStep(constants.DEFAULT_OWNER_ADDRESS)
-    createwallet.verifyOwnerAddressInSummaryStep(constants.DEFAULT_OWNER_ADDRESS)
+    createwallet.verifyOwnerAddressInSummaryStep(constants.defaultOwnerAddress())
+    createwallet.verifyOwnerAddressInSummaryStep(constants.defaultOwnerAddress())
     createwallet.verifyThresholdStringInSummaryStep(1, 2)
     createwallet.verifySafeNetworkNameInSummaryStep(constants.networks.sepolia.toLowerCase())
     createwallet.clickOnBackBtn()
@@ -68,8 +71,8 @@ describe('Safe creation tests', () => {
     createwallet.clickOnNextBtn()
     createwallet.verifySafeNameInSummaryStep(createwallet.walletName)
     createwallet.verifyOwnerNameInSummaryStep(ownerName)
-    createwallet.verifyOwnerAddressInSummaryStep(constants.DEFAULT_OWNER_ADDRESS)
-    createwallet.verifyOwnerAddressInSummaryStep(constants.DEFAULT_OWNER_ADDRESS)
+    createwallet.verifyOwnerAddressInSummaryStep(constants.defaultOwnerAddress())
+    createwallet.verifyOwnerAddressInSummaryStep(constants.defaultOwnerAddress())
     createwallet.verifyThresholdStringInSummaryStep(1, 2)
     createwallet.verifySafeNetworkNameInSummaryStep(constants.networks.sepolia.toLowerCase())
   })
@@ -86,7 +89,7 @@ describe('Safe creation tests', () => {
     createwallet.typeOwnerAddress(main.generateRandomString(10), 1)
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.invalidFormat)
 
-    createwallet.typeOwnerAddress(constants.DEFAULT_OWNER_ADDRESS, 1)
+    createwallet.typeOwnerAddress(constants.defaultOwnerAddress(), 1)
     owner.verifyErrorMsgInvalidAddress(constants.addressBookErrrMsg.ownerAdded)
 
     createwallet.typeOwnerAddress(getMockAddress().replace('A', 'a'), 1)

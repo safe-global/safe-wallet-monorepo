@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { cypressEnvironment, isRemoteBackendHost, planShards, selectCypressSpecs } from './cypress.mjs'
+import { cypressEnvironment, exposedValues, isRemoteBackendHost, planShards, selectCypressSpecs } from './cypress.mjs'
 import { isolatedSpecs } from './specs.mjs'
 import { createOwners } from './scenarios/safe.mjs'
 import { Wallet, verifyMessage } from 'ethers'
@@ -87,6 +87,21 @@ test('preserves path prefixes and excludes remote credentials in isolated browse
   assert.equal(result.FORK_RPC_URL, undefined)
   assert.equal(result.SEPOLIA_FORK_RPC_URL, undefined)
   assert.equal(result.CYPRESS_WALLET_CREDENTIALS, undefined)
+})
+
+test('exposes only the public values to the browser', () => {
+  const isolated = exposedValues(cypressEnvironment(local))
+  assert.deepEqual(Object.keys(isolated).sort(), [
+    'SAFE_CGW_BASE_URL',
+    'SAFE_E2E_ISOLATED',
+    'SAFE_TXS_BASE_URL',
+    'TX_BUILDER_URL',
+  ])
+  const staging = exposedValues(
+    cypressEnvironment({ CYPRESS_WALLET_CREDENTIALS: 'secret', INFURA_API_KEY: 'secret', BEAMER_DATA_E2E: '{}' }),
+  )
+  assert.deepEqual(staging, { BEAMER_DATA_E2E: '{}' })
+  assert.deepEqual(exposedValues({}), {})
 })
 
 test('points isolated Safe App specs at the locally served Transaction Builder', () => {
