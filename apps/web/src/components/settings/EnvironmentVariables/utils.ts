@@ -17,5 +17,6 @@ export const isTenderlySimulateUrl = (value: string): boolean => {
   } catch {
     return false
   }
-  return url.hostname === 'api.tenderly.co' && /\/simulate\/?$/.test(url.pathname)
+  // Braces survive URL parsing percent-encoded, so an unreplaced {account_slug} would otherwise pass as a real path
+  return url.protocol === 'https:' && !/%7B|%7D/i.test(url.pathname) && /\/simulate\/?$/.test(url.pathname)
 }

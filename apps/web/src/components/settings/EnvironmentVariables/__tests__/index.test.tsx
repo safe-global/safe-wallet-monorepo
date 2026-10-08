@@ -333,6 +333,48 @@ describe('EnvironmentVariables', () => {
     expect(reloadPage).not.toHaveBeenCalled()
   })
 
+  it('rejects a URL persisted before validation existed and does not save', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: {
+          rpc: {},
+          tenderly: { url: 'https://dashboard.tenderly.co/my-org/my-project', accessToken: mockTenderlyToken },
+        },
+      },
+    })
+
+    fireEvent.click(screen.getByText('Save'))
+
+    expect(
+      await screen.findByText('This is not a Simulation API URL. Copy it from your Tenderly project.'),
+    ).toBeInTheDocument()
+    expect(analytics.trackEvent).not.toHaveBeenCalled()
+    expect(store.getState().settings.env.tenderly.url).toBe('https://dashboard.tenderly.co/my-org/my-project')
+    expect(reloadPage).not.toHaveBeenCalled()
+  })
+
+  it('saves a valid Simulation API URL with its access token', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+      },
+    })
+
+    fireEvent.change(screen.getByLabelText('Tenderly API URL'), { target: { value: mockTenderlyUrl } })
+    fireEvent.change(screen.getByLabelText('Tenderly access token'), { target: { value: mockTenderlyToken } })
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(store.getState().settings.env.tenderly).toEqual({
+        url: mockTenderlyUrl,
+        accessToken: mockTenderlyToken,
+      })
+    })
+    expect(reloadPage).toHaveBeenCalled()
+  })
+
   it('clears the URL error when the field is reset', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {

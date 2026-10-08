@@ -15,8 +15,10 @@ describe('isTenderlySimulateUrl', () => {
     expect(isTenderlySimulateUrl('https://api.tenderly.co/api/v1/account/my-org/project/my-project')).toBe(false)
   })
 
-  it('rejects a simulate path on another host', () => {
-    expect(isTenderlySimulateUrl('https://example.com/api/v1/account/my-org/project/my-project/simulate')).toBe(false)
+  it('accepts a simulate path on a self-hosted Tenderly instance', () => {
+    expect(
+      isTenderlySimulateUrl('https://tenderly.acme-corp.com/api/v1/account/my-org/project/my-project/simulate'),
+    ).toBe(true)
   })
 
   it('accepts a simulate path with a trailing slash', () => {
@@ -25,8 +27,14 @@ describe('isTenderlySimulateUrl', () => {
     )
   })
 
-  it('accepts the placeholder, whose slug braces survive URL parsing as percent-encoded path segments', () => {
-    expect(isTenderlySimulateUrl(TENDERLY_SIMULATE_URL_PLACEHOLDER)).toBe(true)
+  it('rejects the placeholder with its slug braces unreplaced', () => {
+    expect(isTenderlySimulateUrl(TENDERLY_SIMULATE_URL_PLACEHOLDER)).toBe(false)
+  })
+
+  it('rejects a non-https URL', () => {
+    expect(isTenderlySimulateUrl('http://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate')).toBe(
+      false,
+    )
   })
 
   it('rejects values that are not URLs', () => {
