@@ -1,6 +1,10 @@
 /** Copy of the Create step, verbatim from the Figma frames. */
 export const CREATE_STEP_TITLE = 'Create new policy'
 export const EDIT_STEP_TITLE = 'Edit policy'
+export const UNKNOWN_MODULE_ERROR =
+  "This policy's module isn't a known spending limit module on this network, so it can't be added."
+export const MODULE_ALREADY_ENABLED_ERROR =
+  'The spending limit module is already added to this Safe account. The policy will show as active shortly.'
 export const FLOW_SUBTITLE = 'Spending limit'
 export const FLOW_HELP_LABEL = 'Learn more about spending limits'
 

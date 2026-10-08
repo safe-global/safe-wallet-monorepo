@@ -48,7 +48,7 @@ describe('PolicyOverview', () => {
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         chainId="1"
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 
@@ -72,12 +72,19 @@ describe('PolicyOverview', () => {
       <PolicyOverview
         appliesTo={{ address: SAFE.address, name: 'Treasury' }}
         chainId="1"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 
     expect(screen.queryByText('Last updated')).not.toBeInTheDocument()
     expect(screen.getByText('Enforced by')).toBeInTheDocument()
+  })
+
+  it('leaves out the enforced by row when no enforcer is given', () => {
+    render(<PolicyOverview appliesTo={{ address: SAFE.address, name: 'Treasury' }} chainId="1" />)
+
+    expect(screen.queryByText('Enforced by')).not.toBeInTheDocument()
+    expect(screen.getByText('Safe account')).toBeInTheDocument()
   })
 
   it('binds each account to its own row when an initiator is given', () => {
@@ -87,7 +94,7 @@ describe('PolicyOverview', () => {
         chainId="1"
         initiatedBy={{ address: SAFE.address, name: 'Alice' }}
         lastUpdated="Sep 22, 2026"
-        enforcedBy="Safe allowance module"
+        enforcedBy={{ label: 'Safe allowance module' }}
       />,
     )
 

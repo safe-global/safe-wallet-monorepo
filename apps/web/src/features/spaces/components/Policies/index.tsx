@@ -18,10 +18,18 @@ import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
+import EnableSpendingLimitModuleFlow from './SpendingLimitFlow/EnableModuleFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
 import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy, type PolicySafe } from './types'
+import {
+  isPendingPolicy,
+  isProposerPolicy,
+  isSpendingLimitPolicy,
+  type Policy,
+  type PolicySafe,
+  type SpendingLimitPolicy,
+} from './types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -88,12 +96,27 @@ const Policies = ({
     [policies, openPolicy],
   )
   const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
+  const isSpendingLimitLocked = locked?.lockedPolicies.includes('spending-limit')
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
   // The panel is left open: it hides itself while the flow runs, so cancelling lands back on it.
   const editSpendingLimit = useCallback(
     (safe: PolicySafe) => setTxFlow(<EditSpendingLimitFlow safe={safe} />),
+    [setTxFlow],
+  )
+
+  const enableSpendingLimitModule = useCallback(
+    ({ safe, enforcement, data }: Pick<SpendingLimitPolicy, 'safe' | 'enforcement' | 'data'>) => {
+      if (enforcement.via !== 'module') return
+      setTxFlow(
+        <EnableSpendingLimitModuleFlow
+          safe={safe}
+          moduleAddress={enforcement.moduleAddress}
+          spenders={data.spenders}
+        />,
+      )
+    },
     [setTxFlow],
   )
 
@@ -253,9 +276,8 @@ const Policies = ({
           policy={openedPolicy}
           isUnlisted={!listedPolicy}
           onClose={closeDetails}
-          onEdit={
-            locked?.lockedPolicies.includes('spending-limit') ? undefined : () => editSpendingLimit(openedPolicy.safe)
-          }
+          onEdit={isSpendingLimitLocked ? undefined : () => editSpendingLimit(openedPolicy.safe)}
+          onEnableModule={isSpendingLimitLocked ? undefined : () => enableSpendingLimitModule(openedPolicy)}
         />
       )}
     </div>

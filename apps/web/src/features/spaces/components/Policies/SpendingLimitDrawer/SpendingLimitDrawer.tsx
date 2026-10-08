@@ -28,7 +28,7 @@ type SpendingLimitDrawerBaseProps = {
   viewer: Viewer
   /** The Safe the policy applies to. The overview's "applies to" row derives from it. */
   safe: { address: string; name?: string }
-  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'chainId' | 'enforcedByHref'>
+  overview: Omit<PolicyOverviewProps, 'appliesTo' | 'chainId' | 'enforcedBy'> & { enforcedBy: string }
   names?: Record<string, string>
   onConnectWallet: () => void
 }
@@ -37,6 +37,8 @@ type ActiveSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
   policy: ActiveDrawerPolicy
   /** Arrives with WA-3156; without it the footer's `Edit` stays disabled. */
   onEdit?: () => void
+  /** Only reachable while the policy is unenforced; without it the footer's CTA stays disabled. */
+  onEnableModule?: () => void
 }
 
 type PendingSpendingLimitDrawerProps = SpendingLimitDrawerBaseProps & {
@@ -76,7 +78,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
           onRetry: props.onRetry,
         },
       }
-    : { onEdit: props.onEdit }
+    : { onEdit: props.onEdit, onEnableModule: props.onEnableModule }
 
   return (
     <Drawer open={open} onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
@@ -84,9 +86,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
 
       <DrawerBody>
         <div className="flex flex-col gap-6">
-          {(state.kind === 'pending' || state.kind === 'closed') && (
-            <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />
-          )}
+          {state.kind !== 'active' && <PendingBanner title={state.bannerTitle} line2={state.bannerLine2} />}
           {state.kind === 'pending' && (
             <PendingSignatures safe={safe} signed={state.signed} required={state.required} />
           )}
@@ -98,7 +98,7 @@ const SpendingLimitDrawer = (props: SpendingLimitDrawerProps): ReactElement => {
               href: buildSafeHref(AppRoutes.settings.setup, chain?.shortName, policy.safe.address, spaceId),
             }}
             chainId={policy.safe.chainId}
-            enforcedByHref={enforcedByHref}
+            enforcedBy={state.kind === 'unenforced' ? undefined : { label: overview.enforcedBy, href: enforcedByHref }}
           />
         </div>
       </DrawerBody>

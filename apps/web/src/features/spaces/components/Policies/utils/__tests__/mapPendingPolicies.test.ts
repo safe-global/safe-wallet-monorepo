@@ -153,6 +153,21 @@ describe('mapPendingPolicies', () => {
     expect(row.operation).toBe('create')
   })
 
+  it('should, when the queued tx re-enables the module of an unenforced policy, list the limits it applies again', () => {
+    const unenforced = mapActivePolicies([mockSpendingLimitDto({ enabled: false })], resolveKnownTokens)
+    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], unenforced, resolveKnownTokens)
+
+    expect(row.data).toEqual(unenforced[0].data)
+    expect(row.data.spenders[0].allowances[0]).not.toHaveProperty('change')
+    expect(row.enabled).toBe(true)
+  })
+
+  it('should, when the queued tx enables the module beside an enforced policy, carry over no limit', () => {
+    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], activeRows(), resolveKnownTokens)
+
+    expect(row.data.spenders).toEqual([])
+  })
+
   it('should, when a used limit is edited as a reset then a set, render one allowance with nothing spent', () => {
     const [row] = mapPendingPolicies(
       [
@@ -407,6 +422,13 @@ describe('isPendingChangeIndexed', () => {
     const edit = { ...queued, data: { spenders: [alice, leaving] } }
 
     expect(isPendingChangeIndexed(edit, active())).toBe(true)
+  })
+
+  it('should, for a re-enabled module, report it indexed only once the active policy is enforced again', () => {
+    const reEnable = { ...queued, data: active()[0].data }
+
+    expect(isPendingChangeIndexed(reEnable, active({ enabled: false }))).toBe(false)
+    expect(isPendingChangeIndexed(reEnable, active())).toBe(true)
   })
 
   it('should not match an active policy on another Safe', () => {
