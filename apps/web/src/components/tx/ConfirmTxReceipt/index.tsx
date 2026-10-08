@@ -113,7 +113,7 @@ export const ConfirmTxReceipt = ({ children, onSubmit }: PropsWithChildren<{ onS
 
         {children}
 
-        <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit}>
+        <Slot name={SlotName.Submit} onSubmitSuccess={onSubmit} txPreview={txPreview}>
           <Sign
             onSubmitSuccess={onSubmit}
             options={[{ id: 'sign', label: 'Sign' }]}

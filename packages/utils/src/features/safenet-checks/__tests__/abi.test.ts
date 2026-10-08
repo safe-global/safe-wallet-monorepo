@@ -48,13 +48,7 @@ describe('safenet-checks abi', () => {
     )
   })
 
-  // Freeze EVERY fragment's topic0 as a literal. This is the drift guard that
-  // used to live in checked-in synthetic fixtures: an accidental edit to any
-  // fragment (builders re-encode and would pass silently) fails here instead.
-  // The consensus pairs and the sentinel NewRequest/Committed/Revealed/
-  // OracleResult match live captures; DisputeResolved has no emitter yet, so
-  // its literal is the only pin it has.
-  it('freezes every fragment topic0 (fragment edits must be deliberate)', () => {
+  it('matches the deployed event topic0s, including council resolution', () => {
     const byName = Object.fromEntries(
       EVENT_DISPATCH.map((dispatch) => [`${dispatch.type}:${dispatch.eventName}`, topicHashOf(dispatch)]),
     )
@@ -63,11 +57,15 @@ describe('safenet-checks abi', () => {
       'ORACLE_ATTESTED:TransactionAttested': '0x1980afd018b6bb99a313d3b7a88274259621396f9b8acaa712ef114872977357',
       'PLAIN_PROPOSED:TransactionProposed': '0xe7427c304b80147290ec649ec1d8881f5fa455e85ba79ecb7dbfc58a56ea0906',
       'PLAIN_ATTESTED:TransactionAttested': '0x72272729e643703db011cc155474c30d652f1a68712d921cc263a881efd7bce6',
-      'REQUEST_CREATED:NewRequest': '0x1b858ca4149378382c073a8f8f0304d947775d07f6b7b7a4fb41f314bbf59f58',
+      'REQUEST_CREATED:NewRequest': '0x8ec61272960f97d43d7f8f85ed630aa512818577f3d1e548e7627b06dbbbda86',
       'SENTINEL_COMMITTED:Committed': '0x45acbf2626c7d2bd97eb2142a43d392e8f3364c9e140b3d022446155491819d6',
       'SENTINEL_REVEALED:Revealed': '0xd2cdead965dbd376703d9a79240f31f1228055ab42384b68353332fcd2af939a',
       'ORACLE_RESULT:OracleResult': '0x7843c453c4f7442b00e1bf3873e741f18f3447e18a13304c58bef95efd311757',
       'DISPUTE_RESOLVED:DisputeResolved': '0x7e739d167696b2e67be44f7ceb3afa7ad9e8ad5ee53d016de97ae7ab0b416a70',
+      'DISPUTE_TRIGGERED:DisputeTriggered': '0x86e8b85731e4787f033d85108356db1e068dea243be32d422e6dc5681ff49cc1',
+      'DISPUTE_OUT_OF_SCOPE:DisputeOutOfScope': '0xe32b95dcf423c9ed3915554e30a0db65ad08358b5e5bdb1138c98dcb745dbe81',
+      'ARBITRATION_TIMED_OUT:ArbitrationTimedOut': '0x5f19817b3ad988fdb5a7fb3f657a755e58a107bf47431574b7c516a6dc1551e6',
+      'REQUEST_TIMED_OUT:RequestTimedOut': '0xf1ca1e9147be737b04a2b018a79405f687a97de8dd8a2559bbe62357343af414',
     })
   })
 })

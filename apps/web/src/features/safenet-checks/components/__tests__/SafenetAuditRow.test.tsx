@@ -112,7 +112,7 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
       'href',
-      `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${HASH}`,
+      expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`),
     )
   })
 

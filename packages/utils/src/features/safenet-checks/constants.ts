@@ -13,48 +13,38 @@ const parseCsv = (value: string | undefined): string[] =>
         .filter(Boolean)
     : []
 
-/**
- * The Safenet chain id — feeds both the provider network and the EIP-712 domain
- * attestations are verified against. A wrong value makes every attestation
- * verify as INVALID, so the reader asserts it against `eth_chainId` in
- * development.
- */
-export const SAFENET_CHAIN_ID =
-  process.env.NEXT_PUBLIC_SAFENET_CHAIN_ID || process.env.EXPO_PUBLIC_SAFENET_CHAIN_ID || '100'
+/** Gnosis Chain hosts Safenet and supplies the attestation EIP-712 domain. */
+export const SAFENET_CHAIN_ID = '100'
 
-/** Pinned RPC endpoints for the read layer (csv). Rotated on failure. */
-export const SAFENET_RPC_URLS = parseCsv(
-  process.env.NEXT_PUBLIC_SAFENET_RPC_URLS || process.env.EXPO_PUBLIC_SAFENET_RPC_URLS || 'https://rpc.gnosischain.com',
-)
-
-/** Safenet Consensus contract. Default: Gnosis beta deployment. */
+/** Safenet Consensus contract. Default: Safenet deployment on Gnosis Chain. */
 export const SAFENET_CONSENSUS_ADDRESS =
   process.env.NEXT_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
   process.env.EXPO_PUBLIC_SAFENET_CONSENSUS_ADDRESS ||
-  '0x223624cBF099e5a8f8cD5aF22aFa424a1d1acEE9'
+  '0x73b4BDc3112Dfb86085cDD84f26Ab908B20A4A84'
 
-/** FROSTCoordinator the epoch group keys are read from. Default: Gnosis beta. */
+/** FROSTCoordinator for the Safenet deployment on Gnosis Chain. */
 export const SAFENET_COORDINATOR_ADDRESS =
   process.env.NEXT_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
   process.env.EXPO_PUBLIC_SAFENET_COORDINATOR_ADDRESS ||
-  '0xaE27021CEB45316f1efe69D8E362aC07ED3Bd7E4'
+  '0xC6B34dA4c99C043A093214D58423a8bE39585B78'
 
 /**
  * Sentinel-oracle allowlist (csv). `proposeOracleTransaction` is permissionless
  * with a caller-chosen oracle address, so reading verdicts from an unlisted
  * address would let anyone mark any Safe transaction MALICIOUS with a fabricated
- * `OracleResult`. Empty (the default) skips the oracle path entirely, matching
- * live beta where no sentinel oracle is deployed.
+ * `OracleResult`. The default trusts the SentinelOracle in the Safenet deployment on Gnosis Chain.
  */
 export const SAFENET_ORACLE_ADDRESSES = parseCsv(
-  process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES || process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES,
+  process.env.NEXT_PUBLIC_SAFENET_ORACLE_ADDRESSES ||
+    process.env.EXPO_PUBLIC_SAFENET_ORACLE_ADDRESSES ||
+    '0xB83c4b66e752D947c1F55fd703b7937e21e401E4',
 )
 
 /** Safenet explorer base URL — display-only deep links to a check's attestation. */
 export const SAFENET_EXPLORER_URL = (
   process.env.NEXT_PUBLIC_SAFENET_EXPLORER_URL ||
   process.env.EXPO_PUBLIC_SAFENET_EXPLORER_URL ||
-  'https://explorer.safenet-beta.eth.limo'
+  'https://www.safe.dev/safenet'
 ).replace(/\/$/, '')
 
 // --- Lookback tuning ------------------------------------------------------

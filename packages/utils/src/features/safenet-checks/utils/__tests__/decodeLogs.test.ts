@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { decodeLogs, type RawLog } from '../decodeLogs'
+import { Interface } from 'ethers'
 import {
   buildCommittedLog,
   buildDisputeResolvedLog,
@@ -76,6 +77,22 @@ describe('decodeLogs — commit-reveal lifecycle, built through the real fragmen
     expect(typeof attested.attestation.r.x).toBe('string')
     expect(typeof attested.attestation.z).toBe('string')
     expect(attested.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
+  })
+})
+
+describe('deployed Gnosis terminal events', () => {
+  it.each([
+    ['DisputeTriggered', 'uint64 deadline', [200n], CheckEventType.DISPUTE_TRIGGERED],
+    ['DisputeOutOfScope', 'string context', ['outside scope'], CheckEventType.DISPUTE_OUT_OF_SCOPE],
+    ['ArbitrationTimedOut', '', [], CheckEventType.ARBITRATION_TIMED_OUT],
+    ['RequestTimedOut', '', [], CheckEventType.REQUEST_TIMED_OUT],
+  ] as const)('decodes %s from the deployed signature', (name, fields, values, type) => {
+    const iface = new Interface([`event ${name}(bytes32 indexed requestId${fields ? `, ${fields}` : ''})`])
+    const requestId = `0x${'12'.repeat(32)}`
+    const encoded = iface.encodeEventLog(name, [requestId, ...values])
+    const [event] = decodeLogs([{ ...encoded, blockNumber: 100, logIndex: 0, transactionHash: '0x123' }])
+    expect(event).toMatchObject({ type, requestId })
+    if (type === CheckEventType.DISPUTE_TRIGGERED) expect(event).toHaveProperty('deadlineBlock', '200')
   })
 })
 
@@ -161,8 +178,9 @@ describe('decodeLogs — live-captured Sepolia relaunch lifecycle', () => {
   const events = decodeLogs(fixture.logs)
 
   it('decodes the full lifecycle, skipping unknown topics (Claimed)', () => {
-    // 12 raw logs: 1 proposal + 8 decodable oracle events + 3 Claimed (unknown).
-    expect(events).toHaveLength(9)
+    // 12 raw logs: 1 proposal + 7 decodable oracle events + 3 Claimed (unknown).
+    // This deployment's seven-field NewRequest is not decoded.
+    expect(events).toHaveLength(8)
   })
 
   it('reads chainId and safe from the transaction tuple on the proposal', () => {
@@ -175,15 +193,6 @@ describe('decodeLogs — live-captured Sepolia relaunch lifecycle', () => {
     expect(proposed.epoch).toBe(fixture.epoch)
     // keccak256 of the empty oracleData — derives the requestId.
     expect(proposed.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
-  })
-
-  it('maps sponsor to proposer and both deadlines on NewRequest', () => {
-    const [request] = byType(events, CheckEventType.REQUEST_CREATED)
-    expect(request.requestId).toBe(fixture.requestId)
-    expect(request.proposer.toLowerCase()).toBe('0x1ff07880982708b139c8efb87f4f43d15f312127')
-    expect(request.fee).toBe('400000000000000000')
-    expect(request.commitDeadlineBlock).toBe('11528811')
-    expect(request.deadlineBlock).toBe('11528814')
   })
 
   it('keeps commits blind and carries the verdict on reveals', () => {

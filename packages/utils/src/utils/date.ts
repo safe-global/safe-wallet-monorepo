@@ -60,3 +60,18 @@ export function getPeriod(seconds: number): string | undefined {
     return `${minutes} minute${maybePlural(minutes)}`
   }
 }
+
+export function getDetailedPeriod(seconds: number): string {
+  const { days, hours, minutes } = getCountdown(seconds)
+  const units: Array<[number, string]> = [
+    [days, 'day'],
+    [hours, 'hour'],
+    [minutes, 'minute'],
+    [seconds % 60, 'second'],
+  ]
+
+  return units
+    .filter(([amount]) => amount > 0)
+    .map(([amount, unit]) => `${amount} ${unit}${maybePlural(amount)}`)
+    .join(', ')
+}

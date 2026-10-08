@@ -12,7 +12,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import { getPeriod } from '@safe-global/utils/utils/date'
+import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 
 import tableCss from '@/components/common/EnhancedTable/styles.module.css'
@@ -82,11 +82,11 @@ function RecoverySettings(): ReactElement {
             },
             [HeadCells.Delay]: {
               rawValue: delaySeconds,
-              content: <Typography>{delaySeconds === 0 ? 'none' : getPeriod(delaySeconds)}</Typography>,
+              content: <Typography>{delaySeconds === 0 ? 'none' : getDetailedPeriod(delaySeconds)}</Typography>,
             },
             [HeadCells.Expiry]: {
               rawValue: expirySeconds,
-              content: <Typography>{expirySeconds === 0 ? 'never' : getPeriod(expirySeconds)}</Typography>,
+              content: <Typography>{expirySeconds === 0 ? 'never' : getDetailedPeriod(expirySeconds)}</Typography>,
             },
             [HeadCells.Actions]: {
               rawValue: '',
