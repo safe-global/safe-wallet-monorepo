@@ -44,11 +44,16 @@ jobs:
           AUTHOR: ${{ github.event.pull_request.user.login }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
+          if [ ! -f scripts/design-check/index.cjs ]; then
+            echo "The design scope check is not on the base branch yet."
+            exit 0
+          fi
+          design_pr=$(node scripts/design-check/is-design-pr.cjs)
           set +e
           node scripts/design-check/index.cjs --base "$BASE_SHA" --head "$HEAD_SHA" --summary "$GITHUB_STEP_SUMMARY"
           result=$?
           set -e
-          if node scripts/design-check/is-design-pr.cjs; then
+          if [ "$design_pr" = "true" ]; then
             exit "$result"
           fi
           echo "Not a design pull request; the result above is for information only."
