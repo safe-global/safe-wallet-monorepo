@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import { PopoverContent } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import Identicon from '@/components/common/Identicon'
@@ -41,7 +42,12 @@ export const ProfilePopoverContent = ({
         ) : (
           <InitialsAvatar name={avatarName} size="medium" rounded />
         )}
-        <span className={css.profileName}>{displayName}</span>
+        {displayName && (
+          <Tooltip>
+            <TooltipTrigger render={<span className={css.profileName} />}>{displayName}</TooltipTrigger>
+            <TooltipContent side="top">{signerAddress || displayName}</TooltipContent>
+          </Tooltip>
+        )}
         {signerAddress && <CopyAddressIconButton address={signerAddress} />}
       </div>
 
@@ -58,7 +64,12 @@ export const ProfilePopoverContent = ({
 
           <div className={css.profileIdentity}>
             <Identicon address={connectedWallet} size={32} />
-            <span className={css.profileName}>{shortenAddress(connectedWallet)}</span>
+            <Tooltip>
+              <TooltipTrigger render={<span className={css.profileName} />}>
+                {shortenAddress(connectedWallet)}
+              </TooltipTrigger>
+              <TooltipContent side="top">{connectedWallet}</TooltipContent>
+            </Tooltip>
             <CopyAddressIconButton address={connectedWallet} />
           </div>
 

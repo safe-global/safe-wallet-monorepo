@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { ReactNode } from 'react'
+import type { ReactElement, ReactNode } from 'react'
+import type * as ReactModule from 'react'
 import { ProfilePopoverContent } from '../ProfilePopoverContent'
 
 const SIGNER = '0xB4F6f4F0E0A1F0a2f0b3C4d5E6f7A8b9C0d1cF51'
@@ -12,6 +13,18 @@ jest.mock('@/components/ui/popover', () => ({
     <div data-testid={testId}>{children}</div>
   ),
 }))
+
+// TooltipTrigger renders its content through `render`; cloning keeps the real
+// element (and its class) in the tree so the visible text stays assertable.
+jest.mock('@/components/ui/tooltip', () => {
+  const { cloneElement } = jest.requireActual<typeof ReactModule>('react')
+  return {
+    Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+    TooltipTrigger: ({ children, render: trigger }: { children: ReactNode; render: ReactElement }) =>
+      cloneElement(trigger, undefined, children),
+    TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+  }
+})
 
 jest.mock('@/components/common/InitialsAvatar', () => ({
   __esModule: true,
@@ -35,7 +48,7 @@ describe('ProfilePopoverContent', () => {
     render(<ProfilePopoverContent avatarName="Alice A" displayName="Alice" role="ADMIN" onSignOut={jest.fn()} />)
 
     expect(screen.getByTestId('initials-avatar')).toHaveTextContent('Alice A')
-    expect(screen.getByText('Alice')).toBeInTheDocument()
+    expect(screen.getAllByText('Alice').length).toBeGreaterThan(0)
     expect(screen.getByText('ADMIN')).toBeInTheDocument()
     expect(screen.getByText('Your account')).toBeInTheDocument()
     expect(screen.getByText('Manages your Safe Pro subscription.')).toBeInTheDocument()
@@ -206,6 +219,47 @@ describe('ProfilePopoverContent', () => {
     const copyButtons = screen.getAllByRole('button', { name: 'Copy address' })
     expect(copyButtons).toHaveLength(1)
     expect(copyButtons[0]).toHaveAttribute('data-address', CONNECTED)
+  })
+
+  it('reveals the full signer address in a tooltip behind the shortened one', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.getAllByTestId('tooltip-content').map((el) => el.textContent)).toEqual([SIGNER])
+  })
+
+  it('reveals the full email in a tooltip for email accounts', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="alice@safe.global"
+        displayName="alexandra.mosharova@safe.global"
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.getAllByTestId('tooltip-content').map((el) => el.textContent)).toEqual([
+      'alexandra.mosharova@safe.global',
+    ])
+  })
+
+  it('reveals the full address of both the account and the connected wallet', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        signerAddress={SIGNER}
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.getAllByTestId('tooltip-content').map((el) => el.textContent)).toEqual([SIGNER, CONNECTED])
   })
 
   it('calls onSignOut once per click', async () => {

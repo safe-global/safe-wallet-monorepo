@@ -37,7 +37,9 @@ jest.mock('@/components/ui/tooltip', () => {
     Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,
     TooltipTrigger: ({ children, render: trigger }: { children: ReactNode; render: ReactElement }) =>
       cloneElement(trigger, undefined, children),
-    TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
+    TooltipContent: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
+      <div data-testid={testId ?? 'tooltip-content'}>{children}</div>
+    ),
   }
 })
 
@@ -73,13 +75,13 @@ describe('AccountInfo', () => {
   it('shows a "Signed in as" tooltip naming the account', () => {
     render(<AccountInfo profileName="User" displayName="0x1234...5678" />)
 
-    expect(screen.getByTestId('tooltip-content')).toHaveTextContent('Signed in as 0x1234...5678')
+    expect(screen.getByTestId('account-chip-tooltip')).toHaveTextContent('Signed in as 0x1234...5678')
   })
 
   it('omits the tooltip when there is no display name', () => {
     render(<AccountInfo />)
 
-    expect(screen.queryByTestId('tooltip-content')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('account-chip-tooltip')).not.toBeInTheDocument()
   })
 
   it('labels the trigger generically when there is no display name', () => {

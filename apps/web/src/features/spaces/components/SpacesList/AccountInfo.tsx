@@ -51,7 +51,11 @@ export const AccountInfo = ({
           )}
         </TooltipTrigger>
 
-        {displayName && <TooltipContent side="bottom">Signed in as {displayName}</TooltipContent>}
+        {displayName && (
+          <TooltipContent side="bottom" data-testid="account-chip-tooltip">
+            Signed in as {displayName}
+          </TooltipContent>
+        )}
       </Tooltip>
 
       <ProfilePopoverContent
