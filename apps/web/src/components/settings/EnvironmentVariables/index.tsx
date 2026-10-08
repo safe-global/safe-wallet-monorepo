@@ -63,7 +63,7 @@ const EnvironmentVariables = () => {
   })
 
   const onResetRpc = () => setValue(EnvVariablesField.rpc, '')
-  const onResetTenderlyUrl = () => setValue(EnvVariablesField.tenderlyURL, '')
+  const onResetTenderlyUrl = () => setValue(EnvVariablesField.tenderlyURL, '', { shouldValidate: true })
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (

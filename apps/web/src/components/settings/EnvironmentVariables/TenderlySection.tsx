@@ -54,16 +54,16 @@ const TenderlySection = ({
       <Alert variant="info" className="mb-4" data-testid="tenderly-info">
         <AlertSeverityIcon variant="info" />
         <AlertDescription>
-          Transaction simulation is included in Safe Pro. You can also connect your own Tenderly project.
-          <span className="mt-2 flex flex-wrap items-center gap-3">
-            <ExternalLink href={TENDERLY_SETUP_GUIDE_URL}>View setup guide</ExternalLink>
-            {!hasProFeatures && (
-              <Button variant="outline" size="xs" render={<NextLink href={plansHref} />}>
+          Transaction simulation is included in Safe Pro. You can also connect your own Tenderly project.{' '}
+          <ExternalLink href={TENDERLY_SETUP_GUIDE_URL}>View setup guide</ExternalLink>
+          {!hasProFeatures && (
+            <span className="mt-2 flex">
+              <Button variant="surface" size="sm" weight="semibold" render={<NextLink href={plansHref} />}>
                 See plans
                 <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
               </Button>
-            )}
-          </span>
+            </span>
+          )}
         </AlertDescription>
       </Alert>
 

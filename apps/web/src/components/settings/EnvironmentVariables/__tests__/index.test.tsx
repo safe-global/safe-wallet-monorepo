@@ -332,6 +332,31 @@ describe('EnvironmentVariables', () => {
     expect(reloadPage).not.toHaveBeenCalled()
   })
 
+  it('clears the URL error when the field is reset', async () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    const tenderlyUrlInput = screen.getByLabelText('Tenderly API URL')
+    fireEvent.change(tenderlyUrlInput, { target: { value: 'https://dashboard.tenderly.co/my-org/my-project' } })
+    await screen.findByText('This is not a Simulation API URL. Copy it from your Tenderly project.')
+
+    fireEvent.click(screen.getByLabelText('Reset to default value'))
+
+    await waitFor(() => {
+      expect(
+        screen.queryByText('This is not a Simulation API URL. Copy it from your Tenderly project.'),
+      ).not.toBeInTheDocument()
+    })
+    expect(tenderlyUrlInput).toHaveValue('')
+    expect(tenderlyUrlInput).not.toHaveAttribute('aria-invalid')
+  })
+
   it('should allow clearing all inputs', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {
