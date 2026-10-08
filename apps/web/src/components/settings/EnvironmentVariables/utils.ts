@@ -1,6 +1,8 @@
 export const TENDERLY_SIMULATE_URL_PLACEHOLDER =
   'https://api.tenderly.co/api/v1/account/{account_slug}/project/{project_slug}/simulate'
 
+export const TENDERLY_TOKEN_PLACEHOLDER = 'Paste your access token here'
+
 export const TENDERLY_SETUP_GUIDE_URL =
   'https://docs.tenderly.co/simulations/guides/safe-wallet#simulate-safe-wallet-transactions-in-your-tenderly-project'
 

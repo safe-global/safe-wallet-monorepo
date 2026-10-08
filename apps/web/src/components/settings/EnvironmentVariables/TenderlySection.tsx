@@ -12,11 +12,13 @@ import { ArrowRight, EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
 import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import { useSafeProAccess } from '@/features/spaces'
+import { cn } from '@/utils/cn'
 import { EnvVariablesField, type EnvVariablesFormData } from './index'
 import {
   isTenderlySimulateUrl,
   TENDERLY_SETUP_GUIDE_URL,
   TENDERLY_SIMULATE_URL_PLACEHOLDER,
+  TENDERLY_TOKEN_PLACEHOLDER,
   TENDERLY_URL_ERROR,
   TENDERLY_URL_HELPER_TEXT,
 } from './utils'
@@ -67,9 +69,10 @@ const TenderlySection = ({
         </AlertDescription>
       </Alert>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={EnvVariablesField.tenderlyURL} className={urlError ? 'text-destructive' : undefined}>
+          <Label htmlFor={EnvVariablesField.tenderlyURL} className={cn('gap-1.5', urlError && 'text-destructive')}>
+            <span aria-hidden className="bg-current size-0.5 rounded-full" />
             Tenderly API URL
           </Label>
           <Controller
@@ -77,7 +80,7 @@ const TenderlySection = ({
             control={control}
             rules={{ validate: (value) => !value || isTenderlySimulateUrl(value) || TENDERLY_URL_ERROR }}
             render={({ field, fieldState }) => (
-              <>
+              <div className="flex flex-col gap-1">
                 <InputGroup>
                   <InputGroupInput
                     {...field}
@@ -85,6 +88,14 @@ const TenderlySection = ({
                     value={field.value || ''}
                     type="url"
                     placeholder={TENDERLY_SIMULATE_URL_PLACEHOLDER}
+                    // Without these the browser refills the field on reload, turning the placeholder hint into a value
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-form-type="other"
                     aria-invalid={fieldState.invalid || undefined}
                     aria-describedby={urlDescriptionId}
                   />
@@ -108,13 +119,16 @@ const TenderlySection = ({
                 ) : (
                   <FieldDescription id={urlDescriptionId}>{TENDERLY_URL_HELPER_TEXT}</FieldDescription>
                 )}
-              </>
+              </div>
             )}
           />
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={EnvVariablesField.tenderlyToken}>Tenderly access token</Label>
+          <Label htmlFor={EnvVariablesField.tenderlyToken} className="gap-1.5">
+            <span aria-hidden className="bg-current size-0.5 rounded-full" />
+            Tenderly access token
+          </Label>
           <Controller
             name={EnvVariablesField.tenderlyToken}
             control={control}
@@ -124,8 +138,7 @@ const TenderlySection = ({
                   {...field}
                   id={EnvVariablesField.tenderlyToken}
                   value={field.value || ''}
-                  // A text field masked with CSS, not type="password", so browsers and password managers don't offer to
-                  // save it as a password or autofill a saved one into it.
+                  placeholder={TENDERLY_TOKEN_PLACEHOLDER}
                   type="text"
                   autoComplete="off"
                   autoCorrect="off"

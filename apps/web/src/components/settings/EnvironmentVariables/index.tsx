@@ -83,7 +83,7 @@ const EnvironmentVariables = () => {
             showResetTokenButton={!!tenderlyToken}
           />
 
-          <Button type="submit" className="mt-4">
+          <Button type="submit" className="mt-8">
             Save
           </Button>
         </form>
