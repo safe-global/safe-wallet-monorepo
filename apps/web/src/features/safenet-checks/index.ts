@@ -16,3 +16,4 @@ export const SafenetChecksFeature: FeatureHandle<SafenetChecksContract> = {
 }
 
 export type { SafenetChecksContract } from './types'
+export { useIsSafenetCheckBenign, useIsSafenetCheckRunning } from './useIsSafenetCheckRunning'

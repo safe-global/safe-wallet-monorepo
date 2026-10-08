@@ -8,9 +8,11 @@ import {
   buildCheckView,
   buildSnapshot,
   attestedEvent,
+  sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
+import { SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
@@ -96,7 +98,7 @@ describe('SafenetAuditRow', () => {
     )
   })
 
-  it('falls back to the Safenet explorer hash route when the chain config is unknown', () => {
+  it('links the explorer, labelled as such, when the attestation link cannot be built', () => {
     const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
     const snapshot = buildBenignSnapshot({
       safeTxHash: HASH as `0x${string}`,
@@ -110,10 +112,10 @@ describe('SafenetAuditRow', () => {
 
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
-    expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
-      'href',
-      expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`),
-    )
+    // The explorer page is not proof, so it never stands in for the attestation link.
+    expect(screen.getByText('No issues found')).toBeInTheDocument()
+    expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safenet-explorer-link')).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
   })
 
   it('dates the No-issues step from the attested block', () => {
@@ -176,5 +178,41 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByText('Risk detected')).toBeInTheDocument()
     expect(screen.queryByTestId('safenet-attestation-link')).not.toBeInTheDocument()
+  })
+
+  it('links a MALICIOUS step to the Safenet explorer', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.MALICIOUS,
+      events: [sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.6' })],
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Risk detected')).toBeInTheDocument()
+    const link = screen.getByTestId('safenet-explorer-link')
+    expect(link).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
+    expect(link).toHaveAttribute('href', expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`))
+  })
+
+  it('keeps the short label when several rules were cited', () => {
+    const snapshot = buildSnapshot({
+      safeTxHash: HASH as `0x${string}`,
+      status: CheckStatus.MALICIOUS,
+      events: [
+        sentinelRevealedEvent({ sentinel: '0x1', approved: false, reason: 'R-4.2' }),
+        sentinelRevealedEvent({ sentinel: '0x2', approved: false, reason: 'R-4.1' }),
+      ],
+    })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Risk detected')).toBeInTheDocument()
   })
 })

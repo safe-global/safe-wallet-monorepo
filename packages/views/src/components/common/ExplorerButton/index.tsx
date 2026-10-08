@@ -4,7 +4,12 @@ import { buttonVariants } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import LinkIcon from '@safe-global/views/assets/images/common/link.svg'
+import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import Link from 'next/link'
+
+const ExplorerLinkIcon = ({ className }: { className?: string }) => (
+  <ExternalLinkIcon className={className} fallback={LinkIcon} />
+)
 
 export type ExplorerButtonProps = {
   title?: string
@@ -19,7 +24,7 @@ export type ExplorerButtonProps = {
 const ExplorerButton = ({
   title = '',
   href = '',
-  icon: Icon = LinkIcon,
+  icon: Icon = ExplorerLinkIcon,
   className,
   onClick,
   isCompact = true,
