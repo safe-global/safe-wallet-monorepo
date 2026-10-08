@@ -1,4 +1,4 @@
-import { createRef, type ComponentType, type ReactElement } from 'react'
+import { cloneElement, createRef, type ComponentType, type ReactElement } from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import ts from 'typescript'
 import { runView } from './runtime'
@@ -174,5 +174,26 @@ describe('runView', () => {
     render(<View />)
 
     expect(screen.getByText('x')).toHaveClass('a c')
+  })
+
+  it('gives a library the real props of an element that trusted code passed through a view', () => {
+    const onTrustedClick = jest.fn()
+    const onLibraryClick = jest.fn()
+    const Trigger = ({ render }: { render: ReactElement<{ onClick: () => void }> }) =>
+      cloneElement(render, {
+        onClick: () => {
+          render.props.onClick()
+          onLibraryClick()
+        },
+      })
+    const View = loadView<{ button: ReactElement }>(
+      `import { Trigger } from '@base-ui/react/trigger'\nexport const View = ({ button }) => <Trigger render={button} />`,
+      { '@base-ui/react/trigger': { __esModule: true, Trigger } },
+    )
+    render(<View button={<button onClick={onTrustedClick}>edit</button>} />)
+    fireEvent.click(screen.getByText('edit'))
+
+    expect(onTrustedClick).toHaveBeenCalledTimes(1)
+    expect(onLibraryClick).toHaveBeenCalledTimes(1)
   })
 })

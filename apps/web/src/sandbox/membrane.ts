@@ -230,7 +230,13 @@ const remember = (value: object, result: object): object => {
 /** Converts a value going from view code into trusted code. */
 export function outbound(value: unknown): unknown {
   if (!isObjectLike(value)) return value
-  if (toTrusted.has(value)) return toTrusted.get(value)
+  if (toTrusted.has(value)) {
+    const real = toTrusted.get(value)
+    // Hand trusted code its own element, so libraries like Base UI merge its props instead of overwriting them.
+    if (isObjectLike(real) && (real as React.ReactElement).type === Opaque)
+      return toTrusted.get(((real as React.ReactElement).props as Obj)[OPAQUE_KEY] as object)
+    return real
+  }
   if (toView.has(value)) return value
   const cached = outboundCache.get(value)
   if (cached !== undefined) return cached
