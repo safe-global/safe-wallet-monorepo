@@ -10,7 +10,7 @@ import {
 import css from '../../styles.module.css'
 import { sidebarDeveloperGroup } from '../../developerItems'
 import { SidebarDeveloperItem } from './SidebarDeveloperItem'
-import { itemVariants } from '../../constants'
+import { itemVariants } from '@/features/spaces/components/Sidebar/constants'
 
 interface SidebarDeveloperGroupProps {
   isLoading?: boolean

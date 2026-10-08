@@ -10,10 +10,10 @@ import {
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
-import { AddressChanges } from '../AddressChanges'
+import { AddressChanges } from '@/features/safe-shield/components/AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
 import { ReportFalseResultModal } from '../ReportFalseResultModal'
-import { AnalysisDetailsDropdown } from '../AnalysisDetailsDropdown'
+import { AnalysisDetailsDropdown } from '@/features/safe-shield/components/AnalysisDetailsDropdown'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult

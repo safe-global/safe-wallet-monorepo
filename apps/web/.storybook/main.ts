@@ -16,7 +16,12 @@ process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || pac
 process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../storybook/src/**/*.mdx',
+    '../../../storybook/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',

@@ -3,8 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { ADD_POLICY_DISMISSED_LABEL, POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { cn } from '@/utils/cn'
-import AddPolicyOptionButton from './AddPolicyOptionButton'
-import { ADD_POLICY_OPTIONS, type AddPolicyId, type AddPolicyOption } from './options'
+import AddPolicyOptionButton from '@/features/spaces/components/Policies/AddPolicyDialog/AddPolicyOptionButton'
+import {
+  ADD_POLICY_OPTIONS,
+  type AddPolicyId,
+  type AddPolicyOption,
+} from '@/features/spaces/components/Policies/AddPolicyDialog/options'
 
 const SINGLE_COLUMN_MAX = 3
 

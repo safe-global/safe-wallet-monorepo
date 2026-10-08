@@ -12,7 +12,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
 import { RecoveryFeature, useRecovery } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 import css from '../TransactionGuards/styles.module.css'
 

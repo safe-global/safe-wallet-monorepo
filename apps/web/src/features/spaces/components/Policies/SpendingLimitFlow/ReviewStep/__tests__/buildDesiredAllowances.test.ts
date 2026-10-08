@@ -1,7 +1,7 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
-import type { SpendingLimitPolicyFormValues } from '../../types'
+import type { SpendingLimitPolicyFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { buildDesiredAllowances, findExistingAllowance, UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
 
 const ALICE = '0x1234567890123456789012345678901234567890'

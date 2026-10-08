@@ -1,8 +1,8 @@
-import { SafeWidgetRoot } from './SafeWidgetRoot'
+import { SafeWidgetRoot } from '@/features/spaces/components/SafeWidget/SafeWidgetRoot'
 import { WidgetItem } from './WidgetItem'
-import { WidgetFooter } from './WidgetFooter'
-import { WidgetViewAll } from './WidgetViewAll'
-import { WidgetItemSkeleton } from './WidgetItemSkeleton'
+import { WidgetFooter } from '@/features/spaces/components/SafeWidget/WidgetFooter'
+import { WidgetViewAll } from '@/features/spaces/components/SafeWidget/WidgetViewAll'
+import { WidgetItemSkeleton } from '@/features/spaces/components/SafeWidget/WidgetItemSkeleton'
 import { WidgetEmptyState } from './WidgetEmptyState'
 import { WidgetErrorState } from './WidgetErrorState'
 
@@ -16,11 +16,11 @@ const SafeWidget = Object.assign(SafeWidgetRoot, {
 })
 
 export { SafeWidget, WidgetItem, WidgetFooter, WidgetViewAll, WidgetItemSkeleton, WidgetEmptyState, WidgetErrorState }
-export type { SafeWidgetProps } from './SafeWidgetRoot'
+export type { SafeWidgetProps } from '@/features/spaces/components/SafeWidget/SafeWidgetRoot'
 export type { WidgetItemProps } from './WidgetItem'
-export type { WidgetFooterProps } from './WidgetFooter'
-export type { WidgetViewAllProps } from './WidgetViewAll'
-export type { WidgetItemSkeletonProps } from './WidgetItemSkeleton'
+export type { WidgetFooterProps } from '@/features/spaces/components/SafeWidget/WidgetFooter'
+export type { WidgetViewAllProps } from '@/features/spaces/components/SafeWidget/WidgetViewAll'
+export type { WidgetItemSkeletonProps } from '@/features/spaces/components/SafeWidget/WidgetItemSkeleton'
 export type { WidgetEmptyStateProps } from './WidgetEmptyState'
 export type { WidgetErrorStateProps } from './WidgetErrorState'
 export default SafeWidget

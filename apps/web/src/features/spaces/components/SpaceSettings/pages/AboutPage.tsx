@@ -28,7 +28,9 @@ import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcemen
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`

@@ -23,7 +23,7 @@ import {
 } from '../OnboardingLayout'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
-import SurveyOptionCard from './SurveyOptionCard'
+import SurveyOptionCard from '@/features/spaces/components/SurveyOnboarding/SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
 // This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page

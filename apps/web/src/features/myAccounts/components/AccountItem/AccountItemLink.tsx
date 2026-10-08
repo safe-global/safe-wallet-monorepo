@@ -5,7 +5,7 @@ import classnames from 'classnames'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS } from '@/services/analytics'
 import css from '../AccountItems/styles.module.css'
-import AccountItemContent from './AccountItemContent'
+import AccountItemContent from '@/features/myAccounts/components/AccountItem/AccountItemContent'
 
 export interface AccountItemLinkProps {
   children: ReactNode

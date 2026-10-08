@@ -13,7 +13,13 @@ import { cn } from '@/utils/cn'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
-import { CARD_ROW_CLASS, CELL_BASE, GRID_COLS, HIDE_BALANCE, ROW_VARIANTS } from './constants'
+import {
+  CARD_ROW_CLASS,
+  CELL_BASE,
+  GRID_COLS,
+  HIDE_BALANCE,
+  ROW_VARIANTS,
+} from '@/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import {
   formatBalance,
   getAggregateNonPassingCount,
@@ -25,7 +31,7 @@ import {
   type GetSafeSecurityHref,
   type RowSecurity,
 } from './utils'
-import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '../../types'
+import type { ChainEntry, SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
 
 export type MultichainSafeRowProps = {
   safe: SpaceSafeEntry

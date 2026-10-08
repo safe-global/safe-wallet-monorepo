@@ -1,4 +1,4 @@
-import type { PolicyLock } from '../policyLock'
+import type { PolicyLock } from '@/features/spaces/components/Policies/policyLock'
 
 /** A workspace on a plan that does not include policies, as the Starter story and tests render it. */
 export const mockStarterPlan: Omit<PolicyLock, 'onUpgrade'> = {

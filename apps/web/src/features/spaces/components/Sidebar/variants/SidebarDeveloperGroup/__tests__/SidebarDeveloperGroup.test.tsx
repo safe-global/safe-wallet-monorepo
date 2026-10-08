@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import type * as React from 'react'
 import type { ReactNode } from 'react'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
-import type { ResolvedSidebarItem } from '../../../types'
+import type { ResolvedSidebarItem } from '@/features/spaces/components/Sidebar/types'
 import { setIsProduction } from '@/tests/env'
 
 jest.mock('@/components/ui/sidebar', () => ({

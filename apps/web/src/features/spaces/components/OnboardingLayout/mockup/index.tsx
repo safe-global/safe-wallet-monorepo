@@ -1,4 +1,7 @@
 export { default as SafeAppMockup } from './SafeAppMockup'
-export type { SafeAppMockupAccount, SafeAppMockupProps } from './types'
+export type {
+  SafeAppMockupAccount,
+  SafeAppMockupProps,
+} from '@/features/spaces/components/OnboardingLayout/mockup/types'
 export { deriveSidePanelAccountsFromSpace } from './deriveSidePanelAccountsFromSpace'
 export { useSafeNameLookup } from './useSafeNameLookup'

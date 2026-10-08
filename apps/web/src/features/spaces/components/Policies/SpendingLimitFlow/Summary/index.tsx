@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import AppliesToCard from './AppliesToCard'
 import PolicyCallout from './PolicyCallout'
 import SpenderSummaryCard from './SpenderSummaryCard'
-import type { SpendingLimitSummaryModel } from './types'
+import type { SpendingLimitSummaryModel } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 export type SpendingLimitSummaryProps = { policy: SpendingLimitSummaryModel }
 

@@ -3,10 +3,10 @@ import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-p
 import { cn } from '@/utils/cn'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { reorderByKey } from '@/utils/reorder'
-import DragHandle from './DragHandle'
+import DragHandle from '@/features/spaces/components/SafeSelectorDropdown/components/DragHandle'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
-import type { SafeItemData, SafeRenameTarget } from '../types'
+import type { SafeItemData, SafeRenameTarget } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 interface ReorderableSafeListProps {
   items: SafeItemData[]

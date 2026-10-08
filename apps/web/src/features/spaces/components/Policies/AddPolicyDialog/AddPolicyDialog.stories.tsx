@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import AddPolicyDialog from './index'
-import { ADD_POLICY_OPTIONS, RECOVERY_POLICY_OPTION } from './options'
+import {
+  ADD_POLICY_OPTIONS,
+  RECOVERY_POLICY_OPTION,
+} from '@/features/spaces/components/Policies/AddPolicyDialog/options'
 
 const meta = {
   title: 'Features/Spaces/AddPolicyDialog',

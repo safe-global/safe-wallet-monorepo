@@ -17,9 +17,9 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { flattenSafeItems } from '@/hooks/safes'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
+import { removedSafesNote, summarizeRemovedSafes } from '@/features/spaces/components/Plans/removedSafes'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
+import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from '@/features/spaces/components/Plans/types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())

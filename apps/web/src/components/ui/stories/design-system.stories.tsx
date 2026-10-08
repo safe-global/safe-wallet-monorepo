@@ -2,17 +2,17 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { useState, type ReactNode } from 'react'
 import { Plus, ArrowUpRight, ArrowDownLeft, Download } from 'lucide-react'
 
-import { Button } from '../button'
+import { Button } from '@/components/ui/button'
 import { Input } from '../input'
-import { Textarea } from '../textarea'
-import { Field, FieldLabel, FieldDescription, FieldError } from '../field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../select'
+import { Textarea } from '@/components/ui/textarea'
+import { Field, FieldLabel, FieldDescription, FieldError } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { SearchInput } from '../search-input'
-import { Calendar } from '../calendar'
+import { Calendar } from '@/components/ui/calendar'
 import EnhancedTable from '@/components/common/EnhancedTable'
 import TableCard from '@/components/common/TableCard'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../card'
-import { Tabs, TabsList, TabsTrigger } from '../tabs'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
   DialogTrigger,
@@ -22,9 +22,9 @@ import {
   DialogDescription,
   DialogFooter,
   DialogClose,
-} from '../dialog'
-import { Tooltip, TooltipTrigger, TooltipContent } from '../tooltip'
-import { Typography } from '../typography'
+} from '@/components/ui/dialog'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Typography } from '@/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import { FormProvider, useForm } from 'react-hook-form'
 import DatePickerInput from '@/components/common/DatePickerInput'

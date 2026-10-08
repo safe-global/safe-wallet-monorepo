@@ -9,7 +9,12 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { isRouteEnabled } from '@/utils/chains'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import type { SafeWorkspaceHeaderProps, SidebarItemConfig, SpaceItem, SidebarVariantContentProps } from '../../types'
+import type {
+  SafeWorkspaceHeaderProps,
+  SidebarItemConfig,
+  SpaceItem,
+  SidebarVariantContentProps,
+} from '@/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 

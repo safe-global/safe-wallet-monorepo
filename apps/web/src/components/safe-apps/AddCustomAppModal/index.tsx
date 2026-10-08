@@ -11,7 +11,7 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import { SAFE_APPS_EVENTS, trackSafeAppEvent } from '@/services/analytics'
 import { isSameUrl, trimTrailingSlash } from '@/utils/url'
-import CustomAppPlaceholder from './CustomAppPlaceholder'
+import CustomAppPlaceholder from '@/components/safe-apps/AddCustomAppModal/CustomAppPlaceholder'
 import CustomApp from './CustomApp'
 import { useShareSafeAppUrl } from '@/components/safe-apps/hooks/useShareSafeAppUrl'
 

@@ -6,13 +6,16 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import { INELIGIBILITY_TEXT } from '../constants'
-import BalanceDisplay from '../../../SafeSelectorDropdown/components/BalanceDisplay'
-import RowEndColumn from '../../../SafeSelectorDropdown/components/RowEndColumn'
+import { INELIGIBILITY_TEXT } from '@/features/spaces/components/Policies/SafeAccountSelector/constants'
+import BalanceDisplay from '@/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
-import type { SafeItemDataChain } from '../../../SafeSelectorDropdown/types'
+import type { SafeItemDataChain } from '@/features/spaces/components/SafeSelectorDropdown/types'
 import SafeIdentity from './SafeIdentity'
-import type { SafeAccountIneligibility, SafeAccountOption } from '../types'
+import type {
+  SafeAccountIneligibility,
+  SafeAccountOption,
+} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const ROW_CLASS = [
   'rounded-lg px-3 py-2.5',

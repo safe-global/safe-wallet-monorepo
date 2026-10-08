@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import type { SelectRootChangeEventDetails } from '@base-ui/react/select'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 interface UseSafeSelectorStateProps {
   items: SafeItemData[]

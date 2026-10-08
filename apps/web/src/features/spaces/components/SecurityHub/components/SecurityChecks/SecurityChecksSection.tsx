@@ -1,7 +1,9 @@
 import { type ReactElement } from 'react'
 import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/types'
 import SectionPanel from './SectionPanel'
-import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
+import SafeGradeChip, {
+  SAFE_GRADE_LABEL,
+} from '@/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
 import { useSecurityChecks } from './hooks/useSecurityChecks'
 
 export type SecurityChecksSectionProps = {

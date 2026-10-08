@@ -2,7 +2,11 @@ import { render, screen } from '@testing-library/react'
 import { Home, FileText, Users, Shield } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SpaceItem } from '../../../types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+  SpaceItem,
+} from '@/features/spaces/components/Sidebar/types'
 
 jest.mock('../../SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (

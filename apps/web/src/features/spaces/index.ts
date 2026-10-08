@@ -131,8 +131,12 @@ export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSideba
 export { default as ConnectWalletHint } from './components/ConnectWalletHint'
 export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
 export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
-export type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from './components/SafeSelectorDropdown/types'
-export { matchesSafeSearch } from './components/SafeSelectorDropdown/utils'
+export type {
+  SafeItemData,
+  SafeItemDataChain,
+  SafeRenameTarget,
+} from '@/features/spaces/components/SafeSelectorDropdown/types'
+export { matchesSafeSearch } from '@/features/spaces/components/SafeSelectorDropdown/utils'
 export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
 export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'

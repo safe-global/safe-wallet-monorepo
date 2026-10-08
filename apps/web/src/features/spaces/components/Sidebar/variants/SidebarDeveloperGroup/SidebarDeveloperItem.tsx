@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { ResolvedSidebarActionItem, SidebarDeveloperItemConfig } from '../../types'
+import type { ResolvedSidebarActionItem, SidebarDeveloperItemConfig } from '@/features/spaces/components/Sidebar/types'
 import { getSidebarActionItemTestId } from '../../utils'
 import { NavItem } from '../NavItem'
 

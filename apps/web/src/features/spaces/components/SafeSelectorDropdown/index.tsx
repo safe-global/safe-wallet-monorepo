@@ -11,8 +11,8 @@ import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { useTopbarOverlayElevation } from '@/hooks/useTopbarElevation'
 import useChains from '@/hooks/useChains'
-import { getSafeSelectorClassVariants } from './utils/classVariants'
-import type { SafeItemData, SafeSelectorDropdownProps } from './types'
+import { getSafeSelectorClassVariants } from '@/features/spaces/components/SafeSelectorDropdown/utils/classVariants'
+import type { SafeItemData, SafeSelectorDropdownProps } from '@/features/spaces/components/SafeSelectorDropdown/types'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.

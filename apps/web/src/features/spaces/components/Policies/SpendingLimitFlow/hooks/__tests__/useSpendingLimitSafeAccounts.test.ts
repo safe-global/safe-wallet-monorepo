@@ -1,6 +1,9 @@
 import { renderHook } from '@/tests/test-utils'
 import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
-import { isSafeAccountGroup, type SafeAccountOption } from '../../../SafeAccountSelector/types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountOption,
+} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 import { useEligibleSafeAccounts } from '../../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { useSpendingLimitSafeAccounts } from '../useSpendingLimitSafeAccounts'
 

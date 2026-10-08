@@ -11,7 +11,9 @@ import { Typography } from '@/components/ui/typography'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import EditMemberDialog from '../../MembersList/EditMemberDialog'
 
 const AccountPage = () => {

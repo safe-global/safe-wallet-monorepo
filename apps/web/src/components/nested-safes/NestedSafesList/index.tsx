@@ -18,7 +18,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import WarningIcon from '@/public/images/notifications/warning.svg'
-import { SimilarityGroupContainer } from './SimilarityGroupContainer'
+import { SimilarityGroupContainer } from '@/components/nested-safes/NestedSafesList/SimilarityGroupContainer'
 
 const MAX_NESTED_SAFES = 5
 

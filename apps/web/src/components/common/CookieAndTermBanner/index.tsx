@@ -14,10 +14,10 @@ import { selectCookieBanner, openCookieBanner, closeCookieBanner } from '@/store
 
 import css from './styles.module.css'
 import { COOKIE_AND_TERM_WARNING } from './constants'
-import WarningMessage from './WarningMessage'
+import WarningMessage from '@/components/common/CookieAndTermBanner/WarningMessage'
 import IntroText from './IntroText'
 import CookieOptionsList from './CookieOptionsList'
-import CookieBannerActions from './CookieBannerActions'
+import CookieBannerActions from '@/components/common/CookieAndTermBanner/CookieBannerActions'
 
 /** Overlay chrome for the first-visit popup, matching the other overlays in the design system. */
 export const POPUP_SURFACE = 'bg-popover text-popover-foreground rounded-lg shadow-lg ring-foreground/10 ring-1'

@@ -8,7 +8,13 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import SecurityHubContent from './SecurityHubContent'
 
-export type { BalanceMap, OverviewMap, SelectedSafe, SpaceSafeEntry, ChainEntry } from './types'
+export type {
+  BalanceMap,
+  OverviewMap,
+  SelectedSafe,
+  SpaceSafeEntry,
+  ChainEntry,
+} from '@/features/spaces/components/SecurityHub/types'
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).

@@ -8,14 +8,14 @@ import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import PolicyRule from './components/PolicyRule'
+import PolicyRule from '@/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import PolicyStatusChip from '../components/PolicyStatusChip'
-import { getPolicyLabel } from '../utils/policyLabel'
+import PolicyStatusChip from '@/features/spaces/components/Policies/components/PolicyStatusChip'
+import { getPolicyLabel } from '@/features/spaces/components/Policies/utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
+import { getPolicyStatus, isProposerPolicy, type Policy } from '@/features/spaces/components/Policies/types'
 
 export type PoliciesTableProps = {
   policies: Policy[]

@@ -1,8 +1,8 @@
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { getPolicyTokens } from '../../utils/policyTokens'
-import type { Policy } from '../../types'
+import { getPolicyTokens } from '@/features/spaces/components/Policies/utils/policyTokens'
+import type { Policy } from '@/features/spaces/components/Policies/types'
 
 const MAX_VISIBLE_TOKENS = 3
 

@@ -4,8 +4,12 @@ import DeleteIcon from '@/public/images/common/delete.svg'
 import { Button } from '@/components/ui/button'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
-import type { MultiTokenTransferParams, TokenTransferParams } from '../types'
-import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from '../types'
+import type { MultiTokenTransferParams, TokenTransferParams } from '@/components/tx-flow/flows/TokenTransfer/types'
+import {
+  MultiTokenTransferFields,
+  TokenTransferFields,
+  TokenTransferType,
+} from '@/components/tx-flow/flows/TokenTransfer/types'
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'

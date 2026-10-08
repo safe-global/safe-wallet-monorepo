@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { SlotItem, SlotName } from '../SlotProvider'
+import type { SlotItem, SlotName } from '@/components/tx-flow/slots/SlotProvider'
 import { useSlotContext } from './useSlotContext'
 
 export type UseRegisterSlotProps<T extends SlotName> = {

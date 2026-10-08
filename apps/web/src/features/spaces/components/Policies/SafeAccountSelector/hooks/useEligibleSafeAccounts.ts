@@ -12,7 +12,11 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
+import type {
+  SafeAccountEligibility,
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 

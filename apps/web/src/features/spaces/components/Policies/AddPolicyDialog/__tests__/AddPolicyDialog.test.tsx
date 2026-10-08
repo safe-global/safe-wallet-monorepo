@@ -2,7 +2,11 @@ import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import AddPolicyDialog from '../index'
-import { ADD_POLICY_OPTIONS, RECOVERY_POLICY_OPTION, type AddPolicyOption } from '../options'
+import {
+  ADD_POLICY_OPTIONS,
+  RECOVERY_POLICY_OPTION,
+  type AddPolicyOption,
+} from '@/features/spaces/components/Policies/AddPolicyDialog/options'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

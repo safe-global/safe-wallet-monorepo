@@ -2,9 +2,14 @@ import { type ReactElement } from 'react'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { PolicyLock } from '../policyLock'
-import PolicyCatalogueTile from './PolicyCatalogueTile'
-import { POLICY_CATALOGUE, type PolicyCatalogueEntry, type PolicyCatalogueId, type PolicyId } from './catalogue'
+import type { PolicyLock } from '@/features/spaces/components/Policies/policyLock'
+import PolicyCatalogueTile from '@/features/spaces/components/Policies/PolicyCatalogue/PolicyCatalogueTile'
+import {
+  POLICY_CATALOGUE,
+  type PolicyCatalogueEntry,
+  type PolicyCatalogueId,
+  type PolicyId,
+} from '@/features/spaces/components/Policies/PolicyCatalogue/catalogue'
 
 interface PolicyCatalogueProps {
   onSelect?: (id: PolicyCatalogueId) => void

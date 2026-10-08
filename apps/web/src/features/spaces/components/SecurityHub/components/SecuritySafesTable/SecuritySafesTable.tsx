@@ -7,8 +7,14 @@ import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { cn } from '@/utils/cn'
 import { Skeleton } from '@/components/ui/skeleton'
-import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-import { CARD_ROW_CLASS, CELL_BASE, COLUMNS, GRID_COLS, HIDE_BALANCE } from './constants'
+import type { SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
+import {
+  CARD_ROW_CLASS,
+  CELL_BASE,
+  COLUMNS,
+  GRID_COLS,
+  HIDE_BALANCE,
+} from '@/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
 import { buildSafeSecurityHref, type GetSafeSecurityHref } from './utils'

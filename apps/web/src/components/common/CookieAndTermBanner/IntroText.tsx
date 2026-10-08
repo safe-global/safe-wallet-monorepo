@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Typography } from '@/components/ui/typography'
-import ExternalLink from '../ExternalLink'
+import ExternalLink from '@/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import { TERMS_URL } from '@safe-global/utils/config/constants'
 

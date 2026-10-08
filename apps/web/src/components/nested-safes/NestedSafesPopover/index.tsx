@@ -16,7 +16,7 @@ import {
   getSafesToShow,
   getUncuratedCount,
   getUncuratedCountLabel,
-} from './utils'
+} from '@/components/nested-safes/NestedSafesPopover/utils'
 import AddIcon from '@/public/images/common/add.svg'
 import SettingsIcon from '@/public/images/sidebar/settings.svg'
 import { ModalDialogTitle } from '@/components/common/ModalDialog'

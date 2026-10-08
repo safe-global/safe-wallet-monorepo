@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import PolicyCallout from '../PolicyCallout'
-import { CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
+import { CALLOUT_DESCRIPTION_SINGULAR } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,

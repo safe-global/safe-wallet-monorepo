@@ -1,5 +1,5 @@
 import { ActionsTray } from '@/features/actions-tray'
-import { TotalValueElement } from '../TotalValueElement'
+import { TotalValueElement } from '@/features/spaces/components/TotalValueElement'
 
 /**
  * DashboardHeader

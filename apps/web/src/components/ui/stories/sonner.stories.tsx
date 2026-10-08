@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Toaster } from '../sonner'
 import { toast } from 'sonner'
-import { Button } from '../button'
+import { Button } from '@/components/ui/button'
 
 /**
  * Sonner Component Stories

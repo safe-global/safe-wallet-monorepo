@@ -16,11 +16,15 @@ import {
   TOOLTIP_DELAY_MS,
 } from '@/components/common/AccountRow'
 import { cn } from '@/utils/cn'
-import BalanceDisplay from './BalanceDisplay'
-import RowEndColumn from './RowEndColumn'
+import BalanceDisplay from '@/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from './SafeRowStats'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from '../types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+  SafeRenameTarget,
+} from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData

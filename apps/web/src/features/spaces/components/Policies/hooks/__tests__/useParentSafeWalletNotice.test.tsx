@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { act, renderHook } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import type { SafeAccountOption } from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 import { useParentSafeWallet } from '../useParentSafeWallet'
 import { useParentSafeWalletNotice } from '../useParentSafeWalletNotice'
 

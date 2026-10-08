@@ -9,7 +9,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 /**
  * base-ui dismisses an open Select popup part-way through the outside pointerdown, flushing the

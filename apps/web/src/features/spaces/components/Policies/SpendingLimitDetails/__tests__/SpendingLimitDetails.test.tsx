@@ -20,7 +20,7 @@ import {
   mockPendingRemoval,
   mockPendingUpdate,
 } from '../../mocks/policies'
-import type { PendingSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '@/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction, type PendingPolicyTransaction } from '../hooks/usePendingPolicyTransaction'
 import SpendingLimitDetails from '..'

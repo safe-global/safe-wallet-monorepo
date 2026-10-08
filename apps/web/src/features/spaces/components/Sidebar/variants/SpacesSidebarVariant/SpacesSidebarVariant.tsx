@@ -10,11 +10,15 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { SpaceSelectorProps, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../../types'
+import type {
+  SpaceSelectorProps,
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+} from '@/features/spaces/components/Sidebar/types'
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
-import { containerVariants, itemVariants } from '../../constants'
+import { containerVariants, itemVariants } from '@/features/spaces/components/Sidebar/constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null

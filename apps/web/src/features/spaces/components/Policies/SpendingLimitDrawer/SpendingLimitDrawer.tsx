@@ -3,24 +3,24 @@ import type { LinkProps } from 'next/link'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
-import { getPolicyIcon } from '../utils/policyIcon'
-import { getPolicyLabel } from '../utils/policyLabel'
+import { getPolicyIcon } from '@/features/spaces/components/Policies/utils/policyIcon'
+import { getPolicyLabel } from '@/features/spaces/components/Policies/utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { PendingBanner } from './components/PendingBanner'
+import { PendingBanner } from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import { PendingSignatures } from './components/PendingSignatures'
 import { PolicyOverview, type PolicyOverviewProps } from './components/PolicyOverview'
 import { SpendingLimitActions } from './components/SpendingLimitActions'
 import { SpendingLimits } from './components/SpendingLimits'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { getPolicyStatus, type QueuedSpendingLimitPolicy } from '../types'
+import { getPolicyStatus, type QueuedSpendingLimitPolicy } from '@/features/spaces/components/Policies/types'
 import {
   resolveSpendingLimitDrawerState,
   type ActiveDrawerPolicy,
   type PendingTxOutcome,
   type Viewer,
-} from './resolveState'
+} from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 
 type SpendingLimitDrawerBaseProps = {
   open: boolean

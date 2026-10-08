@@ -7,7 +7,7 @@ import { Field, FieldLabel } from '@/components/ui/field'
 import { Typography } from '@/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@/components/settings/SettingsCard'
 
 export const SafeAppsSigningMethod = () => {
   const onChainSigning = useAppSelector(selectOnChainSigning)

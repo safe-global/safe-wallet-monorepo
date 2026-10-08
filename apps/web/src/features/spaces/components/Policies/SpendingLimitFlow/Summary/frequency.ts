@@ -1,5 +1,5 @@
 import { getResetTimeOptions } from '@/features/spending-limits/constants'
-import { CANONICAL_FREQUENCIES } from './constants'
+import { CANONICAL_FREQUENCIES } from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 
 type FrequencyDescription = {
   /** Row label: `Weekly`, or the dropdown's own label (`30 minutes`) for a non-canonical period. */

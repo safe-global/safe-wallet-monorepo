@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { AccountIdentity } from '../../../components/AccountIdentity'
-import type { PolicySpender } from '../../../types'
+import type { PolicySpender } from '@/features/spaces/components/Policies/types'
 import AllowanceRow from './AllowanceRow'
 
 export type SpenderCardProps = {

@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/utils/colors'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
-import type { SafeWorkspaceHeaderBackToSpace, SafeWorkspaceHeaderAddToWorkspace } from '../../../types'
+import type {
+  SafeWorkspaceHeaderBackToSpace,
+  SafeWorkspaceHeaderAddToWorkspace,
+} from '@/features/spaces/components/Sidebar/types'
 
 const spaceSelectorDropdownMock = jest.fn()
 

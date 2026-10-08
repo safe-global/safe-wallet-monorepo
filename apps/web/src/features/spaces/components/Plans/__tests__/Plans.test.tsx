@@ -5,7 +5,7 @@ import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
-import type { CurrentPlan, PlanSummary } from '../types'
+import type { CurrentPlan, PlanSummary } from '@/features/spaces/components/Plans/types'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 

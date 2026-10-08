@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 type ThemeOption = {
   value: 'light' | 'dark' | 'system'

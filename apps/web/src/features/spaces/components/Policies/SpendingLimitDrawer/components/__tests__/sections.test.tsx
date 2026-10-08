@@ -1,6 +1,6 @@
 import { act, mockClipboard, render, screen, waitFor, within } from '@/tests/test-utils'
 import { CopyTransactionLink } from '../CopyTransactionLink'
-import { PendingBanner } from '../PendingBanner'
+import { PendingBanner } from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
 import { PendingSignatures } from '../PendingSignatures'
 import { PolicyOverview } from '../PolicyOverview'
 

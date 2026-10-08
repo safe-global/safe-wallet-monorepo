@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/utils/colors'
 import { BackToSpaceButton } from './BackToSpaceButton'
-import type { SafeWorkspaceHeaderBackToSpace } from '../types'
+import type { SafeWorkspaceHeaderBackToSpace } from '@/features/spaces/components/Sidebar/types'
 
 const mockHandleBackToSpace = jest.fn()
 

@@ -1,5 +1,8 @@
 import { sectionItems, type SectionItem } from './sectionItems'
-import { SectionVisibilityProvider, useSectionVisibility } from './SectionVisibilityContext'
+import {
+  SectionVisibilityProvider,
+  useSectionVisibility,
+} from '@/features/global-search/components/SearchSection/SectionVisibilityContext'
 
 interface SearchSectionProps {
   query: string

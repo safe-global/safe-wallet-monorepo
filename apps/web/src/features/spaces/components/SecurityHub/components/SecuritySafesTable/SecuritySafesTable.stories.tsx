@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SecuritySafesTable from './SecuritySafesTable'
 import { createMockStory } from '@/stories/mocks'
 import type { ScanResult } from '@/features/security/types'
-import type { SpaceSafeEntry } from '../../types'
+import type { SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
 
 const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   status: 'clear',

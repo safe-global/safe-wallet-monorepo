@@ -9,11 +9,15 @@ import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/Revie
 import { isAllowanceModuleAddress } from '@/features/spending-limits/services'
 import useAddressBook from '@/hooks/useAddressBook'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
-import type { PolicySafe, PolicySpender } from '../../types'
+import type { PolicySafe, PolicySpender } from '@/features/spaces/components/Policies/types'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import SpendingLimitSummary from '../Summary'
 import { toEnableModuleSummaryModel } from '../Summary/toEnableModuleSummaryModel'
-import { MODULE_ALREADY_ENABLED_ERROR, REVIEW_STEP_TITLE, UNKNOWN_MODULE_ERROR } from '../constants'
+import {
+  MODULE_ALREADY_ENABLED_ERROR,
+  REVIEW_STEP_TITLE,
+  UNKNOWN_MODULE_ERROR,
+} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export type EnableModuleFlowData = {
   safe: PolicySafe

@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import SecurityHubContent from '../SecurityHubContent'
-import type { SelectedSafe, SpaceSafeEntry } from '../types'
+import type { SelectedSafe, SpaceSafeEntry } from '@/features/spaces/components/SecurityHub/types'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

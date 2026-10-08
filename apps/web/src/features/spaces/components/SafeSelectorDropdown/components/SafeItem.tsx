@@ -5,11 +5,11 @@ import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
-import BalanceDisplay from './BalanceDisplay'
-import RowEndColumn from './RowEndColumn'
+import BalanceDisplay from '@/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from './SafeRowStats'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeRenameTarget } from '../types'
+import type { SafeItemData, SafeRenameTarget } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 const SafeItem = ({
   name,

@@ -2,9 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockStory } from '@/stories/mocks'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import type { SafeAccountOption } from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 import SpendingLimitSummary from './index'
-import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
+import type {
+  LimitSummary,
+  LimitSummaryToken,
+  SpendingLimitSummaryModel,
+  SpenderSummary,
+} from '@/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'

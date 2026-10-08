@@ -21,11 +21,15 @@ import * as useChainsModule from '@/hooks/useChains'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR, REVIEW_STEP_TITLE } from '../../constants'
-import type { SpendingLimitPolicyFormValues } from '../../types'
+import {
+  EXISTING_LIMITS_LOAD_ERROR,
+  EXISTING_LIMIT_IN_POLICY_ERROR,
+  REVIEW_STEP_TITLE,
+} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import type { SpendingLimitPolicyFormValues } from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
 import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
-import { EditModeProvider } from '../../EditFlow/EditModeContext'
+import { EditModeProvider } from '@/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))

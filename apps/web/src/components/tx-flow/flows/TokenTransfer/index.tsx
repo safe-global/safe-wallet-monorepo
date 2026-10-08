@@ -6,7 +6,11 @@ import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import { TokenTransferType, type MultiTokenTransferParams, type TokenTransferParams } from './types'
+import {
+  TokenTransferType,
+  type MultiTokenTransferParams,
+  type TokenTransferParams,
+} from '@/components/tx-flow/flows/TokenTransfer/types'
 
 export {
   TokenTransferFields,
@@ -15,7 +19,7 @@ export {
   MultiTokenTransferFields,
   type TokenTransferParams,
   type MultiTokenTransferParams,
-} from './types'
+} from '@/components/tx-flow/flows/TokenTransfer/types'
 
 type MultiTokenTransferFlowProps = {
   recipients?: Partial<TokenTransferParams>[]

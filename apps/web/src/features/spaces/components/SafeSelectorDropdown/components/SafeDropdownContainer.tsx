@@ -12,8 +12,8 @@ import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { cn } from '@/utils/cn'
-import { matchesSafeSearch } from '../utils'
-import type { SafeItemData, SafeRenameTarget } from '../types'
+import { matchesSafeSearch } from '@/features/spaces/components/SafeSelectorDropdown/utils'
+import type { SafeItemData, SafeRenameTarget } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 export interface SafeDropdownContainerProps {
   items: SafeItemData[]

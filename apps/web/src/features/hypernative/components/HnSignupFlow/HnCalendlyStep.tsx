@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import HnSignupLayout from './HnSignupLayout'
+import HnSignupLayout from '@/features/hypernative/components/HnSignupFlow/HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
 import css from './styles.module.css'
 import { Typography } from '@/components/ui/typography'

@@ -10,7 +10,7 @@ import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { makeTxFromDetails } from '@/utils/transactions'
 import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
 import { useRefetchOnTxEvents } from '../../hooks/useRefetchOnTxEvents'
-import type { PendingSpendingLimitPolicy } from '../../types'
+import type { PendingSpendingLimitPolicy } from '@/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 
 const REFETCH_EVENTS = [

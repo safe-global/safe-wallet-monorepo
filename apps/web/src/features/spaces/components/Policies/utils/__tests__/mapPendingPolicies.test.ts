@@ -9,7 +9,7 @@ import {
   mockPendingPolicy,
   mockSpendingLimitPolicy,
 } from '../../mocks/policies'
-import type { PolicyTokenInfo } from '../../types'
+import type { PolicyTokenInfo } from '@/features/spaces/components/Policies/types'
 import { mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
 import { getPendingTxId, isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 

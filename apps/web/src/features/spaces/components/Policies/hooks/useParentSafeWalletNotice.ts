@@ -6,7 +6,7 @@ import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import type { ParentSafeWalletCopy, ParentSafeWalletNoticeProps } from '../components/ParentSafeWalletNotice'
-import type { SafeAccountOption } from '../SafeAccountSelector/types'
+import type { SafeAccountOption } from '@/features/spaces/components/Policies/SafeAccountSelector/types'
 import { useParentSafeWallet } from './useParentSafeWallet'
 
 /** Notice props for the picked account when the connected wallet is its parent Safe; the link closes the flow without the discard prompt. */

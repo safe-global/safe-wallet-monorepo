@@ -1,5 +1,5 @@
 import { isMultiChainSafeItem, type AllSafeItems, type SafeItem } from '@/hooks/safes'
-import type { SafeAppMockupAccount } from './types'
+import type { SafeAppMockupAccount } from '@/features/spaces/components/OnboardingLayout/mockup/types'
 
 /**
  * Dedupes by address and falls back to `nameLookup` when a safe has no name —

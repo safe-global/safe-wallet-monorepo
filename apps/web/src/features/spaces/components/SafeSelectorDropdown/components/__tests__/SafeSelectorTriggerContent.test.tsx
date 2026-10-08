@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react'
 import SafeSelectorTriggerContent from '../SafeSelectorTriggerContent'
-import type { SafeItemData } from '../../types'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 const mockUseSafeDisplayName = jest.fn()
 const mockUseChain = jest.fn()

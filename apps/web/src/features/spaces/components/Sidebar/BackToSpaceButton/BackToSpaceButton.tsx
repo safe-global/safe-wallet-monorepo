@@ -6,7 +6,7 @@ import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpac
 import { icons } from '../config'
 import { cn } from '@/utils/cn'
 import css from '../styles.module.css'
-import type { SafeWorkspaceHeaderBackToSpace } from '../types'
+import type { SafeWorkspaceHeaderBackToSpace } from '@/features/spaces/components/Sidebar/types'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()

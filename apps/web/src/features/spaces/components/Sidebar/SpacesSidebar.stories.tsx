@@ -7,8 +7,8 @@ import { withMockProvider } from '@/storybook/preview'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import type { SpaceItem } from './types'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup } from './types'
+import type { SpaceItem } from '@/features/spaces/components/Sidebar/types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarGroup } from '@/features/spaces/components/Sidebar/types'
 
 const mockSpaceId = '1'
 

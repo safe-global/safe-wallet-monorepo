@@ -6,7 +6,7 @@ import ExplorerButton from '@/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { Typography } from '@/components/ui/typography'
 import { SEVERITY_COLORS } from '../../constants'
-import { HighlightedAddress } from '../HighlightedAddress'
+import { HighlightedAddress } from '@/features/safe-shield/components/HighlightedAddress'
 
 interface AddressRowProps {
   label: string

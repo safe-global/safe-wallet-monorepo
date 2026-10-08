@@ -10,7 +10,7 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
 import type { CurrentBadge } from './PlanCards'
-import type { Meter, PlanSummary } from './types'
+import type { Meter, PlanSummary } from '@/features/spaces/components/Plans/types'
 
 export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
 

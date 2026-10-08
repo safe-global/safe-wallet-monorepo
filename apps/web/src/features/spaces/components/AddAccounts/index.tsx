@@ -11,7 +11,7 @@ import {
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
-import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import { getSafeId } from '@/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
 import ExternalLink from '@/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
@@ -33,7 +33,7 @@ import {
   touchNames,
   withWorkspaceNames,
 } from '../NameAccounts'
-import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '@/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -63,13 +63,13 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@/utils/cn'
-import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
-import SafeLimitError from '../SelectedCounter/SafeLimitError'
+import SelectedCounter, { safeLimitTooltip } from '@/features/spaces/components/SelectedCounter'
+import SafeLimitError from '@/features/spaces/components/SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { Link } from '@/components/ui/link'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@/features/spaces/components/SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'

@@ -1,5 +1,5 @@
 import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import type { SpendingLimitDrawerState } from '../../../resolveState'
+import type { SpendingLimitDrawerState } from '@/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import SpendingLimitActions from '../SpendingLimitActions'
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'

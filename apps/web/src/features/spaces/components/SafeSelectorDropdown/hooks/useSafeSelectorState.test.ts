@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { useSafeSelectorState } from './useSafeSelectorState'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@/features/spaces/components/SafeSelectorDropdown/types'
 
 const createItem = (id: string): SafeItemData => ({
   id,

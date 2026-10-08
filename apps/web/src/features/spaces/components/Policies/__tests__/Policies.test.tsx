@@ -1,10 +1,14 @@
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
-import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
+import {
+  REQUEST_POLICY_FORM_HEIGHT,
+  REQUEST_POLICY_FORM_URL,
+  REQUEST_POLICY_FORM_WIDTH,
+} from '@/features/spaces/components/Policies/constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
-import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
 import { mockStarterPlan } from '../mocks/plan'
 import {

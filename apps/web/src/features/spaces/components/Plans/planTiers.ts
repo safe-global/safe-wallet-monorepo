@@ -6,7 +6,7 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_ORDER } from './planCatalog'
+import { ENTERPRISE_TIER, PLAN_ORDER } from '@/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -15,7 +15,7 @@ import type {
   PlanSeatOption,
   PlanSummary,
   PlanTier,
-} from './types'
+} from '@/features/spaces/components/Plans/types'
 
 const CYCLES = ['month', 'year'] as const
 

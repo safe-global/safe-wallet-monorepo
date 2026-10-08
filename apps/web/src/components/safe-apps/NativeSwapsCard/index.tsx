@@ -1,4 +1,4 @@
-import SafeAppIconCard from '../SafeAppIconCard'
+import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import { Typography } from '@/components/ui/typography'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'

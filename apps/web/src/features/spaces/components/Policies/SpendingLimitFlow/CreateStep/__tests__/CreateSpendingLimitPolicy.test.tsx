@@ -5,7 +5,11 @@ import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShi
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../../hooks/useSpendingLimitSafeAccounts'
-import { createDefaultFormValues, createEmptyLimit, type SpendingLimitPolicyFormValues } from '../../types'
+import {
+  createDefaultFormValues,
+  createEmptyLimit,
+  type SpendingLimitPolicyFormValues,
+} from '@/features/spaces/components/Policies/SpendingLimitFlow/types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 import CreateSpendingLimitPolicy from '..'
 

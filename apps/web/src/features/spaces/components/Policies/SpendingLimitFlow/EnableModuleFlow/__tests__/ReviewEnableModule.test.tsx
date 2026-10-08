@@ -8,7 +8,11 @@ import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/Sa
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import { mockUnenforcedPolicy } from '../../../mocks/policies'
-import { MODULE_ALREADY_ENABLED_ERROR, REVIEW_STEP_TITLE, UNKNOWN_MODULE_ERROR } from '../../constants'
+import {
+  MODULE_ALREADY_ENABLED_ERROR,
+  REVIEW_STEP_TITLE,
+  UNKNOWN_MODULE_ERROR,
+} from '@/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import ReviewEnableModule, { type EnableModuleFlowData } from '../ReviewEnableModule'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))

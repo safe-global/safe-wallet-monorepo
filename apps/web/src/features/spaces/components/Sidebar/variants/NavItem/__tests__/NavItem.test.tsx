@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { House } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
-import type { ResolvedSidebarNavItem, ResolvedSidebarActionItem } from '../../../types'
+import type { ResolvedSidebarNavItem, ResolvedSidebarActionItem } from '@/features/spaces/components/Sidebar/types'
 import { NavItem } from '../NavItem'
 
 const mockTrackEvent = jest.fn()

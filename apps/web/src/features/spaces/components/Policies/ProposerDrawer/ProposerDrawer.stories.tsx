@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import ProposerDrawer from './ProposerDrawer'
-import { ProposerStatus } from './variants/types'
+import { ProposerStatus } from '@/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 const PARENT_SAFE = {
   address: '0x8675B754342754A30A2AeF474D114d8460bca19b',

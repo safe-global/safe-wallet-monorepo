@@ -21,7 +21,7 @@ import {
   ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
+import type { SidebarItemConfig, SidebarGroupConfig } from '@/features/spaces/components/Sidebar/types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {

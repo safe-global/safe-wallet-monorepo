@@ -4,7 +4,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
-import type { PlanPick } from '../types'
+import type { PlanPick } from '@/features/spaces/components/Plans/types'
 
 const mockPreviewChange = jest.fn()
 const mockChangePlan = jest.fn()

@@ -5,7 +5,7 @@ import type { NoFeeCampaignContract } from './contract'
 import NoFeeCampaignBanner from './components/NoFeeCampaignBanner'
 const noFeeCampaignBannerID = 'noFeeCampaignBanner'
 import NoFeeCampaignTransactionCard from './components/NoFeeCampaignTransactionCard'
-import GasTooHighBanner from './components/GasTooHighBanner'
+import GasTooHighBanner from '@/features/no-fee-campaign/components/GasTooHighBanner'
 
 // Flat structure - naming conventions determine stub behavior
 // PascalCase → component (stub renders null when not ready)
