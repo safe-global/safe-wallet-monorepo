@@ -1,3 +1,4 @@
+import '@/sandbox/lockdown'
 import Analytics from '@/services/analytics/Analytics'
 import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'

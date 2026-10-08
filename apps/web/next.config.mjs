@@ -10,6 +10,7 @@ import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
 import { SriManifestWebpackPlugin } from './plugins/sri-manifest-webpack-plugin.mjs'
+import viewLoaderRule from './sandbox/view-rule.cjs'
 
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
@@ -121,6 +122,8 @@ const nextConfig = {
       : {}),
   },
   webpack(config, { dev }) {
+    config.module.rules.unshift(viewLoaderRule)
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },

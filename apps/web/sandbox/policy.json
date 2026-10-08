@@ -1,0 +1,28 @@
+{
+  "packages": [
+    "react",
+    "@base-ui/react",
+    "lucide-react",
+    "class-variance-authority",
+    "clsx",
+    "classnames",
+    "vaul",
+    "sonner",
+    "input-otp",
+    "react-day-picker",
+    "react-resizable-panels",
+    "date-fns",
+    "next/link",
+    "next/image"
+  ],
+  "modules": [
+    "@/utils/cn",
+    "@/components/ui/ShadcnProvider",
+    "@/hooks/use-mobile",
+    "@/hooks/use-tablet",
+    "@safe-global/utils/utils/formatters",
+    "@safe-global/utils/utils/addresses",
+    "@safe-global/utils/utils/formatNumber",
+    "@safe-global/utils/utils/date"
+  ]
+}

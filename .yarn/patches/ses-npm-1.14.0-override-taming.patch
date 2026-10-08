@@ -1,0 +1,528 @@
+diff --git a/dist/lockdown.cjs b/dist/lockdown.cjs
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/lockdown.cjs
++++ b/dist/lockdown.cjs
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/lockdown.mjs b/dist/lockdown.mjs
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/lockdown.mjs
++++ b/dist/lockdown.mjs
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/lockdown.umd.js b/dist/lockdown.umd.js
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/lockdown.umd.js
++++ b/dist/lockdown.umd.js
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/ses-hermes.cjs b/dist/ses-hermes.cjs
+index 871475bde6b682ca4ac07f0749b27f6c26be3e1d..69e119c5a570681470ef6f681fdf31a9ca8f5496 100644
+--- a/dist/ses-hermes.cjs
++++ b/dist/ses-hermes.cjs
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/ses.cjs b/dist/ses.cjs
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/ses.cjs
++++ b/dist/ses.cjs
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/ses.mjs b/dist/ses.mjs
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/ses.mjs
++++ b/dist/ses.mjs
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/dist/ses.umd.js b/dist/ses.umd.js
+index 4caf86850cf2456c32ef0da97ec4399770330206..4ab88f35e0e0183a5871c8a07f402ad1d26f7673 100644
+--- a/dist/ses.umd.js
++++ b/dist/ses.umd.js
+@@ -6924,9 +6924,61 @@ function sampleGlobals(globalObject, newPropertyNames) {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true  // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,
+diff --git a/src/enablements.js b/src/enablements.js
+index 77bd6f434464339f3dad2045725233f92faf6e83..83d81695cd4a2c5e4cb159ea75748e18f8b9ecb4 100644
+--- a/src/enablements.js
++++ b/src/enablements.js
+@@ -110,9 +110,61 @@ export const moderateEnablements = {
+   '%FunctionPrototype%': {
+     constructor: true, // set by "regenerator-runtime"
+     bind: true, // set by "underscore", "express"
++    call: true, // set by "viem" namespace functions
++    apply: true,
+     toString: true, // set by "rollup"
+   },
+ 
++  // set by "@date-fns/tz", which copies every Date method onto its own prototype
++  '%DatePrototype%': {
++    toString: true,
++    toDateString: true,
++    toTimeString: true,
++    toISOString: true,
++    toUTCString: true,
++    toGMTString: true,
++    getDate: true,
++    setDate: true,
++    getDay: true,
++    getFullYear: true,
++    setFullYear: true,
++    getHours: true,
++    setHours: true,
++    getMilliseconds: true,
++    setMilliseconds: true,
++    getMinutes: true,
++    setMinutes: true,
++    getMonth: true,
++    setMonth: true,
++    getSeconds: true,
++    setSeconds: true,
++    getTime: true,
++    setTime: true,
++    getTimezoneOffset: true,
++    getUTCDate: true,
++    setUTCDate: true,
++    getUTCDay: true,
++    getUTCFullYear: true,
++    setUTCFullYear: true,
++    getUTCHours: true,
++    setUTCHours: true,
++    getUTCMilliseconds: true,
++    setUTCMilliseconds: true,
++    getUTCMinutes: true,
++    setUTCMinutes: true,
++    getUTCMonth: true,
++    setUTCMonth: true,
++    getUTCSeconds: true,
++    setUTCSeconds: true,
++    valueOf: true,
++    getYear: true,
++    setYear: true,
++    toJSON: true,
++    toLocaleString: true,
++    toLocaleDateString: true,
++    toLocaleTimeString: true,
++  },
++
+   '%ErrorPrototype%': {
+     constructor: true, // set by "fast-json-patch", "node-fetch"
+     message: true,

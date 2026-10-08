@@ -4607,6 +4607,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@endo/cache-map@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@endo/cache-map@npm:1.1.0"
+  checksum: 10/1cf2ebae70e9983edd30e830933df52ab9a0140fdecd420325fd20f1633b9afeb377b5cac548c7b7d04beb4cd1a14e672055ad25145119b2b151db78ffaa0b2f
+  languageName: node
+  linkType: hard
+
+"@endo/env-options@npm:^1.1.11":
+  version: 1.1.11
+  resolution: "@endo/env-options@npm:1.1.11"
+  checksum: 10/a85326b2f422ebb3f5895ed263d230bf9c4915ed2f798210bebb3941daf94d97495f4767f4113bab8f3781b0534ecbe1d29067d7806478fd6237ab69e97fe5c1
+  languageName: node
+  linkType: hard
+
+"@endo/immutable-arraybuffer@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@endo/immutable-arraybuffer@npm:1.1.2"
+  checksum: 10/99159e4a04aad1dbe633b54b90f4591ff527c301ff2dc6585b65949e9c98b8942d726a23815470e6e4641c447bc94368cc96282f8fb50fb78f326b670c48cd16
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.19.12":
   version: 0.19.12
   resolution: "@esbuild/aix-ppc64@npm:0.19.12"
@@ -13890,6 +13911,7 @@ __metadata:
     remark-heading-id: "npm:^1.0.1"
     remark-mdx-frontmatter: "npm:^5.2.0"
     semver: "npm:^7.7.1"
+    ses: "patch:ses@npm%3A1.14.0#~/.yarn/patches/ses-npm-1.14.0-override-taming.patch"
     shadcn: "npm:^3.7.0"
     sonner: "npm:^2.0.7"
     storybook: "npm:^10.6.0"
@@ -41933,6 +41955,28 @@ __metadata:
   version: 0.0.1
   resolution: "server-only@npm:0.0.1"
   checksum: 10/c432348956641ea3f460af8dc3765f3a1bdbcf7a1e0205b0756d868e6e6fe8934cdee6bff68401a1dd49ba4a831c75916517a877446d54b334f7de36fa273e53
+  languageName: node
+  linkType: hard
+
+"ses@npm:1.14.0":
+  version: 1.14.0
+  resolution: "ses@npm:1.14.0"
+  dependencies:
+    "@endo/cache-map": "npm:^1.1.0"
+    "@endo/env-options": "npm:^1.1.11"
+    "@endo/immutable-arraybuffer": "npm:^1.1.2"
+  checksum: 10/bee10b958938fb3d153ea8f1b4514f8ddb390dc7533fe9cfc382dcc046bebd5fca02d80836bfb8f98e94609ffbe3580a0bb65428eb7e39d523315eacdc052300
+  languageName: node
+  linkType: hard
+
+"ses@patch:ses@npm%3A1.14.0#~/.yarn/patches/ses-npm-1.14.0-override-taming.patch":
+  version: 1.14.0
+  resolution: "ses@patch:ses@npm%3A1.14.0#~/.yarn/patches/ses-npm-1.14.0-override-taming.patch::version=1.14.0&hash=847e67"
+  dependencies:
+    "@endo/cache-map": "npm:^1.1.0"
+    "@endo/env-options": "npm:^1.1.11"
+    "@endo/immutable-arraybuffer": "npm:^1.1.2"
+  checksum: 10/c51841f69fae0af3b580fa8f7a4c6b2dd3fa0d4166ab2672eed329b4cb51f753ef9de8d6d8ce8517b8da077949bae6a0eb21859b4dbcc4ee157b81d69c2e1edc
   languageName: node
   linkType: hard
 

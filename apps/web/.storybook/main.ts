@@ -54,8 +54,10 @@ const config: StorybookConfig = {
   webpackFinal: async (config) => {
     config.module = config.module || {}
     config.module.rules = config.module.rules || []
+    config.module.rules.unshift(require('../sandbox/view-rule.cjs'))
     config.resolve = config.resolve || {}
     config.resolve.alias = (config.resolve.alias || {}) as Record<string, string>
+    ;(config.resolve.alias as Record<string, string>)['@views'] = path.resolve(__dirname, '../../../storybook/src')
 
     // Mock useIsOfficialHost to always return true in Storybook
     // This ensures legal pages (terms, privacy, cookie) render their content
