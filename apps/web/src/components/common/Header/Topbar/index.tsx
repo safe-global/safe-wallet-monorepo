@@ -137,7 +137,6 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
             isConnected={Boolean(wallet)}
             walletIcon={wallet?.icon}
             walletLabel={wallet?.label}
-            walletOpen={walletOpen}
             messages={unreadCount}
             showSearch={!isSpaceRoute && !isWelcomeListRoute}
             onSearchClick={() => dispatch(openGlobalSearch())}

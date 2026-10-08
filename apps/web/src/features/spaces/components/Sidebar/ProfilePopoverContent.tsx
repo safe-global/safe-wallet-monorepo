@@ -32,6 +32,7 @@ export const ProfilePopoverContent = ({
     side="bottom"
     align="end"
     sideOffset={12}
+    showBackdrop
     className={css.profilePopover}
     data-testid="sidebar-profile-popover"
   >
