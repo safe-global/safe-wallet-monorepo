@@ -85,7 +85,9 @@ describe('counterfactualSyncListener', () => {
   it('dispatches the delete API call for legacy entries without isCreator (treated as creator)', async () => {
     const state = authedState({
       '1': {
-        '0x123': {/* isCreator undefined */},
+        '0x123': {
+          /* isCreator undefined */
+        },
       },
     })
 

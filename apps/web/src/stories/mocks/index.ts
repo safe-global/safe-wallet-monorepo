@@ -46,7 +46,7 @@ export { MockContextProvider, MockSDKProvider, mockTxModalContext } from './Mock
 export { disconnectedWallet, createConnectedWallet, createNonOwnerWallet, resolveWallet } from './wallets'
 
 // Chain utilities (for escape hatch)
-export { createChainData, createChainsPageData, DEFAULT_FEATURES } from './chains'
+export { createChainData, createChainsPageData, createChainsPageDataV2, DEFAULT_FEATURES } from './chains'
 
 // Handler utilities (for escape hatch)
 export {
@@ -61,6 +61,7 @@ export {
   targetedMessagingHandlers,
   createHandlers,
   createMockPendingTransactions,
+  createMockTransactionDetails,
   getFixtureData,
 } from './handlers'
 

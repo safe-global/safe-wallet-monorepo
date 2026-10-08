@@ -1,5 +1,10 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
+import {
+  CheckStatus,
+  SAFENET_EXPLORER_URL,
+  type PublicCheckStatus,
+  type UnavailableReason,
+} from '@safe-global/utils/features/safenet-checks'
 
 export type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */
@@ -45,12 +50,6 @@ export const STATUS_PRESENTATION: Record<
   },
 }
 
-/** The shared "we do not know" state — a failed read and an inconclusive one. */
-const STATUS_UNKNOWN: Pick<SafenetStatusPresentation, 'label' | 'copy'> = {
-  label: 'Status unavailable',
-  copy: 'The Safenet check status could not be read. Retry later.',
-}
-
 /**
  * None of the three UNAVAILABLE meanings is a verdict, so all stay neutral: a
  * muted icon and the default text colors, never error or warning ones. No
@@ -61,16 +60,54 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
     label: 'Not checked',
     copy: 'No Safenet check was requested for this transaction.',
   },
-  READ_FAILED: STATUS_UNKNOWN,
-  // A read over a window that cannot cover the check's lifetime found nothing
-  // where it looked; it did not establish that nothing is there. That is the
-  // same "unknown" a failed read reports, so it gets the same copy — never the
-  // definite "no check was requested", and never an error tone.
-  WINDOW_UNCERTAIN: STATUS_UNKNOWN,
+  READ_FAILED: {
+    label: "Couldn't read Safenet status",
+    copy: "We couldn't reach Safenet to read this check. We'll keep trying. You can still continue.",
+  },
+  // Found nothing where it looked, which never proves that no check was requested.
+  WINDOW_UNCERTAIN: {
+    label: 'Safenet status unknown',
+    copy: "We couldn't confirm whether Safenet checked this transaction. You can still continue.",
+  },
 }
 
-/** Section heading for every verdict: the state itself is in the copy. */
-const VERDICT_LABEL = 'Safenet check'
+/** Shown before the first signature, while no check exists yet. */
+export const SAFENET_ABOUT =
+  "Independent sentinels simulate this transaction and check it against Safenet's security rules."
+
+export const PRE_CHECK_COPY = {
+  multisig: 'The check starts after you sign. The next signer will see the result.',
+  single: "The check starts after you sign. Execute from the queue once it's in.",
+  executeNow: 'The check starts after you sign. Choose "No, later" to see the result before executing.',
+}
+
+/** Compact queue-chip labels; the full state name stays in the tooltip and screen-reader copy. */
+export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
+  [CheckStatus.SUBMITTED]: 'Submitted',
+  [CheckStatus.IN_PROGRESS]: 'Simulating',
+  [CheckStatus.BENIGN]: 'No issues found',
+  [CheckStatus.MALICIOUS]: 'Risk detected',
+  [CheckStatus.TIMED_OUT]: 'Check failed',
+}
+
+/** Chip colour per state, shared by the queue row and the details card. */
+export const CHIP_VARIANT = {
+  [CheckStatus.SUBMITTED]: 'info',
+  [CheckStatus.IN_PROGRESS]: 'info',
+  [CheckStatus.BENIGN]: 'positive',
+  [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.TIMED_OUT]: 'warning',
+} as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
+
+export const STALE_NOTE = 'Status may be out of date.'
+
+export const MULTIPLE_RULES_TITLE = 'Malicious threats detected'
+
+export const SAFENET_DOCS_URL = 'https://docs.safefoundation.org/safenet'
+
+/** The check's page on the Safenet explorer — per-sentinel detail, not proof of a verdict. */
+export const getSafenetExplorerUrl = (chainId: string, safeTxHash: string): string =>
+  `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
 
 export type ResolvedPresentation = SafenetStatusPresentation & {
   /** Render the icon neutral — set for the non-verdict UNAVAILABLE states. */
@@ -94,5 +131,5 @@ export const resolvePresentation = (
 
   if (!hasSnapshot) return undefined
 
-  return { ...STATUS_PRESENTATION[publicStatus], label: VERDICT_LABEL, muted: false }
+  return { ...STATUS_PRESENTATION[publicStatus], muted: false }
 }

@@ -6,6 +6,9 @@ export const deadlockDelay = 300
 export const threatDelay = 400
 export const simulationDelay = 600
 
+/** Longest reveal delay above plus the cards' 0.6s fade, i.e. when the Copilot panel has finished expanding. */
+export const panelSettledDelay = simulationDelay + analysisVisibilityDelay + 600
+
 /**
  * Calculates delay values for displaying different SafeShield analysis sections
  * in the UI, based on whether recipient, contract, and deadlock analysis sections are empty.

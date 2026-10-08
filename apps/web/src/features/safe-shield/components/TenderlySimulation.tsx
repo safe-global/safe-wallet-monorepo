@@ -1,5 +1,6 @@
 import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
-import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
+import { ExternalLinkIcon as LaunchIcon } from '@/components/common/ExternalLink/ExternalLinkIcon'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { Typography } from '@/components/ui/typography'

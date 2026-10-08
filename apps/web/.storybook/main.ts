@@ -167,6 +167,11 @@ const config: StorybookConfig = {
 
   env: (config) => ({
     ...config,
+    // Dummy service intercepted by Storybook's MSW handler; no Tenderly credentials required.
+    NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL:
+      'https://simulation.storybook.invalid/api/v1/account/storybook/project/wallet/simulate',
+    NEXT_PUBLIC_TENDERLY_ORG_NAME: 'storybook',
+    NEXT_PUBLIC_TENDERLY_PROJECT_NAME: 'wallet',
     NEXT_PUBLIC_HUBSPOT_CONFIG: process.env.NEXT_PUBLIC_HUBSPOT_CONFIG ?? '',
     NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version,
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,

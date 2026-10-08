@@ -327,7 +327,16 @@ export type TransactionValidationResponse = TransactionValidation | TransactionV
  * The chain name
  */
 export type TokenScanSupportedChain =
-  'arbitrum' | 'avalanche' | 'base' | 'bsc' | 'ethereum' | 'optimism' | 'polygon' | 'zora' | 'solana' | 'unknown'
+  | 'arbitrum'
+  | 'avalanche'
+  | 'base'
+  | 'bsc'
+  | 'ethereum'
+  | 'optimism'
+  | 'polygon'
+  | 'zora'
+  | 'solana'
+  | 'unknown'
 
 export interface TransactionScanFeature {
   /**
@@ -361,7 +370,8 @@ export interface TransactionScanResponse {
   features?: unknown
 
   gas_estimation?:
-    TransactionScanResponse.TransactionScanGasEstimation | TransactionScanResponse.TransactionScanGasEstimationError
+    | TransactionScanResponse.TransactionScanGasEstimation
+    | TransactionScanResponse.TransactionScanGasEstimationError
 
   simulation?: TransactionSimulationResponse
 

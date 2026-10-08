@@ -7,7 +7,8 @@ export const UNKNOWN_TOKEN_IN_POLICY_ERROR = 'A token in this policy could not b
 
 /** Either every row resolved, or the first reason none of them can be. */
 export type DesiredAllowancesResult =
-  { desired: DesiredAllowance[]; error?: undefined } | { desired?: undefined; error: Error }
+  | { desired: DesiredAllowance[]; error?: undefined }
+  | { desired?: undefined; error: Error }
 
 /**
  * Turns the form into the flat list the transaction builders take.
