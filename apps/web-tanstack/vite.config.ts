@@ -10,7 +10,7 @@ import remarkHeadingId from 'remark-heading-id'
 import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { readFileSync, statSync } from 'node:fs'
 import { swAssets } from './plugins/vite-plugin-sw-assets'
 import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
 
@@ -21,7 +21,8 @@ const SOURCE_SUFFIXES = ['', '.tsx', '.ts', '.js', '/index.tsx', '/index.ts', '/
 const resolveWebSource = (subpath: string) => {
   for (const root of [path.join(webRoot, 'src'), path.join(storybookRoot, 'src')]) {
     for (const suffix of SOURCE_SUFFIXES) {
-      if (existsSync(path.join(root, subpath) + suffix)) return path.join(root, subpath) + suffix
+      if (statSync(path.join(root, subpath) + suffix, { throwIfNoEntry: false })?.isFile())
+        return path.join(root, subpath) + suffix
     }
   }
   return path.join(webRoot, 'src', subpath)
