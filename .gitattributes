@@ -1,1 +1,3 @@
 * text=auto eol=lf
+# Anvil fork caches are Zstandard binaries with a .json name.
+apps/web/e2e/environment/infra/fork-cache/** binary
