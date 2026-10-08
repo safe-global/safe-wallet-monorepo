@@ -1,19 +1,15 @@
 import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
-import { Typography } from '@/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TokenIcon from '@/components/common/TokenIcon'
-import SpendingLimitLabel from '@/components/common/SpendingLimitLabel'
 import { useCurrentChain } from '@/hooks/useChains'
 import useBalances from '@/hooks/useBalances'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitMethods } from '@/utils/transaction-guards'
 import { isSetAllowance } from '@/utils/transaction-guards'
 import { getResetTimeOptions } from '@/features/spending-limits'
-import TxDetailsRow from '@/components/tx/ConfirmTxDetails/TxDetailsRow'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { SpendingLimitsView } from '@views/components/transactions/TxDetails/TxData/SpendingLimits/SpendingLimitsView'
 
 type SpendingLimitsProps = {
   txData?: TransactionData | null
@@ -42,46 +38,19 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
   if (!txData) return null
 
   return (
-    <div className="flex flex-col gap-2">
-      <Typography>
-        <b>{`${isSetAllowanceMethod ? 'Modify' : 'Delete'} spending limit:`}</b>
-      </Typography>
-
-      <TxDetailsRow label="Beneficiary" grid>
+    <SpendingLimitsView
+      isSetAllowanceMethod={isSetAllowanceMethod}
+      beneficiary={
         <EthHashInfo
           address={(beneficiary as string) || ZERO_ADDRESS}
           shortAddress={false}
           showCopyButton
           hasExplorer
         />
-      </TxDetailsRow>
-
-      <TxDetailsRow label={isSetAllowanceMethod ? (tokenInfo ? 'Amount' : 'Raw Amount (in decimals)') : 'Token'} grid>
-        {tokenInfo && (
-          <>
-            <TokenIcon logoUri={tokenInfo.logoUri} size={32} tokenSymbol={tokenInfo.symbol} />
-            <Typography>{tokenInfo.symbol}</Typography>
-          </>
-        )}
-
-        {isSetAllowanceMethod && (
-          <>
-            {tokenInfo ? (
-              <Typography>
-                {formatVisualAmount(amount as string, tokenInfo.decimals)} {tokenInfo.symbol}
-              </Typography>
-            ) : (
-              <Typography>{amount}</Typography>
-            )}
-          </>
-        )}
-      </TxDetailsRow>
-
-      {isSetAllowanceMethod && (
-        <TxDetailsRow label="Reset time" grid>
-          <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
-        </TxDetailsRow>
-      )}
-    </div>
+      }
+      tokenInfo={tokenInfo}
+      amount={amount}
+      resetTimeLabel={resetTimeLabel}
+    />
   )
 }

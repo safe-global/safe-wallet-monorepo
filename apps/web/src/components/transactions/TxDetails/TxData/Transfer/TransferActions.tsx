@@ -1,8 +1,5 @@
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement, useContext, useState } from 'react'
-import { Ellipsis } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import useAddressBook from '@/hooks/useAddressBook'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
@@ -12,6 +9,7 @@ import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
+import { TransferActionsView } from '@views/components/transactions/TxDetails/TxData/Transfer/TransferActionsView'
 
 // TODO: No need for an enum anymore
 enum ModalType {
@@ -64,44 +62,22 @@ const TransferActions = ({
     trusted && isOutgoingTx && (isNativeTokenTransfer(txInfo.transferInfo) || isERC20Transfer(txInfo.transferInfo))
 
   return (
-    <>
-      <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger
-          data-testid="transfer-actions-btn"
-          render={<Button variant="ghost" size="icon-sm" className="ml-1 text-[var(--color-border-main)]" />}
-        >
-          <Ellipsis />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {canSendAgain && (
-            <CheckWallet>
-              {(isOk) => (
-                <DropdownMenuItem
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
-                  }}
-                  disabled={!isOk}
-                >
-                  Send again
-                </DropdownMenuItem>
-              )}
-            </CheckWallet>
-          )}
-
-          <DropdownMenuItem
-            data-testid="add-to-address-book-btn"
-            onClick={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}
-          >
-            Add to address book
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {open[ModalType.ADD_TO_AB] && (
-        <EntryDialog handleClose={handleCloseModal} defaultValues={{ name, address }} disableAddressInput />
-      )}
-    </>
+    <TransferActionsView
+      menuOpen={menuOpen}
+      onMenuOpenChange={setMenuOpen}
+      canSendAgain={canSendAgain}
+      renderCheckWallet={(render) => <CheckWallet>{render}</CheckWallet>}
+      onSendAgain={() => {
+        setMenuOpen(false)
+        setTxFlow(<TokenTransferFlow recipients={[{ recipient, tokenAddress, amount }]} />)
+      }}
+      onAddToAddressBook={handleOpenModal(ModalType.ADD_TO_AB, TX_LIST_EVENTS.ADDRESS_BOOK)}
+      entryDialog={
+        open[ModalType.ADD_TO_AB] && (
+          <EntryDialog handleClose={handleCloseModal} defaultValues={{ name, address }} disableAddressInput />
+        )
+      }
+    />
   )
 }
 

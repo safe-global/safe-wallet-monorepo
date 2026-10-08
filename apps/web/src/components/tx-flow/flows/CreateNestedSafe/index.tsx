@@ -11,6 +11,7 @@ import { type SubmitCallbackWithData, TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
+import { CREATE_NESTED_SAFE_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/CreateNestedSafe/copy'
 
 const CreateNestedSafe = () => {
   const dispatch = useAppDispatch()
@@ -74,11 +75,11 @@ const CreateNestedSafe = () => {
     <TxFlow<SetupNestedSafeForm>
       initialData={{ name: '', assets: [] }}
       icon={NestedSafeIcon}
-      subtitle="Create a Nested Safe"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewNestedSafeCreationComponent}
       onSubmit={handleSubmit}
     >
-      <TxFlowStep title="Set up Nested Safe">
+      <TxFlowStep title={COPY.stepTitle}>
         <SetUpNestedSafe />
       </TxFlowStep>
     </TxFlow>

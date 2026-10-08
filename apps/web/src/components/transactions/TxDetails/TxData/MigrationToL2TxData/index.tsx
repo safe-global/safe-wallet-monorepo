@@ -9,7 +9,7 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import DecodedData from '../DecodedData'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { MigrateToL2Information } from '@/components/tx/confirmation-views/MigrateToL2Information'
+import { MigrationToL2TxDataView } from '@views/components/transactions/TxDetails/TxData/MigrationToL2TxData/MigrationToL2TxDataView'
 import { isCustomTxInfo, isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import Summary from '../../Summary'
@@ -71,9 +71,7 @@ export const MigrationToL2TxData = ({
   const [txPreview, txPreviewError] = useTxPreview(realSafeTx?.data)
 
   return (
-    <div>
-      <MigrateToL2Information variant="history" />
-
+    <MigrationToL2TxDataView>
       {realSafeTxError ? (
         <ErrorMessage>{realSafeTxError.message}</ErrorMessage>
       ) : txPreviewError ? (
@@ -83,6 +81,6 @@ export const MigrationToL2TxData = ({
       ) : (
         txPreview && <Summary {...txPreview} safeTxData={realSafeTx?.data} />
       )}
-    </div>
+    </MigrationToL2TxDataView>
   )
 }

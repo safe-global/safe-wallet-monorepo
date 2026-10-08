@@ -1,16 +1,14 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Button } from '@/components/ui/button'
 
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import useIsPending from '@/hooks/useIsPending'
-import Track from '@/components/common/Track'
-import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { TxModalContext } from '@/components/tx-flow'
 import { ReplaceTxFlow } from '@/components/tx-flow/flows'
+import { RejectTxButtonView } from '@views/components/transactions/RejectTxButton/RejectTxButtonView'
 
 const RejectTxButton = ({
   txSummary,
@@ -34,19 +32,7 @@ const RejectTxButton = ({
 
   return (
     <CheckWallet>
-      {(isOk) => (
-        <Track {...TX_LIST_EVENTS.REJECT}>
-          <Button
-            data-testid="reject-btn"
-            onClick={openReplacementModal}
-            variant="destructive"
-            disabled={!isOk || isDisabled}
-            size="action"
-          >
-            Reject
-          </Button>
-        </Track>
-      )}
+      {(isOk) => <RejectTxButtonView isOk={isOk} isDisabled={isDisabled} onClick={openReplacementModal} />}
     </CheckWallet>
   )
 }

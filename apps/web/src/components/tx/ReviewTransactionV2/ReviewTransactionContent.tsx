@@ -4,7 +4,6 @@ import { useCallback, useContext } from 'react'
 import madProps from '@/utils/mad-props'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import TxCheckError from '../TxCheckError'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ApprovalEditor from '../ApprovalEditor'
 import { useApprovalInfos } from '../ApprovalEditor/hooks/useApprovalInfos'
@@ -14,12 +13,13 @@ import UnknownContractError from '@/components/tx/shared/errors/UnknownContractE
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import {
+  ReviewTransactionContentView,
+  ReviewTransactionParseErrorView,
+} from '@views/components/tx/ReviewTransactionV2/ReviewTransactionContentView'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
 
@@ -51,10 +51,8 @@ export const ReviewTransactionContent = ({
   }, [onSubmit])
 
   return (
-    <>
-      <TxCard>
-        {children}
-
+    <ReviewTransactionContentView
+      confirmationView={
         <ConfirmationView
           isCreation={isCreation}
           txDetails={txDetails}
@@ -65,43 +63,29 @@ export const ReviewTransactionContent = ({
           withDecodedData={withDecodedData}
         >
           {!isRejection && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ObservabilityErrorBoundary fallback={<ReviewTransactionParseErrorView />}>
               {isApproval && <ApprovalEditor safeTransaction={safeTx} />}
             </ObservabilityErrorBoundary>
           )}
         </ConfirmationView>
-
-        <Slot name={SlotName.Main} />
-
-        <Separator bleed="6" className="mt-4" />
-
-        {safeTxError && <TxCheckError error={safeTxError} />}
-
-        <Slot name={SlotName.Footer} />
-        <NetworkWarning />
-        <UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />
-
-        <TxCardActions className="!mt-0">
-          {/* Continue button */}
-          <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
-            {(isOk) => {
-              return (
-                <Button
-                  data-testid="continue-sign-btn"
-                  type="submit"
-                  size="submit"
-                  onClick={onContinueClick}
-                  disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
-                  className="order-1"
-                >
-                  {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
-                </Button>
-              )
-            }}
-          </CheckWallet>
-        </TxCardActions>
-      </TxCard>
-    </>
+      }
+      mainSlot={<Slot name={SlotName.Main} />}
+      txCheckError={safeTxError && <TxCheckError error={safeTxError} />}
+      footerSlot={<Slot name={SlotName.Footer} />}
+      networkWarning={<NetworkWarning />}
+      unknownContractError={<UnknownContractError txData={txDetails?.txData ?? txPreview?.txData} />}
+      renderCheckWallet={(render) => (
+        <CheckWallet allowNonOwner={onlyExecute} checkNetwork={!isSubmitDisabled}>
+          {render}
+        </CheckWallet>
+      )}
+      onContinueClick={onContinueClick}
+      isSubmitDisabled={isSubmitDisabled}
+      isSubmitLoading={isSubmitLoading}
+      isRiskBlocked={needsRiskConfirmation && !isRiskConfirmed}
+    >
+      {children}
+    </ReviewTransactionContentView>
   )
 }
 

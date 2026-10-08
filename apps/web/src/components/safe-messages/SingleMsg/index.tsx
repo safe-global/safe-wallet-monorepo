@@ -1,9 +1,9 @@
+import type { ReactNode } from 'react'
 import { useRouter } from 'next/router'
-import { TxListGrid } from '@/components/transactions/TxList'
-import { TransactionSkeleton } from '@/components/transactions/TxListItem/ExpandableTransactionItem'
 import ExpandableMsgItem from '../MsgListItem/ExpandableMsgItem'
 import useSafeMessage from '@/hooks/messages/useSafeMessage'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { SingleMsgView } from '@views/components/safe-messages/SingleMsg/SingleMsgView'
 
 const SingleMsg = () => {
   const router = useRouter()
@@ -11,20 +11,13 @@ const SingleMsg = () => {
   const safeMessageHash = Array.isArray(messageHash) ? messageHash[0] : messageHash
   const [safeMessage, , messageError] = useSafeMessage(safeMessageHash)
 
-  if (safeMessage) {
-    return (
-      <TxListGrid>
-        <ExpandableMsgItem msg={safeMessage} expanded />
-      </TxListGrid>
-    )
-  }
-
-  if (messageError) {
-    return <ErrorMessage error={messageError}>Failed to load message</ErrorMessage>
-  }
-
-  // Loading skeleton
-  return <TransactionSkeleton />
+  return (
+    <SingleMsgView
+      message={safeMessage && <ExpandableMsgItem msg={safeMessage} expanded />}
+      hasError={!!messageError}
+      renderErrorMessage={(children: ReactNode) => <ErrorMessage error={messageError}>{children}</ErrorMessage>}
+    />
+  )
 }
 
 export default SingleMsg

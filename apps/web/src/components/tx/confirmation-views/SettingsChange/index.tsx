@@ -1,16 +1,12 @@
 import type { SettingsChangeTransaction as SettingsChangeType } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { SettingsInfoType } from '@safe-global/store/gateway/types'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
-import EthHashInfo from '@/components/common/EthHashInfo'
 import type { NarrowConfirmationViewProps } from '../types'
 import { OwnerList } from '@/components/tx-flow/common/OwnerList'
-import MinusIcon from '@/public/images/common/minus.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ChangeSignerSetupWarning } from '@/features/multichain'
 import { useContext } from 'react'
 import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { SettingsChangeView } from '@views/components/tx/confirmation-views/SettingsChange/SettingsChangeView'
 
 export interface SettingsChangeProps extends NarrowConfirmationViewProps {
   txInfo: SettingsChangeType
@@ -27,45 +23,17 @@ const SettingsChange: React.FC<SettingsChangeProps> = ({ txInfo: { settingsInfo 
   const newSignersLength = safe.owners.length + ('removedOwner' in settingsInfo ? 0 : 1)
 
   return (
-    <>
-      {'oldOwner' in settingsInfo && (
-        <div className="rounded-lg bg-[var(--color-warning-background)] p-4">
-          <div className="text-muted-foreground mb-4 flex items-center">
-            <MinusIcon className="mr-2 size-4" />
-            Previous signer
-          </div>
-          <EthHashInfo
-            name={settingsInfo.oldOwner.name}
-            address={settingsInfo.oldOwner.value}
-            shortAddress={false}
-            showCopyButton
-            hasExplorer
-          />
-        </div>
-      )}
-
-      {'owner' in settingsInfo && !hasNewOwner && <OwnerList owners={[settingsInfo.owner]} />}
-      {hasNewOwner && <OwnerList owners={[{ name: params.newOwner.name, value: params.newOwner.address }]} />}
-
-      {shouldShowChangeSigner && <ChangeSignerSetupWarning />}
-
-      {'threshold' in settingsInfo && (
-        <>
-          <Separator bleed="6" />
-
-          <div>
-            <Typography variant="paragraph-small">Any transaction requires the confirmation of:</Typography>
-            <Typography>
-              <b>{settingsInfo.threshold}</b> out of{' '}
-              <b>
-                {newSignersLength} signer{maybePlural(newSignersLength)}
-              </b>
-            </Typography>
-          </div>
-        </>
-      )}
-      <Separator bleed="6" />
-    </>
+    <SettingsChangeView
+      oldOwner={'oldOwner' in settingsInfo ? settingsInfo.oldOwner : undefined}
+      ownerList={'owner' in settingsInfo && !hasNewOwner && <OwnerList owners={[settingsInfo.owner]} />}
+      newOwnerList={
+        hasNewOwner && <OwnerList owners={[{ name: params.newOwner.name, value: params.newOwner.address }]} />
+      }
+      warning={shouldShowChangeSigner && <ChangeSignerSetupWarning />}
+      hasThreshold={'threshold' in settingsInfo}
+      threshold={'threshold' in settingsInfo ? settingsInfo.threshold : undefined}
+      newSignersLength={newSignersLength}
+    />
   )
 }
 

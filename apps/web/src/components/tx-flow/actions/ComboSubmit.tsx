@@ -1,13 +1,11 @@
 import { useContext, useMemo } from 'react'
 import { Slot, type SlotComponentProps, SlotName, useSlot, useSlotIds, withSlot } from '../slots'
-import WalletRejectionError from '@/components/tx/shared/errors/WalletRejectionError'
-import ErrorMessage from '@/components/tx/ErrorMessage'
-import TxSubmitError from '@/components/tx/TxSubmitError'
 import { TxFlowContext } from '../TxFlowProvider'
 import { useValidateTxData } from '@/hooks/useValidateTxData'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { SafeTxContext } from '../SafeTxProvider'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
+import { ComboSubmitView } from '@views/components/tx-flow/actions/ComboSubmitView'
 
 const COMBO_SUBMIT_ACTION = 'comboSubmitAction'
 const EXECUTE_ACTION = 'execute'
@@ -56,38 +54,22 @@ export const ComboSubmit = (props: SlotComponentProps<SlotName.Submit>) => {
   const disabled = validationError !== undefined || validationLoading
 
   return (
-    <>
-      {submitError && (
-        <div className="mt-2">
-          <TxSubmitError error={submitError} context="execution" />
-        </div>
-      )}
-
-      {isRejectedByUser && (
-        <div className="mt-2">
-          <WalletRejectionError />
-        </div>
-      )}
-
-      {validationError !== undefined && <ErrorMessage error={validationError}>{validationError.message}</ErrorMessage>}
-
-      {showLastSignerWarning && (
-        <div className="mt-2">
-          <ErrorMessage level="info">
-            You&apos;re providing the last signature. After you sign, anyone can execute this transaction.
-          </ErrorMessage>
-        </div>
-      )}
-
-      <Slot
-        name={SlotName.ComboSubmit}
-        id={slotId}
-        options={options}
-        onChange={setSubmitAction}
-        disabled={disabled}
-        {...props}
-      />
-    </>
+    <ComboSubmitView
+      submitError={submitError}
+      isRejectedByUser={isRejectedByUser}
+      validationError={validationError}
+      showLastSignerWarning={showLastSignerWarning}
+      slot={
+        <Slot
+          name={SlotName.ComboSubmit}
+          id={slotId}
+          options={options}
+          onChange={setSubmitAction}
+          disabled={disabled}
+          {...props}
+        />
+      }
+    />
   )
 }
 

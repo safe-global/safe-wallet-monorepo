@@ -8,6 +8,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowType } from '@/services/analytics'
+import { ConfirmTxView } from '@views/components/tx-flow/flows/ConfirmTx/ConfirmTxView'
 
 const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
   const { text } = useTransactionType(txSummary)
@@ -24,7 +25,7 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
   return (
     <TxFlow
       icon={isSwapOrder ? SwapIcon : undefined}
-      subtitle={<>{text}&nbsp;</>}
+      subtitle={<ConfirmTxView text={text} />}
       txId={txId}
       txNonce={txNonce}
       isExecutable={canExecute}

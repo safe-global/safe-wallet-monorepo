@@ -6,10 +6,10 @@ import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { isTxValid } from '@/components/safe-apps/utils'
-import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 import { getTxOrigin } from '@/utils/transactions'
+import { ReviewSafeAppsTxView } from '@views/components/tx-flow/flows/SafeAppsTx/ReviewSafeAppsTxView'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
@@ -50,12 +50,7 @@ const ReviewSafeAppsTx = ({
 
   return (
     <ReviewTransaction onSubmit={onSubmit} {...props}>
-      {error ? (
-        <ErrorMessage error={safeTxError}>
-          This Safe App initiated a transaction which cannot be processed. Please get in touch with the developer of
-          this Safe App for more information.
-        </ErrorMessage>
-      ) : null}
+      <ReviewSafeAppsTxView error={error} safeTxError={safeTxError} />
       {children}
     </ReviewTransaction>
   )

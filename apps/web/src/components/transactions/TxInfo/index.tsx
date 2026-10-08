@@ -8,15 +8,11 @@ import type {
   TransferTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
-import TokenAmount from '@/components/common/TokenAmount'
 import {
   isOrderTxInfo,
   isCreationTxInfo,
   isCustomTxInfo,
-  isERC20Transfer,
-  isERC721Transfer,
   isMultiSendTxInfo,
-  isNativeTokenTransfer,
   isSettingsChangeTxInfo,
   isTransferTxInfo,
   isMigrateToL2TxInfo,
@@ -26,12 +22,18 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
 import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
-import css from './styles.module.css'
 import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
-import { SwapTx } from './SwapTx'
+import { SwapTx } from '@views/components/transactions/TxInfo/SwapTx'
+import {
+  CreationTxView,
+  CustomTxView,
+  MigrationToL2TxView,
+  MultiSendTxView,
+  SettingsChangeTxView,
+  TransferTxView,
+} from '@views/components/transactions/TxInfo/TxInfoView'
 
 export const TransferTx = ({
   info,
@@ -51,67 +53,28 @@ export const TransferTx = ({
   const transfer = info.transferInfo
   const direction = omitSign ? undefined : info.direction
 
-  if (isNativeTokenTransfer(transfer)) {
-    return (
-      <TokenAmount
-        direction={direction}
-        value={transfer.value ?? '0'}
-        decimals={nativeCurrency?.decimals}
-        tokenSymbol={nativeCurrency?.symbol}
-        logoUri={withLogo ? nativeCurrency?.logoUri : undefined}
-        preciseAmount={preciseAmount}
-        iconSize={iconSize}
-      />
-    )
-  }
-
-  if (isERC20Transfer(transfer)) {
-    return (
-      <TokenAmount
-        {...transfer}
-        direction={direction}
-        logoUri={withLogo ? transfer?.logoUri : undefined}
-        preciseAmount={preciseAmount}
-        iconSize={iconSize}
-      />
-    )
-  }
-
-  if (isERC721Transfer(transfer)) {
-    return (
-      <TokenAmount
-        {...transfer}
-        tokenSymbol={ellipsis(
-          `${transfer.tokenSymbol ? transfer.tokenSymbol : 'Unknown NFT'} #${transfer.tokenId}`,
-          withLogo ? 16 : 100,
-        )}
-        value="1"
-        decimals={0}
-        direction={undefined}
-        logoUri={withLogo ? transfer?.logoUri : undefined}
-        fallbackSrc="/images/common/nft-placeholder.png"
-        iconSize={iconSize}
-      />
-    )
-  }
-
-  return <></>
+  return (
+    <TransferTxView
+      transfer={transfer}
+      direction={direction}
+      nativeCurrency={nativeCurrency}
+      withLogo={withLogo}
+      preciseAmount={preciseAmount}
+      iconSize={iconSize}
+    />
+  )
 }
 
 const CustomTx = ({ info }: { info: CustomTransactionInfo }): ReactElement => {
-  return <div className={css.txInfo}>{info.methodName}</div>
+  return <CustomTxView methodName={info.methodName} />
 }
 
 const CreationTx = ({ info }: { info: CreationTransactionInfo }): ReactElement => {
-  return <div className={css.txInfo}>Created by {shortenAddress(info.creator.value)}</div>
+  return <CreationTxView creator={info.creator.value} />
 }
 
 const MultiSendTx = ({ info }: { info: MultiSendTransactionInfo }): ReactElement => {
-  return (
-    <div className={css.txInfo}>
-      {info.actionCount} {`action${maybePlural(info.actionCount)}`}
-    </div>
-  )
+  return <MultiSendTxView actionCount={info.actionCount} />
 }
 
 const SettingsChangeTx = ({ info }: { info: SettingsChangeTransaction }): ReactElement => {
@@ -119,13 +82,13 @@ const SettingsChangeTx = ({ info }: { info: SettingsChangeTransaction }): ReactE
     info.settingsInfo?.type === SettingsInfoType.ENABLE_MODULE ||
     info.settingsInfo?.type === SettingsInfoType.DISABLE_MODULE
   ) {
-    return <div className={css.txInfo}>{info.settingsInfo.module.name}</div>
+    return <SettingsChangeTxView moduleName={info.settingsInfo.module.name} />
   }
   return <></>
 }
 
 const MigrationToL2Tx = (): ReactElement => {
-  return <>Migrate base contract</>
+  return <MigrationToL2TxView />
 }
 
 const TxInfo = ({ info, ...rest }: { info: TransactionInfo; omitSign?: boolean; withLogo?: boolean }): ReactElement => {

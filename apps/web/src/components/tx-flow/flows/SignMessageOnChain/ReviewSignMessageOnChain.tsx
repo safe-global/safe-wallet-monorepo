@@ -2,13 +2,10 @@ import type { ReactElement } from 'react'
 import { useContext, useEffect, useState } from 'react'
 import { useMemo } from 'react'
 import { hashMessage, TypedDataEncoder } from 'ethers'
-import { Typography } from '@/components/ui/typography'
-import WarningIcon from '@/public/images/notifications/warning.svg'
 import { type EIP712TypedData, Methods, type RequestId } from '@safe-global/safe-apps-sdk'
 import { OperationType } from '@safe-global/types-kit'
 
 import SendFromBlock from '@/components/tx/SendFromBlock'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { getReadOnlySignMessageLibContract } from '@/services/contracts/safeContracts'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
@@ -23,8 +20,8 @@ import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { ReviewSignMessageOnChainView } from '@views/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChainView'
 
 export type SignMessageOnChainProps = {
   app?: SafeAppData
@@ -105,39 +102,23 @@ const ReviewSignMessageOnChain = ({ message, method, children, ...props }: SignM
 
   return (
     <ReviewTransaction {...props}>
-      <SendFromBlock />
-
-      <InfoDetails title="Interact with SignMessageLib">
-        <EthHashInfo address={signMessageAddress} shortAddress={false} showCopyButton hasExplorer />
-      </InfoDetails>
-
-      {isEIP712TypedData(decodedMessage) && (
-        <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
-          <ApprovalEditor safeMessage={decodedMessage} />
-        </ObservabilityErrorBoundary>
-      )}
-
-      {safeTx && (
-        <div className="pb-2">
-          <HexEncodedData title="Data:" hexData={safeTx.data.data} />
-        </div>
-      )}
-
-      <Typography className="my-2">
-        <b>Signing method:</b> <code>{method}</code>
-      </Typography>
-
-      <Typography className="my-4">
-        <b>Signing message:</b> {readableMessage && <CopyButton text={readableMessage} />}
-      </Typography>
-      <DecodedMsg message={decodedMessage} isInModal />
-
-      <div className="my-4 flex items-center">
-        <WarningIcon className="size-4 text-[var(--color-warning-main)]" />
-        <Typography className="ml-2">
-          Signing a message with your Safe account requires a transaction on the blockchain
-        </Typography>
-      </div>
+      <ReviewSignMessageOnChainView
+        sendFromBlock={<SendFromBlock />}
+        signMessageAddress={signMessageAddress}
+        renderAddress={(addressProps) => <EthHashInfo {...addressProps} />}
+        isTypedData={isEIP712TypedData(decodedMessage)}
+        renderApprovalEditor={(fallback) =>
+          isEIP712TypedData(decodedMessage) && (
+            <ObservabilityErrorBoundary fallback={fallback}>
+              <ApprovalEditor safeMessage={decodedMessage} />
+            </ObservabilityErrorBoundary>
+          )
+        }
+        safeTxData={safeTx ? safeTx.data.data : undefined}
+        method={method}
+        copyButton={readableMessage && <CopyButton text={readableMessage} />}
+        decodedMessage={<DecodedMsg message={decodedMessage} isInModal />}
+      />
 
       {children}
     </ReviewTransaction>

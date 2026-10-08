@@ -8,6 +8,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { REMOVE_OWNER_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/RemoveOwner/copy'
 
 type Owner = {
   address: string
@@ -42,10 +43,10 @@ const RemoveOwnerFlow = (props: Owner) => {
       initialData={defaultValues}
       eventCategory={TxFlowType.REMOVE_OWNER}
       icon={SaveAddressIcon}
-      subtitle="Remove signer"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewOwnerStep}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <SetThresholdStep />
       </TxFlowStep>
     </TxFlow>

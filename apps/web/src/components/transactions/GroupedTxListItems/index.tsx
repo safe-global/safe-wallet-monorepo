@@ -1,28 +1,10 @@
 import type { AnyTransactionItem } from '@/utils/tx-list'
 import type { ReactElement } from 'react'
 import { useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from '@/components/transactions/TxListItem/ExpandableTransactionItem'
-import css from './styles.module.css'
 import { ReplaceTxHoverContext, ReplaceTxHoverProvider } from './ReplaceTxHoverProvider'
-import ExternalLink from '@/components/common/ExternalLink'
-
-import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-
-const Disclaimer = () => (
-  <Typography>
-    <b>Conflicting transactions</b>. Executing one will automatically replace the others.{' '}
-    <ExternalLink
-      href={HelpCenterArticle.CONFLICTING_TRANSACTIONS}
-      title="Why are transactions with the same nonce conflicting with each other?"
-      noIcon
-      className="hover:text-muted-foreground"
-    >
-      Why did this happen?
-    </ExternalLink>
-  </Typography>
-)
+import { GroupedTxListItemsView } from '@views/components/transactions/GroupedTxListItems/GroupedTxListItemsView'
 
 const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] }): ReactElement => {
   const nonce = isMultisigExecutionInfo(groupedListItems[0].transaction.executionInfo)
@@ -32,23 +14,14 @@ const TxGroup = ({ groupedListItems }: { groupedListItems: AnyTransactionItem[] 
   const { replacedTxIds } = useContext(ReplaceTxHoverContext)
 
   return (
-    <div className={css.container}>
-      <Typography style={{ gridArea: 'nonce' }}>{nonce}</Typography>
-      <div className={css.disclaimerContainer} style={{ gridArea: 'warning' }}>
-        <Disclaimer />
-      </div>
-      <div className={css.line} style={{ gridArea: 'line' }} />
-      <div className={css.txItems} style={{ gridArea: 'items' }}>
-        {groupedListItems.map((tx) => (
-          <div
-            key={tx.transaction.id}
-            className={replacedTxIds.includes(tx.transaction.id) ? css.willBeReplaced : undefined}
-          >
-            <ExpandableTransactionItem item={tx} isConflictGroup />
-          </div>
-        ))}
-      </div>
-    </div>
+    <GroupedTxListItemsView
+      nonce={nonce}
+      items={groupedListItems.map((tx) => ({
+        id: tx.transaction.id,
+        item: <ExpandableTransactionItem item={tx} isConflictGroup />,
+      }))}
+      replacedTxIds={replacedTxIds}
+    />
   )
 }
 

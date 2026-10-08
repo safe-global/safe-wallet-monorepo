@@ -8,8 +8,8 @@ export interface StakingTxProps extends NarrowConfirmationViewProps {
 }
 
 function StakingTx({ txInfo }: StakingTxProps) {
-  const stake = useLoadFeature(StakeFeature)
-  return <stake.StakingConfirmationTx order={txInfo} />
+  const { StakingConfirmationTx } = useLoadFeature(StakeFeature)
+  return <StakingConfirmationTx order={txInfo} />
 }
 
 export default StakingTx

@@ -1,12 +1,8 @@
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 
-import PlusIcon from '@/public/images/common/plus.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { cn } from '@/utils/cn'
-
-import css from './styles.module.css'
-import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { OwnerListView } from '@views/components/tx-flow/common/OwnerList/OwnerListView'
 
 export function OwnerList({
   title,
@@ -23,24 +19,13 @@ export function OwnerList({
   sx?: object
 }): ReactElement {
   void sx
-  const Icon = icon ?? PlusIcon
   return (
-    <div className={cn(css.container, className)}>
-      <p className="flex items-center text-[length:inherit] text-muted-foreground">
-        <Icon className="mr-2 size-4" />
-        {title ?? `Add owner${maybePlural(owners)}`}
-      </p>
-      {owners.map((newOwner) => (
-        <EthHashInfo
-          key={newOwner.value}
-          address={newOwner.value}
-          name={newOwner.name}
-          shortAddress={false}
-          showCopyButton
-          hasExplorer
-          avatarSize={32}
-        />
-      ))}
-    </div>
+    <OwnerListView
+      title={title}
+      icon={icon}
+      owners={owners}
+      containerClassName={className}
+      renderAddress={(props) => <EthHashInfo {...props} />}
+    />
   )
 }

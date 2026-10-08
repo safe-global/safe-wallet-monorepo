@@ -4,25 +4,23 @@ import { useWatch } from 'react-hook-form'
 import { isAddress } from 'ethers'
 import type { ReactElement } from 'react'
 
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { isSmartContractWallet } from '@/utils/wallets'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { UpsertRecoveryFlowFields } from '.'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-
-import addressBookInputCss from '@/components/common/AddressBookInput/styles.module.css'
+import { RecovererSmartContractWarningView } from '@views/components/tx-flow/flows/UpsertRecovery/RecovererSmartContractWarningView'
 
 export function RecovererWarning(): ReactElement | null {
   const { safe, safeAddress } = useSafeInfo()
-  const [warning, setWarning] = useState<string>()
+  const [warning, setWarning] = useState<boolean>(false)
   const [triggerGetSafe] = useLazySafesGetSafeV1Query()
 
   const recoverer = useWatch({ name: UpsertRecoveryFlowFields.recoverer })
   const debouncedRecoverer = useDebounce(recoverer, 500)
 
   useEffect(() => {
-    setWarning(undefined)
+    setWarning(false)
 
     if (!isAddress(debouncedRecoverer) || sameAddress(debouncedRecoverer, safeAddress)) {
       return
@@ -45,7 +43,7 @@ export function RecovererWarning(): ReactElement | null {
       try {
         await triggerGetSafe({ chainId: safe.chainId, safeAddress: debouncedRecoverer }).unwrap()
       } catch {
-        setWarning('The given address is a smart contract. Please ensure that it can sign transactions.')
+        setWarning(true)
       }
     })()
   }, [debouncedRecoverer, safe.chainId, safeAddress, triggerGetSafe])
@@ -54,12 +52,5 @@ export function RecovererWarning(): ReactElement | null {
     return null
   }
 
-  return (
-    <p
-      className={`${addressBookInputCss.unknownAddress} text-sm !bg-[var(--color-warning-background)] !text-[var(--color-warning-main)]`}
-    >
-      <InfoIcon className="size-4" />
-      {warning}
-    </p>
-  )
+  return <RecovererSmartContractWarningView />
 }

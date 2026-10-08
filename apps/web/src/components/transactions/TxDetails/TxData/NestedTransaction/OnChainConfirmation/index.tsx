@@ -1,11 +1,11 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import useChainId from '@/hooks/useChainId'
-import { Skeleton } from '@/components/ui/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { NestedTransaction } from '../NestedTransaction'
 import TxData from '../..'
 import { useSignedHash } from '../useSignedHash'
+import { OnChainConfirmationView } from '@views/components/transactions/TxDetails/TxData/NestedTransaction/OnChainConfirmation/OnChainConfirmationView'
 
 export const OnChainConfirmation = ({
   data,
@@ -24,19 +24,21 @@ export const OnChainConfirmation = ({
 
   return (
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>
-      {nestedTxDetails ? (
-        <TxData
-          txData={nestedTxDetails.txData}
-          txInfo={nestedTxDetails.txInfo}
-          txDetails={nestedTxDetails}
-          trusted
-          imitation={false}
-        />
-      ) : txDetailsError ? (
-        <ErrorMessage>Could not load details on hash to approve.</ErrorMessage>
-      ) : (
-        <Skeleton className="h-5 w-full" />
-      )}
+      <OnChainConfirmationView
+        nestedTxData={
+          nestedTxDetails && (
+            <TxData
+              txData={nestedTxDetails.txData}
+              txInfo={nestedTxDetails.txInfo}
+              txDetails={nestedTxDetails}
+              trusted
+              imitation={false}
+            />
+          )
+        }
+        hasError={!!txDetailsError}
+        renderErrorMessage={(children) => <ErrorMessage>{children}</ErrorMessage>}
+      />
     </NestedTransaction>
   )
 }

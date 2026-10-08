@@ -1,21 +1,6 @@
-import { memo, type CSSProperties, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
-import { RotateCcw } from 'lucide-react'
+import { memo, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import {
-  Combobox,
-  ComboboxCollection,
-  ComboboxContent,
-  ComboboxGroup,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxLabel,
-  ComboboxList,
-} from '@/components/ui/combobox'
-import { InputGroupAddon, InputGroupButton } from '@/components/ui/input-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { _formatNumber } from '@/components/common/NumberField'
@@ -26,14 +11,18 @@ import { getLatestTransactions } from '@/utils/tx-list'
 import { getTransactionType } from '@/hooks/useTransactionType'
 import usePreviousNonces from '@/hooks/usePreviousNonces'
 
-import css from './styles.module.css'
-import classNames from 'classnames'
+import {
+  NonceFormOptionView,
+  TxNonceFormView,
+  TxNonceReadOnlyView,
+  TxNonceView,
+} from '@views/components/tx-flow/common/TxNonce/TxNonceView'
 
 const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string }): ReactElement {
   const addressBook = useAddressBook()
   const transactions = useQueuedTxByNonce(Number(nonce))
 
-  const txLabel = useMemo(() => {
+  const tx = useMemo(() => {
     const latestTransactions = getLatestTransactions(transactions)
 
     if (latestTransactions.length === 0) {
@@ -42,26 +31,15 @@ const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string
 
     const [{ transaction }] = latestTransactions
     const note = transaction.note?.trim()
-    return (
-      note || transaction.txInfo.humanDescription || `${getTransactionType(transaction, addressBook).text} transaction`
-    )
+    return {
+      note,
+      humanDescription: transaction.txInfo.humanDescription,
+      typeText: getTransactionType(transaction, addressBook).text,
+    }
   }, [addressBook, transactions])
 
-  const label = txLabel || 'New transaction'
-
-  return (
-    <Typography variant="paragraph-small">
-      <b>{nonce}</b>&nbsp;- {label}
-    </Typography>
-  )
+  return <NonceFormOptionView nonce={nonce} tx={tx} />
 })
-
-const getFieldMinWidth = (value: string): string => {
-  const MIN_CHARS = 5
-  const MAX_WIDTH = '200px'
-  const clamped = `clamp(calc(${MIN_CHARS}ch + 6px), calc(${Math.max(MIN_CHARS, value.length)}ch + 6px), ${MAX_WIDTH})`
-  return clamped
-}
 
 enum TxNonceFormFieldNames {
   NONCE = 'nonce',
@@ -118,8 +96,6 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
     setWarning(message)
   }, [nonce, recommendedNonce, safe.nonce])
 
-  const options = [recommendedNonce, ...previousNonces]
-
   return (
     <Controller
       name={TxNonceFormFieldNames.NONCE}
@@ -155,127 +131,50 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
       }}
       render={({ field, fieldState }) => {
         if (readOnly) {
-          return (
-            <Typography variant="paragraph-small-bold" className="-ml-2">
-              {nonce}
-            </Typography>
-          )
+          return <TxNonceReadOnlyView nonce={nonce} />
         }
 
         const message = fieldState.error?.message || warning
 
         return (
-          <Combobox
-            items={options}
-            // `value` must be bound alongside `inputValue`: on close Base UI resets the input to the
-            // selected value, so leaving selection uncontrolled discards a typed nonce.
+          <TxNonceFormView
+            name={field.name}
             value={field.value}
-            onValueChange={(value) => field.onChange(_formatNumber(typeof value === 'string' ? value : ''))}
-            inputValue={field.value}
-            onInputValueChange={(value) => field.onChange(_formatNumber(value))}
-            // Always surface the recommended/recent presets regardless of the typed value
-            filter={() => true}
             inputRef={field.ref}
-          >
-            <Tooltip open={!!message}>
-              <TooltipTrigger render={<div className="inline-flex" />}>
-                <ComboboxInput
-                  name={field.name}
-                  aria-label={message || undefined}
-                  showTrigger
-                  // The clamp sizes the text input itself; the group grows to fit the trigger/reset addons
-                  className="[&_input]:font-bold [&_input]:w-(--nonce-width) [&_input]:min-w-0"
-                  style={{ '--nonce-width': getFieldMinWidth(field.value) } as CSSProperties}
-                  onBlur={() => {
-                    field.onBlur()
+            onValueChange={(value) => field.onChange(_formatNumber(value))}
+            onBlur={() => {
+              field.onBlur()
 
-                    if (fieldState.error) {
-                      formMethods.setValue(field.name, recommendedNonce.toString(), { shouldValidate: true })
-                    }
-                  }}
-                >
-                  {showRecommendedNonceButton && (
-                    <InputGroupAddon align="inline-end">
-                      <InputGroupButton
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label="Reset to recommended nonce"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          resetNonce()
-                        }}
-                      >
-                        <RotateCcw className="size-4" />
-                      </InputGroupButton>
-                    </InputGroupAddon>
-                  )}
-                </ComboboxInput>
-              </TooltipTrigger>
-              {message && <TooltipContent side="top">{message}</TooltipContent>}
-            </Tooltip>
-
-            {/* The input itself is tiny (clamped to a few characters), but the shared default ties
-                the popup width to it via --anchor-width. Options show full labels like "12 - New
-                transaction", so size the popup to that content instead — matching the pre-migration
-                MUI Popper, which explicitly opted out of the anchor-width tie for this field. */}
-            <ComboboxContent className="w-max min-w-40 max-w-[300px]">
-              <ComboboxList>
-                {/* Each label must live inside its own ComboboxGroup — Base UI's GroupLabel throws
-                    without a Group ancestor, which previously crashed the popup on open. */}
-                <ComboboxGroup items={[recommendedNonce]}>
-                  <ComboboxLabel>Recommended nonce</ComboboxLabel>
-                  <ComboboxCollection>
-                    {(option: string) => (
-                      <ComboboxItem key={option} value={option}>
-                        <NonceFormOption nonce={option} />
-                      </ComboboxItem>
-                    )}
-                  </ComboboxCollection>
-                </ComboboxGroup>
-
-                {previousNonces.length > 0 && (
-                  <ComboboxGroup items={previousNonces}>
-                    <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>
-                    <ComboboxCollection>
-                      {(option: string) => (
-                        <ComboboxItem key={option} value={option}>
-                          <NonceFormOption nonce={option} />
-                        </ComboboxItem>
-                      )}
-                    </ComboboxCollection>
-                  </ComboboxGroup>
-                )}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+              if (fieldState.error) {
+                formMethods.setValue(field.name, recommendedNonce.toString(), { shouldValidate: true })
+              }
+            }}
+            message={message}
+            recommendedNonce={recommendedNonce}
+            previousNonces={previousNonces}
+            showRecommendedNonceButton={showRecommendedNonceButton}
+            onReset={resetNonce}
+            renderOption={(option) => <NonceFormOption nonce={option} />}
+          />
         )
       }}
     />
   )
 }
 
-const skeletonMinWidth = getFieldMinWidth('')
-
 const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <div data-testid="nonce-fld" className={classNames('flex items-center gap-2', css.nonce)}>
-      Nonce{' '}
-      <Typography variant="paragraph-bold" className="inline">
-        #
-      </Typography>
-      {nonce === undefined || recommendedNonce === undefined ? (
-        // h-9 matches the ComboboxInput/SelectTrigger it stands in for, so the row doesn't shift on load
-        <Skeleton style={{ width: skeletonMinWidth }} className="h-9" />
-      ) : canEdit && !isReadOnly ? (
-        <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
-      ) : (
-        <Typography variant="paragraph-bold" className="-ml-2">
-          {nonce}
-        </Typography>
-      )}
-    </div>
+    <TxNonceView
+      nonce={nonce}
+      isLoading={nonce === undefined || recommendedNonce === undefined}
+      form={
+        nonce !== undefined && recommendedNonce !== undefined && canEdit && !isReadOnly ? (
+          <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
+        ) : undefined
+      }
+    />
   )
 }
 

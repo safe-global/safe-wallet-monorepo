@@ -5,6 +5,7 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { useLoadFeature } from '@/features/__core__'
 import { SpendingLimitsFeature, type NewSpendingLimitFlowProps } from '@/features/spending-limits'
+import { NEW_SPENDING_LIMIT_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/NewSpendingLimit/copy'
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',
@@ -19,12 +20,12 @@ const NewSpendingLimitFlow = () => {
   return (
     <TxFlow
       icon={SaveAddressIcon}
-      subtitle="Spending limit"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewSpendingLimit}
       eventCategory={TxFlowType.SETUP_SPENDING_LIMIT}
       initialData={defaultValues}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <CreateSpendingLimit />
       </TxFlowStep>
     </TxFlow>

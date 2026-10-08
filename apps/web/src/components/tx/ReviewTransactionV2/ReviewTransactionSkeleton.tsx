@@ -1,12 +1,8 @@
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import { ReviewTransactionSkeletonView } from '@views/components/tx/ReviewTransactionV2/ReviewTransactionSkeletonView'
 
 const ReviewTransactionSkeleton = () => (
-  <TxCard>
-    <div className="mb-10 flex min-h-[38svh] items-center justify-center">
-      <LoadingSpinner status={SpinnerStatus.PROCESSING} />
-    </div>
-  </TxCard>
+  <ReviewTransactionSkeletonView spinner={<LoadingSpinner status={SpinnerStatus.PROCESSING} />} />
 )
 
 export default ReviewTransactionSkeleton

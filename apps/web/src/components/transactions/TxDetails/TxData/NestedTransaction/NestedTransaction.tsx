@@ -1,21 +1,12 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
-
-import { Divider } from '@/components/tx/ColorCodedTxAccordion'
-
-import NestedTransactionIcon from '@/public/images/transactions/nestedTx.svg'
 import { type ReactElement } from 'react'
 import MethodCall from '../DecodedData/MethodCall'
 import { MethodDetails } from '../DecodedData/MethodDetails'
-import ExternalLink from '@/components/common/ExternalLink'
-import Track from '@/components/common/Track'
-import Link from 'next/link'
-import { MODALS_EVENTS } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useSignedHash } from './useSignedHash'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { NestedTransactionView } from '@views/components/transactions/TxDetails/TxData/NestedTransaction/NestedTransactionView'
 
 export const NestedTransaction = ({
   txData,
@@ -30,42 +21,25 @@ export const NestedTransaction = ({
   const spaceId = useUrlSpaceId()
   const signedHash = useSignedHash(txData)
   return (
-    <div className="flex flex-col gap-4">
-      {!isConfirmationView && txData?.dataDecoded && (
-        <>
-          <MethodCall contractAddress={txData.to.value} method={txData.dataDecoded.method} />
-          <MethodDetails data={txData.dataDecoded} addressInfoIndex={txData.addressInfoIndex} />
-          <Divider />
-        </>
-      )}
-
-      <Card variant="outlined" surface="sunken" size="none" radius="lg">
-        <div className="border-border-light flex items-center gap-4 border-b p-4">
-          <NestedTransactionIcon className="size-4" />
-          <Typography variant="h4" className="grow">
-            Nested transaction
-          </Typography>
-          {chain && txData && signedHash && (
-            <Track {...MODALS_EVENTS.OPEN_NESTED_TX}>
-              <Link
-                href={{
-                  pathname: AppRoutes.transactions.tx,
-                  query: withSpaceId({ safe: `${chain?.shortName}:${txData.to.value}`, id: signedHash }, spaceId),
-                }}
-                passHref
-                legacyBehavior
-              >
-                <ExternalLink className="text-muted-foreground">
-                  <Typography variant="paragraph-small-bold">Open</Typography>
-                </ExternalLink>
-              </Link>
-            </Track>
-          )}
-        </div>
-        <CardContent>
-          <div className="flex flex-col gap-8 p-4">{children}</div>
-        </CardContent>
-      </Card>
-    </div>
+    <NestedTransactionView
+      decoded={
+        !isConfirmationView && txData?.dataDecoded
+          ? {
+              methodCall: <MethodCall contractAddress={txData.to.value} method={txData.dataDecoded.method} />,
+              methodDetails: <MethodDetails data={txData.dataDecoded} addressInfoIndex={txData.addressInfoIndex} />,
+            }
+          : undefined
+      }
+      openHref={
+        chain && txData && signedHash
+          ? {
+              pathname: AppRoutes.transactions.tx,
+              query: withSpaceId({ safe: `${chain?.shortName}:${txData.to.value}`, id: signedHash }, spaceId),
+            }
+          : undefined
+      }
+    >
+      {children}
+    </NestedTransactionView>
   )
 }

@@ -1,32 +1,23 @@
-import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { Button } from '@/components/ui/button'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
-import Track from '@/components/common/Track'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { useContext } from 'react'
 import { TxModalContext } from '..'
-import SwapIcon from '@/public/images/common/swap.svg'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
-
-const buttonClasses = 'h-[58px] w-full px-6 text-base [&_svg_path]:fill-current'
+import {
+  MakeASwapButtonView,
+  SendTokensButtonView,
+  TxBuilderButtonView,
+} from '@views/components/tx-flow/common/TxButtonView'
 
 export const SendTokensButton = ({ onClick }: { onClick: () => void; sx?: object }) => {
-  return (
-    <Track {...MODALS_EVENTS.SEND_FUNDS}>
-      <Button data-testid="send-tokens-btn" onClick={onClick} className={buttonClasses}>
-        <AssetsIcon width={20} />
-        Send tokens
-      </Button>
-    </Track>
-  )
+  return <SendTokensButtonView onClick={onClick} />
 }
 
 export const TxBuilderButton = () => {
@@ -37,20 +28,7 @@ export const TxBuilderButton = () => {
   const isTxBuilder = typeof txBuilder.link.query === 'object' && router.query.appUrl === txBuilder.link.query?.appUrl
   const onClick = isTxBuilder ? () => setTxFlow(undefined) : undefined
 
-  return (
-    <Track {...MODALS_EVENTS.CONTRACT_INTERACTION}>
-      <Button
-        variant="outline"
-        className={buttonClasses}
-        onClick={onClick}
-        render={<Link href={txBuilder.link} style={{ width: '100%' }} />}
-      >
-        {/* Sized via classes: Tailwind's preflight (img { height: auto }) overrides the height attribute. */}
-        <img src="/images/apps/tx-builder.png" className="h-6 w-auto" alt="Transaction Builder" />
-        Transaction Builder
-      </Button>
-    </Track>
-  )
+  return <TxBuilderButtonView href={txBuilder.link} onClick={onClick} />
 }
 
 export const MakeASwapButton = () => {
@@ -81,10 +59,5 @@ export const MakeASwapButton = () => {
     }
   }
 
-  return (
-    <Button className={buttonClasses} onClick={onClick}>
-      <SwapIcon width={20} />
-      Swap tokens
-    </Button>
-  )
+  return <MakeASwapButtonView onClick={onClick} />
 }

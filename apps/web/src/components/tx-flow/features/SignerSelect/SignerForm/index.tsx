@@ -1,18 +1,14 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { useCallback, useContext, useEffect, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import SignatureIcon from '@/public/images/transactions/signature.svg'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import SignerSelector from '@/components/common/SignerSelector'
-import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
+import { SignerFormView } from '@views/components/tx-flow/features/SignerSelect/SignerForm/SignerFormView'
 
 export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -89,27 +85,12 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
   }
 
   return (
-    <>
-      <TxSectionTitle>
-        <SignatureIcon className="size-4" />
-        {willExecute ? 'Execute' : 'Sign'} with
-        <Tooltip>
-          <TooltipTrigger render={<InfoIcon className="size-4 text-[var(--color-border-main)]" />} />
-          <TooltipContent side="top">
-            {`Your connected wallet controls other Safe accounts, which can sign this transaction. You can select which Account to ${
-              willExecute ? 'execute' : 'sign'
-            } with.`}
-          </TooltipContent>
-        </Tooltip>
-      </TxSectionTitle>
-
-      <SignerSelector
-        options={options}
-        value={signerAddress}
-        onChange={onChange}
-        isOptionDisabled={isOptionDisabled}
-        disabledReason={() => 'Already signed'}
-      />
-    </>
+    <SignerFormView
+      willExecute={willExecute}
+      options={options}
+      value={signerAddress}
+      onChange={onChange}
+      isOptionDisabled={isOptionDisabled}
+    />
   )
 }

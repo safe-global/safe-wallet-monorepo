@@ -8,7 +8,7 @@ import { OwnerList } from '../../common/OwnerList'
 import { SafeTxContext } from '../../SafeTxProvider'
 import type { RecoveryFlowProps } from '.'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { Typography } from '@/components/ui/typography'
+import { RemoveRecoveryFlowReviewView } from '@views/components/tx-flow/flows/RemoveRecovery/RemoveRecoveryFlowReviewView'
 
 export function RemoveRecoveryFlowReview({
   delayModifier,
@@ -28,15 +28,9 @@ export function RemoveRecoveryFlowReview({
 
   return (
     <ReviewTransaction onSubmit={onFormSubmit}>
-      <Typography>
-        This transaction will remove the recovery module from your Safe account. You will no longer be able to recover
-        your Safe account once this transaction is executed.
-      </Typography>
-
-      <OwnerList
-        title="Removing Recoverer"
-        owners={delayModifier.recoverers.map((recoverer) => ({ value: recoverer }))}
-        className="bg-[var(--color-warning-background)]"
+      <RemoveRecoveryFlowReviewView
+        recoverers={delayModifier.recoverers}
+        renderOwnerList={(props) => <OwnerList {...props} />}
       />
 
       {children}

@@ -1,50 +1,44 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
+import { generateDataRowValue } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { Value } from '@/components/transactions/TxDetails/TxData/DecodedData/ValueArray'
 import { isByte } from '@/utils/transaction-guards'
 import { type TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Typography } from '@/components/ui/typography'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
-import classNames from 'classnames'
 import { isAddress } from 'ethers'
 import { useMemo, type ReactElement } from 'react'
 import Msg from '@views/components/safe-messages/Msg'
-import css from './styles.module.css'
 import { normalizeMessageForDisplay } from '@/services/safe-messages/normalizeMessage'
+import { DecodedMsgView, DecodedTypedObjectView } from '@views/components/safe-messages/DecodedMsg/DecodedMsgView'
 
 const EIP712_DOMAIN_TYPE = 'EIP712Domain'
 
 const DecodedTypedObject = ({ displayedType, eip712Msg }: { displayedType: string; eip712Msg: TypedData }) => {
   const { types, message: msg, domain } = eip712Msg
   const findType = (paramName: string) => types[displayedType].find((paramType) => paramType.name === paramName)?.type
-  return (
-    <div>
-      <Typography variant="paragraph-mini-bold" className="uppercase text-[var(--color-border-main)]">
-        {displayedType}
-      </Typography>
 
-      {Object.entries(displayedType === EIP712_DOMAIN_TYPE ? domain : msg).map((param, index) => {
-        const [paramName, paramValue] = param
-        const type = findType(paramName) || 'string'
+  const rows = Object.entries(displayedType === EIP712_DOMAIN_TYPE ? domain : msg).map((param, index) => {
+    const [paramName, paramValue] = param
+    const type = findType(paramName) || 'string'
 
-        const isArrayValueParam = Array.isArray(paramValue)
-        const isNested = Object.keys(types).some((typeName) => typeName === type || `${typeName}[]` === type)
-        const inlineType = isAddress(paramValue as string) ? 'address' : isByte(type) ? 'bytes' : undefined
-        const paramValueAsString = typeof paramValue === 'string' ? paramValue : JSON.stringify(paramValue, null, 2)
-        return (
-          <TxDataRow key={`${displayedType}_param-${index}`} title={`${param[0]}(${type})`}>
-            {isNested ? (
-              <div className={classNames(css.nestedMsg, 'rounded')}>{paramValueAsString}</div>
-            ) : isArrayValueParam ? (
-              <Value method={displayedType} type={type} value={paramValueAsString} />
-            ) : (
-              generateDataRowValue(paramValueAsString, inlineType, true)
-            )}
-          </TxDataRow>
-        )
-      })}
-    </div>
-  )
+    const isArrayValueParam = Array.isArray(paramValue)
+    const isNested = Object.keys(types).some((typeName) => typeName === type || `${typeName}[]` === type)
+    const inlineType = isAddress(paramValue as string) ? 'address' : isByte(type) ? 'bytes' : undefined
+    const paramValueAsString = typeof paramValue === 'string' ? paramValue : JSON.stringify(paramValue, null, 2)
+
+    return {
+      key: `${displayedType}_param-${index}`,
+      title: `${param[0]}(${type})`,
+      isNested,
+      valueAsString: paramValueAsString,
+      value: isNested ? null : isArrayValueParam ? (
+        <Value method={displayedType} type={type} value={paramValueAsString} />
+      ) : (
+        generateDataRowValue(paramValueAsString, inlineType, true)
+      ),
+    }
+  })
+
+  return <DecodedTypedObjectView displayedType={displayedType} rows={rows} />
 }
 
 export const DecodedMsg = ({
@@ -73,11 +67,11 @@ export const DecodedMsg = ({
   }
 
   return (
-    <div className={classNames(css.container, 'rounded', { [css.scrollable]: isInModal })}>
-      <ObservabilityErrorBoundary fallback={<div>Error decoding message</div>}>
-        <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={EIP712_DOMAIN_TYPE} />
-        <DecodedTypedObject eip712Msg={normalizedMsg} displayedType={normalizedMsg.primaryType} />
-      </ObservabilityErrorBoundary>
-    </div>
+    <DecodedMsgView
+      isInModal={isInModal}
+      renderErrorBoundary={(props) => <ObservabilityErrorBoundary {...props} />}
+      domainObject={<DecodedTypedObject eip712Msg={normalizedMsg} displayedType={EIP712_DOMAIN_TYPE} />}
+      primaryObject={<DecodedTypedObject eip712Msg={normalizedMsg} displayedType={normalizedMsg.primaryType} />}
+    />
   )
 }

@@ -6,14 +6,7 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
-import TenderlyIcon from '@/public/images/transactions/tenderly-small.svg'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
 import { useSigner } from '@/hooks/wallets/useWallet'
-import ExternalLink from '@/components/common/ExternalLink'
-import CheckIcon from '@/public/images/common/check.svg'
-import CloseIcon from '@/public/images/common/close.svg'
 import {
   getSimulationStatus,
   isTxSimulationEnabled,
@@ -25,73 +18,26 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useMemo } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeProAccess } from '@/features/spaces'
-import NextLink from 'next/link'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { selectHasOwnTenderly } from '@/store/settingsSlice'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  _getSimulationIcon,
+  _getSimulationStatusText,
+  QueuedTxSimulationView,
+  SimulationSetupLinkView,
+} from '@views/components/transactions/QueuedTxSimulation/QueuedTxSimulationView'
 
 export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
   isSuccess && !isError && !isCallTraceError
 
-export const _getSimulationIcon = (isSuccessful: boolean) =>
-  isSuccessful
-    ? { color: 'var(--color-success-main)', Component: CheckIcon }
-    : { color: 'var(--color-error-main)', Component: CloseIcon }
-
-export const _getSimulationStatusText = (isSuccessful: boolean) =>
-  isSuccessful ? 'Simulation successful' : 'Simulation failed'
-
-const CompactSimulationButton = ({
-  label,
-  iconComponent,
-  disabled = false,
-  onClick,
-}: {
-  label: string
-  iconComponent: React.ReactNode
-  disabled?: boolean
-  onClick?: () => void
-}) => {
-  return (
-    <Button
-      variant="ghost"
-      disabled={disabled}
-      // visibility is required as the icon otherwise disappears when the first tx accordion is closed
-      // eslint-disable-next-line no-restricted-syntax -- inline simulation toggle: custom size + surface bg; pending a variant
-      className="flex flex-row items-center gap-1 rounded-lg !visible h-auto bg-[var(--color-background-main)] py-1 hover:bg-[var(--color-background-main)]"
-      onClick={onClick}
-    >
-      {iconComponent}
-      <Typography variant="paragraph-small-bold">{label}</Typography>
-    </Button>
-  )
-}
+export { _getSimulationIcon, _getSimulationStatusText }
 
 const SimulationSetupLink = () => {
   const safeLinkQuery = useSafeLinkQuery()
 
-  return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <NextLink
-            href={{ pathname: AppRoutes.settings.environmentVariables, query: safeLinkQuery }}
-            data-testid="queued-tx-simulation-setup"
-            className="flex flex-row items-center gap-1 rounded-lg bg-[var(--color-background-main)] px-2 py-1 no-underline"
-          >
-            <TenderlyIcon className="h-4" />
-            <Typography variant="paragraph-small-bold">Set up simulation</Typography>
-          </NextLink>
-        }
-      />
-      <TooltipContent>
-        Built-in simulation is part of Safe Pro. To simulate on your own Tenderly project, add its URL and access token
-        in Settings › Environment variables.
-      </TooltipContent>
-    </Tooltip>
-  )
+  return <SimulationSetupLinkView href={{ pathname: AppRoutes.settings.environmentVariables, query: safeLinkQuery }} />
 }
 
 const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }) => {
@@ -137,40 +83,19 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
   }
 
   if (status?.isLoading) {
-    return <CompactSimulationButton label="Simulating" iconComponent={<Spinner className="size-4" />} disabled={true} />
+    return <QueuedTxSimulationView isLoading />
   }
 
   if (!status?.isFinished) {
-    return (
-      <CompactSimulationButton
-        label="Simulate"
-        iconComponent={<TenderlyIcon className="h-4" />}
-        disabled={!safeTransaction}
-        onClick={handleSimulation}
-      />
-    )
+    return <QueuedTxSimulationView disabled={!safeTransaction} onSimulate={handleSimulation} />
   }
 
   if (status?.isFinished && !status.isError) {
-    const isSuccessful = _isSimulationSuccessful(status)
-    const { color, Component } = _getSimulationIcon(isSuccessful)
-    return (
-      <ExternalLink href={simulationLink}>
-        <div className="flex flex-row items-center gap-1">
-          <Component className="h-4" style={{ color }} />
-          {_getSimulationStatusText(isSuccessful)}
-        </div>
-      </ExternalLink>
-    )
+    return <QueuedTxSimulationView result={{ isSuccessful: _isSimulationSuccessful(status), simulationLink }} />
   }
 
   if (status?.isError) {
-    return (
-      <div className="flex flex-row items-center gap-1">
-        <CloseIcon className="h-4 text-[var(--color-error-main)]" />
-        Error while simulating
-      </div>
-    )
+    return <QueuedTxSimulationView isError />
   }
 
   return null

@@ -9,10 +9,8 @@ import { useUpdateBatch } from '@/features/batching'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { Errors, logError } from '@/services/exceptions'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
 import { BATCH_EVENTS, trackEvent } from '@/services/analytics'
-import { TxCardActions } from '@views/components/tx-flow/common/TxCard'
-import { Separator } from '@/components/ui/separator'
+import { BatchingView } from '@views/components/tx-flow/actions/Batching/BatchingView'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { SafeAppsName } from '@/config/constants'
 import { useHasFeature } from '@/hooks/useChains'
@@ -65,20 +63,14 @@ export const Batching = ({
   }
 
   return (
-    <div>
-      <Separator bleed="6" />
-
-      <TxCardActions>
-        <SplitMenuButton
-          onClick={(_, e) => handleSubmit(e)}
-          selected={slotId}
-          onChange={({ id }) => onChange(id)}
-          options={options}
-          disabled={isSubmitDisabled || disabled}
-          loading={isSubmitLoading}
-        />
-      </TxCardActions>
-    </div>
+    <BatchingView
+      onSubmit={handleSubmit}
+      slotId={slotId}
+      onChange={onChange}
+      options={options}
+      disabled={isSubmitDisabled || disabled}
+      loading={isSubmitLoading}
+    />
   )
 }
 

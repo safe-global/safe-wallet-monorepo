@@ -3,6 +3,7 @@ import type { ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATE
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { ReviewBatch } from './ReviewBatch'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
+import { EXECUTE_BATCH_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/ExecuteBatch/copy'
 
 export type ExecuteBatchFlowProps = {
   txs: ModuleTransaction[]
@@ -10,7 +11,7 @@ export type ExecuteBatchFlowProps = {
 
 const ExecuteBatchFlow = (props: ExecuteBatchFlowProps) => {
   return (
-    <TxLayout title="Confirm transaction" subtitle="Batch" icon={BatchIcon} hideNonce isBatch>
+    <TxLayout title={COPY.title} subtitle={COPY.subtitle} icon={BatchIcon} hideNonce isBatch>
       <ReviewBatch params={props} />
     </TxLayout>
   )

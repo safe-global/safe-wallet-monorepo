@@ -8,6 +8,7 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import { ADD_OWNER_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/AddOwner/copy'
 
 type Owner = {
   address: string
@@ -53,10 +54,10 @@ const AddOwnerFlow = ({ address }: { address?: string }) => {
       initialData={defaultValues}
       eventCategory={TxFlowType.ADD_OWNER}
       icon={SaveAddressIcon}
-      subtitle="Add signer"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewOwnerStep}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <ChooseOwnerStep />
       </TxFlowStep>
     </TxFlow>

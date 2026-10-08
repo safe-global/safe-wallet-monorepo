@@ -1,16 +1,7 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
-import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
-import { X as CloseIcon } from 'lucide-react'
-import TokenIcon from '@/components/common/TokenIcon'
-import AddIcon from '@/public/images/common/add.svg'
 import {
   type MultiTokenTransferParams,
   TokenTransferFields,
@@ -18,9 +9,6 @@ import {
   TokenTransferType,
   MultiTransfersFields,
 } from '@views/components/tx-flow/flows/TokenTransfer/types'
-import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
@@ -31,8 +19,6 @@ import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
 import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
 import { useHasFeature } from '@/hooks/useChains'
-import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import {
@@ -43,22 +29,12 @@ import {
 import { useLoadFeature } from '@/features/__core__'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
 import uniq from 'lodash/uniq'
+import {
+  AutocompleteItem,
+  CreateTokenTransferView,
+} from '@views/components/tx-flow/flows/TokenTransfer/CreateTokenTransferView'
 
-export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
-  <div className="flex items-center gap-2">
-    <TokenIcon logoUri={item.tokenInfo.logoUri} key={item.tokenInfo.address} tokenSymbol={item.tokenInfo.symbol} />
-
-    <div className="flex-1" data-testid="token-item">
-      <Typography variant="paragraph-small" className="block whitespace-nowrap">
-        {item.tokenInfo.name}
-      </Typography>
-
-      <Typography variant="paragraph-mini" className="block">
-        {formatVisualAmount(item.balance, item.tokenInfo.decimals)} {item.tokenInfo.symbol}
-      </Typography>
-    </div>
-  </div>
-)
+export { AutocompleteItem }
 
 const MAX_RECIPIENTS = 5
 
@@ -151,12 +127,6 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
 
   const csvAirdropAppUrl = safeApps?.[0]?.url
 
-  const CsvAirdropLink = () => (
-    <Link render={<button type="button" />} className="cursor-pointer" onClick={() => setCsvAirdropModalOpen(true)}>
-      CSV Airdrop
-    </Link>
-  )
-
   const canBatch = isMassPayoutsEnabled && type === TokenTransferType.multiSig
 
   const recipientsWatched = useWatch({ control, name: MultiTokenTransferFields.recipients })
@@ -168,112 +138,38 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
   useSafeShieldForRecipients(recipientAddresses)
 
   return (
-    <TxCard>
-      <FormProvider {...formMethods}>
-        <form onSubmit={handleSubmit(onNext)} className={commonCss.form}>
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-16">
-              {recipientFields.map((field, index) => (
-                <RecipientRow
-                  key={field.id}
-                  removable={recipientFields.length > 1}
-                  fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
-                  remove={removeRecipient}
-                  disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
-                />
-              ))}
-            </div>
-
-            {canBatch && (
-              <>
-                <div className="flex flex-row items-center justify-between">
-                  <Track {...MODALS_EVENTS.ADD_RECIPIENT}>
-                    <Button
-                      data-testid="add-recipient-btn"
-                      variant="ghost"
-                      size="lg"
-                      onClick={addRecipient}
-                      disabled={!canAddMoreRecipients}
-                    >
-                      <AddIcon className="size-4" />
-                      Add recipient
-                    </Button>
-                  </Track>
-                  <Typography
-                    data-testid="recipients-count"
-                    variant="paragraph-small"
-                    className={
-                      canAddMoreRecipients ? 'text-[var(--color-primary-main)]' : 'text-[var(--color-error-main)]'
-                    }
-                  >{`${recipientFields.length}/${MAX_RECIPIENTS}`}</Typography>
-                </div>
-
-                {isEligible && isNoFeeCampaignEnabled && <NoFeeCampaignTransactionCard />}
-
-                {hasInsufficientFunds && (
-                  <Alert data-testid="insufficient-balance-error" variant="destructive" outlined={false}>
-                    <AlertSeverityIcon variant="destructive" />
-                    <AlertTitle>Insufficient balance</AlertTitle>
-                    <AlertDescription>
-                      The total amount assigned to all recipients exceeds your available balance. Please adjust the
-                      amounts you want to send.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {canAddMoreRecipients && maxRecipientsInfo && !!csvAirdropAppUrl && (
-                  <Alert data-testid="csv-airdrop-hint" variant="info">
-                    <AlertSeverityIcon variant="info" />
-                    <AlertDescription>
-                      If you want to add more than {MAX_RECIPIENTS} recipients, use <CsvAirdropLink />
-                    </AlertDescription>
-                    <AlertAction>
-                      <Button
-                        aria-label="close"
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => setMaxRecipientsInfo(false)}
-                      >
-                        <CloseIcon />
-                      </Button>
-                    </AlertAction>
-                  </Alert>
-                )}
-
-                {!canAddMoreRecipients && (
-                  <Alert data-testid="max-recipients-reached" variant="warning" outlined={false}>
-                    <AlertSeverityIcon variant="warning" />
-                    <AlertDescription>
-                      No more recipients can be added.
-                      {!!csvAirdropAppUrl && (
-                        <>
-                          <br />
-                          Please use <CsvAirdropLink />
-                        </>
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                {csvAirdropModalOpen && (
-                  <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={csvAirdropAppUrl} />
-                )}
-              </>
-            )}
-
-            <div>
-              <Separator bleed="6" />
-
-              <TxCardActions>
-                <Button type="submit" size="submit" disabled={!formState.isValid}>
-                  Next
-                </Button>
-              </TxCardActions>
-            </div>
-          </div>
-        </form>
-      </FormProvider>
-    </TxCard>
+    <FormProvider {...formMethods}>
+      <CreateTokenTransferView
+        onSubmit={handleSubmit(onNext)}
+        recipientRows={recipientFields.map((field, index) => (
+          <RecipientRow
+            key={field.id}
+            removable={recipientFields.length > 1}
+            fieldArray={{ name: MultiTokenTransferFields.recipients, index }}
+            remove={removeRecipient}
+            disableSpendingLimit={disableSpendingLimit || recipientFields.length > 1}
+          />
+        ))}
+        canBatch={!!canBatch}
+        onAddRecipient={addRecipient}
+        canAddMoreRecipients={canAddMoreRecipients}
+        recipientCount={recipientFields.length}
+        maxRecipients={MAX_RECIPIENTS}
+        showNoFeeCampaign={!!(isEligible && isNoFeeCampaignEnabled)}
+        noFeeCampaignCard={<NoFeeCampaignTransactionCard />}
+        hasInsufficientFunds={hasInsufficientFunds}
+        maxRecipientsInfo={maxRecipientsInfo}
+        onCloseMaxRecipientsInfo={() => setMaxRecipientsInfo(false)}
+        hasCsvAirdropApp={!!csvAirdropAppUrl}
+        onOpenCsvAirdrop={() => setCsvAirdropModalOpen(true)}
+        csvAirdropModal={
+          csvAirdropModalOpen && (
+            <CSVAirdropAppModal onClose={() => setCsvAirdropModalOpen(false)} appUrl={csvAirdropAppUrl} />
+          )
+        }
+        isValid={formState.isValid}
+      />
+    </FormProvider>
   )
 }
 

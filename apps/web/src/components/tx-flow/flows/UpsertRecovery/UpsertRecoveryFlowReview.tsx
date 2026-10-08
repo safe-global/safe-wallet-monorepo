@@ -1,22 +1,18 @@
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import InfoIcon from '@/public/images/notifications/info.svg'
 import { getRecoveryUpsertTransactions } from '@/features/recovery/services'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender'
-import { TOOLTIP_TITLES } from '@views/components/tx-flow/common/constants'
 import type { UpsertRecoveryFlowProps } from '.'
-import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
-import ErrorMessage from '@/components/tx/ErrorMessage'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  UpsertRecoveryFlowReviewNoDataView,
+  UpsertRecoveryFlowReviewView,
+} from '@views/components/tx-flow/flows/UpsertRecovery/UpsertRecoveryFlowReviewView'
 
 export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransactionProps): ReactElement {
   const web3ReadOnly = useWeb3ReadOnly()
@@ -46,7 +42,7 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
   const isEdit = !!data?.moduleAddress
 
   if (!data) {
-    return <ErrorMessage>No data provided</ErrorMessage>
+    return <UpsertRecoveryFlowReviewNoDataView />
   }
 
   const { recoverer, delay, expiry } = data
@@ -54,49 +50,14 @@ export function UpsertRecoveryFlowReview({ children, ...props }: ReviewTransacti
 
   return (
     <ReviewTransaction {...props}>
-      <Typography>
-        This transaction will {isEdit ? 'update' : 'enable'} the Account recovery feature once executed.
-      </Typography>
-
-      <TxDataRow title="Trusted Recoverer">
-        <EthHashInfo address={recoverer} showName={false} hasExplorer showCopyButton avatarSize={24} />
-      </TxDataRow>
-
-      <TxDataRow
-        title={
-          <>
-            Review window
-            <Tooltip>
-              <TooltipTrigger render={<span />}>
-                <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
-              </TooltipTrigger>
-              <TooltipContent>{TOOLTIP_TITLES.REVIEW_WINDOW}</TooltipContent>
-            </Tooltip>
-          </>
-        }
+      <UpsertRecoveryFlowReviewView
+        isEdit={isEdit}
+        recoverer={recoverer}
+        delaySeconds={Number(delay)}
+        expirySeconds={expirySeconds}
       >
-        {getDetailedPeriod(Number(delay))}
-      </TxDataRow>
-
-      {expirySeconds !== 0 && (
-        <TxDataRow
-          title={
-            <>
-              Proposal expiry
-              <Tooltip>
-                <TooltipTrigger render={<span />}>
-                  <InfoIcon className="ml-1 inline size-4 align-middle text-[var(--color-border-main)]" />
-                </TooltipTrigger>
-                <TooltipContent>{TOOLTIP_TITLES.PROPOSAL_EXPIRY}</TooltipContent>
-              </Tooltip>
-            </>
-          }
-        >
-          {getDetailedPeriod(expirySeconds)}
-        </TxDataRow>
-      )}
-
-      {children}
+        {children}
+      </UpsertRecoveryFlowReviewView>
     </ReviewTransaction>
   )
 }

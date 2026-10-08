@@ -2,7 +2,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, hideSuspiciousTransactions } from '@/store/settingsSlice'
 import madProps from '@/utils/mad-props'
-import _TrustedToggleButton from './TrustedToggleButton'
+import _TrustedToggleButton from '@views/components/transactions/TrustedToggle/TrustedToggleButton'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 const useOnlyTrusted = () => {

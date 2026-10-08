@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ReactElement, ReactNode } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
   getGasLimitTooLowMessage,
@@ -10,13 +10,15 @@ import {
 } from '@/utils/transaction-errors'
 import { getSpecificContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
+import {
+  getCouldNotCheckMessage,
+  TX_WILL_FAIL_MESSAGE,
+  TxCheckErrorView,
+} from '@views/components/tx/TxCheckError/TxCheckErrorView'
 
-export const TX_WILL_FAIL_MESSAGE =
-  'This transaction will most likely fail. To save gas costs, reject this transaction.'
+export { getCouldNotCheckMessage, TX_WILL_FAIL_MESSAGE } from '@views/components/tx/TxCheckError/TxCheckErrorView'
 
 const onHypernativeCtaClick = () => {
   trackEvent(HYPERNATIVE_EVENTS.EXECUTION_BLOCKED_APPROVAL_CLICKED)
@@ -32,29 +34,13 @@ const HypernativeApprovalRequired = (): ReactElement => {
   const assessmentUrl = useSafeShieldAssessmentUrl()
 
   return (
-    <ErrorMessage level="error">
+    <TxCheckErrorView assessmentUrl={assessmentUrl} onHypernativeCtaClick={onHypernativeCtaClick}>
       {HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE}
-
-      {assessmentUrl && (
-        <span className="mt-3 block">
-          <Button
-            variant="surface"
-            size="sm"
-            className="gap-2"
-            onClick={onHypernativeCtaClick}
-            render={<a href={assessmentUrl} target="_blank" rel="noreferrer noopener" />}
-          >
-            Approve in Hypernative
-            <ExternalLinkIcon />
-          </Button>
-        </span>
-      )}
-    </ErrorMessage>
+    </TxCheckErrorView>
   )
 }
 
-export const getCouldNotCheckMessage = (network?: string): string =>
-  `Could not check this transaction. ${network ?? 'The network'} is not responding. Nothing was signed.`
+type Level = 'error' | 'warning'
 
 /**
  * Renders the pre-execution validity/estimation error, keeping two separate
@@ -72,12 +58,14 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
     return <HypernativeApprovalRequired />
   }
 
+  const render = (level: Level, message: ReactNode) => (
+    <ErrorMessage error={error} level={level} context={context}>
+      {message}
+    </ErrorMessage>
+  )
+
   if (isRateLimitError(error)) {
-    return (
-      <ErrorMessage error={error} level="warning" context={context}>
-        {RATE_LIMIT_USER_MESSAGE}
-      </ErrorMessage>
-    )
+    return render('warning', RATE_LIMIT_USER_MESSAGE)
   }
 
   // `useIsValidExecution` simulates with the gas limit the user set, so a node that rejects the
@@ -85,11 +73,7 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
   // will fail, so it must never reach the "reject this transaction" advice below.
   const gasLimitTooLow = getGasLimitTooLowMessage(error)
   if (gasLimitTooLow) {
-    return (
-      <ErrorMessage error={error} level="warning" context={context}>
-        {gasLimitTooLow}
-      </ErrorMessage>
-    )
+    return render('warning', gasLimitTooLow)
   }
 
   const willRevert = isRevertError(error)
@@ -97,10 +81,9 @@ const TxCheckError = ({ error, context }: { error: Error; context?: 'estimation'
   // of their own keep the prediction — it is more useful than the shared fallback here.
   const contractErrorMessage = getSpecificContractErrorMessage(error, { nativeAsset: chain?.nativeCurrency.symbol })
 
-  return (
-    <ErrorMessage error={error} level={willRevert ? 'error' : 'warning'} context={context}>
-      {contractErrorMessage ?? (willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName))}
-    </ErrorMessage>
+  return render(
+    willRevert ? 'error' : 'warning',
+    contractErrorMessage ?? (willRevert ? TX_WILL_FAIL_MESSAGE : getCouldNotCheckMessage(chain?.chainName)),
   )
 }
 

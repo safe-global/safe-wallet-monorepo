@@ -3,30 +3,14 @@ import SignMessage, { type SignMessageProps } from '@/components/tx-flow/flows/S
 import { getSwapTitle } from '@/features/swap'
 import { selectSwapParams } from '@/features/swap/store'
 import { useAppSelector } from '@/store'
-import { Typography } from '@/components/ui/typography'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { SWAP_TITLE } from '@/features/swap/constants'
 import { STAKE_TITLE, getStakeTitle } from '@/features/stake'
 import { EARN_TITLE } from '@/features/earn'
 import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
-import EarnIcon from '@/public/images/common/earn.svg'
-import StakeIcon from '@/public/images/common/stake.svg'
-
-const APP_LOGO_FALLBACK_IMAGE = '/images/apps/apps-icon.svg'
-const APP_NAME_FALLBACK = 'Sign message'
-
-/** Inline SVG to support currentColor in dark mode */
-const InlineIcon = ({ name }: { name: string }) => {
-  if (name === EARN_TITLE) {
-    return <EarnIcon className="size-8" />
-  }
-  if (name === STAKE_TITLE) {
-    return <StakeIcon className="size-8" />
-  }
-  return null
-}
+import { AppTitleView, SignMessageErrorFallbackView } from '@views/components/tx-flow/flows/SignMessage/AppTitleView'
+import { SIGN_MESSAGE_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/SignMessage/copy'
 
 export const AppTitle = ({
   name,
@@ -39,31 +23,18 @@ export const AppTitle = ({
 }) => {
   const swapParams = useAppSelector(selectSwapParams)
 
-  const appName = name || APP_NAME_FALLBACK
-  const appLogo = logoUri || APP_LOGO_FALLBACK_IMAGE
-  const useInlineIcon = name === EARN_TITLE || name === STAKE_TITLE
+  const inlineIcon = name === EARN_TITLE ? 'earn' : name === STAKE_TITLE ? 'stake' : undefined
 
-  let title = appName
+  let customTitle: string | undefined
   if (name === SWAP_TITLE) {
-    title = getSwapTitle(swapParams.tradeType, txs) || title
+    customTitle = getSwapTitle(swapParams.tradeType, txs)
   }
 
   if (name === STAKE_TITLE) {
-    title = getStakeTitle(txs) || title
+    customTitle = getStakeTitle(txs)
   }
 
-  return (
-    <div className="flex items-center">
-      {useInlineIcon && name ? (
-        <InlineIcon name={name} />
-      ) : (
-        <SafeAppIconCard src={appLogo} alt={name || 'The icon of the application'} width={32} height={32} />
-      )}
-      <Typography variant="h4" as="span" className="pl-4 font-bold">
-        {title}
-      </Typography>
-    </div>
-  )
+  return <AppTitleView name={name} logoUri={logoUri} inlineIcon={inlineIcon} customTitle={customTitle} />
 }
 
 const SignMessageFlow = ({ message, ...props }: SignMessageProps) => {
@@ -71,14 +42,14 @@ const SignMessageFlow = ({ message, ...props }: SignMessageProps) => {
 
   return (
     <TxLayout
-      title="Confirm message"
+      title={COPY.title}
       subtitle={<AppTitle name={props.name} logoUri={props.logoUri} />}
       step={0}
       hideNonce
       isMessage
       hideSafeShield={!isEip712}
     >
-      <ObservabilityErrorBoundary fallback={<div>Error signing message</div>}>
+      <ObservabilityErrorBoundary fallback={<SignMessageErrorFallbackView />}>
         <SignMessage message={message} {...props} />
       </ObservabilityErrorBoundary>
     </TxLayout>

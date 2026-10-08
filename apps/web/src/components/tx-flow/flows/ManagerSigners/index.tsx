@@ -8,6 +8,7 @@ import { TxFlowType } from '@/services/analytics'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import type { NamedAddress } from '@/components/new-safe/create/types'
+import { MANAGE_SIGNERS_FLOW_COPY as COPY } from '@views/components/tx-flow/flows/ManagerSigners/copy'
 
 export enum ManageSignersFormFields {
   threshold = 'threshold',
@@ -37,12 +38,12 @@ const ManageSignersFlow = () => {
   return (
     <TxFlow
       icon={SaveAddressIcon}
-      subtitle="Manage signers"
+      subtitle={COPY.subtitle}
       ReviewTransactionComponent={ReviewSigners}
       eventCategory={TxFlowType.SIGNERS_STRUCTURE}
       initialData={defaultValues}
     >
-      <TxFlowStep title="New transaction">
+      <TxFlowStep title={COPY.stepTitle}>
         <SignersStructure />
       </TxFlowStep>
     </TxFlow>
