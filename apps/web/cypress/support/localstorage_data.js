@@ -401,6 +401,13 @@ export const addressBookData = {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
     },
   },
+  // ETH_FUNDS_SAFE_13 does not have the default owner, so its Ethereum name goes to one of its owners.
+  get ownerNamesPerNetwork() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
+      1: { '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0': 'Automation owner Eth' },
+    }
+  },
   get sameOwnerName() {
     return {
       11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
