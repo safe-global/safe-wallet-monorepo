@@ -7,6 +7,10 @@ name: Design scope
 on:
   pull_request_target:
     types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+  # Spike only: pull_request_target runs only once this file is on the default branch, so pull_request lets
+  # the check be tried before that. Remove before merging: under pull_request a PR can edit this file.
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
