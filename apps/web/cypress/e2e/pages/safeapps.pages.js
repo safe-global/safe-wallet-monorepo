@@ -13,6 +13,8 @@ export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
 export const clearTransactionsBtn = '[aria-label="Clear transactions"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
+// App links take the Safe from the router query, which is empty (`safe=`) until the router is ready
+const linkWithSafe = /[?&]safe=[^&]+/
 const appMessageInput = 'input[placeholder="Message"]'
 const txBuilderUntrustedFallbackWarning = '[data-testid="untrusted-fallback-handler-warning"]'
 export const handlerInput = 'input[id="contract-field-handler"]'
@@ -221,8 +223,7 @@ export function clickOnApp(app) {
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
   const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
-  // The link takes the Safe from the router query, which stays empty until the router is ready
-  appLink().should('have.attr', 'href').and('include', 'safe=')
+  appLink().should('have.attr', 'href').and('match', linkWithSafe)
   appLink().click()
 }
 
@@ -302,6 +303,7 @@ export function verifyAppDescription(descr) {
 }
 
 export function clickOnOpenSafeAppBtn() {
+  cy.get(openSafeAppBtn).should('have.attr', 'href').and('match', linkWithSafe)
   cy.get(openSafeAppBtn).click()
 }
 

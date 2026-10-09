@@ -10,6 +10,7 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 import { getTxOrigin } from '@/utils/transactions'
+import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
@@ -23,10 +24,14 @@ const ReviewSafeAppsTx = ({
   ...props
 }: ReviewSafeAppsTxProps): ReactElement => {
   const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
+  const safeSDK = useSafeSDK()
 
   useHighlightHiddenTab()
 
   useEffect(() => {
+    // An app can request a transaction right after the page loads, before the Safe SDK is ready
+    if (!safeSDK) return
+
     const createSafeTx = async (): Promise<SafeTransaction> => {
       const isMultiSend = txs.length > 1
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
@@ -44,7 +49,7 @@ const ReviewSafeAppsTx = ({
         setTxOrigin(getTxOrigin(app))
       })
       .catch(setSafeTxError)
-  }, [txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
+  }, [safeSDK, txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
 
   const error = !isTxValid(txs)
 
