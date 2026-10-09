@@ -42,7 +42,7 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
   },
   {
     icon: BookUser,
-    label: 'Address book',
+    label: 'Workspace address book',
     href: AppRoutes.spaces.addressBook,
   },
   {
@@ -105,7 +105,7 @@ export const safeMainNavigation: SidebarItemConfig[] = [
   },
   {
     icon: BookUser,
-    label: 'Address book',
+    label: 'Local address book',
     href: AppRoutes.addressBook,
   },
   {
