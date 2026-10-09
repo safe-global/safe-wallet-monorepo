@@ -20,7 +20,7 @@ import { getGasPayment } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@/components/tx-flow/safe-scope'
 import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
@@ -130,8 +130,9 @@ export const ExecuteForm = ({
     onSubmit?.()
 
     let executedTxId: string
+    let isExecuted: boolean
     try {
-      executedTxId = await executeTx(
+      ;({ txId: executedTxId, isExecuted } = await executeTx(
         txOptions,
         safeTx,
         txId,
@@ -139,7 +140,7 @@ export const ExecuteForm = ({
         willRelay,
         acceptUnverifiedSimulation,
         sponsorSpaceId,
-      )
+      ))
     } catch (_err) {
       const err = asError(_err)
       const refusal = getGasPaymentRefusal(err, gasPayer)
@@ -159,10 +160,18 @@ export const ExecuteForm = ({
       return
     }
 
-    // On success
-    onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
+    // A queuing Safe executor returns a safeTxHash, so the explorer link would be wrong
+    onSubmitSuccess?.({ txId: executedTxId, isExecuted })
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
-    setTxFlow(<SuccessScreenFlow txId={executedTxId} scope={successScope} />, undefined, false)
+    setTxFlow(
+      isExecuted ? (
+        <SuccessScreenFlow txId={executedTxId} scope={successScope} />
+      ) : (
+        <NestedTxSuccessScreenFlow txId={executedTxId} />
+      ),
+      undefined,
+      false,
+    )
   }
 
   // On modal submit

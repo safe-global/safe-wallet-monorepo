@@ -13,11 +13,10 @@ import { useAppSelector } from '@/store'
 import ExternalLink from '@/components/common/ExternalLink'
 import { MODALS_EVENTS } from '@/services/analytics'
 import Track from '@/components/common/Track'
-import useAsync from '@safe-global/utils/hooks/useAsync'
-import { getSafeTransaction } from '@/utils/transactions'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { Typography } from '@/components/ui/typography'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useCurrentChain } from '@/hooks/useChains'
+import { getExplorerLink } from '@safe-global/utils/utils/gateway'
 
 type Props = {
   txId: string
@@ -35,20 +34,14 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
     }
   }, [_pendingTx])
 
-  const [safeTx] = useAsync(() => {
-    if (cachedPendingTx?.status == PendingStatus.NESTED_SIGNING) {
-      return getSafeTransaction(
-        cachedPendingTx.txHashOrParentSafeTxHash,
-        cachedPendingTx.chainId,
-        cachedPendingTx.signerAddress,
-      )
-    }
-  }, [cachedPendingTx])
-  const isSafeTxHash =
-    cachedPendingTx?.status == PendingStatus.NESTED_SIGNING &&
-    !!safeTx &&
-    isMultisigDetailedExecutionInfo(safeTx.detailedExecutionInfo) &&
-    safeTx.detailedExecutionInfo.safeTxHash === cachedPendingTx.txHashOrParentSafeTxHash
+  const chain = useCurrentChain()
+
+  // Executed → on-chain tx hash; queued → the parent's safeTxHash
+  const isExecuted = cachedPendingTx?.status === PendingStatus.NESTED_SIGNING && cachedPendingTx.executed
+  const explorerLink =
+    isExecuted && chain
+      ? getExplorerLink(cachedPendingTx.txHashOrParentSafeTxHash, chain.blockExplorerUriTemplate)
+      : undefined
 
   if (cachedPendingTx?.status !== PendingStatus.NESTED_SIGNING) {
     return <ErrorMessage>No transaction data found</ErrorMessage>
@@ -56,6 +49,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
 
   const currentSafeAddress = addressBook[cachedPendingTx.safeAddress]
   const parentSafeAddress = addressBook[cachedPendingTx.signerAddress]
+  const isExecTransaction = cachedPendingTx.method === 'execTransaction'
 
   return (
     <div className="mx-auto w-full max-w-[825px] rounded-lg bg-[var(--color-background-paper)] text-center">
@@ -64,10 +58,14 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
           <NestedSafeIcon className="size-9" aria-label="Nested Safe" />
         </div>
         <Typography data-testid="transaction-status" variant="h4" className="mt-4">
-          A nested transaction was created
+          {isExecuted ? 'Transaction submitted' : 'One more step in the parent Safe'}
         </Typography>
         <Typography variant="paragraph-small" className="mb-6 block">
-          Once confirmed and executed this signer transaction will confirm the child Safe&apos;s transaction.
+          {isExecuted
+            ? 'The parent Safe executed this transaction on-chain.'
+            : isExecTransaction
+              ? "Executing as the parent Safe created a transaction inside it. The parent Safe's owners still need to confirm and execute that transaction before this Safe's transaction runs."
+              : "Signing as the parent Safe created an approval transaction inside it. The parent Safe's owners still need to confirm and execute that transaction before it signs this Safe's transaction."}
         </Typography>
         <div className="flex w-[70%] flex-col gap-4">
           <div className="flex flex-col items-start gap-2">
@@ -82,7 +80,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
               variant="code"
               className="rounded-sm bg-[var(--color-background-main)] px-2 py-0.5 font-mono whitespace-nowrap text-[var(--color-primary-light)]"
             >
-              approveHash
+              {cachedPendingTx.method}
             </Typography>
           </div>
           <div className="flex flex-col items-start gap-2">
@@ -93,33 +91,29 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
           </div>
         </div>
         <Track {...MODALS_EVENTS.OPEN_PARENT_TX}>
-          <Link
-            href={
-              isSafeTxHash
-                ? {
-                    pathname: AppRoutes.transactions.tx,
-                    query: withSpaceId(
-                      {
-                        safe: cachedPendingTx.signerAddress,
-                        chainId: cachedPendingTx.chainId,
-                        id: cachedPendingTx.txHashOrParentSafeTxHash,
-                      },
-                      spaceId,
-                    ),
-                  }
-                : {
-                    pathname: AppRoutes.transactions.queue,
-                    query: withSpaceId(
-                      { safe: cachedPendingTx.signerAddress, chainId: cachedPendingTx.chainId },
-                      spaceId,
-                    ),
-                  }
-            }
-            passHref
-            legacyBehavior
-          >
-            <ExternalLink mode="button">Open the transaction</ExternalLink>
-          </Link>
+          {explorerLink ? (
+            <ExternalLink href={explorerLink.href} mode="button">
+              Open the transaction
+            </ExternalLink>
+          ) : (
+            <Link
+              href={{
+                pathname: AppRoutes.transactions.tx,
+                query: withSpaceId(
+                  {
+                    safe: cachedPendingTx.signerAddress,
+                    chainId: cachedPendingTx.chainId,
+                    id: cachedPendingTx.txHashOrParentSafeTxHash,
+                  },
+                  spaceId,
+                ),
+              }}
+              passHref
+              legacyBehavior
+            >
+              <ExternalLink mode="button">Open the transaction</ExternalLink>
+            </Link>
+          )}
         </Track>
       </div>
     </div>
