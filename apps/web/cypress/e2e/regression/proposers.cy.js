@@ -27,6 +27,7 @@ describe('Proposers tests', () => {
   })
 
   beforeEach(() => {
+    proposer.disableProposerGating()
     wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
@@ -122,5 +123,17 @@ describe('Proposers tests', () => {
       cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
       proposer.checkProposerData([proposerNameAD])
     })
+  })
+})
+
+describe('Proposers tests with the Safe Pro gate', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify Safe Pro replaces the "Add proposer" button when no Workspace plan grants policies', () => {
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
+    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+    proposer.verifyAddProposerIsLocked()
   })
 })

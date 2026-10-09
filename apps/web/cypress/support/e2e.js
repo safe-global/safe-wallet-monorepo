@@ -40,6 +40,19 @@ Cypress.on('test:before:run', () => {
   })
 })
 
+// One browser runs all specs of a shard, so the app's IndexedDB, caches and service workers would carry over.
+before(() => {
+  if (!Cypress.isBrowser({ family: 'chromium' })) return
+  const origin = new URL(Cypress.config('baseUrl')).origin
+  cy.wrap(
+    Cypress.automation('remote:debugger:protocol', {
+      command: 'Storage.clearDataForOrigin',
+      params: { origin, storageTypes: 'all' },
+    }),
+    { log: false },
+  )
+})
+
 // Isolated runs receive their generated owners with the scenario instead.
 if (!Cypress.expose('SAFE_E2E_ISOLATED')) {
   before(() => {
