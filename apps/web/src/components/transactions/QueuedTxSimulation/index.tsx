@@ -168,7 +168,7 @@ const InlineTxSimulation = ({ transaction }: { transaction: TransactionDetails }
     return (
       <div className="flex flex-row items-center gap-1">
         <CloseIcon className="h-4 text-[var(--color-error-main)]" />
-        Error while simulating
+        {hasOwnTenderly ? 'Simulation failed. Check your Tenderly API URL and access token.' : 'Error while simulating'}
       </div>
     )
   }

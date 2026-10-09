@@ -1,5 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
   InputGroup,
@@ -9,7 +10,6 @@ import {
 } from '@safe-global/views/components/ui/input-group'
 import { RotateCcwIcon } from 'lucide-react'
 import { useCurrentChain } from '@/hooks/useChains'
-import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { EnvVariablesField } from './index'
 
 type RpcProviderSectionProps = {
@@ -23,19 +23,14 @@ const RpcProviderSection = ({ onReset, showResetButton }: RpcProviderSectionProp
 
   return (
     <>
-      <Typography variant="paragraph-bold" className="mb-4 mt-6 flex items-center">
+      <Typography variant="paragraph-bold" className="mb-2 mt-6">
         RPC provider
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <span>
-                <InfoIcon className="ml-1 size-4 align-middle text-muted-foreground" />
-              </span>
-            }
-          />
-          <TooltipContent>Any provider that implements the Ethereum JSON-RPC standard can be used.</TooltipContent>
-        </Tooltip>
       </Typography>
+
+      <Alert variant="info" className="mb-3" data-testid="rpc-info">
+        <AlertSeverityIcon variant="info" />
+        <AlertDescription>Any provider that implements the Ethereum JSON-RPC standard can be used.</AlertDescription>
+      </Alert>
 
       <Controller
         name={EnvVariablesField.rpc}

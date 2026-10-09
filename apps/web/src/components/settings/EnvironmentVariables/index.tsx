@@ -36,7 +36,7 @@ const EnvironmentVariables = () => {
     },
   })
 
-  const { handleSubmit, setValue, watch } = formMethods
+  const { handleSubmit, setValue, trigger, watch } = formMethods
 
   const rpc = watch(EnvVariablesField.rpc)
   const tenderlyURL = watch(EnvVariablesField.tenderlyURL)
@@ -54,7 +54,7 @@ const EnvironmentVariables = () => {
 
     dispatch(
       setTenderly({
-        url: data[EnvVariablesField.tenderlyURL],
+        url: data[EnvVariablesField.tenderlyURL].replace(/\/$/, ''),
         accessToken: data[EnvVariablesField.tenderlyToken],
       }),
     )
@@ -63,7 +63,10 @@ const EnvironmentVariables = () => {
   })
 
   const onResetRpc = () => setValue(EnvVariablesField.rpc, '')
-  const onResetTenderlyUrl = () => setValue(EnvVariablesField.tenderlyURL, '')
+  const onResetTenderlyUrl = () => {
+    setValue(EnvVariablesField.tenderlyURL, '', { shouldValidate: true })
+    trigger(EnvVariablesField.tenderlyToken)
+  }
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
@@ -83,7 +86,7 @@ const EnvironmentVariables = () => {
             showResetTokenButton={!!tenderlyToken}
           />
 
-          <Button type="submit" className="mt-4">
+          <Button type="submit" className="mt-8">
             Save
           </Button>
         </form>

@@ -7,6 +7,7 @@ import {
   isEnvInitialState,
   initialState,
   selectCuratedNestedSafes,
+  selectHasOwnTenderly,
   selectHasCompletedCuration,
   selectCuratedAddresses,
   selectAllCuratedNestedSafes,
@@ -163,6 +164,48 @@ describe('settingsSlice', () => {
       } as unknown as RootState
 
       expect(isEnvInitialState(state, '5')).toEqual(false)
+    })
+  })
+
+  describe('selectHasOwnTenderly', () => {
+    const stateWithTenderly = (tenderly: { url: string; accessToken: string }): RootState =>
+      ({
+        settings: {
+          env: {
+            rpc: {},
+            tenderly,
+          },
+        },
+      }) as unknown as RootState
+
+    it('should return true when both the URL and the access token are set', () => {
+      expect(
+        selectHasOwnTenderly(
+          stateWithTenderly({
+            url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+            accessToken: 'test123',
+          }),
+        ),
+      ).toBe(true)
+    })
+
+    it('should return false when neither is set', () => {
+      expect(selectHasOwnTenderly(stateWithTenderly({ url: '', accessToken: '' }))).toBe(false)
+    })
+
+    it('should return false when the URL is set without an access token', () => {
+      expect(
+        selectHasOwnTenderly(
+          stateWithTenderly({
+            url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+            accessToken: '',
+          }),
+        ),
+      ).toBe(false)
+    })
+
+    it('should return false when the access token is set without a URL', () => {
+      expect(selectHasOwnTenderly(stateWithTenderly({ url: '', accessToken: 'test123' }))).toBe(false)
     })
   })
 
