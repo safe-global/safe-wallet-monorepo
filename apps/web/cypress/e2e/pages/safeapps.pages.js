@@ -102,6 +102,8 @@ export const failedStr = 'Failed'
 const blindSigningStr = 'This request involves blind signing'
 const enableBlindSigningStr = 'Enable blind signing'
 const blindSigningStr2 = 'blind signing'
+const blindSigningAllowedStr = 'Proceed with caution.'
+const blindSigningBlockedStr = 'If you wish to proceed, you must first'
 const signBtnStr = 'Sign'
 
 export const dummyTxStr = 'Trigger dummy tx (safe.txs.send)'
@@ -170,12 +172,10 @@ export function triggetOffChainTx() {
   cy.contains(dummyTxStr).click()
 }
 
-export function verifyBlindSigningEnabled(option) {
-  if (option) {
-    cy.contains(blindSigningStr).should('be.visible')
-  } else {
-    cy.contains(blindSigningStr).should('not.exist')
-  }
+// The warning shows in both states: blocking while the setting is off, a caution once it is on
+export function verifyBlindSigningWarning(settingEnabled) {
+  cy.contains(blindSigningStr).should('be.visible')
+  cy.contains(settingEnabled ? blindSigningAllowedStr : blindSigningBlockedStr).should('be.visible')
 }
 
 export function clickOnBlindSigningOption() {
@@ -183,7 +183,9 @@ export function clickOnBlindSigningOption() {
   // Navigating away from the open message flow asks to discard it. This used to be a
   // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
   cy.contains('button', 'Discard').click()
-  cy.contains(enableBlindSigningStr).click()
+  cy.contains('label', enableBlindSigningStr).parent().find('[role="checkbox"]').as('blindSigning')
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'false').click()
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'true')
 }
 
 export function triggetSignMsg() {
