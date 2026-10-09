@@ -5,6 +5,7 @@ import { registerArgosTask } from '@argos-ci/cypress/task'
 import { version } from './src/markdown/terms/version.js'
 import { cypressEnvironment, exposedValues } from './e2e/environment/cypress.mjs'
 import { isolatedSpecs } from './e2e/environment/specs.mjs'
+import { esbuildPreprocessor } from './cypress/plugins/esbuild-preprocessor.js'
 
 function setupArgosPlugin(on, config) {
   registerArgosTask(on, config, {
@@ -86,6 +87,7 @@ export default defineConfig({
     async setupNodeEvents(on, config) {
       let scenarioFixtures
 
+      on('file:preprocessor', esbuildPreprocessor)
       setupArgosPlugin(on, config)
       setupHeadlessViewport(on, config.env.SAFE_E2E_ISOLATED)
 
