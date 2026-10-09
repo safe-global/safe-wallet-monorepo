@@ -10,4 +10,4 @@
 import '../src/styles/shadcn.css'
 import './shadcn-stories.css'
 
-export { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+export { ShadcnProvider } from '@safe-global/design/components/ui/ShadcnProvider'

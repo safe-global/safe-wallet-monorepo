@@ -13,7 +13,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import {
   RENEWAL_MESSAGE,
   RENEWAL_NOTIFICATION_KEY,
-} from '@safe-global/views/components/settings/PushNotifications/constants'
+} from '@safe-global/design/components/settings/PushNotifications/constants'
 
 const { V1, V2 } = NotificationsTokenVersion
 

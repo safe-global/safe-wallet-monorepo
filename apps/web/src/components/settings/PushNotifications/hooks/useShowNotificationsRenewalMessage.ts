@@ -11,7 +11,7 @@ import { NotificationsTokenVersion } from '@/services/push-notifications/prefere
 import {
   RENEWAL_MESSAGE,
   RENEWAL_NOTIFICATION_KEY,
-} from '@safe-global/views/components/settings/PushNotifications/constants'
+} from '@safe-global/design/components/settings/PushNotifications/constants'
 
 /**
  * Hook to show a notification to renew the notifications token if needed.

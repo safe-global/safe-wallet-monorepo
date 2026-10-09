@@ -7,9 +7,9 @@ import {
   FieldDescription,
   FieldError as FieldErrorText,
   FieldLabel,
-} from '@safe-global/views/components/ui/field'
-import { Input } from '@safe-global/views/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views/components/ui/input-group'
+} from '@safe-global/design/components/ui/field'
+import { Input } from '@safe-global/design/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/design/components/ui/input-group'
 
 type NameInputProps = {
   name: string

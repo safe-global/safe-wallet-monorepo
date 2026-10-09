@@ -6,12 +6,12 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
-import { WidgetCard } from '@safe-global/views/components/dashboard/styled'
+} from '@safe-global/design/components/ui/accordion'
+import { Separator } from '@safe-global/design/components/ui/separator'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
+import { WidgetCard } from '@safe-global/design/components/dashboard/styled'
 import css from './styles.module.css'
 import PositionsHeader from '../PositionsHeader'
 import { PositionGroup } from '../PositionGroup'

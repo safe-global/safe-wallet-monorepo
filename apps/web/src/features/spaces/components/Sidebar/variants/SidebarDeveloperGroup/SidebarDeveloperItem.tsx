@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import type {
   ResolvedSidebarActionItem,
   SidebarDeveloperItemConfig,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 import { getSidebarActionItemTestId } from '../../utils'
 import { NavItem } from '../NavItem'
 

@@ -2,8 +2,8 @@ import { memo, type CSSProperties, type ReactElement, useContext, useMemo, useSt
 import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import {
   Combobox,
   ComboboxCollection,
@@ -13,9 +13,9 @@ import {
   ComboboxItem,
   ComboboxLabel,
   ComboboxList,
-} from '@safe-global/views/components/ui/combobox'
-import { InputGroupAddon, InputGroupButton } from '@safe-global/views/components/ui/input-group'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+} from '@safe-global/design/components/ui/combobox'
+import { InputGroupAddon, InputGroupButton } from '@safe-global/design/components/ui/input-group'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { _formatNumber } from '@/components/common/NumberField'

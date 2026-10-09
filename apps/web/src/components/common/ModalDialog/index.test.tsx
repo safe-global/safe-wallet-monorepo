@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import ModalDialog from './index'
 
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({
+jest.mock('@safe-global/design/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 

@@ -2,9 +2,9 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { useState, type ReactElement } from 'react'
 import { Circle as CircleOutlinedIcon } from 'lucide-react'
 
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Link } from '@safe-global/views/components/ui/link'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Link } from '@safe-global/design/components/ui/link'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import DotIcon from '@/public/images/messages/dot.svg'

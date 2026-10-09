@@ -1,15 +1,15 @@
 import { createPortal } from 'react-dom'
 import { DragDropContext, Draggable, Droppable, type DropResult } from '@hello-pangea/dnd'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import { reorderByKey } from '@/utils/reorder'
-import DragHandle from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/DragHandle'
+import DragHandle from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/components/DragHandle'
 import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import type {
   SafeItemData,
   SafeRenameTarget,
-} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+} from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/types'
 
 interface ReorderableSafeListProps {
   items: SafeItemData[]

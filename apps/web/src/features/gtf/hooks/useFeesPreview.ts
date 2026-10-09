@@ -26,10 +26,10 @@ import {
   type TotalOutgoing,
   type TotalOutgoingLine,
 } from '../services/totalOutgoing'
-import type { FeeRow } from '@safe-global/views/features/gtf/types'
+import type { FeeRow } from '@safe-global/design/features/gtf/types'
 
 export type { TotalOutgoing, TotalOutgoingLine }
-export type { FeeRow } from '@safe-global/views/features/gtf/types'
+export type { FeeRow } from '@safe-global/design/features/gtf/types'
 
 export type FeesPreviewData = {
   canCoverFees: boolean

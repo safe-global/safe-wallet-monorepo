@@ -1,10 +1,10 @@
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Alert, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Alert, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
 
-import SpendingLimitLabel from '@safe-global/views/components/common/SpendingLimitLabel'
+import SpendingLimitLabel from '@safe-global/design/components/common/SpendingLimitLabel'
 import { getResetTimeOptions } from '../../constants'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import useBalances from '@/hooks/useBalances'

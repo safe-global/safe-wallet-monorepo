@@ -7,7 +7,7 @@ on:
   pull_request:
     paths:
       - apps/web/**
-      - packages/views/**
+      - packages/design/**
       - .github/workflows/web-storybook-tests.yml
       - yarn.lock
       - package.json
@@ -19,7 +19,7 @@ on:
       - main
     paths:
       - apps/web/**
-      - packages/views/**
+      - packages/design/**
       - .github/workflows/web-storybook-tests.yml
       - yarn.lock
       - package.json

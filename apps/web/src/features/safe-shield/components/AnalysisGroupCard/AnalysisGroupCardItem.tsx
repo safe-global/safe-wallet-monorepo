@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link } from '@safe-global/views/components/ui/link'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Link } from '@safe-global/design/components/ui/link'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import type { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   type AnalysisResult,
@@ -10,10 +10,10 @@ import {
 import { isAddressChange } from '@safe-global/utils/features/safe-shield/utils'
 import { SEVERITY_COLORS } from '../../constants'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
-import { AddressChanges } from '@safe-global/views/features/safe-shield/components/AddressChanges'
+import { AddressChanges } from '@safe-global/design/features/safe-shield/components/AddressChanges'
 import { ShowAllAddress } from '../ShowAllAddress/ShowAllAddress'
 import { ReportFalseResultModal } from '../ReportFalseResultModal'
-import { AnalysisDetailsDropdown } from '@safe-global/views/features/safe-shield/components/AnalysisDetailsDropdown'
+import { AnalysisDetailsDropdown } from '@safe-global/design/features/safe-shield/components/AnalysisDetailsDropdown'
 
 interface AnalysisGroupCardItemProps {
   result: AnalysisResult

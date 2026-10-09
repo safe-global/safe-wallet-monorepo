@@ -4,10 +4,10 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '@safe-global/views/components/ui/accordion'
-import { Chip } from '@safe-global/views/components/ui/chip'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Chip } from '@safe-global/design/components/ui/chip'
+import { Separator } from '@safe-global/design/components/ui/separator'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import PendingDelegation from './PendingDelegation'
 import DelegationErrorBoundary from './DelegationErrorBoundary'
 import { usePendingDelegations } from '../hooks/usePendingDelegations'

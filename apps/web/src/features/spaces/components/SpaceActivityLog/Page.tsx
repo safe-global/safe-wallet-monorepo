@@ -1,6 +1,6 @@
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import AuthState from '../AuthState'
 import SpaceActivityLog from './index'
 

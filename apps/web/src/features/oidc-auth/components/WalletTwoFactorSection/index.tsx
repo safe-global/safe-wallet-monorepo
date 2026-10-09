@@ -1,7 +1,7 @@
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Badge, BadgeDot } from '@safe-global/design/components/ui/badge'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 
 /**

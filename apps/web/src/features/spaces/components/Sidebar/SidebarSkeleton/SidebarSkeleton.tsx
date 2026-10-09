@@ -8,7 +8,7 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-} from '@safe-global/views/components/ui/sidebar'
+} from '@safe-global/design/components/ui/sidebar'
 import { SidebarTopBar } from '../SidebarTopBar'
 import css from '../styles.module.css'
 

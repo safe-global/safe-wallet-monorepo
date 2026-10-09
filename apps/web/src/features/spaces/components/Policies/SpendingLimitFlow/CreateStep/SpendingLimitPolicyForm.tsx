@@ -1,25 +1,25 @@
 import { useEffect, useRef, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form'
-import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import { Button } from '@safe-global/views/components/ui/button'
-import type { SafeAccountEntry } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import TxCard, { TxCardActions } from '@safe-global/design/components/tx-flow/common/TxCard'
+import { Button } from '@safe-global/design/components/ui/button'
+import type { SafeAccountEntry } from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from '../../SafeAccountSelector/utils'
-import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import PendingRemovalsCard from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
+import { useIsEditMode } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import PendingRemovalsCard from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/PendingRemovalsCard'
 import { useEditState } from '../EditFlow/useEditState'
 import SafeAccountField from './SafeAccountField'
-import SpenderCallout from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
+import SpenderCallout from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/CreateStep/SpenderCallout'
 import SpenderCard from './SpenderCard'
 import {
   createDefaultFormValues,
   createEmptySpender,
   type SpendingLimitPolicyFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   ADD_SPENDER_LABEL,
   NEXT_LABEL,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export type SpendingLimitPolicyFormProps = {
   defaultValues: SpendingLimitPolicyFormValues

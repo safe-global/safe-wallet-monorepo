@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { Controller, type Control } from 'react-hook-form'
-import { Checkbox } from '@safe-global/views/components/ui/checkbox'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Checkbox } from '@safe-global/design/components/ui/checkbox'
+import { Label } from '@safe-global/design/components/ui/label'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 
 type CookieFormData = {

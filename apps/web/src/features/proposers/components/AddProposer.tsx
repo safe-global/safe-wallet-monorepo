@@ -33,12 +33,18 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import { XIcon } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@safe-global/views/components/ui/dialog'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@safe-global/design/components/ui/dialog'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Separator } from '@safe-global/design/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
   type CreateDelegateDto,
@@ -48,8 +54,8 @@ import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SignerSelector from '@/components/common/SignerSelector'
-import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
-import SignatureIcon from '@safe-global/views/assets/images/transactions/signature.svg'
+import InfoIcon from '@safe-global/design/assets/images/notifications/info.svg'
+import SignatureIcon from '@safe-global/design/assets/images/transactions/signature.svg'
 
 type AddProposerProps = {
   onClose: () => void

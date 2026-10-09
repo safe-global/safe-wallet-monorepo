@@ -2,9 +2,9 @@ import { useMemo } from 'react'
 import { useFilteredNestedSafes, type NestedSafeValidation } from './useFilteredNestedSafes'
 import { useCuratedNestedSafes } from './useCuratedNestedSafes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { NestedSafeWithStatus } from '@safe-global/views/components/nested-safes/NestedSafesPopover/types'
+import type { NestedSafeWithStatus } from '@safe-global/design/components/nested-safes/NestedSafesPopover/types'
 
-export type { NestedSafeWithStatus } from '@safe-global/views/components/nested-safes/NestedSafesPopover/types'
+export type { NestedSafeWithStatus } from '@safe-global/design/components/nested-safes/NestedSafesPopover/types'
 
 type UseNestedSafesVisibilityResult = {
   /** All safes with their validation status */

@@ -1,8 +1,8 @@
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import type { ReactElement } from 'react'
 
-import NestedSafesIllustration from '@safe-global/views/assets/images/sidebar/nested-safes.svg'
+import NestedSafesIllustration from '@safe-global/design/assets/images/sidebar/nested-safes.svg'
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 

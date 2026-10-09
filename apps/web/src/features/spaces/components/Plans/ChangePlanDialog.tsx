@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/design/components/ui/dialog'
+import { Separator } from '@safe-global/design/components/ui/separator'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Spinner } from '@safe-global/design/components/ui/spinner'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
@@ -20,14 +20,14 @@ import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import {
   removedSafesNote,
   summarizeRemovedSafes,
-} from '@safe-global/views/features/spaces/components/Plans/removedSafes'
+} from '@safe-global/design/features/spaces/components/Plans/removedSafes'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
 import type {
   CurrentPlan,
   PlanChangeDirection,
   PlanPick,
   SafeRef,
-} from '@safe-global/views/features/spaces/components/Plans/types'
+} from '@safe-global/design/features/spaces/components/Plans/types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())

@@ -1,12 +1,12 @@
 import { shortenText } from '@safe-global/utils/utils/formatters'
-import { Link } from '@safe-global/views/components/ui/link'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Link } from '@safe-global/design/components/ui/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import type { ReactElement, SyntheticEvent } from 'react'
 import { Fragment, useState } from 'react'
 import css from './styles.module.css'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import CopyButton from '@/components/common/CopyButton'
-import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/design/components/tx/FieldsGrid'
 
 interface Props {
   hexData: string

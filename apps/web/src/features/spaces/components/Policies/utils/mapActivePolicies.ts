@@ -9,7 +9,7 @@ import type {
   PolicyAllowance,
   ProposerPolicy,
   SpendingLimitPolicy,
-} from '@safe-global/views/features/spaces/components/Policies/types'
+} from '@safe-global/design/features/spaces/components/Policies/types'
 import { toPolicyToken } from './toPolicyToken'
 
 const toAllowance = (allowance: SpendingLimitAllowanceDto): PolicyAllowance => {

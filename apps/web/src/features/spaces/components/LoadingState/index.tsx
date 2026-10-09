@@ -1,5 +1,5 @@
-import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { cn } from '@safe-global/views/utils/cn'
+import { Spinner } from '@safe-global/design/components/ui/spinner'
+import { cn } from '@safe-global/design/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 const LoadingState = () => {

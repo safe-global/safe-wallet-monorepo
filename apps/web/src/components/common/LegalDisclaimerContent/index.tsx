@@ -1,6 +1,6 @@
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { TERMS_URL } from '@safe-global/utils/config/constants'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { type ReactElement } from 'react'
 import css from './styles.module.css'
 

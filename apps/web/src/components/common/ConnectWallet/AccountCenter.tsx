@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/design/components/ui/popover'
 import css from '@/components/common/ConnectWallet/styles.module.css'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'

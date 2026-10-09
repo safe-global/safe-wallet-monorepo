@@ -5,10 +5,10 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useAddNetworkState, type AddNetworkUnavailableReason } from '@/features/multichain'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import ChainLogo from './ChainLogo'

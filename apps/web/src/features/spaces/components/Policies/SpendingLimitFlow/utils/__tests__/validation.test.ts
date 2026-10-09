@@ -5,7 +5,7 @@ import {
   DUPLICATE_SPENDER_ERROR,
   DUPLICATE_TOKEN_ERROR,
   EXISTING_LIMIT_ERROR,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
   existingTokensForSpender,
   validateLimitAmount,

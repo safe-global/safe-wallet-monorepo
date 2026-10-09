@@ -1,13 +1,13 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Link } from '@safe-global/views/components/ui/link'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Link } from '@safe-global/design/components/ui/link'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
+} from '@safe-global/design/components/ui/accordion'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -25,11 +25,11 @@ import CopyButton from '@/components/common/CopyButton'
 import MsgSigners from '@/components/safe-messages/MsgSigners'
 import useDecodedSafeMessage from '@/hooks/messages/useDecodedSafeMessage'
 import useSyncSafeMessageSigner from '@/hooks/messages/useSyncSafeMessageSigner'
-import SuccessMessage from '@safe-global/views/components/tx/SuccessMessage'
+import SuccessMessage from '@safe-global/design/components/tx/SuccessMessage'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
-import InfoBox from '@safe-global/views/components/safe-messages/InfoBox'
+import InfoBox from '@safe-global/design/components/safe-messages/InfoBox'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
-import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@safe-global/design/components/tx-flow/common/TxCard'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'

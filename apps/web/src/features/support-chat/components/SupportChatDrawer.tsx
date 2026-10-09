@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { overlayVariants } from '@safe-global/views/components/ui/overlay'
-import { cn } from '@safe-global/views/utils/cn'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Spinner } from '@safe-global/design/components/ui/spinner'
+import { overlayVariants } from '@safe-global/design/components/ui/overlay'
+import { cn } from '@safe-global/design/utils/cn'
 
 // Types
 type ChatStatus = 'idle' | 'waiting' | 'config-sent' | 'ready' | 'error'

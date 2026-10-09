@@ -6,7 +6,7 @@ import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
   SpaceItem,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 
 jest.mock('../../SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
@@ -16,7 +16,7 @@ jest.mock('../../SidebarDeveloperGroup', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
@@ -24,7 +24,7 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   TooltipContent: () => null,
 }))
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design/components/ui/sidebar', () => ({
   useSidebar: () => ({ state: 'expanded', isMobile: false }),
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,

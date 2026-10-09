@@ -6,7 +6,7 @@ const MODULES = {
   ModalDialog: join(__dirname, 'styles.module.css'),
   TxModalDialog: join(
     __dirname,
-    '../../../../../../packages/views/src/components/common/TxModalDialog/styles.module.css',
+    '../../../../../../packages/design/src/components/common/TxModalDialog/styles.module.css',
   ),
 }
 

@@ -6,14 +6,14 @@ import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@safe-global/design/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import EditMemberDialog from '../../MembersList/EditMemberDialog'
 
 const AccountPage = () => {

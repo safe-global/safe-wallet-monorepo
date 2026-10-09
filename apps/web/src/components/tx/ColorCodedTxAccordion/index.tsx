@@ -7,13 +7,13 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { Card } from '@safe-global/views/components/ui/card'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { Card } from '@safe-global/design/components/ui/card'
+import { Separator } from '@safe-global/design/components/ui/separator'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'

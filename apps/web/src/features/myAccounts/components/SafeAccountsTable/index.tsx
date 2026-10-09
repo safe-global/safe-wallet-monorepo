@@ -7,15 +7,15 @@ import {
   TableRow,
   TableSortIcon,
   tableVariants,
-} from '@safe-global/views/components/ui/table'
+} from '@safe-global/design/components/ui/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import {
   SAFE_ACCOUNT_COLUMNS,
   SELECT_COLUMN,
   type SafeAccountColumnId,
-} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+} from '@safe-global/design/features/myAccounts/components/SafeAccountsTable/columns'
 import {
   compareGroups,
   getContextMenuChainIds,
@@ -28,7 +28,7 @@ import {
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
-import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
+import { orderGroupsBySimilarity } from '@safe-global/design/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'

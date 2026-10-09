@@ -71,7 +71,7 @@ jobs:
           # only checks `.tsx?` extensions, which matches the repo (TS-only
           # stories); keep these two lists in sync.
           ALL_CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-            | grep -E '^(apps/web|packages/views)/src/.*\.tsx?$' \
+            | grep -E '^(apps/web|packages/design)/src/.*\.tsx?$' \
             | grep -v '\.test\.' || true)
 
           STORY_FILES=""

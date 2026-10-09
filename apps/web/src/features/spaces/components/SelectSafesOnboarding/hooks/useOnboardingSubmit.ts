@@ -32,8 +32,8 @@ import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import {
   getSafeId,
   getMultiChainSafeId,
-} from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
+} from '@safe-global/design/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/design/features/spaces/components/SelectSafesOnboarding/constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'

@@ -1,21 +1,21 @@
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
-import { SelectItem } from '@safe-global/views/components/ui/select'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
-import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
-import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
-import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
+import { SelectItem } from '@safe-global/design/components/ui/select'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import NotActivatedBadge from '@safe-global/design/components/common/NotActivatedBadge'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
+import { INELIGIBILITY_TEXT } from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/constants'
+import BalanceDisplay from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
-import type { SafeItemDataChain } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemDataChain } from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/types'
 import SafeIdentity from './SafeIdentity'
 import type {
   SafeAccountIneligibility,
   SafeAccountOption,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const ROW_CLASS = [
   'rounded-lg px-3 py-2.5',

@@ -3,8 +3,8 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '@safe-global/views/components/ui/accordion'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 import Question from '@/public/images/common/question.svg'

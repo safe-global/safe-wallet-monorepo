@@ -1,7 +1,7 @@
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useCallback, useEffect } from 'react'
 
 const SAMPLE_DAPPS = [

@@ -7,7 +7,7 @@ import type {
   PlanPick,
   PlanSummary,
   PlanTier,
-} from '@safe-global/views/features/spaces/components/Plans/types'
+} from '@safe-global/design/features/spaces/components/Plans/types'
 
 export default function Plans({
   plan,

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import TableCard from '@safe-global/views/components/common/TableCard'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import TableCard from '@safe-global/design/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -15,9 +15,9 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
-import { Badge } from '@safe-global/views/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/design/components/ui/tabs'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design/components/ui/tooltip'
+import { Badge } from '@safe-global/design/components/ui/badge'
 import { Check } from 'lucide-react'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'

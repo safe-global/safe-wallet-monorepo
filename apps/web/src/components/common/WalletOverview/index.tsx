@@ -1,10 +1,10 @@
 import Identicon from '@/components/common/Identicon'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { Suspense } from 'react'
 import type { ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import WalletIcon from '@safe-global/views/components/common/WalletIcon'
+import WalletIcon from '@safe-global/design/components/common/WalletIcon'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { useChain } from '@/hooks/useChains'
 import { useWalletName } from '@/hooks/wallets/useWalletName'

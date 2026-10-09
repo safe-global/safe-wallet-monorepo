@@ -4,18 +4,18 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
+} from '@safe-global/design/components/ui/accordion'
 import TxListAccordionItem, {
   TX_LIST_ITEM_VALUE,
-} from '@safe-global/views/components/transactions/TxListItem/TxListAccordionItem'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+} from '@safe-global/design/components/transactions/TxListItem/TxListAccordionItem'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
 import TxSummary from '@/components/transactions/TxSummary'
 import TxDetails from '@/components/transactions/TxDetails'
 import CreateTxInfo from '@/components/transactions/SafeCreationTx'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
 import { useContext, useState } from 'react'
-import { BatchExecuteHoverContext } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
-import css from '@safe-global/views/components/transactions/TxListItem/styles.module.css'
+import { BatchExecuteHoverContext } from '@safe-global/design/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
+import css from '@safe-global/design/components/transactions/TxListItem/styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 

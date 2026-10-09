@@ -22,7 +22,7 @@ import {
   queueSettingsChange,
   queueSwapBuyOrder,
   queueSwapSellOrder,
-} from '@safe-global/views/components/transactions/TxSummary/TxSummary.fixtures'
+} from '@safe-global/design/components/transactions/TxSummary/TxSummary.fixtures'
 
 /**
  * TxSummary's grid switches on CSS **container** queries (680px and 380px), not the viewport, so a

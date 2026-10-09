@@ -1,17 +1,17 @@
 import { ChevronRight } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/design/components/common/PaginatedDataTable'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import PolicyRule from '@safe-global/design/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
-import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
+import PolicyStatusChip from '@safe-global/design/features/spaces/components/Policies/components/PolicyStatusChip'
+import { getPolicyLabel } from '@safe-global/design/features/spaces/components/Policies/utils/policyLabel'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
@@ -19,7 +19,7 @@ import {
   getPolicyStatus,
   isProposerPolicy,
   type Policy,
-} from '@safe-global/views/features/spaces/components/Policies/types'
+} from '@safe-global/design/features/spaces/components/Policies/types'
 
 export type PoliciesTableProps = {
   policies: Policy[]

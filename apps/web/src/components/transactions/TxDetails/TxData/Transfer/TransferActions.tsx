@@ -1,13 +1,13 @@
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement, useContext, useState } from 'react'
 import { Ellipsis } from 'lucide-react'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '@safe-global/design/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
+} from '@safe-global/design/components/ui/dropdown-menu'
 import useAddressBook from '@/hooks/useAddressBook'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'

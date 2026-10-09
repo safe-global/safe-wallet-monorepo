@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
-import SubmitButton from '@safe-global/views/components/common/SubmitButton'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import SubmitButton from '@safe-global/design/components/common/SubmitButton'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import ArrowIcon from '@/public/images/common/arrow-up-right.svg'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
-import { Sticky } from '@safe-global/views/components/common/Sticky'
+import { Sticky } from '@safe-global/design/components/common/Sticky'
 import CheckWallet from '@/components/common/CheckWallet'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 

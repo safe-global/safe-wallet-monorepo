@@ -5,7 +5,7 @@ import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'
-import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import InfoIcon from '@safe-global/design/assets/images/notifications/info.svg'
 import { TokenType } from '@safe-global/store/gateway/types'
 import {
   Combobox,
@@ -13,10 +13,10 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@safe-global/views/components/ui/combobox'
-import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { cn } from '@safe-global/views/utils/cn'
+} from '@safe-global/design/components/ui/combobox'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/design/components/ui/field'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import { cn } from '@safe-global/design/utils/cn'
 
 export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: ApprovalInfo; readOnly: boolean }) => {
   const { control } = useFormContext()

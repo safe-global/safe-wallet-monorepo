@@ -3,13 +3,13 @@ import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import {
   getNestedSafesNoticeText,
   SAFE_ACCOUNT_SELECTOR_LABEL,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SafeAccountOption } from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/types'
 import SafeAccountField from '../SafeAccountField'
 
 jest.mock('@/components/common/ChainIndicator', () => {

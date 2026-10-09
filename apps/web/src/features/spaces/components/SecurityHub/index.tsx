@@ -1,9 +1,9 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import SecurityHubContent from './SecurityHubContent'
@@ -14,7 +14,7 @@ export type {
   SelectedSafe,
   SpaceSafeEntry,
   ChainEntry,
-} from '@safe-global/views/features/spaces/components/SecurityHub/types'
+} from '@safe-global/design/features/spaces/components/SecurityHub/types'
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).

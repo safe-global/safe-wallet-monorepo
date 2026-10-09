@@ -6,7 +6,7 @@ import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type {
   SidebarItemConfig,
   SidebarVariantContentProps,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'

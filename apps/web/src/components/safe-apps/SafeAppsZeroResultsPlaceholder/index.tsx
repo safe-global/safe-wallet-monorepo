@@ -1,5 +1,5 @@
-import { Typography } from '@safe-global/views/components/ui/typography'
-import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import PagePlaceholder from '@safe-global/design/components/common/PagePlaceholder'
 import AddCustomAppIcon from '@/public/images/apps/add-custom-app.svg'
 import { BRAND_NAME } from '@/config/constants'
 

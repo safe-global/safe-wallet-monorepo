@@ -1,9 +1,9 @@
 import css from '../Dashboard/styles.module.css'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 const UnauthorizedState = () => {

@@ -1,13 +1,13 @@
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOnChainSigning, setOnChainSigning } from '@/store/settingsSlice'
-import { Checkbox } from '@safe-global/views/components/ui/checkbox'
-import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Checkbox } from '@safe-global/design/components/ui/checkbox'
+import { Field, FieldLabel } from '@safe-global/design/components/ui/field'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
+import SettingsCard from '@safe-global/design/components/settings/SettingsCard'
 
 export const SafeAppsSigningMethod = () => {
   const onChainSigning = useAppSelector(selectOnChainSigning)

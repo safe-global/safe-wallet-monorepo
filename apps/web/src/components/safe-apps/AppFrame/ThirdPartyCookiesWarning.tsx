@@ -1,8 +1,8 @@
 import React from 'react'
 import { X } from 'lucide-react'
-import { Alert, AlertTitle, AlertAction, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { Button } from '@safe-global/views/components/ui/button'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Alert, AlertTitle, AlertAction, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
+import { Button } from '@safe-global/design/components/ui/button'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 

@@ -1,9 +1,9 @@
 import { RotateCw } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
-import { SearchInput } from '@safe-global/views/components/ui/search-input'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Button } from '@safe-global/views/components/ui/button'
+import { SelectContent, SelectItem } from '@safe-global/design/components/ui/select'
+import { SearchInput } from '@safe-global/design/components/ui/search-input'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Button } from '@safe-global/design/components/ui/button'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import { useBottomScrollFade } from '@/hooks/useBottomScrollFade'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -11,12 +11,12 @@ import SafeItem from './SafeItem'
 import MultiChainSafeItemRow from './MultiChainSafeItemRow'
 import ReorderableSafeList from './ReorderableSafeList'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
-import { cn } from '@safe-global/views/utils/cn'
-import { matchesSafeSearch } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils'
+import { cn } from '@safe-global/design/utils/cn'
+import { matchesSafeSearch } from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/utils'
 import type {
   SafeItemData,
   SafeRenameTarget,
-} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+} from '@safe-global/design/features/spaces/components/SafeSelectorDropdown/types'
 
 export interface SafeDropdownContainerProps {
   items: SafeItemData[]

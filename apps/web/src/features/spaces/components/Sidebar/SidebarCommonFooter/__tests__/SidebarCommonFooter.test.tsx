@@ -34,7 +34,7 @@ jest.mock('@/components/common/HelpMenu', () => ({
 }))
 
 // Mock sidebar UI components
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design/components/ui/sidebar', () => ({
   SidebarFooter: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
@@ -63,7 +63,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
     children,
@@ -77,7 +77,7 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   TooltipContent: ({ children }: { children: ReactNode }) => <div role="tooltip">{children}</div>,
 }))
 
-jest.mock('@safe-global/views/components/ui/switch', () => ({
+jest.mock('@safe-global/design/components/ui/switch', () => ({
   Switch: ({
     id,
     checked,
@@ -97,7 +97,7 @@ jest.mock('@safe-global/views/components/ui/switch', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/field', () => ({
+jest.mock('@safe-global/design/components/ui/field', () => ({
   Field: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   FieldLabel: ({ children, htmlFor }: { children: ReactNode; htmlFor: string }) => (
     <label htmlFor={htmlFor}>{children}</label>

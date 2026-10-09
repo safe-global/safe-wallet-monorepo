@@ -1,16 +1,16 @@
 import type { ReactElement, ReactNode } from 'react'
 import NextLink from 'next/link'
-import type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
+import type { AccountIdentityProps } from '@safe-global/design/features/spaces/components/Policies/components/AccountIdentity/types'
 import { blo } from 'blo'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getInitials, getSafeDisplayInfo, TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
 import CopyAddressButton from '@/components/common/CopyAddressButton'
-import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/design/components/ui/avatar'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import { Typography } from '@safe-global/design/components/ui/typography'
 
-export type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
+export type { AccountIdentityProps } from '@safe-global/design/features/spaces/components/Policies/components/AccountIdentity/types'
 
 const AccountIdentity = ({ address, name, showCopyButton, href }: AccountIdentityProps): ReactElement => {
   const { displayName, shortAddress } = getSafeDisplayInfo(name ?? '', address)

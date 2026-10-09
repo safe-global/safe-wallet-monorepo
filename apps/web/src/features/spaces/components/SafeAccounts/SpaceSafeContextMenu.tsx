@@ -3,15 +3,15 @@ import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import RemoveSafeDialog from './RemoveSafeDialog'
 import { type MouseEvent, useState } from 'react'
 import { LogOut, MoreVertical, Pencil } from 'lucide-react'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '@safe-global/design/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
+} from '@safe-global/design/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { trackEvent } from '@/services/analytics'
 import { useAddressBookWriteScope, useIsAdmin } from '@/features/spaces'

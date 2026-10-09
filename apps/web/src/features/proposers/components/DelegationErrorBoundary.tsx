@@ -1,6 +1,6 @@
 import { Component, type ReactElement, type ReactNode } from 'react'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
 
 type DelegationErrorBoundaryProps = {
   children: ReactNode

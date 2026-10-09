@@ -8,7 +8,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   TokenTransferType,
   type MultiTokenTransferParams,
-} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+} from '@safe-global/design/components/tx-flow/flows/TokenTransfer/types'
 
 const USDC_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 

@@ -7,7 +7,7 @@ import type {
   ResolvedSidebarItem,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
@@ -93,7 +93,7 @@ jest.mock('../../NavItem', () => ({
     ) : null,
 }))
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -131,13 +131,13 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   TooltipContent: () => null,
 }))
 
-jest.mock('@safe-global/views/components/ui/avatar', () => ({
+jest.mock('@safe-global/design/components/ui/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

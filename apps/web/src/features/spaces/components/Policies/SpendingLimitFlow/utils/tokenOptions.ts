@@ -4,7 +4,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TokensGetTokensV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
-import type { TokenOption } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import type { TokenOption } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type TokenMetadata = TokensGetTokensV1ApiResponse[number]
 
@@ -27,7 +27,7 @@ export const toPopularToken = (token: TokenMetadata): PopularToken => ({
 export type {
   TokenOption,
   TokenOptionGroup,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type NativeCurrencyInfo = {
   symbol: string

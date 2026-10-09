@@ -9,11 +9,11 @@ import {
   DialogTitle,
   DialogDescription,
   DialogClose,
-} from '@safe-global/views/components/ui/dialog'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Button } from '@safe-global/views/components/ui/button'
+} from '@safe-global/design/components/ui/dialog'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
 import Identicon from '@/components/common/Identicon'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import css from './styles.module.css'
 
 const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/collections/1628654831-workspace?lang=en'

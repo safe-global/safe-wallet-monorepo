@@ -1,1 +1,1 @@
-export type { GtfPaymentMode } from '@safe-global/views/features/gtf/types'
+export type { GtfPaymentMode } from '@safe-global/design/features/gtf/types'

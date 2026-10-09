@@ -1,10 +1,10 @@
 import { useCallback } from 'react'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { Controller, useForm } from 'react-hook-form'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Field } from '@safe-global/views/components/ui/field'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views/components/ui/input-group'
-import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Field } from '@safe-global/design/components/ui/field'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/design/components/ui/input-group'
+import TxSectionTitle from '@safe-global/design/components/tx-flow/common/TxSectionTitle'
 
 const MAX_NOTE_LENGTH = 60
 

@@ -25,10 +25,10 @@
     "cypress:ci": "cross-env TZ=UTC yarn cypress:run --config baseUrl=http://localhost:3001 --spec cypress/e2e/smoke/*.cy.js"
   },
   "dependencies": {
+    "@safe-global/design": "workspace:*",
     "@safe-global/store": "workspace:*",
     "@safe-global/theme": "workspace:*",
     "@safe-global/utils": "workspace:*",
-    "@safe-global/views": "workspace:*",
     "@safe-global/web": "workspace:*",
     "@tanstack/react-router": "1.159.4",
     "firebase": "11.1.0",

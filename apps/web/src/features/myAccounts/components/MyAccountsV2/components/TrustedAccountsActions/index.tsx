@@ -1,8 +1,8 @@
 import { Settings2 } from 'lucide-react'
 import AddAccountsChooser from '@/components/common/AddAccountsChooser'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '@safe-global/design/components/ui/button'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 /**
  * Action buttons on the trusted-accounts panel: open the "Add accounts" chooser

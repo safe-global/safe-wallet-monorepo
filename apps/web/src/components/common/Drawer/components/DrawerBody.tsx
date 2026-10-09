@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import { SCROLL_AREA } from '@/utils/styles'
 import css from './DrawerBody.module.css'
 

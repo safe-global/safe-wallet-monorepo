@@ -6,7 +6,7 @@ import {
   ADD_POLICY_OPTIONS,
   RECOVERY_POLICY_OPTION,
   type AddPolicyOption,
-} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
+} from '@safe-global/design/features/spaces/components/Policies/AddPolicyDialog/options'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

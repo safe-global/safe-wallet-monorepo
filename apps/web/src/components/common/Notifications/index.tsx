@@ -10,16 +10,16 @@ import {
   AlertDescription,
   AlertTitle,
   AlertSeverityIcon,
-} from '@safe-global/views/components/ui/alert'
-import { Link } from '@safe-global/views/components/ui/link'
-import { Button } from '@safe-global/views/components/ui/button'
+} from '@safe-global/design/components/ui/alert'
+import { Link } from '@safe-global/design/components/ui/link'
+import { Button } from '@safe-global/design/components/ui/button'
 import css from './styles.module.css'
 import NextLink from 'next/link'
 import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
 

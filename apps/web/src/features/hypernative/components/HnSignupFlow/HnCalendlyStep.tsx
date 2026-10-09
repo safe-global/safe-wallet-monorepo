@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from 'react'
-import HnSignupLayout from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnSignupLayout'
+import HnSignupLayout from '@safe-global/design/features/hypernative/components/HnSignupFlow/HnSignupLayout'
 import { useCalendly } from '../../hooks/useCalendly'
-import css from '@safe-global/views/features/hypernative/components/HnSignupFlow/styles.module.css'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Button } from '@safe-global/views/components/ui/button'
+import css from '@safe-global/design/features/hypernative/components/HnSignupFlow/styles.module.css'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Button } from '@safe-global/design/components/ui/button'
 import { RotateCw, ExternalLink as OpenInNewIcon } from 'lucide-react'
 
 export type HnCalendlyStepProps = {

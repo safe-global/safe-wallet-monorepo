@@ -3,17 +3,17 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import PositionsHeader from './components/PositionsHeader'
 import { PositionGroup } from './components/PositionGroup'
 import usePositions from './hooks/usePositions'
 import PositionsEmpty from './components/PositionsEmpty'
 import usePositionsFiatTotal from './hooks/usePositionsFiatTotal'
 import React from 'react'
-import PositionsUnavailable from '@safe-global/views/features/positions/components/PositionsUnavailable'
+import PositionsUnavailable from '@safe-global/design/features/positions/components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
-import PositionsSkeleton from '@safe-global/views/features/positions/components/PositionsSkeleton'
+import PositionsSkeleton from '@safe-global/design/features/positions/components/PositionsSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__'
 
