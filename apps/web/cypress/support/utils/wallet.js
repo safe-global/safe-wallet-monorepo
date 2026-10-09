@@ -70,11 +70,11 @@ export function connectSigner(signer) {
  * Two modes:
  * - With `url`: seeds in onBeforeLoad and visits (single load, fastest). Use to replace an adjacent
  *   `cy.visit(url)` + `connectSigner(signer)`.
- * - Without `url`: seeds the already-loaded window and reloads. Use when the visit happened earlier
+ * - Without `url`: visits the current URL again, seeded the same way. Use when the visit happened earlier
  *   (e.g. in beforeEach) and only the connect is in the test body.
  *
  * @param {string} signer - Private key of the signer to connect.
- * @param {string} [url] - URL to visit; omit to seed the current window and reload.
+ * @param {string} [url] - URL to visit; omit to visit the current URL again.
  * @param {object} [options] - Extra cy.visit options; its onBeforeLoad runs after seeding.
  * @param {Record<string, unknown>} [options.extraStorage] - localStorage entries to seed in
  *   onBeforeLoad (values are JSON-stringified). Use to pre-seed persisted state (e.g. a batch)
@@ -97,17 +97,20 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
     }
   }
 
-  if (url) {
-    cy.visit(url, {
+  const visitSeeded = (target) =>
+    cy.visit(target, {
       ...visitOptions,
       onBeforeLoad(win) {
         seed(win)
         visitOptions.onBeforeLoad?.(win)
       },
     })
+
+  if (url) {
+    visitSeeded(url)
   } else {
-    cy.window().then(seed)
-    cy.reload()
+    // Not a seed and reload: the running app can overwrite the seeded key before the reload
+    cy.url().then(visitSeeded)
   }
 
   // The last wallet reconnects asynchronously after the page loads (useOnboard ->
@@ -118,4 +121,6 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   if (waitForConnection) {
     cy.get(connectedWalletChip, { timeout: 30000 }).should('be.visible')
   }
+  // The launch screen covers the page, so clicks hit it until it unmounts
+  cy.get('[data-testid="launch-screen"]', { timeout: 30000 }).should('not.exist')
 }

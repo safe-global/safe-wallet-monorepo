@@ -222,7 +222,6 @@ export function typeOwnerAddress(address) {
       const typedValue = $input.val()
       expect(address).to.contain(typedValue)
     })
-  cy.wait(1000)
 }
 //Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
 export function typeOwnerAddressManage(index, address) {
