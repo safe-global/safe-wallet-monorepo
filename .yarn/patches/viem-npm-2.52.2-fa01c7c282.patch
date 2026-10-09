@@ -1,0 +1,1710 @@
+diff --git a/_cjs/actions/public/call.js b/_cjs/actions/public/call.js
+index 6f92cd3dd9386ba4b44884490c88904e2985d366..f4b6fd30e6ac3c94eaa04c325fc3af53ae6e104b 100644
+--- a/_cjs/actions/public/call.js
++++ b/_cjs/actions/public/call.js
+@@ -1,6 +1,6 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+-exports.call = call;
++Object.defineProperty(exports, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ exports.getRevertErrorData = getRevertErrorData;
+ const abitype_1 = require("abitype");
+ const BlockOverrides = require("ox/BlockOverrides");
+diff --git a/_cjs/tempo/actions/accessKey.js b/_cjs/tempo/actions/accessKey.js
+index a01f48fccabefbd3a17694517a116980aea061b1..6280c5eff9c8b2d0a554bb7e61200ca9f70f5e97 100644
+--- a/_cjs/tempo/actions/accessKey.js
++++ b/_cjs/tempo/actions/accessKey.js
+@@ -113,7 +113,7 @@ async function burnWitness(client, parameters) {
+             args: [witness],
+         });
+     }
+-    burnWitness.call = call;
++    Object.defineProperty(burnWitness, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.accountKeychain,
+@@ -168,7 +168,7 @@ async function getMetadata(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    getMetadata.call = call;
++    Object.defineProperty(getMetadata, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getMetadata || (exports.getMetadata = getMetadata = {}));
+ async function getRemainingLimit(client, parameters) {
+     const { account: account_ = client.account, accessKey, token, ...rest } = parameters;
+@@ -203,7 +203,7 @@ async function getRemainingLimit(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey), token],
+         });
+     }
+-    getRemainingLimit.call = call;
++    Object.defineProperty(getRemainingLimit, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function callWithPeriod(args) {
+         const { account, accessKey, token } = args;
+         return (0, utils_js_1.defineCall)({
+@@ -236,7 +236,7 @@ async function isAdmin(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    isAdmin.call = call;
++    Object.defineProperty(isAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isAdmin || (exports.isAdmin = isAdmin = {}));
+ async function isWitnessBurned(client, parameters) {
+     const { account: account_ = client.account, witness, ...rest } = parameters;
+@@ -259,7 +259,7 @@ async function isWitnessBurned(client, parameters) {
+             args: [account, witness],
+         });
+     }
+-    isWitnessBurned.call = call;
++    Object.defineProperty(isWitnessBurned, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isWitnessBurned || (exports.isWitnessBurned = isWitnessBurned = {}));
+ async function revoke(client, parameters) {
+     return revoke.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -283,7 +283,7 @@ async function revoke(client, parameters) {
+             args: [resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    revoke.call = call;
++    Object.defineProperty(revoke, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.accountKeychain,
+@@ -345,7 +345,7 @@ async function updateLimit(client, parameters) {
+             args: [resolveAccessKeyAddress(accessKey), token, limit],
+         });
+     }
+-    updateLimit.call = call;
++    Object.defineProperty(updateLimit, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.accountKeychain,
+@@ -433,7 +433,7 @@ async function verifyHash(client, parameters) {
+             args: [account, hash, signature],
+         });
+     }
+-    verifyHash.call = call;
++    Object.defineProperty(verifyHash, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(verifyHash || (exports.verifyHash = verifyHash = {}));
+ function resolveAccessKeyAddress(accessKey) {
+     if (typeof accessKey === 'string')
+diff --git a/_cjs/tempo/actions/amm.js b/_cjs/tempo/actions/amm.js
+index f23c081cb4d3439891c655428a13396067bf5779..0b2826edfa9ca8cfdd6fd5eb50401204d776c8fa 100644
+--- a/_cjs/tempo/actions/amm.js
++++ b/_cjs/tempo/actions/amm.js
+@@ -87,7 +87,7 @@ async function getLiquidityBalance(client, parameters) {
+             functionName: 'liquidityBalances',
+         });
+     }
+-    getLiquidityBalance.call = call;
++    Object.defineProperty(getLiquidityBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getLiquidityBalance || (exports.getLiquidityBalance = getLiquidityBalance = {}));
+ async function rebalanceSwap(client, parameters) {
+     return rebalanceSwap.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -121,7 +121,7 @@ async function rebalanceSwap(client, parameters) {
+             ],
+         });
+     }
+-    rebalanceSwap.call = call;
++    Object.defineProperty(rebalanceSwap, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.feeAmm,
+@@ -179,7 +179,7 @@ async function mint(client, parameters) {
+             ],
+         });
+     }
+-    mint.call = call;
++    Object.defineProperty(mint, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.feeAmm,
+@@ -232,7 +232,7 @@ async function burn(client, parameters) {
+             ],
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.feeAmm,
+diff --git a/_cjs/tempo/actions/channel.js b/_cjs/tempo/actions/channel.js
+index 244443015625518a6be30654cce6d3630afa8508..4e2fe0e7cbcd18b0aa947cf7fcdb29f7e9930bb6 100644
+--- a/_cjs/tempo/actions/channel.js
++++ b/_cjs/tempo/actions/channel.js
+@@ -57,7 +57,7 @@ async function close(client, parameters) {
+             ],
+         });
+     }
+-    close.call = call;
++    Object.defineProperty(close, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+@@ -123,7 +123,7 @@ async function getStates(client, parameters) {
+             functionName: 'getChannelState',
+         });
+     }
+-    getStates.call = call;
++    Object.defineProperty(getStates, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getStates || (exports.getStates = getStates = {}));
+ async function open(client, parameters) {
+     return open.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -160,7 +160,7 @@ async function open(client, parameters) {
+             ],
+         });
+     }
+-    open.call = call;
++    Object.defineProperty(open, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+@@ -204,7 +204,7 @@ async function requestClose(client, parameters) {
+             args: [tempo_1.Channel.from(channel)],
+         });
+     }
+-    requestClose.call = call;
++    Object.defineProperty(requestClose, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+@@ -248,7 +248,7 @@ async function settle(client, parameters) {
+             args: [tempo_1.Channel.from(channel), cumulativeAmount, signature],
+         });
+     }
+-    settle.call = call;
++    Object.defineProperty(settle, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+@@ -307,7 +307,7 @@ async function topUp(client, parameters) {
+             args: [tempo_1.Channel.from(channel), additionalDeposit],
+         });
+     }
+-    topUp.call = call;
++    Object.defineProperty(topUp, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+@@ -351,7 +351,7 @@ async function withdraw(client, parameters) {
+             args: [tempo_1.Channel.from(channel)],
+         });
+     }
+-    withdraw.call = call;
++    Object.defineProperty(withdraw, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20ChannelReserve,
+diff --git a/_cjs/tempo/actions/dex.js b/_cjs/tempo/actions/dex.js
+index 3fe8566ba9c624eb8de5b8e3e1c5ce20474249ad..9c0aef9ac9e6c8b6dc3bbbdc998ea02f87b2bc93 100644
+--- a/_cjs/tempo/actions/dex.js
++++ b/_cjs/tempo/actions/dex.js
+@@ -59,7 +59,7 @@ async function buy(client, parameters) {
+             args: [tokenIn, tokenOut, amountOut, maxAmountIn],
+         });
+     }
+-    buy.call = call;
++    Object.defineProperty(buy, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(buy || (exports.buy = buy = {}));
+ async function buySync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -91,7 +91,7 @@ async function cancel(client, parameters) {
+             args: [orderId],
+         });
+     }
+-    cancel.call = call;
++    Object.defineProperty(cancel, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.stablecoinDex,
+@@ -139,7 +139,7 @@ async function cancelStale(client, parameters) {
+             args: [orderId],
+         });
+     }
+-    cancelStale.call = call;
++    Object.defineProperty(cancelStale, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.stablecoinDex,
+@@ -187,7 +187,7 @@ async function createPair(client, parameters) {
+             args: [base],
+         });
+     }
+-    createPair.call = call;
++    Object.defineProperty(createPair, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.stablecoinDex,
+@@ -233,7 +233,7 @@ async function getBalance(client, parameters) {
+             functionName: 'balanceOf',
+         });
+     }
+-    getBalance.call = call;
++    Object.defineProperty(getBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBalance || (exports.getBalance = getBalance = {}));
+ async function getBuyQuote(client, parameters) {
+     const { tokenIn, tokenOut, amountOut, ...rest } = parameters;
+@@ -252,7 +252,7 @@ async function getBuyQuote(client, parameters) {
+             functionName: 'quoteSwapExactAmountOut',
+         });
+     }
+-    getBuyQuote.call = call;
++    Object.defineProperty(getBuyQuote, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBuyQuote || (exports.getBuyQuote = getBuyQuote = {}));
+ async function getOrder(client, parameters) {
+     const { orderId, ...rest } = parameters;
+@@ -271,7 +271,7 @@ async function getOrder(client, parameters) {
+             functionName: 'getOrder',
+         });
+     }
+-    getOrder.call = call;
++    Object.defineProperty(getOrder, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOrder || (exports.getOrder = getOrder = {}));
+ async function getOrderbook(client, parameters) {
+     const { base, quote, ...rest } = parameters;
+@@ -291,7 +291,7 @@ async function getOrderbook(client, parameters) {
+             functionName: 'books',
+         });
+     }
+-    getOrderbook.call = call;
++    Object.defineProperty(getOrderbook, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOrderbook || (exports.getOrderbook = getOrderbook = {}));
+ async function getTickLevel(client, parameters) {
+     const { base, tick, isBid, ...rest } = parameters;
+@@ -311,7 +311,7 @@ async function getTickLevel(client, parameters) {
+             functionName: 'getTickLevel',
+         });
+     }
+-    getTickLevel.call = call;
++    Object.defineProperty(getTickLevel, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getTickLevel || (exports.getTickLevel = getTickLevel = {}));
+ async function getSellQuote(client, parameters) {
+     const { tokenIn, tokenOut, amountIn, ...rest } = parameters;
+@@ -330,7 +330,7 @@ async function getSellQuote(client, parameters) {
+             functionName: 'quoteSwapExactAmountIn',
+         });
+     }
+-    getSellQuote.call = call;
++    Object.defineProperty(getSellQuote, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getSellQuote || (exports.getSellQuote = getSellQuote = {}));
+ async function place(client, parameters) {
+     return place.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -355,7 +355,7 @@ async function place(client, parameters) {
+             args: [token, amount, isBid, tick],
+         });
+     }
+-    place.call = call;
++    Object.defineProperty(place, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.stablecoinDex,
+@@ -392,7 +392,7 @@ async function placeFlip(client, parameters) {
+             args: [token, amount, isBid, tick, flipTick],
+         });
+     }
+-    placeFlip.call = call;
++    Object.defineProperty(placeFlip, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const parsedLogs = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.stablecoinDex,
+@@ -453,7 +453,7 @@ async function sell(client, parameters) {
+             args: [tokenIn, tokenOut, amountIn, minAmountOut],
+         });
+     }
+-    sell.call = call;
++    Object.defineProperty(sell, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(sell || (exports.sell = sell = {}));
+ async function sellSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -557,7 +557,7 @@ async function withdraw(client, parameters) {
+             args: [token, amount],
+         });
+     }
+-    withdraw.call = call;
++    Object.defineProperty(withdraw, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(withdraw || (exports.withdraw = withdraw = {}));
+ async function withdrawSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+diff --git a/_cjs/tempo/actions/fee.js b/_cjs/tempo/actions/fee.js
+index e89aa8e2d68aba48ee3e6079fc30dc2b59c42757..1534357b697817cdf6b49be8bd7e19d53681de39 100644
+--- a/_cjs/tempo/actions/fee.js
++++ b/_cjs/tempo/actions/fee.js
+@@ -106,7 +106,7 @@ async function getUserToken(client, ...parameters) {
+             functionName: 'userTokens',
+         });
+     }
+-    getUserToken.call = call;
++    Object.defineProperty(getUserToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getUserToken || (exports.getUserToken = getUserToken = {}));
+ async function setUserToken(client, parameters) {
+     return setUserToken.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -130,7 +130,7 @@ async function setUserToken(client, parameters) {
+             args: [tempo_1.TokenId.toAddress(token)],
+         });
+     }
+-    setUserToken.call = call;
++    Object.defineProperty(setUserToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.feeManager,
+@@ -193,7 +193,7 @@ async function getValidatorToken(client, parameters) {
+             functionName: 'validatorTokens',
+         });
+     }
+-    getValidatorToken.call = call;
++    Object.defineProperty(getValidatorToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getValidatorToken || (exports.getValidatorToken = getValidatorToken = {}));
+ async function setValidatorToken(client, parameters) {
+     return setValidatorToken.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -217,7 +217,7 @@ async function setValidatorToken(client, parameters) {
+             args: [tempo_1.TokenId.toAddress(token)],
+         });
+     }
+-    setValidatorToken.call = call;
++    Object.defineProperty(setValidatorToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.feeManager,
+diff --git a/_cjs/tempo/actions/nonce.js b/_cjs/tempo/actions/nonce.js
+index f0ee3a73decbeaf61b44c220ae12ceee798c5872..f2a905315d06fdb34265011341c15c6971ceee67 100644
+--- a/_cjs/tempo/actions/nonce.js
++++ b/_cjs/tempo/actions/nonce.js
+@@ -24,7 +24,7 @@ async function getNonce(client, parameters) {
+             functionName: 'getNonce',
+         });
+     }
+-    getNonce.call = call;
++    Object.defineProperty(getNonce, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getNonce || (exports.getNonce = getNonce = {}));
+ function watchNonceIncremented(client, parameters) {
+     const { onNonceIncremented, ...rest } = parameters;
+diff --git a/_cjs/tempo/actions/policy.js b/_cjs/tempo/actions/policy.js
+index 098b136d48b46cc17aaf6459bddfd347a2163969..f2a09116d412c8690b1c97cb7252c8ffd26d1a38 100644
+--- a/_cjs/tempo/actions/policy.js
++++ b/_cjs/tempo/actions/policy.js
+@@ -64,7 +64,7 @@ async function create(client, parameters) {
+             ...config,
+         });
+     }
+-    create.call = call;
++    Object.defineProperty(create, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip403Registry,
+@@ -112,7 +112,7 @@ async function setAdmin(client, parameters) {
+             args: [policyId, admin],
+         });
+     }
+-    setAdmin.call = call;
++    Object.defineProperty(setAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip403Registry,
+@@ -164,7 +164,7 @@ async function modifyWhitelist(client, parameters) {
+             args: [policyId, address, allowed],
+         });
+     }
+-    modifyWhitelist.call = call;
++    Object.defineProperty(modifyWhitelist, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip403Registry,
+@@ -216,7 +216,7 @@ async function modifyBlacklist(client, parameters) {
+             args: [policyId, address, restricted],
+         });
+     }
+-    modifyBlacklist.call = call;
++    Object.defineProperty(modifyBlacklist, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip403Registry,
+@@ -263,7 +263,7 @@ async function getData(client, parameters) {
+             functionName: 'policyData',
+         });
+     }
+-    getData.call = call;
++    Object.defineProperty(getData, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getData || (exports.getData = getData = {}));
+ async function isAuthorized(client, parameters) {
+     const { policyId, user, ...rest } = parameters;
+@@ -282,7 +282,7 @@ async function isAuthorized(client, parameters) {
+             functionName: 'isAuthorized',
+         });
+     }
+-    isAuthorized.call = call;
++    Object.defineProperty(isAuthorized, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isAuthorized || (exports.isAuthorized = isAuthorized = {}));
+ function watchCreate(client, parameters) {
+     const { onPolicyCreated, ...rest } = parameters;
+diff --git a/_cjs/tempo/actions/receivePolicy.js b/_cjs/tempo/actions/receivePolicy.js
+index 111c15f9d2cd7652c10396ad1ba8eafb324041e1..491c6eb83df2ab460f6add5bee18b427440dd175 100644
+--- a/_cjs/tempo/actions/receivePolicy.js
++++ b/_cjs/tempo/actions/receivePolicy.js
+@@ -54,7 +54,7 @@ async function burn(client, parameters) {
+             args: [receipt],
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.receivePolicyGuard,
+@@ -106,7 +106,7 @@ async function claim(client, parameters) {
+             args: [to, receipt],
+         });
+     }
+-    claim.call = call;
++    Object.defineProperty(claim, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.receivePolicyGuard,
+@@ -162,7 +162,7 @@ async function get(client, parameters) {
+             args: [account],
+         });
+     }
+-    get.call = call;
++    Object.defineProperty(get, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(get || (exports.get = get = {}));
+ async function getBlockedBalance(client, parameters) {
+     const { receipt, ...rest } = parameters;
+@@ -181,7 +181,7 @@ async function getBlockedBalance(client, parameters) {
+             args: [receipt],
+         });
+     }
+-    getBlockedBalance.call = call;
++    Object.defineProperty(getBlockedBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBlockedBalance || (exports.getBlockedBalance = getBlockedBalance = {}));
+ async function set(client, parameters) {
+     return set.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -215,7 +215,7 @@ async function set(client, parameters) {
+             args: [senderPolicyId, tokenFilterId, recoveryAuthority],
+         });
+     }
+-    set.call = call;
++    Object.defineProperty(set, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip403Registry,
+@@ -265,7 +265,7 @@ async function validate(client, parameters) {
+             args: [token, sender, receiver],
+         });
+     }
+-    validate.call = call;
++    Object.defineProperty(validate, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(validate || (exports.validate = validate = {}));
+ function watchBlocked(client, parameters) {
+     const { onBlocked, ...rest } = parameters;
+diff --git a/_cjs/tempo/actions/reward.js b/_cjs/tempo/actions/reward.js
+index dc7a5d299882509ec5a3b3b3cc6275c398645866..181593bd702f81d7cb715695ed8a1589ef8324f1 100644
+--- a/_cjs/tempo/actions/reward.js
++++ b/_cjs/tempo/actions/reward.js
+@@ -40,7 +40,7 @@ async function claim(client, parameters) {
+             functionName: 'claimRewards',
+         });
+     }
+-    claim.call = call;
++    Object.defineProperty(claim, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(claim || (exports.claim = claim = {}));
+ async function claimSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -86,7 +86,7 @@ async function distributeSync(client, parameters) {
+             functionName: 'distributeReward',
+         });
+     }
+-    distribute.call = call;
++    Object.defineProperty(distribute, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -116,7 +116,7 @@ async function getGlobalRewardPerToken(client, parameters) {
+             functionName: 'globalRewardPerToken',
+         });
+     }
+-    getGlobalRewardPerToken.call = call;
++    Object.defineProperty(getGlobalRewardPerToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getGlobalRewardPerToken || (exports.getGlobalRewardPerToken = getGlobalRewardPerToken = {}));
+ async function getPendingRewards(client, parameters) {
+     return (0, readContract_js_1.readContract)(client, {
+@@ -134,7 +134,7 @@ async function getPendingRewards(client, parameters) {
+             functionName: 'getPendingRewards',
+         });
+     }
+-    getPendingRewards.call = call;
++    Object.defineProperty(getPendingRewards, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getPendingRewards || (exports.getPendingRewards = getPendingRewards = {}));
+ async function getUserRewardInfo(client, parameters) {
+     return (0, readContract_js_1.readContract)(client, {
+@@ -152,7 +152,7 @@ async function getUserRewardInfo(client, parameters) {
+             functionName: 'userRewardInfo',
+         });
+     }
+-    getUserRewardInfo.call = call;
++    Object.defineProperty(getUserRewardInfo, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getUserRewardInfo || (exports.getUserRewardInfo = getUserRewardInfo = {}));
+ async function setRecipient(client, parameters) {
+     return setRecipient.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -188,7 +188,7 @@ async function setRecipientSync(client, parameters) {
+             functionName: 'setRewardRecipient',
+         });
+     }
+-    setRecipient.call = call;
++    Object.defineProperty(setRecipient, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+diff --git a/_cjs/tempo/actions/token.js b/_cjs/tempo/actions/token.js
+index b970e2937bcd4baa9abf5e0d05b2b18eec5e227c..8ba328aeba4a57a78882e0ae072535098e2e6cb8 100644
+--- a/_cjs/tempo/actions/token.js
++++ b/_cjs/tempo/actions/token.js
+@@ -82,7 +82,7 @@ async function approve(client, parameters) {
+             args: [spender, amount],
+         });
+     }
+-    approve.call = call;
++    Object.defineProperty(approve, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -126,7 +126,7 @@ async function burnBlocked(client, parameters) {
+             args: [from, amount],
+         });
+     }
+-    burnBlocked.call = call;
++    Object.defineProperty(burnBlocked, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -181,7 +181,7 @@ async function burn(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -228,7 +228,7 @@ async function changeTransferPolicy(client, parameters) {
+             args: [policyId],
+         });
+     }
+-    changeTransferPolicy.call = call;
++    Object.defineProperty(changeTransferPolicy, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -297,7 +297,7 @@ async function create(client, parameters) {
+             functionName: 'createToken',
+         });
+     }
+-    create.call = call;
++    Object.defineProperty(create, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20Factory,
+@@ -345,7 +345,7 @@ async function getAllowance(client, parameters) {
+             args: [account, spender],
+         });
+     }
+-    getAllowance.call = call;
++    Object.defineProperty(getAllowance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getAllowance || (exports.getAllowance = getAllowance = {}));
+ async function getBalance(client, parameters) {
+     const { account = client.account, ...rest } = parameters;
+@@ -367,7 +367,7 @@ async function getBalance(client, parameters) {
+             args: [account],
+         });
+     }
+-    getBalance.call = call;
++    Object.defineProperty(getBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBalance || (exports.getBalance = getBalance = {}));
+ async function getMetadata(client, parameters) {
+     const { token, ...rest } = parameters;
+@@ -511,7 +511,7 @@ async function getRoleAdmin(client, parameters) {
+             args: [tempo_1.TokenRole.serialize(role)],
+         });
+     }
+-    getRoleAdmin.call = call;
++    Object.defineProperty(getRoleAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getRoleAdmin || (exports.getRoleAdmin = getRoleAdmin = {}));
+ async function hasRole(client, parameters) {
+     const { account = client.account } = parameters;
+@@ -533,7 +533,7 @@ async function hasRole(client, parameters) {
+             args: [account, tempo_1.TokenRole.serialize(role)],
+         });
+     }
+-    hasRole.call = call;
++    Object.defineProperty(hasRole, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(hasRole || (exports.hasRole = hasRole = {}));
+ async function grantRoles(client, parameters) {
+     return grantRoles.inner(sendTransaction_js_1.sendTransaction, client, parameters);
+@@ -562,7 +562,7 @@ async function grantRoles(client, parameters) {
+             args: [roleHash, to],
+         });
+     }
+-    grantRoles.call = call;
++    Object.defineProperty(grantRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvents(logs) {
+         const events = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -617,7 +617,7 @@ async function mint(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    mint.call = call;
++    Object.defineProperty(mint, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -664,7 +664,7 @@ async function pause(client, parameters) {
+             args: [],
+         });
+     }
+-    pause.call = call;
++    Object.defineProperty(pause, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -716,7 +716,7 @@ async function renounceRoles(client, parameters) {
+             args: [roleHash],
+         });
+     }
+-    renounceRoles.call = call;
++    Object.defineProperty(renounceRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvents(logs) {
+         const events = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -770,7 +770,7 @@ async function revokeRoles(client, parameters) {
+             args: [roleHash, from],
+         });
+     }
+-    revokeRoles.call = call;
++    Object.defineProperty(revokeRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvents(logs) {
+         const events = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -818,7 +818,7 @@ async function setSupplyCap(client, parameters) {
+             args: [supplyCap],
+         });
+     }
+-    setSupplyCap.call = call;
++    Object.defineProperty(setSupplyCap, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -867,7 +867,7 @@ async function setRoleAdmin(client, parameters) {
+             args: [roleHash, adminRoleHash],
+         });
+     }
+-    setRoleAdmin.call = call;
++    Object.defineProperty(setRoleAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -934,7 +934,7 @@ async function transfer(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    transfer.call = call;
++    Object.defineProperty(transfer, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -981,7 +981,7 @@ async function unpause(client, parameters) {
+             args: [],
+         });
+     }
+-    unpause.call = call;
++    Object.defineProperty(unpause, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -1028,7 +1028,7 @@ async function prepareUpdateQuoteToken(client, parameters) {
+             args: [tempo_1.TokenId.toAddress(quoteToken)],
+         });
+     }
+-    prepareUpdateQuoteToken.call = call;
++    Object.defineProperty(prepareUpdateQuoteToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+@@ -1071,7 +1071,7 @@ async function updateQuoteToken(client, parameters) {
+             args: [],
+         });
+     }
+-    updateQuoteToken.call = call;
++    Object.defineProperty(updateQuoteToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.tip20,
+diff --git a/_cjs/tempo/actions/validator.js b/_cjs/tempo/actions/validator.js
+index 65044b924ee16c0fe9604c3f389f5f9eebdd0c77..33c22766de181906ee4a5387ec7feaa718f74e4e 100644
+--- a/_cjs/tempo/actions/validator.js
++++ b/_cjs/tempo/actions/validator.js
+@@ -56,7 +56,7 @@ async function add(client, parameters) {
+             functionName: 'addValidator',
+         });
+     }
+-    add.call = call;
++    Object.defineProperty(add, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(add || (exports.add = add = {}));
+ async function addSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -88,7 +88,7 @@ async function changeOwner(client, parameters) {
+             functionName: 'changeOwner',
+         });
+     }
+-    changeOwner.call = call;
++    Object.defineProperty(changeOwner, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(changeOwner || (exports.changeOwner = changeOwner = {}));
+ async function changeOwnerSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -120,7 +120,7 @@ async function changeStatus(client, parameters) {
+             functionName: 'changeValidatorStatus',
+         });
+     }
+-    changeStatus.call = call;
++    Object.defineProperty(changeStatus, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(changeStatus || (exports.changeStatus = changeStatus = {}));
+ async function changeStatusSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -145,7 +145,7 @@ async function getNextFullDkgCeremony(client, parameters = {}) {
+             functionName: 'getNextFullDkgCeremony',
+         });
+     }
+-    getNextFullDkgCeremony.call = call;
++    Object.defineProperty(getNextFullDkgCeremony, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getNextFullDkgCeremony || (exports.getNextFullDkgCeremony = getNextFullDkgCeremony = {}));
+ async function getOwner(client, parameters = {}) {
+     return (0, readContract_js_1.readContract)(client, {
+@@ -162,7 +162,7 @@ async function getOwner(client, parameters = {}) {
+             functionName: 'owner',
+         });
+     }
+-    getOwner.call = call;
++    Object.defineProperty(getOwner, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOwner || (exports.getOwner = getOwner = {}));
+ async function get(client, parameters) {
+     const { validator, ...rest } = parameters;
+@@ -181,7 +181,7 @@ async function get(client, parameters) {
+             functionName: 'validators',
+         });
+     }
+-    get.call = call;
++    Object.defineProperty(get, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(get || (exports.get = get = {}));
+ async function getByIndex(client, parameters) {
+     const { index, ...rest } = parameters;
+@@ -200,7 +200,7 @@ async function getByIndex(client, parameters) {
+             functionName: 'validatorsArray',
+         });
+     }
+-    getByIndex.call = call;
++    Object.defineProperty(getByIndex, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getByIndex || (exports.getByIndex = getByIndex = {}));
+ async function getCount(client, parameters = {}) {
+     return (0, readContract_js_1.readContract)(client, {
+@@ -217,7 +217,7 @@ async function getCount(client, parameters = {}) {
+             functionName: 'validatorCount',
+         });
+     }
+-    getCount.call = call;
++    Object.defineProperty(getCount, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getCount || (exports.getCount = getCount = {}));
+ async function list(client, parameters = {}) {
+     return (0, readContract_js_1.readContract)(client, {
+@@ -234,7 +234,7 @@ async function list(client, parameters = {}) {
+             functionName: 'getValidators',
+         });
+     }
+-    list.call = call;
++    Object.defineProperty(list, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(list || (exports.list = list = {}));
+ async function setNextFullDkgCeremony(client, parameters) {
+     return setNextFullDkgCeremony.inner(writeContract_js_1.writeContract, client, parameters);
+@@ -258,7 +258,7 @@ async function setNextFullDkgCeremony(client, parameters) {
+             functionName: 'setNextFullDkgCeremony',
+         });
+     }
+-    setNextFullDkgCeremony.call = call;
++    Object.defineProperty(setNextFullDkgCeremony, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(setNextFullDkgCeremony || (exports.setNextFullDkgCeremony = setNextFullDkgCeremony = {}));
+ async function setNextFullDkgCeremonySync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+@@ -295,7 +295,7 @@ async function update(client, parameters) {
+             functionName: 'updateValidator',
+         });
+     }
+-    update.call = call;
++    Object.defineProperty(update, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(update || (exports.update = update = {}));
+ async function updateSync(client, parameters) {
+     const { throwOnReceiptRevert = true, ...rest } = parameters;
+diff --git a/_cjs/tempo/actions/virtualAddress.js b/_cjs/tempo/actions/virtualAddress.js
+index 6a510837b09f09096507d031e0ec794c0644a6db..cc5a0daf0cfa77730fe3bdd6f7f632b433ebfd68 100644
+--- a/_cjs/tempo/actions/virtualAddress.js
++++ b/_cjs/tempo/actions/virtualAddress.js
+@@ -32,7 +32,7 @@ async function getMasterAddress(client, parameters) {
+             functionName: 'getMaster',
+         });
+     }
+-    getMasterAddress.call = call;
++    Object.defineProperty(getMasterAddress, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getMasterAddress || (exports.getMasterAddress = getMasterAddress = {}));
+ async function resolve(client, parameters) {
+     if (!isVirtual(parameters.address))
+@@ -62,7 +62,7 @@ async function registerMaster(client, parameters) {
+             args: [salt],
+         });
+     }
+-    registerMaster.call = call;
++    Object.defineProperty(registerMaster, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = (0, parseEventLogs_js_1.parseEventLogs)({
+             abi: Abis.addressRegistry,
+diff --git a/_esm/tempo/actions/accessKey.js b/_esm/tempo/actions/accessKey.js
+index 2faed3815624434117659042590314252957634a..13c23e4e6eff1461a9ed60dbd54ff6bb86471886 100644
+--- a/_esm/tempo/actions/accessKey.js
++++ b/_esm/tempo/actions/accessKey.js
+@@ -221,7 +221,7 @@ export async function burnWitness(client, parameters) {
+             args: [witness],
+         });
+     }
+-    burnWitness.call = call;
++    Object.defineProperty(burnWitness, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.accountKeychain,
+@@ -331,7 +331,7 @@ export async function getMetadata(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    getMetadata.call = call;
++    Object.defineProperty(getMetadata, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getMetadata || (getMetadata = {}));
+ /**
+  * Gets the remaining spending limit for a key-token pair.
+@@ -400,7 +400,7 @@ export async function getRemainingLimit(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey), token],
+         });
+     }
+-    getRemainingLimit.call = call;
++    Object.defineProperty(getRemainingLimit, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Defines a call to the `getRemainingLimitWithPeriod` function (T3+).
+      *
+@@ -474,7 +474,7 @@ export async function isAdmin(client, parameters) {
+             args: [account, resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    isAdmin.call = call;
++    Object.defineProperty(isAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isAdmin || (isAdmin = {}));
+ /**
+  * Checks whether a key-authorization witness has been burned for an account.
+@@ -527,7 +527,7 @@ export async function isWitnessBurned(client, parameters) {
+             args: [account, witness],
+         });
+     }
+-    isWitnessBurned.call = call;
++    Object.defineProperty(isWitnessBurned, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isWitnessBurned || (isWitnessBurned = {}));
+ /**
+  * Revokes an authorized access key.
+@@ -606,7 +606,7 @@ export async function revoke(client, parameters) {
+             args: [resolveAccessKeyAddress(accessKey)],
+         });
+     }
+-    revoke.call = call;
++    Object.defineProperty(revoke, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.accountKeychain,
+@@ -781,7 +781,7 @@ export async function updateLimit(client, parameters) {
+             args: [resolveAccessKeyAddress(accessKey), token, limit],
+         });
+     }
+-    updateLimit.call = call;
++    Object.defineProperty(updateLimit, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.accountKeychain,
+@@ -1020,7 +1020,7 @@ export async function verifyHash(client, parameters) {
+             args: [account, hash, signature],
+         });
+     }
+-    verifyHash.call = call;
++    Object.defineProperty(verifyHash, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(verifyHash || (verifyHash = {}));
+ /** @internal */
+ function resolveAccessKeyAddress(accessKey) {
+diff --git a/_esm/tempo/actions/amm.js b/_esm/tempo/actions/amm.js
+index 7790d144cdd2dca194551a8fd7ec7189ce480e69..fd64851f402e6f16725cc37522f5768515e81477 100644
+--- a/_esm/tempo/actions/amm.js
++++ b/_esm/tempo/actions/amm.js
+@@ -139,7 +139,7 @@ export async function getLiquidityBalance(client, parameters) {
+             functionName: 'liquidityBalances',
+         });
+     }
+-    getLiquidityBalance.call = call;
++    Object.defineProperty(getLiquidityBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getLiquidityBalance || (getLiquidityBalance = {}));
+ /**
+  * Performs a rebalance swap from validator token to user token.
+@@ -242,7 +242,7 @@ export async function rebalanceSwap(client, parameters) {
+             ],
+         });
+     }
+-    rebalanceSwap.call = call;
++    Object.defineProperty(rebalanceSwap, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `RebalanceSwap` event from logs.
+      *
+@@ -403,7 +403,7 @@ export async function mint(client, parameters) {
+             ],
+         });
+     }
+-    mint.call = call;
++    Object.defineProperty(mint, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `Mint` event from logs.
+      *
+@@ -559,7 +559,7 @@ export async function burn(client, parameters) {
+             ],
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `Burn` event from logs.
+      *
+diff --git a/_esm/tempo/actions/channel.js b/_esm/tempo/actions/channel.js
+index fcb89a756271de4d1f7adc0617a2334504ed9f93..ebce0f425af4c26bbf497a38ffb7c7bdc1e0d388 100644
+--- a/_esm/tempo/actions/channel.js
++++ b/_esm/tempo/actions/channel.js
+@@ -67,7 +67,7 @@ export async function close(client, parameters) {
+             ],
+         });
+     }
+-    close.call = call;
++    Object.defineProperty(close, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ChannelClosed` event from logs.
+      *
+@@ -206,7 +206,7 @@ export async function getStates(client, parameters) {
+             functionName: 'getChannelState',
+         });
+     }
+-    getStates.call = call;
++    Object.defineProperty(getStates, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getStates || (getStates = {}));
+ /**
+  * Opens and funds a TIP-20 channel reserve channel.
+@@ -277,7 +277,7 @@ export async function open(client, parameters) {
+             ],
+         });
+     }
+-    open.call = call;
++    Object.defineProperty(open, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ChannelOpened` event from logs.
+      *
+@@ -378,7 +378,7 @@ export async function requestClose(client, parameters) {
+             args: [ox_Channel.from(channel)],
+         });
+     }
+-    requestClose.call = call;
++    Object.defineProperty(requestClose, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `CloseRequested` event from logs.
+      *
+@@ -471,7 +471,7 @@ export async function settle(client, parameters) {
+             args: [ox_Channel.from(channel), cumulativeAmount, signature],
+         });
+     }
+-    settle.call = call;
++    Object.defineProperty(settle, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `Settled` event from logs.
+      *
+@@ -596,7 +596,7 @@ export async function topUp(client, parameters) {
+             args: [ox_Channel.from(channel), additionalDeposit],
+         });
+     }
+-    topUp.call = call;
++    Object.defineProperty(topUp, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `TopUp` event from logs.
+      *
+@@ -687,7 +687,7 @@ export async function withdraw(client, parameters) {
+             args: [ox_Channel.from(channel)],
+         });
+     }
+-    withdraw.call = call;
++    Object.defineProperty(withdraw, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ChannelClosed` event from logs.
+      *
+diff --git a/_esm/tempo/actions/dex.js b/_esm/tempo/actions/dex.js
+index 77d10b7c59ec8f49d546261bfba654dd9f2da496..2b05812e351ec71296d351fd93e0ce3219c58806 100644
+--- a/_esm/tempo/actions/dex.js
++++ b/_esm/tempo/actions/dex.js
+@@ -94,7 +94,7 @@ export async function buy(client, parameters) {
+             args: [tokenIn, tokenOut, amountOut, maxAmountIn],
+         });
+     }
+-    buy.call = call;
++    Object.defineProperty(buy, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(buy || (buy = {}));
+ /**
+  * Buys a specific amount of tokens.
+@@ -211,7 +211,7 @@ export async function cancel(client, parameters) {
+             args: [orderId],
+         });
+     }
+-    cancel.call = call;
++    Object.defineProperty(cancel, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `OrderCancelled` event from logs.
+      *
+@@ -350,7 +350,7 @@ export async function cancelStale(client, parameters) {
+             args: [orderId],
+         });
+     }
+-    cancelStale.call = call;
++    Object.defineProperty(cancelStale, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `OrderCancelled` event from logs.
+      *
+@@ -489,7 +489,7 @@ export async function createPair(client, parameters) {
+             args: [base],
+         });
+     }
+-    createPair.call = call;
++    Object.defineProperty(createPair, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `PairCreated` event from logs.
+      *
+@@ -596,7 +596,7 @@ export async function getBalance(client, parameters) {
+             functionName: 'balanceOf',
+         });
+     }
+-    getBalance.call = call;
++    Object.defineProperty(getBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBalance || (getBalance = {}));
+ /**
+  * Gets the quote for buying a specific amount of tokens.
+@@ -646,7 +646,7 @@ export async function getBuyQuote(client, parameters) {
+             functionName: 'quoteSwapExactAmountOut',
+         });
+     }
+-    getBuyQuote.call = call;
++    Object.defineProperty(getBuyQuote, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBuyQuote || (getBuyQuote = {}));
+ /**
+  * Gets an order's details from the orderbook.
+@@ -694,7 +694,7 @@ export async function getOrder(client, parameters) {
+             functionName: 'getOrder',
+         });
+     }
+-    getOrder.call = call;
++    Object.defineProperty(getOrder, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOrder || (getOrder = {}));
+ /**
+  * Gets orderbook information for a trading pair.
+@@ -744,7 +744,7 @@ export async function getOrderbook(client, parameters) {
+             functionName: 'books',
+         });
+     }
+-    getOrderbook.call = call;
++    Object.defineProperty(getOrderbook, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOrderbook || (getOrderbook = {}));
+ /**
+  * Gets the price level information at a specific tick.
+@@ -795,7 +795,7 @@ export async function getTickLevel(client, parameters) {
+             functionName: 'getTickLevel',
+         });
+     }
+-    getTickLevel.call = call;
++    Object.defineProperty(getTickLevel, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getTickLevel || (getTickLevel = {}));
+ /**
+  * Gets the quote for selling a specific amount of tokens.
+@@ -845,7 +845,7 @@ export async function getSellQuote(client, parameters) {
+             functionName: 'quoteSwapExactAmountIn',
+         });
+     }
+-    getSellQuote.call = call;
++    Object.defineProperty(getSellQuote, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getSellQuote || (getSellQuote = {}));
+ /**
+  * Places a limit order on the orderbook.
+@@ -933,7 +933,7 @@ export async function place(client, parameters) {
+             args: [token, amount, isBid, tick],
+         });
+     }
+-    place.call = call;
++    Object.defineProperty(place, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `OrderPlaced` event from logs.
+      *
+@@ -1041,7 +1041,7 @@ export async function placeFlip(client, parameters) {
+             args: [token, amount, isBid, tick, flipTick],
+         });
+     }
+-    placeFlip.call = call;
++    Object.defineProperty(placeFlip, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `OrderPlaced` event (with `isFlipOrder: true`) from logs.
+      *
+@@ -1228,7 +1228,7 @@ export async function sell(client, parameters) {
+             args: [tokenIn, tokenOut, amountIn, minAmountOut],
+         });
+     }
+-    sell.call = call;
++    Object.defineProperty(sell, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(sell || (sell = {}));
+ /**
+  * Sells a specific amount of tokens.
+@@ -1519,7 +1519,7 @@ export async function withdraw(client, parameters) {
+             args: [token, amount],
+         });
+     }
+-    withdraw.call = call;
++    Object.defineProperty(withdraw, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(withdraw || (withdraw = {}));
+ /**
+  * Withdraws tokens from the DEX to the caller's wallet.
+diff --git a/_esm/tempo/actions/fee.js b/_esm/tempo/actions/fee.js
+index aca471f5a376983e67bf8997c8e3145ee4009b6f..003292d771e8d00da633881dfb001855a1f97c4b 100644
+--- a/_esm/tempo/actions/fee.js
++++ b/_esm/tempo/actions/fee.js
+@@ -147,7 +147,7 @@ export async function getUserToken(client, ...parameters) {
+             functionName: 'userTokens',
+         });
+     }
+-    getUserToken.call = call;
++    Object.defineProperty(getUserToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getUserToken || (getUserToken = {}));
+ /**
+  * Sets the user's default fee token.
+@@ -231,7 +231,7 @@ export async function setUserToken(client, parameters) {
+             args: [TokenId.toAddress(token)],
+         });
+     }
+-    setUserToken.call = call;
++    Object.defineProperty(setUserToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.feeManager,
+@@ -373,7 +373,7 @@ export async function getValidatorToken(client, parameters) {
+             functionName: 'validatorTokens',
+         });
+     }
+-    getValidatorToken.call = call;
++    Object.defineProperty(getValidatorToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getValidatorToken || (getValidatorToken = {}));
+ /**
+  * Sets the validator's preferred fee token.
+@@ -457,7 +457,7 @@ export async function setValidatorToken(client, parameters) {
+             args: [TokenId.toAddress(token)],
+         });
+     }
+-    setValidatorToken.call = call;
++    Object.defineProperty(setValidatorToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.feeManager,
+diff --git a/_esm/tempo/actions/nonce.js b/_esm/tempo/actions/nonce.js
+index c4ee88fa35e66b9491d448dd72f1a74ba3f17d0b..6a124e365659ce5be34a3db56d73e9bf6b0e85bd 100644
+--- a/_esm/tempo/actions/nonce.js
++++ b/_esm/tempo/actions/nonce.js
+@@ -74,7 +74,7 @@ export async function getNonce(client, parameters) {
+             functionName: 'getNonce',
+         });
+     }
+-    getNonce.call = call;
++    Object.defineProperty(getNonce, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getNonce || (getNonce = {}));
+ export function watchNonceIncremented(client, parameters) {
+     const { onNonceIncremented, ...rest } = parameters;
+diff --git a/_esm/tempo/actions/policy.js b/_esm/tempo/actions/policy.js
+index 603601ffe6bfd41eb51c5c3b566325d641af1637..002febb1fe76891cdfbae74ebb8573f46770df51 100644
+--- a/_esm/tempo/actions/policy.js
++++ b/_esm/tempo/actions/policy.js
+@@ -112,7 +112,7 @@ export async function create(client, parameters) {
+             ...config,
+         });
+     }
+-    create.call = call;
++    Object.defineProperty(create, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `PolicyCreated` event from logs.
+      *
+@@ -255,7 +255,7 @@ export async function setAdmin(client, parameters) {
+             args: [policyId, admin],
+         });
+     }
+-    setAdmin.call = call;
++    Object.defineProperty(setAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `PolicyAdminUpdated` event from logs.
+      *
+@@ -405,7 +405,7 @@ export async function modifyWhitelist(client, parameters) {
+             args: [policyId, address, allowed],
+         });
+     }
+-    modifyWhitelist.call = call;
++    Object.defineProperty(modifyWhitelist, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `WhitelistUpdated` event from logs.
+      *
+@@ -556,7 +556,7 @@ export async function modifyBlacklist(client, parameters) {
+             args: [policyId, address, restricted],
+         });
+     }
+-    modifyBlacklist.call = call;
++    Object.defineProperty(modifyBlacklist, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `BlacklistUpdated` event from logs.
+      *
+@@ -665,7 +665,7 @@ export async function getData(client, parameters) {
+             functionName: 'policyData',
+         });
+     }
+-    getData.call = call;
++    Object.defineProperty(getData, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getData || (getData = {}));
+ /**
+  * Checks if a user is authorized by a policy.
+@@ -714,7 +714,7 @@ export async function isAuthorized(client, parameters) {
+             functionName: 'isAuthorized',
+         });
+     }
+-    isAuthorized.call = call;
++    Object.defineProperty(isAuthorized, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(isAuthorized || (isAuthorized = {}));
+ /**
+  * Watches for policy creation events.
+diff --git a/_esm/tempo/actions/receivePolicy.js b/_esm/tempo/actions/receivePolicy.js
+index ee11d2d923753250a5a4ce094bde1c51d5d8f9c3..4d49a8f293e1188f14f3ccbd4fca33d0a1d25aea 100644
+--- a/_esm/tempo/actions/receivePolicy.js
++++ b/_esm/tempo/actions/receivePolicy.js
+@@ -79,7 +79,7 @@ export async function burn(client, parameters) {
+             args: [receipt],
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ReceiptBurned` event from logs.
+      *
+@@ -195,7 +195,7 @@ export async function claim(client, parameters) {
+             args: [to, receipt],
+         });
+     }
+-    claim.call = call;
++    Object.defineProperty(claim, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ReceiptClaimed` event from logs.
+      *
+@@ -312,7 +312,7 @@ export async function get(client, parameters) {
+             args: [account],
+         });
+     }
+-    get.call = call;
++    Object.defineProperty(get, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(get || (get = {}));
+ /**
+  * Gets the blocked balance for an encoded receipt.
+@@ -360,7 +360,7 @@ export async function getBlockedBalance(client, parameters) {
+             args: [receipt],
+         });
+     }
+-    getBlockedBalance.call = call;
++    Object.defineProperty(getBlockedBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBlockedBalance || (getBlockedBalance = {}));
+ /**
+  * Sets the receive policy for the calling account.
+@@ -433,7 +433,7 @@ export async function set(client, parameters) {
+             args: [senderPolicyId, tokenFilterId, recoveryAuthority],
+         });
+     }
+-    set.call = call;
++    Object.defineProperty(set, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `ReceivePolicyUpdated` event from logs.
+      *
+@@ -551,7 +551,7 @@ export async function validate(client, parameters) {
+             args: [token, sender, receiver],
+         });
+     }
+-    validate.call = call;
++    Object.defineProperty(validate, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(validate || (validate = {}));
+ /**
+  * Watches for blocked transfer events.
+diff --git a/_esm/tempo/actions/reward.js b/_esm/tempo/actions/reward.js
+index b747560151760477bc594afd52e0993e73370fb1..dd10928cf4997820a34cf6449d34d7f28a11b97c 100644
+--- a/_esm/tempo/actions/reward.js
++++ b/_esm/tempo/actions/reward.js
+@@ -96,7 +96,7 @@ export async function claim(client, parameters) {
+             functionName: 'claimRewards',
+         });
+     }
+-    claim.call = call;
++    Object.defineProperty(claim, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(claim || (claim = {}));
+ /**
+  * Claims accumulated rewards for a recipient and waits for confirmation.
+@@ -280,7 +280,7 @@ export async function distributeSync(client, parameters) {
+             functionName: 'distributeReward',
+         });
+     }
+-    distribute.call = call;
++    Object.defineProperty(distribute, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `RewardDistributed` event from logs.
+      *
+@@ -348,7 +348,7 @@ export async function getGlobalRewardPerToken(client, parameters) {
+             functionName: 'globalRewardPerToken',
+         });
+     }
+-    getGlobalRewardPerToken.call = call;
++    Object.defineProperty(getGlobalRewardPerToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getGlobalRewardPerToken || (getGlobalRewardPerToken = {}));
+ /**
+  * Calculates the pending claimable rewards for an account without modifying state.
+@@ -398,7 +398,7 @@ export async function getPendingRewards(client, parameters) {
+             functionName: 'getPendingRewards',
+         });
+     }
+-    getPendingRewards.call = call;
++    Object.defineProperty(getPendingRewards, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getPendingRewards || (getPendingRewards = {}));
+ /**
+  * Gets the reward information for a specific account.
+@@ -452,7 +452,7 @@ export async function getUserRewardInfo(client, parameters) {
+             functionName: 'userRewardInfo',
+         });
+     }
+-    getUserRewardInfo.call = call;
++    Object.defineProperty(getUserRewardInfo, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getUserRewardInfo || (getUserRewardInfo = {}));
+ /**
+  * Sets or changes the reward recipient for a token holder.
+@@ -589,7 +589,7 @@ export async function setRecipientSync(client, parameters) {
+             functionName: 'setRewardRecipient',
+         });
+     }
+-    setRecipient.call = call;
++    Object.defineProperty(setRecipient, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `RewardRecipientSet` event from logs.
+      *
+diff --git a/_esm/tempo/actions/token.js b/_esm/tempo/actions/token.js
+index 035072ad2e62e9a56d2e50402b15ecd01b1454d1..f3c3d4521c1e90f52b28a149592d0f76f340736c 100644
+--- a/_esm/tempo/actions/token.js
++++ b/_esm/tempo/actions/token.js
+@@ -95,7 +95,7 @@ export async function approve(client, parameters) {
+             args: [spender, amount],
+         });
+     }
+-    approve.call = call;
++    Object.defineProperty(approve, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.tip20,
+@@ -226,7 +226,7 @@ export async function burnBlocked(client, parameters) {
+             args: [from, amount],
+         });
+     }
+-    burnBlocked.call = call;
++    Object.defineProperty(burnBlocked, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -373,7 +373,7 @@ export async function burn(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    burn.call = call;
++    Object.defineProperty(burn, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -511,7 +511,7 @@ export async function changeTransferPolicy(client, parameters) {
+             args: [policyId],
+         });
+     }
+-    changeTransferPolicy.call = call;
++    Object.defineProperty(changeTransferPolicy, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -676,7 +676,7 @@ export async function create(client, parameters) {
+             functionName: 'createToken',
+         });
+     }
+-    create.call = call;
++    Object.defineProperty(create, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the `TokenCreated` event from logs.
+      *
+@@ -789,7 +789,7 @@ export async function getAllowance(client, parameters) {
+             args: [account, spender],
+         });
+     }
+-    getAllowance.call = call;
++    Object.defineProperty(getAllowance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getAllowance || (getAllowance = {}));
+ /**
+  * Gets TIP20 token balance for an address.
+@@ -842,7 +842,7 @@ export async function getBalance(client, parameters) {
+             args: [account],
+         });
+     }
+-    getBalance.call = call;
++    Object.defineProperty(getBalance, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getBalance || (getBalance = {}));
+ /**
+  * Gets TIP20 token metadata including name, symbol, logo URI, currency, decimals, and total supply.
+@@ -1041,7 +1041,7 @@ export async function getRoleAdmin(client, parameters) {
+             args: [TokenRole.serialize(role)],
+         });
+     }
+-    getRoleAdmin.call = call;
++    Object.defineProperty(getRoleAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getRoleAdmin || (getRoleAdmin = {}));
+ /**
+  * Checks if an account has a specific role for a TIP20 token.
+@@ -1094,7 +1094,7 @@ export async function hasRole(client, parameters) {
+             args: [account, TokenRole.serialize(role)],
+         });
+     }
+-    hasRole.call = call;
++    Object.defineProperty(hasRole, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(hasRole || (hasRole = {}));
+ /**
+  * Grants a role for a TIP20 token.
+@@ -1184,7 +1184,7 @@ export async function grantRoles(client, parameters) {
+             args: [roleHash, to],
+         });
+     }
+-    grantRoles.call = call;
++    Object.defineProperty(grantRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the events from the logs.
+      *
+@@ -1333,7 +1333,7 @@ export async function mint(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    mint.call = call;
++    Object.defineProperty(mint, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -1470,7 +1470,7 @@ export async function pause(client, parameters) {
+             args: [],
+         });
+     }
+-    pause.call = call;
++    Object.defineProperty(pause, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -1612,7 +1612,7 @@ export async function renounceRoles(client, parameters) {
+             args: [roleHash],
+         });
+     }
+-    renounceRoles.call = call;
++    Object.defineProperty(renounceRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the events from the logs.
+      *
+@@ -1759,7 +1759,7 @@ export async function revokeRoles(client, parameters) {
+             args: [roleHash, from],
+         });
+     }
+-    revokeRoles.call = call;
++    Object.defineProperty(revokeRoles, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the events from the logs.
+      *
+@@ -1899,7 +1899,7 @@ export async function setSupplyCap(client, parameters) {
+             args: [supplyCap],
+         });
+     }
+-    setSupplyCap.call = call;
++    Object.defineProperty(setSupplyCap, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -2041,7 +2041,7 @@ export async function setRoleAdmin(client, parameters) {
+             args: [roleHash, adminRoleHash],
+         });
+     }
+-    setRoleAdmin.call = call;
++    Object.defineProperty(setRoleAdmin, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -2201,7 +2201,7 @@ export async function transfer(client, parameters) {
+             ...callArgs,
+         });
+     }
+-    transfer.call = call;
++    Object.defineProperty(transfer, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -2337,7 +2337,7 @@ export async function unpause(client, parameters) {
+             args: [],
+         });
+     }
+-    unpause.call = call;
++    Object.defineProperty(unpause, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -2474,7 +2474,7 @@ export async function prepareUpdateQuoteToken(client, parameters) {
+             args: [TokenId.toAddress(quoteToken)],
+         });
+     }
+-    prepareUpdateQuoteToken.call = call;
++    Object.defineProperty(prepareUpdateQuoteToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+@@ -2606,7 +2606,7 @@ export async function updateQuoteToken(client, parameters) {
+             args: [],
+         });
+     }
+-    updateQuoteToken.call = call;
++    Object.defineProperty(updateQuoteToken, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     /**
+      * Extracts the event from the logs.
+      *
+diff --git a/_esm/tempo/actions/validator.js b/_esm/tempo/actions/validator.js
+index f3c0b9311cad6e90ccfd91ad533472b32366b595..73701e7a5a15d90456e8a7eba8ec8c064654b412 100644
+--- a/_esm/tempo/actions/validator.js
++++ b/_esm/tempo/actions/validator.js
+@@ -103,7 +103,7 @@ export async function add(client, parameters) {
+             functionName: 'addValidator',
+         });
+     }
+-    add.call = call;
++    Object.defineProperty(add, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(add || (add = {}));
+ /**
+  * Adds a new validator (owner only) and waits for the transaction receipt.
+@@ -221,7 +221,7 @@ export async function changeOwner(client, parameters) {
+             functionName: 'changeOwner',
+         });
+     }
+-    changeOwner.call = call;
++    Object.defineProperty(changeOwner, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(changeOwner || (changeOwner = {}));
+ /**
+  * Changes the owner and waits for the transaction receipt.
+@@ -337,7 +337,7 @@ export async function changeStatus(client, parameters) {
+             functionName: 'changeValidatorStatus',
+         });
+     }
+-    changeStatus.call = call;
++    Object.defineProperty(changeStatus, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(changeStatus || (changeStatus = {}));
+ /**
+  * Changes validator active status and waits for the transaction receipt.
+@@ -435,7 +435,7 @@ export async function getNextFullDkgCeremony(client, parameters = {}) {
+             functionName: 'getNextFullDkgCeremony',
+         });
+     }
+-    getNextFullDkgCeremony.call = call;
++    Object.defineProperty(getNextFullDkgCeremony, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getNextFullDkgCeremony || (getNextFullDkgCeremony = {}));
+ /**
+  * Gets the contract owner.
+@@ -499,7 +499,7 @@ export async function getOwner(client, parameters = {}) {
+             functionName: 'owner',
+         });
+     }
+-    getOwner.call = call;
++    Object.defineProperty(getOwner, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getOwner || (getOwner = {}));
+ /**
+  * Gets validator information by address.
+@@ -570,7 +570,7 @@ export async function get(client, parameters) {
+             functionName: 'validators',
+         });
+     }
+-    get.call = call;
++    Object.defineProperty(get, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(get || (get = {}));
+ /**
+  * Gets validator address by index.
+@@ -642,7 +642,7 @@ export async function getByIndex(client, parameters) {
+             functionName: 'validatorsArray',
+         });
+     }
+-    getByIndex.call = call;
++    Object.defineProperty(getByIndex, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getByIndex || (getByIndex = {}));
+ /**
+  * Gets the total number of validators.
+@@ -706,7 +706,7 @@ export async function getCount(client, parameters = {}) {
+             functionName: 'validatorCount',
+         });
+     }
+-    getCount.call = call;
++    Object.defineProperty(getCount, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getCount || (getCount = {}));
+ /**
+  * Gets the complete set of validators.
+@@ -770,7 +770,7 @@ export async function list(client, parameters = {}) {
+             functionName: 'getValidators',
+         });
+     }
+-    list.call = call;
++    Object.defineProperty(list, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(list || (list = {}));
+ /**
+  * Sets the next epoch for a full DKG ceremony.
+@@ -851,7 +851,7 @@ export async function setNextFullDkgCeremony(client, parameters) {
+             functionName: 'setNextFullDkgCeremony',
+         });
+     }
+-    setNextFullDkgCeremony.call = call;
++    Object.defineProperty(setNextFullDkgCeremony, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(setNextFullDkgCeremony || (setNextFullDkgCeremony = {}));
+ /**
+  * Sets the next epoch for a full DKG ceremony and waits for the transaction receipt.
+@@ -976,7 +976,7 @@ export async function update(client, parameters) {
+             functionName: 'updateValidator',
+         });
+     }
+-    update.call = call;
++    Object.defineProperty(update, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(update || (update = {}));
+ /**
+  * Updates validator information and waits for the transaction receipt.
+diff --git a/_esm/tempo/actions/virtualAddress.js b/_esm/tempo/actions/virtualAddress.js
+index 08ddf93f0eb737963fe3ca6e20f4832157ea3713..447a878c76d7e46687bcb05f86083a400f672488 100644
+--- a/_esm/tempo/actions/virtualAddress.js
++++ b/_esm/tempo/actions/virtualAddress.js
+@@ -55,7 +55,7 @@ export async function getMasterAddress(client, parameters) {
+             functionName: 'getMaster',
+         });
+     }
+-    getMasterAddress.call = call;
++    Object.defineProperty(getMasterAddress, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+ })(getMasterAddress || (getMasterAddress = {}));
+ /**
+  * Resolves a virtual address to its master address.
+@@ -169,7 +169,7 @@ export async function registerMaster(client, parameters) {
+             args: [salt],
+         });
+     }
+-    registerMaster.call = call;
++    Object.defineProperty(registerMaster, 'call', { value: call, writable: true, enumerable: true, configurable: true });
+     function extractEvent(logs) {
+         const [log] = parseEventLogs({
+             abi: Abis.addressRegistry,

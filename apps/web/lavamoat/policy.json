@@ -1,0 +1,22 @@
+{
+  "resources": {
+    "@safe-global/views": {
+      "globals": {
+        "Intl.DateTimeFormat": true
+      },
+      "packages": {
+        "@base-ui/react": true,
+        "@safe-global/utils": true,
+        "next>@swc/helpers": true,
+        "class-variance-authority": true,
+        "classnames": true,
+        "date-fns": true,
+        "lucide-react": true,
+        "next": true,
+        "react": true,
+        "react-day-picker": true,
+        "vaul": true
+      }
+    }
+  }
+}
