@@ -118,4 +118,6 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   if (waitForConnection) {
     cy.get(connectedWalletChip, { timeout: 30000 }).should('be.visible')
   }
+  // The launch screen covers the page, so clicks hit it until it unmounts
+  cy.get('[data-testid="launch-screen"]', { timeout: 30000 }).should('not.exist')
 }
