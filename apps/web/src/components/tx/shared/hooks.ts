@@ -47,9 +47,10 @@ import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/n
 const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
 
 // Whether the signer executes the on-chain tx immediately (returning a real tx hash) rather than
-// queuing it in its own Safe (returning a safeTxHash). True for EOAs and non-Safe smart accounts,
-// and for a Safe signer at threshold 1 whether it is the in-app nested signer or connected directly.
-const executesImmediately = (signer: SignerWallet): boolean => !isSafeSigner(signer) || signer.threshold === 1
+// queuing it in its own Safe (returning a safeTxHash). True for EOAs, non-Safe smart accounts and a
+// threshold-1 Safe connected directly; the in-app nested signer only ever proposes in its parent.
+const executesImmediately = (signer: SignerWallet): boolean =>
+  !signer.isSafe && (!signer.isConnectedSafe || signer.threshold === 1)
 
 // A smart-account signer creates an on-chain approveHash tx in its own Safe, so signing lands in
 // a "nested signing" state rather than adding an off-chain signature.

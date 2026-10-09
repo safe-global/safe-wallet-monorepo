@@ -110,7 +110,8 @@ export const getNestedWallet = (
           )
           result = await connectedSDK.approveTransactionHash(safeTxHash)
         } else {
-          // The queue only accepts signed proposals, and the tx is always proposed so the link to it resolves
+          // The queue only accepts signed proposals. Never executed here, even at threshold 1: the
+          // user executes it from the parent Safe, same as any other Safe tx
           const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
           await proposeTx(
             safeInfo.chainId,
@@ -121,10 +122,6 @@ export const getNestedWallet = (
             undefined,
             nestedChildTx,
           )
-
-          if (safeInfo.threshold === 1) {
-            result = await connectedSDK.executeTransaction(signedTx)
-          }
         }
       } catch (err) {
         logError(ErrorCodes._817, err)

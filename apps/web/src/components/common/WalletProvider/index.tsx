@@ -13,10 +13,10 @@ export type SignerWallet = {
   address: string
   chainId: string
   // The signer is the in-app nested signer (a parent Safe picked from the signer dropdown, wrapped
-  // by getNestedWallet). It executes an on-chain signature/execution immediately at threshold 1.
+  // by getNestedWallet). It only proposes signed txs in the parent, never executes them.
   isSafe?: boolean
   // The connected wallet is itself a Safe (e.g. connected via WalletConnect) acting as the signer.
-  // Like the in-app nested signer, it executes on-chain immediately at threshold 1.
+  // It executes on-chain immediately at threshold 1.
   isConnectedSafe?: boolean
   // Threshold of the signer Safe when `isSafe`/`isConnectedSafe` is true.
   threshold?: number

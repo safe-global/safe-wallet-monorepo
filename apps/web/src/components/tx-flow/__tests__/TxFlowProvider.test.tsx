@@ -2,6 +2,11 @@ import { type PropsWithChildren, useContext } from 'react'
 import { act, renderHook } from '@/tests/test-utils'
 import TxFlowProvider, { TxFlowContext } from '../TxFlowProvider'
 import { faker } from '@faker-js/faker'
+import type { SafeTransaction } from '@safe-global/types-kit'
+import { SafeTxContext, type SafeTxContextParams } from '../SafeTxProvider'
+import { useSigner } from '@/hooks/wallets/useWallet'
+import * as useSafeInfoHook from '@/hooks/useSafeInfo'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -46,21 +51,28 @@ describe('TxFlowProvider', () => {
   const renderContext = ({
     txId,
     onContinueToExecute,
+    isExecutable,
+    safeTx,
   }: {
     txId?: string
     onContinueToExecute?: (txId: string) => void
+    isExecutable?: boolean
+    safeTx?: SafeTransaction
   }) => {
     const Wrapper = ({ children }: PropsWithChildren) => (
-      <TxFlowProvider
-        step={0}
-        data={undefined}
-        prevStep={jest.fn()}
-        nextStep={jest.fn()}
-        txId={txId}
-        onContinueToExecute={onContinueToExecute}
-      >
-        {children}
-      </TxFlowProvider>
+      <SafeTxContext.Provider value={{ safeTx } as SafeTxContextParams}>
+        <TxFlowProvider
+          step={0}
+          data={undefined}
+          prevStep={jest.fn()}
+          nextStep={jest.fn()}
+          txId={txId}
+          onContinueToExecute={onContinueToExecute}
+          isExecutable={isExecutable}
+        >
+          {children}
+        </TxFlowProvider>
+      </SafeTxContext.Provider>
     )
     return renderHook(() => useContext(TxFlowContext), { wrapper: Wrapper })
   }
@@ -89,5 +101,52 @@ describe('TxFlowProvider', () => {
 
     expect(result.current.txId).toBe(existingTxId)
     expect(result.current.isCreation).toBe(false)
+  })
+
+  describe('with the in-app nested Safe signer', () => {
+    const createSafeTx = (signatureCount: number) =>
+      ({ data: { nonce: 0 }, signatures: { size: signatureCount } }) as unknown as SafeTransaction
+
+    beforeEach(() => {
+      jest.mocked(useSigner).mockReturnValue({
+        address: faker.finance.ethereumAddress(),
+        chainId: '1',
+        provider: null,
+        isSafe: true,
+      })
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { ...extendedSafeInfoBuilder().build(), threshold: 1 },
+        safeAddress: faker.finance.ethereumAddress(),
+        safeLoaded: true,
+        safeLoading: false,
+      })
+    })
+
+    afterEach(() => {
+      jest.mocked(useSigner).mockReturnValue(null)
+      jest.restoreAllMocks()
+    })
+
+    it('does not offer execution of a new unsigned tx', () => {
+      const { result } = renderContext({ safeTx: createSafeTx(0) })
+
+      expect(result.current.canExecute).toBe(false)
+      expect(result.current.willExecute).toBe(false)
+      expect(result.current.willSignBeforeExecute).toBe(false)
+    })
+
+    it('does not offer execution of an existing tx still missing signatures', () => {
+      const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(0) })
+
+      expect(result.current.canExecute).toBe(false)
+    })
+
+    it('offers execution of a fully signed tx', () => {
+      const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(1) })
+
+      expect(result.current.canExecute).toBe(true)
+    })
   })
 })

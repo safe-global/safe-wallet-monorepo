@@ -221,4 +221,34 @@ describe('getNestedWallet send', () => {
       undefined,
     )
   })
+
+  it('only proposes the signed parent tx without executing it, even at threshold 1', async () => {
+    const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+    const signedTx = { data: { nonce: 1 } } as SafeTransaction
+    jest.spyOn(wallets, 'isSmartContractWallet').mockResolvedValue(false)
+    jest.spyOn(txSenderSdk, 'tryOffChainTxSigning').mockResolvedValue(signedTx)
+
+    const nestedWallet = getNestedWallet(
+      actualWallet,
+      { ...safeInfo, threshold: 1 },
+      {} as JsonRpcProvider,
+      {} as NextRouter,
+    )
+    const result = await nestedWallet.provider?.request({
+      method: 'eth_sendTransaction',
+      params: [{ from: PARENT_SAFE, to: CHILD_SAFE, value: '0x0', data: '0xdeadbeef' }],
+    })
+
+    expect(proposeTxMock).toHaveBeenCalledWith(
+      safeInfo.chainId,
+      PARENT_SAFE,
+      SIGNER,
+      signedTx,
+      keccak256('0x01'),
+      undefined,
+      undefined,
+    )
+    expect(mockConnectedSdk.executeTransaction).not.toHaveBeenCalled()
+    expect(result).toBe(keccak256('0x01'))
+  })
 })
