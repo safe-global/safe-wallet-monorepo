@@ -9,11 +9,7 @@ import { getStoreInstance } from '@/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { NestedTxEnvelope } from './nestedTxEnvelope'
 
-/**
- * Child tx of a nested approveHash, proposed alongside the parent tx so the service learns
- * about it without a proposal from the child Safe. The generated `ProposeTransactionDto` does
- * not include the field yet — replace this with the generated type once the CGW schema ships it.
- */
+// TODO: replace with the generated type once the CGW schema ships `nestedTransaction`
 export type NestedTransactionDto = {
   to: string
   value: string

@@ -98,9 +98,6 @@ export const SignForm = ({
       return
     }
 
-    // A smart-account signer (nested Safe or a Safe connected via WalletConnect) creates an
-    // on-chain approveHash tx in its own Safe. Show the nested success screen so the user
-    // understands the signature still needs confirming there, rather than silently closing.
     if (isNestedSigning) {
       setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)
     } else {

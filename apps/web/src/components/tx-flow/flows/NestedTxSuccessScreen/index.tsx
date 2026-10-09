@@ -36,9 +36,7 @@ const NestedTxSuccessScreen = ({ txId }: Props) => {
 
   const chain = useCurrentChain()
 
-  // When the parent executed immediately (threshold 1), `txHashOrParentSafeTxHash` is a real
-  // on-chain tx hash → link to the block explorer. Otherwise it is the parent's safeTxHash of a
-  // queued tx → deep-link to the parent's transaction detail so it can be confirmed.
+  // Executed → on-chain tx hash; queued → the parent's safeTxHash
   const isExecuted = cachedPendingTx?.status === PendingStatus.NESTED_SIGNING && cachedPendingTx.executed
   const explorerLink =
     isExecuted && chain

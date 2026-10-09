@@ -223,8 +223,7 @@ export const dispatchOnChainSigning = async (
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   const safeTxHash = await sdk.getTransactionHash(safeTx)
-  // The envelope flow skips the CGW proposal, so there is no service-assigned id yet; derive the
-  // deterministic id CGW will use once it learns about the tx
+  // No CGW proposal yet, so derive the id CGW will assign
   const id = txId ?? `multisig_${safeAddress}_${safeTxHash}`
   const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
 
@@ -233,9 +232,7 @@ export const dispatchOnChainSigning = async (
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     let encodedApproveHashTx = await prepareApproveTxHash(safeTxHash, provider, scope)
 
-    // A parent Safe signer queues this approveHash as an unsigned proposal; append the full child
-    // tx as a self-verifying envelope so receivers can verify and display it without a service
-    // lookup. approveHash(bytes32) ABI decoding ignores trailing calldata, so appending is safe.
+    // approveHash(bytes32) ABI decoding ignores trailing calldata
     if (isSafeSigner && supportsNestedTxEnvelope(safeVersion)) {
       const payload = encodeNestedTxPayload([{ chainId, safe: safeAddress, ...safeTx.data }])
       encodedApproveHashTx = concat([encodedApproveHashTx, payload])
@@ -269,8 +266,7 @@ export const dispatchOnChainSigning = async (
 
   txDispatch(TxEvent.ONCHAIN_SIGNATURE_SUCCESS, eventParams)
 
-  // On-chain signing runs for any smart-account signer, but only a Safe signer creates an
-  // approveHash tx we can surface and deep-link to. Non-Safe smart accounts keep the plain flow.
+  // Only a Safe signer creates an approveHash tx we can deep-link to
   if (isSafeSigner) {
     txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
       ...eventParams,
@@ -286,12 +282,7 @@ export const dispatchOnChainSigning = async (
   return id
 }
 
-/**
- * First confirmation of a new tx by the in-app nested Safe signer when the child Safe is too old to
- * carry a nested-tx envelope. The queue only accepts signed proposals (PLA-1897), so the parent
- * owner's EOA signs the child hash; the child is proposed only after the parent approveHash tx is
- * accepted, so a rejected parent signature leaves nothing queued.
- */
+// For child Safes too old for an envelope; the child is proposed only once the parent approveHash is accepted
 export const dispatchNestedTxCreation = async ({
   safeTx,
   wallet,
@@ -464,8 +455,7 @@ export const dispatchTxExecution = async (
   scope?: TxSenderScope,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
-  // A Safe executor's tx is never proposed to CGW, so no service-assigned id exists yet; derive
-  // the deterministic id CGW will use once it learns about the tx
+  // Never proposed to CGW, so derive the id CGW will assign
   const safeTxHash = await sdk.getTransactionHash(safeTx)
   const id = txId ?? `multisig_${safeAddress}_${safeTxHash}`
   const eventParams = { txId: id, nonce: safeTx.data.nonce, chainId, safeAddress }
@@ -479,9 +469,7 @@ export const dispatchTxExecution = async (
     if (isSmartAccount) {
       let encodedTx = await prepareTxExecution(safeTx, provider, scope)
 
-      // A parent Safe executor queues this execTransaction in its own Safe; append the child tx
-      // envelope (same predicate as approveHash) so the parent proposes it as `nestedTransaction`
-      // and the child keeps seeing it in its queue until the parent executes.
+      // The parent proposes the child tx as `nestedTransaction`
       if (isSafeSigner && supportsNestedTxEnvelope(safeVersion)) {
         const payload = encodeNestedTxPayload([{ chainId, safe: safeAddress, ...safeTx.data }])
         encodedTx = concat([encodedTx, payload])
@@ -509,10 +497,7 @@ export const dispatchTxExecution = async (
     throw error
   }
 
-  // A smart-contract-wallet executor (a nested parent Safe, or a Safe connected via WalletConnect)
-  // that doesn't execute immediately only queues the execTransaction in that Safe; nothing executes
-  // here yet, and `result.hash` is the executor Safe's safeTxHash, not an on-chain tx hash. Treat it
-  // like nested signing instead of a processing/executed tx.
+  // A queuing executor returns its Safe's safeTxHash, not an on-chain tx hash
   if (isSmartAccount && !executed) {
     txDispatch(TxEvent.NESTED_SAFE_TX_CREATED, {
       ...eventParams,

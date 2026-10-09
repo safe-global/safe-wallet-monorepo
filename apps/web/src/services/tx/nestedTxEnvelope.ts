@@ -4,17 +4,8 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import semverSatisfies from 'semver/functions/satisfies'
 
 /**
- * Nested-Safe transaction envelope (v1).
- *
- * When a parent Safe signs a child Safe transaction via `approveHash(bytes32)` or executes it via
- * `execTransaction(...)`, the full child transaction is appended to the calldata so receivers can
- * verify and display it without a service lookup. Solidity ABI decoding ignores trailing calldata,
- * so appending is safe for both.
- *
- * Wire format:
- *   approveHash calldata     = 0xd4d9bdcd ++ childSafeTxHash (32 bytes) ++ payload
- *   execTransaction calldata = 0x6a761202 ++ abi.encode(execTransaction args) ++ payload
- *   payload = MAGIC (4 bytes) ++ abi.encode(Envelope[])   (envelope list is outermost-first)
+ * Nested-Safe tx envelope (v1), appended to approveHash/execTransaction calldata:
+ *   payload = MAGIC (4 bytes) ++ abi.encode(Envelope[])   (outermost-first)
  */
 export type NestedTxEnvelope = {
   chainId: string
@@ -40,11 +31,7 @@ const execTransactionFragment = safeInterface.getFunction('execTransaction')
 // The envelope hash derivation (EIP-712 domain with chainId) only holds for Safes >= 1.3.0
 const NESTED_TX_ENVELOPE_SAFE_VERSION = '>=1.3.0'
 
-/**
- * Whether a child Safe of this version can carry its tx to the parent in an approveHash envelope.
- * The same predicate gates appending the envelope and skipping the CGW proposal — they must
- * never diverge, or the child tx data would be lost entirely.
- */
+// Gates both appending the envelope and skipping the CGW proposal, or the child tx is lost
 export const supportsNestedTxEnvelope = (safeVersion: string | null | undefined): boolean =>
   Boolean(safeVersion && semverSatisfies(safeVersion, NESTED_TX_ENVELOPE_SAFE_VERSION))
 
@@ -53,7 +40,6 @@ export const NESTED_TX_MAGIC = dataSlice(id('SafeNestedChildTxV1'), 0, 4)
 const ENVELOPE_LIST_ABI =
   'tuple(uint256 chainId, address safe, uint256 nonce, address to, uint256 value, bytes data, uint8 operation, uint256 safeTxGas, uint256 baseGas, uint256 gasPrice, address gasToken, address refundReceiver)[]'
 
-// Envelope hashes are only derived for Safes >= 1.3.0, whose EIP-712 domain includes the chainId
 const SAFE_TX_TYPES = { SafeTx: getEip712TxTypes('1.3.0').SafeTx }
 
 export const deriveEnvelopeSafeTxHash = (env: NestedTxEnvelope): string => {
@@ -140,11 +126,7 @@ export const splitApproveHashCalldata = (data: string): { approvedHash: string; 
 
 export type ExecTransactionArgs = Omit<NestedTxEnvelope, 'chainId' | 'safe' | 'nonce'>
 
-/**
- * Splits `execTransaction` calldata into its canonical ABI encoding and any trailing payload.
- * Returns null when the data is not a decodable execTransaction call, or when the decoded args do
- * not re-encode to a prefix of the data (so the trailing bytes cannot be told apart from the args).
- */
+// Returns null when the trailing bytes can't be told apart from the args
 export const splitExecTransactionCalldata = (
   data: string,
 ): { execTx: ExecTransactionArgs; canonicalData: string; payload: string } | null => {
@@ -219,12 +201,7 @@ const verifyEnvelopeChain = (envelopes: NestedTxEnvelope[]): boolean => {
 
 export type NestedTxContext = { to: string; chainId: string }
 
-/**
- * Decodes and verifies an envelope list [E0..En] against decoded `execTransaction` args: E0 must
- * carry the same tx fields, belong to the called Safe on the current chain when a context is given,
- * and each E[i].data must be exactly `approveHash(derive(E[i+1]))`. The nonce is not in the
- * calldata and is taken from the envelope as-is. Returns null on any mismatch.
- */
+// Each E[i].data must be exactly approveHash(derive(E[i+1])); the nonce comes from the envelope
 export const verifyNestedExecTxPayload = (
   execTx: ExecTransactionArgs,
   payload: string,
@@ -246,11 +223,7 @@ export const verifyNestedExecTxPayload = (
   return verifyEnvelopeChain(envelopes) ? envelopes : null
 }
 
-/**
- * Decodes and fully verifies an envelope list [E0..En] against the approved hash:
- * derive(E0) must equal the approved hash, and each E[i].data must be exactly
- * `approveHash(derive(E[i+1]))`. Returns null on any mismatch.
- */
+// derive(E0) must equal the approved hash and each E[i].data must be approveHash(derive(E[i+1]))
 export const verifyNestedTxPayload = (approvedHash: string, payload: string): NestedTxEnvelope[] | null => {
   const envelopes = decodeNestedTxPayload(payload)
   if (!envelopes) {
@@ -356,14 +329,7 @@ const verifyAndStripExecTransactionCalldata = (data: string, context?: NestedTxC
   }
 }
 
-/**
- * Receiver-side helper: verifies and strips an envelope from incoming `approveHash` or
- * `execTransaction` calldata.
- * - Neither call, no trailing payload, or an unknown payload → original data unchanged
- * - Payload decodes but does not verify (against the approved hash / the exec args) → throws
- * - Verified → canonical calldata plus the innermost envelope (the actual child tx)
- * `context` (the called Safe and current chain) additionally pins an exec envelope to that Safe.
- */
+// Throws when a payload decodes but doesn't verify; absent or unknown payloads pass through
 export const verifyAndStripNestedTxCalldata = (data: string, context?: NestedTxContext): StripResult => {
   if (isHexString(data) && data.toLowerCase().startsWith(EXEC_TRANSACTION_SELECTOR)) {
     return verifyAndStripExecTransactionCalldata(data, context)

@@ -126,8 +126,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
       async send(params: { txs: any[]; params: { safeTxGas: number } }, appInfo) {
         const id = Math.random().toString(36).slice(2)
 
-        // approveHash/execTransaction calldata may carry a nested-tx envelope; verify it and strip
-        // it so the parent SafeTx only contains the canonical calldata
+        // Verify and strip any nested-tx envelope
         let nestedChildTx: NestedTxEnvelope | undefined
         let strippedTxs: { to: string; value: string; data: string }[]
         try {

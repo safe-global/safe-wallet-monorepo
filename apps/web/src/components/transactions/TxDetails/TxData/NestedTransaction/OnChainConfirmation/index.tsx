@@ -24,15 +24,12 @@ export const OnChainConfirmation = ({
   const chainId = useChainId()
   const signedHash = useSignedHash(data)
 
-  // A verified envelope from the current flow (e.g. a nested tx received via WalletConnect),
-  // used as a display fallback when the child tx is unknown to the service
+  // Display fallback when the child tx is unknown to the service
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const envelopeChildTx = flowData?.nestedChildTx
 
   const verifiedEnvelopeTx = useMemo<NestedTxEnvelope | undefined>(() => {
-    // The envelope must commit to the hash this component is rendering — a batch can contain
-    // several approveHash calls but the flow only carries one envelope. It must also describe
-    // the Safe the approveHash is executed on, on the current chain.
+    // A batch can hold several approveHash calls but the flow carries only one envelope
     if (!envelopeChildTx || !signedHash) return undefined
     if (deriveEnvelopeSafeTxHash(envelopeChildTx).toLowerCase() !== signedHash.toLowerCase()) {
       console.info('[NestedTxEnvelope] flow envelope does not match the displayed approveHash, ignoring it', {
@@ -60,8 +57,6 @@ export const OnChainConfirmation = ({
     return envelopeChildTx
   }, [envelopeChildTx, signedHash, data?.to?.value, chainId])
 
-  // CGW preview decodes the envelope tx against the child Safe for human-readable details;
-  // until it resolves (or if it fails) the raw envelope fields are shown
   const [envelopePreview] = useTxPreview(
     verifiedEnvelopeTx && {
       to: verifiedEnvelopeTx.to,
@@ -83,8 +78,7 @@ export const OnChainConfirmation = ({
     [verifiedEnvelopeTx],
   )
 
-  // The verified envelope is the primary source: the first signer's child tx is not known to
-  // the service yet, and the envelope is cryptographically bound to the approved hash
+  // The first signer's child tx isn't known to the service yet
   const { data: nestedTxDetails, error: txDetailsError } = useTransactionsGetTransactionByIdV1Query(
     { chainId: chainId || '', id: signedHash || '' },
     { skip: !signedHash || !chainId || !!verifiedEnvelopeTx },
@@ -93,7 +87,6 @@ export const OnChainConfirmation = ({
   return (
     <NestedTransaction txData={data} isConfirmationView={isConfirmationView}>
       {verifiedEnvelopeTx && envelopePreview ? (
-        // Same rendering as the service path, so all signers see identical decoding
         <TxData
           txData={envelopePreview.txData}
           txInfo={envelopePreview.txInfo}

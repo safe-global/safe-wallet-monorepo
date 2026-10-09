@@ -16,7 +16,6 @@ export type SafeAppsTxParams = {
   requestId: RequestId
   txs: BaseTransaction[]
   params?: SendTransactionRequestParams
-  // Verified child tx carried by a nested-Safe approveHash envelope, for display fallback
   nestedChildTx?: NestedTxEnvelope
 }
 

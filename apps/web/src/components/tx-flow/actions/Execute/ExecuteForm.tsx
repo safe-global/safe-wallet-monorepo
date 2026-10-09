@@ -160,9 +160,7 @@ export const ExecuteForm = ({
       return
     }
 
-    // A smart-contract-wallet executor (nested Safe or a Safe connected via WalletConnect) that
-    // only queues the tx returns a safeTxHash rather than executing. Route those to the nested
-    // success screen instead of the processing screen (whose Etherscan link would be wrong).
+    // A queuing Safe executor returns a safeTxHash, so the explorer link would be wrong
     onSubmitSuccess?.({ txId: executedTxId, isExecuted })
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
     setTxFlow(

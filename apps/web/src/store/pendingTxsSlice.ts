@@ -71,8 +71,7 @@ type PendingIndexingTx = PendingTxCommonProps & {
 type PendingNestedSigningTx = PendingTxCommonProps & {
   signerAddress: string
   txHashOrParentSafeTxHash: string
-  // true → executor Safe executed immediately, so `txHashOrParentSafeTxHash` is an on-chain tx hash
-  // false → the tx was only queued in the executor Safe, so it is that Safe's safeTxHash
+  // false → `txHashOrParentSafeTxHash` is the executor Safe's safeTxHash
   executed: boolean
   // Which Safe method the signer Safe was asked to run (drives the success-screen label)
   method: 'approveHash' | 'execTransaction'

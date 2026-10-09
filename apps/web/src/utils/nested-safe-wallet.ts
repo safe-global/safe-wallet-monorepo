@@ -66,9 +66,7 @@ export const getNestedWallet = (
         return Promise.reject('Could not initialize core sdk')
       }
 
-      // approveHash/execTransaction calldata may carry a nested-tx envelope; verify it and strip it
-      // before creating the parent SafeTx (throws if the envelope doesn't match the call).
-      // The verified child tx is proposed alongside the parent tx below.
+      // Verify and strip any nested-tx envelope; the child tx is proposed alongside the parent below
       let nestedChildTx: NestedTxEnvelope | undefined
       const transactions = params.txs.map(({ to, value, data }: any) => {
         const { data: strippedData, childTx } = verifyAndStripNestedTxCalldata(data, {
@@ -110,8 +108,7 @@ export const getNestedWallet = (
           )
           result = await connectedSDK.approveTransactionHash(safeTxHash)
         } else {
-          // The queue only accepts signed proposals. Never executed here, even at threshold 1: the
-          // user executes it from the parent Safe, same as any other Safe tx
+          // Never executed here, even at threshold 1: the user executes it from the parent Safe
           const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
           await proposeTx(
             safeInfo.chainId,
