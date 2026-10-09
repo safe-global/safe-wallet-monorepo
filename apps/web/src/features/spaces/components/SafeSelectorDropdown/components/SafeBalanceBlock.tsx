@@ -1,5 +1,5 @@
 import FiatValue from '@/components/common/FiatValue'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 
 export interface SafeBalanceBlockProps {
   isLoading: boolean

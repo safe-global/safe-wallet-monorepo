@@ -7,7 +7,7 @@ import type {
   SidebarGroupConfig,
   SidebarItemConfig,
   SafeSidebarVariantProps,
-} from '@views/features/spaces/components/Sidebar/types'
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()

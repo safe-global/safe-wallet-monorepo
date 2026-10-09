@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Copy, Check } from 'lucide-react'
 import useCopyToClipboard from '@/hooks/useCopyToClipboard'
-import RowIconAction from '@views/components/common/AccountRow/RowIconAction'
+import RowIconAction from '@safe-global/views/components/common/AccountRow/RowIconAction'
 
 // Copies a safe address to the clipboard. Used in the dropdown trigger and list rows; the rows pass
 // a distinct testId so the trigger's `copy-address-btn` stays a single, unambiguous element.

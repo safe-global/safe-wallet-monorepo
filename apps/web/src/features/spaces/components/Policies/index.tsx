@@ -1,21 +1,24 @@
 import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
   ADD_POLICY_OPTIONS,
   type AddPolicyId,
-} from '@views/features/spaces/components/Policies/AddPolicyDialog/options'
+} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
-import { PoliciesLoadError, PoliciesLoading } from '@views/features/spaces/components/Policies/PoliciesLoadState'
+import {
+  PoliciesLoadError,
+  PoliciesLoading,
+} from '@safe-global/views/features/spaces/components/Policies/PoliciesLoadState'
 import PolicyCatalogue from './PolicyCatalogue'
-import type { PolicyLock } from '@views/features/spaces/components/Policies/policyLock'
+import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
-import { PROPOSER_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -23,12 +26,12 @@ import SpendingLimitFlow from './SpendingLimitFlow'
 import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
 import EnableSpendingLimitModuleFlow from './SpendingLimitFlow/EnableModuleFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
-import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import {
   REQUEST_POLICY_FORM_HEIGHT,
   REQUEST_POLICY_FORM_URL,
   REQUEST_POLICY_FORM_WIDTH,
-} from '@views/features/spaces/components/Policies/constants'
+} from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
   isPendingPolicy,
   isProposerPolicy,
@@ -36,7 +39,7 @@ import {
   type Policy,
   type PolicySafe,
   type SpendingLimitPolicy,
-} from '@views/features/spaces/components/Policies/types'
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */

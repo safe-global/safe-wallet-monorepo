@@ -9,7 +9,7 @@ import type { ChainInfo } from '@/features/spaces/types'
 import type {
   SafeAccountEntry,
   SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 // Ids the story fixtures serve, so the chain logos resolve.
 const ETHEREUM = '1'

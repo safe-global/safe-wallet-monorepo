@@ -2,7 +2,7 @@ import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { MemberRole, MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
-import { getSidebarProfileInfo } from '@views/features/spaces/components/HeaderNavigation/getSidebarProfileInfo'
+import { getSidebarProfileInfo } from '@safe-global/views/features/spaces/components/HeaderNavigation/getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
 
 /**

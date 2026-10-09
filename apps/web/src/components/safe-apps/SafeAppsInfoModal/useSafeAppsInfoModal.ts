@@ -3,8 +3,8 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
 import useChainId from '@/hooks/useChainId'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import type { AllowedFeatures } from '@views/components/safe-apps/types'
-import { PermissionStatus } from '@views/components/safe-apps/types'
+import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'
+import { PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import { getOrigin } from '../utils'
 
 const SAFE_APPS_INFO_MODAL = 'SafeApps__infoModal'

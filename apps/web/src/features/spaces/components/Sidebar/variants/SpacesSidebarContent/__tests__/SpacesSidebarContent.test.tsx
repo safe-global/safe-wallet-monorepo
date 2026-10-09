@@ -6,7 +6,7 @@ import type {
   SpaceItem,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@views/features/spaces/components/Sidebar/types'
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const mockUseCurrentSpaceId = jest.fn()
 const mockUseIsActiveMember = jest.fn()

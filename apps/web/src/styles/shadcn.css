@@ -13,7 +13,6 @@
 @source '../';
 /* Also scan shared packages whose JSX is reused via path aliases. */
 @source '../../../../packages';
-@source '../../../../storybook/src';
 
 /* CSS variables scoped to .shadcn-scope ONLY — never :root */
 .shadcn-scope {

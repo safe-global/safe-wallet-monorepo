@@ -9,7 +9,7 @@ import type {
   PolicySafe,
   PolicySpender,
   SpendingLimitPolicy,
-} from '@views/features/spaces/components/Policies/types'
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import { unknownToken, type ResolveTokenInfo } from './mapActivePolicies'
 
 type PendingChange = PendingPolicyDto['data']['changes'][number]

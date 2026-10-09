@@ -2,8 +2,11 @@ import uniqWith from 'lodash/uniqWith'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { filledLimits } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/filledLimits'
+import type {
+  RemovalCopy,
+  SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import { filledLimits } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/filledLimits'
 
 /** What an edit would take away, counted for the notice that stands in for the removed rows. */
 export type PendingRemovals = {
@@ -43,7 +46,7 @@ export const findPendingRemovals = (
 }
 
 /** The notice's two lines: what goes, and what that means before the transaction executes. */
-export type RemovalCopy = { title: string; description: string }
+export type { RemovalCopy } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 const STAYS_IN_FORCE = 'They can still be spent until this transaction is executed.'
 const POLICY_GOES = 'Executing it removes the spending limit from this Safe account entirely.'

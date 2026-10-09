@@ -3,7 +3,7 @@ import { fn } from 'storybook/test'
 import {
   PENDING_BANNER_TITLE,
   signAndExecuteLine,
-} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import SpendingLimitActions from './SpendingLimitActions'
 
 const meta = {

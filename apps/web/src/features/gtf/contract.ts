@@ -1,6 +1,6 @@
 import type FeesPreview from './components/FeesPreview'
 import type FeeInfoBanner from './components/FeeInfoBanner'
-import type HistoryFeesAccordion from '@views/features/gtf/components/HistoryFeesAccordion'
+import type HistoryFeesAccordion from '@safe-global/views/features/gtf/components/HistoryFeesAccordion'
 import type { resolveFeeParams } from './services/resolveFeeParams'
 
 export interface GTFContract {

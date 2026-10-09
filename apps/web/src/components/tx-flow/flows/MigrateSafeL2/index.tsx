@@ -1,5 +1,5 @@
 import { MigrateSafeL2Review } from './MigrateSafeL2Review'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
 import { TxFlow } from '../../TxFlow'
 
 const MigrateSafeL2Flow = () => (

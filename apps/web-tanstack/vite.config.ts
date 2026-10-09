@@ -10,23 +10,12 @@ import remarkHeadingId from 'remark-heading-id'
 import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
-import { readFileSync, statSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import { swAssets } from './plugins/vite-plugin-sw-assets'
 import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const webRoot = path.resolve(__dirname, '../web')
-const storybookRoot = path.resolve(__dirname, '../../storybook')
-const SOURCE_SUFFIXES = ['', '.tsx', '.ts', '.js', '/index.tsx', '/index.ts', '/index.js']
-const resolveWebSource = (subpath: string) => {
-  for (const root of [path.join(webRoot, 'src'), path.join(storybookRoot, 'src')]) {
-    for (const suffix of SOURCE_SUFFIXES) {
-      if (statSync(path.join(root, subpath) + suffix, { throwIfNoEntry: false })?.isFile())
-        return path.join(root, subpath) + suffix
-    }
-  }
-  return path.join(webRoot, 'src', subpath)
-}
 const pkg = JSON.parse(readFileSync(path.resolve(webRoot, 'package.json'), 'utf-8'))
 
 let commitHash = process.env.VITE_COMMIT_HASH || process.env.NEXT_PUBLIC_COMMIT_HASH || ''
@@ -170,14 +159,14 @@ export default defineConfig(({ mode }) => {
 
         // Cross-workspace source aliases — reuse apps/web/src verbatim during cutover.
         { find: /^@\/public\/(.*)$/, replacement: path.resolve(webRoot, 'public/$1') },
-        { find: /^@views\/(.*)$/, replacement: path.resolve(storybookRoot, 'src/$1') },
-        { find: /^@\/(.*)$/, replacement: '$1', customResolver: (subpath) => resolveWebSource(subpath) },
+        { find: /^@\/(.*)$/, replacement: path.resolve(webRoot, 'src/$1') },
 
         // Mirror apps/web/tsconfig.json `paths` so reused source resolves shared
         // packages by subpath (e.g. `@safe-global/utils/utils/chains`).
         { find: /^@safe-global\/theme\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/theme/src/$1') },
         { find: /^@safe-global\/store\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/store/src/$1') },
         { find: /^@safe-global\/utils\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/utils/src/$1') },
+        { find: /^@safe-global\/views\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/views/src/$1') },
         { find: /^@safe-global\/test\/(.*)$/, replacement: path.resolve(__dirname, '../../config/test/$1') },
 
         // apps/web/src/pages/_app.tsx uses bare `src/...` imports (Next.js baseUrl convention).

@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import ProposerDrawer from '../ProposerDrawer'
-import { ProposerStatus } from '@views/features/spaces/components/Policies/ProposerDrawer/variants/types'
+import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 const OVERVIEW = {
   proposer: { address: '0x1f9090aaE28b8a3dCeaDf281B0F12828e676c326', name: 'Marc' },

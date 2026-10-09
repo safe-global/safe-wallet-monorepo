@@ -1,6 +1,6 @@
-export { default as HnModal } from '@views/features/hypernative/components/HnSignupFlow/HnModal'
+export { default as HnModal } from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnModal'
 export { default as HnSignupIntro } from './HnSignupIntro'
 export { default as HnSignupFlow } from './HnSignupFlow'
-export type { HnModalProps } from '@views/features/hypernative/components/HnSignupFlow/HnModal'
+export type { HnModalProps } from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnModal'
 export type { HnSignupIntroProps } from './HnSignupIntro'
 export type { HnSignupFlowProps } from './HnSignupFlow'

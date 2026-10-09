@@ -1,13 +1,13 @@
 import { type ReactNode } from 'react'
 import type * as ReactModule from 'react'
-import type * as SafeScopeModule from '@/components/tx-flow/safe-scope'
+import type * as SafeScopeModule from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
 import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
-import { SIGNERS_ONLY_COPY } from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import { SIGNERS_ONLY_COPY } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { useGrantProposer, type GrantProposer } from '../hooks/useGrantProposer'
 import { useParentSafeWallet } from '../../hooks/useParentSafeWallet'
 import ProposerRoleFlow from '../index'
@@ -37,7 +37,9 @@ jest.mock('@/components/common/ChainIndicator', () => {
 // The real provider fetches the Safe, builds a provider and an SDK; the flow only needs the scope contract.
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => {
   const React = jest.requireActual<typeof ReactModule>('react')
-  const { SafeScopeContext } = jest.requireActual<typeof SafeScopeModule>('@/components/tx-flow/safe-scope')
+  const { SafeScopeContext } = jest.requireActual<typeof SafeScopeModule>(
+    '@safe-global/views/components/tx-flow/safe-scope',
+  )
   const Provider = ({ children }: { children: ReactNode }) => {
     const [target, setTarget] = React.useState<{ chainId: string; safeAddress: string }>()
     const value = React.useMemo(

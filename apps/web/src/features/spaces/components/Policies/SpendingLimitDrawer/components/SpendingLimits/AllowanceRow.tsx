@@ -1,17 +1,17 @@
 import type { ReactElement } from 'react'
 import TokenIcon from '@/components/common/TokenIcon'
-import { Badge } from '@/components/ui/badge'
-import { Progress, ProgressIndicator, ProgressTrack } from '@/components/ui/progress'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { CHANGE_BADGE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import type { PolicyAllowance } from '@views/features/spaces/components/Policies/types'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Progress, ProgressIndicator, ProgressTrack } from '@safe-global/views/components/ui/progress'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { PolicyAllowance } from '@safe-global/views/features/spaces/components/Policies/types'
 import {
   formatAllowanceAmount,
   formatRemaining,
   formatResetUtc,
   remainingPercent,
-} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/format'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 
 const TOKEN_ICON_SIZE = 24
 

@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
@@ -18,12 +18,12 @@ import {
   resolveStatusTone,
   SeverityIcon,
   type SeverityTone,
-} from '@views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import {
   VULNERABLE_MODULE_INTRO,
   ZODIAC_VULNERABILITY_CTA,
   getModuleRowContent,
-} from '@views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }

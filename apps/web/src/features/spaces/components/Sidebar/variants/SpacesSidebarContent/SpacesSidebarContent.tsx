@@ -3,7 +3,10 @@ import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
-import type { SidebarItemConfig, SidebarVariantContentProps } from '@views/features/spaces/components/Sidebar/types'
+import type {
+  SidebarItemConfig,
+  SidebarVariantContentProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'

@@ -16,14 +16,14 @@
     "incremental": true,
     "types": ["vite/client", "jest", "@testing-library/jest-dom"],
     "paths": {
-      "@/*": ["../web/src/*", "../../storybook/src/*"],
-      "@views/*": ["../../storybook/src/*"],
+      "@/*": ["../web/src/*"],
       "@/public/*": ["../web/public/*"],
       "@/storybook/*": ["../web/.storybook/*"],
       "src/*": ["../web/src/*"],
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/views/*": ["../../packages/views/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
       "@safe-global/safe-apps-sdk/dist/types/types/permissions": [
         "../../node_modules/@safe-global/safe-apps-sdk/dist/types/types/permissions"

@@ -1,7 +1,7 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { useContext } from 'react'
 import type { SyntheticEvent, ReactElement } from 'react'
 
@@ -14,7 +14,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import { RecoveryListItemContext } from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 export default function CancelRecoveryButton({

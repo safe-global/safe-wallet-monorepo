@@ -1,9 +1,9 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useMemo } from 'react'
 import type { ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { useIsRecoverer } from '../../hooks/useIsRecoverer'
 import useSafeInfo from '@/hooks/useSafeInfo'

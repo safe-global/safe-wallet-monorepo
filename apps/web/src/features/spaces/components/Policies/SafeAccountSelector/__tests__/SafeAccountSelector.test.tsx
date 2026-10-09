@@ -13,13 +13,13 @@ import {
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
   SIGNERS_ONLY_COPY,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../utils'
 import type {
   SafeAccountEntry,
   SafeAccountGroup,
   SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />

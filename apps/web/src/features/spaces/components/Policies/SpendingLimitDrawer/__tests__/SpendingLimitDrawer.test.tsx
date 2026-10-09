@@ -13,7 +13,7 @@ import type {
   DrawerPolicy,
   PendingTxOutcome,
   Viewer,
-} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
 jest.mock('@/components/common/ChainIndicator', () => {

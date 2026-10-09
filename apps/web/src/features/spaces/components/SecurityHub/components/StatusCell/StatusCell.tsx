@@ -1,10 +1,10 @@
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SafeGrade } from '@/features/security/types'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
-} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
 
 const DASH = '—'
 

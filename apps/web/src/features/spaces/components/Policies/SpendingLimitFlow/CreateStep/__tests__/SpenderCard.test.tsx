@@ -13,14 +13,14 @@ import {
   SPENDER_HELPER_TEXT,
   SPENDER_IS_SAFE_ERROR,
   SPENDER_RESERVED_ERROR,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
   createEmptySpender,
   type SpenderFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpenderCard from '../SpenderCard'
 
 jest.mock('@/hooks/useSafeInfo')

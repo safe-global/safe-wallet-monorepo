@@ -1,22 +1,22 @@
 import { type MouseEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { Select, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/utils/cn'
+import { Select, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { cn } from '@safe-global/views/utils/cn'
 import SafeSelectorTriggerContent from './components/SafeSelectorTriggerContent'
 import SafeDropdownContainer from './components/SafeDropdownContainer'
-import InlineRetryError from '@/components/common/InlineRetryError'
+import InlineRetryError from '@safe-global/views/components/common/InlineRetryError'
 import { useSafeSelectorState } from './hooks/useSafeSelectorState'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'
 import { useTopbarOverlayElevation } from '@/hooks/useTopbarElevation'
 import useChains from '@/hooks/useChains'
-import { getSafeSelectorClassVariants } from '@views/features/spaces/components/SafeSelectorDropdown/utils/classVariants'
+import { getSafeSelectorClassVariants } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils/classVariants'
 import type {
   SafeItemData,
   SafeSelectorDropdownProps,
-} from '@views/features/spaces/components/SafeSelectorDropdown/types'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 
 // Keeps the dropdown trigger renderable when the current safe isn't in `items`.
 function buildFallbackSafeItem(selectedItemId: string | undefined, chainConfigs: Chain[]): SafeItemData | null {

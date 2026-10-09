@@ -14,7 +14,7 @@ import {
   isSafeAccountGroup,
   type SafeAccountEntry,
   type SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const mockUseSpaceSafes = jest.fn()
 const mockUseGetMultipleSafeOverviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')

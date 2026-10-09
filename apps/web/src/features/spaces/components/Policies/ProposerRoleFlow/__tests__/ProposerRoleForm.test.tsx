@@ -7,10 +7,10 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
-import { getNestedSafesNoticeText } from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import { getNestedSafesNoticeText } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
-import { PARENT_SAFE_WALLET_COPY } from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import { PARENT_SAFE_WALLET_COPY } from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 import ProposerRoleForm, { type ProposerRoleFormProps } from '../ProposerRoleForm'
 
 jest.mock('@/components/common/ChainIndicator', () => {

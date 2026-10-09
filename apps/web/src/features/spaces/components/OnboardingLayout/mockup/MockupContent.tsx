@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { SafeAppMockupAccount } from '@views/features/spaces/components/OnboardingLayout/mockup/types'
+import type { SafeAppMockupAccount } from '@safe-global/views/features/spaces/components/OnboardingLayout/mockup/types'
 import MockupAccountRow, { sumOverviewsForAddress } from './MockupAccountRow'
 
 interface MockupContentProps {

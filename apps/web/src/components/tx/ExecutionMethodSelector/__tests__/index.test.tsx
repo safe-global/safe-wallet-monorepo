@@ -17,7 +17,7 @@ jest.mock('../../SponsoredBy', () => ({
     <span data-testid="sponsored-by" data-props={JSON.stringify(props)} />
   ),
 }))
-jest.mock('@/components/common/WalletIcon', () => ({ __esModule: true, default: () => null }))
+jest.mock('@safe-global/views/components/common/WalletIcon', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/tx/BalanceInfo', () => ({
   __esModule: true,
   default: () => <div data-testid="balance-info" />,

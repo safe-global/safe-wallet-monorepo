@@ -3,7 +3,7 @@ import SafeSelectorTriggerContent from '../components/SafeSelectorTriggerContent
 import * as useIsHypernativeGuard from '@/features/hypernative'
 import * as coreFeatures from '@/features/__core__'
 import { SafeHeaderHnTooltip } from '@/features/hypernative'
-import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
 jest.mock('@/features/__core__', () => ({
@@ -23,7 +23,10 @@ jest.mock('@/hooks/useSafeDisplayName', () => ({
 
 jest.mock('../components/SafeBalanceBlock', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/components/common/AccountRow/CopyAddressButton', () => ({ __esModule: true, default: () => null }))
-jest.mock('@/components/common/AccountRow/ExplorerLinkButton', () => ({ __esModule: true, default: () => null }))
+jest.mock('@safe-global/views/components/common/AccountRow/ExplorerLinkButton', () => ({
+  __esModule: true,
+  default: () => null,
+}))
 jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => ({ __esModule: true, default: () => null }))
 
 const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock

@@ -20,7 +20,7 @@ import { HnActivatedBannerForSettings } from './components/HnActivatedSettingsBa
 import HnSecurityReportBtn from './components/HnSecurityReportBtn/HnSecurityReportBtn'
 import HnSecuritySection from './components/HnSecuritySection'
 import { HnLoginCard } from './components/HnLoginCard'
-import HypernativeLogo from '@views/features/hypernative/components/HypernativeLogo'
+import HypernativeLogo from '@safe-global/views/features/hypernative/components/HypernativeLogo'
 import { HypernativeTooltip } from './components/HypernativeTooltip'
 import { SafeHeaderHnTooltip } from './components/SafeHeaderHnTooltip'
 import { HnAnalysisGroupCard } from './components/HnAnalysisGroupCard'

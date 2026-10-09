@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Button } from '@safe-global/views/components/ui/button'
 import AddCustomAppIcon from '@/public/images/apps/add-custom-app.svg'
 import { AddCustomAppModal } from '@/components/safe-apps/AddCustomAppModal'
 

@@ -5,7 +5,7 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { countSeats } from '@/utils/spaces'
-import type { SafeRef } from '@views/features/spaces/components/Plans/types'
+import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
 
 export const useSeatTrim = (spaceId: string) => {
   const { currentData: spaceSafes } = useSpaceSafesGetV1Query({ spaceId })

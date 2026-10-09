@@ -1,14 +1,14 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
-import { buildSafeScopeKey } from '@/components/tx-flow/safe-scope/utils'
+import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
 import type {
   SafeAccountEntry,
   SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { flattenSafeAccounts } from '../../SafeAccountSelector/utils'
-import type { PolicySafe, PolicySpender } from '@views/features/spaces/components/Policies/types'
+import type { PolicySafe, PolicySpender } from '@safe-global/views/features/spaces/components/Policies/types'
 import { resolveName, resolveSafe } from './toPolicySummaryModel'
-import type { SpendingLimitSummaryModel } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+import type { SpendingLimitSummaryModel } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 /** The indexer's address casing need not match the account list's, so the Safe is matched by address, not by id. */
 const findSafe = (safe: PolicySafe, accounts: readonly SafeAccountEntry[]): SafeAccountOption =>

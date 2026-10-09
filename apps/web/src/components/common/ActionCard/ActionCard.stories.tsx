@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ActionCard } from '.'
-import { Countdown } from '@/components/common/Countdown'
+import { Countdown } from '@safe-global/views/components/common/Countdown'
 
 const meta = {
   title: 'Components/Common/ActionCard',

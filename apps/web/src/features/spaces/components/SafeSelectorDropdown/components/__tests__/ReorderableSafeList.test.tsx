@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import ReorderableSafeList from '../ReorderableSafeList'
-import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('../SafeItem', () => ({
   __esModule: true,

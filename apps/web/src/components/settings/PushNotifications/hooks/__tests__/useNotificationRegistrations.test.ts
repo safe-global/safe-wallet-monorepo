@@ -13,7 +13,7 @@ import {
   PERMISSION_REQUIRED_MESSAGE,
   RETRY_MESSAGE,
   SIGNATURE_REJECTED_MESSAGE,
-} from '@views/components/settings/PushNotifications/constants'
+} from '@safe-global/views/components/settings/PushNotifications/constants'
 import { getGenericErrorWithStatus, RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import * as preferences from '../useNotificationPreferences'
 import * as tokenVersion from '../useNotificationsTokenVersion'

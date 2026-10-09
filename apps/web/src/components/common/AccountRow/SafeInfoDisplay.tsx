@@ -1,20 +1,20 @@
 import { useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { blo } from 'blo'
 import NextLink, { type LinkProps } from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 import {
   getInitials,
   getSafeDisplayInfo,
   TOOLTIP_DELAY_MS,
   HOVER_ACTION_CLASS,
-} from '@views/components/common/AccountRow/utils'
+} from '@safe-global/views/components/common/AccountRow/utils'
 import CopyAddressButton from './CopyAddressButton'
-import ExplorerLinkButton from '@views/components/common/AccountRow/ExplorerLinkButton'
-import FullAddress from '@views/components/common/AccountRow/FullAddress'
-import RenameButton from '@views/components/common/AccountRow/RenameButton'
-import TruncatedText, { shouldOpenTooltip } from '@views/components/common/AccountRow/TruncatedText'
+import ExplorerLinkButton from '@safe-global/views/components/common/AccountRow/ExplorerLinkButton'
+import FullAddress from '@safe-global/views/components/common/AccountRow/FullAddress'
+import RenameButton from '@safe-global/views/components/common/AccountRow/RenameButton'
+import TruncatedText, { shouldOpenTooltip } from '@safe-global/views/components/common/AccountRow/TruncatedText'
 
 export interface SafeInfoDisplayProps {
   name: string

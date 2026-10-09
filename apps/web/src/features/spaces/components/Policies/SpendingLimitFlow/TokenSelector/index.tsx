@@ -1,8 +1,8 @@
 import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { InputGroupAddon } from '@/components/ui/input-group'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
 import {
   Combobox,
   ComboboxCollection,
@@ -14,18 +14,18 @@ import {
   ComboboxLabel,
   ComboboxList,
   useComboboxAnchor,
-} from '@/components/ui/combobox'
+} from '@safe-global/views/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
-import { matchesTokenQuery } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
+import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import DisabledTokenOption from './DisabledTokenOption'
 import {
   TokenGroupError,
   TokenGroupLoading,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
 import {
   BALANCES_LOAD_ERROR_TEXT,
   HELD_GROUP_LABEL,
@@ -35,7 +35,7 @@ import {
   TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */

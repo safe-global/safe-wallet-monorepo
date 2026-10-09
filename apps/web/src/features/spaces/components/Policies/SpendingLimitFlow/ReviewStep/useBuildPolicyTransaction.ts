@@ -1,19 +1,19 @@
 import { useContext, useEffect, useMemo } from 'react'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxContext'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useLoadFeature } from '@/features/__core__'
 import { SpendingLimitsFeature, type DesiredAllowance, type SpendingLimitState } from '@/features/spending-limits'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   EXISTING_LIMITS_LOAD_ERROR,
   EXISTING_LIMIT_IN_POLICY_ERROR,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { buildDesiredAllowances, findExistingAllowance } from './buildDesiredAllowances'
 
 type BlockerInputs = {

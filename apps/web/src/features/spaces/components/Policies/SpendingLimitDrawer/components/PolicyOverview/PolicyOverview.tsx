@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { ShieldCheck } from 'lucide-react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { DrawerList, DrawerSection, type DrawerListItem } from '@/components/common/Drawer'
-import { Link } from '@/components/ui/link'
+import { Link } from '@safe-global/views/components/ui/link'
 import { AccountIdentity, type AccountIdentityProps } from '../../../components/AccountIdentity'
 
 export type PolicyOverviewProps = {

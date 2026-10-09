@@ -3,7 +3,7 @@ import { PencilLine, ShieldCheck, UsersRound } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import PolicyIntroDialog, {
   type PolicyIntroExplainer,
-} from '@views/features/spaces/components/Policies/PolicyIntroDialog'
+} from '@safe-global/views/features/spaces/components/Policies/PolicyIntroDialog'
 import ProposerPreview from './ProposerPreview'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [

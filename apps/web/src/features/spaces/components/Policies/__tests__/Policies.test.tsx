@@ -5,10 +5,10 @@ import {
   REQUEST_POLICY_FORM_HEIGHT,
   REQUEST_POLICY_FORM_URL,
   REQUEST_POLICY_FORM_WIDTH,
-} from '@views/features/spaces/components/Policies/constants'
+} from '@safe-global/views/features/spaces/components/Policies/constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { PROPOSER_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/ProposerIntroDialog/constants'
-import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
 import { mockStarterPlan } from '../mocks/plan'
 import {

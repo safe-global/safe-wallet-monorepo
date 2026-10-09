@@ -1,11 +1,11 @@
 import { isMultiChainSafeItem } from '@/hooks/safes'
 import { useSpaceSafes } from '@/features/spaces'
 import { SafeCardReadOnly } from '@/features/spaces'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
-import SectionWrapper from '@views/features/global-search/components/SearchSection/SectionWrapper'
+import SectionWrapper from '@safe-global/views/features/global-search/components/SearchSection/SectionWrapper'
 
 const AccountsSection = ({ query, label }: SectionItemProps) => {
   const { allSafes, isLoading } = useSpaceSafes()

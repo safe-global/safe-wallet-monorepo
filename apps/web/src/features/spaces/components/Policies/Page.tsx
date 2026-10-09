@@ -1,14 +1,14 @@
 import { useRouter } from 'next/router'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AuthState from '../AuthState'
 import { usePlanGate } from '../../hooks/usePlanGate'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpacePolicies } from './hooks/useSpacePolicies'
-import type { PolicyId } from '@views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
+import type { PolicyId } from '@safe-global/views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
 import Policies from './index'
 
 const LOCKED_POLICIES: PolicyId[] = ['spending-limit', 'proposer']

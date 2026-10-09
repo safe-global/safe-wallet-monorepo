@@ -7,10 +7,10 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxContext'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { useLoadFeature } from '@/features/__core__'
 import { trackEvent } from '@/services/analytics'
@@ -25,11 +25,11 @@ import {
   EXISTING_LIMITS_LOAD_ERROR,
   EXISTING_LIMIT_IN_POLICY_ERROR,
   REVIEW_STEP_TITLE,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
 import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
-import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))
@@ -51,8 +51,8 @@ jest.mock('@/components/common/ChainIndicator', () => {
   Mock.displayName = 'ChainIndicator'
   return { __esModule: true, default: Mock }
 })
-jest.mock('@/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))

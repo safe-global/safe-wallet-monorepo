@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import type { PaymentLink, Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import { createMockStory } from '@/stories/mocks'
 import ChangePlanDialog from './ChangePlanDialog'
 import ClaimTrialModal from './ClaimTrialModal'

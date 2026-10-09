@@ -1,5 +1,5 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 
 import css from './styles.module.css'

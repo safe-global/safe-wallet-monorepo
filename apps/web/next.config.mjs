@@ -114,12 +114,13 @@ const nextConfig = {
   eslint: {
     dirs: ['src', 'cypress'],
   },
-  experimental: {
-    externalDir: true,
-    ...(isProd || enableExperimentalOptimizations
-      ? { optimizePackageImports: ['lodash', 'date-fns', '@gnosis.pm/zodiac'] }
-      : {}),
-  },
+  ...(isProd || enableExperimentalOptimizations
+    ? {
+        experimental: {
+          optimizePackageImports: ['lodash', 'date-fns', '@gnosis.pm/zodiac'],
+        },
+      }
+    : {}),
   webpack(config, { dev }) {
     config.module.rules.push({
       test: /\.svg$/i,

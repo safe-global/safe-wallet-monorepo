@@ -1,13 +1,15 @@
 import { useContext, useState } from 'react'
 import type { ComponentProps, ReactElement } from 'react'
 
-import TxListAccordionItem, { TX_LIST_ITEM_VALUE } from '@/components/transactions/TxListItem/TxListAccordionItem'
+import TxListAccordionItem, {
+  TX_LIST_ITEM_VALUE,
+} from '@safe-global/views/components/transactions/TxListItem/TxListAccordionItem'
 import RecoverySummary from '../RecoverySummary'
 import RecoveryDetails from '../RecoveryDetails'
 import {
   RecoveryListItemContext,
   RecoveryListItemProvider,
-} from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+} from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 function ProvidedRecoveryListItem({ item }: { item: RecoveryQueueItem }): ReactElement {

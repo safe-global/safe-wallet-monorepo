@@ -135,8 +135,8 @@ export type {
   SafeItemData,
   SafeItemDataChain,
   SafeRenameTarget,
-} from '@views/features/spaces/components/SafeSelectorDropdown/types'
-export { matchesSafeSearch } from '@views/features/spaces/components/SafeSelectorDropdown/utils'
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
+export { matchesSafeSearch } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils'
 export { default as SafeSelectorDropdown } from './components/SafeSelectorDropdown'
 export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'

@@ -3,11 +3,17 @@ import { type ReactElement, useContext, useEffect, useMemo, useState } from 'rea
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
 
-import { Alert, AlertTitle, AlertDescription, AlertAction, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import {
+  Alert,
+  AlertTitle,
+  AlertDescription,
+  AlertAction,
+  AlertSeverityIcon,
+} from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { X as CloseIcon } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import AddIcon from '@/public/images/common/add.svg'
@@ -17,10 +23,10 @@ import {
   MultiTokenTransferFields,
   TokenTransferType,
   MultiTransfersFields,
-} from '@views/components/tx-flow/flows/TokenTransfer/types'
-import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'

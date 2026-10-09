@@ -6,9 +6,9 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 import { useIsAdmin } from '../../../hooks/useSpaceMembers'
@@ -17,7 +17,7 @@ import SafeAccountSelector from '../SafeAccountSelector'
 import {
   getNestedSafesNoticeText,
   NESTED_SAFES_NOTICE_TITLE,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import type { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import {
@@ -26,7 +26,7 @@ import {
   PROPOSER_FIELD_HELPER,
   PROPOSER_NAME_HELPER,
   PROPOSER_NAME_WORKSPACE_HELPER,
-} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 
 export type ProposerRoleFormValues = {
   proposer: string

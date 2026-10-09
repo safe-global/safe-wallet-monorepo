@@ -17,8 +17,7 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*", "../../storybook/src/*"],
-      "@views/*": ["../../storybook/src/*"],
+      "@/*": ["./src/*"],
       "@safe-global/safe-apps-sdk/*": ["../../node_modules/@safe-global/safe-apps-sdk/*"],
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],
@@ -26,6 +25,7 @@
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/views/*": ["../../packages/views/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
       "@/storybook/*": ["./.storybook/*"]
     },
@@ -51,8 +51,8 @@
     "./jest.setup.js",
     "./eslint.config.mjs",
     "../../config/test/**/*.ts",
-    "../../storybook/src/**/*.ts",
-    "../../storybook/src/**/*.tsx"
+    "../../packages/views/src/**/*.ts",
+    "../../packages/views/src/**/*.tsx"
   ],
   "exclude": ["node_modules", "src/types/contracts"]
 }

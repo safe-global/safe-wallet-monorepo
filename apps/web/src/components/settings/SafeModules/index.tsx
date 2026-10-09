@@ -1,9 +1,9 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { RemoveModuleFlow } from '@/components/tx-flow/flows'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -12,7 +12,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
 import { RecoveryFeature, useRecovery } from '@/features/recovery'
 import { useLoadFeature } from '@/features/__core__'
-import SettingsCard from '@views/components/settings/SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 import css from '../TransactionGuards/styles.module.css'
 

@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { Card } from '@/components/ui/card'
+import { Card } from '@safe-global/views/components/ui/card'
 import LimitSummaryRow from './LimitSummaryRow'
-import SummaryField from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
+import SummaryField from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
 import {
   LIMITS_LABEL,
   SPENDER_LABEL,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import type { SpenderSummary } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { SpenderSummary } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 const AVATAR_SIZE = 24
 

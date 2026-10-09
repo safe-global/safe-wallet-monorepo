@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { LockedCheckRow } from '@views/features/safe-shield/components/LockedCheckRow'
+import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 /** Without Pro or an own Tenderly project nothing is called; "Set" leads to settings to bring one's own project. */

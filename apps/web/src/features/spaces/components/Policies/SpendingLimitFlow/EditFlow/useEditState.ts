@@ -3,9 +3,9 @@ import type { UseFormReturn } from 'react-hook-form'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { describeRemovals, findPendingRemovals, type RemovalCopy } from '../utils/removals'
 import { hasEditChanges } from '../utils/hasEditChanges'
-import { toSpendingLimitFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { toSpendingLimitFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 export type EditState = {
   /** The notice that stands in for the rows an edit would remove; absent while nothing would go. */

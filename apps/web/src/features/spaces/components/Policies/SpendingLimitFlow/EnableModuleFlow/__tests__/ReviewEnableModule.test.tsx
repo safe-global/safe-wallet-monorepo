@@ -4,15 +4,15 @@ import type Safe from '@safe-global/protocol-kit'
 import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployments'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxContext'
+import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { mockUnenforcedPolicy } from '../../../mocks/policies'
 import {
   MODULE_ALREADY_ENABLED_ERROR,
   REVIEW_STEP_TITLE,
   UNKNOWN_MODULE_ERROR,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import ReviewEnableModule, { type EnableModuleFlowData } from '../ReviewEnableModule'
 
 jest.mock('@/components/tx-flow/TxFlowStep', () => ({ TxFlowStep: jest.fn(({ children }) => <>{children}</>) }))
@@ -28,8 +28,8 @@ jest.mock('@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton', () =>
   __esModule: true,
   default: () => <div data-testid="review-skeleton" />,
 }))
-jest.mock('@/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))

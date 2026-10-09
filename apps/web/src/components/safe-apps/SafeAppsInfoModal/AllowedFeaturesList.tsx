@@ -1,11 +1,11 @@
 import ShieldIcon from '@/public/images/settings/permissions/shield.svg'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import { getBrowserPermissionDisplayValues } from '@/hooks/safe-apps/permissions'
-import PermissionsCheckbox from '@views/components/safe-apps/PermissionCheckbox'
+import PermissionsCheckbox from '@safe-global/views/components/safe-apps/PermissionCheckbox'
 
-import type { AllowedFeatures, AllowedFeatureSelection } from '@views/components/safe-apps/types'
-import { isBrowserFeature } from '@views/components/safe-apps/types'
+import type { AllowedFeatures, AllowedFeatureSelection } from '@safe-global/views/components/safe-apps/types'
+import { isBrowserFeature } from '@safe-global/views/components/safe-apps/types'
 
 type SafeAppsInfoAllowedFeaturesProps = {
   features: AllowedFeatureSelection[]

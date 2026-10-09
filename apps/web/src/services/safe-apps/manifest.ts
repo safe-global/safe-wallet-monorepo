@@ -1,5 +1,5 @@
 import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
-import type { AllowedFeatures, SafeAppDataWithPermissions } from '@/components/safe-apps/types'
+import type { AllowedFeatures, SafeAppDataWithPermissions } from '@safe-global/views/components/safe-apps/types'
 import { isRelativeUrl, trimTrailingSlash, stripUrlParams } from '@/utils/url'
 
 type AppManifestIcon = {

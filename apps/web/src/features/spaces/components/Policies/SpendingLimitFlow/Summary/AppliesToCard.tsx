@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
-import { Card } from '@/components/ui/card'
+import { Card } from '@safe-global/views/components/ui/card'
 import { SafeAccountSummary } from '../../SafeAccountSelector/components/SafeAccountRow'
-import type { SafeAccountOption } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
-import SummaryField from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
-import { APPLIES_TO_LABEL } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import SummaryField from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/SummaryField'
+import { APPLIES_TO_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 
 /** Reuses the selector's own row, so the Safe cannot read differently here than it did in step 1. */
 const AppliesToCard = ({ safe }: { safe: SafeAccountOption }): ReactElement => (

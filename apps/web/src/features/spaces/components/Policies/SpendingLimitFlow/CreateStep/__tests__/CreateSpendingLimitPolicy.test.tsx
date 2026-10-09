@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
@@ -9,7 +9,7 @@ import {
   createDefaultFormValues,
   createEmptyLimit,
   type SpendingLimitPolicyFormValues,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import type { SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 import CreateSpendingLimitPolicy from '..'
 

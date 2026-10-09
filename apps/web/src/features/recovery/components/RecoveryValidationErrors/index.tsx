@@ -4,7 +4,7 @@ import type { ReactElement } from 'react'
 import TxCheckError from '@/components/tx/TxCheckError'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import { useIsValidRecoveryExecuteNextTx, useIsValidRecoverySkipExpired } from '../../hooks/useIsValidRecoveryExecution'
-import { RecoveryListItemContext } from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 export default function RecoveryValidationErrors({ item }: { item: RecoveryQueueItem }): ReactElement | null {

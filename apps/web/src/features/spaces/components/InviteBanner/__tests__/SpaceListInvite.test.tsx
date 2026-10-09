@@ -52,7 +52,7 @@ jest.mock('@/features/spaces', () => ({
   MemberStatus: { INVITED: 'INVITED', ACTIVE: 'ACTIVE', DECLINED: 'DECLINED' },
 }))
 
-jest.mock('@views/features/spaces/components/SpaceCard', () => ({
+jest.mock('@safe-global/views/features/spaces/components/SpaceCard', () => ({
   SpaceSummary: () => <div data-testid="space-summary" />,
 }))
 

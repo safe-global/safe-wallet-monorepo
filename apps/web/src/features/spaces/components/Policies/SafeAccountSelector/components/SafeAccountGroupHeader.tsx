@@ -1,8 +1,8 @@
-import { SelectLabel } from '@/components/ui/select'
+import { SelectLabel } from '@safe-global/views/components/ui/select'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
 import SafeIdentity from './SafeIdentity'
 import { AccountBalance, toStatChains } from './SafeAccountRow'
-import type { SafeAccountGroup } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SafeAccountGroup } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 /**
  * A Safe eligible on more than one chain: its identity, setup, networks and total balance.

@@ -12,12 +12,12 @@ import {
   CALLOUT_TITLE_PREFIX,
   EDIT_CALLOUT_DESCRIPTION,
   EDIT_CALLOUT_NO_CHANGES,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { describeFrequency } from './frequency'
 import type {
   SpendingLimitSummaryModel,
   SpenderSummary,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 type PolicyDescription = {
   title: string

@@ -12,14 +12,14 @@ import {
   EXISTING_LIMIT_ERROR,
   ONE_TIME_HELPER_TEXT,
   REMOVE_LIMIT_LABEL,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import {
   createEmptyLimit,
   spenderAddressPath,
   type LimitFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import TokenLimitCard from '../TokenLimitCard'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'

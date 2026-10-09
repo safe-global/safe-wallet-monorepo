@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
@@ -17,9 +17,17 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { flattenSafeItems } from '@/hooks/safes'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import { removedSafesNote, summarizeRemovedSafes } from '@views/features/spaces/components/Plans/removedSafes'
+import {
+  removedSafesNote,
+  summarizeRemovedSafes,
+} from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from '@views/features/spaces/components/Plans/types'
+import type {
+  CurrentPlan,
+  PlanChangeDirection,
+  PlanPick,
+  SafeRef,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())

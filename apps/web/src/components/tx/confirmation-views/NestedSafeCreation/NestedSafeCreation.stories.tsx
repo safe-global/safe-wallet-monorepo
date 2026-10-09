@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { NestedSafeCreation } from './index'
-import { mockNestedSafeCreationTxData } from '@views/components/tx/confirmation-views/NestedSafeCreation/mockData'
+import { mockNestedSafeCreationTxData } from '@safe-global/views/components/tx/confirmation-views/NestedSafeCreation/mockData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/NestedSafeCreation',

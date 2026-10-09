@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import isString from 'lodash/isString'
 import isNumber from 'lodash/isNumber'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { gridFieldClass } from '@views/components/tx/FieldsGrid'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { gridFieldClass } from '@safe-global/views/components/tx/FieldsGrid'
 
 const TxDetailsRow = ({ label, children, grid = false }: { label: string; children: ReactNode; grid?: boolean }) => (
   <div className={cn('flex flex-row flex-wrap items-center gap-2', grid ? 'justify-start' : 'justify-between')}>

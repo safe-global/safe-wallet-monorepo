@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxContext'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
@@ -9,7 +9,7 @@ import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/Revie
 import { isAllowanceModuleAddress } from '@/features/spending-limits/services'
 import useAddressBook from '@/hooks/useAddressBook'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
-import type { PolicySafe, PolicySpender } from '@views/features/spaces/components/Policies/types'
+import type { PolicySafe, PolicySpender } from '@safe-global/views/features/spaces/components/Policies/types'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import SpendingLimitSummary from '../Summary'
 import { toEnableModuleSummaryModel } from '../Summary/toEnableModuleSummaryModel'
@@ -17,7 +17,7 @@ import {
   MODULE_ALREADY_ENABLED_ERROR,
   REVIEW_STEP_TITLE,
   UNKNOWN_MODULE_ERROR,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export type EnableModuleFlowData = {
   safe: PolicySafe

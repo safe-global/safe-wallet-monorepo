@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
-import FileIcon from '@/public/images/settings/data/file.svg'
+import FileIcon from '@safe-global/views/assets/images/settings/data/file.svg'
 import ExportIcon from '@/public/images/common/export.svg'
 import { getPersistedState, useAppSelector } from '@/store'
 import { addressBookSlice, selectAllAddressBooks } from '@/store/addressBookSlice'
@@ -20,7 +20,7 @@ import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
-import SettingsCard from '@views/components/settings/SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)

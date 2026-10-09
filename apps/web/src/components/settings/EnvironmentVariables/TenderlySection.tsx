@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 import { EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import ExternalLink from '@/components/common/ExternalLink'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { TENDERLY_SIMULATE_ENDPOINT_URL } from '@safe-global/utils/config/constants'
 import { EnvVariablesField } from './index'
 

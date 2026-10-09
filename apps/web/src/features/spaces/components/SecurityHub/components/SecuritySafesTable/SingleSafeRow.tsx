@@ -6,8 +6,8 @@ import Identicon from '@/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { cn } from '@/utils/cn'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
 import { BalanceCell, ScoreCell } from './cells'
 import {
@@ -16,9 +16,9 @@ import {
   GRID_COLS,
   HIDE_BALANCE,
   ROW_VARIANTS,
-} from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { getNonPassingCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
-import type { SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
+import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 export type SingleSafeRowProps = {
   safe: SpaceSafeEntry

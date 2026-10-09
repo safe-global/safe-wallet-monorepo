@@ -1,14 +1,14 @@
 import type { ReactElement } from 'react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ScanContext, ScanResult } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { usePanelHeader } from '../../SecurityChecks/hooks/usePanelHeader'
 import SecurityChecksSection from '../../SecurityChecks/SecurityChecksSection'
-import { ScoreGauge } from '@views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
+import { ScoreGauge } from '@safe-global/views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
 
 type SecurityDrawerChecksProps = {
   scanContext: ScanContext | null

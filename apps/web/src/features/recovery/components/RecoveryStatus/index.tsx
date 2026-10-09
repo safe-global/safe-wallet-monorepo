@@ -1,12 +1,12 @@
 import type { ReactElement } from 'react'
 
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import ClockIcon from '@/public/images/common/clock.svg'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryEvent } from '../../services/recoveryEvents'
 import store from '../RecoveryContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
-import TxStatusChip from '@/components/transactions/TxStatusChip'
+import TxStatusChip from '@safe-global/views/components/transactions/TxStatusChip'
 
 const STATUS_LABELS: Partial<Record<RecoveryEvent, string>> = {
   [RecoveryEvent.PROCESSING]: 'Processing',

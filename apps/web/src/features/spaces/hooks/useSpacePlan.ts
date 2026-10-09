@@ -1,4 +1,4 @@
-import type { PlanSummary } from '@views/features/spaces/components/Plans/types'
+import type { PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
 import {
   getDaysLeft,
   getSubscriptionPeriodEnd,

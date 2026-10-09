@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import React, { type ReactElement, useCallback, useEffect, useRef, useState } from 'react'
 import { Check } from 'lucide-react'
 import CopyIcon from '@/public/images/common/copy.svg'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import CopyTooltip from '../CopyTooltip'
 
 export interface ButtonProps {

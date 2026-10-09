@@ -6,7 +6,7 @@ import {
   SafeProPendingModal,
   SafeProSubscriptionActivatedModal,
   SafeProTrialActivatedModal,
-} from '@views/features/spaces/components/SafeProModals'
+} from '@safe-global/views/features/spaces/components/SafeProModals'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { getSubscriptionPeriodEnd, getSubscriptionPlanName } from '../../hooks/billing/subscription'

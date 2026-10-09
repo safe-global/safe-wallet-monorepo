@@ -1,12 +1,12 @@
 import type { ReactElement } from 'react'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { SidebarMenuButton } from '@safe-global/views/components/ui/sidebar'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import { getDeterministicColor } from '@/utils/colors'
 import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
 import { icons } from '../config'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import css from '../styles.module.css'
-import type { SafeWorkspaceHeaderBackToSpace } from '@views/features/spaces/components/Sidebar/types'
+import type { SafeWorkspaceHeaderBackToSpace } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()

@@ -1,7 +1,13 @@
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import PlanCards, { type PlanCardActions } from './PlanCards'
 import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
-import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from '@views/features/spaces/components/Plans/types'
+import type {
+  CurrentPlan,
+  Meter,
+  PlanPick,
+  PlanSummary,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 export default function Plans({
   plan,

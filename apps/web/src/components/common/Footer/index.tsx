@@ -1,17 +1,17 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { Github } from 'lucide-react'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
-import ExternalLink from '@views/components/common/ExternalLink'
-import { Link } from '@/components/ui/link'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Link } from '@safe-global/views/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL, PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { IS_PRODUCTION, COMMIT_HASH, LEGAL_URL } from '@/config/constants'
-import type { FooterProps } from '@views/components/common/Footer/footer.type'
+import type { FooterProps } from '@safe-global/views/components/common/Footer/footer.type'
 
 const footerPages = [
   AppRoutes.settings.index,

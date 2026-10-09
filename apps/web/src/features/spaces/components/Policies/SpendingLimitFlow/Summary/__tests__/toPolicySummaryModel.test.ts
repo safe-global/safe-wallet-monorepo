@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelector/utils'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { safeAccountOptionBuilder } from '../SpendingLimitSummary.fixtures'
 import { toPolicySummaryModel } from '../toPolicySummaryModel'
 

@@ -1,10 +1,10 @@
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { isSameAllowance, isSpendingLimitFor } from '@/features/spending-limits/services'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   filledLimits,
   type FilledLimit,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/filledLimits'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/filledLimits'
 
 /** @returns `true` when the row matches the chain; a half-typed amount cannot, so it counts as changed. */
 const matchesChain = (row: FilledLimit, onChain: SpendingLimitState): boolean => {

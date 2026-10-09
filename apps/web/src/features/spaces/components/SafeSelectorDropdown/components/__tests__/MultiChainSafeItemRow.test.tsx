@@ -2,7 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
-import type { SafeItemData, SafeItemDataChain } from '@views/features/spaces/components/SafeSelectorDropdown/types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -31,7 +34,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
   const Mock = () => <div data-testid="balance-display" />
   Mock.displayName = 'BalanceDisplay'
   return { __esModule: true, default: Mock }
@@ -49,7 +52,7 @@ jest.mock('@/components/common/FiatValue', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 

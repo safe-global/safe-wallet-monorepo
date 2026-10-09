@@ -6,11 +6,11 @@ import { addressIsNotCurrentSafe, addressIsNotReserved } from '@safe-global/util
 import AddressBookInput from '@/components/common/AddressBookInput'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { cn } from '@/utils/cn'
-import { FieldDescription } from '@/components/ui/field'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { cn } from '@safe-global/views/utils/cn'
+import { FieldDescription } from '@safe-global/views/components/ui/field'
 import TokenLimitCard from './TokenLimitCard'
 import { validateUniqueSpender } from '../utils/validation'
 import {
@@ -18,7 +18,7 @@ import {
   limitsPath,
   spenderAddressPath,
   type SpendingLimitPolicyFormValues,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import {
   ADD_TOKEN_LABEL,
   REMOVE_SPENDER_LABEL,
@@ -27,7 +27,7 @@ import {
   SPENDER_LABEL,
   SPENDER_PLACEHOLDER,
   SPENDER_RESERVED_ERROR,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5

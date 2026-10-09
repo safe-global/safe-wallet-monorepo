@@ -1,19 +1,19 @@
 import { type ReactElement, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
-} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
-import type { SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
-import { ScoreGauge } from '@views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
-import { Button } from '@/components/ui/button'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
+import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
+import { ScoreGauge } from '@safe-global/views/features/spaces/components/SecurityHub/components/WorkspaceHealthCard/WorkspaceGauge'
+import { Button } from '@safe-global/views/components/ui/button'
 
 const FILTER_GRADES: SafeGrade[] = ['critical', 'at_risk', 'needs_attention', 'passing']
 

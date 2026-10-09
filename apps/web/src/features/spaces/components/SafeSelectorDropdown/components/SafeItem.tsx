@@ -1,15 +1,18 @@
 import FiatValue from '@/components/common/FiatValue'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
-import BalanceDisplay from '@views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
-import RowEndColumn from '@views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
+import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from './SafeRowStats'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeRenameTarget } from '@views/features/spaces/components/SafeSelectorDropdown/types'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import type {
+  SafeItemData,
+  SafeRenameTarget,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const SafeItem = ({
   name,

@@ -31,7 +31,7 @@ import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
-import { formatContactLabel } from '@views/features/spaces/components/Policies/utils/policyLabel'
+import { formatContactLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
 import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
 

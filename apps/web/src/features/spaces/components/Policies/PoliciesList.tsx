@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react'
 import { ArrowDownUp, Plus } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { SearchInput } from '@/components/ui/search-input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import TableCard from '@/components/common/TableCard'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import TableCard from '@safe-global/views/components/common/TableCard'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import PoliciesTable from './PoliciesTable'
-import { PoliciesNoSearchResults } from '@views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
+import { PoliciesNoSearchResults } from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
 import {
   DEFAULT_POLICY_SORT,
@@ -16,8 +16,8 @@ import {
   sortPolicies,
   type PolicySortContext,
   type PolicySortOption,
-} from '@views/features/spaces/components/Policies/utils/policySort'
-import type { Policy, PolicyType } from '@views/features/spaces/components/Policies/types'
+} from '@safe-global/views/features/spaces/components/Policies/utils/policySort'
+import type { Policy, PolicyType } from '@safe-global/views/features/spaces/components/Policies/types'
 
 const POLICY_TYPE_FILTERS: { type: PolicyType; label: string }[] = [
   { type: 'spending-limit', label: 'Spending limits' },

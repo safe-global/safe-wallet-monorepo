@@ -3,7 +3,7 @@ import { userEvent } from '@testing-library/user-event'
 
 import { render } from '@/tests/test-utils'
 import RecoveryListItem from '.'
-import { RecoveryListItemContext } from '@views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
+import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 const MockRecoverySummary = () => {

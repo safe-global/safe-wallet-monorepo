@@ -16,7 +16,7 @@ const SRC_DIR = path.join(__dirname, '../src')
 // Find all story files
 const storyFiles = [
   ...globSync(path.join(SRC_DIR, '**/*.stories.tsx')),
-  ...globSync(path.join(__dirname, '../../../storybook/src/**/*.stories.tsx')),
+  ...globSync(path.join(__dirname, '../../../packages/views/src/**/*.stories.tsx')),
 ]
 
 const testTemplate = (storyImportPath, setupImportPath) => `/**

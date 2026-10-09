@@ -2,7 +2,7 @@ import { buildSafeAccountId, groupSafeAccounts } from '../../../SafeAccountSelec
 import {
   isSafeAccountGroup,
   type SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { markSafeAccountsOffChains } from '../safeAccounts'
 import type { ChainInfo } from '@/features/spaces/types'
 

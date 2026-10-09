@@ -16,7 +16,7 @@ import {
   PROPOSER_RESERVED_ERROR,
   PROPOSER_SAFE_ERROR_MESSAGE,
   PROPOSER_SAFE_LOADING_MESSAGE,
-} from '@views/features/spaces/components/Policies/ProposerRoleFlow/constants'
+} from '@safe-global/views/features/spaces/components/Policies/ProposerRoleFlow/constants'
 
 export const addressIsNotExistingProposer =
   (proposers: string[], message: string) =>

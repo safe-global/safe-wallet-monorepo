@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import Fuse from 'fuse.js'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
-import { getPolicyTokens } from '@views/features/spaces/components/Policies/utils/policyTokens'
-import { isSpendingLimitPolicy, type Policy } from '@views/features/spaces/components/Policies/types'
+import { getPolicyTokens } from '@safe-global/views/features/spaces/components/Policies/utils/policyTokens'
+import { isSpendingLimitPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 type SafeNameResolver = ReturnType<typeof useSafeNameResolver>
 

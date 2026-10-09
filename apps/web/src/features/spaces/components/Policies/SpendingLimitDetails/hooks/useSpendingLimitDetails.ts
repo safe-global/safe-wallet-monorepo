@@ -6,8 +6,8 @@ import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import type { ActiveDrawerPolicy } from '../../SpendingLimitDrawer'
-import { formatLastUpdated } from '@views/features/spaces/components/Policies/SpendingLimitDrawer/format'
-import type { PendingSpendingLimitPolicy } from '@views/features/spaces/components/Policies/types'
+import { formatLastUpdated } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/format'
+import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 const ENFORCED_BY = 'Safe allowance module'
 

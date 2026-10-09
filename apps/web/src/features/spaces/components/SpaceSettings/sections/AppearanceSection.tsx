@@ -1,13 +1,13 @@
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setDarkMode } from '@/store/settingsSlice'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
-} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 type ThemeOption = {
   value: 'light' | 'dark' | 'system'

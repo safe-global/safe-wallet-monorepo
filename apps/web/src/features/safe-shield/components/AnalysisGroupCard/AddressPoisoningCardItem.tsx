@@ -2,11 +2,11 @@ import { Severity, type AnalysisResult } from '@safe-global/utils/features/safe-
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
-import ExplorerButton from '@/components/common/ExplorerButton'
+import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import CopyTooltip from '@/components/common/CopyTooltip'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { SEVERITY_COLORS } from '../../constants'
-import { HighlightedAddress } from '@views/features/safe-shield/components/HighlightedAddress'
+import { HighlightedAddress } from '@safe-global/views/features/safe-shield/components/HighlightedAddress'
 
 interface AddressRowProps {
   label: string

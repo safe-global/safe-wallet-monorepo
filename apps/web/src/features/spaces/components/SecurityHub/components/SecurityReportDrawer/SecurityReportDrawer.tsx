@@ -5,11 +5,11 @@ import { useChain } from '@/hooks/useChains'
 import { Drawer, DrawerBody, DrawerHeader, DrawerSubtitle, DrawerTitle } from '@/components/common/Drawer'
 import Identicon from '@/components/common/Identicon'
 import CopyButton from '@/components/common/CopyButton'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { HnSignupFlow } from '@/features/hypernative'
 import SecurityDrawerContent from './SecurityDrawerContent'
-import type { SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
+import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 type SecurityReportDrawerProps = {
   selectedSafe: SelectedSafe | null

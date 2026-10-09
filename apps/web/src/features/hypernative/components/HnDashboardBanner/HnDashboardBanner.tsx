@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import Image from 'next/image'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
-import { dashboardBannerConfig } from '@views/features/hypernative/components/HnDashboardBanner/config'
+import { dashboardBannerConfig } from '@safe-global/views/features/hypernative/components/HnDashboardBanner/config'
 import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, trackEvent, MixpanelEventParams } from '@/services/analytics'
 
 export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}

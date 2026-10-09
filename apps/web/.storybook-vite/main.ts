@@ -124,7 +124,12 @@ function publicAssetsPlugin(): Plugin {
 }
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/views/src/**/*.mdx',
+    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',

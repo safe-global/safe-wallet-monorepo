@@ -2,8 +2,8 @@ import type { MouseEvent, ReactElement } from 'react'
 import type { UrlObject } from 'url'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Link } from '@/components/ui/link'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Link } from '@safe-global/views/components/ui/link'
 
 export type ParentSafeWalletCopy = {
   title: string

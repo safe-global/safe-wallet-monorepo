@@ -1,9 +1,9 @@
 import WalletOverview from '@/components/common/WalletOverview'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
-import SafeLogo from '@/public/images/logo-no-text.svg'
+import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 
 import css from '@/components/new-safe/create/OverviewWidget/styles.module.css'
 import ConnectWalletButton from '@/components/common/ConnectWallet/ConnectWalletButton'

@@ -3,7 +3,7 @@ import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/typ
 import SectionPanel from './SectionPanel'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
-} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
 import { useSecurityChecks } from './hooks/useSecurityChecks'
 
 export type SecurityChecksSectionProps = {

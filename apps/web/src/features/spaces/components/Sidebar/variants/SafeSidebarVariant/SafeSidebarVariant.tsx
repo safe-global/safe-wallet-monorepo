@@ -10,9 +10,12 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarSeparator,
-} from '@/components/ui/sidebar'
+} from '@safe-global/views/components/ui/sidebar'
 import css from '../../styles.module.css'
-import type { ResolvedSidebarNavItem, SafeSidebarVariantProps } from '@views/features/spaces/components/Sidebar/types'
+import type {
+  ResolvedSidebarNavItem,
+  SafeSidebarVariantProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { AppRoutes } from '@/config/routes'
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
@@ -24,7 +27,7 @@ import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { containerVariants, itemVariants } from '@views/features/spaces/components/Sidebar/constants'
+import { containerVariants, itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'

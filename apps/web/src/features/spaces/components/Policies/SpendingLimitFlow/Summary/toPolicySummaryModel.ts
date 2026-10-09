@@ -1,17 +1,17 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
 import {
   isSafeAccountGroup,
   type SafeAccountEntry,
   type SafeAccountOption,
-} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 import type {
   LimitSummaryToken,
   SpendingLimitSummaryModel,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 export type PolicySummarySources = {
   /** The eligible accounts the step-1 selector offered (groups included). */

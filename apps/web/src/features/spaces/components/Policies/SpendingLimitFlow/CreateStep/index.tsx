@@ -1,5 +1,5 @@
 import { useContext, useState, type ReactElement } from 'react'
-import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@/components/tx-flow/safe-scope'
+import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
@@ -9,7 +9,7 @@ import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type CreateSpendingLimitPolicyProps = {
   isCalloutDismissed: boolean

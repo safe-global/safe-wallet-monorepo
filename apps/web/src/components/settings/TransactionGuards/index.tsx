@@ -1,10 +1,10 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import css from './styles.module.css'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { SafeFeature } from '@safe-global/protocol-kit'
 import { hasSafeFeature } from '@/utils/safe-versions'
 import DeleteIcon from '@/public/images/common/delete.svg'
@@ -13,7 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import SettingsCard from '@views/components/settings/SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 const NoTransactionGuard = () => {
   return <Typography className="mt-4 text-muted-foreground">No transaction guard set</Typography>

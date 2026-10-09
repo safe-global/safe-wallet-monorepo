@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeUnavailableMessage from '@/hooks/useSafeUnavailableMessage'
 import { useUrlChain } from '@/hooks/useChainId'
-import PagePlaceholder from '@views/components/common/PagePlaceholder'
+import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 
