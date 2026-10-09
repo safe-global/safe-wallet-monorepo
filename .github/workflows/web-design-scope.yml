@@ -1,16 +1,16 @@
 name: Design scope
 
 # Checks whether a pull request only changes styling, copy and presentational markup.
-# For pull requests from the design team (or labelled `design`) the check must pass.
-# For everyone else it only reports the result in the job summary.
+# Opt-in: the check must pass only when the author marks the pull request as design-only (label `design-only`,
+# or a ticked "- [x] Design-only" line in the description). For the design team it otherwise only reports.
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review]
   # Spike only: pull_request_target runs only once this file is on the default branch, so pull_request lets
   # the check be tried before that. Remove before merging: under pull_request a PR can edit this file.
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled, ready_for_review]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled, ready_for_review]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
@@ -47,17 +47,22 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
           LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          BODY: ${{ github.event.pull_request.body }}
         run: |
           if [ ! -f scripts/design-check/index.cjs ]; then
             echo "The design scope check is not on the base branch yet."
             exit 0
           fi
-          design_pr=$(node scripts/design-check/is-design-pr.cjs)
+          mode=$(node scripts/design-check/is-design-pr.cjs)
+          if [ "$mode" = "skip" ]; then
+            echo "Not marked as a design-only pull request; nothing to check."
+            exit 0
+          fi
           set +e
           node scripts/design-check/index.cjs --base "$BASE_SHA" --head "$HEAD_SHA" --summary "$GITHUB_STEP_SUMMARY"
           result=$?
           set -e
-          if [ "$design_pr" = "true" ]; then
+          if [ "$mode" = "enforce" ]; then
             exit "$result"
           fi
-          echo "Not a design pull request; the result above is for information only."
+          echo "Not marked as design-only, so the result above is for information only. Add the design-only label to enforce it."

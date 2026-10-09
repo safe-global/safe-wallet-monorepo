@@ -9,16 +9,8 @@
 /apps/mobile/       @safe-global/safe-mobile
 /expo-plugins/      @safe-global/safe-mobile
 
-# Design team: styling, copy and presentational markup of the web app. The "Design scope" workflow
-# fails a design pull request that changes anything else; .github/design-team.json lists the members.
-/apps/web/src/components/  @safe-global/safe-web @safe-global/design
-/apps/web/src/features/    @safe-global/safe-web @safe-global/design
-/apps/web/src/pages/       @safe-global/safe-web @safe-global/design
-/apps/web/src/styles/      @safe-global/safe-web @safe-global/design
-/apps/web/public/images/   @safe-global/safe-web @safe-global/design
-
 # The rules of the design scope check
-/scripts/design-check/     @safe-global/infrasec @compojoom @PooyaRaki
+/scripts/design-check/     @safe-global/infrasec @compojoom @PooyaRaki @TimDaub
 
 # CI, deploy, dependency resolution and anything that executes on dev machines or in builds
 /.github/           @safe-global/infrasec @compojoom @PooyaRaki

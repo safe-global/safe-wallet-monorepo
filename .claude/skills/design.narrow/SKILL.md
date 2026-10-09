@@ -1,12 +1,14 @@
 ---
-name: design.pr
-description: Make a design pull request — change styling, copy and presentational markup of the web app without touching behaviour, checked by scripts/design-check. Use when the user says "make a design PR", "design PR", "design change", or is a designer changing how the app looks.
+name: design.narrow
+description: Design narrowly for production — limit a change to styling, copy and presentational markup so it can be merged without a developer re-reviewing logic, and opt the pull request into the Design scope check. Use ONLY when the user explicitly asks to "design narrowly for production" or for a "design-only PR". Do not use for other design, prototype or Storybook work.
 argument-hint: '[what to change]'
 ---
 
-# Design pull request
+# Design narrowly for production
 
-A design pull request changes how the web app **looks and reads**, never what it **does**. The `Design scope` workflow fails a design pull request that changes anything else. Run the same check locally after every change, so the person you work with never gets a red CI.
+Use this only when someone (designer, developer or anyone else) explicitly asks to design narrowly for production. All other design work, such as prototypes, stories or handover pull requests, is not restricted and does not use this skill.
+
+The change may alter how the web app **looks and reads**, never what it **does**. The pull request opts in to the `Design scope` workflow, which then fails it if it changes anything else. That keeps the review fast. Run the same check locally after every change, so the person you work with never gets a red CI.
 
 ## You may
 
@@ -38,4 +40,4 @@ If the design needs one of these, stop and tell the user: a developer has to mak
    ```
    A finding names the file and line and what is not allowed, for example `adds onClick={subscribe}`. Undo that part instead of working around it.
 4. Look at the result in Storybook (`yarn workspace @safe-global/web storybook`) or the running app, and take a screenshot for the pull request.
-5. Run `yarn prettier:fix`, commit, push, and open the pull request as a draft with the label `design`. Put the screenshot in the "Visual summary" section.
+5. Run `yarn prettier:fix`, commit, push, and open the pull request as a draft. Opt in to the check: add the label `design-only` and put `- [x] Design-only` in the checklist of the description. Put the screenshot in the "Visual summary" section.
