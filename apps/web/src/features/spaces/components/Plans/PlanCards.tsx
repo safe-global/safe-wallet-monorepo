@@ -160,7 +160,6 @@ const PlanCta = ({
           weight="semibold"
           accentIcon
           className="w-full"
-          disabled={isBusy}
           onClick={() => {
             clicked()
             onSubscribe?.(pick)
@@ -281,7 +280,12 @@ export const PlanCard = ({
                   {hint && (
                     <Typography variant="paragraph-mini" color="muted">
                       {hint}{' '}
-                      <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+                      <Link
+                        href="https://safe-pro-sales.example.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="muted"
+                      >
                         Talk to sales <ArrowRight className="inline size-3" />
                       </Link>
                     </Typography>
@@ -369,7 +373,7 @@ export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions
         <div className="flex flex-col gap-8">
           <PlanCatalog {...props} />
           {props.readOnly && (
-            <Typography variant="paragraph-small" color="muted" align="center">
+            <Typography variant="paragraph-small" color="muted" align="center" className="hidden">
               {READ_ONLY_NOTE}
             </Typography>
           )}
