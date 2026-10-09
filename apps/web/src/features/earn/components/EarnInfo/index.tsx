@@ -11,7 +11,8 @@ import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
 import useBalances from '@/hooks/useBalances'
-import { EligibleEarnTokens, VaultAPYs } from '../../constants'
+import { VaultAPYs } from '../../constants'
+import { isEligibleEarnToken } from '../../services/utils'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -71,7 +72,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
   const chainId = useChainId()
   const router = useRouter()
 
-  const eligibleAssets = balances.items.filter((token) => EligibleEarnTokens[chainId].includes(token.tokenInfo.address))
+  const eligibleAssets = balances.items.filter((token) => isEligibleEarnToken(chainId, token.tokenInfo.address))
 
   return (
     <div className="m-6">

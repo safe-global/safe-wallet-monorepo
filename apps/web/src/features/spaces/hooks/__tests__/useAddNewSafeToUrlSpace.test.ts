@@ -121,8 +121,9 @@ describe('useAddNewSafeToUrlSpace', () => {
     expect(await addSafe(result)).toEqual(outside)
     expect(result.current.notifications).toEqual([
       expect.objectContaining({
-        message: expect.stringContaining('Your plan covers 5 Safe accounts'),
-        variant: 'info',
+        message:
+          'Safe created in My accounts, but not added to the Workspace. Your plan covers 5 Safe accounts and this Workspace already holds 5. Remove one to add another, or upgrade your plan.',
+        variant: 'warning',
       }),
     ])
   })
