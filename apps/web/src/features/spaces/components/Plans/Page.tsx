@@ -12,6 +12,7 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
+import { PlanCompareTable } from './PlanCompareTable'
 import { RECOMMENDED_PLAN } from './planCatalog'
 import { takePlansEntry } from './planSelection'
 import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
@@ -101,24 +102,27 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         ) : isPlanLoading || isOffersLoading ? (
           <PlansSkeleton />
         ) : (
-          <Plans
-            plan={plan}
-            safeAccounts={seats}
-            sponsoredTxs={sponsoredTxs}
-            tiers={tiers}
-            onManage={() => void openPortal()}
-            isManaging={isRedirecting}
-            canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
-            onSubscribe={(picked) => {
-              if (canChange) setPick(picked)
-              else if (picked.option.paymentLinkId) {
-                void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
-              }
-            }}
-            isSubscribing={isCheckingOut}
-            currentPlan={currentPlan}
-            readOnly={!isAdmin}
-          />
+          <div className="flex flex-col gap-6">
+            <Plans
+              plan={plan}
+              safeAccounts={seats}
+              sponsoredTxs={sponsoredTxs}
+              tiers={tiers}
+              onManage={() => void openPortal()}
+              isManaging={isRedirecting}
+              canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
+              onSubscribe={(picked) => {
+                if (canChange) setPick(picked)
+                else if (picked.option.paymentLinkId) {
+                  void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+                }
+              }}
+              isSubscribing={isCheckingOut}
+              currentPlan={currentPlan}
+              readOnly={!isAdmin}
+            />
+            <PlanCompareTable currentPlanName={plan?.name} />
+          </div>
         )}
 
         {pick && currentPlan && (

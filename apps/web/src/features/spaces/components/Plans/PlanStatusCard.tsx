@@ -10,6 +10,7 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
 import type { CurrentBadge } from './PlanCards'
+import { StatusDot } from './StatusDot'
 import type { Meter, PlanSummary } from './types'
 
 export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
@@ -30,7 +31,7 @@ export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefi
 
 export const InfoTip = ({ text, 'data-testid': testId }: { text: string; 'data-testid'?: string }) => (
   <Tooltip>
-    <TooltipTrigger render={<span className="inline-flex" data-testid={testId} />}>
+    <TooltipTrigger render={<span className="inline-flex shrink-0" data-testid={testId} />}>
       <Info className="size-4 text-muted-foreground" />
     </TooltipTrigger>
     <TooltipContent className="max-w-65">{text}</TooltipContent>
@@ -52,9 +53,9 @@ const UsageMeter = ({
   const isExhausted = left === 0
 
   return (
-    <Card variant="muted" size="sm" className="flex-1">
+    <Card variant="hairline" radius="lg-xl" size="sm" className="flex-1">
       <CardContent className="flex items-center justify-between">
-        <div className="mr-4 flex items-center gap-3">
+        <div className="mr-4 flex min-w-0 items-center gap-3">
           <Avatar>
             <AvatarFallback surface="card">{icon}</AvatarFallback>
           </Avatar>
@@ -124,13 +125,20 @@ export default function PlanStatusCard({
   return (
     <Card radius="xl">
       <CardContent>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="@container flex flex-col gap-4">
+          <div className="flex flex-col gap-4 @2xl:flex-row @2xl:items-start @2xl:justify-between">
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
                 {badge && (
-                  <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
+                  <Badge
+                    variant="subtle"
+                    size="status"
+                    shape="status"
+                    className="gap-1.5 text-foreground"
+                    data-testid="plan-status-badge"
+                  >
+                    <StatusDot isWarning={badge.variant === 'warning'} />
                     {badge.label}
                   </Badge>
                 )}
@@ -151,7 +159,7 @@ export default function PlanStatusCard({
             )}
           </div>
 
-          <div className="flex flex-col gap-4 md:flex-row">
+          <div className="flex flex-col gap-4 @2xl:flex-row">
             <UsageMeter
               icon={<WalletCards className="size-5" strokeWidth={1.5} />}
               label="Safe accounts available"

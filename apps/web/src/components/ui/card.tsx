@@ -24,8 +24,8 @@ import { cn } from '@/utils/cn'
  *
  * @remarks
  * Key Props:
- * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none'),
- *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand'),
+ * - Card: `as`, `size` ('default' | 'sm' | 'lg' | 'none' | 'offer'),
+ *   `variant` ('default' | 'outlined' | 'muted' | 'muted-secondary' | 'brand' | 'hairline' | 'offer'),
  *   `surface` ('default' | 'sunken', default 'default'), `radius` ('lg' | 'lg-xl' | 'xl' | 'none', default 'lg'),
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `className` (layout-only: w-*, margins, flex/grid)
@@ -50,6 +50,8 @@ import { cn } from '@/utils/cn'
  * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
  * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
  * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
+ * - 2026-10-09: Added `variant="hairline"` (muted-secondary with the hairline outline), `variant="offer"` (hairline
+ *   that lifts to the card surface on hover and focus-within) and `size="offer"` (28px top, 24px bottom) for plan cards
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -66,6 +68,9 @@ const cardVariants = cva(
         'muted-secondary': 'bg-muted-secondary',
         brand:
           'bg-muted-secondary bg-[linear-gradient(90deg,color-mix(in_srgb,var(--mint)_40%,var(--muted-secondary)),color-mix(in_srgb,var(--mint)_8%,var(--muted-secondary)))]',
+        hairline: 'bg-muted-secondary shadow-hairline',
+        offer:
+          'bg-muted-secondary shadow-hairline transition-[background-color,box-shadow] duration-300 ease-soft hover:bg-card hover:shadow-hairline-lg hover:duration-200 focus-within:bg-card focus-within:shadow-hairline-lg focus-within:duration-200 motion-reduce:transition-none',
       },
       surface: {
         default: '',
@@ -76,6 +81,7 @@ const cardVariants = cva(
         sm: 'gap-4 py-4',
         lg: 'gap-8 py-8',
         none: 'gap-0 py-0',
+        offer: 'gap-0 pt-7 pb-6',
       },
       radius: {
         lg: 'rounded-lg',

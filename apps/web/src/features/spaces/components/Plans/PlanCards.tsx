@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Link } from '@/components/ui/link'
 import { List, ListItem, ListItemText } from '@/components/ui/list'
+import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Typography } from '@/components/ui/typography'
@@ -16,6 +16,18 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@/utils/cn'
+import { CtaArrow } from './CtaArrow'
+import { FeatureCheck } from './FeatureCheck'
+import {
+  FEATURE_LIST_STAGGER,
+  FEATURE_TEXT_HOVER,
+  PlanComingSoon,
+  PlanDescription,
+  PlanFeaturesHeading,
+  PlanPerSafe,
+  PlanPriceNote,
+  PlanSupport,
+} from './PlanCardDetails'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanCta as PlanCtaKindOf, PlanPick, PlanSeatOption, PlanTier } from './types'
 
@@ -141,7 +153,7 @@ const PlanCta = ({
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <CtaArrow variant="nudge" />
         </Button>
       )
     case 'manage':
@@ -164,7 +176,7 @@ const PlanCta = ({
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <CtaArrow variant="nudge" />
         </Button>
       )
     case 'change':
@@ -181,6 +193,7 @@ const PlanCta = ({
           }}
         >
           {cta.label}
+          <CtaArrow variant="reveal" />
         </Button>
       )
   }
@@ -223,10 +236,14 @@ export const PlanCard = ({
 
   return (
     <Card
-      variant={isCurrentInCatalog ? 'default' : 'muted-secondary'}
+      variant={isCurrentInCatalog ? 'default' : 'offer'}
       elevated={isCurrentInCatalog}
+      size="offer"
       radius="lg-xl"
-      className={cn('flex-1', selectable && 'cursor-pointer')}
+      className={cn(
+        'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
+        selectable && 'cursor-pointer',
+      )}
       selected={selectable ? Boolean(selected) : undefined}
       role={selectable ? 'radio' : undefined}
       aria-checked={selectable ? selected : undefined}
@@ -235,63 +252,72 @@ export const PlanCard = ({
       onKeyDown={selectable ? (e) => (e.key === 'Enter' || e.key === ' ') && onSelect() : undefined}
       data-testid={tier.isCurrent ? 'current-plan-card' : undefined}
     >
-      <CardContent className="flex flex-1 flex-col">
-        <div className="flex h-full flex-col gap-4">
-          <div className="flex flex-1 flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Typography variant={selectable ? 'paragraph-large-medium' : 'h4'}>{tier.name}</Typography>
-                {tier.isCurrent && currentBadge && (
-                  <Badge variant={currentBadge.variant} size="status" shape="status">
-                    {currentBadge.label}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="flex items-baseline gap-1">
-                <Typography variant="h4" className={cn(selectable && 'line-through')}>
-                  {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
-                </Typography>
-                <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
-                {selectable && (
-                  <Typography variant="paragraph-large-bold" color="success">
-                    Free
-                  </Typography>
-                )}
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {option && (
-                <div className="flex flex-col gap-1.5">
-                  <Seats options={tier.options} value={option} onChange={changeOption} />
-                  {hint && (
-                    <Typography variant="paragraph-mini" color="muted">
-                      {hint}{' '}
-                      <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-                        Talk to sales <ArrowRight className="inline size-3" />
-                      </Link>
-                    </Typography>
-                  )}
-                </div>
-              )}
-
-              <List className="gap-1">
-                {features.map((feature) => (
-                  <ListItem key={feature} size="sm" className="py-0">
-                    <Avatar size="xs">
-                      <AvatarFallback>
-                        <Check className="size-4" strokeWidth={1.5} />
-                      </AvatarFallback>
-                    </Avatar>
-                    <ListItemText primary={feature} />
-                  </ListItem>
-                ))}
-              </List>
-            </div>
+      <CardContent className="flex min-w-0 flex-1 flex-col @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2">
+            <Typography variant={selectable ? 'paragraph-large-medium' : 'h4'}>{tier.name}</Typography>
+            {tier.isCurrent && currentBadge && (
+              <Badge variant={currentBadge.variant} size="status" shape="status">
+                {currentBadge.label}
+              </Badge>
+            )}
           </div>
+          <PlanDescription name={tier.name} />
+        </div>
 
+        <div className="mt-5 flex flex-col gap-0.5">
+          <div className="flex items-baseline gap-1">
+            <Typography variant="h3" className={cn(selectable && 'line-through')}>
+              {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
+            </Typography>
+            <Typography variant="paragraph-small" color="muted">
+              {price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}
+            </Typography>
+            {selectable && (
+              <Typography variant="paragraph-large-bold" color="success">
+                Free
+              </Typography>
+            )}
+          </div>
+          <PlanPerSafe price={price} seats={option?.seats} billingCycle={tier.billingCycle} currency={tier.currency} />
+        </div>
+
+        <div className="mt-5 flex flex-col gap-2.5">
+          {option && (
+            <div className="flex flex-col gap-1.5">
+              <Seats options={tier.options} value={option} onChange={changeOption} />
+              {hint && (
+                <Typography variant="paragraph-mini" color="muted">
+                  {hint}{' '}
+                  <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+                    Talk to sales <ArrowRight className="inline size-3" />
+                  </Link>
+                </Typography>
+              )}
+            </div>
+          )}
           {!selectable && !actions.readOnly && option && <PlanCta pick={{ tier, option }} {...actions} />}
+          <PlanPriceNote billingCycle={tier.billingCycle} isCustom={price === null} />
+        </div>
+
+        <div className="mt-6 flex flex-col gap-6">
+          <Separator />
+          <div className="flex flex-col gap-3">
+            <PlanFeaturesHeading />
+            <List className={FEATURE_LIST_STAGGER}>
+              {features.map((feature) => (
+                <ListItem key={feature} size="sm" className="items-start py-0">
+                  <FeatureCheck followsPlanHover />
+                  <ListItemText primary={feature} className={FEATURE_TEXT_HOVER} />
+                </ListItem>
+              ))}
+              <PlanComingSoon name={tier.name} />
+            </List>
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <PlanSupport name={tier.name} />
         </div>
       </CardContent>
     </Card>
@@ -315,15 +341,15 @@ export function PlanCatalog({
   })
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+    <div className="@container flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
           <TabsList aria-label="Billing cycle">
             <TabsTrigger value="month">Monthly</TabsTrigger>
             <TabsTrigger value="year">
               Yearly
               {hasYearly && (
-                <Badge variant="brand" size="status" shape="status">
+                <Badge variant="subtle" size="status" shape="status">
                   {YEARLY_SAVINGS_LABEL}
                 </Badge>
               )}
@@ -331,12 +357,19 @@ export function PlanCatalog({
           </TabsList>
         </Tabs>
 
-        <Link href={SAFE_PRO_PRICING_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+        <Link
+          href={SAFE_PRO_PRICING_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          variant="muted"
+          className="whitespace-nowrap"
+        >
           Compare all features <ArrowUpRight />
         </Link>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row">
+      {/* One shared row track per card section (the cards subgrid into it), so rows line up whatever wraps. */}
+      <div className="flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
         {visible.map((tier) => (
           <PlanCard
             key={tier.id}
@@ -355,9 +388,9 @@ export const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to 
 
 export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions) {
   return (
-    <Card radius="xl">
+    <Card radius="xl" size="sm">
       <CardContent>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <PlanCatalog {...props} />
           {props.readOnly && (
             <Typography variant="paragraph-small" color="muted" align="center">
