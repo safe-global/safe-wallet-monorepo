@@ -17,7 +17,6 @@ import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
-import { usePolicyTokenResolver } from './usePolicyTokenResolver'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import type { Policy } from '../types'
@@ -49,7 +48,7 @@ export type SpacePoliciesResult = {
   refetch: () => void
 }
 
-/** The Space's active and queued policies, ready for the table. It counts as loading until the active rows and their tokens are in. */
+/** The Space's active and queued policies, ready for the table. It counts as loading until the active rows are in. */
 export const useSpacePolicies = (): SpacePoliciesResult => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -82,18 +81,8 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
-  // Separate lookups, so tokens only a queued change uses don't blank the active rows while they load.
-  const activeTokens = usePolicyTokenResolver(dtos)
-  const pendingTokens = usePolicyTokenResolver(NO_POLICIES, pendingDtos)
-
-  const activeRows = useMemo(
-    () => mapActivePolicies(dtos, activeTokens.resolveToken),
-    [dtos, activeTokens.resolveToken],
-  )
-  const pendingRows = useMemo(
-    () => (pendingTokens.isLoading ? [] : mapPendingPolicies(pendingDtos, activeRows, pendingTokens.resolveToken)),
-    [pendingDtos, activeRows, pendingTokens.isLoading, pendingTokens.resolveToken],
-  )
+  const activeRows = useMemo(() => mapActivePolicies(dtos), [dtos])
+  const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,
     resetKey: spaceId,
@@ -115,7 +104,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
 
   return {
     policies,
-    isLoading: isLoadingActive || activeTokens.isLoading,
+    isLoading: isLoadingActive,
     isError: active.isError,
     refetch,
   }
