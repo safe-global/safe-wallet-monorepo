@@ -58,7 +58,7 @@ function titleToStoryId(title) {
  * Which becomes story ID: components-common-chip
  */
 function filePathToStoryId(filePath) {
-  let normalized = filePath.replace(/^apps\/web\//, '')
+  let normalized = filePath.replace(/^(apps\/web|packages\/views)\//, '')
   normalized = normalized.replace(/^src\//, '')
   normalized = normalized.replace(/\.(stories|story)\.(tsx?|jsx?)$/, '')
   normalized = normalized.replace(/\/index$/, '')

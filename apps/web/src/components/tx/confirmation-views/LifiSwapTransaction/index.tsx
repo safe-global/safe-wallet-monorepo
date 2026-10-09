@@ -1,13 +1,13 @@
-import { DataTable } from '@/components/common/Table/DataTable'
+import { DataTable } from '@safe-global/views/components/common/Table/DataTable'
 import { type SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
 import { SwapFeature } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import { DataRow } from '@/components/common/Table/DataRow'
+import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import TokenAmount from '@/components/common/TokenAmount'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
 
 const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {

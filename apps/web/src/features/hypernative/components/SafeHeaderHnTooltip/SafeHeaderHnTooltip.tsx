@@ -3,7 +3,7 @@ import { type ReactElement } from 'react'
 import { HypernativeTooltip } from '../HypernativeTooltip'
 import SafeShieldIconSvg from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
-import { safeShieldSvgClassName } from './styles'
+import { safeShieldSvgClassName } from '@safe-global/views/features/hypernative/components/SafeHeaderHnTooltip/styles'
 
 /**
  * SafeHeaderHnTooltip component

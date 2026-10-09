@@ -9,7 +9,7 @@ import { ProposerStatus, type ProposerDrawerContentProps } from '../../ProposerD
 import { useNestedSafeGrantor } from './useNestedSafeGrantor'
 import { useProposerOverview } from './useProposerOverview'
 import { getRemovableGrantDelegator, REMOVE_PROPOSER_NOT_ALLOWED } from './useRemoveProposer'
-import type { ProposerDetailsArgs } from './types'
+import type { ProposerDetailsArgs } from '@safe-global/views/features/spaces/components/Policies/ProposerDetails/hooks/types'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export const REMOVE_NESTED_PROPOSER_HINT = 'Remove this proposer from the Safe account settings'

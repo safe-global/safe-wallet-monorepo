@@ -3,7 +3,11 @@ import { ArrowUpRight } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { GeoblockingContext } from '@/components/common/GeoblockingProvider'
 import { SafeSidebarContent } from '../SafeSidebarContent'
-import type { SidebarGroupConfig, SidebarItemConfig, SafeSidebarVariantProps } from '../../../types'
+import type {
+  SidebarGroupConfig,
+  SidebarItemConfig,
+  SafeSidebarVariantProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const mockUseResolvedSidebarNav = jest.fn()
 const mockIsRouteEnabled = jest.fn()

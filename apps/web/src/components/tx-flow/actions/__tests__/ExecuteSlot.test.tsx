@@ -214,10 +214,25 @@ describe('Execute slot', () => {
     })
   })
 
-  it('keeps Execute for a nested Safe signer on a 1/n Safe', async () => {
+  it('offers only Sign for a nested Safe signer on a 1/n Safe', async () => {
     mockSigner({ isSafe: true })
 
     const { result } = renderSlotIds({ safeTx: buildSafeTx({ signed: false }) })
+
+    await waitFor(() => {
+      expect(result.current).toContain('sign')
+      expect(result.current).not.toContain('execute')
+    })
+  })
+
+  it('offers Execute for a nested Safe signer once the transaction is fully signed', async () => {
+    mockSigner({ isSafe: true })
+
+    const { result } = renderSlotIds({
+      safeTx: buildSafeTx({ signed: false, otherSignatures: 1 }),
+      txId: 'multisig_0x1_0x2',
+      isExecutable: true,
+    })
 
     await waitFor(() => {
       expect(result.current).toContain('execute')

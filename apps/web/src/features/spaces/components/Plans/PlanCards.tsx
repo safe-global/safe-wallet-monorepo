@@ -1,23 +1,29 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Link } from '@/components/ui/link'
-import { List, ListItem, ListItemText } from '@/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Typography } from '@/components/ui/typography'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Link } from '@safe-global/views/components/ui/link'
+import { List, ListItem, ListItemText } from '@safe-global/views/components/ui/list'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanCta as PlanCtaKindOf, PlanPick, PlanSeatOption, PlanTier } from './types'
+import type {
+  CurrentPlan,
+  PlanCta as PlanCtaKindOf,
+  PlanPick,
+  PlanSeatOption,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 type Cycle = 'month' | 'year'
 

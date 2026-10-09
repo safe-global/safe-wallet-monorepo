@@ -5,9 +5,14 @@ import DeleteSpaceDialog from '../SpaceSettings/DeleteSpaceDialog'
 import UpdateSpaceDialog from '../SpaceSettings/UpdateSpaceDialog'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { useSpaceDeletionGuard } from '@/features/spaces'
 
 enum ModalType {

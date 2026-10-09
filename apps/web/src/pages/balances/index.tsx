@@ -7,7 +7,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useState, useRef } from 'react'
 import type { ManageTokensButtonHandle } from '@/components/balances/ManageTokensButton'
 
-import PagePlaceholder from '@/components/common/PagePlaceholder'
+import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'

@@ -13705,6 +13705,42 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@safe-global/views@workspace:*, @safe-global/views@workspace:^, @safe-global/views@workspace:packages/views":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/views@workspace:packages/views"
+  dependencies:
+    "@base-ui/react": "npm:^1.1.0"
+    "@eslint/js": "npm:^9.18.0"
+    "@hello-pangea/dnd": "npm:^18.0.1"
+    "@safe-global/protocol-kit": "npm:^8.0.7"
+    "@safe-global/store": "workspace:^"
+    "@safe-global/types-kit": "npm:^4.0.1"
+    "@safe-global/utils": "workspace:^"
+    class-variance-authority: "npm:^0.7.1"
+    classnames: "npm:^2.5.1"
+    clsx: "npm:^2.1.1"
+    date-fns: "npm:^4.1.0"
+    eslint: "npm:^9.29.0"
+    eslint-plugin-react-hooks: "npm:^5.2.0"
+    ethers: "npm:6.17.0"
+    input-otp: "npm:^1.4.2"
+    lucide-react: "npm:^0.563.0"
+    react-day-picker: "npm:^9.13.0"
+    react-dropzone: "npm:^14.2.3"
+    react-resizable-panels: "npm:^4.5.3"
+    sonner: "npm:^2.0.7"
+    tailwind-merge: "npm:^3.4.0"
+    typescript: "npm:~5.9.2"
+    typescript-eslint: "npm:^8.70.1"
+    vaul: "npm:^1.1.2"
+  peerDependencies:
+    next: "*"
+    next-themes: ^0.4.6
+    react: 19.2.0
+    react-dom: 19.2.0
+  languageName: unknown
+  linkType: soft
+
 "@safe-global/web-tanstack@workspace:apps/web-tanstack":
   version: 0.0.0-use.local
   resolution: "@safe-global/web-tanstack@workspace:apps/web-tanstack"
@@ -13714,6 +13750,7 @@ __metadata:
     "@safe-global/test": "workspace:*"
     "@safe-global/theme": "workspace:*"
     "@safe-global/utils": "workspace:*"
+    "@safe-global/views": "workspace:*"
     "@safe-global/web": "workspace:*"
     "@tailwindcss/vite": "npm:^4.3.3"
     "@tanstack/react-router": "npm:1.159.4"
@@ -13793,6 +13830,7 @@ __metadata:
     "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
     "@safe-global/utils": "workspace:^"
+    "@safe-global/views": "workspace:^"
     "@storybook/addon-designs": "npm:^11.1.4"
     "@storybook/addon-docs": "npm:^10.6.0"
     "@storybook/addon-links": "npm:^10.5.0"

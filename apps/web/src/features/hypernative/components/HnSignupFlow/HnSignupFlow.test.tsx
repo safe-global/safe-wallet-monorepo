@@ -15,7 +15,7 @@ jest.mock('@/services/analytics', () => ({
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
-jest.mock('@/features/hypernative/components/HnSignupFlow/HnModal', () => ({
+jest.mock('@safe-global/views/features/hypernative/components/HnSignupFlow/HnModal', () => ({
   __esModule: true,
   default: ({ children, open, onClose }: { children: React.ReactNode; open: boolean; onClose: () => void }) =>
     open ? (

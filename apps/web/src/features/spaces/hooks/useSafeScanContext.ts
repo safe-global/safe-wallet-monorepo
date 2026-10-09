@@ -12,11 +12,9 @@ import { selectCurrency, selectUndeployedSafes } from '@/store/slices'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/utils'
 import type { ScanContext } from '@/features/security/types'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
+import type { OverviewData } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
-export type OverviewData = {
-  balanceUsd: number
-  queuedTxCount: number
-}
+export type { OverviewData } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 const useSafeScanContext = (
   selected: SelectedSafe | null,

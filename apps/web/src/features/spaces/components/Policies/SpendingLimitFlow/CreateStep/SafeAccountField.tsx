@@ -1,10 +1,13 @@
 import type { ReactElement } from 'react'
 import { Controller, useFormContext } from 'react-hook-form'
-import { parseSafeScopeKey } from '@/components/tx-flow/safe-scope'
+import { parseSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope'
 import SafeAccountSelector from '../../SafeAccountSelector'
-import { getNestedSafesNoticeText, NESTED_SAFES_NOTICE_TITLE } from '../../SafeAccountSelector/constants'
-import type { SafeAccountEntry } from '../../SafeAccountSelector/types'
-import type { SpendingLimitPolicyFormValues } from '../types'
+import {
+  getNestedSafesNoticeText,
+  NESTED_SAFES_NOTICE_TITLE,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import type { SafeAccountEntry } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type SafeAccountFieldProps = {
   accounts: SafeAccountEntry[]

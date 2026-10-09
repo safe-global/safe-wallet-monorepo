@@ -5,7 +5,11 @@ import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { formatDate } from '@/features/spaces/utils'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import { getAuditEventDescription, getDefaultTargetDisplay, getTargetUserId } from './auditEventCopy'
+import {
+  getAuditEventDescription,
+  getDefaultTargetDisplay,
+  getTargetUserId,
+} from '@safe-global/views/features/spaces/components/SpaceActivityLog/auditEventCopy'
 
 // People resolve as: space member name → wallet address → server label.
 // Shared address-book names are member-editable and are deliberately not

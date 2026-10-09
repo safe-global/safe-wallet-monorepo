@@ -9,7 +9,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
 import type { RecoveryQueueItem } from '@/features/recovery'
 
-import css from './styles.module.css'
+import css from '@safe-global/views/components/dashboard/PendingTxs/styles.module.css'
 import classnames from 'classnames'
 
 function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueItem }): ReactElement {

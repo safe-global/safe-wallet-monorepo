@@ -8,7 +8,7 @@ const SIGNER = '0xB4F6f4F0E0A1F0a2f0b3C4d5E6f7A8b9C0d1cF51'
 const CONNECTED = '0x481a0000000000000000000000000000000bFbc0'
 
 // PopoverContent renders into a portal only when open; render it inline here.
-jest.mock('@/components/ui/popover', () => ({
+jest.mock('@safe-global/views/components/ui/popover', () => ({
   PopoverContent: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
     <div data-testid={testId}>{children}</div>
   ),
@@ -16,7 +16,7 @@ jest.mock('@/components/ui/popover', () => ({
 
 // TooltipTrigger renders its content through `render`; cloning keeps the real
 // element (and its class) in the tree so the visible text stays assertable.
-jest.mock('@/components/ui/tooltip', () => {
+jest.mock('@safe-global/views/components/ui/tooltip', () => {
   const { cloneElement } = jest.requireActual<typeof ReactModule>('react')
   return {
     Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,

@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import FileIcon from '@/public/images/settings/data/file.svg'
+import FileIcon from '@safe-global/views/assets/images/settings/data/file.svg'
 
 import useChains from '@/hooks/useChains'
 import { ImportErrors } from '@/components/settings/DataManagement/useGlobalImportFileParser'

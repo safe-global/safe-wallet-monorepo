@@ -54,4 +54,4 @@ export { useRecipientAnalysis } from './hooks/useRecipientAnalysis'
 
 // Analysis card components (used by hypernative)
 export { AnalysisGroupCard, type AnalysisGroupCardProps } from './components/AnalysisGroupCard'
-export { AnalysisGroupCardDisabled } from './components/ThreatAnalysis/AnalysisGroupCardDisabled'
+export { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'

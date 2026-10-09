@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import useGetSpaceAuditLog, { type SpaceAuditLogQueryArgs } from '../../hooks/useGetSpaceAuditLog'

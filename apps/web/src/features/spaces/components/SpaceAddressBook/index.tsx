@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
-import TableCard from '@/components/common/TableCard'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import TableCard from '@safe-global/views/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
@@ -15,9 +15,9 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Check } from 'lucide-react'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -30,7 +30,7 @@ import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
-import { SpaceLoadError, SpaceLoading } from '../LoadState'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')

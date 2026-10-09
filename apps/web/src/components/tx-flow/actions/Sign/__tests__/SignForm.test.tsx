@@ -112,7 +112,7 @@ describe('SignForm', () => {
   })
 
   it('signs a transaction', async () => {
-    const mockSignTx = jest.fn()
+    const mockSignTx = jest.fn().mockResolvedValue({ txId: '0x123', isNestedSigning: false })
 
     const { getByText } = render(
       <SignForm
@@ -144,7 +144,10 @@ describe('SignForm', () => {
       <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
-        txActions={{ ...defaultProps.txActions, signTx: jest.fn().mockResolvedValue(signedTxId) }}
+        txActions={{
+          ...defaultProps.txActions,
+          signTx: jest.fn().mockResolvedValue({ txId: signedTxId, isNestedSigning: false }),
+        }}
       />,
       { willSignBeforeExecute: false, continueToExecute },
     )
@@ -165,7 +168,10 @@ describe('SignForm', () => {
       <SignForm
         {...defaultProps}
         safeTx={safeTransaction}
-        txActions={{ ...defaultProps.txActions, signTx: jest.fn().mockResolvedValue(signedTxId) }}
+        txActions={{
+          ...defaultProps.txActions,
+          signTx: jest.fn().mockResolvedValue({ txId: signedTxId, isNestedSigning: false }),
+        }}
       />,
       { willSignBeforeExecute: true, continueToExecute },
     )

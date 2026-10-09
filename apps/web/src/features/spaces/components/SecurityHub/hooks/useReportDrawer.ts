@@ -4,7 +4,11 @@ import type { ScanContext } from '@/features/security/types'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
 import useSafeScanContext from '../../../hooks/useSafeScanContext'
-import type { OverviewMap, SelectedSafe, SpaceSafeEntry } from '../types'
+import type {
+  OverviewMap,
+  SelectedSafe,
+  SpaceSafeEntry,
+} from '@safe-global/views/features/spaces/components/SecurityHub/types'
 import { isSameSelection } from '../utils'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>

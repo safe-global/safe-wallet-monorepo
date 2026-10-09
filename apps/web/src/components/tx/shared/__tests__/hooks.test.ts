@@ -29,6 +29,8 @@ import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as loadFeature from '@/features/__core__/useLoadFeature'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
@@ -289,7 +291,9 @@ describe('SignOrExecute hooks', () => {
       const signedTx = createSafeTx()
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => Promise.resolve(signedTx))
 
-      const onchainSignSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockImplementation(() => Promise.resolve())
+      const onchainSignSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
 
       const { result } = renderHook(() => useTxActions())
       const { signTx } = result.current
@@ -300,7 +304,7 @@ describe('SignOrExecute hooks', () => {
       expect(onchainSignSpy).not.toHaveBeenCalled()
       expect(proposeSpy).toHaveBeenCalledTimes(1)
       expect(confirmSpy).not.toHaveBeenCalled()
-      expect(id).toBe('123')
+      expect(id.txId).toBe('123')
 
       // Subsequent signature: the tx already has an id, so only the signature is added
       const id2 = await signTx(createSafeTx(), '456')
@@ -314,7 +318,7 @@ describe('SignOrExecute hooks', () => {
           chainId: '1',
         }),
       )
-      expect(id2).toBe('456')
+      expect(id2.txId).toBe('456')
     })
 
     it('should sign a tx on-chain', async () => {
@@ -339,14 +343,354 @@ describe('SignOrExecute hooks', () => {
       jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-      const signSpy = jest.spyOn(txSender, 'dispatchOnChainSigning').mockImplementation(() => Promise.resolve())
+      const signSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
 
       const { result } = renderHook(() => useTxActions())
       const { signTx } = result.current
 
       const id = await signTx(createSafeTx(), '456')
       expect(signSpy).toHaveBeenCalled()
-      expect(id).toBe('456')
+      expect(id.txId).toBe('456')
+    })
+
+    it('should propose before signing on-chain when a non-Safe smart account is the first signer', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const signSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const { result } = renderHook(() => useTxActions())
+      const { signTx } = result.current
+
+      const id = await signTx(createSafeTx())
+      expect(proposeSpy).toHaveBeenCalled()
+      expect(signSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        '123',
+        expect.anything(),
+        '1',
+        expect.anything(),
+        expect.anything(),
+        false,
+        true,
+        '1.3.0',
+        undefined,
+      )
+      expect(id).toEqual({ txId: '123', isNestedSigning: false })
+    })
+
+    it('should NOT propose to CGW for a Safe signer (only the parent proposes)', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: '0x1234567890000000000000000000000000000000',
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 2,
+      } as unknown as NestedWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const signSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const { result } = renderHook(() => useTxActions())
+      const { signTx } = result.current
+
+      const id = await signTx(createSafeTx())
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(signSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        undefined,
+        expect.anything(),
+        '1',
+        expect.anything(),
+        expect.anything(),
+        true,
+        false,
+        '1.3.0',
+        undefined,
+      )
+      expect(id).toEqual({ txId: 'derived_id', isNestedSigning: true })
+    })
+
+    it('should propose the parent tx with the nested child tx carried by the flow', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => Promise.resolve(createSafeTx()))
+
+      const nestedChildTx: NestedTxEnvelope = {
+        chainId: '1',
+        safe: zeroPadValue('0x0def', 20),
+        nonce: 7,
+        to: zeroPadValue('0x0456', 20),
+        value: '1',
+        data: '0xabcdef',
+        operation: 0,
+        safeTxGas: '0',
+        baseGas: '0',
+        gasPrice: '0',
+        gasToken: zeroPadValue('0x00', 20),
+        refundReceiver: zeroPadValue('0x00', 20),
+      }
+
+      const ref: { current?: ReturnType<typeof useTxActions> } = {}
+      const Harness = () => {
+        ref.current = useTxActions()
+        return null
+      }
+      const flowContext: TxFlowContextType = { ...initialContext, data: { nestedChildTx } }
+      render(createElement(TxFlowContext.Provider, { value: flowContext }, createElement(Harness)))
+
+      await ref.current!.signTx(createSafeTx())
+
+      expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ nestedTransaction: nestedChildTx }))
+    })
+
+    const mockEnvelopelessSafe = (version: string) =>
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version,
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+    it("should sign the child hash with the EOA when the nested signer's child Safe does not support the envelope", async () => {
+      const connectedWallet = {
+        label: 'MetaMask',
+        chainId: '1',
+        address: '0x1234567890000000000000000000000000000000',
+        provider: MockEip1193Provider,
+      } as ConnectedWallet
+      jest.spyOn(wallet, 'default').mockReturnValue(connectedWallet)
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0456', 20),
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 2,
+      } as unknown as NestedWallet)
+
+      mockEnvelopelessSafe('1.1.1')
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const signSpy = jest.spyOn(txSender, 'dispatchOnChainSigning')
+      const nestedSpy = jest.spyOn(txSender, 'dispatchNestedTxCreation').mockResolvedValue('nested-id')
+
+      const { result } = renderHook(() => useTxActions())
+      const safeTx = createSafeTx()
+
+      const id = await result.current.signTx(safeTx, undefined, 'origin')
+
+      // Without an envelope the child tx is proposed here, and the queue rejects unsigned proposals
+      expect(id).toEqual({ txId: 'nested-id', isNestedSigning: true })
+      expect(nestedSpy).toHaveBeenCalledWith({
+        safeTx,
+        wallet: connectedWallet,
+        parentSafeAddress: zeroPadValue('0x0456', 20),
+        parentProvider: MockEip1193Provider,
+        chainId: '1',
+        safeAddress: zeroPadValue('0x0000', 20),
+        executed: false,
+        origin: 'origin',
+        scope: undefined,
+        nestedTransaction: undefined,
+      })
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(signSpy).not.toHaveBeenCalled()
+    })
+
+    it('should propose unsigned for a WalletConnect-connected Safe, which has no EOA to sign the child hash', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0456', 20),
+        provider: MockEip1193Provider,
+        isConnectedSafe: true,
+      } as unknown as SignerWallet)
+
+      mockEnvelopelessSafe('1.1.1')
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const signSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+      const nestedSpy = jest.spyOn(txSender, 'dispatchNestedTxCreation')
+
+      const { result } = renderHook(() => useTxActions())
+
+      const id = await result.current.signTx(createSafeTx())
+
+      expect(nestedSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).toHaveBeenCalled()
+      expect(signSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        '123',
+        expect.anything(),
+        '1',
+        expect.anything(),
+        expect.anything(),
+        true,
+        false,
+        '1.1.1',
+        undefined,
+      )
+      expect(id).toEqual({ txId: '123', isNestedSigning: true })
+    })
+
+    it.each([
+      ['executes immediately', 1, true],
+      ['only queues the approveHash', 2, false],
+    ])(
+      'should mark the tx as executed=%s when a WalletConnect-connected Safe at threshold %i signs',
+      async (_label, threshold, executed) => {
+        jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+        jest.spyOn(wallet, 'useSigner').mockReturnValue({
+          chainId: '1',
+          address: zeroPadValue('0x0456', 20),
+          provider: MockEip1193Provider,
+          isConnectedSafe: true,
+          threshold,
+        } as unknown as SignerWallet)
+
+        mockEnvelopelessSafe('1.1.1')
+
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const signSpy = jest
+          .spyOn(txSender, 'dispatchOnChainSigning')
+          .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+        const { result } = renderHook(() => useTxActions())
+
+        await result.current.signTx(createSafeTx())
+
+        expect(signSpy).toHaveBeenCalledWith(
+          expect.anything(),
+          '123',
+          expect.anything(),
+          '1',
+          expect.anything(),
+          expect.anything(),
+          true,
+          executed,
+          '1.1.1',
+          undefined,
+        )
+      },
+    )
+
+    it('should confirm an existing tx on-chain without re-proposing when the nested signer adds a signature', async () => {
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(true))
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: zeroPadValue('0x0456', 20),
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 2,
+      } as unknown as NestedWallet)
+
+      mockEnvelopelessSafe('1.1.1')
+
+      const proposeSpy = jest.spyOn(txSender, 'dispatchTxProposal')
+      const signSpy = jest
+        .spyOn(txSender, 'dispatchOnChainSigning')
+        .mockImplementation((_safeTx, txId) => Promise.resolve(txId ?? 'derived_id'))
+      const nestedSpy = jest.spyOn(txSender, 'dispatchNestedTxCreation')
+
+      const { result } = renderHook(() => useTxActions())
+
+      const id = await result.current.signTx(createSafeTx(), '456')
+
+      expect(id).toEqual({ txId: '456', isNestedSigning: true })
+      expect(nestedSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(signSpy).toHaveBeenCalledWith(
+        expect.anything(),
+        '456',
+        expect.anything(),
+        '1',
+        expect.anything(),
+        expect.anything(),
+        true,
+        false,
+        '1.1.1',
+        undefined,
+      )
     })
 
     it('should execute a tx without a txId (immediate execution)', async () => {
@@ -371,7 +715,7 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const executeSpy = jest
         .spyOn(txSender, 'dispatchTxExecution')
-        .mockImplementation((() => Promise.resolve(createSafeTx())) as unknown as typeof txSender.dispatchTxExecution)
+        .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
 
       const { result } = renderHook(() => useTxActions())
       const { executeTx } = result.current
@@ -379,7 +723,161 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx())
       expect(proposeSpy).toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
+    })
+
+    it('should NOT propose to CGW when a Safe executor executes without a txId', async () => {
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: '0x1234567890000000000000000000000000000000',
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 2,
+      } as unknown as NestedWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+      const executeSpy = jest
+        .spyOn(txSender, 'dispatchTxExecution')
+        .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const { result } = renderHook(() => useTxActions())
+      const { executeTx } = result.current
+
+      const id = await executeTx({ gasPrice: 1 }, createSafeTx())
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(executeSpy).toHaveBeenCalledWith(
+        '1',
+        expect.anything(),
+        { gasPrice: 1 },
+        undefined,
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        true,
+        false,
+        true,
+        '1.3.0',
+        undefined,
+      )
+      expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
+    })
+
+    it('should not treat the in-app nested signer at threshold 1 as executing immediately', async () => {
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: '0x1234567890000000000000000000000000000000',
+        provider: MockEip1193Provider,
+        isSafe: true,
+        threshold: 1,
+      } as unknown as NestedWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const executeSpy = jest
+        .spyOn(txSender, 'dispatchTxExecution')
+        .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const { result } = renderHook(() => useTxActions())
+
+      const id = await result.current.executeTx({ gasPrice: 1 }, createSafeTx())
+
+      expect(executeSpy).toHaveBeenCalledWith(
+        '1',
+        expect.anything(),
+        { gasPrice: 1 },
+        undefined,
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        true,
+        false,
+        true,
+        '1.3.0',
+        undefined,
+      )
+      expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
+    })
+
+    it('should treat a WalletConnect-connected Safe at threshold 1 as executing immediately', async () => {
+      jest.spyOn(wallet, 'useSigner').mockReturnValue({
+        chainId: '1',
+        address: '0x1234567890000000000000000000000000000000',
+        provider: MockEip1193Provider,
+        isConnectedSafe: true,
+        threshold: 1,
+      } as unknown as SignerWallet)
+
+      jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+        safe: {
+          ...extendedSafeInfo,
+          version: '1.3.0',
+          address: { value: zeroPadValue('0x0000', 20) },
+          nonce: 100,
+          threshold: 2,
+          owners: [{ value: zeroPadValue('0x0123', 20) }, { value: zeroPadValue('0x0456', 20) }],
+          chainId: '1',
+        },
+        safeAddress: '0x123',
+        safeError: undefined,
+        safeLoading: false,
+        safeLoaded: true,
+      }))
+
+      const executeSpy = jest
+        .spyOn(txSender, 'dispatchTxExecution')
+        .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
+
+      const { result } = renderHook(() => useTxActions())
+
+      const id = await result.current.executeTx({ gasPrice: 1 }, createSafeTx())
+
+      expect(executeSpy).toHaveBeenCalledWith(
+        '1',
+        expect.anything(),
+        { gasPrice: 1 },
+        undefined,
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        true,
+        true,
+        true,
+        '1.3.0',
+        undefined,
+      )
+      expect(id).toEqual({ txId: 'derived_id', isExecuted: true })
     })
 
     it('should execute a tx with an id (existing tx)', async () => {
@@ -404,7 +902,7 @@ describe('SignOrExecute hooks', () => {
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
       const executeSpy = jest
         .spyOn(txSender, 'dispatchTxExecution')
-        .mockImplementation((() => Promise.resolve(createSafeTx())) as unknown as typeof txSender.dispatchTxExecution)
+        .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
 
       const { result } = renderHook(() => useTxActions())
       const { executeTx } = result.current
@@ -412,7 +910,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, createSafeTx(), '455')
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(executeSpy).toHaveBeenCalled()
-      expect(id).toEqual('455')
+      expect(id.txId).toEqual('455')
     })
 
     it('should block the broadcast when a GS026 pre-check fails', async () => {
@@ -518,7 +1016,7 @@ describe('SignOrExecute hooks', () => {
       const id = await executeTx({ gasPrice: 1 }, tx, '123', 'origin.com', true)
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should sign a not fully signed tx when relaying', async () => {
@@ -577,7 +1075,7 @@ describe('SignOrExecute hooks', () => {
       expect(proposeSpy).not.toHaveBeenCalled()
       expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: '123', safeTx: tx }))
       expect(relaySpy).toHaveBeenCalled()
-      expect(id).toEqual('123')
+      expect(id.txId).toEqual('123')
     })
 
     it('should throw when relaying an unsigned tx as a smart contract wallet', async () => {
@@ -678,9 +1176,14 @@ describe('SignOrExecute hooks', () => {
           callOrder.push('propose')
           return Promise.resolve({ txId: '123' })
         }) as unknown as typeof txSender.dispatchTxProposal)
-        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation((() => {
+        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution').mockImplementation(((
+          _chainId: string,
+          _safeTx: unknown,
+          _txOptions: unknown,
+          txId: string,
+        ) => {
           callOrder.push('execute')
-          return Promise.resolve('0xhash')
+          return Promise.resolve(txId)
         }) as unknown as typeof txSender.dispatchTxExecution)
 
         const { result } = renderHook(() => useTxActions())
@@ -688,7 +1191,7 @@ describe('SignOrExecute hooks', () => {
 
         expect(signSpy).toHaveBeenCalledWith(tx, MockEip1193Provider, undefined)
         expect(callOrder).toEqual(['sign', 'propose', 'execute'])
-        expect(id).toBe('123')
+        expect(id).toEqual({ txId: '123', isExecuted: true })
         expect(executeSpy.mock.calls[0][1]).toBe(signedTx)
       })
 

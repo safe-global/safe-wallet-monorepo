@@ -1,5 +1,5 @@
 import type { MutableRefObject, ReactElement } from 'react'
-import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
+import type { SafeAppDataWithPermissions } from '@safe-global/views/components/safe-apps/types'
 import css from './styles.module.css'
 import { sanitizeUrl } from '@/utils/url'
 

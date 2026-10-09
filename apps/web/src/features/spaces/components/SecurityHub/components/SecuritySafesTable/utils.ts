@@ -3,8 +3,8 @@ import type { SecurityGrade } from '@/features/security/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
-import { DASH } from './constants'
-import type { SpaceSafeEntry } from '../../types'
+import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 /** Inverse of `SEVERITY_RANK` — rank index → SecurityGrade. Single source of truth for ordering. */
 const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade, number]>)

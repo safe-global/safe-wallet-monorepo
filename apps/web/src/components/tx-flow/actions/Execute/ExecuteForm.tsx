@@ -1,9 +1,9 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type ReactNode, type SyntheticEvent, useContext, useState, useEffect } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Separator } from '@/components/ui/separator'
-import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Button } from '@safe-global/views/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
 import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -20,18 +20,18 @@ import { getGasPayment } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButton'
+import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
@@ -130,8 +130,9 @@ export const ExecuteForm = ({
     onSubmit?.()
 
     let executedTxId: string
+    let isExecuted: boolean
     try {
-      executedTxId = await executeTx(
+      ;({ txId: executedTxId, isExecuted } = await executeTx(
         txOptions,
         safeTx,
         txId,
@@ -139,7 +140,7 @@ export const ExecuteForm = ({
         willRelay,
         acceptUnverifiedSimulation,
         sponsorSpaceId,
-      )
+      ))
     } catch (_err) {
       const err = asError(_err)
       const refusal = getGasPaymentRefusal(err, gasPayer)
@@ -159,10 +160,18 @@ export const ExecuteForm = ({
       return
     }
 
-    // On success
-    onSubmitSuccess?.({ txId: executedTxId, isExecuted: true })
+    // A queuing Safe executor returns a safeTxHash, so the explorer link would be wrong
+    onSubmitSuccess?.({ txId: executedTxId, isExecuted })
     const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
-    setTxFlow(<SuccessScreenFlow txId={executedTxId} scope={successScope} />, undefined, false)
+    setTxFlow(
+      isExecuted ? (
+        <SuccessScreenFlow txId={executedTxId} scope={successScope} />
+      ) : (
+        <NestedTxSuccessScreenFlow txId={executedTxId} />
+      ),
+      undefined,
+      false,
+    )
   }
 
   // On modal submit

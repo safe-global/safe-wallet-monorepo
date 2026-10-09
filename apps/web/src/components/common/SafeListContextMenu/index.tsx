@@ -3,14 +3,19 @@ import { ADMIN_ONLY_RENAME_MESSAGE } from '@/utils/addressBookNotifications'
 import { useRef, useState, type ReactElement } from 'react'
 import { EllipsisVertical } from 'lucide-react'
 
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/views/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { useAddressBookWriteScope } from '@/features/spaces'
 import SafeListRemoveDialog from '@/components/common/SafeListRemoveDialog'
-import NestedSafesIcon from '@/public/images/sidebar/nested-safes-icon.svg'
-import EditIcon from '@/public/images/common/edit.svg'
+import NestedSafesIcon from '@safe-global/views/assets/images/sidebar/nested-safes-icon.svg'
+import EditIcon from '@safe-global/views/assets/images/common/edit.svg'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import PlusIcon from '@/public/images/common/plus.svg'
 import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS, type AnalyticsEvent } from '@/services/analytics'
