@@ -36,7 +36,7 @@ const EnvironmentVariables = () => {
     },
   })
 
-  const { handleSubmit, setValue, watch } = formMethods
+  const { handleSubmit, setValue, trigger, watch } = formMethods
 
   const rpc = watch(EnvVariablesField.rpc)
   const tenderlyURL = watch(EnvVariablesField.tenderlyURL)
@@ -63,7 +63,10 @@ const EnvironmentVariables = () => {
   })
 
   const onResetRpc = () => setValue(EnvVariablesField.rpc, '')
-  const onResetTenderlyUrl = () => setValue(EnvVariablesField.tenderlyURL, '', { shouldValidate: true })
+  const onResetTenderlyUrl = () => {
+    setValue(EnvVariablesField.tenderlyURL, '', { shouldValidate: true })
+    trigger(EnvVariablesField.tenderlyToken)
+  }
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (

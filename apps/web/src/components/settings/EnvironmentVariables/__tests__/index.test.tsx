@@ -67,6 +67,7 @@ describe('EnvironmentVariables', () => {
 
   afterEach(() => {
     jest.restoreAllMocks()
+    localStorage.clear()
   })
 
   it('should render with empty initial values', () => {
@@ -416,6 +417,65 @@ describe('EnvironmentVariables', () => {
     })
     expect(tenderlyUrlInput).toHaveValue('')
     expect(tenderlyUrlInput).not.toHaveAttribute('aria-invalid')
+  })
+
+  it('tells the user to append /simulate when the project API URL was pasted as copied', async () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    fireEvent.change(screen.getByLabelText('Tenderly API URL'), {
+      target: { value: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/' },
+    })
+
+    expect(await screen.findByText('Add /simulate to the end of the URL.')).toBeInTheDocument()
+  })
+
+  it('rejects a Simulation API URL without an access token and does not save', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+      },
+    })
+
+    fireEvent.change(screen.getByLabelText('Tenderly API URL'), { target: { value: mockTenderlyUrl } })
+    fireEvent.click(screen.getByText('Save'))
+
+    expect(await screen.findByText('Add the access token from your Tenderly project.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Tenderly access token')).toHaveAttribute('aria-invalid', 'true')
+    expect(analytics.trackEvent).not.toHaveBeenCalled()
+    expect(store.getState().settings.env.tenderly.url).toBe('')
+    expect(reloadPage).not.toHaveBeenCalled()
+  })
+
+  it('clears the access token error when the URL is reset', async () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    const tenderlyUrlInput = screen.getByLabelText('Tenderly API URL')
+    fireEvent.change(tenderlyUrlInput, { target: { value: mockTenderlyUrl } })
+    fireEvent.click(screen.getByText('Save'))
+    await screen.findByText('Add the access token from your Tenderly project.')
+
+    const urlGroup = tenderlyUrlInput.closest('[data-slot="input-group"]') as HTMLElement
+    fireEvent.click(within(urlGroup).getByRole('button', { name: 'Reset to default value' }))
+
+    await waitFor(() => {
+      expect(screen.queryByText('Add the access token from your Tenderly project.')).not.toBeInTheDocument()
+    })
+    expect(screen.getByLabelText('Tenderly access token')).not.toHaveAttribute('aria-invalid')
   })
 
   it('should allow clearing all inputs', async () => {

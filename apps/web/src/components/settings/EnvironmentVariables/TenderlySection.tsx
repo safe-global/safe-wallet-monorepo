@@ -15,11 +15,11 @@ import { useSafeProAccess } from '@/features/spaces'
 import { cn } from '@/utils/cn'
 import { EnvVariablesField, type EnvVariablesFormData } from './index'
 import {
-  isTenderlySimulateUrl,
+  getTenderlyUrlError,
   TENDERLY_SETUP_GUIDE_URL,
   TENDERLY_SIMULATE_URL_PLACEHOLDER,
+  TENDERLY_TOKEN_ERROR,
   TENDERLY_TOKEN_PLACEHOLDER,
-  TENDERLY_URL_ERROR,
   TENDERLY_URL_HELPER_TEXT,
 } from './utils'
 
@@ -38,13 +38,16 @@ const TenderlySection = ({
 }: TenderlySectionProps) => {
   const {
     control,
+    getValues,
     formState: { errors },
   } = useFormContext<EnvVariablesFormData>()
   const { hasProFeatures, spaceId } = useSafeProAccess()
   const [isTokenVisible, setIsTokenVisible] = useState(false)
   const tokenVisibilityLabel = isTokenVisible ? 'Hide access token' : 'Show access token'
   const urlError = errors[EnvVariablesField.tenderlyURL]
+  const tokenError = errors[EnvVariablesField.tenderlyToken]
   const urlDescriptionId = `${EnvVariablesField.tenderlyURL}-description`
+  const tokenErrorId = `${EnvVariablesField.tenderlyToken}-error`
   const plansHref = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces
 
   return (
@@ -77,7 +80,10 @@ const TenderlySection = ({
           <Controller
             name={EnvVariablesField.tenderlyURL}
             control={control}
-            rules={{ validate: (value) => !value || isTenderlySimulateUrl(value) || TENDERLY_URL_ERROR }}
+            rules={{
+              validate: (value) => !value || getTenderlyUrlError(value),
+              deps: [EnvVariablesField.tenderlyToken],
+            }}
             render={({ field, fieldState }) => (
               <div className="flex flex-col gap-1">
                 <InputGroup>
@@ -124,59 +130,67 @@ const TenderlySection = ({
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor={EnvVariablesField.tenderlyToken} className="gap-1.5">
+          <Label htmlFor={EnvVariablesField.tenderlyToken} className={cn('gap-1.5', tokenError && 'text-destructive')}>
             Tenderly access token
           </Label>
           <Controller
             name={EnvVariablesField.tenderlyToken}
             control={control}
-            render={({ field }) => (
-              <InputGroup>
-                <InputGroupInput
-                  {...field}
-                  id={EnvVariablesField.tenderlyToken}
-                  value={field.value || ''}
-                  placeholder={TENDERLY_TOKEN_PLACEHOLDER}
-                  type="text"
-                  autoComplete="off"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  data-1p-ignore
-                  data-lpignore="true"
-                  data-form-type="other"
-                  className={isTokenVisible ? undefined : '[-webkit-text-security:disc]'}
-                />
-                <InputGroupAddon align="inline-end">
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <InputGroupButton
-                          size="icon-sm"
-                          onClick={() => setIsTokenVisible((visible) => !visible)}
-                          aria-label={tokenVisibilityLabel}
-                          data-testid="tenderly-token-visibility"
-                        >
-                          {isTokenVisible ? <EyeOffIcon /> : <EyeIcon />}
-                        </InputGroupButton>
-                      }
-                    />
-                    <TooltipContent>{tokenVisibilityLabel}</TooltipContent>
-                  </Tooltip>
-                  {showResetTokenButton && (
+            rules={{
+              validate: (value) => !getValues(EnvVariablesField.tenderlyURL) || !!value || TENDERLY_TOKEN_ERROR,
+            }}
+            render={({ field, fieldState }) => (
+              <div className="flex flex-col gap-1">
+                <InputGroup>
+                  <InputGroupInput
+                    {...field}
+                    id={EnvVariablesField.tenderlyToken}
+                    value={field.value || ''}
+                    placeholder={TENDERLY_TOKEN_PLACEHOLDER}
+                    aria-invalid={fieldState.invalid || undefined}
+                    aria-describedby={fieldState.error ? tokenErrorId : undefined}
+                    type="text"
+                    autoComplete="off"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    data-1p-ignore
+                    data-lpignore="true"
+                    data-form-type="other"
+                    className={isTokenVisible ? undefined : '[-webkit-text-security:disc]'}
+                  />
+                  <InputGroupAddon align="inline-end">
                     <Tooltip>
                       <TooltipTrigger
                         render={
-                          <InputGroupButton size="icon-sm" onClick={onResetToken} aria-label="Reset to default value">
-                            <RotateCcwIcon />
+                          <InputGroupButton
+                            size="icon-sm"
+                            onClick={() => setIsTokenVisible((visible) => !visible)}
+                            aria-label={tokenVisibilityLabel}
+                            data-testid="tenderly-token-visibility"
+                          >
+                            {isTokenVisible ? <EyeOffIcon /> : <EyeIcon />}
                           </InputGroupButton>
                         }
                       />
-                      <TooltipContent>Reset to default value</TooltipContent>
+                      <TooltipContent>{tokenVisibilityLabel}</TooltipContent>
                     </Tooltip>
-                  )}
-                </InputGroupAddon>
-              </InputGroup>
+                    {showResetTokenButton && (
+                      <Tooltip>
+                        <TooltipTrigger
+                          render={
+                            <InputGroupButton size="icon-sm" onClick={onResetToken} aria-label="Reset to default value">
+                              <RotateCcwIcon />
+                            </InputGroupButton>
+                          }
+                        />
+                        <TooltipContent>Reset to default value</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </InputGroupAddon>
+                </InputGroup>
+                {fieldState.error && <FieldError id={tokenErrorId}>{fieldState.error.message}</FieldError>}
+              </div>
             )}
           />
         </div>
