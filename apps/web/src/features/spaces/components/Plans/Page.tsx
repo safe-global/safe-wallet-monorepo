@@ -23,6 +23,7 @@ import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
 import { PlansHero } from './PlansHero'
 import { PlansFaq } from './PlansFaq'
+import { PlanCompareTable } from './PlanCompareTable'
 import type { PlanPick, PlanTier } from './types'
 
 const PlansSkeleton = () => (
@@ -119,6 +120,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             readOnly={!isAdmin}
           />
         )}
+
+        <PlanCompareTable />
 
         <PlansFaq />
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, ArrowUpRight, CircleCheck } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +15,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@/utils/cn'
+import { FeatureCheck } from './FeatureCheck'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanCta as PlanCtaKindOf, PlanPick, PlanSeatOption, PlanTier } from './types'
 
@@ -141,7 +141,10 @@ const PlanCta = ({
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <ArrowRight
+            data-icon="inline-end"
+            className="transition-transform duration-300 group-hover/plan:translate-x-0.5 motion-reduce:transition-none"
+          />
         </Button>
       )
     case 'manage':
@@ -164,7 +167,10 @@ const PlanCta = ({
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <ArrowRight
+            data-icon="inline-end"
+            className="transition-transform duration-300 group-hover/plan:translate-x-0.5 motion-reduce:transition-none"
+          />
         </Button>
       )
     case 'change':
@@ -226,7 +232,7 @@ export const PlanCard = ({
       variant={isCurrentInCatalog ? 'default' : 'muted-secondary'}
       elevated={isCurrentInCatalog}
       radius="xl"
-      className={cn('flex-1', selectable && 'cursor-pointer')}
+      className={cn('group/plan flex-1', selectable && 'cursor-pointer')}
       selected={selectable ? Boolean(selected) : undefined}
       role={selectable ? 'radio' : undefined}
       aria-checked={selectable ? selected : undefined}
@@ -286,11 +292,7 @@ export const PlanCard = ({
               <List className="gap-2">
                 {features.map((feature) => (
                   <ListItem key={feature} size="sm" className="py-0">
-                    <Avatar size="xs">
-                      <AvatarFallback className="bg-transparent">
-                        <CircleCheck className="size-4 text-badge-dot-success" strokeWidth={2} />
-                      </AvatarFallback>
-                    </Avatar>
+                    <FeatureCheck />
                     <ListItemText primary={feature} />
                   </ListItem>
                 ))}
