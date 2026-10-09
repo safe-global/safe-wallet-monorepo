@@ -111,26 +111,26 @@ const Value = ({ value, isCurrent, isAddOn }: { value: CompareValue; isCurrent: 
   )
 
 /**
- * Collapsed, the card shows the first rows fading out; the header opens it. A native <details>, so it needs no
- * state, and `::details-content` keeps the rows laid out while it is closed.
+ * Collapsed, the card shows the first rows fading out under an "Expand table" button. A native <details>, so it
+ * needs no state, and `::details-content` keeps the rows laid out while it is closed.
  */
 export const PlanCompareTable = ({ currentPlanName }: { currentPlanName?: string }) => (
   <Card radius="xl" size="none" className="overflow-clip">
-    <details className="group/compare flex flex-col gap-2 p-2 [&::details-content]:[content-visibility:visible] [&::details-content]:block">
-      <summary className="flex w-full cursor-pointer list-none items-center justify-between gap-4 rounded-lg px-4 py-3.5 outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
-        <span className="flex flex-col gap-0.5">
-          <Typography variant="h4">Compare all features</Typography>
-          <Typography variant="paragraph-small" color="muted">
-            Limits, operations, security and support for every plan
-          </Typography>
-        </span>
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
-          <ChevronDown
-            aria-hidden
-            className="size-4.5 transition-transform duration-[420ms] ease-soft group-open/compare:rotate-180 motion-reduce:transition-none"
-          />
-        </span>
+    <details className="group/compare relative flex flex-col gap-2 p-2 [&::details-content]:block [&::details-content]:[content-visibility:visible]">
+      <summary className="absolute bottom-5 left-1/2 z-20 flex -translate-x-1/2 cursor-pointer list-none items-center gap-1.5 rounded-md border border-border bg-card px-3 py-1.5 text-sm font-semibold shadow-sm outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring group-open/compare:top-5 group-open/compare:right-5 group-open/compare:bottom-auto group-open/compare:left-auto group-open/compare:translate-x-0 [&::-webkit-details-marker]:hidden">
+        <span className="group-open/compare:hidden">Expand table</span>
+        <span className="hidden group-open/compare:inline">Collapse</span>
+        <ChevronDown
+          aria-hidden
+          className="size-4 transition-transform duration-[420ms] ease-soft group-open/compare:rotate-180 motion-reduce:transition-none"
+        />
       </summary>
+      <div className="flex flex-col gap-0.5 px-4 py-3.5 pr-36">
+        <Typography variant="h4">Compare all features</Typography>
+        <Typography variant="paragraph-small" color="muted">
+          Limits, operations, security and support for every plan
+        </Typography>
+      </div>
 
       <div className="@container relative">
         <div className="max-h-96 overflow-clip rounded-xl bg-card transition-[max-height] duration-[420ms] ease-soft group-open/compare:max-h-[400rem] motion-reduce:transition-none @2xl:[&_[data-slot=table-container]]:overflow-visible">

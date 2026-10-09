@@ -364,7 +364,7 @@ export function PlanCatalog({
           variant="muted"
           className="whitespace-nowrap"
         >
-          See the full feature comparison <ArrowUpRight />
+          Compare all features <ArrowUpRight />
         </Link>
       </div>
 
