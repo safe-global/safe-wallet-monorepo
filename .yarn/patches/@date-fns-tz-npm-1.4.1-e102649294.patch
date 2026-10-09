@@ -1,0 +1,86 @@
+diff --git a/date/mini.cjs b/date/mini.cjs
+index c2068a7a46ae2b61a8775837cc81c3e0197d060e..76ef296729012cbac6fc9e25a3d437abfc984770 100644
+--- a/date/mini.cjs
++++ b/date/mini.cjs
+@@ -71,6 +71,8 @@ class TZDateMini extends Date {
+ // Assign getters and setters
+ exports.TZDateMini = TZDateMini;
+ const re = /^(get|set)(?!UTC)/;
++// Defined, not assigned: assigning a name that Date.prototype holds fails once Date.prototype is frozen (SES lockdown).
++const defineMethod = (name, value) => Object.defineProperty(TZDateMini.prototype, name, { value, writable: true, enumerable: true, configurable: true });
+ Object.getOwnPropertyNames(Date.prototype).forEach(method => {
+   if (!re.test(method)) return;
+   const utcMethod = method.replace(re, "$1UTC");
+@@ -78,23 +80,23 @@ Object.getOwnPropertyNames(Date.prototype).forEach(method => {
+   if (!TZDateMini.prototype[utcMethod]) return;
+   if (method.startsWith("get")) {
+     // Delegate to internal date's UTC method
+-    TZDateMini.prototype[method] = function () {
++    defineMethod(method, function () {
+       return this.internal[utcMethod]();
+-    };
++    });
+   } else {
+     // Assign regular setter
+-    TZDateMini.prototype[method] = function () {
++    defineMethod(method, function () {
+       Date.prototype[utcMethod].apply(this.internal, arguments);
+       syncFromInternal(this);
+       return +this;
+-    };
++    });
+ 
+     // Assign UTC setter
+-    TZDateMini.prototype[utcMethod] = function () {
++    defineMethod(utcMethod, function () {
+       Date.prototype[utcMethod].apply(this, arguments);
+       syncToInternal(this);
+       return +this;
+-    };
++    });
+   }
+ });
+ 
+diff --git a/date/mini.js b/date/mini.js
+index 67ca5b82149bcf2d12ee62978d44d1b2f850ded5..994df60924f5a93b1d993fa9ae9bd110fa124ea1 100644
+--- a/date/mini.js
++++ b/date/mini.js
+@@ -67,6 +67,8 @@ export class TZDateMini extends Date {
+ 
+ // Assign getters and setters
+ const re = /^(get|set)(?!UTC)/;
++// Defined, not assigned: assigning a name that Date.prototype holds fails once Date.prototype is frozen (SES lockdown).
++const defineMethod = (name, value) => Object.defineProperty(TZDateMini.prototype, name, { value, writable: true, enumerable: true, configurable: true });
+ Object.getOwnPropertyNames(Date.prototype).forEach(method => {
+   if (!re.test(method)) return;
+   const utcMethod = method.replace(re, "$1UTC");
+@@ -74,23 +76,23 @@ Object.getOwnPropertyNames(Date.prototype).forEach(method => {
+   if (!TZDateMini.prototype[utcMethod]) return;
+   if (method.startsWith("get")) {
+     // Delegate to internal date's UTC method
+-    TZDateMini.prototype[method] = function () {
++    defineMethod(method, function () {
+       return this.internal[utcMethod]();
+-    };
++    });
+   } else {
+     // Assign regular setter
+-    TZDateMini.prototype[method] = function () {
++    defineMethod(method, function () {
+       Date.prototype[utcMethod].apply(this.internal, arguments);
+       syncFromInternal(this);
+       return +this;
+-    };
++    });
+ 
+     // Assign UTC setter
+-    TZDateMini.prototype[utcMethod] = function () {
++    defineMethod(utcMethod, function () {
+       Date.prototype[utcMethod].apply(this, arguments);
+       syncToInternal(this);
+       return +this;
+-    };
++    });
+   }
+ });
+ 
