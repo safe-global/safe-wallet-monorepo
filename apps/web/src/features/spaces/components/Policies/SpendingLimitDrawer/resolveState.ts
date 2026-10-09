@@ -10,7 +10,10 @@ import {
   NOT_A_SIGNER_HELPER,
   PENDING_BANNER_TITLE,
   PENDING_OUTCOME_TITLE,
-  UNENFORCED_HELPER,
+  UNENFORCED_BANNER_LINE,
+  UNENFORCED_BANNER_TITLE,
+  UNENFORCED_CONNECT_HELPER,
+  UNENFORCED_NOT_A_SIGNER_HELPER,
   connectHelper,
   executeLine,
   outcomeLine,
@@ -34,9 +37,11 @@ export type ActiveDrawerState = {
 
 export type UnenforcedDrawerState = {
   kind: 'unenforced'
-  action: 'manage'
-  disabled: true
-  helper: string
+  action: 'enable' | 'connect'
+  disabled: boolean
+  bannerTitle: string
+  bannerLine2: string
+  helper?: string
 }
 
 export type PendingDrawerState = {
@@ -68,13 +73,19 @@ export type ActiveDrawerPolicy = SpendingLimitPolicy & { status: 'active' }
 
 export type DrawerPolicy = ActiveDrawerPolicy | QueuedSpendingLimitPolicy
 
-/** A module that is present but not enabled enforces nothing, so no wallet makes this limit manageable. */
-const resolveUnenforced = (): UnenforcedDrawerState => ({
-  kind: 'unenforced',
-  action: 'manage',
-  disabled: true,
-  helper: UNENFORCED_HELPER,
-})
+/** A disabled module enforces nothing, so the only action is enabling it again. */
+const resolveUnenforced = (viewer: Viewer): UnenforcedDrawerState => {
+  const base = {
+    kind: 'unenforced',
+    bannerTitle: UNENFORCED_BANNER_TITLE,
+    bannerLine2: UNENFORCED_BANNER_LINE,
+  } as const
+
+  if (!viewer.address) return { ...base, action: 'connect', disabled: false, helper: UNENFORCED_CONNECT_HELPER }
+  if (!viewer.isSigner) return { ...base, action: 'enable', disabled: true, helper: UNENFORCED_NOT_A_SIGNER_HELPER }
+
+  return { ...base, action: 'enable', disabled: false }
+}
 
 const resolveActive = (viewer: Viewer): ActiveDrawerState => {
   if (!viewer.address) return { kind: 'active', action: 'connect', disabled: false, helper: ACTIVE_CONNECT_HELPER }
@@ -132,5 +143,5 @@ export const resolveSpendingLimitDrawerState = (
     return outcome ? resolveClosed(policy, outcome) : resolvePending(policy, viewer, safeName)
   }
 
-  return policy.enabled ? resolveActive(viewer) : resolveUnenforced()
+  return policy.enabled ? resolveActive(viewer) : resolveUnenforced(viewer)
 }

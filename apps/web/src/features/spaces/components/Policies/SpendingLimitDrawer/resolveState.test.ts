@@ -44,19 +44,39 @@ describe('active states', () => {
 })
 
 describe('unenforced state', () => {
-  const UNENFORCED = {
-    kind: 'unenforced',
-    action: 'manage',
-    disabled: true,
-    helper: 'The allowance module is not enabled on this Safe account, so this limit is not enforced.',
+  const unenforced = () => asActivePolicy(mockUnenforcedPolicy())
+  const BANNER = {
+    bannerTitle: 'Spending limit module deleted',
+    bannerLine2: 'Spending limit not applied as module is deleted.',
   }
 
-  it.each([
-    ['a signer', MOCK_VIEWERS.signer],
-    ['a non-signer', MOCK_VIEWERS.nonSigner],
-    ['no wallet', MOCK_VIEWERS.disconnected],
-  ])('offers %s nothing to manage while the module is disabled', (_case, viewer) => {
-    expect(resolve(asActivePolicy(mockUnenforcedPolicy()), viewer)).toEqual(UNENFORCED)
+  it('offers a signer to add the module again', () => {
+    expect(resolve(unenforced(), MOCK_VIEWERS.signer)).toEqual({
+      kind: 'unenforced',
+      action: 'enable',
+      disabled: false,
+      ...BANNER,
+    })
+  })
+
+  it('asks for a wallet before the module can be added', () => {
+    expect(resolve(unenforced(), MOCK_VIEWERS.disconnected)).toEqual({
+      kind: 'unenforced',
+      action: 'connect',
+      disabled: false,
+      ...BANNER,
+      helper: 'Connect a signer wallet to add the module.',
+    })
+  })
+
+  it('shows a non-signer the action disabled and why', () => {
+    expect(resolve(unenforced(), MOCK_VIEWERS.nonSigner)).toEqual({
+      kind: 'unenforced',
+      action: 'enable',
+      disabled: true,
+      ...BANNER,
+      helper: 'Only signers of this Safe account can add the module.',
+    })
   })
 })
 

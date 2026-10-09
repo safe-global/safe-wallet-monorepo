@@ -1,4 +1,4 @@
-import { act, mockClipboard, render, screen, waitFor } from '@/tests/test-utils'
+import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import {
   MOCK_SAFE_NAME,
   MOCK_VIEWERS,
@@ -143,13 +143,36 @@ describe('SpendingLimitDrawer', () => {
     expect(screen.queryByText('Active')).not.toBeInTheDocument()
   })
 
-  it('keeps editing out of reach for an unenforced policy, and explains why', () => {
+  it('warns that the module was deleted and offers a signer to add it back instead of editing', async () => {
+    const onEnableModule = jest.fn()
+    const { user } = renderWithUserEvent(
+      <SpendingLimitDrawer
+        open
+        onClose={jest.fn()}
+        viewer={MOCK_VIEWERS.signer}
+        safe={{ address: SAFE_ADDRESS, name: MOCK_SAFE_NAME }}
+        overview={OVERVIEW}
+        onConnectWallet={jest.fn()}
+        policy={asActivePolicy(mockUnenforcedPolicy())}
+        onEdit={jest.fn()}
+        onEnableModule={onEnableModule}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+    expect(screen.getByText('Spending limit module deleted')).toBeInTheDocument()
+    expect(screen.getByText('Spending limit not applied as module is deleted.')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Add module' }))
+
+    expect(onEnableModule).toHaveBeenCalledTimes(1)
+  })
+
+  it('leaves out the enforced by row for an unenforced policy, which nothing enforces', () => {
     setup(asActivePolicy(mockUnenforcedPolicy()))
 
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(
-      screen.getByText('The allowance module is not enabled on this Safe account, so this limit is not enforced.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByText('Enforced by')).not.toBeInTheDocument()
+    expect(screen.queryByText('Safe allowance module')).not.toBeInTheDocument()
   })
 
   it('shows no usage bars for an unenforced policy, whose spending nothing measures', () => {

@@ -28,13 +28,20 @@ export const ACTIVE_CONNECT_HELPER = 'Connect a signer wallet to edit.'
 
 export const NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can edit this spending limit.'
 
-export const UNENFORCED_HELPER =
-  'The allowance module is not enabled on this Safe account, so this limit is not enforced.'
+export const UNENFORCED_BANNER_TITLE = 'Spending limit module deleted'
+
+export const UNENFORCED_BANNER_LINE = 'Spending limit not applied as module is deleted.'
+
+export const UNENFORCED_CONNECT_HELPER = 'Connect a signer wallet to add the module.'
+
+export const UNENFORCED_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can add the module.'
 
 export const TX_LOAD_FAILED_HELPER = "The transaction couldn't be loaded."
 
-/** The page withholds `onEdit` only when the Workspace's plan does not include policies. */
+/** The page withholds `onEdit` and `onEnableModule` only when the Workspace's plan does not include policies. */
 export const EDIT_LOCKED_HELPER = 'Upgrade to Business to edit spending limits.'
+
+export const ENABLE_LOCKED_HELPER = 'Upgrade to Business to add the module.'
 
 /** The trailing full stop lives here, not at the call site, so the sentence is punctuated in one place. */
 export const signedAndWaitingLine = (missing: number): string => `You've signed. ${formatAwaitingSignatures(missing)}.`

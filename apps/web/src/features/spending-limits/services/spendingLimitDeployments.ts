@@ -45,6 +45,13 @@ export const getLatestSpendingLimitAddress = (chainId: string): string | undefin
   }
 }
 
+/** Whether `address` is an AllowanceModule registered on `chainId`, so it is safe to pass to `enableModule`. */
+export const isAllowanceModuleAddress = (chainId: string, address: string): boolean =>
+  ALL_VERSIONS.some((version) => {
+    const registered = getAllowanceModuleDeployment({ version })?.networkAddresses[chainId]
+    return !!registered && sameAddress(registered, address)
+  })
+
 export const getDeployedSpendingLimitModuleAddress = (
   chainId: string,
   modules: SafeState['modules'],

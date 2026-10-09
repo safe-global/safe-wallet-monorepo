@@ -1,5 +1,7 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
-import { useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
+import useWallet from '@/hooks/wallets/useWallet'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { MemberRole, MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
 import { getSidebarProfileInfo } from './getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
 
@@ -10,15 +12,25 @@ import { AccountInfo } from '../SpacesList/AccountInfo'
  */
 const HeaderAccountInfo = () => {
   const isSignedIn = useIsSignedIn()
-  const { membership, signerAddress, email } = useCurrentMemberProfile()
+  const wallet = useWallet()
+  const { membership, signerAddress, email, isLoading } = useCurrentMemberProfile()
 
   if (!isSignedIn) return null
 
-  const { profileName, displayName } = getSidebarProfileInfo(membership, signerAddress, email)
+  const { profileName, displayName, shortDisplayName } = getSidebarProfileInfo(membership, signerAddress, email)
+  const showConnectedWallet = Boolean(signerAddress) && !sameAddress(wallet?.address, signerAddress)
+  const isMember = membership?.status === MemberStatus.ACTIVE && membership.role === MemberRole.MEMBER
 
   return (
-    <div className="flex items-center rounded-lg bg-accent" data-testid="header-account-info">
-      <AccountInfo profileName={profileName} displayName={displayName} />
+    <div className="flex min-w-0 items-center rounded-lg bg-accent" data-testid="header-account-info">
+      <AccountInfo
+        profileName={profileName}
+        displayName={isLoading ? '' : displayName}
+        shortDisplayName={isLoading ? '' : shortDisplayName}
+        isMember={isMember}
+        signerAddress={signerAddress}
+        connectedWallet={showConnectedWallet ? wallet?.address : undefined}
+      />
     </div>
   )
 }

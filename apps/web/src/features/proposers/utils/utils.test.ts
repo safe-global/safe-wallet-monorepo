@@ -1,15 +1,25 @@
-import { addressIsNotSmartContract, encodeEIP1271Signature, signProposerTypedDataForSafe } from './utils'
+import {
+  addressIsNotSmartContract,
+  encodeEIP1271Signature,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
+  signProposerTypedDataForSafe,
+} from './utils'
 import { faker } from '@faker-js/faker'
-import { getAddress } from 'ethers'
-import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
+import { BrowserProvider, JsonRpcSigner, Wallet, getAddress, getBytes, makeError, verifyMessage } from 'ethers'
+import { connectedWalletBuilder } from '@/tests/builders/wallet'
+import type { JsonRpcProvider } from 'ethers'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { chainBuilder } from '@/tests/builders/chains'
 import * as web3Utils from '@safe-global/utils/utils/web3'
 import * as delegateUtils from '@safe-global/utils/services/delegates'
 
 jest.mock('@/utils/wallets', () => ({
   isSmartContractWallet: jest.fn(),
+  isEthSignWallet: jest.fn(),
 }))
 
-const { isSmartContractWallet } = jest.requireMock('@/utils/wallets')
+const { isSmartContractWallet, isEthSignWallet } = jest.requireMock('@/utils/wallets')
 
 describe('encodeEIP1271Signature', () => {
   const parentSafeAddress = getAddress(faker.finance.ethereumAddress())
@@ -134,10 +144,152 @@ describe('encodeEIP1271Signature', () => {
   })
 })
 
+const queueServiceChain = () =>
+  chainBuilder()
+    .with({ features: [FEATURES.QUEUE_SERVICE] })
+    .build()
+const transactionServiceChain = () => chainBuilder().with({ features: [] }).build()
+
+const createSigner = () =>
+  new JsonRpcSigner(new BrowserProvider({ request: jest.fn() }), faker.finance.ethereumAddress())
+
+describe('signProposerDelegation', () => {
+  const wallet = connectedWalletBuilder().build()
+  const proposerAddress = getAddress(faker.finance.ethereumAddress())
+  const safeAddress = getAddress(faker.finance.ethereumAddress())
+  const signatureRs = faker.string.hexadecimal({ length: 128, casing: 'lower' })
+
+  const sign = (chain: ReturnType<typeof queueServiceChain>, signer: JsonRpcSigner, action: 'add' | 'delete' = 'add') =>
+    signProposerDelegation({ chain, wallet, proposerAddress, safeAddress, action, signer })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  describe('with a typed-data wallet', () => {
+    beforeEach(() => {
+      isEthSignWallet.mockReturnValue(false)
+    })
+
+    it('signs the transaction service typed data through ethers on a chain without QUEUE_SERVICE', async () => {
+      const chain = transactionServiceChain()
+      const signer = createSigner()
+      const signature = `${signatureRs}1b`
+      jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(signature)
+      const send = jest.spyOn(signer.provider, 'send')
+
+      const result = await sign(chain, signer)
+
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        signer,
+        delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
+      )
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        signer,
+        expect.objectContaining({ domain: expect.objectContaining({ name: 'Safe Transaction Service' }) }),
+      )
+      expect(send).not.toHaveBeenCalled()
+      expect(result).toBe(signature)
+    })
+
+    it('signs the queue service typed data with raw eth_signTypedData_v4 on a chain with QUEUE_SERVICE', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      jest.spyOn(web3Utils, 'signTypedData')
+      const send = jest.spyOn(signer.provider, 'send').mockResolvedValue(`${signatureRs}00`)
+
+      const result = await sign(chain, signer, 'delete')
+
+      const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'delete')
+      expect(typedData.domain.name).toBe('Safe Queue Service')
+      expect(send).toHaveBeenCalledWith('eth_signTypedData_v4', [
+        signer.address.toLowerCase(),
+        JSON.stringify(typedData),
+      ])
+      expect(web3Utils.signTypedData).not.toHaveBeenCalled()
+      expect(result).toBe(`${signatureRs}1b`)
+    })
+
+    it('falls back to eth_signTypedData when the wallet does not support eth_signTypedData_v4', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      const send = jest
+        .spyOn(signer.provider, 'send')
+        .mockRejectedValueOnce(makeError('unsupported operation', 'UNSUPPORTED_OPERATION'))
+        .mockResolvedValueOnce(`${signatureRs}01`)
+
+      const result = await sign(chain, signer)
+
+      const typedData = delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add')
+      expect(send).toHaveBeenLastCalledWith('eth_signTypedData', [signer.address.toLowerCase(), typedData])
+      expect(result).toBe(`${signatureRs}1c`)
+    })
+
+    it('does not fall back when the wallet rejects the signature request', async () => {
+      const chain = queueServiceChain()
+      const signer = createSigner()
+      const rejection = makeError('user rejected action', 'ACTION_REJECTED')
+      const send = jest.spyOn(signer.provider, 'send').mockRejectedValue(rejection)
+
+      await expect(sign(chain, signer)).rejects.toBe(rejection)
+      expect(send).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe('with an eth_sign wallet', () => {
+    const owner = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
+
+    const ownerSigner = () => {
+      const signer = createSigner()
+      Object.defineProperty(signer, 'address', { value: owner.address })
+      jest.spyOn(signer, 'signMessage').mockImplementation((message) => owner.signMessage(message))
+      return signer
+    }
+
+    beforeEach(() => {
+      isEthSignWallet.mockReturnValue(true)
+    })
+
+    it('eth_signs the queue service delegate hash so it recovers to the signer, with v shifted by 4', async () => {
+      const chain = queueServiceChain()
+
+      const signature = await sign(chain, ownerSigner())
+
+      const hash = delegateUtils.hashDelegateTypedData(
+        delegateUtils.getDelegateTypedData(chain, proposerAddress, safeAddress, 'add'),
+      )
+      const v = parseInt(signature.slice(-2), 16)
+      expect([31, 32]).toContain(v)
+      expect(verifyMessage(getBytes(hash), `${signature.slice(0, -2)}${(v - 4).toString(16)}`)).toBe(owner.address)
+    })
+
+    it('signs the v1 proposer message on a chain without QUEUE_SERVICE', async () => {
+      const signer = ownerSigner()
+
+      await sign(transactionServiceChain(), signer)
+
+      expect(signer.signMessage).toHaveBeenCalledWith(expect.stringMatching(new RegExp(`^${proposerAddress}\\d+$`)))
+    })
+  })
+})
+
+describe('usesV1DelegateEndpoint', () => {
+  const wallet = connectedWalletBuilder().build()
+
+  it('keeps eth_sign wallets on the v1 endpoints only where there is no queue service', () => {
+    isEthSignWallet.mockReturnValue(true)
+    expect(usesV1DelegateEndpoint(transactionServiceChain(), wallet)).toBe(true)
+    expect(usesV1DelegateEndpoint(queueServiceChain(), wallet)).toBe(false)
+
+    isEthSignWallet.mockReturnValue(false)
+    expect(usesV1DelegateEndpoint(transactionServiceChain(), wallet)).toBe(false)
+  })
+})
+
 describe('signProposerTypedDataForSafe', () => {
-  const mockChainId = '11155111'
   const mockProposerAddress = getAddress(faker.finance.ethereumAddress())
   const mockParentSafeAddress = getAddress(faker.finance.ethereumAddress())
+  const mockSafeAddress = getAddress(faker.finance.ethereumAddress())
   const mockSignature = '0x' + 'ab'.repeat(65)
   const mockDelegateHash = '0x' + 'dd'.repeat(32)
   const mockSigner = {} as JsonRpcSigner
@@ -146,49 +298,90 @@ describe('signProposerTypedDataForSafe', () => {
     jest.clearAllMocks()
   })
 
-  it('should hash the delegate typed data and sign the SafeMessage-wrapped hash', async () => {
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
-    jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
 
-    const result = await signProposerTypedDataForSafe(
-      mockChainId,
-      mockProposerAddress,
-      mockParentSafeAddress,
-      mockSigner,
-    )
+  describe.each([
+    { service: 'queue service', createChain: queueServiceChain },
+    { service: 'transaction service', createChain: transactionServiceChain },
+  ])('on a $service chain', ({ createChain }) => {
+    it('should hash the delegate typed data and sign the SafeMessage-wrapped hash', async () => {
+      const chain = createChain()
+      jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
+      jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
-    // Should hash the delegate typed data first
-    expect(web3Utils.hashTypedData).toHaveBeenCalledWith(
-      delegateUtils.getDelegateTypedData(mockChainId, mockProposerAddress),
-    )
+      const result = await signProposerTypedDataForSafe(
+        chain,
+        mockProposerAddress,
+        mockParentSafeAddress,
+        mockSafeAddress,
+        'add',
+        mockSigner,
+      )
 
-    // Should sign the SafeMessage typed data (not the raw delegate typed data)
-    expect(web3Utils.signTypedData).toHaveBeenCalledWith(
-      mockSigner,
-      expect.objectContaining({
-        domain: {
-          verifyingContract: mockParentSafeAddress,
-          chainId: Number(mockChainId),
-        },
-        types: {
-          SafeMessage: [{ type: 'bytes', name: 'message' }],
-        },
-        message: {
-          message: mockDelegateHash,
-        },
-        primaryType: 'SafeMessage',
-      }),
-    )
+      // Should hash the delegate typed data first
+      expect(delegateUtils.hashDelegateTypedData).toHaveBeenCalledWith(
+        delegateUtils.getDelegateTypedData(chain, mockProposerAddress, mockSafeAddress, 'add'),
+      )
 
-    expect(result).toBe(mockSignature)
+      // Should sign the SafeMessage typed data (not the raw delegate typed data)
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        mockSigner,
+        expect.objectContaining({
+          domain: {
+            verifyingContract: mockParentSafeAddress,
+            chainId: Number(chain.chainId),
+          },
+          types: {
+            SafeMessage: [{ type: 'bytes', name: 'message' }],
+          },
+          message: {
+            message: mockDelegateHash,
+          },
+          primaryType: 'SafeMessage',
+        }),
+      )
+
+      expect(result).toBe(mockSignature)
+    })
+
+    it('wraps the hash of the delegate typed data for the chain', async () => {
+      const chain = createChain()
+      jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
+
+      await signProposerTypedDataForSafe(
+        chain,
+        mockProposerAddress,
+        mockParentSafeAddress,
+        mockSafeAddress,
+        'delete',
+        mockSigner,
+      )
+
+      const expectedHash = delegateUtils.hashDelegateTypedData(
+        delegateUtils.getDelegateTypedData(chain, mockProposerAddress, mockSafeAddress, 'delete'),
+      )
+      expect(web3Utils.signTypedData).toHaveBeenCalledWith(
+        mockSigner,
+        expect.objectContaining({ message: { message: expectedHash } }),
+      )
+    })
   })
 
   it('should use the correct parent Safe address in the domain', async () => {
     const specificParentSafe = getAddress(faker.finance.ethereumAddress())
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
+    jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
     jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
-    await signProposerTypedDataForSafe(mockChainId, mockProposerAddress, specificParentSafe, mockSigner)
+    await signProposerTypedDataForSafe(
+      queueServiceChain(),
+      mockProposerAddress,
+      specificParentSafe,
+      mockSafeAddress,
+      'add',
+      mockSigner,
+    )
 
     expect(web3Utils.signTypedData).toHaveBeenCalledWith(
       mockSigner,
@@ -201,16 +394,24 @@ describe('signProposerTypedDataForSafe', () => {
   })
 
   it('should use the correct chainId in the domain', async () => {
-    jest.spyOn(web3Utils, 'hashTypedData').mockReturnValue(mockDelegateHash)
+    const chain = transactionServiceChain()
+    jest.spyOn(delegateUtils, 'hashDelegateTypedData').mockReturnValue(mockDelegateHash)
     jest.spyOn(web3Utils, 'signTypedData').mockResolvedValue(mockSignature)
 
-    await signProposerTypedDataForSafe('1', mockProposerAddress, mockParentSafeAddress, mockSigner)
+    await signProposerTypedDataForSafe(
+      chain,
+      mockProposerAddress,
+      mockParentSafeAddress,
+      mockSafeAddress,
+      'add',
+      mockSigner,
+    )
 
     expect(web3Utils.signTypedData).toHaveBeenCalledWith(
       mockSigner,
       expect.objectContaining({
         domain: expect.objectContaining({
-          chainId: 1,
+          chainId: Number(chain.chainId),
         }),
       }),
     )

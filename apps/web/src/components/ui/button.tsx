@@ -101,6 +101,7 @@ const buttonVariants = cva(
         // control tucked into a corner. `icon-xs` shares the box but keeps the square-ish radius
         // and a 12px glyph, which reads as a different control.
         'icon-circle': "size-6 rounded-full [&_svg:not([class*='size-'])]:size-4",
+        chip: 'h-8 gap-1.5 px-2 text-xs in-data-[slot=button-group]:rounded-sm',
       },
       weight: {
         medium: '',

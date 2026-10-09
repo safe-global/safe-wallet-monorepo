@@ -1,8 +1,6 @@
 import Topbar, {
-  SAFE_BAR_ACTIONS_WRAP,
   SAFE_BAR_CONTEXT_HEIGHT,
   SAFE_BAR_CONTEXT_WRAP,
-  SEARCH_ACTIONS_WRAP,
   SEARCH_CONTEXT_HEIGHT,
   SEARCH_CONTEXT_WRAP,
 } from './index'
@@ -350,8 +348,8 @@ describe('Topbar', () => {
       // The logo opts out of both variants' thresholds — it always fits beside the actions.
       expect(context.className).not.toMatch(/basis-full/)
       expect(actions.className).not.toMatch(/order-first/)
-      // Nothing left to push the actions off the right edge.
-      expect(actions.className).toContain('ml-auto')
+      // The context's auto margin is what parks the actions on the right edge.
+      expect(context.className).toContain('mr-auto')
     })
 
     it.each(LOGO_ROUTES)('centers the short logo row against the actions card on %s', (pathname) => {
@@ -368,11 +366,10 @@ describe('Topbar', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
 
-      const { header, context, actions } = groups(render(<Topbar />).container)
+      const { header, context } = groups(render(<Topbar />).container)
 
       expect(context).toContainElement(screen.getByTestId('space-safe-bar'))
       expect(context.className).toContain(SAFE_BAR_CONTEXT_WRAP)
-      expect(actions.className).toContain(SAFE_BAR_ACTIONS_WRAP)
       expect(header.className).toMatch(/items-start/)
       // A floor, not a fixed height: the bar wraps internally at narrow widths, and against a fixed
       // h-14 the slot's items-center centred the overflow — half of it spilling up into the actions.
@@ -386,14 +383,14 @@ describe('Topbar', () => {
       mockIsSpaceRoute.mockReturnValue(true)
       mockUsePathname.mockReturnValue('/spaces')
 
-      const { context, actions } = groups(render(<Topbar />).container)
+      const { context } = groups(render(<Topbar />).container)
 
       // The search variant is the one the safe bar is NOT in (GlobalSearchInput is stubbed to null
       // by the feature mock, so there is no element of its own to assert on).
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
       expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
-      expect(actions.className).toContain(SEARCH_ACTIONS_WRAP)
       expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
+      expect(context.className).not.toMatch(/order-last/)
       // This variant keeps the FIXED height: the search input sizes itself with `h-full`, which
       // needs a definite parent — a min-height would leave it collapsed to its content.
       expect(context.className).toContain(SEARCH_CONTEXT_HEIGHT)
@@ -415,6 +412,16 @@ describe('Topbar', () => {
       expect(actions.className).not.toContain('basis-full')
     })
 
+    it('leaves the search in DOM order so it does not flip sides as the row wraps', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces')
+
+      const { context } = groups(render(<Topbar />).container)
+
+      expect(context.className).not.toMatch(/order-last/)
+      expect(context.className).toContain('basis-full')
+    })
+
     it('stacks the account card above the context with both rows on the left edge', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
@@ -425,13 +432,28 @@ describe('Topbar', () => {
       // ahead of the burger and pushed it onto a row of its own.
       expect(context.className).toMatch(/order-last/)
       expect(actions.className).not.toMatch(/order-first/)
-      // `ml-0` drops the `ml-auto` that right-aligns the card while the two share a row, so both
-      // wrapped rows start on the page's left padding.
-      expect(actions.className).toMatch(/ml-0/)
+      // The card has no margin of its own, so a row it has to itself starts on the page's left padding.
+      expect(actions.className).not.toMatch(/ml-auto/)
       // And the search is not right-aligned inside its full-width slot, which would put the two
       // rows on a diagonal.
       expect(context.className).not.toMatch(/justify-end/)
     })
+
+    // Above the forced-wrap threshold the pair can still outgrow the row (the safe bar's width follows
+    // its content), and flexbox wraps on its own. The only thing deciding the alignment of a row a
+    // group has to itself is a margin on that group, so neither may right-align itself.
+    it.each([['/home'], ['/spaces']])(
+      'relies on the context margin alone to right-align the actions on %s',
+      (pathname) => {
+        mockIsSpaceRoute.mockReturnValue(pathname === '/spaces')
+        mockUsePathname.mockReturnValue(pathname)
+
+        const { context, actions } = groups(render(<Topbar />).container)
+
+        expect(context.className).toContain('mr-auto')
+        expect(actions.className).not.toMatch(/ml-auto|ml-0|justify-end/)
+      },
+    )
 
     it('leaves the sidebar burger first in the header so it holds the top row', () => {
       mockIsSpaceRoute.mockReturnValue(false)

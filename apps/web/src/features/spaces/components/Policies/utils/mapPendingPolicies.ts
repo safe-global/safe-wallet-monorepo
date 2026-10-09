@@ -80,7 +80,13 @@ const toSpenders = (
 
   for (const change of dto.data.changes) {
     switch (change.kind) {
+      // Re-enabling an unenforced policy's module applies its indexed limits again, unchanged.
       case 'enable-module':
+        if (active && !active.enabled) {
+          active.data.spenders.forEach(({ spender, allowances }) =>
+            spenderFor(spender).allowances.push(...allowances.map((allowance) => ({ ...allowance }))),
+          )
+        }
         break
       case 'add-delegate':
         spenderFor(change.delegate)
@@ -153,6 +159,7 @@ export const mapPendingPolicies = (
 
     const current = findActive(dto.safe, dto.enforcement.moduleAddress, active)
     const operation = getOperation(dto.data.changes, current)
+    const enablesModule = dto.data.changes.some((change) => change.kind === 'enable-module')
 
     return [
       {
@@ -161,7 +168,7 @@ export const mapPendingPolicies = (
         status: 'pending',
         safe: dto.safe,
         enforcement: dto.enforcement,
-        enabled: current?.enabled ?? true,
+        enabled: enablesModule || (current?.enabled ?? true),
         operation,
         safeTxHash: dto.safeTxHash,
         nonce: dto.nonce,
@@ -196,6 +203,7 @@ export const isPendingChangeIndexed = (row: PendingSpendingLimitPolicy, active: 
 
   return (
     current !== undefined &&
+    current.enabled === row.enabled &&
     row.data.spenders.every(({ spender, allowances }) => {
       // A spender whose every limit is being removed leaves the active rows altogether.
       const isLeaving = allowances.length > 0 && allowances.every((allowance) => allowance.change === 'removed')

@@ -1,49 +1,93 @@
 import type { ReactElement } from 'react'
 import { PopoverContent } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { LogOut } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
+import Identicon from '@/components/common/Identicon'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
 
 export interface ProfilePopoverContentProps {
-  /** Name used to render the avatar initials. */
   avatarName: string
-  /** Primary name/identifier shown in the popover. */
   displayName: string
-  /** Optional role line (e.g. "ADMIN"). */
+  shortDisplayName?: string
   role?: string
+  isMember?: boolean
+  signerAddress?: string
+  connectedWallet?: string
   onSignOut: () => void
 }
 
-/**
- * Body of the signed-in profile popover (header, name/role, sign out), rendered
- * by the top-bar account menu. Opens below the account icon and is right-aligned
- * so its trailing edge lines up with the icon.
- */
 export const ProfilePopoverContent = ({
   avatarName,
   displayName,
+  shortDisplayName,
   role,
+  isMember = false,
+  signerAddress,
+  connectedWallet,
   onSignOut,
 }: ProfilePopoverContentProps): ReactElement => (
   <PopoverContent
     side="bottom"
     align="end"
     sideOffset={12}
+    showBackdrop
     className={css.profilePopover}
     data-testid="sidebar-profile-popover"
   >
-    <div className={css.profileHeader}>
-      <InitialsAvatar name={avatarName} size="medium" rounded />
-      <span className={css.profileSignedIn}>Signed in</span>
-    </div>
+    <div className={css.profileSection}>
+      <span className={css.profileSectionLabel}>Your account</span>
 
-    <div className={css.profileInfo}>
-      <span className={css.profileName}>{displayName}</span>
+      <div className={css.profileIdentity}>
+        {signerAddress ? (
+          <Identicon address={signerAddress} size={32} />
+        ) : (
+          <InitialsAvatar name={avatarName} size="medium" rounded />
+        )}
+        {displayName && (
+          <Tooltip>
+            <TooltipTrigger render={<span className={css.profileName} />}>
+              {shortDisplayName || displayName}
+            </TooltipTrigger>
+            <TooltipContent side="top">{signerAddress || displayName}</TooltipContent>
+          </Tooltip>
+        )}
+        {signerAddress && <CopyAddressIconButton address={signerAddress} />}
+      </div>
+
+      <span className={css.profileSectionCaption}>
+        {isMember ? 'Your Safe Pro membership.' : 'Manages your Safe Pro subscription.'}
+      </span>
       {role && <span className={css.profileRole}>{role}</span>}
     </div>
 
-    <Separator />
+    {connectedWallet && (
+      <>
+        <Separator className={css.profileDivider} />
+
+        <div className={css.profileSection} data-testid="sidebar-profile-wallet-hint">
+          <span className={css.profileSectionLabel}>Connected wallet</span>
+
+          <div className={css.profileIdentity}>
+            <Identicon address={connectedWallet} size={32} />
+            <Tooltip>
+              <TooltipTrigger render={<span className={css.profileName} />}>
+                {shortenAddress(connectedWallet)}
+              </TooltipTrigger>
+              <TooltipContent side="top">{connectedWallet}</TooltipContent>
+            </Tooltip>
+            <CopyAddressIconButton address={connectedWallet} />
+          </div>
+
+          <span className={css.profileSectionCaption}>Signs and executes transactions.</span>
+        </div>
+      </>
+    )}
+
+    <Separator className={css.profileDivider} />
 
     <button
       type="button"
@@ -52,7 +96,7 @@ export const ProfilePopoverContent = ({
       data-testid="sidebar-profile-sign-out"
       aria-label="Sign out"
     >
-      <LogOut className="size-4" aria-hidden="true" />
+      <LogOut className="size-4" strokeWidth={2.5} aria-hidden="true" />
       <span>Sign out</span>
     </button>
   </PopoverContent>
