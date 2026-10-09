@@ -52,18 +52,20 @@ const UsageMeter = ({
   const isExhausted = left === 0
 
   return (
-    <Card variant="muted" size="sm" className="flex-1">
+    <Card variant="outlined" size="sm" radius="xl" className="flex-1">
       <CardContent className="flex items-center justify-between">
         <div className="mr-4 flex items-center gap-3">
-          <Avatar>
+          <Avatar className="size-10 rounded-xl">
             <AvatarFallback surface="card">{icon}</AvatarFallback>
           </Avatar>
-          <Typography variant="paragraph-medium">{label}</Typography>
+          <Typography variant="paragraph-small-medium" color="muted">
+            {label}
+          </Typography>
           {tooltip && <InfoTip text={tooltip} />}
         </div>
         <Typography
-          variant="paragraph-bold"
-          className="flex items-center gap-1.5 whitespace-nowrap"
+          variant="h4"
+          className="flex items-center gap-1.5 whitespace-nowrap tabular-nums"
           data-testid={isExhausted ? 'meter-exhausted' : undefined}
         >
           {isExhausted && <span aria-hidden className="size-1.5 rounded-full bg-destructive" />}
@@ -122,13 +124,16 @@ export default function PlanStatusCard({
   const text = statusText(plan, endDate, safeAccounts !== null && _remaining(safeAccounts) === 0)
 
   return (
-    <Card radius="xl">
+    <Card radius="xl" variant="outlined" elevated>
       <CardContent>
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <Typography variant="h4">{plan?.name ?? 'No active plan'}</Typography>
+              <Typography variant="paragraph-mini-bold" color="muted" className="uppercase tracking-widest">
+                Your current plan
+              </Typography>
+              <div className="flex items-center gap-3">
+                <Typography variant="h3">{plan?.name ?? 'No active plan'}</Typography>
                 {badge && (
                   <Badge variant={badge.variant} size="status" shape="status" data-testid="plan-status-badge">
                     {badge.label}
@@ -136,7 +141,7 @@ export default function PlanStatusCard({
                 )}
               </div>
               {text && (
-                <Typography className="flex items-center gap-1">
+                <Typography variant="paragraph-small" color="muted" className="flex max-w-xl items-center gap-1">
                   {text}
                   {isTrial && !plan?.hasPaymentMethod && (
                     <InfoTip text={TRIAL_DISCLAIMER} data-testid="trial-disclaimer" />
@@ -154,13 +159,13 @@ export default function PlanStatusCard({
           <div className="flex flex-col gap-4 md:flex-row">
             <UsageMeter
               icon={<WalletCards className="size-5" strokeWidth={1.5} />}
-              label="Safe accounts available"
+              label="Safe accounts left"
               tooltip={seatsTooltip(tierName, safeAccounts?.quota)}
               meter={safeAccounts}
             />
             <UsageMeter
               icon={<Fuel className="size-5" strokeWidth={1.5} />}
-              label="Sponsored transactions available"
+              label="Sponsored transactions left"
               meter={sponsoredTxs}
             />
           </div>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ArrowRight, ArrowUpRight } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -16,6 +15,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@/utils/cn'
+import { FeatureCheck } from './FeatureCheck'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
 import type { CurrentPlan, PlanCta as PlanCtaKindOf, PlanPick, PlanSeatOption, PlanTier } from './types'
 
@@ -141,7 +141,10 @@ const PlanCta = ({
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <ArrowRight
+            data-icon="inline-end"
+            className="transition-transform duration-300 group-hover/plan:translate-x-0.5 motion-reduce:transition-none"
+          />
         </Button>
       )
     case 'manage':
@@ -157,14 +160,16 @@ const PlanCta = ({
           weight="semibold"
           accentIcon
           className="w-full"
-          disabled={isBusy}
           onClick={() => {
             clicked()
             onSubscribe?.(pick)
           }}
         >
           {cta.label}
-          <ArrowRight data-icon="inline-end" />
+          <ArrowRight
+            data-icon="inline-end"
+            className="transition-transform duration-300 group-hover/plan:translate-x-0.5 motion-reduce:transition-none"
+          />
         </Button>
       )
     case 'change':
@@ -225,8 +230,8 @@ export const PlanCard = ({
     <Card
       variant={isCurrentInCatalog ? 'default' : 'muted-secondary'}
       elevated={isCurrentInCatalog}
-      radius="lg-xl"
-      className={cn('flex-1', selectable && 'cursor-pointer')}
+      radius="xl"
+      className={cn('group/plan flex-1', selectable && 'cursor-pointer')}
       selected={selectable ? Boolean(selected) : undefined}
       role={selectable ? 'radio' : undefined}
       aria-checked={selectable ? selected : undefined}
@@ -236,11 +241,16 @@ export const PlanCard = ({
       data-testid={tier.isCurrent ? 'current-plan-card' : undefined}
     >
       <CardContent className="flex flex-1 flex-col">
-        <div className="flex h-full flex-col gap-4">
+        <div className="flex h-full flex-col gap-6">
           <div className="flex flex-1 flex-col gap-6">
             <div className="flex flex-col gap-4">
               <div className="flex items-center gap-2">
-                <Typography variant={selectable ? 'paragraph-large-medium' : 'h4'}>{tier.name}</Typography>
+                <Typography
+                  variant={selectable ? 'paragraph-large-medium' : 'paragraph-small-bold'}
+                  className="uppercase tracking-widest text-muted-foreground"
+                >
+                  {tier.name}
+                </Typography>
                 {tier.isCurrent && currentBadge && (
                   <Badge variant={currentBadge.variant} size="status" shape="status">
                     {currentBadge.label}
@@ -248,8 +258,8 @@ export const PlanCard = ({
                 )}
               </div>
 
-              <div className="flex items-baseline gap-1">
-                <Typography variant="h4" className={cn(selectable && 'line-through')}>
+              <div className="flex items-baseline gap-1.5">
+                <Typography variant="h1" className={cn('tabular-nums tracking-tight', selectable && 'line-through')}>
                   {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
                 </Typography>
                 <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
@@ -261,14 +271,21 @@ export const PlanCard = ({
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div aria-hidden className="h-px w-full bg-border" />
+
+            <div className="flex flex-col gap-5">
               {option && (
                 <div className="flex flex-col gap-1.5">
                   <Seats options={tier.options} value={option} onChange={changeOption} />
                   {hint && (
                     <Typography variant="paragraph-mini" color="muted">
                       {hint}{' '}
-                      <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+                      <Link
+                        href="https://safe-pro-sales.example.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="muted"
+                      >
                         Talk to sales <ArrowRight className="inline size-3" />
                       </Link>
                     </Typography>
@@ -276,14 +293,10 @@ export const PlanCard = ({
                 </div>
               )}
 
-              <List className="gap-1">
+              <List className="gap-2">
                 {features.map((feature) => (
                   <ListItem key={feature} size="sm" className="py-0">
-                    <Avatar size="xs">
-                      <AvatarFallback>
-                        <Check className="size-4" strokeWidth={1.5} />
-                      </AvatarFallback>
-                    </Avatar>
+                    <FeatureCheck />
                     <ListItemText primary={feature} />
                   </ListItem>
                 ))}
@@ -316,7 +329,7 @@ export function PlanCatalog({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
         <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
           <TabsList aria-label="Billing cycle">
             <TabsTrigger value="month">Monthly</TabsTrigger>
@@ -332,11 +345,11 @@ export function PlanCatalog({
         </Tabs>
 
         <Link href={SAFE_PRO_PRICING_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          Compare all features <ArrowUpRight />
+          See the full feature comparison <ArrowUpRight />
         </Link>
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {visible.map((tier) => (
           <PlanCard
             key={tier.id}
@@ -355,12 +368,12 @@ export const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to 
 
 export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions) {
   return (
-    <Card radius="xl">
+    <Card radius="xl" variant="muted-secondary">
       <CardContent>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           <PlanCatalog {...props} />
           {props.readOnly && (
-            <Typography variant="paragraph-small" color="muted" align="center">
+            <Typography variant="paragraph-small" color="muted" align="center" className="hidden">
               {READ_ONLY_NOTE}
             </Typography>
           )}

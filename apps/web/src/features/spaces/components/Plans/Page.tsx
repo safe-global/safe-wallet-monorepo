@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@/utils/cn'
@@ -22,6 +21,9 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
+import { PlansHero } from './PlansHero'
+import { PlansFaq } from './PlansFaq'
+import { PlanCompareTable } from './PlanCompareTable'
 import type { PlanPick, PlanTier } from './types'
 
 const PlansSkeleton = () => (
@@ -85,10 +87,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
 
   return (
     <AuthState spaceId={spaceId}>
-      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
-          Plans
-        </Typography>
+      <div className={cn('shadcn-scope mx-auto max-w-6xl', isDarkMode && 'dark')}>
+        <PlansHero />
 
         {!isSafePro ? (
           <Card
@@ -120,6 +120,10 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             readOnly={!isAdmin}
           />
         )}
+
+        <PlanCompareTable />
+
+        <PlansFaq />
 
         {pick && currentPlan && (
           <ChangePlanFlow
