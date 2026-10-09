@@ -3,13 +3,9 @@ import * as swaps from '../pages/swaps.pages.js'
 import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as txs from '../pages/transactions.page.js'
+import fallbackHandlers from '../../fixtures/fallback-handlers.js'
 
 let staticSafes = []
-
-const txUrls = {
-  '1_4_1':
-    '&id=multisig_0xc36A530ccD728d36a654ccedEB7994473474C018_0x2b68245cc89c3e2c602f8c426d987ec535f2cd7362d5cac20deb9703dc714a0e',
-}
 
 describe('Transaction details queue tests', () => {
   before(async () => {
@@ -29,7 +25,7 @@ describe('Transaction details queue tests', () => {
   })
 
   it('Verify that when the tx contains the action with an official 1.4.1 fallbackhandler contract there is no error', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_35 + txUrls['1_4_1'])
+    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_35 + fallbackHandlers.official141)
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyExpandedDetails([create_tx.txActions.setFallbackHandler])
     txs.verifyUntrustedHandllerWarningDoesNotExist()

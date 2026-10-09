@@ -6,14 +6,13 @@ import * as createtx from '../pages/create_tx.pages.js'
 import * as tx from '../pages/transactions.page.js'
 import * as assets from '../pages/assets.pages.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import proposerData from '../../fixtures/proposers.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
 const signer3 = walletCredentials.OWNER_3_PRIVATE_KEY
-const proposerAddress = '0x8eeC...2a3b'
-const proposerAddress_2 = '0x0972...9f35'
 const sendValue = 0.000001
 
 describe('Proposers 2 tests', () => {
@@ -39,17 +38,17 @@ describe('Proposers 2 tests', () => {
 
   it('Verify a proposer can rename any proposer, as renaming is a local address book edit', () => {
     wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
-    proposer.verifyEditProposerBtnEnabled(proposerAddress)
+    proposer.verifyEditProposerBtnEnabled(proposerData.delegate)
   })
 
   it('Verify a proposer cannot remove other proposers', () => {
     wallet.connectSignerViaStorage(signer2, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
+    proposer.verifyDeleteProposerBtnIsDisabled(proposerData.safeDelegate)
   })
 
   it('Verify that deleting a proposer is only possible by creator', () => {
     wallet.connectSignerViaStorage(signer3, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_33)
-    proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress_2)
-    proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
+    proposer.verifyDeleteProposerBtnIsDisabled(proposerData.safeDelegate)
+    proposer.verifyDeleteProposerBtnIsDisabled(proposerData.delegate)
   })
 })

@@ -1,5 +1,5 @@
 import { INFO_MODAL_KEY } from '../e2e/safe-apps/constants'
-import safes from '../fixtures/safes/static.js'
+import { getSafes, CATEGORIES } from './safes/safesHandler.js'
 
 const allowedApps = ['https://safe-test-app.com']
 
@@ -13,10 +13,12 @@ Cypress.Commands.add('visitSafeApp', (appUrl) => {
     )
   })
 
-  cy.visit(`/apps/open?safe=${safes.SEP_STATIC_SAFE_2}&appUrl=${encodeURIComponent(appUrl)}`, {
-    failOnStatusCode: false,
-    onBeforeLoad: (win) => {
-      win.addEventListener('message', cy.stub().as('safeAppsMessage'))
-    },
+  cy.wrap(getSafes(CATEGORIES.static), { log: false }).then((safes) => {
+    cy.visit(`/apps/open?safe=${safes.SEP_STATIC_SAFE_2}&appUrl=${encodeURIComponent(appUrl)}`, {
+      failOnStatusCode: false,
+      onBeforeLoad: (win) => {
+        win.addEventListener('message', cy.stub().as('safeAppsMessage'))
+      },
+    })
   })
 })

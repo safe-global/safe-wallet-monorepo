@@ -1,0 +1,223 @@
+name: Web isolated E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      specs:
+        description: Comma-separated registered specs (suite/name); empty runs every registered spec
+        required: false
+        default: ''
+      shards:
+        description: Number of parallel jobs, each with its own backend
+        required: false
+        default: '6'
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths:
+      - '.github/workflows/web-isolated-e2e-backend.yml'
+      - '.github/actions/isolated-e2e-backend/**'
+      - '.github/actions/build/**'
+      - '.github/actions/yarn/**'
+      - '.github/actions/corepack/**'
+      - '.github/actions/cache-deps/**'
+      - 'apps/web/**'
+      - 'apps/tx-builder/**'
+      - 'packages/**'
+      - 'config/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.yarnrc.yml'
+      - '.yarn/patches/**'
+
+permissions:
+  contents: read
+
+# Only the full-run label replaces a running run; other label events get their own group and skip.
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.ref }}${{
+    github.event.action == 'labeled' && github.event.label.name != 'isolated-e2e-full'
+    && format('-label-{0}', github.event.label.name) || '' }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    # A label event only matters when it adds the full-run label.
+    if: >-
+      (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
+      && (github.event.action != 'labeled' || github.event.label.name == 'isolated-e2e-full')
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Plan shards
+        id: plan
+        env:
+          PULL_REQUEST_SPECS: regression/assets,regression/spaces_basicflow,regression/tx_queue_reject_btn
+          FULL_RUN_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'isolated-e2e-full') }}
+          SAFE_E2E_SPECS: ${{ inputs.specs }}
+          SAFE_E2E_SHARDS: ${{ inputs.shards }}
+        # Pull requests run a short selection unless labelled isolated-e2e-full; empty specs run every spec.
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ] && [ "$FULL_RUN_LABEL" = true ]; then
+            SAFE_E2E_SPECS='' SAFE_E2E_SHARDS=6
+          elif [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            SAFE_E2E_SPECS=$PULL_REQUEST_SPECS SAFE_E2E_SHARDS=1
+          fi
+          [ -n "$SAFE_E2E_SPECS" ] || unset SAFE_E2E_SPECS
+          echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: plan
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/yarn
+
+      - name: Check isolated runner
+        run: yarn workspace @safe-global/web e2e:env:test
+
+      - name: Build wallet for local CGW
+        uses: ./.github/actions/build
+        with:
+          prod: 'false'
+        env:
+          NODE_ENV: cypress
+          NEXT_PUBLIC_IS_TEST_E2E: 'true'
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: WALLET_WEB
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: http://localhost:8000/cgw
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: http://localhost:8000/cgw
+
+      - name: Build Transaction Builder for local CGW
+        env:
+          VITE_GATEWAY_URL: http://localhost:8000/cgw
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: http://localhost:4003/simulate
+        run: yarn workspace @safe-global/tx-builder exec vite build --config vite.config.ts
+
+      - name: Upload builds
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: isolated-e2e-builds
+          path: |
+            apps/web/out
+            apps/tx-builder/build
+          retention-days: 1
+          if-no-files-found: error
+
+  cypress:
+    needs: [plan, build]
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      SAFE_E2E_PROJECT: safe-e2e-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+      SAFE_E2E_WEB_PORT: '8080'
+      SAFE_E2E_WEB_URL: http://localhost:8080
+      SAFE_E2E_SPECS: ${{ matrix.specs }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/yarn
+
+      - name: Download builds
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: isolated-e2e-builds
+          path: apps
+
+      - name: Install browser dependencies
+        id: browser
+        working-directory: apps/web
+        run: |
+          yarn exec playwright install --with-deps --no-shell chromium
+          sudo apt-get install -y libgtk-3-0t64 libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb
+          yarn exec cypress install
+          yarn exec cypress verify
+          node -e 'console.log("path=" + require("@playwright/test").chromium.executablePath())' >> "$GITHUB_OUTPUT"
+
+      - name: Start and validate backend
+        id: backend
+        uses: ./.github/actions/isolated-e2e-backend
+        with:
+          project: ${{ env.SAFE_E2E_PROJECT }}
+          fork-rpc-url: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
+          chains: ${{ matrix.chains }}
+          mainnet-rpc-url: ${{ secrets.FORK_RPC_URL_MAINNET }}
+          polygon-rpc-url: ${{ secrets.FORK_RPC_URL_POLYGON }}
+
+      - name: Serve Transaction Builder and simulation adapter
+        run: |
+          nohup yarn workspace @safe-global/tx-builder exec \
+            vite preview --config vite.config.ts --host localhost --strictPort \
+            > "$RUNNER_TEMP/tx-builder.log" 2>&1 &
+          SAFE_RPC_URL=http://localhost:8545 nohup node apps/web/e2e/environment/simulation.mjs \
+            > "$RUNNER_TEMP/simulation.log" 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
+
+      - name: Run isolated Cypress shard
+        uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
+        with:
+          install: false
+          working-directory: apps/web
+          start: yarn serve
+          wait-on: http://localhost:8080
+          wait-on-timeout: 120
+          command: yarn e2e:env cypress
+        env:
+          SAFE_E2E_BROWSER: ${{ steps.browser.outputs.path }}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          SAFE_E2E_RECORD_BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          REVERSE_PROXY_UI_PORT: '8080'
+
+      - name: Collect redacted container diagnostics
+        if: always() && steps.backend.outcome != 'skipped'
+        working-directory: apps/web/e2e/environment/infra
+        env:
+          # The logs command needs the provider URLs to redact them.
+          SEPOLIA_FORK_RPC_URL: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
+          FORK_RPC_URL_MAINNET: ${{ secrets.FORK_RPC_URL_MAINNET }}
+          FORK_RPC_URL_POLYGON: ${{ secrets.FORK_RPC_URL_POLYGON }}
+        run: |
+          output="$RUNNER_TEMP/isolated-e2e-backend"
+          mkdir -p "$output"
+          docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
+            --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
+          for service in cgw-web decoder-web txs-web txs-worker-indexer; do
+            python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
+          done
+
+      - name: Clean up owned backend
+        if: always() && steps.backend.outcome != 'skipped'
+        working-directory: apps/web/e2e/environment/infra
+        run: python3 scripts/test_env.py reset
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: isolated-e2e-results-${{ matrix.shard }}
+          # The fork cache lives in .anvil-cache, which the action skips as hidden by default.
+          include-hidden-files: true
+          path: |
+            apps/web/cypress/snapshots/actual/**/*.png
+            apps/web/e2e/environment/artifacts/cypress/videos/**/*.mp4
+            apps/web/e2e/environment/artifacts/cypress/reports/*.xml
+            ${{ runner.temp }}/isolated-e2e-backend/manifest.json
+            ${{ runner.temp }}/isolated-e2e-backend/wallet-ref.txt
+            ${{ runner.temp }}/isolated-e2e-backend/containers.txt
+            ${{ runner.temp }}/isolated-e2e-backend/*.log
+            apps/web/e2e/environment/infra/.anvil-cache/**
+            ${{ runner.temp }}/tx-builder.log
+            ${{ runner.temp }}/simulation.log
+          retention-days: 7
+          if-no-files-found: ignore

@@ -7,19 +7,11 @@ import * as messages from '../pages/messages.pages.js'
 import * as msg_confirmation_modal from '../pages/modals/message_confirmation.pages.js'
 import * as navigation from '../pages/navigation.page'
 import * as spendinglimit from '../pages/spending_limits.pages'
+import notes from '../../fixtures/notes.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
-const safe = 'sep:0xF184a243925Bf7fb1D64487339FF4F177Fb75644'
-
-const txs = {
-  oneOfoneTx:
-    '&id=multisig_0xF184a243925Bf7fb1D64487339FF4F177Fb75644_0xccc6945d0d674ceb45f856841bfc3991b4da27ea578ffe9652bbc6835944b323',
-}
-
-const noteCreator = 'sep:0x96D4...5aC5'
-
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
@@ -54,17 +46,17 @@ describe('Transaction notes tests', () => {
   })
 
   it('Verify in the transaction details the note is visible', () => {
-    cy.visit(constants.transactionUrl + safe + txs.oneOfoneTx)
+    cy.visit(constants.transactionUrl + notes.safe + notes.oneOfoneTx)
     createtx.checkNoteRecordedNote(createtx.recordedTxNote)
   })
 
   it('Verify hovering over the note tooltip shows note originator', () => {
-    cy.visit(constants.transactionUrl + safe + txs.oneOfoneTx)
-    createtx.checkNoteCreator(noteCreator)
+    cy.visit(constants.transactionUrl + notes.safe + notes.oneOfoneTx)
+    createtx.checkNoteCreator(notes.creator)
   })
 
   it('Verify that after a tx was executed, the tx note is not editable', () => {
-    cy.visit(constants.transactionUrl + safe + txs.oneOfoneTx)
+    cy.visit(constants.transactionUrl + notes.safe + notes.oneOfoneTx)
     createtx.checkNoteRecordedNoteReadOnly()
   })
 

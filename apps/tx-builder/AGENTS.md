@@ -16,7 +16,7 @@ Root `yarn verify:changed` does NOT cover this app; run `node scripts/verify.mjs
 
 ## Testing
 
-Unit tests are colocated. E2E coverage lives in the main web suite at `apps/web/cypress/e2e/safe-apps/` (exercises the real iframe integration).
+Unit tests are colocated. E2E coverage lives in the main web suite at `apps/web/cypress/e2e/safe-apps/` (exercises the real iframe integration). `VITE_GATEWAY_URL` makes one Client Gateway serve every gateway request and the only ABI source; the isolated E2E stack uses it (see `apps/web/e2e/docs/ISOLATED_ENVIRONMENT.md`).
 
 ## Safe App constraints
 
