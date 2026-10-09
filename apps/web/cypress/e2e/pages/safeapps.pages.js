@@ -218,7 +218,6 @@ export function clickOnApp(app) {
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
   cy.get(`a[aria-label="Open ${app}"]`).first().click()
-  cy.wait(2000)
 }
 
 export function verifyNoAppsTextPresent() {
