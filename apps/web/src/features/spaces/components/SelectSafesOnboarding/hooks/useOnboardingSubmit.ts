@@ -37,7 +37,7 @@ import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/c
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
-import { getSeatLimitMessage } from '../../../utils/seatLimitError'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
@@ -185,9 +185,8 @@ const useOnboardingSubmit = (
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
-      const seatLimit = getSeatLimitMessage(result.error)
-      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceIdStr)
-      throw new Error(seatLimit ?? getRtkQueryErrorMessage(result.error))
+      if (getQuotaExceededError(result.error)) refreshSpaceEntitlements(dispatch, spaceIdStr)
+      throw new Error(getRtkQueryErrorMessage(result.error))
     }
   }
 
