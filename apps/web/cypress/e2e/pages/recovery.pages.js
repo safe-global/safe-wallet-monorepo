@@ -163,15 +163,15 @@ export function enterOwnerAddress(address) {
   safe.inputOwnerAddress(0, address)
 }
 
+const RECOVERY_PROPOSAL_TIMEOUT_MS = 7000
+
+// The proposal modal shows once the recovery state loads, and only for a guardian who did not dismiss it.
 export function postponeRecovery() {
-  cy.wait(7000)
-  cy.get(postponeRecoveryBtn)
-    .should(() => {})
-    .then(($button) => {
-      if (!$button.length) {
-        return
-      }
-      cy.wrap($button).click()
+  main
+    .pollUntil(() => Cypress.$(postponeRecoveryBtn).length > 0, RECOVERY_PROPOSAL_TIMEOUT_MS)
+    .then((shown) => {
+      if (!shown) return
+      cy.get(postponeRecoveryBtn).click()
       cy.get(postponeRecoveryBtn).should('not.exist')
     })
 }

@@ -29,7 +29,7 @@ describe('Swaps tests', () => {
     () => {
       let isCustomRecipientFound
       swaps.acceptLegalDisclaimer()
-      cy.wait(4000)
+      swaps.ensureWidgetWalletConnected(iframeSelector)
       main
         .getIframeBody(iframeSelector)
         .then(($frame) => {

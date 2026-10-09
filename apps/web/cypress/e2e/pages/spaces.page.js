@@ -573,10 +573,8 @@ export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // The cards may render slightly after the list container, and at the limit the
-  // Create button is disabled. Give the cards a beat to load, then read the count
-  // and delete a space to free a slot before any create attempt.
-  cy.wait(2000)
+  // The list renders its rows together with the container. At the limit the Create button is
+  // disabled, so delete a space to free a slot before any create attempt.
   cy.get('body').then(($body) => {
     if ($body.find(spaceCard).length >= MAX_SPACES) {
       deleteOneSpace()
@@ -677,19 +675,10 @@ export function acceptInvite(spaceName, name) {
 // ===========================================
 
 function navigateToCreateSpacePage() {
-  // Wait for the page to settle, then check if we need to click "Create space" or are already on the form
-  cy.url({ timeout: 15000 }).then((url) => {
-    if (url.includes(onboardingCreateSpacePath)) {
-      // Already redirected to create-space form
-      cy.get(orgSpaceInput).should('be.visible')
-    } else {
-      // Still on spaces list — wait a moment for potential auto-redirect
-      cy.wait(3000)
-      cy.url().then((urlAfterWait) => {
-        if (!urlAfterWait.includes(onboardingCreateSpacePath)) {
-          cy.get(createSpaceBtn).should('be.visible').click()
-        }
-      })
+  cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+  cy.url().then((url) => {
+    if (!url.includes(onboardingCreateSpacePath)) {
+      cy.get(createSpaceBtn).filter(':visible').first().click()
     }
   })
   cy.url().should('include', onboardingCreateSpacePath)

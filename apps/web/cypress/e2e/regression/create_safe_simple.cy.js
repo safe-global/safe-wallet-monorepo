@@ -64,7 +64,6 @@ describe('Safe creation tests', () => {
     createwallet.verifySafeNetworkNameInSummaryStep(constants.networks.sepolia.toLowerCase())
     createwallet.clickOnBackBtn()
     createwallet.clickOnBackBtn()
-    cy.wait(1000)
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     createwallet.verifySafeNameInSummaryStep(createwallet.walletName)
