@@ -56,8 +56,7 @@ describe('Transaction Builder 2 tests', { defaultCommandTimeout: 20000 }, () => 
       // Clear the uploaded draft: the app persists it in its own localStorage, and with
       // testIsolation off the next tests would land on the batch view instead of the dropzone
       getBody().findByText(safeapps.backToTransactionStr).click()
-      getBody().findByText(safeapps.createBatchStr).click()
-      getBody().findByRole('button', { name: safeapps.cancelBtnStr }).click()
+      getBody().find(safeapps.clearTransactionsBtn).click()
       getBody().findByText(safeapps.clearTransactionListStr)
       getBody().findByRole('button', { name: safeapps.confirmClearTransactionListStr }).click()
       getBody().findAllByText('choose a file').should('be.visible')
