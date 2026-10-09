@@ -48,6 +48,7 @@ type FieldProps<T extends FieldValues = FieldValues> = {
   id: string
   name: FieldPath<T> | string
   label: string
+  helperText?: string
   fullWidth?: boolean
   required?: boolean
   validations?: ValidationFunction[]
@@ -107,6 +108,7 @@ interface FieldComponentBaseProps {
   onChange: (...event: unknown[]) => void
   onBlur?: () => void
   label: string
+  helperText?: string
   error?: string
   required?: boolean
   options?: SelectItem[]

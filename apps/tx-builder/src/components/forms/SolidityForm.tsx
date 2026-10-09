@@ -21,6 +21,10 @@ export const CONTRACT_METHOD_INDEX_FIELD_NAME = 'contractMethodIndex'
 export const CONTRACT_VALUES_FIELD_NAME = 'contractFieldsValues'
 export const CUSTOM_TRANSACTION_DATA_FIELD_NAME = 'customTransactionData'
 
+// The field takes a decimal amount, not wei — users otherwise paste wei and get it
+// silently converted. See the label too, which carries the unit.
+export const NATIVE_VALUE_FORMAT_HINT = 'Decimal amount, not wei (e.g. 1.5)'
+
 type SolidityFormPropsTypes = {
   id: string
   networkPrefix: undefined | string
@@ -120,6 +124,8 @@ const SolidityForm = ({
 
   const isValueInputVisible = showHexEncodedData || !showContractFields || isPayableMethod
 
+  const nativeValueLabel = nativeCurrencySymbol ? `Value (${nativeCurrencySymbol})` : 'Value'
+
   const resetForm = () => {
     // Unregister contract field values so they get freshly registered with
     // their defaultValues on the next render. Without this, shouldUnregister=false
@@ -182,7 +188,8 @@ const SolidityForm = ({
           <Field
             id="token-value-input"
             name={NATIVE_VALUE_FIELD_NAME}
-            label={`${nativeCurrencySymbol} value`}
+            label={nativeValueLabel}
+            helperText={NATIVE_VALUE_FORMAT_HINT}
             fieldType={NATIVE_AMOUNT_FIELD_TYPE}
             fullWidth
             required
