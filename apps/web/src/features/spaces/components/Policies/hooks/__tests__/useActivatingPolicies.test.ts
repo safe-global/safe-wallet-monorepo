@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { MOCK_SAFES, asActivePolicy, mockPendingPolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
-import type { PendingSpendingLimitPolicy, Policy } from '../../types'
+import type { PendingSpendingLimitPolicy, Policy } from '@views/features/spaces/components/Policies/types'
 import { useActivatingPolicies } from '../useActivatingPolicies'
 
 const mockGetTransaction = jest.fn()

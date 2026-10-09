@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 const action = (name: string) => fn().mockName(name)
 import SafeSelectorDropdown from './index'
-import type { SafeItemData } from './types'
+import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',

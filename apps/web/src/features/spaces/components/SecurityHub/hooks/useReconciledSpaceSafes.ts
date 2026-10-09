@@ -6,7 +6,12 @@ import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { useLoadFeature } from '@/features/__core__'
 import type { SecurityContract } from '@/features/security'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from '../utils'
-import type { BalanceMap, OverviewMap, SelectedSafe, SpaceSafeEntry } from '../types'
+import type {
+  BalanceMap,
+  OverviewMap,
+  SelectedSafe,
+  SpaceSafeEntry,
+} from '@views/features/spaces/components/SecurityHub/types'
 
 type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
 

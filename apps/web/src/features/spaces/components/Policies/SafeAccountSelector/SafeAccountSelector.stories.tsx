@@ -6,7 +6,10 @@ import { createMockStory } from '@/stories/mocks'
 import SafeAccountSelector from './index'
 import { buildSafeAccountId, groupSafeAccounts } from './utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEntry, SafeAccountOption } from './types'
+import type {
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 // Ids the story fixtures serve, so the chain logos resolve.
 const ETHEREUM = '1'

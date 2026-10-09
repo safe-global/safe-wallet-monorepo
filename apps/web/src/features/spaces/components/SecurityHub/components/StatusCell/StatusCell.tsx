@@ -2,7 +2,9 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SafeGrade } from '@/features/security/types'
-import SafeGradeChip, { SAFE_GRADE_LABEL } from '../SafeGradeChip/SafeGradeChip'
+import SafeGradeChip, {
+  SAFE_GRADE_LABEL,
+} from '@views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
 
 const DASH = '—'
 

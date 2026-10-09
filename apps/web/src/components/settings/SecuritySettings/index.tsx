@@ -3,7 +3,7 @@ import { selectBlindSigning, setBlindSigning } from '@/store/settingsSlice'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Field, FieldLabel } from '@/components/ui/field'
 import { Typography } from '@/components/ui/typography'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@views/components/settings/SettingsCard'
 
 const SecuritySettings = () => {
   const isBlindSigningEnabled = useAppSelector(selectBlindSigning)

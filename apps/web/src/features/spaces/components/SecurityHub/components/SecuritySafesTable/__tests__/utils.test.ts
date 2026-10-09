@@ -1,7 +1,7 @@
 import type { ScanResult, SecurityGrade } from '@/features/security/types'
-import type { SpaceSafeEntry } from '../../../types'
+import type { SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 import { buildSafeSecurityHref, formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
-import { DASH } from '../constants'
+import { DASH } from '@views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { AppRoutes } from '@/config/routes'
 
 const mkResult = (status: ScanResult['status'], severity: SecurityGrade = 'Low'): ScanResult => ({

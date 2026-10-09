@@ -12,7 +12,7 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
-import { RECOMMENDED_PLAN } from './planCatalog'
+import { RECOMMENDED_PLAN } from '@views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from './planSelection'
 import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
@@ -22,7 +22,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
-import type { PlanPick, PlanTier } from './types'
+import type { PlanPick, PlanTier } from '@views/features/spaces/components/Plans/types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">

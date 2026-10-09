@@ -3,7 +3,7 @@ import SafeSelectorTriggerContent from '../components/SafeSelectorTriggerContent
 import * as useIsHypernativeGuard from '@/features/hypernative'
 import * as coreFeatures from '@/features/__core__'
 import { SafeHeaderHnTooltip } from '@/features/hypernative'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
 jest.mock('@/features/__core__', () => ({

@@ -1,7 +1,10 @@
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
 import SpenderSummaryCard from '../SpenderSummaryCard'
-import { LIMITS_LABEL, SPENDER_LABEL } from '../constants'
+import {
+  LIMITS_LABEL,
+  SPENDER_LABEL,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import { limitSummaryBuilder, limitSummaryTokenBuilder, spenderSummaryBuilder } from '../SpendingLimitSummary.fixtures'
 
 const SPENDER = '0x8675B754342754A30A2AeF474D114d8460bca19b'

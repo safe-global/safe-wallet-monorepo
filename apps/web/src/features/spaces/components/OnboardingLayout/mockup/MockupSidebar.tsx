@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import { ChevronDown, House, WalletCards, BookUser, UsersRound, Settings } from 'lucide-react'
 import SafeLogo from '@/public/images/logo-no-text.svg'
-import SpaceAvatar from './SpaceAvatar'
+import SpaceAvatar from '@views/features/spaces/components/OnboardingLayout/mockup/SpaceAvatar'
 
 interface MockupSidebarProps {
   displayName: string

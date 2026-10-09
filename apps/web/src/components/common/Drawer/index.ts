@@ -1,4 +1,4 @@
-export { Drawer, type DrawerProps } from './Drawer'
+export { Drawer, type DrawerProps } from '@views/components/common/Drawer/Drawer'
 export {
   DrawerHeader,
   DrawerTitle,

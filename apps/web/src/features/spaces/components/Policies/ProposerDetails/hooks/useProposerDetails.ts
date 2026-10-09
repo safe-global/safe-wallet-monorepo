@@ -1,7 +1,7 @@
 import { ProposerStatus, type ProposerDrawerContentProps } from '../../ProposerDrawer'
-import type { ProposerPolicy } from '../../types'
+import type { ProposerPolicy } from '@views/features/spaces/components/Policies/types'
 import { useActiveProposer } from './useActiveProposer'
-import type { ProposerDetailsArgs } from './types'
+import type { ProposerDetailsArgs } from '@views/features/spaces/components/Policies/ProposerDetails/hooks/types'
 
 /** Nothing in the payload marks a proposer as pending yet, so only `enabled` decides. */
 export const getProposerStatus = (policy: ProposerPolicy): ProposerStatus =>

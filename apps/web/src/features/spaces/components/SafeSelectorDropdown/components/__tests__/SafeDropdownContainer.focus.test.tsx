@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Select } from '@/components/ui/select'
 import SafeDropdownContainer from '../SafeDropdownContainer'
-import type { SafeItemData } from '../../types'
+import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 
 // Real base-ui Select (not mocked like in SafeDropdownContainer.test.tsx): the focus regression lives
 // in base-ui's list navigation, which moves focus onto an option when one remounts mid-search.

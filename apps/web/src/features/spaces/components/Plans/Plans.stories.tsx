@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks'
 import Plans from './index'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import type { PlanSummary } from './types'
+import type { PlanSummary } from '@views/features/spaces/components/Plans/types'
 import { PAID_PLANS, subscription } from './plans.fixtures'
 
 const setup = createMockStory({ scenario: 'efSafe', layout: 'paper', shadcn: true })

@@ -2,7 +2,7 @@ import type { TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_G
 import { getOrderFeeBps } from '@safe-global/utils/features/swap/helpers/utils'
 import { DataRow } from '@/components/common/Table/DataRow'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { HelpIconTooltip } from '../../HelpIconTooltip'
+import { HelpIconTooltip } from '@views/features/swap/components/HelpIconTooltip'
 
 export const SurplusFee = ({
   order,

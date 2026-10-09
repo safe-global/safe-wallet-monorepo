@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
-import SpendingLimitIcon from '../SpendingLimitIcon'
+import SpendingLimitIcon from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
 import TxCard from '@/components/tx-flow/common/TxCard'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import LoadError from '../../components/LoadError'
-import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '../constants'
+import LoadError from '@views/features/spaces/components/Policies/components/LoadError'
+import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 export const BASELINE_LOAD_ERROR =
   "The Safe account's current spending limits could not be read, so this policy cannot be edited right now."

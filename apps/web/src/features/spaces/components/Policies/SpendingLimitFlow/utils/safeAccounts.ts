@@ -1,5 +1,8 @@
 import { flattenSafeAccounts, groupSafeAccounts } from '../../SafeAccountSelector/utils'
-import type { SafeAccountEntry, SafeAccountIneligibility } from '../../SafeAccountSelector/types'
+import type {
+  SafeAccountEntry,
+  SafeAccountIneligibility,
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 /** Disables, rather than drops, every per-chain entry off `chainIds`; a reason the entry already has is kept. */
 export const markSafeAccountsOffChains = (

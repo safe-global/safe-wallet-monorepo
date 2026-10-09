@@ -14,7 +14,7 @@ import useChainId from '@/hooks/useChainId'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { makeStore } from '@/store'
-import { POPULAR_TOKEN_ADDRESSES } from '../../popularTokens'
+import { POPULAR_TOKEN_ADDRESSES } from '@views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
 import useSpendingLimitTokenOptions, { buildIdentityKey } from '../useSpendingLimitTokenOptions'
 
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))

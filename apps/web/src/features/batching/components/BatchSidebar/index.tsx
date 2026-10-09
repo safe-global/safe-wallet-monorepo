@@ -14,7 +14,7 @@ import Track from '@/components/common/Track'
 import { BATCH_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import PlusIcon from '@/public/images/common/plus.svg'
-import EmptyBatch from './EmptyBatch'
+import EmptyBatch from '@views/features/batching/components/BatchSidebar/EmptyBatch'
 import BatchTxList from './BatchTxList'
 
 const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: boolean) => void }) => {

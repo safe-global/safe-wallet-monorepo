@@ -8,7 +8,9 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)

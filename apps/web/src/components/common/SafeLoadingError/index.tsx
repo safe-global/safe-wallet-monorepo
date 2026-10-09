@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeUnavailableMessage from '@/hooks/useSafeUnavailableMessage'
 import { useUrlChain } from '@/hooks/useChainId'
-import PagePlaceholder from '../PagePlaceholder'
+import PagePlaceholder from '@views/components/common/PagePlaceholder'
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 

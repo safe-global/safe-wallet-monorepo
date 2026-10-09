@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { useUpdateSpace, type UpdateSpaceFormData } from './useUpdateSpace'
-import ErrorAlert from './ErrorAlert'
+import ErrorAlert from '@views/features/spaces/components/SpaceSettings/ErrorAlert'
 import { Button } from '@/components/ui/button'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '@/features/spaces'

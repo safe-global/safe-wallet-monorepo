@@ -13,7 +13,7 @@
 // Component imports for typeof pattern (enables IDE navigation)
 import type NoFeeCampaignBanner from './components/NoFeeCampaignBanner'
 import type NoFeeCampaignTransactionCard from './components/NoFeeCampaignTransactionCard'
-import type GasTooHighBanner from './components/GasTooHighBanner'
+import type GasTooHighBanner from '@views/features/no-fee-campaign/components/GasTooHighBanner'
 
 /**
  * No Fee Campaign Feature Contract - flat structure (NO hooks)

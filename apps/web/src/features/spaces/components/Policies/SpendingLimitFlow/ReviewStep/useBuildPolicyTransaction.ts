@@ -6,11 +6,14 @@ import { SpendingLimitsFeature, type DesiredAllowance, type SpendingLimitState }
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '../EditFlow/EditModeContext'
+import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import type { SpendingLimitPolicyFormValues } from '../types'
-import { EXISTING_LIMITS_LOAD_ERROR, EXISTING_LIMIT_IN_POLICY_ERROR } from '../constants'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import {
+  EXISTING_LIMITS_LOAD_ERROR,
+  EXISTING_LIMIT_IN_POLICY_ERROR,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import { buildDesiredAllowances, findExistingAllowance } from './buildDesiredAllowances'
 
 type BlockerInputs = {

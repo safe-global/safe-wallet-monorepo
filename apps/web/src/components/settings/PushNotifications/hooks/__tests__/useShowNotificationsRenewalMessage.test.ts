@@ -10,7 +10,7 @@ import * as notificationsSlice from '@/store/notificationsSlice'
 import * as useIsWrongChain from '@/hooks/useIsWrongChain'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
 import { renderHook, waitFor } from '@testing-library/react'
-import { RENEWAL_MESSAGE, RENEWAL_NOTIFICATION_KEY } from '../../constants'
+import { RENEWAL_MESSAGE, RENEWAL_NOTIFICATION_KEY } from '@views/components/settings/PushNotifications/constants'
 
 const { V1, V2 } = NotificationsTokenVersion
 

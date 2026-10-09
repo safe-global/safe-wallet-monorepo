@@ -1,8 +1,15 @@
 import chains from '@safe-global/utils/config/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { describeEdit, describePolicy, isEditSummary, joinNames, spenderDisplayName } from '../describePolicy'
-import { CALLOUT_DESCRIPTION_PLURAL, CALLOUT_DESCRIPTION_SINGULAR, EDIT_CALLOUT_NO_CHANGES } from '../constants'
-import type { LimitSummary, SpendingLimitSummaryModel } from '../types'
+import {
+  CALLOUT_DESCRIPTION_PLURAL,
+  CALLOUT_DESCRIPTION_SINGULAR,
+  EDIT_CALLOUT_NO_CHANGES,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type {
+  LimitSummary,
+  SpendingLimitSummaryModel,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,

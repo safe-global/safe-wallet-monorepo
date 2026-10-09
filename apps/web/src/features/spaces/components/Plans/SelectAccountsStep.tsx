@@ -14,13 +14,13 @@ import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { SafeRef } from './types'
-import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
+import type { SafeRef } from '@views/features/spaces/components/Plans/types'
+import { removedSafesNote, summarizeRemovedSafes } from '@views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import SelectedCounter from '../SelectedCounter'
+import SelectedCounter from '@views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
-import { getMultiChainSafeId, getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import { getMultiChainSafeId, getSafeId } from '@views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
 const NO_FLAGGED = new Set<string>()

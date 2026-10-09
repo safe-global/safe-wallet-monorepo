@@ -7,9 +7,9 @@ import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '
 import { Skeleton } from '@/components/ui/skeleton'
 import { Typography } from '@/components/ui/typography'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import LoadError from '../components/LoadError'
-import { SKELETON_ROW_COUNT } from '../constants'
-import NoEligibleAccounts from './components/NoEligibleAccounts'
+import LoadError from '@views/features/spaces/components/Policies/components/LoadError'
+import { SKELETON_ROW_COUNT } from '@views/features/spaces/components/Policies/constants'
+import NoEligibleAccounts from '@views/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
   SafeAccountChainRow,
@@ -21,8 +21,11 @@ import {
   INELIGIBILITY_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
-} from './constants'
-import { isSafeAccountGroup, type SafeAccountEntry } from './types'
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {

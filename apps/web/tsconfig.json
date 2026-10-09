@@ -17,7 +17,8 @@
     "jsx": "preserve",
     "incremental": true,
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*", "../../storybook/src/*"],
+      "@views/*": ["../../storybook/src/*"],
       "@safe-global/safe-apps-sdk/*": ["../../node_modules/@safe-global/safe-apps-sdk/*"],
       "@gnosis.pm/zodiac/*": ["../../node_modules/@gnosis.pm/zodiac/*"],
       "@cowprotocol/app-data": ["../../node_modules/@cowprotocol/app-data"],
@@ -49,7 +50,9 @@
     ".storybook-vite/**/*.tsx",
     "./jest.setup.js",
     "./eslint.config.mjs",
-    "../../config/test/**/*.ts"
+    "../../config/test/**/*.ts",
+    "../../storybook/src/**/*.ts",
+    "../../storybook/src/**/*.tsx"
   ],
   "exclude": ["node_modules", "src/types/contracts"]
 }

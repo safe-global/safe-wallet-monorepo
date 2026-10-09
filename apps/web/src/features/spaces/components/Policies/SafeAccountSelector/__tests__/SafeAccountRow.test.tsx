@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { SafeAccountSummary } from '../components/SafeAccountRow'
 import { buildSafeAccountId } from '../utils'
-import type { SafeAccountOption } from '../types'
+import type { SafeAccountOption } from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />

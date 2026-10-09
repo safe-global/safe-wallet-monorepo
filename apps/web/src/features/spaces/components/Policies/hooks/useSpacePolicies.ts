@@ -20,7 +20,7 @@ import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { usePolicyTokenResolver } from './usePolicyTokenResolver'
 import { useActivatingPolicies } from './useActivatingPolicies'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
-import type { Policy } from '../types'
+import type { Policy } from '@views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
 export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']

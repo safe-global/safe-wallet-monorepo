@@ -1,7 +1,7 @@
 import { getAddress } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import type { SpendingLimitPolicyFormValues } from '../../types'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { describeRemovals, findPendingRemovals } from '../removals'
 
 const SAFE = '11155111:0x1000000000000000000000000000000000000001'

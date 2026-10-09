@@ -8,8 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { Typography } from '@/components/ui/typography'
 import { cn } from '@/utils/cn'
 import { describeFrequency } from './frequency'
-import { CHANGE_BADGE } from './constants'
-import type { LimitSummary } from './types'
+import { CHANGE_BADGE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { LimitSummary } from '@views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 const TOKEN_ICON_SIZE = 24
 

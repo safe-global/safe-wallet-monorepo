@@ -1,7 +1,9 @@
 import type { ReactElement } from 'react'
 import { CalendarClock, HandCoins, UsersRound } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import PolicyIntroDialog, { type PolicyIntroExplainer } from '../PolicyIntroDialog'
+import PolicyIntroDialog, {
+  type PolicyIntroExplainer,
+} from '@views/features/spaces/components/Policies/PolicyIntroDialog'
 import SpendingLimitPreview from './SpendingLimitPreview'
 
 const EXPLAINERS: PolicyIntroExplainer[] = [

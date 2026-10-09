@@ -9,7 +9,11 @@ import { Typography } from '@/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
-import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../SeverityIcon/SeverityIcon'
+import {
+  resolveStatusTone,
+  SeverityIcon,
+  type SeverityTone,
+} from '@views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 
 /** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */

@@ -6,7 +6,10 @@ import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../hooks/useSpendingLimitSafeAccounts'
 import SpendingLimitPolicyForm from './SpendingLimitPolicyForm'
-import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
+import {
+  createDefaultFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 
 export type CreateSpendingLimitPolicyProps = {
   isCalloutDismissed: boolean

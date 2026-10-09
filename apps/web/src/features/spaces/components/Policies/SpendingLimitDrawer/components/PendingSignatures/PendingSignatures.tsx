@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { DrawerList, DrawerSection } from '@/components/common/Drawer'
 import { AccountIdentity } from '../../../components/AccountIdentity'
-import { formatSignedCount } from '../../format'
+import { formatSignedCount } from '@views/features/spaces/components/Policies/SpendingLimitDrawer/format'
 
 export type PendingSignaturesProps = {
   safe: { address: string; name?: string }

@@ -17,7 +17,13 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@/utils/cn'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanCta as PlanCtaKindOf, PlanPick, PlanSeatOption, PlanTier } from './types'
+import type {
+  CurrentPlan,
+  PlanCta as PlanCtaKindOf,
+  PlanPick,
+  PlanSeatOption,
+  PlanTier,
+} from '@views/features/spaces/components/Plans/types'
 
 type Cycle = 'month' | 'year'
 

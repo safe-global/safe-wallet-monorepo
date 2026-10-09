@@ -7,7 +7,11 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { createMockStory } from '@/stories/mocks'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
-import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+  type SafeAccountOption,
+} from '@views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import ProposerRoleForm from './ProposerRoleForm'
 

@@ -6,7 +6,7 @@ import type { ReviewTransactionContentProps } from './ReviewTransactionContent'
 import ReviewTransactionContent from './ReviewTransactionContent'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import ErrorTransactionPreview from './ErrorTransactionPreview'
+import ErrorTransactionPreview from '@views/components/tx/ReviewTransactionV2/ErrorTransactionPreview'
 
 export type ReviewTransactionProps = {
   title?: string

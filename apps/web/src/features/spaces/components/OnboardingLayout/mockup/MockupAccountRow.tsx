@@ -2,7 +2,7 @@ import Identicon from '@/components/common/Identicon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { SafeAppMockupAccount } from './types'
+import type { SafeAppMockupAccount } from '@views/features/spaces/components/OnboardingLayout/mockup/types'
 
 const rowFiatFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 2,

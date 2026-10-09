@@ -13,7 +13,7 @@ import {
   getSafeDisplayInfo,
 } from '@/components/common/AccountRow'
 import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@views/features/spaces/components/SafeSelectorDropdown/types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'

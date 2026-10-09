@@ -9,7 +9,7 @@ import {
   mockProposerPolicy,
   mockSpendingLimitPolicy,
 } from '../../mocks/policies'
-import type { Policy } from '../../types'
+import type { Policy } from '@views/features/spaces/components/Policies/types'
 
 const mockChains = [
   chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build(),

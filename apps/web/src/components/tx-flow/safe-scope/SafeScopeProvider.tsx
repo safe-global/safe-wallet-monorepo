@@ -12,10 +12,10 @@ import { useChain } from '@/hooks/useChains'
 import { trackError } from '@/services/exceptions'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
-import { registerActiveScope } from './activeScope'
-import { SafeScopeContext } from './context'
-import type { SafeScope, SafeScopeContextValue, SafeScopeTarget } from './types'
-import { buildSafeScopeKey } from './utils'
+import { registerActiveScope } from '@views/components/tx-flow/safe-scope/activeScope'
+import { SafeScopeContext } from '@views/components/tx-flow/safe-scope/context'
+import type { SafeScope, SafeScopeContextValue, SafeScopeTarget } from '@views/components/tx-flow/safe-scope/types'
+import { buildSafeScopeKey } from '@views/components/tx-flow/safe-scope/utils'
 
 type SafeScopeProviderProps = {
   /** Start with a Safe already selected (e.g. signing an existing transaction). Omit when the flow's first step picks it. */

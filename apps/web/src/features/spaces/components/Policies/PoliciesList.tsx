@@ -8,7 +8,7 @@ import TableCard from '@/components/common/TableCard'
 import useChains from '@/hooks/useChains'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import PoliciesTable from './PoliciesTable'
-import { PoliciesNoSearchResults } from './PoliciesTable/components/PoliciesTableStates'
+import { PoliciesNoSearchResults } from '@views/features/spaces/components/Policies/PoliciesTable/components/PoliciesTableStates'
 import usePolicySearch from './hooks/usePolicySearch'
 import {
   DEFAULT_POLICY_SORT,
@@ -16,8 +16,8 @@ import {
   sortPolicies,
   type PolicySortContext,
   type PolicySortOption,
-} from './utils/policySort'
-import type { Policy, PolicyType } from './types'
+} from '@views/features/spaces/components/Policies/utils/policySort'
+import type { Policy, PolicyType } from '@views/features/spaces/components/Policies/types'
 
 const POLICY_TYPE_FILTERS: { type: PolicyType; label: string }[] = [
   { type: 'spending-limit', label: 'Spending limits' },

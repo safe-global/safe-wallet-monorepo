@@ -2,7 +2,7 @@ import { getAddress, parseUnits } from 'ethers'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
-import type { SpendingLimitPolicyFormValues } from '../../types'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { toEditSummaryModel } from '../toEditSummaryModel'
 
 const SAFE = '1:0x1000000000000000000000000000000000000001'

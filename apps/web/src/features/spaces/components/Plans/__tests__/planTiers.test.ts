@@ -1,6 +1,6 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { PlanGroup, PlanOffer } from '../../../hooks/billing/types'
-import { ENTERPRISE_TIER } from '../planCatalog'
+import { ENTERPRISE_TIER } from '@views/features/spaces/components/Plans/planCatalog'
 import {
   buildPlanTiers,
   claimTiers,
@@ -11,7 +11,7 @@ import {
   _subscriptionToTier,
   toCurrentPlan,
 } from '../planTiers'
-import type { CurrentPlan, PlanSummary } from '../types'
+import type { CurrentPlan, PlanSummary } from '@views/features/spaces/components/Plans/types'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
   priceId: `price_${overrides.paymentLinkId}`,

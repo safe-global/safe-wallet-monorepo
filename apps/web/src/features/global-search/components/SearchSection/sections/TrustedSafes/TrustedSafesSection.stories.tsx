@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import type { AddedSafesState } from '@/store/addedSafesSlice'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { createMockStory } from '@/stories/mocks'
-import { SectionVisibilityProvider } from '../../SectionVisibilityContext'
+import { SectionVisibilityProvider } from '@views/features/global-search/components/SearchSection/SectionVisibilityContext'
 import TrustedSafesSection from './TrustedSafesSection'
 
 const CHAIN_ID = '1'

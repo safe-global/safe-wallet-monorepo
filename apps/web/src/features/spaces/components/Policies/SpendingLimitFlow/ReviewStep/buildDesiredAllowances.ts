@@ -1,6 +1,6 @@
 import type { DesiredAllowance, SpendingLimitState } from '@/features/spending-limits'
 import { isSpendingLimitFor } from '@/features/spending-limits/services'
-import type { SpendingLimitPolicyFormValues } from '../types'
+import type { SpendingLimitPolicyFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 
 export const UNKNOWN_TOKEN_IN_POLICY_ERROR = 'A token in this policy could not be resolved. Go back and pick it again.'

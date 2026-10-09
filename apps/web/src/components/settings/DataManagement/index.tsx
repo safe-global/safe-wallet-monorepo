@@ -20,7 +20,7 @@ import css from './styles.module.css'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import { ClearPendingTxs } from '../ClearPendingTxs'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@views/components/settings/SettingsCard'
 
 const getExportFileName = () => {
   const today = new Date().toISOString().slice(0, 10)

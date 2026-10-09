@@ -2,7 +2,7 @@ import { type ReactNode, type MouseEvent, type RefObject } from 'react'
 import classnames from 'classnames'
 import { clickOnEnterOrSpace } from '@/utils/keyboard'
 import css from '../AccountItems/styles.module.css'
-import AccountItemContent from './AccountItemContent'
+import AccountItemContent from '@views/features/myAccounts/components/AccountItem/AccountItemContent'
 
 export interface AccountItemButtonProps {
   children: ReactNode

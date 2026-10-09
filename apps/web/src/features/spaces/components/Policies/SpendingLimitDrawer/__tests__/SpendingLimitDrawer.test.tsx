@@ -9,7 +9,11 @@ import {
 } from '../../mocks/policies'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import type { DrawerPolicy, PendingTxOutcome, Viewer } from '../resolveState'
+import type {
+  DrawerPolicy,
+  PendingTxOutcome,
+  Viewer,
+} from '@views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import SpendingLimitDrawer from '../SpendingLimitDrawer'
 
 jest.mock('@/components/common/ChainIndicator', () => {

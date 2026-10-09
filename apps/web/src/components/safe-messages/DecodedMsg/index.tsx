@@ -8,7 +8,7 @@ import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBo
 import classNames from 'classnames'
 import { isAddress } from 'ethers'
 import { useMemo, type ReactElement } from 'react'
-import Msg from '../Msg'
+import Msg from '@views/components/safe-messages/Msg'
 import css from './styles.module.css'
 import { normalizeMessageForDisplay } from '@/services/safe-messages/normalizeMessage'
 

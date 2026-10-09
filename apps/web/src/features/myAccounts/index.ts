@@ -69,7 +69,7 @@ export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/A
 export { default as SafeAccountsTable } from './components/SafeAccountsTable'
 export type { SafeAccountsSelection } from './components/SafeAccountsTable'
 export type { AccountLine } from './components/SafeAccountsTable/useSafeAccountRows'
-export type { SafeAccountColumnId } from './components/SafeAccountsTable/columns'
+export type { SafeAccountColumnId } from '@views/features/myAccounts/components/SafeAccountsTable/columns'
 
 // Public types
 export type * from './types'

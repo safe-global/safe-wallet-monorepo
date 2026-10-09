@@ -1,18 +1,18 @@
 import { type ReactElement } from 'react'
-import SpendingLimitIcon from '../SpendingLimitIcon'
+import SpendingLimitIcon from '@views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { buildSafeScopeKey } from '@/components/tx-flow/safe-scope/utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
-import type { PolicySafe } from '../../types'
+import type { PolicySafe } from '@views/features/spaces/components/Policies/types'
 import CreateSpendingLimitPolicy from '../CreateStep'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
-import { toSpendingLimitFormValues } from '../utils/prefill'
-import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '../constants'
+import { toSpendingLimitFormValues } from '@views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
+import { EDIT_STEP_TITLE, FLOW_SUBTITLE } from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import BaselineGate from './BaselineGate'
-import { EditModeProvider } from './EditModeContext'
+import { EditModeProvider } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 const noop = () => {}
 

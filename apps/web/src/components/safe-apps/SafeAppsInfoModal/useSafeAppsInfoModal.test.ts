@@ -1,8 +1,8 @@
 import { act, renderHook } from '@/tests/test-utils'
 import useSafeAppsInfoModal from './useSafeAppsInfoModal'
 import { useBrowserPermissions } from '@/hooks/safe-apps/permissions'
-import { PermissionStatus } from '../types'
-import type { AllowedFeatures } from '../types'
+import { PermissionStatus } from '@views/components/safe-apps/types'
+import type { AllowedFeatures } from '@views/components/safe-apps/types'
 
 jest.mock('@/hooks/useChainId', () => jest.fn(() => '11155111'))
 

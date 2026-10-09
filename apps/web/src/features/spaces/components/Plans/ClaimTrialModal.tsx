@@ -18,11 +18,11 @@ import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/serv
 import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
-import { RECOMMENDED_PLAN } from './planCatalog'
+import { RECOMMENDED_PLAN } from '@views/features/spaces/components/Plans/planCatalog'
 import { claimTiers, formatPlanPrice, pickProps, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
-import type { PlanTier, SafeRef } from './types'
+import type { PlanTier, SafeRef } from '@views/features/spaces/components/Plans/types'
 
 // The CGW grants the 60-day grace only to Workspaces that predate enforcement; anything else is a new Workspace.
 const MIGRATED_TRIAL_DAYS = 60

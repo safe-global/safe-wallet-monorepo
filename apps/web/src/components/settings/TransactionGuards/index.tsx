@@ -13,7 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveGuardFlow } from '@/components/tx-flow/flows'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@views/components/settings/SettingsCard'
 
 const NoTransactionGuard = () => {
   return <Typography className="mt-4 text-muted-foreground">No transaction guard set</Typography>

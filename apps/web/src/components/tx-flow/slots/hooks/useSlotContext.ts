@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { SlotContext } from '../SlotProvider'
+import { SlotContext } from '@views/components/tx-flow/slots/SlotProvider'
 
 export const useSlotContext = () => {
   const context = useContext(SlotContext)

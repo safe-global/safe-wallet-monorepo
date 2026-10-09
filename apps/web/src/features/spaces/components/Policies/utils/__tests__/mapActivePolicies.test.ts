@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import type { PolicyTokenInfo } from '../../types'
+import type { PolicyTokenInfo } from '@views/features/spaces/components/Policies/types'
 import { getReferencedTokens, mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
 
 const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }

@@ -5,7 +5,11 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import { getDateFilterValidation, toDateInputValue, toIsoBound } from './dateFilters'
+import {
+  getDateFilterValidation,
+  toDateInputValue,
+  toIsoBound,
+} from '@views/features/spaces/components/SpaceActivityLog/dateFilters'
 
 export type ActivityLogFilterState = {
   actorUserId?: number

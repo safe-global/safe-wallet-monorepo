@@ -18,10 +18,12 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  roots: ['<rootDir>', '<rootDir>/../../storybook/src'],
 
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
-    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@/(.*)$': ['<rootDir>/src/$1', '<rootDir>/../../storybook/src/$1'],
+    '^@views/(.*)$': '<rootDir>/../../storybook/src/$1',
     '^react-dom$': '<rootDir>/../../node_modules/react-dom',
     '^react-dom/client$': '<rootDir>/../../node_modules/react-dom/client',
     '^.+\\.(svg)$': '<rootDir>/mocks/svg.js',

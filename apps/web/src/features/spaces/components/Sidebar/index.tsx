@@ -3,7 +3,7 @@ import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import type { SpaceSelectorProps } from './types'
+import type { SpaceSelectorProps } from '@views/features/spaces/components/Sidebar/types'
 import type { SidebarVariantType } from './variants'
 
 interface SidebarProps extends SpaceSelectorProps {

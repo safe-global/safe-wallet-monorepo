@@ -12,9 +12,9 @@ import type { RecoveryContract } from './contract'
 // Component imports - direct default imports
 import Recovery from './components/Recovery'
 import RecoveryList from './components/RecoveryList'
-import RecoveryInfo from './components/RecoveryInfo'
+import RecoveryInfo from '@views/features/recovery/components/RecoveryInfo'
 import RecoveryStatus from './components/RecoveryStatus'
-import RecoveryType from './components/RecoveryType'
+import RecoveryType from '@views/features/recovery/components/RecoveryType'
 import RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import RecoveryDescription from './components/RecoveryDescription'
 

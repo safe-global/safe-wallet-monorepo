@@ -2,7 +2,11 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { isSpendingLimitFor, validateSpendingLimitAmount } from '@/features/spending-limits/services'
-import { DUPLICATE_SPENDER_ERROR, DUPLICATE_TOKEN_ERROR, EXISTING_LIMIT_ERROR } from '../constants'
+import {
+  DUPLICATE_SPENDER_ERROR,
+  DUPLICATE_TOKEN_ERROR,
+  EXISTING_LIMIT_ERROR,
+} from '@views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** `setAllowance` is keyed on (safe, delegate, token): a second row for the same spender would overwrite the first. */
 export const validateUniqueSpender = (address: string, otherAddresses: readonly string[]): string | undefined =>

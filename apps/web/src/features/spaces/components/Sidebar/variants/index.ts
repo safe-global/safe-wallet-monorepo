@@ -3,7 +3,7 @@ import { SafeSidebarVariant } from './SafeSidebarVariant'
 import { SafeSidebarContent } from './SafeSidebarContent'
 import { SpacesSidebarVariant } from './SpacesSidebarVariant'
 import { SpacesSidebarContent } from './SpacesSidebarContent'
-import type { SidebarVariantContentProps } from '../types'
+import type { SidebarVariantContentProps } from '@views/features/spaces/components/Sidebar/types'
 
 export type { SidebarVariantContentProps }
 

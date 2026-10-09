@@ -21,12 +21,12 @@ import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import css from './styles.module.css'
 import NamedAddress from '@/components/common/NamedAddressInfo'
-import { PartDuration } from '../SwapOrder/rows/PartDuration'
-import { PartSellAmount } from '../SwapOrder/rows/PartSellAmount'
-import { PartBuyAmount } from '../SwapOrder/rows/PartBuyAmount'
+import { PartDuration } from '@views/features/swap/components/SwapOrder/rows/PartDuration'
+import { PartSellAmount } from '@views/features/swap/components/SwapOrder/rows/PartSellAmount'
+import { PartBuyAmount } from '@views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
 import { isSettingTwapFallbackHandler } from '../../helpers/utils'
-import { TwapFallbackHandlerWarning } from '../TwapFallbackHandlerWarning'
+import { TwapFallbackHandlerWarning } from '@views/features/swap/components/TwapFallbackHandlerWarning'
 
 type SwapOrderProps = {
   order: SwapOrderTransactionInfo | SwapTransferTransactionInfo | TwapOrderTransactionInfo

@@ -1,5 +1,10 @@
 import { useRouter } from 'next/router'
-import type { SidebarItemConfig, SidebarGroupConfig, ResolvedSidebarNavItem, ResolvedSidebarGroup } from '../types'
+import type {
+  SidebarItemConfig,
+  SidebarGroupConfig,
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+} from '@views/features/spaces/components/Sidebar/types'
 
 interface NavResolverOptions {
   getLink: (item: SidebarItemConfig) => ResolvedSidebarNavItem['link']

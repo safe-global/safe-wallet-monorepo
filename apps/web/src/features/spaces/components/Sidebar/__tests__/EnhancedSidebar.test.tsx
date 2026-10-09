@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { EnhancedSidebar } from '../index'
-import type { SpaceItem } from '../types'
+import type { SpaceItem } from '@views/features/spaces/components/Sidebar/types'
 
 // Mock the sidebar components
 jest.mock('@/components/ui/sidebar', () => ({

@@ -16,7 +16,8 @@
     "incremental": true,
     "types": ["vite/client", "jest", "@testing-library/jest-dom"],
     "paths": {
-      "@/*": ["../web/src/*"],
+      "@/*": ["../web/src/*", "../../storybook/src/*"],
+      "@views/*": ["../../storybook/src/*"],
       "@/public/*": ["../web/public/*"],
       "@/storybook/*": ["../web/.storybook/*"],
       "src/*": ["../web/src/*"],

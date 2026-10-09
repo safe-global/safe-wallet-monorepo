@@ -6,12 +6,12 @@ import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { APP_VERSION, APP_HOMEPAGE } from '@/config/version'
-import ExternalLink from '../ExternalLink'
+import ExternalLink from '@views/components/common/ExternalLink'
 import { Link } from '@/components/ui/link'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { HELP_CENTER_URL, PRIVACY_URL } from '@safe-global/utils/config/constants'
 import { IS_PRODUCTION, COMMIT_HASH, LEGAL_URL } from '@/config/constants'
-import type { FooterProps } from './footer.type'
+import type { FooterProps } from '@views/components/common/Footer/footer.type'
 
 const footerPages = [
   AppRoutes.settings.index,

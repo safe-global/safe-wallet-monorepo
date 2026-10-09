@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { SpendingLimitState } from '@/features/spending-limits'
-import { useIsEditMode } from '../EditFlow/EditModeContext'
+import { useIsEditMode } from '@views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import type { TokenOption } from '../utils/tokenOptions'
 

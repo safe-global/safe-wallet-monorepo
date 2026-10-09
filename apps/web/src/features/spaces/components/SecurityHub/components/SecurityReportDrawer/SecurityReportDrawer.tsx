@@ -9,7 +9,7 @@ import { Typography } from '@/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { HnSignupFlow } from '@/features/hypernative'
 import SecurityDrawerContent from './SecurityDrawerContent'
-import type { SelectedSafe, SpaceSafeEntry } from '../../types'
+import type { SelectedSafe, SpaceSafeEntry } from '@views/features/spaces/components/SecurityHub/types'
 
 type SecurityReportDrawerProps = {
   selectedSafe: SelectedSafe | null

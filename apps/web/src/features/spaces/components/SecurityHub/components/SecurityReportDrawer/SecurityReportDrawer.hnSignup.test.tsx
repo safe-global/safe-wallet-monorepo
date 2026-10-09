@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { fireEvent } from '@testing-library/react'
 import { render, screen } from '@/tests/test-utils'
 import SecurityReportDrawer from './SecurityReportDrawer'
-import type { SelectedSafe } from '../../types'
+import type { SelectedSafe } from '@views/features/spaces/components/SecurityHub/types'
 
 jest.mock('./SecurityDrawerContent', () => ({
   __esModule: true,

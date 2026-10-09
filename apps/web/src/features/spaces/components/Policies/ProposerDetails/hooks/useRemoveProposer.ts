@@ -11,9 +11,9 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { assertWalletChain, getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import type { Proposer } from '../../types'
-import { formatContactLabel } from '../../utils/policyLabel'
-import type { ProposerRef } from './types'
+import type { Proposer } from '@views/features/spaces/components/Policies/types'
+import { formatContactLabel } from '@views/features/spaces/components/Policies/utils/policyLabel'
+import type { ProposerRef } from '@views/features/spaces/components/Policies/ProposerDetails/hooks/types'
 
 export const REMOVE_PROPOSER_NOT_ALLOWED =
   'Only the signer who granted this proposer role, or the proposer themselves, can remove it'

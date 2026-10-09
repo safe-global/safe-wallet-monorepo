@@ -8,7 +8,7 @@ import type { ReactElement, SyntheticEvent } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import TxCard, { TxCardActions } from '../../common/TxCard'
+import TxCard, { TxCardActions } from '@views/components/tx-flow/common/TxCard'
 import InfoIcon from '@/public/images/notifications/info.svg'
 import { TOOLTIP_TITLES } from '@/components/tx-flow/common/constants'
 import type { RemoveOwnerFlowProps } from '.'
