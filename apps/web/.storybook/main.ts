@@ -4,6 +4,7 @@ import type { StorybookConfig } from '@storybook/nextjs'
 import path from 'path'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
+import viewLoaderRule from '../sandbox/view-rule'
 
 const require = createRequire(import.meta.url)
 
@@ -54,6 +55,7 @@ const config: StorybookConfig = {
   webpackFinal: async (config) => {
     config.module = config.module || {}
     config.module.rules = config.module.rules || []
+    config.module.rules.unshift(viewLoaderRule)
     config.resolve = config.resolve || {}
     config.resolve.alias = (config.resolve.alias || {}) as Record<string, string>
 

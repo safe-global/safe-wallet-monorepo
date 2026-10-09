@@ -116,10 +116,7 @@ jest.mock('@web3-onboard/core', () => () => ({
 // which means that `jest.spyOn` cannot modify the exported function.
 const defineProperty = Object.defineProperty
 Object.defineProperty = (obj, prop, desc) => {
-  if (prop !== 'prototype') {
-    desc.configurable = true
-  }
-  return defineProperty(obj, prop, desc)
+  return defineProperty(obj, prop, prop === 'prototype' ? desc : { ...desc, configurable: true })
 }
 
 beforeAll(() => {

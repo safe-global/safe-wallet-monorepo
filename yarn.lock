@@ -4214,10 +4214,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@date-fns/tz@npm:^1.4.1":
+"@date-fns/tz@npm:1.4.1":
   version: 1.4.1
   resolution: "@date-fns/tz@npm:1.4.1"
   checksum: 10/062097590005cce3da4c7d9880f9c77d386cff5b4dd58fa3dde3c346a8b2e4f4a8025a613306351a7cad8eb71178a0f67b4840d5884f73aa4c759085fac92063
+  languageName: node
+  linkType: hard
+
+"@date-fns/tz@patch:@date-fns/tz@npm%3A1.4.1#~/.yarn/patches/@date-fns-tz-npm-1.4.1-e102649294.patch":
+  version: 1.4.1
+  resolution: "@date-fns/tz@patch:@date-fns/tz@npm%3A1.4.1#~/.yarn/patches/@date-fns-tz-npm-1.4.1-e102649294.patch::version=1.4.1&hash=aa7375"
+  checksum: 10/bbeb5afb489e6774c0e5ab6c78e6eeaa7ab1bb749927ba5badcd2eb563974b343a4a846bd366200e2493c88490b6dba8810019eda32eb9ef8fee394f3d58f725
   languageName: node
   linkType: hard
 
@@ -4604,6 +4611,27 @@ __metadata:
   version: 13.2.0
   resolution: "@emurgo/cardano-serialization-lib-nodejs@npm:13.2.0"
   checksum: 10/b8483dd74ec902da607f0ee00259674ba1794784fafd322948043dd4dfdbddecc81f6546fc98c9a57810639f91110cf76be7755a138a3506af6233954cfe449e
+  languageName: node
+  linkType: hard
+
+"@endo/cache-map@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@endo/cache-map@npm:1.1.0"
+  checksum: 10/1cf2ebae70e9983edd30e830933df52ab9a0140fdecd420325fd20f1633b9afeb377b5cac548c7b7d04beb4cd1a14e672055ad25145119b2b151db78ffaa0b2f
+  languageName: node
+  linkType: hard
+
+"@endo/env-options@npm:^1.1.11":
+  version: 1.1.11
+  resolution: "@endo/env-options@npm:1.1.11"
+  checksum: 10/a85326b2f422ebb3f5895ed263d230bf9c4915ed2f798210bebb3941daf94d97495f4767f4113bab8f3781b0534ecbe1d29067d7806478fd6237ab69e97fe5c1
+  languageName: node
+  linkType: hard
+
+"@endo/immutable-arraybuffer@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "@endo/immutable-arraybuffer@npm:1.1.2"
+  checksum: 10/99159e4a04aad1dbe633b54b90f4591ff527c301ff2dc6585b65949e9c98b8942d726a23815470e6e4641c447bc94368cc96282f8fb50fb78f326b670c48cd16
   languageName: node
   linkType: hard
 
@@ -13902,7 +13930,7 @@ __metadata:
     js-cookie: "npm:^3.0.7"
     lodash: "npm:^4.18.1"
     lucide-react: "npm:^0.563.0"
-    mixpanel-browser: "npm:^2.66.0"
+    mixpanel-browser: "patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch"
     mockdate: "npm:^3.0.5"
     motion: "npm:^12.34.0"
     msw: "npm:^2.7.3"
@@ -13928,6 +13956,7 @@ __metadata:
     remark-heading-id: "npm:^1.0.1"
     remark-mdx-frontmatter: "npm:^5.2.0"
     semver: "npm:^7.7.1"
+    ses: "npm:^1.14.0"
     shadcn: "npm:^3.7.0"
     sonner: "npm:^2.0.7"
     storybook: "npm:^10.6.0"
@@ -13939,7 +13968,7 @@ __metadata:
     typescript: "npm:~5.9.2"
     typescript-plugin-css-modules: "npm:^4.2.2"
     vaul: "npm:^1.1.2"
-    viem: "npm:^2.21.55"
+    viem: "patch:viem@npm%3A2.52.2#~/.yarn/patches/viem-npm-2.52.2-fa01c7c282.patch"
     vite: "npm:8.3.0"
     vite-plugin-svgr: "npm:^5.2.0"
     wait-on: "npm:^9.1.0"
@@ -36436,12 +36465,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mixpanel-browser@npm:^2.66.0":
+"mixpanel-browser@npm:2.66.0":
   version: 2.66.0
   resolution: "mixpanel-browser@npm:2.66.0"
   dependencies:
     rrweb: "npm:2.0.0-alpha.18"
   checksum: 10/e968608d9c41e3c8dfdf3ca154e55e483a5f5d4e97533b1698b5153eb247701d8c77825c15a3a7d0dd50e12361828487d8bb61e5b63bce88c4b4c7ad4a39ebc6
+  languageName: node
+  linkType: hard
+
+"mixpanel-browser@patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch":
+  version: 2.66.0
+  resolution: "mixpanel-browser@patch:mixpanel-browser@npm%3A2.66.0#~/.yarn/patches/mixpanel-browser-npm-2.66.0-0e7e94bf60.patch::version=2.66.0&hash=332e75"
+  dependencies:
+    rrweb: "npm:2.0.0-alpha.18"
+  checksum: 10/8eb0df110b08d5ebd930b6d29a81d576a3919cbf7714fcaf9676242da8ebff0e740523a9c77bb849543e5f5cfc2c6295866146382ad52075038ddf0cfe0d59c8
   languageName: node
   linkType: hard
 
@@ -41974,6 +42012,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ses@npm:^1.14.0":
+  version: 1.15.0
+  resolution: "ses@npm:1.15.0"
+  dependencies:
+    "@endo/cache-map": "npm:^1.1.0"
+    "@endo/env-options": "npm:^1.1.11"
+    "@endo/immutable-arraybuffer": "npm:^1.1.2"
+  checksum: 10/494894d35de847103ca0e4357632d80436c0e3dbc0e0bf98448a962d2257cb9045db9c6e7737b4003846a690318fcf5c06ef5a9a51c8b47cd4ffeaf2fa330155
+  languageName: node
+  linkType: hard
+
 "set-blocking@npm:^2.0.0":
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0"
@@ -46047,6 +46096,27 @@ __metadata:
     typescript:
       optional: true
   checksum: 10/755530dd313edfc433d3c48492940871a122647e5cbed7eaffd0622064fa91aab6ae1b06617af751dcdcb4b60aac782b83f7a8d5960d77c2655a75c552d980d9
+  languageName: node
+  linkType: hard
+
+"viem@patch:viem@npm%3A2.52.2#~/.yarn/patches/viem-npm-2.52.2-fa01c7c282.patch":
+  version: 2.52.2
+  resolution: "viem@patch:viem@npm%3A2.52.2#~/.yarn/patches/viem-npm-2.52.2-fa01c7c282.patch::version=2.52.2&hash=9b9252"
+  dependencies:
+    "@noble/curves": "npm:1.9.1"
+    "@noble/hashes": "npm:1.8.0"
+    "@scure/bip32": "npm:1.7.0"
+    "@scure/bip39": "npm:1.6.0"
+    abitype: "npm:1.2.3"
+    isows: "npm:1.0.7"
+    ox: "npm:0.14.29"
+    ws: "npm:8.20.1"
+  peerDependencies:
+    typescript: ">=5.0.4"
+  peerDependenciesMeta:
+    typescript:
+      optional: true
+  checksum: 10/a0fcacf6d9e42d0e7cb63d9dc3af3de1ddd8d91d61646e361584942906e15ca16ee4f448a0bbefe7156d42ea553a848f1ef347921b7df39fe5fea10dc657c974
   languageName: node
   linkType: hard
 

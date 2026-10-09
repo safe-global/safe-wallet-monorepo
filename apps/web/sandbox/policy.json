@@ -1,0 +1,40 @@
+{
+  "packages": [
+    "react",
+    "@base-ui/react",
+    "lucide-react",
+    "class-variance-authority",
+    "clsx",
+    "classnames",
+    "vaul",
+    "sonner",
+    "input-otp",
+    "react-day-picker",
+    "react-resizable-panels",
+    "date-fns",
+    "next/link",
+    "next/image"
+  ],
+  "modules": [
+    "@safe-global/views/utils/cn",
+    "@safe-global/views/components/ui/ShadcnProvider",
+    "@safe-global/views/hooks/use-mobile",
+    "@safe-global/views/hooks/use-tablet",
+    "@safe-global/utils/utils/formatters",
+    "@safe-global/utils/utils/addresses",
+    "@safe-global/utils/utils/formatNumber",
+    "@safe-global/utils/utils/date"
+  ],
+  "trusted": [
+    "components/ui/ShadcnProvider",
+    "components/ui/combobox",
+    "components/ui/input",
+    "components/ui/input-group",
+    "components/ui/search-input",
+    "components/ui/sidebar",
+    "components/ui/sonner",
+    "hooks/use-mobile",
+    "hooks/use-tablet",
+    "utils/cn"
+  ]
+}
