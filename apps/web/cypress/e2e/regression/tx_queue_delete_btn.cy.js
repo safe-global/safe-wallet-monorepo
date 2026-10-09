@@ -5,12 +5,15 @@ import * as create_tx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_3_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer, signer2
+before(() => {
+  signer = walletCredentials.OWNER_3_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Transaction queue Delete button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {

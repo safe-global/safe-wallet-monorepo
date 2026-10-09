@@ -216,7 +216,7 @@ Cypress.Commands.add('enter', (selector, opts) => {
 
 Cypress.Commands.add('setupInterceptors', () => {
   cy.intercept('*', (req) => {
-    if (Cypress.env('SAFE_E2E_ISOLATED')) {
+    if (Cypress.expose('SAFE_E2E_ISOLATED')) {
       const host = new URL(req.url).hostname
       if (isRemoteBackendHost(host)) {
         throw new Error(`Isolated Cypress attempted a remote backend request: ${host}`)

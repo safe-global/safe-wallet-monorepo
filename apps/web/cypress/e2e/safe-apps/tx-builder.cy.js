@@ -96,7 +96,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
   it('Verify a batch can be created from an ABI', () => {
     cy.enter(iframeSelector).then((getBody) => {
-      getBody().findByLabelText(safeapps.enterABIStr).type(safeapps.abi, { parseSpecialCharSequences: false })
+      getBody().findByLabelText(safeapps.enterABIStr).type(safeapps.abi, safeapps.abiTypingOptions)
       getBody().findByLabelText(safeapps.toAddressStr).type(safeAppSafes.SEP_SAFEAPP_SAFE_2)
       getBody().findByLabelText(safeapps.tokenAmount).type('0')
       getBody().findByText(safeapps.addTransactionStr).click()
@@ -224,7 +224,7 @@ describe('Transaction Builder tests', { defaultCommandTimeout: 20000 }, () => {
 
   it('Verify that error types are not displayed in ABI methods', () => {
     cy.enter(iframeSelector).then((getBody) => {
-      getBody().findByLabelText(safeapps.enterABIStr).type(safeapps.abi, { parseSpecialCharSequences: false })
+      getBody().findByLabelText(safeapps.enterABIStr).type(safeapps.abi, safeapps.abiTypingOptions)
       getBody().find(safeapps.contractMethodSelector).click()
       getBody().find(safeapps.AddressEmptyCodeStr).should('not.exist')
     })

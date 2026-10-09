@@ -8,11 +8,14 @@ import * as tx from '../pages/transactions.page.js'
 import * as owner from '../pages/owners.pages'
 import * as navigation from '../pages/navigation.page.js'
 import { getSafeSingletonDeployment } from '@safe-global/safe-deployments'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 // The networks selected in the creation flow below, in selection order.
 const selectedChainIds = ['11155111', '1', '137'] // sepolia, ethereum, polygon

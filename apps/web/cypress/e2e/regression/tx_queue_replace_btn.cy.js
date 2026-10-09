@@ -7,11 +7,14 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page.js'
 import { spendingLimitTxOption } from '../pages/spending_limits.pages'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer2
+before(() => {
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Transaction queue Replace button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
