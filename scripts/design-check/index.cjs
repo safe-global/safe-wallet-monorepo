@@ -2,7 +2,8 @@
 /**
  * Checks whether the changes between two git refs are design-only.
  *
- * Usage: node scripts/design-check/index.cjs [--base origin/dev] [--head HEAD] [--json] [--summary <file>]
+ * Usage: node scripts/design-check/index.cjs [--base origin/dev] [--head <ref>] [--json] [--summary <file>]
+ * Without --head it checks the working tree, including uncommitted and new files.
  *
  * Exit code 0: design-only. Exit code 1: something else changed; every finding names the file and line.
  */
@@ -16,11 +17,11 @@ const opt = (name, fallback) => {
   return i >= 0 ? args[i + 1] : fallback
 }
 const base = opt('--base', 'origin/dev')
-const head = opt('--head', 'HEAD')
+const head = opt('--head')
 
 const git = (...a) =>
   execFileSync('git', a, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] })
-const mergeBase = git('merge-base', base, head).trim()
+const mergeBase = git('merge-base', base, head ?? 'HEAD').trim()
 const show = (ref) => (file) => {
   try {
     return git('show', `${ref}:${file}`)
@@ -29,15 +30,28 @@ const show = (ref) => (file) => {
   }
 }
 
-const changes = git('diff', '--name-status', '-M', mergeBase, head)
-  .split('\n')
+const readWorkingTree = (file) => {
+  try {
+    return fs.readFileSync(file, 'utf8')
+  } catch {
+    return undefined
+  }
+}
+const untracked = head
+  ? []
+  : git('ls-files', '--others', '--exclude-standard')
+      .split('\n')
+      .filter(Boolean)
+      .map((file) => `A\t${file}`)
+
+const changes = [...git('diff', '--name-status', '-M', mergeBase, ...(head ? [head] : [])).split('\n'), ...untracked]
   .filter(Boolean)
   .map((line) => {
     const [status, a, b] = line.split('\t')
     return status.startsWith('R') ? { status, from: a, file: b } : { status, file: a }
   })
 
-const checker = new DesignChecker({ readBase: show(mergeBase), readHead: show(head) })
+const checker = new DesignChecker({ readBase: show(mergeBase), readHead: head ? show(head) : readWorkingTree })
 const result = checker.check(changes)
 
 if (args.includes('--json')) {
