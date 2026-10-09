@@ -147,8 +147,8 @@ describe('mapPendingPolicies', () => {
   })
 
   it('should, when the queued tx re-enables the module of an unenforced policy, list the limits it applies again', () => {
-    const unenforced = mapActivePolicies([mockSpendingLimitDto({ enabled: false })], resolveKnownTokens)
-    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], unenforced, resolveKnownTokens)
+    const unenforced = mapActivePolicies([mockSpendingLimitDto({ enabled: false })])
+    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], unenforced)
 
     expect(row.data).toEqual(unenforced[0].data)
     expect(row.data.spenders[0].allowances[0]).not.toHaveProperty('change')
@@ -156,7 +156,7 @@ describe('mapPendingPolicies', () => {
   })
 
   it('should, when the queued tx enables the module beside an enforced policy, carry over no limit', () => {
-    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], activeRows(), resolveKnownTokens)
+    const [row] = mapPendingPolicies([withChanges([{ kind: 'enable-module' }])], activeRows())
 
     expect(row.data.spenders).toEqual([])
   })
