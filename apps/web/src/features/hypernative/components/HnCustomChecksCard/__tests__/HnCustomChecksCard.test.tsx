@@ -25,7 +25,7 @@ jest.mock('../../HnAnalysisGroupCard', () => ({
 }))
 
 // Mock AnalysisGroupCardDisabled
-jest.mock('@/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled', () => ({
+jest.mock('@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled', () => ({
   AnalysisGroupCardDisabled: jest.fn(({ children, 'data-testid': testId }) => (
     <div data-testid={testId}>AnalysisGroupCardDisabled: {children}</div>
   )),

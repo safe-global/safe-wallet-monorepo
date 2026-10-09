@@ -40,7 +40,7 @@ export function useIsBelowMd(): boolean {
 /**
  * Legacy MUI `theme.breakpoints.down('sm')` === `(max-width:599.95px)`.
  *
- * Not the same as `useIsMobile` from `@/hooks/use-mobile`, which is shadcn's stock hook at 768px.
+ * Not the same as `useIsMobile` from `@safe-global/views/hooks/use-mobile`, which is shadcn's stock hook at 768px.
  * Components that were on MUI's `sm` before the migration belong here — 768px would flip their
  * layout 168px earlier than they were designed for.
  */

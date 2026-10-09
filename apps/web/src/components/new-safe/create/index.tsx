@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useRouter } from 'next/router'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -16,7 +16,7 @@ import type { CreateSafeInfoVariant } from '@/components/new-safe/create/CreateS
 import type { CreateSafeInfoItem } from '@/components/new-safe/create/CreateSafeInfos'
 import CreateSafeInfos from '@/components/new-safe/create/CreateSafeInfos'
 import { type ReactElement, useMemo, useState } from 'react'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { type SafeVersion } from '@safe-global/types-kit'
 import { useCurrentChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'

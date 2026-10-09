@@ -3,7 +3,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useChain } from '@/hooks/useChains'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { isSmartContractWallet } from '@/utils/wallets'
-import type { Proposer } from '../../types'
+import type { Proposer } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The parent Safe that granted the role: the first delegator with code. An unreadable delegator counts as an EOA. */
 export const useNestedSafeGrantor = (chainId: string, proposer: Proposer): string | undefined => {

@@ -1,6 +1,6 @@
-import { ProgressBar } from '@/components/common/ProgressBar'
+import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import { ChevronDown } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useEffect, useRef, useState, type ReactElement } from 'react'
 

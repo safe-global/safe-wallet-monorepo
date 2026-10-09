@@ -10,7 +10,11 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 // round-trip through this barrel re-enters the safeOverviews ↔ index cycle.
 import * as gatewayApi from '@/store/api/gateway'
 import { useEligibleSafeAccounts } from './useEligibleSafeAccounts'
-import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+  type SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const mockUseSpaceSafes = jest.fn()
 const mockUseGetMultipleSafeOverviewsQuery = jest.spyOn(gatewayApi, 'useGetMultipleSafeOverviewsQuery')

@@ -1,13 +1,13 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 import { reloadPage } from '@/utils/navigation'
 
 export enum EnvVariablesField {

@@ -1,9 +1,9 @@
 import { ArrowRight, ShieldCheck, X } from 'lucide-react'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 
 /** Sidebar card announcing that the workspace requires 2FA. */
 const WorkspaceTwoFactorAwarenessCard = ({

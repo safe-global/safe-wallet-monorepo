@@ -19,7 +19,7 @@ const FallbackSwapWidget = dynamic(() => import('./components/FallbackSwapWidget
 import SwapButton from './components/SwapButton'
 import SwapOrder from './components/SwapOrder'
 import SwapOrderConfirmation from './components/SwapOrderConfirmationView'
-import StatusLabel from './components/StatusLabel'
+import StatusLabel from '@safe-global/views/features/swap/components/StatusLabel'
 import SwapTokens from './components/SwapTokens'
 
 // Flat structure - naming determines stub behavior

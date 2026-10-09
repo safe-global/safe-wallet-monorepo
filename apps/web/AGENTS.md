@@ -9,8 +9,8 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`)
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
-- Build UI from the shadcn/ui primitives in `@/components/ui/*` (Tailwind); MUI/Emotion are removed
-- **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@/components/ui/overlay`](src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
+- Build UI from the shadcn/ui primitives in `@safe-global/views/components/ui/*` (Tailwind); MUI/Emotion are removed
+- **Never hand-roll a modal scrim.** Anything that dims the page behind it — a dialog, alert dialog, sheet, drawer, backdrop-ed select — renders `overlayVariants()` from [`@safe-global/views/components/ui/overlay`](../../packages/views/src/components/ui/overlay.ts). Tint lives in the `--backdrop` token, the blur and the stacking layer live in that one cva. `overlay.test.tsx` fails if a surface drifts. Anchored surfaces (popovers, dropdowns, menus, tooltips) have no scrim by design.
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
 - **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`. Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
@@ -25,7 +25,7 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 - **On `<Button>`, `className` is LAYOUT-ONLY** (`w-full`, margins, grid placement); size/skin utilities are
   **ESLint-enforced errors** (`no-restricted-syntax` in `eslint.config.mjs`). The only sanctioned escape is a
   justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` — when a pattern recurs, add a
-  size/variant to `components/ui/button.tsx` rather than disabling.
+  size/variant to `packages/views/src/components/ui/button.tsx` rather than disabling.
 - **Prefer the closed presets in `components/common/`** (`SubmitButton`, `ActionBar`+`ActionButton`,
   `DialogActions`, `OnboardingFooter`, `IconAction`) over the raw primitive — they take semantic props and
   reject styling `className` at the type level.
@@ -202,8 +202,8 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    an overlapping MAX button (ISSUE-052). The variant lint cannot catch this: raw `div`s contain
    no design-system component to flag. If a field needs something the primitives lack, extend
    the primitive, don't wrap it.
-6. **`src/components/ui/` primitives are managed via the shadcn CLI** – read
-   [src/components/ui/README.md](src/components/ui/README.md) before hand-editing them.
+6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read
+   [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
 
 ## Code complexity
 

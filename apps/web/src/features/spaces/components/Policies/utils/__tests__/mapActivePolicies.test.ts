@@ -1,21 +1,10 @@
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { mockProposerDto, mockSpendingLimitDto } from '../../mocks/activePolicies'
-import { mockPendingDto } from '../../mocks/pendingPolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
-import type { PolicyTokenInfo } from '../../types'
-import { getReferencedTokens, mapActivePolicies, type ResolveTokenInfo } from '../mapActivePolicies'
-
-const ETH: PolicyTokenInfo = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: null }
-
-const resolveKnownTokens: ResolveTokenInfo = (_chainId, address) => {
-  if (address === ZERO_ADDRESS) return ETH
-  if (address === MOCK_TOKENS.usdc.address) return MOCK_TOKENS.usdc
-  return undefined
-}
+import { mapActivePolicies } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {
   it('should, when given a spending limit, keep the reset in minutes and compute the remaining amount', () => {
-    const [policy] = mapActivePolicies([mockSpendingLimitDto()], resolveKnownTokens)
+    const [policy] = mapActivePolicies([mockSpendingLimitDto()])
 
     expect(policy.type).toBe('spending-limit')
     expect(policy.status).toBe('active')
@@ -36,7 +25,7 @@ describe('mapActivePolicies', () => {
     dto.data.spenders[0].allowances[0].resetPeriodMinutes = 0
     dto.data.spenders[0].allowances[0].resetsAtMinute = null
 
-    const [policy] = mapActivePolicies([dto], resolveKnownTokens)
+    const [policy] = mapActivePolicies([dto])
     if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
 
     expect(policy.data.spenders[0].allowances[0].resetPeriodMinutes).toBe(0)
@@ -48,14 +37,18 @@ describe('mapActivePolicies', () => {
     if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
     dto.data.spenders[0].allowances[0].spent = '9000000000'
 
-    const [policy] = mapActivePolicies([dto], resolveKnownTokens)
+    const [policy] = mapActivePolicies([dto])
     if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
 
     expect(policy.data.spenders[0].allowances[0].remaining).toBe('0')
   })
 
-  it('should, when the token is unknown to the gateway, render its address as the symbol in base units', () => {
-    const [policy] = mapActivePolicies([mockSpendingLimitDto()], () => undefined)
+  it('should, when CGW could not resolve the token, render its address as the symbol in base units', () => {
+    const dto = mockSpendingLimitDto()
+    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
+    dto.data.spenders[0].allowances[0].tokenMetadata = null
+
+    const [policy] = mapActivePolicies([dto])
     if (policy.type !== 'spending-limit') throw new Error('expected a spending limit')
 
     expect(policy.data.spenders[0].allowances[0].token).toEqual({
@@ -67,13 +60,13 @@ describe('mapActivePolicies', () => {
   })
 
   it('should, when the module is not enabled, keep the policy and mark it as not enabled', () => {
-    const [policy] = mapActivePolicies([mockSpendingLimitDto({ enabled: false })], resolveKnownTokens)
+    const [policy] = mapActivePolicies([mockSpendingLimitDto({ enabled: false })])
 
     expect(policy.enabled).toBe(false)
   })
 
   it('should, when given a proposer grant, keep every proposer with their grantors', () => {
-    const [policy] = mapActivePolicies([mockProposerDto()], resolveKnownTokens)
+    const [policy] = mapActivePolicies([mockProposerDto()])
 
     expect(policy.type).toBe('proposer')
     expect(policy.enforcement).toEqual({ via: 'offchain', source: 'delegates' })
@@ -94,7 +87,7 @@ describe('mapActivePolicies', () => {
       },
     })
 
-    const policies = mapActivePolicies([dto], resolveKnownTokens)
+    const policies = mapActivePolicies([dto])
 
     expect(policies).toHaveLength(2)
     expect(policies[0].id).not.toBe(policies[1].id)
@@ -104,17 +97,17 @@ describe('mapActivePolicies', () => {
   })
 
   it('should, when the same Safe has a policy on two chains, give each its own id', () => {
-    const policies = mapActivePolicies(
-      [mockSpendingLimitDto(), mockSpendingLimitDto({ safe: { ...MOCK_SAFES.treasury, chainId: '137' } })],
-      resolveKnownTokens,
-    )
+    const policies = mapActivePolicies([
+      mockSpendingLimitDto(),
+      mockSpendingLimitDto({ safe: { ...MOCK_SAFES.treasury, chainId: '137' } }),
+    ])
 
     expect(policies).toHaveLength(2)
     expect(policies[0].id).not.toBe(policies[1].id)
   })
 
   it('should, when given a type the page does not render, leave it out', () => {
-    const policies = mapActivePolicies([mockSpendingLimitDto({ type: 'cosigner' })], resolveKnownTokens)
+    const policies = mapActivePolicies([mockSpendingLimitDto({ type: 'cosigner' })])
 
     expect(policies).toEqual([])
   })
@@ -122,7 +115,7 @@ describe('mapActivePolicies', () => {
   it('should, when the data does not match the type, leave the policy out', () => {
     const mismatched = mockProposerDto({ type: 'spending-limit', enforcement: { via: 'module', moduleAddress: '0x1' } })
 
-    expect(mapActivePolicies([mismatched], resolveKnownTokens)).toEqual([])
+    expect(mapActivePolicies([mismatched])).toEqual([])
   })
 
   it('leaves out a spending limit whose allowances have all been removed', () => {
@@ -130,7 +123,7 @@ describe('mapActivePolicies', () => {
     if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
     dto.data.spenders = []
 
-    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
+    expect(mapActivePolicies([dto])).toEqual([])
   })
 
   it('leaves out a spending limit whose spender has no allowance left', () => {
@@ -138,53 +131,6 @@ describe('mapActivePolicies', () => {
     if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
     dto.data.spenders = dto.data.spenders.map((spender) => ({ ...spender, allowances: [] }))
 
-    expect(mapActivePolicies([dto], resolveKnownTokens)).toEqual([])
-  })
-})
-
-describe('getReferencedTokens', () => {
-  it('should, when policies share a token on one chain, list it once', () => {
-    const tokens = getReferencedTokens([mockSpendingLimitDto(), mockSpendingLimitDto()])
-
-    expect(tokens).toEqual([{ chainId: '1', address: MOCK_TOKENS.usdc.address }])
-  })
-
-  it('should, when the same token is used on two chains, list it per chain', () => {
-    const tokens = getReferencedTokens([
-      mockSpendingLimitDto(),
-      mockSpendingLimitDto({ safe: { ...MOCK_SAFES.treasury, chainId: '137' } }),
-    ])
-
-    expect(tokens.map((token) => token.chainId)).toEqual(['1', '137'])
-  })
-
-  it('should, when an allowance is in the native currency, not list it', () => {
-    const dto = mockSpendingLimitDto()
-    if (!('spenders' in dto.data)) throw new Error('expected spending limit data')
-    dto.data.spenders[0].allowances[0].tokenAddress = ZERO_ADDRESS
-
-    expect(getReferencedTokens([dto, mockProposerDto()])).toEqual([])
-  })
-
-  it('should, when a queued tx sets an ERC-20 allowance, include that token once', () => {
-    const pending = mockPendingDto({
-      data: {
-        ...mockPendingDto().data,
-        changes: [
-          {
-            kind: 'set-allowance',
-            delegate: MOCK_ADDRESSES.bob,
-            token: MOCK_TOKENS.usdt.address,
-            amount: '1',
-            resetPeriodMinutes: 0,
-          },
-        ],
-      },
-    })
-
-    expect(getReferencedTokens([mockSpendingLimitDto()], [pending, pending])).toEqual([
-      { chainId: MOCK_SAFES.treasury.chainId, address: MOCK_TOKENS.usdc.address },
-      { chainId: MOCK_SAFES.treasury.chainId, address: MOCK_TOKENS.usdt.address },
-    ])
+    expect(mapActivePolicies([dto])).toEqual([])
   })
 })

@@ -1,8 +1,13 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 import { RotateCcwIcon } from 'lucide-react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { EnvVariablesField } from './index'

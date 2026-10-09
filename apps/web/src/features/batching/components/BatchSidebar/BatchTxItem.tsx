@@ -1,7 +1,7 @@
 import type { TransactionData, MultiSend } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type SyntheticEvent, useMemo, useCallback } from 'react'
-import { ListItem } from '@/components/ui/list'
-import { Skeleton } from '@/components/ui/skeleton'
+import { ListItem } from '@safe-global/views/components/ui/list'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import css from './styles.module.css'
 
 import { type DraftBatchItem } from '../../store/batchSlice'

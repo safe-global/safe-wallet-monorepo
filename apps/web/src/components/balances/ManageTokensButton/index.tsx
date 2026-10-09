@@ -1,9 +1,9 @@
 import { useState, useImperativeHandle, forwardRef, type ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { Button } from '@safe-global/views/components/ui/button'
+import { DropdownMenu, DropdownMenuTrigger } from '@safe-global/views/components/ui/dropdown-menu'
 import ManageTokensMenu from './ManageTokensMenu'
 import { trackEvent, ASSETS_EVENTS } from '@/services/analytics'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
 
 interface ManageTokensButtonProps {
   onHideTokens?: () => void

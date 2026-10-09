@@ -1,18 +1,23 @@
 import { useState } from 'react'
 import NextLink from 'next/link'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Typography } from '@/components/ui/typography'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { FieldDescription, FieldError } from '@/components/ui/field'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { FieldDescription, FieldError } from '@safe-global/views/components/ui/field'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 import { ArrowRight, EyeIcon, EyeOffIcon, RotateCcwIcon } from 'lucide-react'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import { useSafeProAccess } from '@/features/spaces'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { EnvVariablesField, type EnvVariablesFormData } from './index'
 import {
   getTenderlyUrlError,

@@ -1,8 +1,8 @@
 import type { CSSProperties, ReactElement } from 'react'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Button } from '@/components/ui/button'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 
 type Placement =
   | 'top'

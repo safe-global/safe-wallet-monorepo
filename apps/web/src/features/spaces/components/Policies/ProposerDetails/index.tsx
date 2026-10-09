@@ -3,7 +3,7 @@ import ProposerDrawer from '../ProposerDrawer'
 import RemoveProposerModal from '../RemoveProposerModal'
 import { useProposerDetails } from './hooks/useProposerDetails'
 import { useRemoveProposer } from './hooks/useRemoveProposer'
-import type { Proposer, ProposerPolicy } from '../types'
+import type { Proposer, ProposerPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 export type ProposerDetailsProps = {
   policy: ProposerPolicy

@@ -1,5 +1,5 @@
 import { type ReactElement, useEffect, useRef, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

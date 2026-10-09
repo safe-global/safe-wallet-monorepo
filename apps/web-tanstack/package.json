@@ -28,6 +28,7 @@
     "@safe-global/store": "workspace:*",
     "@safe-global/theme": "workspace:*",
     "@safe-global/utils": "workspace:*",
+    "@safe-global/views": "workspace:*",
     "@safe-global/web": "workspace:*",
     "@tanstack/react-router": "1.159.4",
     "firebase": "11.1.0",

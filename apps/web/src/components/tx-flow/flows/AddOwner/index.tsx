@@ -8,17 +8,9 @@ import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
+import type { AddOwnerFlowProps } from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 
-type Owner = {
-  address: string
-  name?: string
-}
-
-export type AddOwnerFlowProps = {
-  newOwner: Owner
-  removedOwner?: Owner
-  threshold: number
-}
+export type { AddOwnerFlowProps } from '@safe-global/views/components/tx-flow/flows/AddOwner/types'
 
 const ChooseOwnerStep = () => {
   const { onNext, data } = useContext(TxFlowContext)

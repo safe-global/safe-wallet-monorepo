@@ -1,6 +1,6 @@
 import AddAccountsChooser from '../AddAccountsChooser'
 import Image from 'next/image'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
 import EmptyDashboardDark from '@/public/images/spaces/empty_dashboard_dark.png'
 

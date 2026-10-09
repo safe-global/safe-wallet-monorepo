@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createRemoveModuleTx } from '@/services/tx/tx-sender'

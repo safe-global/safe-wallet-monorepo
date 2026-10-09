@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
 import { createRemoveGuardTx } from '@/services/tx/tx-sender'

@@ -23,7 +23,7 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
@@ -80,8 +80,8 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-jest.mock('@/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
@@ -375,7 +375,7 @@ describe('ExecuteForm', () => {
   })
 
   it('execute the tx when the submit button is clicked', async () => {
-    const mockExecuteTx = jest.fn()
+    const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0x123', isExecuted: true })
 
     const { getByText } = render(
       <ExecuteForm
@@ -402,7 +402,7 @@ describe('ExecuteForm', () => {
   describe('success screen scope', () => {
     const renderWithModal = () => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
@@ -582,7 +582,7 @@ describe('ExecuteForm', () => {
     const mockExecuteTx = jest
       .fn()
       .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
-      .mockResolvedValueOnce('0xnewtx')
+      .mockResolvedValueOnce({ txId: '0xnewtx', isExecuted: true })
 
     const { getByText, getByTestId } = render(
       <ExecuteForm

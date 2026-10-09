@@ -8,7 +8,7 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import { NftItems } from '@/components/tx-flow/flows/NftTransfer/SendNftBatch'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 
 const ReviewNftBatch = ({ onSubmit, children }: ReviewTransactionProps): ReactElement => {

@@ -9,11 +9,11 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-} from '@/components/ui/alert-dialog'
+} from '@safe-global/views/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { Input } from '@/components/ui/input'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'

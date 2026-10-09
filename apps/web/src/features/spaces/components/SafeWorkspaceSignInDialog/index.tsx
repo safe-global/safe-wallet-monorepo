@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SignInOptions from '../SignInOptions'
 import { useRemoveUrlSpaceId, useSafeWorkspaceAction } from '../../hooks/useSafeWorkspaceCheck'
 

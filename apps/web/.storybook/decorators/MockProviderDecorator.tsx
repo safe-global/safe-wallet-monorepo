@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { StoryContext } from 'storybook/internal/csf'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 type MockProviderDecoratorProps = {
   children: ReactNode

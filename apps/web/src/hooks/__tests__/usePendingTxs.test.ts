@@ -16,7 +16,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { act, renderHook } from '@/tests/test-utils'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { filterUntrustedQueue, getNextTransactions, useHasPendingTxs, usePendingTxsQueue } from '../usePendingTxs'
-import { isLabelListItem } from '@/utils/transaction-guards'
+import { isLabelListItem, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -183,6 +183,21 @@ describe('filterUntrustedQueue', () => {
     expect(result?.results[1].type).not.toEqual(TransactionListItemType.CONFLICT_HEADER)
   })
 
+  it('should remove transactions that the trusted queue already shows', () => {
+    const result = filterUntrustedQueue(mockQueue, ['multisig_123', 'multisig_456'], ['multisig_123'])
+
+    expect(result?.results.map((item) => (isTransactionQueuedItem(item) ? item.transaction.id : item.type))).toEqual([
+      'LABEL',
+      'multisig_456',
+    ])
+  })
+
+  it('should return undefined when every pending transaction is already in the trusted queue', () => {
+    const result = filterUntrustedQueue(mockQueue, ['multisig_123'], ['multisig_123'])
+
+    expect(result).toBeUndefined()
+  })
+
   it('should remove all transactions that are signed', () => {
     const mockPendingIds = ['multisig_123', 'multisig_789']
     const mockQueueWithSignedTxs = { ...mockQueue }
@@ -261,6 +276,26 @@ describe('usePendingTxsQueue', () => {
     expect(resultItems?.length).toBe(2)
     expect((resultItems?.[0] as LabelQueuedItem).label).toBe('Pending')
     expect((resultItems?.[1] as ModuleTransaction).transaction.id).toBe('multisig_123')
+  })
+
+  it('should return undefined if the trusted queue already shows the pending tx', async () => {
+    const { result } = renderHook(() => usePendingTxsQueue(), {
+      initialReduxState: {
+        pendingTxs: {
+          multisig_123: {
+            chainId: '5',
+            safeAddress: '0x0000000000000000000000000000000000000001',
+            txHash: 'tx123',
+          } as PendingTx,
+        },
+        txQueue: { data: mockQueue, loading: false, loaded: true },
+      },
+    })
+
+    await act(() => Promise.resolve(true))
+
+    expect(result?.current.loading).toBe(false)
+    expect(result?.current.page).toBeUndefined()
   })
 
   it('should return undefined if none of the returned txs are pending', async () => {

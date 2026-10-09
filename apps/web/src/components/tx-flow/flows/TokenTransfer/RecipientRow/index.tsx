@@ -1,11 +1,18 @@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import DeleteIcon from '@/public/images/common/delete.svg'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { get, useFormContext } from 'react-hook-form'
 import type { FieldArrayPath, FieldPath } from 'react-hook-form'
-import type { MultiTokenTransferParams, TokenTransferParams } from '../types'
-import { MultiTokenTransferFields, TokenTransferFields, TokenTransferType } from '../types'
+import type {
+  MultiTokenTransferParams,
+  TokenTransferParams,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+import {
+  MultiTokenTransferFields,
+  TokenTransferFields,
+  TokenTransferType,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import { useTokenAmount } from '../utils'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
@@ -18,7 +25,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { X } from 'lucide-react'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'

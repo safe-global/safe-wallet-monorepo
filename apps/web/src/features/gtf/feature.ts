@@ -1,7 +1,7 @@
 import type { GTFContract } from './contract'
 import FeesPreview from './components/FeesPreview'
 import FeeInfoBanner from './components/FeeInfoBanner'
-import HistoryFeesAccordion from './components/HistoryFeesAccordion'
+import HistoryFeesAccordion from '@safe-global/views/features/gtf/components/HistoryFeesAccordion'
 import { resolveFeeParams } from './services/resolveFeeParams'
 
 export default {

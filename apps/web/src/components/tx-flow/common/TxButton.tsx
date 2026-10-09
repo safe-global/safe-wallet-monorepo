@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
@@ -12,7 +12,7 @@ import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-
 import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 

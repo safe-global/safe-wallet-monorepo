@@ -1,7 +1,7 @@
 import { ArrowDownLeft, ArrowUpRight, Repeat, UserRound, type LucideIcon } from 'lucide-react'
 import type { ReactElement, ReactNode } from 'react'
 import Identicon from '@/components/common/Identicon'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 const PREVIEW_SIGNERS = ['0x8674ff2cC41CE1A26D0A1B4b8f6c8B58F7bca19b', '0x2F4b9a1Cd3e5F70a8b6c4D2E1a9F8c7B6E5d4c3b']
 

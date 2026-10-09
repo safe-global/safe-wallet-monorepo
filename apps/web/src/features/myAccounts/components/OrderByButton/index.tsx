@@ -4,11 +4,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import TransactionsIcon from '@/public/images/transactions/transactions.svg'
-import CheckIcon from '@/public/images/common/check.svg'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import { OrderByOption } from '@/store/orderByPreferenceSlice'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 

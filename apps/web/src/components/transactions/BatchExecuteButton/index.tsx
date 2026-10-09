@@ -1,7 +1,7 @@
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -9,9 +9,9 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-} from '@/components/ui/alert-dialog'
+} from '@safe-global/views/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
+import { BatchExecuteHoverContext } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { useAppSelector } from '@/store'
 import { selectPendingTxs } from '@/store/pendingTxsSlice'
 import useBatchedTxs from '@/hooks/useBatchedTxs'
