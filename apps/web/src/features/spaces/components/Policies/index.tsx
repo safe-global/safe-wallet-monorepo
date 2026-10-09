@@ -10,10 +10,7 @@ import {
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
-import {
-  PoliciesLoadError,
-  PoliciesLoading,
-} from '@safe-global/views/features/spaces/components/Policies/PoliciesLoadState'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
@@ -231,9 +228,9 @@ const Policies = ({
       </div>
 
       {isLoading ? (
-        <PoliciesLoading />
+        <SpaceLoading subject="policies" testId="policies-loading" />
       ) : isError ? (
-        <PoliciesLoadError onReload={onRetry} />
+        <SpaceLoadError onReload={onRetry} testId="policies-error" />
       ) : (
         <>
           {locked && (

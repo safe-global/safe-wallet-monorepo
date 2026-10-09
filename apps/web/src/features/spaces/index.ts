@@ -69,7 +69,7 @@ export { default as useGetSpaceAddressBook, useSpaceAddressBookState } from './h
 export { useMemberNameResolver } from './hooks/useMemberNameResolver'
 export { default as useGetSpaceAuditLog } from './hooks/useGetSpaceAuditLog'
 export { default as useGetSpaceAuditLogActors } from './hooks/useGetSpaceAuditLogActors'
-export { default as useGetAddressBookRequests } from './hooks/useGetAddressBookRequests'
+export { default as useGetAddressBookRequests, useAddressBookRequestsState } from './hooks/useGetAddressBookRequests'
 export { useAdminCount, useIsLastActiveAdmin } from './hooks/useIsLastActiveAdmin'
 export { default as useIsQualifiedSafe } from './hooks/useIsQualifiedSafe'
 export { useMembersSearch } from './hooks/useMembersSearch'

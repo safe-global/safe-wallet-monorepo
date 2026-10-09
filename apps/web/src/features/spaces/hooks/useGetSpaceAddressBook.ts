@@ -14,6 +14,7 @@ export const useSpaceAddressBookState = (): {
   items: SpaceAddressBookItemDto[]
   isLoading: boolean
   isError: boolean
+  refetch: () => void
 } => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -21,12 +22,13 @@ export const useSpaceAddressBookState = (): {
     currentData: addressBook,
     isLoading,
     isError,
+    refetch,
   } = useAddressBooksGetAddressBookItemsV1Query(
     { spaceId: spaceId ?? '' },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
 
-  return { items: addressBook?.data ?? EMPTY_ADDRESS_BOOK, isLoading, isError }
+  return { items: addressBook?.data ?? EMPTY_ADDRESS_BOOK, isLoading, isError, refetch }
 }
 
 const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => useSpaceAddressBookState().items

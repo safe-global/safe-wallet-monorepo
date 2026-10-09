@@ -1,9 +1,9 @@
 /* Indeterminate: the page has no progress to report, so the bar sweeps rather than sits at one value. */
 .bar {
-  animation: policies-load 1.6s ease-in-out infinite alternate;
+  animation: space-load 1.6s ease-in-out infinite alternate;
 }
 
-@keyframes policies-load {
+@keyframes space-load {
   from {
     width: 30%;
   }
