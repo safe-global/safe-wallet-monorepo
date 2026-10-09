@@ -39,7 +39,7 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        canManage={readOnly ? false : canManage}
+        canManage={canManage}
       />
       <PlanCards
         tiers={tiers}
