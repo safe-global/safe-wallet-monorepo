@@ -9,6 +9,9 @@
 /apps/mobile/       @safe-global/safe-mobile
 /expo-plugins/      @safe-global/safe-mobile
 
+# The rules of the design scope check
+/scripts/design-check/     @safe-global/infrasec @compojoom @PooyaRaki @TimDaub
+
 # CI, deploy, dependency resolution and anything that executes on dev machines or in builds
 /.github/           @safe-global/infrasec @compojoom @PooyaRaki
 /package.json       @safe-global/infrasec @compojoom @PooyaRaki

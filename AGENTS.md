@@ -154,6 +154,10 @@ Before writing code for any non-trivial change (anything beyond a typo, doc twea
 - When you open the PR, carry the relevant lines into the "Affected flows", "Blast radius", and "Risks / not checked" fields of the PR template.
 - If the checklist reveals that a shared abstraction has many unknown consumers, slow down and investigate before coding — that is the signal this process is designed to surface.
 
+### Design narrowly for production
+
+Only when the user explicitly asks to "design narrowly for production" or for a "design-only PR", use the `design.narrow` skill (`.claude/skills/design.narrow/SKILL.md`). Such a pull request may only change styling, copy and presentational markup; `node scripts/design-check/index.cjs --base origin/dev` checks this, and the `Design scope` workflow enforces it for pull requests labelled `design-only`. Other design work (prototypes, stories, handover pull requests) is not restricted.
+
 ### Commit and PR conventions
 
 Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Do not commit or open a PR without having read it.
