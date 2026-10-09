@@ -65,20 +65,20 @@ export function cypressEnvironment(env) {
   return result
 }
 
-// Measured in CI with one Cypress process per shard: a spec that needs a fork takes about 1.5 times as long
-// as one that does not, and starting the forks adds about 2.5 specs' worth of setup to a shard.
-const FORK_SPEC_COST = 1.5
+// Measured in CI with one Cypress process per shard, in units of one spec without forks: a spec that needs a fork
+// costs about 1.2, and starting the forks adds about 2.5 to a shard.
+const FORK_SPEC_COST = 1.2
 const FORK_SETUP_COST = 2.5
 
-/** How many of `count` shards the fork specs get, so that the longest shard is as short as possible. */
+/** How many of `count` shards start the forks, so that the longest shard is as short as possible. */
 export function forkShardCount(plainSpecs, forkSpecs, count) {
   if (!forkSpecs) return 0
-  if (!plainSpecs || count < 2) return Math.min(Math.max(count - 1, 1), forkSpecs)
   let best = 1
   let bestCost = Infinity
-  for (let forkShards = 1; forkShards <= Math.min(forkSpecs, count - 1); forkShards++) {
-    const forkCost = (forkSpecs * FORK_SPEC_COST) / forkShards + FORK_SETUP_COST
-    const cost = Math.max(forkCost, plainSpecs / (count - forkShards))
+  for (let forkShards = 1; forkShards <= Math.min(forkSpecs, count); forkShards++) {
+    const forkCost = Math.ceil(forkSpecs / forkShards) * FORK_SPEC_COST + FORK_SETUP_COST
+    const average = (forkSpecs * FORK_SPEC_COST + forkShards * FORK_SETUP_COST + plainSpecs) / count
+    const cost = Math.max(forkCost, average)
     if (cost < bestCost) [best, bestCost] = [forkShards, cost]
   }
   return best
@@ -98,8 +98,9 @@ function chunkByForks(forkSpecs, shardCount, specs) {
 }
 
 /**
- * Splits specs into shards for parallel CI jobs. Specs that need extra forks get their own shards, so only those
- * jobs start the forks; {@link forkShardCount} decides how many, from the measured relative costs.
+ * Splits specs into shards for parallel CI jobs. Specs that need extra forks go to the shards that start them;
+ * {@link forkShardCount} decides how many. The other specs then go one by one to the cheapest shard, so the fork
+ * shards also take plain specs and all shards end at about the same time.
  */
 export function planShards(selected, count, specs = isolatedSpecs) {
   if (!Number.isInteger(count) || count < 1) throw new Error('Shard count must be a positive integer')
@@ -107,11 +108,21 @@ export function planShards(selected, count, specs = isolatedSpecs) {
   const plain = selected.filter((spec) => !needsForks(spec))
   const forked = selected.filter(needsForks)
   const forkShards = forkShardCount(plain.length, forked.length, count)
-  const plainShards = plain.length ? Math.min(plain.length, Math.max(1, count - forkShards)) : 0
-  const plainBuckets = Array.from({ length: plainShards }, () => [])
-  plain.forEach((spec, index) => plainBuckets[index % plainShards].push(spec))
-  return [...plainBuckets, ...chunkByForks(forked, forkShards, specs)].map((bucket) => ({
-    specs: bucket,
-    chains: requiredChains(bucket, specs).map((id) => chainProfiles[id]),
+  const plainShards = Math.min(plain.length, count - forkShards)
+  const shards = [
+    ...Array.from({ length: plainShards }, () => ({ specs: [], cost: 0 })),
+    ...chunkByForks(forked, forkShards, specs).map((chunk) => ({
+      specs: chunk,
+      cost: chunk.length * FORK_SPEC_COST + FORK_SETUP_COST,
+    })),
+  ]
+  for (const spec of plain) {
+    const cheapest = shards.reduce((min, shard) => (shard.cost < min.cost ? shard : min))
+    cheapest.specs.push(spec)
+    cheapest.cost += 1
+  }
+  return shards.map((shard) => ({
+    specs: shard.specs,
+    chains: requiredChains(shard.specs, specs).map((id) => chainProfiles[id]),
   }))
 }
