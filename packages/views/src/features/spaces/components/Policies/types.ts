@@ -25,14 +25,14 @@ export type PolicyTokenInfo = {
   address: string
   symbol: string
   decimals: number
-  logoUri?: string | null
+  logoUri: string | null
 }
 
 /** How a queued edit changes an allowance the policy already holds. Unset on active rows and on a brand-new policy. */
 export type PendingAllowanceChange = 'added' | 'changed' | 'removed'
 
 export type PolicyAllowance = {
-  /** Resolved from the response's `tokenAddress` via the CGW tokens endpoint. */
+  /** From the CGW response's `tokenMetadata`; the address alone when CGW could not resolve it. */
   token: PolicyTokenInfo
   /** Base units. */
   amount: string
