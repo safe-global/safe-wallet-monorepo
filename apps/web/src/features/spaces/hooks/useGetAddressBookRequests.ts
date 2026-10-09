@@ -5,10 +5,11 @@ import {
   useAddressBookRequestsGetPendingRequestsV1Query,
   type AddressBookRequestItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
 const EMPTY_REQUESTS: AddressBookRequestItemDto[] = []
 
-/** Pending contact requests with their query state, so an empty list is distinguishable from an unread one. */
+/** Pending contact requests plus the query state, so callers can tell "no requests" from "not loaded". */
 export const useAddressBookRequestsState = (): {
   items: AddressBookRequestItemDto[]
   isLoading: boolean
@@ -22,7 +23,10 @@ export const useAddressBookRequestsState = (): {
     isLoading,
     isError,
     refetch,
-  } = useAddressBookRequestsGetPendingRequestsV1Query({ spaceId: spaceId ?? '' }, { skip: !isUserSignedIn || !spaceId })
+  } = useAddressBookRequestsGetPendingRequestsV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
+  )
 
   return { items: requests?.data ?? EMPTY_REQUESTS, isLoading, isError, refetch }
 }

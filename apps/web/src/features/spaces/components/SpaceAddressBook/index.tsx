@@ -209,6 +209,10 @@ const SpaceAddressBook = () => {
                       entries={filteredMine}
                       showAddedBy={false}
                       renderExtraAction={(entry, { isCompact }) => {
+                        // An unread Workspace book cannot tell "already shared" from "not shared yet"
+                        if (!isAddressBookSettled) {
+                          return null
+                        }
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
@@ -239,6 +243,10 @@ const SpaceAddressBook = () => {
                         }
                         // Invitees can preview the space but cannot propose contacts
                         if (isInvited) {
+                          return null
+                        }
+                        // An unread request list would show "Request to add" for an open request
+                        if (!isRequestsSettled) {
                           return null
                         }
                         return (

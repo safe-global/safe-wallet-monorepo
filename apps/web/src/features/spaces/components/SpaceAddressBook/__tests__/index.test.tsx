@@ -19,7 +19,8 @@ jest.mock('@/store')
 jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: jest.fn(() => false),
 }))
-jest.mock('@/hooks/useAllAddressBooks', () => jest.fn(() => ({})))
+const mockLocalAddressBooks = jest.fn(() => ({}) as Record<string, Record<string, string>>)
+jest.mock('@/hooks/useAllAddressBooks', () => () => mockLocalAddressBooks())
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
@@ -41,7 +42,21 @@ jest.mock('../../InviteBanner/PreviewInvite', () => {
   return PreviewInvite
 })
 jest.mock('../SpaceAddressBookTable', () => {
-  const SpaceAddressBookTable = () => <div data-testid="table" />
+  const SpaceAddressBookTable = ({
+    entries,
+    renderExtraAction,
+  }: {
+    entries: { address: string }[]
+    renderExtraAction?: (entry: { address: string }, ctx: { isCompact: boolean }) => React.ReactNode
+  }) => (
+    <div data-testid="table">
+      {entries.map((entry) => (
+        <div key={entry.address} data-testid={`row-${entry.address}`}>
+          {renderExtraAction?.(entry, { isCompact: false })}
+        </div>
+      ))}
+    </div>
+  )
   return SpaceAddressBookTable
 })
 jest.mock('../AddContact', () => {
@@ -102,6 +117,7 @@ describe('SpaceAddressBook', () => {
     mockRequests()
     ;(useAddressBookSearch as jest.Mock).mockReturnValue([])
     ;(useHasFeature as jest.Mock).mockReturnValue(true)
+    mockLocalAddressBooks.mockReturnValue({})
   })
 
   it('hides action buttons for non-admin users', () => {
@@ -203,6 +219,45 @@ describe('SpaceAddressBook', () => {
     render(<SpaceAddressBook />)
 
     expect(screen.getByRole('tab', { name: /Pending/ })).not.toHaveTextContent('(0)')
+  })
+
+  it('offers no workspace action on a local contact while the Workspace book is unread', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockLocalAddressBooks.mockReturnValue({ '1': { '0xAAA': 'Alice' } })
+    mockAddressBook({ isError: true })
+    ;(useAddressBookSearch as jest.Mock).mockImplementation((contacts) => contacts)
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByTestId('row-0xAAA')).toBeEmptyDOMElement()
+  })
+
+  it('marks a local contact as already shared once the Workspace book loads', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockLocalAddressBooks.mockReturnValue({ '1': { '0xAAA': 'Alice' } })
+    mockAddressBook({ items: [{ address: '0xaaa', name: 'Alice', chainIds: ['1'] }] as never })
+    ;(useAddressBookSearch as jest.Mock).mockImplementation((contacts) => contacts)
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByText('Already shared')).toBeInTheDocument()
+  })
+
+  it('offers no request action while the pending requests are unread', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockLocalAddressBooks.mockReturnValue({ '1': { '0xAAA': 'Alice' } })
+    mockRequests({ isError: true })
+    ;(useAddressBookSearch as jest.Mock).mockImplementation((contacts) => contacts)
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByTestId('row-0xAAA')).toBeEmptyDOMElement()
   })
 
   it('does not render an activity log tab', () => {

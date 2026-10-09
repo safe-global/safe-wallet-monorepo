@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useGetAddressBookRequests, { useAddressBookRequestsState } from '../useGetAddressBookRequests'
+import { SPACE_REFRESH_OPTIONS } from '../refreshOptions'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
@@ -37,7 +38,10 @@ describe('useGetAddressBookRequests', () => {
 
     renderHook(() => useGetAddressBookRequests())
 
-    expect(mockUseAddressBookRequestsGetPendingRequestsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseAddressBookRequestsGetPendingRequestsV1Query).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+    })
   })
 
   it('skips the query when there is no current spaceId', () => {
@@ -45,7 +49,10 @@ describe('useGetAddressBookRequests', () => {
 
     renderHook(() => useGetAddressBookRequests())
 
-    expect(mockUseAddressBookRequestsGetPendingRequestsV1Query).toHaveBeenCalledWith(expect.anything(), { skip: true })
+    expect(mockUseAddressBookRequestsGetPendingRequestsV1Query).toHaveBeenCalledWith(expect.anything(), {
+      skip: true,
+      ...SPACE_REFRESH_OPTIONS,
+    })
   })
 
   it('returns the requests when the query resolves', () => {
