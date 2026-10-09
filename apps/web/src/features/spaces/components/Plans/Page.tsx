@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Typography } from '@/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@/utils/cn'
@@ -11,6 +12,7 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
+import { PlanCompareTable } from './PlanCompareTable'
 import { RECOMMENDED_PLAN } from './planCatalog'
 import { takePlansEntry } from './planSelection'
 import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
@@ -21,9 +23,6 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
-import { PlansHero } from './PlansHero'
-import { PlansFaq } from './PlansFaq'
-import { PlanCompareTable } from './PlanCompareTable'
 import type { PlanPick, PlanTier } from './types'
 
 const PlansSkeleton = () => (
@@ -87,8 +86,10 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
 
   return (
     <AuthState spaceId={spaceId}>
-      <div className={cn('shadcn-scope mx-auto max-w-6xl', isDarkMode && 'dark')}>
-        <PlansHero />
+      <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
+        <Typography variant="h2" className="mb-6 font-bold leading-[1] tracking-tight">
+          Plans
+        </Typography>
 
         {!isSafePro ? (
           <Card
@@ -101,29 +102,28 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         ) : isPlanLoading || isOffersLoading ? (
           <PlansSkeleton />
         ) : (
-          <Plans
-            plan={plan}
-            safeAccounts={seats}
-            sponsoredTxs={sponsoredTxs}
-            tiers={tiers}
-            onManage={() => void openPortal()}
-            isManaging={isRedirecting}
-            canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
-            onSubscribe={(picked) => {
-              if (canChange) setPick(picked)
-              else if (picked.option.paymentLinkId) {
-                void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
-              }
-            }}
-            isSubscribing={isCheckingOut}
-            currentPlan={currentPlan}
-            readOnly={!isAdmin}
-          />
+          <div className="flex flex-col gap-6">
+            <Plans
+              plan={plan}
+              safeAccounts={seats}
+              sponsoredTxs={sponsoredTxs}
+              tiers={tiers}
+              onManage={() => void openPortal()}
+              isManaging={isRedirecting}
+              canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
+              onSubscribe={(picked) => {
+                if (canChange) setPick(picked)
+                else if (picked.option.paymentLinkId) {
+                  void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+                }
+              }}
+              isSubscribing={isCheckingOut}
+              currentPlan={currentPlan}
+              readOnly={!isAdmin}
+            />
+            <PlanCompareTable currentPlanName={plan?.name} />
+          </div>
         )}
-
-        <PlanCompareTable />
-
-        <PlansFaq />
 
         {pick && currentPlan && (
           <ChangePlanFlow
