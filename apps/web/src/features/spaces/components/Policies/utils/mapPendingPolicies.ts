@@ -10,7 +10,7 @@ import type {
   PolicySpender,
   SpendingLimitPolicy,
 } from '../types'
-import { toPolicyToken } from './mapActivePolicies'
+import { toPolicyToken } from './toPolicyToken'
 
 type PendingChange = PendingPolicyDto['data']['changes'][number]
 type ActiveSpendingLimit = SpendingLimitPolicy & { status: 'active' }

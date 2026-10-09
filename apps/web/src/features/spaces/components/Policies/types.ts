@@ -25,7 +25,7 @@ export type PolicyTokenInfo = {
   address: string
   symbol: string
   decimals: number
-  logoUri?: string | null
+  logoUri: string | null
 }
 
 /** How a queued edit changes an allowance the policy already holds. Unset on active rows and on a brand-new policy. */
