@@ -1,6 +1,13 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import SpaceAddressBook from '../index'
-import { useIsAdmin, useIsInvited, useAddressBookSearch, useGetSpaceAddressBook } from '@/features/spaces'
+import {
+  useIsAdmin,
+  useIsInvited,
+  useAddressBookSearch,
+  useSpaceAddressBookState,
+  useAddressBookRequestsState,
+} from '@/features/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { useHasFeature } from '@/hooks/useChains'
@@ -14,14 +21,16 @@ jest.mock('@/hooks/useDarkMode', () => ({
 }))
 jest.mock('@/hooks/useAllAddressBooks', () => jest.fn(() => ({})))
 jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ configs: [] })),
   useHasFeature: jest.fn(() => true),
 }))
 jest.mock('@/features/spaces', () => ({
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(() => false),
   useAddressBookSearch: jest.fn(() => []),
-  useGetSpaceAddressBook: jest.fn(() => []),
-  useGetAddressBookRequests: jest.fn(() => []),
+  useSpaceAddressBookState: jest.fn(),
+  useAddressBookRequestsState: jest.fn(),
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
@@ -43,6 +52,30 @@ jest.mock('../Import', () => {
   const ImportAddressBook = () => <button>Import</button>
   return ImportAddressBook
 })
+jest.mock('../PendingRequestsTable', () => {
+  const PendingRequestsTable = () => <div data-testid="pending-table" />
+  return PendingRequestsTable
+})
+
+const SETTLED = { isLoading: false, isError: false }
+
+const mockAddressBook = (state: Partial<ReturnType<typeof useSpaceAddressBookState>> = {}) => {
+  ;(useSpaceAddressBookState as jest.Mock).mockReturnValue({
+    items: [],
+    ...SETTLED,
+    refetch: jest.fn(),
+    ...state,
+  })
+}
+
+const mockRequests = (state: Partial<ReturnType<typeof useAddressBookRequestsState>> = {}) => {
+  ;(useAddressBookRequestsState as jest.Mock).mockReturnValue({
+    items: [],
+    ...SETTLED,
+    refetch: jest.fn(),
+    ...state,
+  })
+}
 const walletBuilder = () =>
   Builder.new<UserWallet>().with({
     id: faker.number.int(),
@@ -65,7 +98,8 @@ describe('SpaceAddressBook', () => {
     jest.clearAllMocks()
     ;(useAppSelector as jest.Mock).mockReturnValue(true)
     ;(useIsInvited as jest.Mock).mockReturnValue(false)
-    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
+    mockAddressBook()
+    mockRequests()
     ;(useAddressBookSearch as jest.Mock).mockReturnValue([])
     ;(useHasFeature as jest.Mock).mockReturnValue(true)
   })
@@ -96,6 +130,79 @@ describe('SpaceAddressBook', () => {
 
     expect(screen.getByText('Import')).toBeInTheDocument()
     expect(screen.getByText('Add contact')).toBeInTheDocument()
+  })
+
+  it('shows a reload state instead of an empty address book when the request fails', async () => {
+    const refetch = jest.fn()
+    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
+    mockAddressBook({ isError: true, refetch })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+
+    expect(screen.queryByText('No contacts in this Workspace yet.')).not.toBeInTheDocument()
+    expect(screen.getByTestId('address-book-error')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reload' }))
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('does not report zero workspace contacts while the request is unresolved', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
+    mockAddressBook({ isError: true })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+
+    expect(screen.getByRole('tab', { name: /Workspace contacts/ })).not.toHaveTextContent('(0)')
+  })
+
+  it('shows a loading state while the address book request is in flight', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(true)
+    mockAddressBook({ isLoading: true })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+
+    expect(screen.getByTestId('address-book-loading')).toBeInTheDocument()
+    expect(screen.queryByText('No contacts in this Workspace yet.')).not.toBeInTheDocument()
+  })
+
+  it('keeps the local contacts tab usable while the workspace request fails', async () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockAddressBook({ isError: true })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Local contacts/ }))
+
+    expect(screen.getByText("You haven't added any contacts yet.")).toBeInTheDocument()
+  })
+
+  it('shows a reload state on the pending tab when its request fails', async () => {
+    const refetch = jest.fn()
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockRequests({ isError: true, refetch })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+    await userEvent.click(screen.getByRole('tab', { name: /Pending/ }))
+
+    expect(screen.queryByTestId('pending-table')).not.toBeInTheDocument()
+    expect(screen.getByTestId('pending-requests-error')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: 'Reload' }))
+    expect(refetch).toHaveBeenCalled()
+  })
+
+  it('does not report zero pending requests while the request is unresolved', () => {
+    ;(useIsAdmin as jest.Mock).mockReturnValue(false)
+    mockRequests({ isError: true })
+    mockUserQuery(userBuilder().build())
+
+    render(<SpaceAddressBook />)
+
+    expect(screen.getByRole('tab', { name: /Pending/ })).not.toHaveTextContent('(0)')
   })
 
   it('does not render an activity log tab', () => {

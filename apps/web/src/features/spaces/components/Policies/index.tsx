@@ -7,7 +7,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
 import { ADD_POLICY_OPTIONS, type AddPolicyId } from './AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
-import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
+import { SpaceLoadError, SpaceLoading } from '../LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
 import type { PolicyLock } from './policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
@@ -221,9 +221,9 @@ const Policies = ({
       </div>
 
       {isLoading ? (
-        <PoliciesLoading />
+        <SpaceLoading subject="policies" testId="policies-loading" />
       ) : isError ? (
-        <PoliciesLoadError onReload={onRetry} />
+        <SpaceLoadError onReload={onRetry} testId="policies-error" />
       ) : (
         <>
           {locked && (
