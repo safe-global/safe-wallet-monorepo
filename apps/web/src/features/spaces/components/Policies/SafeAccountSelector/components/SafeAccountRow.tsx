@@ -1,18 +1,21 @@
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
-import { SelectItem } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { INELIGIBILITY_TEXT } from '../constants'
-import BalanceDisplay from '../../../SafeSelectorDropdown/components/BalanceDisplay'
-import RowEndColumn from '../../../SafeSelectorDropdown/components/RowEndColumn'
+import { SelectItem } from '@safe-global/views/components/ui/select'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { INELIGIBILITY_TEXT } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
-import type { SafeItemDataChain } from '../../../SafeSelectorDropdown/types'
+import type { SafeItemDataChain } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 import SafeIdentity from './SafeIdentity'
-import type { SafeAccountIneligibility, SafeAccountOption } from '../types'
+import type {
+  SafeAccountIneligibility,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const ROW_CLASS = [
   'rounded-lg px-3 py-2.5',

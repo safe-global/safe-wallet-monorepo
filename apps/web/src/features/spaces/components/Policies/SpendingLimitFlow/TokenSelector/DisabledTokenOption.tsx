@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { ComboboxItem } from '@/components/ui/combobox'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { ComboboxItem } from '@safe-global/views/components/ui/combobox'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import type { TokenOption } from '../utils/tokenOptions'
 import TokenOptionRow from './TokenOptionRow'
 

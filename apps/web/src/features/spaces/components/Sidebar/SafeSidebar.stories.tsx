@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
-import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@safe-global/views/components/ui/sidebar'
 import { withMockProvider } from '@/storybook/preview'
 import { createChainData } from '@/stories/mocks'
 import { EnhancedSidebar } from './index'
@@ -11,7 +11,12 @@ import { chainsAdapter, chainsInitialState } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY, DEFAULT_CHAIN_ID } from '@/config/constants'
 import chains from '@safe-global/utils/config/chains'
 import type { RootState } from '@/store'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup, SidebarItemConfig, SpaceItem } from './types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+  SidebarItemConfig,
+  SpaceItem,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { safeDefiGroup, safeMainNavigation } from './config'
 
 const defaultChainShortName =

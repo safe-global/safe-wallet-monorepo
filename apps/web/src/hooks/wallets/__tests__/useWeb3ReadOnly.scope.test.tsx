@@ -2,7 +2,7 @@ import { renderHook, act } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import type { JsonRpcProvider } from 'ethers'
 import { setWeb3ReadOnly, useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const singleton = { id: 'singleton' } as unknown as JsonRpcProvider
 const scoped = { id: 'scoped' } as unknown as JsonRpcProvider

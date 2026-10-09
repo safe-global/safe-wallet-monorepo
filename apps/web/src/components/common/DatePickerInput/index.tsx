@@ -15,9 +15,9 @@ import {
 } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
 
-import { Calendar } from '@/components/ui/calendar'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Calendar } from '@safe-global/views/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
+import { Field, FieldError, FieldLabel } from '@safe-global/views/components/ui/field'
 import {
   clearRange,
   DATE_DIGITS,
@@ -28,8 +28,13 @@ import {
   textToSlots,
   writeDigits,
   type SlotState,
-} from './slots'
-import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+} from '@safe-global/views/components/common/DatePickerInput/slots'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 
 const DATE_FORMAT = 'dd/MM/yyyy'
 const INVALID_DATE_ERROR = 'Invalid date'

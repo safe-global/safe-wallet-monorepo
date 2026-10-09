@@ -4,7 +4,12 @@ import type {
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { Policy, PolicyAllowance, ProposerPolicy, SpendingLimitPolicy } from '../types'
+import type {
+  Policy,
+  PolicyAllowance,
+  ProposerPolicy,
+  SpendingLimitPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import { toPolicyToken } from './toPolicyToken'
 
 const toAllowance = (allowance: SpendingLimitAllowanceDto): PolicyAllowance => {

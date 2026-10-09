@@ -1,0 +1,16 @@
+{
+  "extends": "../../config/tsconfig/confs/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "types/*.d.ts"],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/**/*.stories.tsx",
+    "src/**/__tests__/**",
+    "src/**/__mocks__/**"
+  ]
+}

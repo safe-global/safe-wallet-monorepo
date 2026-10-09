@@ -1,9 +1,9 @@
-import { Sticky } from '@/components/common/Sticky'
+import { Sticky } from '@safe-global/views/components/common/Sticky'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
 import { EyeOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import css from './styles.module.css'
 

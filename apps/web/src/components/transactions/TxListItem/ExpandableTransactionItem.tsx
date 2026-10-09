@@ -1,14 +1,21 @@
 import type { MultisigTransaction, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import TxListAccordionItem, { TX_LIST_ITEM_VALUE } from './TxListAccordionItem'
-import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import TxListAccordionItem, {
+  TX_LIST_ITEM_VALUE,
+} from '@safe-global/views/components/transactions/TxListItem/TxListAccordionItem'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import TxSummary from '@/components/transactions/TxSummary'
 import TxDetails from '@/components/transactions/TxDetails'
 import CreateTxInfo from '@/components/transactions/SafeCreationTx'
 import { isCreationTxInfo } from '@/utils/transaction-guards'
 import { useContext, useState } from 'react'
-import { BatchExecuteHoverContext } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
-import css from './styles.module.css'
+import { BatchExecuteHoverContext } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
+import css from '@safe-global/views/components/transactions/TxListItem/styles.module.css'
 import classNames from 'classnames'
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 

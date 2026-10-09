@@ -15,8 +15,8 @@ import {
 import useAddressBook from './useAddressBook'
 import type { AddressBook } from '@/store/addressBookSlice'
 import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
-import { ICON_STROKE } from '@/components/common/iconStroke'
-import { cn } from '@/utils/cn'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
+import { cn } from '@safe-global/views/utils/cn'
 import {
   type LucideIcon,
   ArrowDownLeft,

@@ -1,6 +1,6 @@
 import { TriangleAlert } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import DialogActions from '@/components/common/DialogActions'
 import EthHashInfo from '@/components/common/EthHashInfo'
 

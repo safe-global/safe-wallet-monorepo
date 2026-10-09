@@ -1,11 +1,11 @@
 import type { ReactElement } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 export type RemoveProposerModalProps = {
   open: boolean

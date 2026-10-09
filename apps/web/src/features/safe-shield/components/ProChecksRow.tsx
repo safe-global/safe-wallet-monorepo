@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { trackPlanSelectionStarted, useSafeProAccess } from '@/features/spaces'
 import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'

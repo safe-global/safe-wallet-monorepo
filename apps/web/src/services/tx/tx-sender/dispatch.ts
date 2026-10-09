@@ -46,7 +46,7 @@ import {
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { concat, dataLength } from 'ethers'
 import { encodeNestedTxPayload, supportsNestedTxEnvelope, type NestedTxEnvelope } from '../nestedTxEnvelope'
 

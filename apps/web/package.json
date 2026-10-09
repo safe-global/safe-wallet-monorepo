@@ -79,6 +79,7 @@
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
     "@safe-global/utils": "workspace:^",
+    "@safe-global/views": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",
     "@trezor/connect-web": "9.7.2",
     "@walletconnect/core": "^2.21.10",

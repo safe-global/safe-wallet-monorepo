@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'

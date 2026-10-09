@@ -23,6 +23,7 @@
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/views/*": ["../../packages/views/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
       "@safe-global/safe-apps-sdk/dist/types/types/permissions": [
         "../../node_modules/@safe-global/safe-apps-sdk/dist/types/types/permissions"

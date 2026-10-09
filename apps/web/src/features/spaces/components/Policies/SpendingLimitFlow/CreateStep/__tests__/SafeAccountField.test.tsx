@@ -1,9 +1,15 @@
 import { FormProvider, useForm } from 'react-hook-form'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import { getNestedSafesNoticeText, SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
+import {
+  getNestedSafesNoticeText,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
-import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../../types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import {
+  createDefaultFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import SafeAccountField from '../SafeAccountField'
 
 jest.mock('@/components/common/ChainIndicator', () => {

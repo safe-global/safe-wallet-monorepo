@@ -1,5 +1,5 @@
 import type { NextPage } from 'next'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { TERMS_URL } from '@safe-global/utils/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import {
   type SafeItem,
   type SafeItems,
@@ -11,9 +11,9 @@ import {
   useAllOwnedSafes,
 } from '@/hooks/safes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
-import { getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import { getSafeId } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import { useSimilarityClusters } from '@/features/address-poisoning'
 import {
@@ -33,7 +33,7 @@ import {
   touchNames,
   withWorkspaceNames,
 } from '../NameAccounts'
-import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
   useSpaceSafesDeleteV1Mutation,
@@ -47,10 +47,10 @@ import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import { ArrowLeft, Info, Plus, Settings2, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { SearchInput } from '@/components/ui/search-input'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
@@ -62,14 +62,14 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { showNotification } from '@/store/notificationsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import { cn } from '@/utils/cn'
-import SelectedCounter, { safeLimitTooltip } from '../SelectedCounter'
-import SafeLimitError from '../SelectedCounter/SafeLimitError'
+import { cn } from '@safe-global/views/utils/cn'
+import SelectedCounter, { safeLimitTooltip } from '@safe-global/views/features/spaces/components/SelectedCounter'
+import SafeLimitError from '@safe-global/views/features/spaces/components/SelectedCounter/SafeLimitError'
 import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
 import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { Link } from '@/components/ui/link'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../SelectSafesOnboarding/constants'
+import { Link } from '@safe-global/views/components/ui/link'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'

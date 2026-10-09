@@ -8,7 +8,7 @@ import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_
 import { Builder } from '@/tests/Builder'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
