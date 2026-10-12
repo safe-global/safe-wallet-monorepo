@@ -70,3 +70,7 @@ export const inProgressWithDeadline = (): SafenetCheckSnapshot =>
     deadlineBlock: '48600024',
     events: [requestCreatedEvent({ blockNumber: 48_599_976, deadlineBlock: '48600024' })],
   })
+
+/** In progress with aimedAtMs set (no head/deadline blocks). */
+export const inProgressElapsed = (): SafenetCheckSnapshot =>
+  exampleSnapshot(CheckStatus.IN_PROGRESS, { aimedAtMs: Date.now() - 3 * 60_000 - 5_000 })

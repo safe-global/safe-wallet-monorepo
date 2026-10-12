@@ -1,5 +1,6 @@
-import { render, screen } from '@/tests/test-utils'
+import { act, render, screen } from '@/tests/test-utils'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
+import { panelSettledDelay } from '../../hooks/useDelayedLoading'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { faker } from '@faker-js/faker'
@@ -12,9 +13,27 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
+import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
+import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
+import type { FlowSafenetCheck } from '@/features/safenet-checks/useFlowSafenetCheck'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
+
+const flowCheck = (publicStatus: PublicCheckStatus, isLoading = false): FlowSafenetCheck => ({
+  safeTxHash: faker.string.hexadecimal({ length: 64, casing: 'lower' }),
+  submittedAt: 1,
+  isTxDetailsLoading: false,
+  check: buildCheckView({ status: publicStatus, publicStatus, isLoading }),
+})
+const NO_CHECK: FlowSafenetCheck = { ...flowCheck(CheckStatus.UNAVAILABLE), safeTxHash: undefined }
+
+let mockFlowCheck = NO_CHECK
+jest.mock('@/features/safenet-checks', () => ({
+  ...jest.requireActual('@/features/safenet-checks'),
+  useIsSafenetChecksEnabled: () => true,
+}))
+jest.mock('@/features/safenet-checks/useFlowSafenetCheck', () => ({ useFlowSafenetCheck: () => mockFlowCheck }))
 
 // Default empty AsyncResult values
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
@@ -33,6 +52,7 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockFlowCheck = NO_CHECK
 
     // Mock useCheckSimulation to return no simulation error by default
     jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
@@ -110,7 +130,7 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText('3 of 3 checks passed')).toBeInTheDocument()
     })
 
-    it('counts the locked Pro checks as not passed without Safe Pro', () => {
+    it('counts the locked Pro checks, Safenet included, as not passed without Safe Pro', () => {
       render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
@@ -121,7 +141,36 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(screen.getByText('1 of 2 checks passed')).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 checks passed')).toBeInTheDocument()
+    })
+
+    it('counts a Safenet verdict as a check', () => {
+      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByText('4 of 4 checks passed')).toBeInTheDocument()
+    })
+
+    it('shows a Safenet risk instead of "all checks passed"', () => {
+      mockFlowCheck = flowCheck(CheckStatus.MALICIOUS)
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-shield-status')).toHaveTextContent('Risk detected')
+      expect(screen.queryByText(/checks passed/i)).not.toBeInTheDocument()
     })
 
     it('should show "Risk detected" when there are critical issues', () => {
@@ -447,6 +496,184 @@ describe('SafeShieldDisplay', () => {
 
       expect(screen.queryByText('Authentication required')).not.toBeInTheDocument()
       expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
+    })
+  })
+
+  describe('Safe Shield badge', () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    const settle = () => act(() => jest.advanceTimersByTime(panelSettledDelay))
+    it('stays gray while any check is still running', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={[undefined, undefined, true]}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('turns full color once every check has finished', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+    })
+
+    it('waits for a running Safenet check before turning full color', () => {
+      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('waits for the first Safenet read before turning full color', () => {
+      mockFlowCheck = flowCheck(CheckStatus.UNAVAILABLE, true)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('ignores Safenet for a Safe without Pro features', () => {
+      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+          hasProFeatures={false}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+    })
+
+    it('waits for a running Safenet check when Safe Pro is off', () => {
+      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+          isSafePro={false}
+          hasProFeatures={false}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+    })
+
+    it('turns full color without the shimmer until Safenet confirms', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'false')
+    })
+
+    it('shimmers once Safenet finds no issues', () => {
+      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      // Stays benign through settle(), since the settled re-render reads it again.
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'true')
+    })
+
+    it.each([
+      ['critical', () => mockCriticalRecipient],
+      ['warning', () => mockWarningRecipient],
+    ])('never shimmers when the overall result is %s, even if Safenet finds no issues', (_name, recipient) => {
+      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={recipient()}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-shimmer', 'false')
+    })
+
+    it('waits for the panel to finish expanding before turning full color', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'true')
+    })
+
+    it('stays gray before any check has produced a result', () => {
+      const { container } = render(
+        <SafeShieldDisplay
+          recipient={[undefined, undefined, false]}
+          contract={[undefined, undefined, false]}
+          threat={emptyThreat}
+          deadlock={[undefined, undefined, false]}
+        />,
+      )
+
+      settle()
+      expect(container.querySelector('[data-done]')).toHaveAttribute('data-done', 'false')
     })
   })
 })
