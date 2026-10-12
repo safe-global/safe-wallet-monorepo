@@ -8,7 +8,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
-import { isSmartContractWallet } from '@/utils/wallets'
+import * as walletUtils from '@/utils/wallets'
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -21,11 +21,6 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
   default: jest.fn(),
   useSigner: jest.fn(() => undefined),
-}))
-
-jest.mock('@/utils/wallets', () => ({
-  ...jest.requireActual('@/utils/wallets'),
-  isSmartContractWallet: jest.fn(),
 }))
 
 jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
@@ -171,7 +166,7 @@ describe('TxFlowProvider', () => {
       })
 
     beforeEach(() => {
-      jest.mocked(isSmartContractWallet).mockResolvedValue(false)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
       jest.mocked(useSigner).mockReturnValue({
         address: faker.finance.ethereumAddress(),
         chainId: '1',
@@ -229,11 +224,11 @@ describe('TxFlowProvider', () => {
 
     it('keeps the implicit executor approval for a smart-contract signer on an m/n Safe', async () => {
       mockThreshold(3)
-      jest.mocked(isSmartContractWallet).mockResolvedValue(true)
+      const isSmartContractWalletSpy = jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
       const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(2) })
 
       await act(async () => {})
-      expect(isSmartContractWallet).toHaveBeenCalled()
+      expect(isSmartContractWalletSpy).toHaveBeenCalled()
       expect(result.current.willSignBeforeExecute).toBe(false)
     })
   })
