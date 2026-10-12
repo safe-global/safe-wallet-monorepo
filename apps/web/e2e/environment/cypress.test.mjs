@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { cypressEnvironment, isRemoteBackendHost, planShards, selectCypressSpecs } from './cypress.mjs'
+import {
+  cypressEnvironment,
+  exposedValues,
+  forkShardCount,
+  isRemoteBackendHost,
+  planShards,
+  selectCypressSpecs,
+} from './cypress.mjs'
 import { isolatedSpecs } from './specs.mjs'
 import { createOwners } from './scenarios/safe.mjs'
 import { Wallet, verifyMessage } from 'ethers'
@@ -89,6 +96,21 @@ test('preserves path prefixes and excludes remote credentials in isolated browse
   assert.equal(result.CYPRESS_WALLET_CREDENTIALS, undefined)
 })
 
+test('exposes only the public values to the browser', () => {
+  const isolated = exposedValues(cypressEnvironment(local))
+  assert.deepEqual(Object.keys(isolated).sort(), [
+    'SAFE_CGW_BASE_URL',
+    'SAFE_E2E_ISOLATED',
+    'SAFE_TXS_BASE_URL',
+    'TX_BUILDER_URL',
+  ])
+  const staging = exposedValues(
+    cypressEnvironment({ CYPRESS_WALLET_CREDENTIALS: 'secret', INFURA_API_KEY: 'secret', BEAMER_DATA_E2E: '{}' }),
+  )
+  assert.deepEqual(staging, { BEAMER_DATA_E2E: '{}' })
+  assert.deepEqual(exposedValues({}), {})
+})
+
 test('points isolated Safe App specs at the locally served Transaction Builder', () => {
   assert.equal(cypressEnvironment(local).TX_BUILDER_URL, 'http://localhost:4000')
   assert.equal(cypressEnvironment({}).TX_BUILDER_URL, undefined)
@@ -151,4 +173,28 @@ test('plans shards that keep specs needing extra forks apart and cover every spe
   }
   assert.deepEqual(planShards([assets], 4), [{ specs: [assets], chains: [] }])
   assert.throws(() => planShards(specs, 0), /positive integer/)
+})
+
+test('gives the slower fork specs enough shards that they do not hold up the run', () => {
+  // 97 plain and 17 fork specs, as in CI: one fork shard would take 28 spec-units against 20 on the others.
+  assert.equal(forkShardCount(97, 17, 6), 2)
+  assert.equal(forkShardCount(97, 17, 8), 2)
+  assert.equal(forkShardCount(97, 0, 6), 0)
+  assert.equal(forkShardCount(0, 17, 6), 5)
+  assert.equal(forkShardCount(3, 1, 1), 1)
+})
+
+test('keeps fork specs that need the same forks in the same shard', () => {
+  const registry = {
+    'cypress/e2e/test/plain.cy.js': {},
+    'cypress/e2e/test/mainnet-a.cy.js': { chains: [1] },
+    'cypress/e2e/test/polygon-a.cy.js': { chains: [137] },
+    'cypress/e2e/test/mainnet-b.cy.js': { chains: [1] },
+    'cypress/e2e/test/polygon-b.cy.js': { chains: [137] },
+  }
+  const forkShards = planShards(Object.keys(registry), 3, registry).filter(({ chains }) => chains.length)
+  assert.deepEqual(
+    forkShards.map(({ chains }) => chains),
+    [['mainnet'], ['polygon']],
+  )
 })

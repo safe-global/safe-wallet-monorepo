@@ -4,13 +4,16 @@ import * as createtx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue2 = 0.0001
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+let signer2
+before(() => {
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+})
 
 describe('Mass payouts happy path tests', () => {
   before(async () => {

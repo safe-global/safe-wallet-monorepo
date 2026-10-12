@@ -219,17 +219,25 @@ export function verifyNextBtnIsEnabled() {
   cy.get('button').contains('Next').should('not.be.disabled')
 }
 
+const CHOOSER_ATTEMPTS = 3
+
+// A click on the "Add accounts" chooser that comes right after the page renders can be lost, so click again.
+function openAddAccountsChooser(attemptsLeft = CHOOSER_ATTEMPTS) {
+  cy.get(addAccountsChooserBtn).filter(':visible').first().click()
+  main
+    .pollUntil(() => Cypress.$(`${createNewAccountOption}:visible`).length > 0, 2000)
+    .then((opened) => {
+      if (opened) return
+      if (attemptsLeft <= 1) throw new Error('The "Add accounts" chooser did not open')
+      openAddAccountsChooser(attemptsLeft - 1)
+    })
+}
+
 export function clickOnCreateNewSafeBtn() {
   // Open the "Add accounts" chooser, then pick "Create new" to enter the create-safe flow.
-  cy.get(addAccountsChooserBtn).should('be.visible').click()
-  cy.wait(1000)
-  cy.get('body').then(($body) => {
-    if (!$body.find(`${createNewAccountOption}:visible`).length) {
-      cy.get(addAccountsChooserBtn).filter(':visible').first().click()
-    }
-  })
+  openAddAccountsChooser()
   cy.get(createNewAccountOption).should('be.visible').click()
-  cy.wait(1000)
+  cy.location('pathname').should('include', '/new-safe/create')
 }
 
 export function clickOnContinueWithWalletBtn() {
@@ -240,7 +248,7 @@ export function verifyConnectWalletBtnDisplayed() {
   return cy.get(connectWalletBtn).should('be.visible')
 }
 export function typeWalletName(name) {
-  cy.get(main.nameInput).type(name).should('have.value', name)
+  cy.get(main.nameInput).type(name, main.nameTypingOptions).should('have.value', name)
 }
 
 export function clearWalletName() {
@@ -262,6 +270,20 @@ export function selectMultiNetwork(index, network) {
   clickOnMultiNetworkInput(index)
   enterNetwork(index, network)
   clickOnNetwrokCheckbox()
+}
+
+/**
+ * Selects the network unless it is selected already: the form preselects the wallet's chain only when the
+ * wallet is connected before the form mounts, so the starting selection depends on timing.
+ */
+export function ensureMultiNetworkSelected(index, network) {
+  clickOnMultiNetworkInput(index)
+  enterNetwork(index, network)
+  cy.get(networkCheckbox)
+    .eq(0)
+    .then(($checkbox) => {
+      if ($checkbox.attr('aria-checked') !== 'true') clickOnNetwrokCheckbox()
+    })
 }
 
 export function clickOnNetwrokCheckbox() {
@@ -440,7 +462,9 @@ export function connectWalletAndCreateSafe(signer) {
   clickOnCreateNewSafeBtn()
 }
 
+/** Opens the create-Safe form with the wallet connected first, so the form preselects the wallet's network. */
 export function startCreateSafeFlow(signer, chain = 'sep') {
-  visitWelcomeAccountPage(chain)
-  connectWalletAndCreateSafe(signer)
+  wallet.connectSignerViaStorage(signer, `${constants.welcomeAccountUrl}?chain=${chain}`)
+  owner.waitForConnectionStatus()
+  clickOnCreateNewSafeBtn()
 }
