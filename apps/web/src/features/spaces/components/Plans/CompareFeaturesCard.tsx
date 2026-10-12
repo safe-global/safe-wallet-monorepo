@@ -22,10 +22,6 @@ import PeekCollapsible from './PeekCollapsible'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
 
-/** Collapsed, only the coming-soon rows show in full; the next row fades out under the button. */
-const VISIBLE_FEATURES = COMPARE_SECTIONS[0].rows.length
-const PEEK_FEATURES = 1
-
 const CompareValue = ({ value }: { value: CompareValue }) => {
   if (value === true) {
     return (
@@ -132,13 +128,6 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
   </TableHeader>
 )
 
-/** Where each section's rows start in the whole table, so the collapsed preview counts rows across sections. */
-const SECTION_FIRST_ROWS = COMPARE_SECTIONS.map((_, index) =>
-  COMPARE_SECTIONS.slice(0, index).reduce((count, section) => count + section.rows.length, 0),
-)
-const TOTAL_ROWS = COMPARE_SECTIONS.reduce((count, section) => count + section.rows.length, 0)
-const LAST_PEEK_ROW = Math.min(VISIBLE_FEATURES + PEEK_FEATURES, TOTAL_ROWS) - 1
-
 const CompareSection = ({
   section,
   index,
@@ -152,8 +141,9 @@ const CompareSection = ({
   onOpenAddOn: () => void
   lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
-  const firstRow = SECTION_FIRST_ROWS[index]
-  const isFoldable = firstRow > LAST_PEEK_ROW
+  // Collapsed, the first section shows in full, the second peeks out under the fade and the rest is hidden.
+  const isPeek = index === 1
+  const isFoldable = index > 1
   const isFolded = isFoldable && !isExpanded
   return (
     <TableBody
@@ -187,9 +177,9 @@ const CompareSection = ({
       {section.rows.map((row, rowIndex) => (
         <CompareRow
           key={row.feature}
-          ref={firstRow + rowIndex === LAST_PEEK_ROW ? lastPeekRowRef : undefined}
+          ref={isPeek && rowIndex === 0 ? lastPeekRowRef : undefined}
           row={row}
-          isFolded={!isFoldable && !isExpanded && firstRow + rowIndex >= VISIBLE_FEATURES}
+          isFolded={isPeek && !isExpanded}
           onOpenAddOn={onOpenAddOn}
         />
       ))}
