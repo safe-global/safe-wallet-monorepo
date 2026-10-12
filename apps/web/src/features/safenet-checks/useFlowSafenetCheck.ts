@@ -8,14 +8,12 @@ import { useSafenetCheck, type SafenetCheckView } from '@safe-global/utils/featu
 export type FlowSafenetCheck = {
   safeTxHash: string | undefined
   submittedAt: number | undefined
-  /** The transaction details, which carry `submittedAt`, are still loading. */
-  isTxDetailsLoading: boolean
   check: SafenetCheckView
 }
 
 /** The open flow's check; reads once its submission time is known, and all callers share one chain read. */
 export const useFlowSafenetCheck = (enabled = true): FlowSafenetCheck => {
-  const { txId, txDetails, txDetailsLoading } = useContext(TxFlowContext)
+  const { txId, txDetails } = useContext(TxFlowContext)
   const safeTxHash = txId ? getSafeTxHashFromTxId(txId) : undefined
   const submittedAt =
     txDetails && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
@@ -28,5 +26,5 @@ export const useFlowSafenetCheck = (enabled = true): FlowSafenetCheck => {
     safeAddress,
   })
 
-  return { safeTxHash, submittedAt, isTxDetailsLoading: Boolean(txDetailsLoading), check }
+  return { safeTxHash, submittedAt, check }
 }

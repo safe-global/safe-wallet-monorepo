@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import { useMemo, type ReactElement } from 'react'
 import compact from 'lodash/compact'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
@@ -12,7 +12,6 @@ import type {
   DeadlockAnalysisResults,
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
-import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldHeader } from './SafeShieldHeader'
 import { SafeShieldContent } from './SafeShieldContent'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -24,28 +23,15 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
-import css from './SafeShieldBadge.module.css'
-import { panelSettledDelay } from '../hooks/useDelayedLoading'
 import { useIsSafenetChecksEnabled, useSafenetShieldState } from '@/features/safenet-checks'
 
-const shieldLogoTransition =
-  'cursor-pointer [&_.shield-bg]:transition-[fill] [&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill] duration-500'
-
 const shieldLogoOnHover = [
-  shieldLogoTransition,
+  'cursor-pointer',
+  '[&_.shield-img]:transition-[fill] [&_.shield-lines]:transition-[fill] [&_.shield-text]:transition-[fill]',
   'hover:[&_.shield-bg]:fill-[var(--color-background-secondary)]',
   'hover:[&_.shield-img]:fill-[var(--color-static-text-brand)]',
   'hover:[&_.shield-lines]:fill-[var(--color-static-main)]',
   'hover:[&_.shield-text]:fill-[var(--color-text-primary)]',
-].join(' ')
-
-/** The hover colors, held once every check has finished. */
-const shieldLogoDone = [
-  shieldLogoTransition,
-  '[&_.shield-bg]:fill-[var(--color-background-secondary)]',
-  '[&_.shield-img]:fill-[var(--color-static-text-brand)]',
-  '[&_.shield-lines]:fill-[var(--color-static-main)]',
-  '[&_.shield-text]:fill-[var(--color-text-primary)]',
 ].join(' ')
 
 export const SafeShieldDisplay = ({
@@ -144,26 +130,6 @@ export const SafeShieldDisplay = ({
 
   const SafeShieldLogo = isDarkMode ? SafeShieldLogoFullDark : SafeShieldLogoFull
 
-  const isAnalysing = [recipient, contract, threat, deadlock].some((result) => result?.[2])
-  const hasResults = [recipientResults, contractResults, threatResults, deadlockResults].some(Boolean)
-  const isDone = !isAnalysing && hasResults && !safenet.isRunning
-
-  // The badge waits for the panel to finish expanding, so its colour change lands after the last card.
-  const [isSettled, setIsSettled] = useState(false)
-  useEffect(() => {
-    if (!isDone) {
-      setIsSettled(false)
-      return
-    }
-    const timer = setTimeout(() => setIsSettled(true), panelSettledDelay)
-    return () => clearTimeout(timer)
-  }, [isDone])
-
-  // The shimmer is Safenet's sign-off, so it plays only when Safenet and every other check came back clean.
-  const isAllClear =
-    !overallStatus || overallStatus.severity === Severity.OK || overallStatus.severity === Severity.INFO
-  const isConfirmed = isSettled && safenet.isBenign && isAllClear
-
   return (
     <div className="flex flex-col gap-2" data-testid="safe-shield-widget">
       {/* Radius pairs with the inner header/list: 16px outer − 4px inset (px-1) = 12px inner, so the
@@ -198,20 +164,7 @@ export const SafeShieldDisplay = ({
 
       <div className="flex flex-row items-center self-end">
         <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
-          {/* Remounts on each change, so the shimmer plays once when Safenet confirms. */}
-          <span
-            key={isConfirmed ? 'confirmed' : isSettled ? 'done' : 'running'}
-            className={css.badge}
-            data-done={isSettled}
-            data-shimmer={isConfirmed}
-          >
-            <SafeShieldLogo
-              data-testid="safe-shield-logo"
-              width={104}
-              height={24}
-              className={isSettled ? shieldLogoDone : shieldLogoOnHover}
-            />
-          </span>
+          <SafeShieldLogo data-testid="safe-shield-logo" width={78} height={18} className={shieldLogoOnHover} />
         </ExternalLink>
       </div>
     </div>
