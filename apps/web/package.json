@@ -5,6 +5,8 @@
   "version": "1.102.0",
   "type": "module",
   "scripts": {
+    "e2e:env": "node e2e/environment/run.mjs",
+    "e2e:env:test": "node --test e2e/environment/*.test.mjs",
     "pw:test": "npx playwright test --config=e2e/playwright.config.ts --project=chromium",
     "pw:test:smoke": "npx playwright test --config=e2e/playwright.config.ts --grep @smoke",
     "pw:test:api": "npx playwright test --config=e2e/playwright.config.ts --grep @api",

@@ -9,6 +9,7 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as modules from '../pages/modules.page.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import recoveryData from '../../fixtures/recovery.js'
 
 let recoverySafes,
   staticSafes = []
@@ -121,7 +122,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   })
 
   it('Verify initial and edited recovery settings', () => {
-    const address = '0x9445...F1BA'
+    const address = recoveryData.recoverer
     const settings = [address, recovery.recoveryOptions.fiveSixDays, recovery.recoveryOptions.never]
     const confirmationData = [recovery.recoveryOptions.fiveMin, recovery.recoveryOptions.oneHr]
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)

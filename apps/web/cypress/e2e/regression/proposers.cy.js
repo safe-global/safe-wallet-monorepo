@@ -7,19 +7,16 @@ import * as navigation from '../pages/navigation.page.js'
 import * as ls from '../../support/localstorage_data.js'
 import * as proposer from '../pages/proposers.pages.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import proposerData from '../../fixtures/proposers.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
-const proposerAddress = 'sep:0xC16D...6fED'
-const creatorAddress = 'sep:0xC16D...6fED'
 const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
 const proposerNameAD = 'AD Proposer1'
 const proposerNameAD2 = 'AD Proposer2'
 const migratedProposerName = 'Name held by the Transaction Service'
-const proposedTx =
-  '&id=multisig_0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35_0xd70f2f8b31ae98a7e3064f6cdb437e71d3df083a0709fb82c915fa82767a19eb'
 
 describe('Proposers tests', () => {
   before(async () => {
@@ -56,14 +53,14 @@ describe('Proposers tests', () => {
   })
 
   it('Verify a proposer Creator is shown in the table', () => {
-    proposer.checkCreatorAddress([creatorAddress])
+    proposer.checkCreatorAddress([proposerData.creator])
   })
 
   it('Verify non-creators of a proposers cannot delete it', () => {
     navigation.clickOnWalletExpandMoreIcon()
     navigation.clickOnDisconnectBtn()
     wallet.connectSigner(signer2)
-    proposer.verifyDeleteProposerBtnIsDisabled(proposerAddress)
+    proposer.verifyDeleteProposerBtnIsDisabled(proposerData.creator)
   })
 
   it('Verify a proposer name still held by the Transaction Service is migrated into the address book', () => {
@@ -97,15 +94,19 @@ describe('Proposers tests', () => {
   })
 
   it('Verify a tx with the "proposal" status shows a message about being created by a proposer', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposedTx)
+    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposerData.proposedTx)
     proposer.verifyPropsalStatusExists()
     proposer.verifyProposedTxMsgVisible()
   })
 
   it('Verify a tx with the "proposal" status shows the details of a proposer', () => {
-    wallet.connectSignerViaStorage(signer, constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposedTx, {
-      extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
-    })
+    wallet.connectSignerViaStorage(
+      signer,
+      constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + proposerData.proposedTx,
+      {
+        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.proposers },
+      },
+    )
 
     proposer.verifyProposerInTxActionList(proposerNameAD2)
   })

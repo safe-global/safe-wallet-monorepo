@@ -6,6 +6,7 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as data from '../../fixtures/txhistory_data_data.json'
+import swapFixtures from '../../fixtures/swaps.js'
 
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -24,8 +25,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify partially filled sell order', () => {
-    const tx =
-      'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551&id=multisig_0x8f4A19C85b39032A37f7a6dCc65234f966F72551_0x2fdf5e5d94306de5f7285fd74ca014067b090338b3ff15e3f66d6c02ef81e4a4'
+    const tx = swapFixtures.twapPartiallyFilled
     cy.visit(constants.transactionUrl + tx)
     const weth = swaps.createRegex(swapsHistory.forAtLeastFullWETH, 'WETH')
     const eq = swaps.createRegex(swapsHistory.WETHeqDAI, 'DAI')
@@ -54,8 +54,7 @@ describe('Twaps history tests', { defaultCommandTimeout: 30000 }, () => {
   })
 
   it('Verify fully filled sell order', () => {
-    const tx =
-      'sep:0x8f4A19C85b39032A37f7a6dCc65234f966F72551&id=multisig_0x8f4A19C85b39032A37f7a6dCc65234f966F72551_0xc8a9399afbba45e82a0645770db38386cbe10bec77dd8b6395f7d24e19a45c9a'
+    const tx = swapFixtures.twapFilled
     cy.visit(constants.transactionUrl + tx)
     const weth = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
     const eq = swaps.createRegex(swapsHistory.DAIeqWETH, 'WETH')

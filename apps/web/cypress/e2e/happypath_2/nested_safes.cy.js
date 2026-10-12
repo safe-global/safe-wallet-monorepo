@@ -9,12 +9,11 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createTx from '../pages/create_tx.pages.js'
 import * as owner from '../pages/owners.pages'
+import nested from '../../fixtures/nested.js'
 
 let staticSafes = []
 const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
 const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-
-const nestedSafe1Short = '0x22e5...Cf9d'
 
 describe('Nested safes happy path tests', () => {
   before(async () => {
@@ -51,6 +50,6 @@ describe('Nested safes happy path tests', () => {
     ])
     safeNav.clickOnNestedSafesBtn()
     sideBar.checkSafesCountInPopverList(1)
-    sideBar.clickOnSafeInPopover(nestedSafe1Short)
+    sideBar.clickOnSafeInPopover(nested.safe1Short)
   })
 })

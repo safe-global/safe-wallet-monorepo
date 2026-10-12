@@ -351,6 +351,8 @@ export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {
 }
 
 export function clickViewAllAccounts() {
+  // The loading placeholder shares the widget testid and its View all button is replaced once the feature loads.
+  cy.get(spaceDashboardAccountsWidget).find(spaceDashboardAccountsRowSelector).should('exist')
   cy.get(spaceDashboardAccountsWidget).find(widgetViewAllBtn).should('be.visible').click()
 }
 
