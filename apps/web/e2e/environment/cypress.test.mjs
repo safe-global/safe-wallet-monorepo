@@ -160,27 +160,39 @@ test('retains legacy configuration without forwarding archive provider credentia
   )
 })
 
-test('plans shards that keep specs needing extra forks apart and cover every spec once', () => {
+test('plans shards that cover every spec once and start forks only where a spec needs them', () => {
   const specs = Object.keys(isolatedSpecs)
   const needsForks = (spec) => Boolean(isolatedSpecs[spec].chains)
   const shards = planShards(specs, 6)
-  assert.ok(shards.length <= 7)
+  assert.equal(shards.length, 6)
   assert.deepEqual(shards.flatMap(({ specs }) => specs).sort(), [...specs].sort())
   for (const shard of shards) {
-    const forkShard = shard.specs.some(needsForks)
-    assert.ok(shard.specs.every((spec) => needsForks(spec) === forkShard))
-    assert.equal(shard.chains.length > 0, forkShard)
+    assert.equal(shard.chains.length > 0, shard.specs.some(needsForks))
   }
   assert.deepEqual(planShards([assets], 4), [{ specs: [assets], chains: [] }])
   assert.throws(() => planShards(specs, 0), /positive integer/)
 })
 
+test('fills the fork shards with plain specs so that all shards cost about the same', () => {
+  const registry = Object.fromEntries([
+    ...Array.from({ length: 97 }, (_, index) => [`cypress/e2e/test/plain-${index}.cy.js`, {}]),
+    ...Array.from({ length: 17 }, (_, index) => [`cypress/e2e/test/fork-${index}.cy.js`, { chains: [1] }]),
+  ])
+  const cost = ({ specs }) => {
+    const forks = specs.filter((spec) => registry[spec].chains).length
+    return specs.length - forks + (forks ? forks * 1.2 + 2.5 : 0)
+  }
+  const costs = planShards(Object.keys(registry), 6, registry).map(cost)
+  assert.ok(Math.max(...costs) - Math.min(...costs) <= 1.2, `unbalanced shards: ${costs}`)
+  assert.ok(Math.max(...costs) <= 21)
+})
+
 test('gives the slower fork specs enough shards that they do not hold up the run', () => {
-  // 97 plain and 17 fork specs, as in CI: one fork shard would take 28 spec-units against 20 on the others.
+  // 97 plain and 17 fork specs, as in CI: one fork shard would cost 22.9 against an average of 20.4.
   assert.equal(forkShardCount(97, 17, 6), 2)
   assert.equal(forkShardCount(97, 17, 8), 2)
   assert.equal(forkShardCount(97, 0, 6), 0)
-  assert.equal(forkShardCount(0, 17, 6), 5)
+  assert.equal(forkShardCount(0, 17, 6), 6)
   assert.equal(forkShardCount(3, 1, 1), 1)
 })
 

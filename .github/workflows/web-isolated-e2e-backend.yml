@@ -64,9 +64,9 @@ jobs:
         # Pull requests run a short selection unless labelled isolated-e2e-full; empty specs run every spec.
         run: |
           if [ "$GITHUB_EVENT_NAME" = pull_request ] && [ "$FULL_RUN_LABEL" = true ]; then
-            SAFE_E2E_SPECS='' SAFE_E2E_SHARDS=6
+            export SAFE_E2E_SPECS='' SAFE_E2E_SHARDS=6
           elif [ "$GITHUB_EVENT_NAME" = pull_request ]; then
-            SAFE_E2E_SPECS=$PULL_REQUEST_SPECS SAFE_E2E_SHARDS=1
+            export SAFE_E2E_SPECS=$PULL_REQUEST_SPECS SAFE_E2E_SHARDS=1
           fi
           [ -n "$SAFE_E2E_SPECS" ] || unset SAFE_E2E_SPECS
           echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
@@ -112,8 +112,12 @@ jobs:
           if-no-files-found: error
 
   cypress:
-    needs: [plan, build]
+    # Starts next to the build job: setting up the backend takes about as long as the build.
+    needs: plan
     runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      actions: read
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -128,12 +132,6 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./.github/actions/yarn
-
-      - name: Download builds
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
-        with:
-          name: isolated-e2e-builds
-          path: apps
 
       - name: Install browser dependencies
         id: browser
@@ -154,6 +152,32 @@ jobs:
           chains: ${{ matrix.chains }}
           mainnet-rpc-url: ${{ secrets.FORK_RPC_URL_MAINNET }}
           polygon-rpc-url: ${{ secrets.FORK_RPC_URL_POLYGON }}
+
+      - name: Wait for the builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          for _ in $(seq 1 120); do
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" \
+              --jq '.jobs[] | select(.name == "build") | .conclusion')
+            case "$conclusion" in
+              success) exit 0 ;;
+              failure | cancelled | skipped)
+                echo "The build job ended with $conclusion" >&2
+                exit 1
+                ;;
+            esac
+            sleep 5
+          done
+          echo 'The build job did not finish within 10 minutes' >&2
+          exit 1
+
+      - name: Download builds
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: isolated-e2e-builds
+          path: apps
 
       - name: Serve Transaction Builder and simulation adapter
         run: |
