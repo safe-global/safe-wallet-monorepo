@@ -14,7 +14,9 @@ import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
+import { buildPlanTiers, toCurrentPlan } from './planTiers'
+import { useAppDispatch } from '@/store'
+import { checkoutEntrySet } from '../../store/checkoutEntrySlice'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -54,6 +56,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
+  const dispatch = useAppDispatch()
   const { canChange } = useChangePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
@@ -112,7 +115,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             onSubscribe={(picked) => {
               if (canChange) setPick(picked)
               else if (picked.option.paymentLinkId) {
-                void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+                dispatch(checkoutEntrySet(entry))
+                void startCheckout(picked.option.paymentLinkId)
               }
             }}
             isSubscribing={isCheckingOut}

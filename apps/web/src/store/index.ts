@@ -27,6 +27,7 @@ import {
   elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
 } from './slices'
@@ -74,6 +75,7 @@ const rootReducer = combineReducers({
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
+  [slices.checkoutEntrySlice.name]: slices.checkoutEntrySlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
   // Deliberately absent from `persistedSlices`: a phase restored from a previous
@@ -142,6 +144,7 @@ const listeners = [
   elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
   forbiddenSessionListener,

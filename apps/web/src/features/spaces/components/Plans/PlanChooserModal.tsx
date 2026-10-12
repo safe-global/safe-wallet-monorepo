@@ -19,9 +19,11 @@ import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
-import { buildPlanTiers, pickProps } from './planTiers'
+import { buildPlanTiers } from './planTiers'
+import { useAppDispatch } from '@/store'
+import { checkoutEntrySet } from '../../store/checkoutEntrySlice'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
+import type { PlanPick, PlanTier, SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
 
 export const _LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
@@ -73,6 +75,7 @@ export default function PlanChooserModal({
   const { paidPlans, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => buildPlanTiers(paidPlans).filter((tier) => tier.id !== ENTERPRISE_TIER.id), [paidPlans])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId)
+  const dispatch = useAppDispatch()
   const { openPortal, isRedirecting: isOpeningPortal } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const { title, subtitle } = chooserCopy(reason, endedAt)
@@ -82,10 +85,16 @@ export default function PlanChooserModal({
 
   const start = () => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)
 
+  const startCheckout = (picked: PlanPick, removed?: SafeRef[]) => {
+    if (!picked.option.paymentLinkId) return
+    dispatch(checkoutEntrySet(entry))
+    void checkout(picked.option.paymentLinkId, removed)
+  }
+
   const subscribe = (picked: PlanPick) => {
     if (!picked.option.paymentLinkId) return
     if (needsTrim(picked.option.seats)) setPick(picked)
-    else void checkout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+    else startCheckout(picked)
   }
 
   return (
@@ -97,11 +106,7 @@ export default function PlanChooserModal({
               limit={trimming.option.seats as number}
               planName={trimming.tier.name}
               onBack={() => setPick(undefined)}
-              onContinue={(removed) => {
-                if (trimming.option.paymentLinkId) {
-                  void checkout(trimming.option.paymentLinkId, { ...pickProps(trimming), ...entry }, removed)
-                }
-              }}
+              onContinue={(removed) => startCheckout(trimming, removed)}
               isSubmitting={isBusy}
               error={error}
             />

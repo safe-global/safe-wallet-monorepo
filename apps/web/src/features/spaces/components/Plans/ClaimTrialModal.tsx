@@ -19,7 +19,9 @@ import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { claimTiers, formatPlanPrice, pickProps, priceSuffix } from './planTiers'
+import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
+import { useAppDispatch } from '@/store'
+import { checkoutEntrySet } from '../../store/checkoutEntrySlice'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
 import type { PlanTier, SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -157,6 +159,7 @@ export default function ClaimTrialModal({
   const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
+  const dispatch = useAppDispatch()
   const [pickedTierId, setPickedTierId] = useState<string>()
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')
 
@@ -178,15 +181,16 @@ export default function ClaimTrialModal({
     !isLoading,
   )
 
-  const claim = () => {
-    if (!tier || !option?.paymentLinkId) return
-    if (needsTrim(seats)) setStep('accounts')
-    else void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry })
+  const startCheckout = (removed?: SafeRef[]) => {
+    if (!option?.paymentLinkId) return
+    dispatch(checkoutEntrySet(entry))
+    void checkout(option.paymentLinkId, removed)
   }
 
-  const continueToCheckout = (removed: SafeRef[]) => {
-    if (tier && option?.paymentLinkId)
-      void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry }, removed)
+  const claim = () => {
+    if (!option?.paymentLinkId) return
+    if (needsTrim(seats)) setStep('accounts')
+    else startCheckout()
   }
 
   return (
@@ -198,7 +202,7 @@ export default function ClaimTrialModal({
               limit={seats}
               planName={tier.name}
               onBack={() => setStep('offer')}
-              onContinue={continueToCheckout}
+              onContinue={startCheckout}
               isSubmitting={isBusy}
               error={error}
             />

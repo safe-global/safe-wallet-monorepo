@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
+import { getStoreInstance } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SpacePlansPage from '../Page'
@@ -192,12 +193,8 @@ describe('SpacePlansPage', () => {
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
-    expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m', {
-      'Target Plan': 'starter',
-      Seats: 2,
-      'Billing Period': 'monthly',
-      'Entry Point': 'direct',
-    })
+    expect(mockStartCheckout).toHaveBeenCalledWith('pl_starter_m')
+    expect(getStoreInstance().getState().checkoutEntry).toEqual({ 'Entry Point': 'direct' })
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
   })
 
