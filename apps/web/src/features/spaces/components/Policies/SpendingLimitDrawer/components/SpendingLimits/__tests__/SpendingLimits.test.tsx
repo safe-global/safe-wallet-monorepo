@@ -1,5 +1,10 @@
 import { render, screen, within } from '@/tests/test-utils'
-import { MOCK_ADDRESSES, mockMultiSpenderPolicy, mockSpendingLimitPolicy } from '../../../../mocks/policies'
+import {
+  MOCK_ADDRESSES,
+  mockMultiSpenderPolicy,
+  mockPendingEdit,
+  mockSpendingLimitPolicy,
+} from '../../../../mocks/policies'
 import SpendingLimits from '../SpendingLimits'
 
 const { spenders } = mockSpendingLimitPolicy().data
@@ -31,6 +36,32 @@ describe('SpendingLimits', () => {
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
     expect(screen.queryByText(/remaining/)).not.toBeInTheDocument()
     expect(screen.queryByText(/Resets/)).not.toBeInTheDocument()
+  })
+
+  it('marks each limit of a queued edit as added, changed or removed', () => {
+    render(<SpendingLimits spenders={mockPendingEdit().data.spenders} showUsage={false} />)
+
+    const [added, changed, removed] = screen.getAllByTestId('spending-limit-allowance')
+    expect(within(added).getByTestId('allowance-change-added')).toHaveTextContent('Added')
+    expect(within(changed).getByTestId('allowance-change-changed')).toHaveTextContent('Changed')
+    expect(within(removed).getByTestId('allowance-change-removed')).toHaveTextContent('Removed')
+  })
+
+  // A removal that reads like an addition is the bug this guards: both rows looked equally live.
+  it('strikes through only the limit being removed', () => {
+    render(<SpendingLimits spenders={mockPendingEdit().data.spenders} showUsage={false} />)
+
+    expect(screen.getByText('USDC')).toHaveClass('line-through')
+    expect(screen.getByText('1,500/month')).toHaveClass('line-through')
+    expect(screen.getByText('USDT')).not.toHaveClass('line-through')
+    expect(screen.getByText('2,000/month')).not.toHaveClass('line-through')
+  })
+
+  it('shows no change badge on limits that carry no change', () => {
+    render(<SpendingLimits spenders={spenders} showUsage={false} />)
+
+    expect(screen.queryByTestId(/^allowance-change-/)).not.toBeInTheDocument()
+    expect(screen.getByText('USDC')).not.toHaveClass('line-through')
   })
 
   it('repeats the spender block, each with its own tokens', () => {

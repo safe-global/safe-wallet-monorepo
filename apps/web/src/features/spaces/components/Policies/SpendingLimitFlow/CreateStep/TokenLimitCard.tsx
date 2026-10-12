@@ -2,19 +2,20 @@ import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react'
 import { CalendarClock, X } from 'lucide-react'
 import { Controller, get, useFormContext } from 'react-hook-form'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
 import { getResetTimeOptions } from '@/features/spending-limits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useChainId from '@/hooks/useChainId'
 import { computeFiatValue } from '@/utils/fiat'
 import FiatValue from '@/components/common/FiatValue'
 import NumberField from '@/components/common/NumberField'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import TokenSelector from '../TokenSelector'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { useIsEditMode } from '../EditFlow/EditModeContext'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
 import { findTokenOption, tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
@@ -25,8 +26,19 @@ import {
   validateNoExistingLimit,
   validateUniqueToken,
 } from '../utils/validation'
-import { limitPath, limitsPath, spenderAddressPath, type SpendingLimitPolicyFormValues } from '../types'
-import { FREQUENCY_LABEL, LIMIT_AMOUNT_LABEL, LIMIT_AMOUNT_PLACEHOLDER, REMOVE_LIMIT_LABEL } from '../constants'
+import {
+  limitPath,
+  limitsPath,
+  spenderAddressPath,
+  type SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+import {
+  EXISTING_LIMIT_TOOLTIP,
+  FREQUENCY_LABEL,
+  LIMIT_AMOUNT_LABEL,
+  LIMIT_AMOUNT_PLACEHOLDER,
+  REMOVE_LIMIT_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -92,13 +104,10 @@ const TokenLimitCard = ({
   // RHF hands back the same mutated array every render, so key on the joined values, not the reference.
   const siblingTokensKey = (watch(limitsPath(spenderIndex)) ?? []).map((limit) => limit?.tokenAddress ?? '').join(',')
 
-  /** Tokens the spender's other rows use, plus those the Safe already limits for this spender — hidden from this row. */
+  /** Tokens the spender's other rows use — hidden from this row. */
   const excludeAddresses = useMemo(
-    () => [
-      ...siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
-      ...existingTokens,
-    ],
-    [siblingTokensKey, limitIndex, existingTokens],
+    () => siblingTokensKey.split(',').filter((address, index) => index !== limitIndex && address !== ''),
+    [siblingTokensKey, limitIndex],
   )
   /** A token change on a sibling re-validates this row, so a duplicate shows on both. */
   const siblingTokenPaths = useMemo(
@@ -173,6 +182,8 @@ const TokenLimitCard = ({
                   value={field.value || undefined}
                   onChange={(next) => field.onChange(next ?? '')}
                   excludeAddresses={excludeAddresses}
+                  disabledAddresses={existingTokens}
+                  disabledAddressReason={EXISTING_LIMIT_TOOLTIP}
                   name={field.name}
                   error={!!tokenError}
                   helperText={
@@ -209,7 +220,12 @@ const TokenLimitCard = ({
                 </HelperLine>
               }
               data-testid="limit-amount-input"
-              {...register(amountPath, { validate: (value) => validateLimitAmount(value, decimals) })}
+              {...register(amountPath, {
+                // NumberField leaves at most one separator, the locale's; store it as a dot.
+                setValueAs: (value: unknown) =>
+                  typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
+                validate: (value) => validateLimitAmount(value, decimals),
+              })}
             />
           </div>
         </div>

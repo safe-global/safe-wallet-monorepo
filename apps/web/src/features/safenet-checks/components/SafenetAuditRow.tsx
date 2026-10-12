@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useChain } from '@/hooks/useChains'
 import {

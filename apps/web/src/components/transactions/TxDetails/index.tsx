@@ -1,7 +1,7 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useIsExpiredSwap } from '@/features/swap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 
 import TxSigners from '@/components/transactions/TxSigners'
 import Summary from '@/components/transactions/TxDetails/Summary'
@@ -22,11 +22,11 @@ import {
   isBridgeOrderTxInfo,
   isLifiSwapTxInfo,
 } from '@/utils/transaction-guards'
-import { InfoDetails } from '@/components/transactions/InfoDetails'
+import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import classNames from 'classnames'
 import css from './styles.module.css'
-import { Card } from '@/components/ui/card'
+import { Card } from '@safe-global/views/components/ui/card'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import ExecuteTxButton from '@/components/transactions/ExecuteTxButton'

@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import Track from '@/components/common/Track'
 import { SETTINGS_EVENTS } from '@/services/analytics'
 import { ChangeThresholdFlow } from '@/components/tx-flow/flows'

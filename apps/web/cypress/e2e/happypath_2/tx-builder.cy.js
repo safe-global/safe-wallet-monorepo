@@ -44,7 +44,6 @@ describe('Transaction Builder happy path tests', { defaultCommandTimeout: 20000 
       iframeSelector = safeapps.getSafeAppIframeSelector(appUrl)
 
       wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAppSafes.SEP_SAFEAPP_SAFE_1)
-      cy.wait(5000)
       createtx.deleteAllTx()
       safeapps.openSafeAppWithAddressBookPermission(safeAppSafes.SEP_SAFEAPP_SAFE_1, appUrl)
       navigation.verifyTxBtnStatus(constants.enabledStates.enabled)

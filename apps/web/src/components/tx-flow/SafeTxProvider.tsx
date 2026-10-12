@@ -1,10 +1,10 @@
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { useState, useEffect, useCallback } from 'react'
 import type { ReactNode, ReactElement } from 'react'
-import { SafeTxContext } from './SafeTxContext'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { createTx } from '@/services/tx/tx-sender'
-import { useSafeScope } from './safe-scope/context'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
@@ -13,8 +13,8 @@ import { selectGtfPaymentSourcePreference, setGtfPaymentSourcePreference } from 
 import type { GtfPaymentMode } from '@/features/gtf/types'
 import useWallet from '@/hooks/wallets/useWallet'
 
-export { SafeTxContext } from './SafeTxContext'
-export type { SafeTxContextParams } from './SafeTxContext'
+export { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+export type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 
 const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const scope = useSafeScope()
@@ -67,6 +67,8 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
     if (!canEdit) return
     if (!safeTx?.data) return
     if (safeTx.data.nonce === finalNonce && safeTx.data.safeTxGas === finalSafeTxGas) return
+    // A Space-level scope drops its SDK while it is recreated; building without it fails.
+    if (scope && !scope.sdk) return
 
     setSafeTxError(undefined)
 

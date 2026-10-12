@@ -30,7 +30,6 @@ const link = (
 ) =>
   ({
     id: `pl_${planName}_${seats}_${interval}${trialPeriodDays ? '_trial' : ''}`,
-    url: 'https://buy.stripe.com/x',
     active: true,
     metadata: { planName, FEATURE_SAFE_SEATS: String(seats), ...PLAN_METADATA[planName] },
     lineItems: [
@@ -95,6 +94,7 @@ const entitlements = (sub: Subscription | undefined): EntitlementsResponse => ({
         id: sub.plan.id,
         name: sub.plan.name ?? null,
         cycleEndsAt: new Date((sub.currentPeriodEnd ?? now()) * 1000).toISOString(),
+        status: sub.status === 'trialing' ? 'trialing' : 'active',
       }
     : null,
   entitlements: sub

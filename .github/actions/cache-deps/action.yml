@@ -36,7 +36,7 @@ runs:
           ~/.yarn/berry/cache
           ${{ github.workspace }}/.yarn/install-state.gz
           ${{ github.workspace }}/packages/utils/src/types
-        key: ${{ runner.os }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-web-core-modules-${{ hashFiles('**/package.json','**/yarn.lock') }}
 
     - name: Set composite outputs yarn
       if: ${{ inputs.mode == 'restore-yarn' }}
@@ -64,7 +64,7 @@ runs:
       with:
         path: |
           ${{ github.workspace }}/apps/web/.next/cache
-        key: ${{ runner.os }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-nextjs-cypress-${{ hashFiles('apps/web/package.json', 'apps/web/yarn.lock') }}-${{ hashFiles('apps/web/src/**/*', 'apps/web/public/**/*', 'apps/web/*.{js,jsx,cjs,ts,mjs,tsx,json}') }}
 
     - name: Set composite outputs nc
       if: ${{ inputs.mode == 'restore-nc' }}

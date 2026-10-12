@@ -1,15 +1,104 @@
-import { hashTypedData, signTypedData } from '@safe-global/utils/utils/web3'
+import { signTypedData } from '@safe-global/utils/utils/web3'
 import { EthSafeSignature, buildContractSignature, buildSignatureBytes } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
+import { getBytes, isError } from 'ethers'
 import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
-import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import {
+  getDelegateTypedData,
+  hashDelegateTypedData,
+  isQueueServiceDelegateTypedData,
+} from '@safe-global/utils/services/delegates'
+import type { DelegateAction, DelegateTypedData } from '@safe-global/utils/services/delegates'
 import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
-import { isSmartContractWallet } from '@/utils/wallets'
+import { isEthSignWallet, isSmartContractWallet } from '@/utils/wallets'
+import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-export const signProposerTypedData = async (chainId: string, proposerAddress: string, signer: JsonRpcSigner) => {
-  const typedData = getDelegateTypedData(chainId, proposerAddress)
-  return signTypedData(signer, typedData)
+type DelegateChain = Pick<Chain, 'chainId' | 'features'>
+
+// The queue service domain has a non-standard `safe` field that ethers' signTypedData rejects, so it goes to the wallet as raw eth_signTypedData_v4.
+const signDelegateTypedData = async (signer: JsonRpcSigner, typedData: DelegateTypedData): Promise<string> => {
+  if (!isQueueServiceDelegateTypedData(typedData)) {
+    return signTypedData(signer, typedData)
+  }
+
+  const address = signer.address.toLowerCase()
+  let signature: string
+  try {
+    signature = await signer.provider.send('eth_signTypedData_v4', [address, JSON.stringify(typedData)])
+  } catch (error) {
+    // Same Ledger fallback as the shared signTypedData helper
+    if (!isError(error, 'UNSUPPORTED_OPERATION')) throw error
+    signature = await signer.provider.send('eth_signTypedData', [address, typedData])
+  }
+  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
+}
+
+// v1 only writes to the transaction service, so eth_sign wallets use it only on chains without QUEUE_SERVICE; the queue service (v3) accepts their eth_sign signature directly.
+export const usesV1DelegateEndpoint = (chain: DelegateChain, wallet: ConnectedWallet) =>
+  isEthSignWallet(wallet) && !hasFeature(chain, FEATURES.QUEUE_SERVICE)
+
+const signProposerTypedData = async (
+  chain: DelegateChain,
+  proposerAddress: string,
+  safeAddress: string,
+  action: DelegateAction,
+  signer: JsonRpcSigner,
+) => {
+  const typedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
+  return signDelegateTypedData(signer, typedData)
+}
+
+// For wallets that cannot sign typed data: eth_sign over the delegate EIP-712 hash, v shifted by 4 as for Safe eth_sign signatures.
+const ethSignProposerTypedDataHash = async (
+  chain: DelegateChain,
+  proposerAddress: string,
+  safeAddress: string,
+  action: DelegateAction,
+  signer: JsonRpcSigner,
+) => {
+  const hash = hashDelegateTypedData(getDelegateTypedData(chain, proposerAddress, safeAddress, action))
+  const signature = await signer.signMessage(getBytes(hash))
+  return adjustVInSignature(SigningMethod.ETH_SIGN, signature, hash, signer.address)
+}
+
+const getProposerDataV1 = (proposerAddress: string) => {
+  const totp = Math.floor(Date.now() / 1000 / TOTP_INTERVAL_SECONDS)
+
+  return `${proposerAddress}${totp}`
+}
+
+const signProposerData = async (proposerAddress: string, signer: JsonRpcSigner) => {
+  const data = getProposerDataV1(proposerAddress)
+
+  const signature = await signer.signMessage(data)
+
+  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
+}
+
+type ProposerDelegation = {
+  chain: DelegateChain
+  wallet: ConnectedWallet
+  proposerAddress: string
+  safeAddress: string
+  action: DelegateAction
+  signer: JsonRpcSigner
+}
+
+/** The v1 message on transaction-service chains for eth_sign wallets, eth_sign over the delegate hash on queue-service chains, typed data otherwise. */
+export const signProposerDelegation = ({
+  chain,
+  wallet,
+  proposerAddress,
+  safeAddress,
+  action,
+  signer,
+}: ProposerDelegation): Promise<string> => {
+  if (usesV1DelegateEndpoint(chain, wallet)) return signProposerData(proposerAddress, signer)
+  if (isEthSignWallet(wallet)) return ethSignProposerTypedDataHash(chain, proposerAddress, safeAddress, action, signer)
+  return signProposerTypedData(chain, proposerAddress, safeAddress, action, signer)
 }
 
 /**
@@ -25,20 +114,22 @@ export const signProposerTypedData = async (chainId: string, proposerAddress: st
  * can recover the signer correctly.
  */
 export const signProposerTypedDataForSafe = async (
-  chainId: string,
+  chain: DelegateChain,
   proposerAddress: string,
   parentSafeAddress: string,
+  safeAddress: string,
+  action: DelegateAction,
   signer: JsonRpcSigner,
 ) => {
   // Step 1: Compute the delegate typed data hash
-  const delegateTypedData = getDelegateTypedData(chainId, proposerAddress)
-  const delegateHash = hashTypedData(delegateTypedData)
+  const delegateTypedData = getDelegateTypedData(chain, proposerAddress, safeAddress, action)
+  const delegateHash = hashDelegateTypedData(delegateTypedData)
 
   // Step 2: Build the SafeMessage typed data that the CompatibilityFallbackHandler uses
   const safeMessageTypedData = {
     domain: {
       verifyingContract: parentSafeAddress,
-      chainId: Number(chainId),
+      chainId: Number(chain.chainId),
     },
     types: {
       SafeMessage: [{ type: 'bytes', name: 'message' }],
@@ -51,20 +142,6 @@ export const signProposerTypedDataForSafe = async (
 
   // Step 3: Sign the SafeMessage typed data with the EOA
   return signTypedData(signer, safeMessageTypedData)
-}
-
-const getProposerDataV1 = (proposerAddress: string) => {
-  const totp = Math.floor(Date.now() / 1000 / TOTP_INTERVAL_SECONDS)
-
-  return `${proposerAddress}${totp}`
-}
-
-export const signProposerData = async (proposerAddress: string, signer: JsonRpcSigner) => {
-  const data = getProposerDataV1(proposerAddress)
-
-  const signature = await signer.signMessage(data)
-
-  return adjustVInSignature(SigningMethod.ETH_SIGN_TYPED_DATA, signature)
 }
 
 /**

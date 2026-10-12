@@ -1,10 +1,14 @@
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { fireEvent, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
-import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from '../constants'
+import {
+  REQUEST_POLICY_FORM_HEIGHT,
+  REQUEST_POLICY_FORM_URL,
+  REQUEST_POLICY_FORM_WIDTH,
+} from '@safe-global/views/features/spaces/components/Policies/constants'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { PROPOSER_INTRO_SEEN_KEY } from '../ProposerIntroDialog/constants'
-import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '../SpendingLimitIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import useWallet from '@/hooks/wallets/useWallet'
 import { mockStarterPlan } from '../mocks/plan'
 import {
@@ -15,6 +19,7 @@ import {
   mockPendingPolicy,
   mockPolicies,
   mockProposerPolicy,
+  mockUnenforcedPolicy,
 } from '../mocks/policies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
@@ -727,6 +732,60 @@ describe('Policies', () => {
       expect(setTxFlow.mock.calls[0][0].props.safe).toEqual(policy.safe)
       // Left open rather than closed, so cancelling the flow lands back on the panel.
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
+    })
+
+    it('keeps Edit disabled and points to the upgrade while the plan locks spending limits', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
+      expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
+    })
+
+    it('keeps Add module disabled and points to the upgrade while the plan locks spending limits', async () => {
+      const policy = asActivePolicy(mockUnenforcedPolicy())
+      mockWallet()
+      mockSignerOf(policy)
+      const setTxFlow = jest.fn()
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <Policies policies={[policy]} locked={{ ...mockStarterPlan, onUpgrade: jest.fn() }} />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+      expect(screen.getByText('Upgrade to Business to add the module.')).toBeInTheDocument()
+      expect(setTxFlow).not.toHaveBeenCalled()
+    })
+
+    it('keeps Edit available when only proposers are locked', async () => {
+      const policy = mockActiveSpendingLimit()
+      mockWallet()
+      mockSignerOf(policy)
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies
+            policies={[policy]}
+            locked={{ ...mockStarterPlan, lockedPolicies: ['proposer'], onUpgrade: jest.fn() }}
+          />
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
+
+      expect(screen.getByRole('button', { name: 'Edit' })).toBeEnabled()
     })
 
     it('hides the panel while a flow is open, as the pending panel does', async () => {

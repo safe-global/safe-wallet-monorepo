@@ -96,7 +96,7 @@ import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/feat
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration

@@ -4,14 +4,28 @@ import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
-import { SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
-import { ADD_SPENDER_LABEL, CALLOUT_DISMISS_LABEL, CALLOUT_TITLE, NEXT_LABEL } from '../../constants'
-import { createDefaultFormValues, createEmptySpender } from '../../types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import {
+  INELIGIBILITY_TEXT,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import {
+  ADD_SPENDER_LABEL,
+  CALLOUT_DISMISS_LABEL,
+  CALLOUT_TITLE,
+  NEXT_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import {
+  createDefaultFormValues,
+  createEmptySpender,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '../../EditFlow/EditModeContext'
-import { DISCARD_CHANGES_LABEL, REMOVE_SPENDER_LABEL } from '../../constants'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import {
+  DISCARD_CHANGES_LABEL,
+  REMOVE_SPENDER_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
@@ -128,6 +142,13 @@ const notActivated: SafeAccountOption = {
   ineligibleReason: 'not-activated',
 }
 
+const unsupportedNetwork: SafeAccountOption = {
+  ...treasury,
+  id: buildSafeAccountId('137', SAFE_A),
+  chainId: '137',
+  ineligibleReason: 'unsupported-chain',
+}
+
 const renderForm = (props: Partial<SpendingLimitPolicyFormProps> = {}) => {
   const onSubmit = jest.fn()
   const onSafeChange = jest.fn()
@@ -222,6 +243,19 @@ describe('SpendingLimitPolicyForm', () => {
 
     await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
     expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+  })
+
+  it('keeps Next disabled and names the network when the prefilled Safe is on an unsupported one', async () => {
+    const { user } = renderForm({
+      accounts: [treasury, unsupportedNetwork],
+      defaultValues: { ...createDefaultFormValues(), safe: unsupportedNetwork.id },
+    })
+
+    await fillFirstSpender(user)
+
+    await waitFor(() => expect(screen.getAllByTestId('limit-amount-input')[0]).toHaveValue('1'))
+    expect(screen.getByRole('button', { name: NEXT_LABEL })).toBeDisabled()
+    expect(screen.getByText(INELIGIBILITY_TEXT['unsupported-chain'])).toBeInTheDocument()
   })
 
   it('keeps Next disabled when the prefilled Safe is missing from the resolved accounts', async () => {
@@ -379,6 +413,19 @@ describe('SpendingLimitPolicyForm', () => {
 
       expect(screen.getByTestId('safe-account-readonly')).toHaveTextContent('Treasury')
       expect(screen.queryByTestId('safe-account-selector')).not.toBeInTheDocument()
+    })
+
+    it('neither flags the Safe nor blocks the edit when its network is no longer supported', async () => {
+      const { user } = renderEdit({ accounts: [{ ...treasury, ineligibleReason: 'unsupported-chain' }] })
+
+      expect(screen.getByTestId('safe-account-readonly')).toHaveTextContent('Treasury')
+      expect(screen.queryByText(INELIGIBILITY_TEXT['unsupported-chain'])).not.toBeInTheDocument()
+
+      const amount = screen.getByTestId('limit-amount-input')
+      await user.clear(amount)
+      await user.type(amount, '80')
+
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
     })
 
     it('lets the last spender be removed, which the create flow forbids', () => {

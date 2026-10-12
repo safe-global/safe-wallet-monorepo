@@ -1,4 +1,4 @@
-import Disclaimer from '@/components/common/Disclaimer'
+import Disclaimer from '@safe-global/views/components/common/Disclaimer'
 import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
 import StakingWidget from '../StakingWidget'
 import { useRouter } from 'next/router'

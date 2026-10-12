@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import get from 'lodash/get'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH, NAME_MIN_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import Identicon from '@/components/common/Identicon'
 import NameInput from '@/components/common/NameInput'
 import { FullAddress, HOVER_ACTION_CLASS, RenameButton } from '@/components/common/AccountRow'
@@ -11,7 +11,7 @@ import type { AllSafeItems } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { nameFieldKey } from './utils'
 import { validateContactName } from '../SpaceAddressBook/utils'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']
 

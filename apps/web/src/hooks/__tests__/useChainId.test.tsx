@@ -6,7 +6,7 @@ import * as useWalletHook from '@/hooks/wallets/useWallet'
 import * as useChains from '@/hooks/useChains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 // mock useRouter
 jest.mock('next/navigation', () => ({

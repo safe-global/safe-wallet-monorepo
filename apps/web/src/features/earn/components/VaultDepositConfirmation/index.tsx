@@ -1,13 +1,13 @@
 import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { vaultTypeToLabel } from '../../services/utils'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
-import { DataTable } from '@/components/common/Table/DataTable'
-import { DataRow } from '@/components/common/Table/DataRow'
+import { DataTable } from '@safe-global/views/components/common/Table/DataTable'
+import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
 import IframeIcon from '@/components/common/IframeIcon'
-import { InfoTooltip } from '@/components/common/InfoTooltip'
+import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
 import { BRAND_NAME } from '@/config/constants'
 
 const AdditionalRewards = ({ txInfo }: { txInfo: VaultDepositTransactionInfo }) => {

@@ -8,8 +8,8 @@ import type {
   QueuedSpendingLimitPolicy,
   RecoveryPolicy,
   SpendingLimitPolicy,
-} from '../types'
-import type { Viewer } from '../SpendingLimitDrawer/resolveState'
+} from '@safe-global/views/features/spaces/components/Policies/types'
+import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 
 /** Policies as the table renders them. The stories and the unit tests share these; the wire shape is in activePolicies.ts. */
 
@@ -227,6 +227,25 @@ export const mockPendingUpdate = (): QueuedSpendingLimitPolicy =>
   mockPendingPolicy({
     id: '0xspending-limit-pending-update',
     operation: 'update',
+  })
+
+/** A queued edit that adds, changes and removes limits in one transaction. */
+export const mockPendingEdit = (): QueuedSpendingLimitPolicy =>
+  mockPendingPolicy({
+    id: '0xspending-limit-pending-edit',
+    operation: 'create',
+    data: {
+      spenders: [
+        {
+          spender: MOCK_ADDRESSES.alice,
+          allowances: [
+            { ...allowance(MOCK_TOKENS.unknown, '5000000000000000000', '0', DAY_MINUTES * 7), change: 'added' },
+            { ...allowance(MOCK_TOKENS.usdt, '2000000000', '750000000', DAY_MINUTES * 30), change: 'changed' },
+            { ...allowance(MOCK_TOKENS.usdc, '1500000000', '1000000000', DAY_MINUTES * 30), change: 'removed' },
+          ],
+        },
+      ],
+    },
   })
 
 /** Every signature collected; the transaction is waiting only for execution. */

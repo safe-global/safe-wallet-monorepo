@@ -8,6 +8,7 @@ import {
   mockFullySignedPending,
   mockMissingMetadataPolicy,
   mockMultiSpenderPolicy,
+  mockPendingEdit,
   mockPendingPolicy,
   mockPendingRemoval,
   mockPendingUpdate,
@@ -44,6 +45,7 @@ const meta = {
     safe: SAFE,
     overview: OVERVIEW,
     onEdit: fn(),
+    onEnableModule: fn(),
     onConnectWallet: fn(),
     policy: mockActiveSpendingLimit(),
     viewer: MOCK_VIEWERS.signer,
@@ -90,6 +92,11 @@ export const PendingFullySigned: Story = {
 /** A queued edit: the current limits still apply until it executes. */
 export const PendingUpdate: Story = {
   args: { ...PENDING_ARGS, policy: mockPendingUpdate(), viewer: MOCK_VIEWERS.signer },
+}
+
+/** A queued edit that adds, changes and removes limits: each row says which, and a removed one is struck through. */
+export const PendingEdit: Story = {
+  args: { ...PENDING_ARGS, policy: mockPendingEdit(), viewer: MOCK_VIEWERS.signer },
 }
 
 /** A queued removal: the limit is still enforced until it executes. */

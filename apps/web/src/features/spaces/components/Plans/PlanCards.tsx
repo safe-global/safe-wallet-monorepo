@@ -1,23 +1,38 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Link } from '@/components/ui/link'
-import { List, ListItem, ListItemText } from '@/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Typography } from '@/components/ui/typography'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Link } from '@safe-global/views/components/ui/link'
+import { List, ListItem, ListItemText } from '@safe-global/views/components/ui/list'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
-import { cn } from '@/utils/cn'
-import { YEARLY_SAVINGS_LABEL } from './planCatalog'
-import { formatPlanPrice, getPlanCta, getVisibleTiers, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from './types'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
+import { cn } from '@safe-global/views/utils/cn'
+import { YEARLY_SAVINGS_LABEL } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { formatPlanPrice, getPlanCta, getVisibleTiers, pickProps, priceSuffix } from './planTiers'
+import type {
+  CurrentPlan,
+  PlanCta as PlanCtaKindOf,
+  PlanPick,
+  PlanSeatOption,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 type Cycle = 'month' | 'year'
+
+const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
+  billing: PlanCtaKind.ADD_PAYMENT_METHOD,
+  change: PlanCtaKind.SWITCH_PLAN,
+  subscribe: PlanCtaKind.CONTINUE_WITH_PLAN,
+}
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
@@ -79,6 +94,10 @@ export type PlanCardActions = {
   salesHint?: (tier: PlanTier) => string | undefined
   /** A viewer who cannot act on the plan (a Workspace member who is not an admin): the cards show no buttons. */
   readOnly?: boolean
+  /** Where the catalog is shown, for analytics. */
+  location: PlanLocation
+  /** Any plan button was clicked, before its action runs. */
+  onCta?: (pick: PlanPick, cta: PlanCtaKindOf) => void
 }
 
 const PlanCta = ({
@@ -88,8 +107,19 @@ const PlanCta = ({
   onSubscribe,
   onManage,
   isBusy,
+  location,
+  onCta,
 }: { pick: PlanPick } & PlanCardActions) => {
   const cta = getPlanCta(pick, currentPlan, recommendedPlan)
+  const clicked = () => {
+    trackEvent(SAFE_PRO_EVENTS.PLAN_CTA_CLICKED, {
+      ...pickProps(pick),
+      [MixpanelEventParams.CTA]: CTA_KIND[cta.kind],
+      [MixpanelEventParams.PLAN_IS_CURRENT]: Boolean(pick.tier.isCurrent),
+      [MixpanelEventParams.LOCATION]: location,
+    })
+    onCta?.(pick, cta)
+  }
 
   switch (cta.kind) {
     case 'sales':
@@ -99,14 +129,26 @@ const PlanCta = ({
           size="lg"
           weight="semibold"
           className="w-full"
-          render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
+          render={
+            <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" onClick={() => onCta?.(pick, cta)} />
+          }
         >
           {cta.label}
         </Button>
       )
     case 'billing':
       return (
-        <Button size="lg" weight="semibold" accentIcon className="w-full" disabled={isBusy} onClick={onManage}>
+        <Button
+          size="lg"
+          weight="semibold"
+          accentIcon
+          className="w-full"
+          disabled={isBusy}
+          onClick={() => {
+            clicked()
+            onManage?.()
+          }}
+        >
           {cta.label}
           <ArrowRight data-icon="inline-end" />
         </Button>
@@ -125,7 +167,10 @@ const PlanCta = ({
           accentIcon
           className="w-full"
           disabled={isBusy}
-          onClick={() => onSubscribe?.(pick)}
+          onClick={() => {
+            clicked()
+            onSubscribe?.(pick)
+          }}
         >
           {cta.label}
           <ArrowRight data-icon="inline-end" />
@@ -139,7 +184,10 @@ const PlanCta = ({
           weight="semibold"
           className="w-full"
           disabled={isBusy}
-          onClick={() => onSubscribe?.(pick)}
+          onClick={() => {
+            clicked()
+            onSubscribe?.(pick)
+          }}
         >
           {cta.label}
         </Button>
@@ -177,7 +225,6 @@ export const PlanCard = ({
   const price = option?.price ?? null
   const hint = salesHint?.(tier)
   const features = option?.features?.length ? option.features : tier.features
-
   const changeOption = (next: PlanSeatOption) => {
     setOption(next)
     onOptionChange?.(next)

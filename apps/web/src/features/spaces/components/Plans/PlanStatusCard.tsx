@@ -1,17 +1,17 @@
 import type { ReactNode } from 'react'
 import { Fuel, Info, WalletCards } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
 import type { CurrentBadge } from './PlanCards'
-import type { Meter, PlanSummary } from './types'
+import type { Meter, PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
 import { StatusDot } from './v2/StatusDot'
 
 export const _remaining = ({ used, quota }: Meter): number | null => (quota === null ? null : Math.max(quota - used, 0))
@@ -64,7 +64,7 @@ const UsageMeter = ({
       className="flex-1"
     >
       <CardContent className="flex items-center justify-between">
-        <div className="mr-4 flex min-w-0 items-center gap-3">
+        <div className="mr-4 flex items-center gap-3">
           <Avatar>
             <AvatarFallback surface="card">{icon}</AvatarFallback>
           </Avatar>

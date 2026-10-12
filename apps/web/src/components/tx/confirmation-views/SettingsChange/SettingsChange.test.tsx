@@ -3,7 +3,7 @@ import type { TransactionDetails, SwapOwner } from '@safe-global/store/gateway/A
 import { render } from '@/tests/test-utils'
 import SettingsChange from '.'
 import { ownerAddress, txInfo } from './mockData'
-import { SettingsChangeContext } from '@/components/tx-flow/flows/AddOwner/context'
+import { SettingsChangeContext } from '@safe-global/views/components/tx-flow/flows/AddOwner/context'
 import { type AddOwnerFlowProps } from '@/components/tx-flow/flows/AddOwner'
 import { type ReplaceOwnerFlowProps } from '@/components/tx-flow/flows/ReplaceOwner'
 

@@ -1,15 +1,15 @@
 import { useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Link } from '@/components/ui/link'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Typography } from '@/components/ui/typography'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { HnSignupFlow } from '@/features/hypernative'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import {
   COMPARE_COPY_V2,
   COMPARE_SECTIONS_V2,
@@ -17,7 +17,7 @@ import {
   type CompareValueV2,
   PLAN_ORDER,
   type CompareSectionV2,
-} from '../planCatalog'
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
 
 export const COMPARE_FEATURES_ID = 'compare-features'

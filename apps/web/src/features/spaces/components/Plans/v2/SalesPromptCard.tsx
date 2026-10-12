@@ -1,14 +1,14 @@
 import { ArrowUpRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { SALES_PROMPT_V2 } from '../planCatalog'
+import { SALES_PROMPT_V2 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 
 const trackSalesPrompt = () =>
   trackEvent(

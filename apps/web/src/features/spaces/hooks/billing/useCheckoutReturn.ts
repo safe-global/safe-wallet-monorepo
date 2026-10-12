@@ -5,6 +5,9 @@ import {
   useBillingGetCheckoutSessionV1Query,
   useBillingGetSubscriptionsV1Query,
 } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { CheckoutOutcome, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { CHECKOUT_SESSION_QUERY_PARAM } from './returnUrl'
 import { getPlanStatus, selectCurrentSubscription } from './subscription'
 import { useBillingSpaceId } from './useBillingSpaceId'
@@ -38,10 +41,13 @@ const setDeadline = (sessionId: string, deadline: number) => {
 
 // Every mounted instance sees the abandoned session; only the first one drops it from the URL.
 const dismissedSessions = new Set<string>()
+// Likewise, only the first instance to see the outcome tracks it.
+const trackedSessions = new Set<string>()
 
 export const _resetCheckoutDeadlines = () => {
   deadlines.clear()
   dismissedSessions.clear()
+  trackedSessions.clear()
 }
 
 /** Polls the checkout session until it settles, then the subscriptions until the billing webhook propagates it. */
@@ -80,6 +86,14 @@ export const useCheckoutReturn = (spaceId?: string | null) => {
 
   useEffect(() => setIsSessionDone(isSettled || isSessionError || isCanceled), [isSettled, isSessionError, isCanceled])
   useEffect(() => setIsSubscriptionDone(isComplete), [isComplete])
+
+  useEffect(() => {
+    if (!sessionId || !(isComplete || isCanceled) || trackedSessions.has(sessionId)) return
+    trackedSessions.add(sessionId)
+    trackEvent(SAFE_PRO_EVENTS.CHECKOUT_RETURNED, {
+      [MixpanelEventParams.OUTCOME]: isComplete ? CheckoutOutcome.SUCCESS : CheckoutOutcome.CANCELLED,
+    })
+  }, [sessionId, isComplete, isCanceled])
 
   useEffect(() => {
     if (sessionId && !isComplete && !isCanceled && !deadlines.has(sessionId)) {

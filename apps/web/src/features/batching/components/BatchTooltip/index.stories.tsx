@@ -50,7 +50,7 @@ export const Default: Story = {
       <button
         type="button"
         className="border-border rounded-md border px-3 py-2 text-sm font-medium"
-        onClick={() => txDispatch(TxEvent.BATCH_ADD, { txId: '0x-story-tx', nonce: 0 })}
+        onClick={() => txDispatch(TxEvent.BATCH_ADD, { nonce: 0 })}
       >
         Add to batch
       </button>
@@ -68,7 +68,7 @@ export const Shown: Story = {
   },
   render: () => {
     useEffect(() => {
-      const id = setTimeout(() => txDispatch(TxEvent.BATCH_ADD, { txId: '0x-story-tx', nonce: 0 }), 0)
+      const id = setTimeout(() => txDispatch(TxEvent.BATCH_ADD, { nonce: 0 }), 0)
       return () => clearTimeout(id)
     }, [])
 

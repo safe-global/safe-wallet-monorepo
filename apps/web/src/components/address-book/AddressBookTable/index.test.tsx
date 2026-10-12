@@ -12,7 +12,7 @@ const mockAddressBook: Record<string, string> = Object.fromEntries(
 )
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => mockAddressBook }))
 jest.mock('@/hooks/useChains', () => ({ useCurrentChain: () => undefined }))

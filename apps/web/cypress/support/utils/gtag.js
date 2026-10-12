@@ -1,3 +1,5 @@
+import { TX_Builder_url } from '../constants.js'
+
 export function getEvents() {
   cy.window()
     .its('dataLayer')
@@ -61,7 +63,7 @@ export const events = {
   txCreatedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://tx-builder.staging.5afe.dev',
+    eventLabel: TX_Builder_url,
     eventType: 'tx_created',
     event: 'tx_created',
   },
@@ -69,7 +71,7 @@ export const events = {
   txConfirmedTxBuilder: {
     category: 'transactions',
     action: 'Confirm transaction',
-    eventLabel: 'https://tx-builder.staging.5afe.dev',
+    eventLabel: TX_Builder_url,
     eventType: 'tx_confirmed',
     event: 'tx_confirmed',
   },

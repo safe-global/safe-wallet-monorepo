@@ -18,7 +18,7 @@ let mockCurrentSpaceId: string | null = null
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockCurrentSpaceId }))
 
 const SAFE = { safe: { chainId: '1' }, safeAddress: '0xAbC' }
-const holding = (safes: Record<string, string[]>) => ({ currentData: { safes }, isFetching: false })
+const holding = (safes: Record<string, string[]>) => ({ currentData: { safes }, isFetching: false, isError: false })
 const meter = { used: 20, quota: 50, resetsAt: '2026-11-01T00:00:00.000Z' }
 
 describe('useSafeSponsoredTxs', () => {
@@ -29,7 +29,12 @@ describe('useSafeSponsoredTxs', () => {
     mockUseSafeInfo.mockReturnValue(SAFE)
     mockIsSignedIn.mockReturnValue(true)
     mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xabc'] }))
-    mockUseSpacePlan.mockReturnValue({ plan: { status: 'active' }, sponsoredTxs: meter, isLoading: false })
+    mockUseSpacePlan.mockReturnValue({
+      plan: { status: 'active' },
+      sponsoredTxs: meter,
+      isLoading: false,
+      isError: false,
+    })
   })
 
   it('reads the allowance of the Workspace the Safe belongs to', () => {
@@ -45,6 +50,7 @@ describe('useSafeSponsoredTxs', () => {
       spaceId: 'space-1',
       canSponsor: true,
       isLoading: false,
+      isError: false,
     })
   })
 
@@ -132,6 +138,7 @@ describe('useSafeSponsoredTxs', () => {
       spaceId: null,
       canSponsor: false,
       isLoading: false,
+      isError: false,
     })
   })
 
@@ -152,5 +159,22 @@ describe('useSafeSponsoredTxs', () => {
     mockUseSpaceSafesGetV1Query.mockReturnValue(holding({ '1': ['0xabc'] }))
     mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: true })
     expect(renderHook(() => useSafeSponsoredTxs()).result.current.isLoading).toBe(true)
+  })
+
+  it("reports the lookup as failed when the Workspace's Safes cannot be loaded", () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false, isError: true })
+
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({
+      isError: true,
+      isPro: false,
+      isLoading: false,
+    })
+  })
+
+  it('reports the lookup as failed when the plan cannot be loaded', () => {
+    mockUseSpacePlan.mockReturnValue({ plan: null, sponsoredTxs: null, isLoading: false, isError: true })
+
+    expect(renderHook(() => useSafeSponsoredTxs()).result.current).toMatchObject({ isError: true, isPro: false })
+    expect(mockUseSpacePlan).toHaveBeenCalledWith('space-1')
   })
 })

@@ -186,7 +186,6 @@ export type UrlResponse = {
 }
 export type PaymentLink = {
   id: string
-  url: string
   active: boolean
   metadata: object
   customText?: object

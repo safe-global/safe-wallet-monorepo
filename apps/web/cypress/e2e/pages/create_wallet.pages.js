@@ -170,6 +170,8 @@ export function clickOnBackBtn() {
 
 export function clickOnSignInToWorkspaceBtn() {
   cy.get(signInToWorkspaceBtn).should('be.visible').click()
+  // Single-network Next is enabled before sign-in finishes; the link disappears once pay later is selected.
+  cy.get(signInToWorkspaceBtn).should('not.exist')
   cy.get(reviewStepNextBtn).should('not.be.disabled')
 }
 

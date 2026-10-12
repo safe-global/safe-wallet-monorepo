@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks'
 import { buildPlanTiers, toCurrentPlan } from '../planTiers'
-import type { PlanSummary } from '../types'
+import type { PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PAID_PLANS, subscription } from '../plans.fixtures'
 import CompareFeaturesCard from './CompareFeaturesCard'
 import PlansV2 from './PlansV2'

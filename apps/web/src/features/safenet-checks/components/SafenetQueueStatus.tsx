@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 // eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'

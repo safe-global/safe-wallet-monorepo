@@ -19,7 +19,10 @@ export const EOA = '0x03042B890b99552b60A073F808100517fb148F60'
 export const SAFE_APP_ADDRESS = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 export const SAFE_APP_ADDRESS_2 = '0x49d4450977E2c95362C13D3a31a09311E0Ea26A6'
 export const SAFE_APP_ADDRESS_3 = '0xc6b82bA149CFA113f8f48d5E3b1F78e933e16DfD'
-export const DEFAULT_OWNER_ADDRESS = '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
+// Isolated runs generate OWNER_4; staging runs keep the staging wallet.
+export const DEFAULT_OWNER_ADDRESS = Cypress.env('SAFE_E2E_ISOLATED')
+  ? JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS')).OWNER_4_WALLET_ADDRESS
+  : '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED'
 // Below is also used in sidebar tests as a beneficiary
 export const SPENDING_LIMIT_ADDRESS_2 = '0x52835f11E348605E9D791Ec09380a3224526d538'
 // AllowanceModule contract addresses — keyed by contract version, not by network
@@ -57,7 +60,7 @@ export const prodbaseUrl = 'https://app.safe.global'
 export const swapWidget = 'https://swap.cow.fi/#/11155111/widget/swap/'
 export const bridgeWidget = 'https://iframe.jumper.exchange/bridge'
 export const safeTestAppurl = 'https://safe-apps-test-app.pages.dev'
-export const TX_Builder_url = 'https://tx-builder.staging.5afe.dev'
+export const TX_Builder_url = Cypress.env('TX_BUILDER_URL') || 'https://tx-builder.staging.5afe.dev'
 export const drainAccount_url = 'https://safe-apps.dev.5afe.dev/drain-safe'
 export const testAppUrl = 'https://safe-test-app.com'
 export const swapUrl = '/swap?safe='
@@ -101,13 +104,16 @@ export const notificationsUrl = '/settings/notifications?safe='
 export const envVariablesUrl = '/settings/environment-variables?safe='
 export const validAppUrl = 'https://my-valid-custom-app.com'
 export const etherscanlLink = 'etherscan.io'
-export const stagingTxServiceUrl = 'https://safe-transaction-sepolia.staging.5afe.dev/api'
+export const stagingTxServiceUrl = (
+  Cypress.env('SAFE_TXS_BASE_URL') || 'https://safe-transaction-sepolia.staging.5afe.dev/api'
+).replace(/\/$/, '')
 export const stagingTxServiceSafesUrl = '/safes/'
 export const stagingTxServiceBalancesUrl = '/balances/'
 export const appearanceSettingsUrl = '/settings/appearance?safe='
-export const stagingCGWUrl = 'https://safe-client.staging.5afe.dev/'
-export const stagingCGWUrlv1 = 'https://safe-client.staging.5afe.dev/v1'
-export const stagingCGWUrlv2 = 'https://safe-client.staging.5afe.dev/v2'
+export const stagingCGWUrl =
+  (Cypress.env('SAFE_CGW_BASE_URL') || 'https://safe-client.staging.5afe.dev').replace(/\/$/, '') + '/'
+export const stagingCGWUrlv1 = `${stagingCGWUrl}v1`
+export const stagingCGWUrlv2 = `${stagingCGWUrl}v2`
 export const stagingCGWChains = '/chains/'
 export const stagingCGWSafes = '/safes/'
 export const stagingCGWNone = '/nonces/'
@@ -129,7 +135,7 @@ export const transactionHistoryEndpoint = '**/v1/**/transactions/history**'
 export const safeListEndpoint = '**/safes*'
 export const ownedSafesEndpoint = '**/v2/owners/**/safes*'
 export const queuedEndpoint = '**/queued*'
-export const messagesEndpoint = 'v1/chains/**/safes/**/messages*'
+export const messagesEndpoint = '**/v1/chains/**/safes/**/messages*'
 // Must stay scoped to the API path: a bare '**/collectibles*' also matches the Vite dev-server
 // module URL for store/gateway/AUTO_GENERATED/collectibles.ts, and fulfilling that with JSON
 // kills the whole app on load (module MIME type error).

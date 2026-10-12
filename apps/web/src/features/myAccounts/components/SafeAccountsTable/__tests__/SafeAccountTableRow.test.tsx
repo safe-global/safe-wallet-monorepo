@@ -2,7 +2,10 @@ import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
 import { useAddressBookWriteScope } from '@/features/spaces'
-import { SELECT_COLUMN, type SafeAccountColumn } from '../columns'
+import {
+  SELECT_COLUMN,
+  type SafeAccountColumn,
+} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import type { AccountLine } from '../useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
@@ -16,7 +19,10 @@ jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: (
 jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))
-jest.mock('@/components/common/AccountBadges', () => ({ PendingBadge: () => null, ThresholdBadge: () => null }))
+jest.mock('@safe-global/views/components/common/AccountBadges', () => ({
+  PendingBadge: () => null,
+  ThresholdBadge: () => null,
+}))
 jest.mock('@/components/common/FiatBalance', () => ({ __esModule: true, default: () => null }))
 jest.mock('../cells', () => ({ WorkspaceAvatars: () => null }))
 jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () => ({

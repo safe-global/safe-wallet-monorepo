@@ -1,5 +1,6 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 import { isAddress } from 'ethers'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import EmailInfo from '@/components/common/EmailInfo'
 import { NetworkLogosPill } from '@/features/multichain'
@@ -11,8 +12,11 @@ import LocalContactActions from './LocalContactActions'
 import { formatDate } from '@/features/spaces/utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import PaginatedDataTable, { type DataTableColumn, type ColumnWidth } from '@/components/common/PaginatedDataTable'
-import { cn } from '@/utils/cn'
+import PaginatedDataTable, {
+  type DataTableColumn,
+  type ColumnWidth,
+} from '@safe-global/views/components/common/PaginatedDataTable'
+import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {
@@ -24,10 +28,15 @@ export type AddressBookEntry = SpaceAddressBookItemDto & {
 // address-book names are member-editable and are deliberately not used here.
 function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: string }) {
   if (memberName) {
+    const label = isAddress(memberName) ? shortenAddress(memberName) : memberName
+
     return (
-      <span className="inline-flex items-center gap-1.5">
+      <span className="inline-flex min-w-0 items-center gap-1.5">
         <InitialsAvatar name={memberName} size="xsmall" rounded />
-        <span className="min-w-0 truncate text-sm">{memberName}</span>
+        <Tooltip>
+          <TooltipTrigger render={<span className="min-w-0 truncate text-left text-sm" />}>{label}</TooltipTrigger>
+          <TooltipContent align="start">{memberName}</TooltipContent>
+        </Tooltip>
       </span>
     )
   }
@@ -38,7 +47,7 @@ function AddedBy({ createdBy, memberName }: { createdBy: string; memberName?: st
     )
   }
 
-  return <EmailInfo email={createdBy} size="xsmall" />
+  return <EmailInfo email={createdBy} size="xsmall" showTooltip />
 }
 
 type SpaceAddressBookTableProps = {

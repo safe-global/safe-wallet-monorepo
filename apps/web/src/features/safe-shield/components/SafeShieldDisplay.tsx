@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from 'react'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,
@@ -45,6 +45,7 @@ export const SafeShieldDisplay = ({
   onAddToTrustedList,
   hasProFeatures = true,
   isSafePro = true,
+  isOffchainMessage = false,
 }: {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -59,6 +60,7 @@ export const SafeShieldDisplay = ({
   hasProFeatures?: boolean
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
+  isOffchainMessage?: boolean
 }): ReactElement => {
   const [recipientResults] = recipient || []
   const [contractResults] = contract || []
@@ -98,6 +100,7 @@ export const SafeShieldDisplay = ({
         hasSimulation,
         isSimulationSuccess,
         isContractCall: isContractCall(safeTx),
+        isOffchainMessage,
       }),
     [
       threatResults,
@@ -108,6 +111,7 @@ export const SafeShieldDisplay = ({
       hasSimulation,
       isSimulationSuccess,
       safeTx,
+      isOffchainMessage,
     ],
   )
 
@@ -141,6 +145,7 @@ export const SafeShieldDisplay = ({
           onAddToTrustedList={onAddToTrustedList}
           hasProFeatures={hasProFeatures}
           isSafePro={isSafePro}
+          isOffchainMessage={isOffchainMessage}
         />
       </div>
 

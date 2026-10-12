@@ -142,3 +142,17 @@ Adding a `data-testid` to a component:
 - API mocks: `cy.intercept()` + `cy.fixture()` from `fixtures/`
 - Do NOT create new setup helpers — use existing patterns from `support/`
 - **Data/selector separation**: fixtures hold test data only (ids, names, addresses, counts); page objects hold selectors, labels, and regex only. Never duplicate fixture data in page objects, never re-export fixtures from them — tests import fixtures directly.
+
+## Isolated regression
+
+The isolated CI workflow runs registered specs against local Anvil, CGW and TXS: pull requests run the assets, Spaces basic flow and rejection specs; a manual dispatch runs any selection, by default every registered spec, in parallel shards. Shared Cypress support prepares SDK scenario data through a Node task in isolated mode; preserve staging defaults for ordinary runs. Keep generated owner keys in memory and wait for CGW-visible state before browser assertions.
+
+Use `yarn workspace @safe-global/web e2e:env cypress` after starting the backend and wallet. `SAFE_E2E_SPECS` selects registered specs, `SAFE_E2E_WEB_URL` overrides the wallet URL, and `SAFE_E2E_BROWSER` selects a Chromium executable (default: Chrome). The runner clears `e2e/environment/artifacts/cypress` once per invocation and retains per-spec videos, screenshots and JUnit reports. Backend cleanup belongs to the calling CI workflow and must run after failures. See [local setup](../e2e/docs/ISOLATED_ENVIRONMENT.md).
+
+Shared isolated setup runs in `support/safes/isolated.js` before spec hooks. `getSafes()` only reads prepared fixtures. Mutable scenarios reset before each test when their entry in `e2e/environment/specs.mjs` sets `perTest`. Specs must not branch on `SAFE_E2E_ISOLATED`: seed their expected data and expose generated identifiers through fixture getters. Preserve existing mocks and assertions.
+
+Per-spec scenario `files` replace JSON data at existing fixture paths in a temporary fixtures directory. Preserve the original fixture shape and expected values, supplying generated IDs for seeded backend records. Source fixture files remain unchanged; the temporary directory is removed after each spec.
+
+When a spec hard-codes staging data (a Safe address outside `getSafes`, a short address, a transaction ID or a date), move the value into a fixture under `fixtures/` built with `fixtureGetters(namespace, { name: stagingDefault })`, and read it in the spec; the scenario returns the local value as `fixtures['<namespace>.<name>']`. Wrap localStorage payloads keyed by static Safes in `aliasedStorage`. Rebuild static Safes from `scenarios/staging-safes.mjs` snapshots of their real staging state instead of inventing data.
+
+Cases that need a service the local stack cannot provide are listed with a reason in the spec's `skips` (`e2e/environment/specs.mjs`); isolated runs skip them and staging runs keep them. Do not skip cases that also fail on staging.

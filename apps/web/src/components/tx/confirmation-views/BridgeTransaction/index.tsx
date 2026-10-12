@@ -1,7 +1,7 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import { DataRow } from '@/components/common/Table/DataRow'
-import { DataTable } from '@/components/common/Table/DataTable'
+import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
+import { DataTable } from '@safe-global/views/components/common/Table/DataTable'
 import TokenAmount from '@/components/common/TokenAmount'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
@@ -9,7 +9,7 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { formatUnits } from 'ethers'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
 
 interface BridgeTransactionProps {

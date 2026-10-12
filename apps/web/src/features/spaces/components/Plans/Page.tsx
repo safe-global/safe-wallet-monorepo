@@ -1,16 +1,21 @@
 import { useMemo, useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useLoadFeature } from '@/features/__core__'
 import { SafeProFeature } from '@/features/safe-pro-announcement'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
 import PlansV2 from './v2/PlansV2'
-import { buildPlanTiers, toCurrentPlan } from './planTiers'
+import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { takePlansEntry } from './planSelection'
+import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
@@ -19,7 +24,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
-import type { PlanPick } from './types'
+import type { PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
@@ -28,12 +33,27 @@ const PlansSkeleton = () => (
   </div>
 )
 
+/** The seats the recommended card opens on, the same option its card picks first. */
+const defaultSeats = (tiers: PlanTier[]): number | undefined => {
+  const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN && candidate.billingCycle !== 'year')
+  const option = tier?.options.find((candidate) => candidate.priceId === tier.currentPriceId) ?? tier?.options[0]
+  return option?.seats ?? undefined
+}
+
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useIsSafeProEnabled()
   const isPlansV2 = useIsSafeProPlansV2Enabled()
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
-  const { plan, seats, sponsoredTxs, subscription, isTrialing, isLoading: isPlanLoading } = useSpacePlan(spaceId)
+  const {
+    plan,
+    seats,
+    sponsoredTxs,
+    subscription,
+    isTrialing,
+    isLoading: isPlanLoading,
+    isUninitialized,
+  } = useSpacePlan(spaceId)
   const { paidPlans, isLoading: isOffersLoading } = useSpaceOffers(spaceId)
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const { startCheckout, isRedirecting: isCheckingOut } = useStartCheckout(spaceId)
@@ -50,6 +70,21 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
     () =>
       buildPlanTiers(paidPlans, currentPlan && subscription ? { subscription, seatsQuota: seats?.quota } : undefined),
     [paidPlans, currentPlan, subscription, seats?.quota],
+  )
+  const [entry] = useState(takePlansEntry)
+  const isReady = isSafePro && !isPlanLoading && !isOffersLoading && !isUninitialized
+  useTrackOnce(
+    SAFE_PRO_EVENTS.PLANS_PAGE_VIEWED,
+    {
+      ...entry,
+      [MixpanelEventParams.DEFAULT_SEATS]: defaultSeats(tiers),
+      [MixpanelEventParams.DEFAULT_BILLING_PERIOD]: BillingPeriod.MONTHLY,
+      [MixpanelEventParams.PLAN_LIMIT]: seats?.quota ?? undefined,
+      [MixpanelEventParams.SPONSORED_REMAINING]:
+        sponsoredTxs?.quota != null ? sponsoredTxs.quota - sponsoredTxs.used : undefined,
+      [MixpanelEventParams.SPONSORED_QUOTA]: sponsoredTxs?.quota ?? undefined,
+    },
+    isReady,
   )
 
   return (
@@ -80,7 +115,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
             onSubscribe={(picked) => {
               if (canChange) setPick(picked)
-              else if (picked.option.paymentLinkId) void startCheckout(picked.option.paymentLinkId)
+              else if (picked.option.paymentLinkId) {
+                void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+              }
             }}
             isSubscribing={isCheckingOut}
             currentPlan={currentPlan}
@@ -89,7 +126,13 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         )}
 
         {pick && currentPlan && (
-          <ChangePlanFlow spaceId={spaceId} pick={pick} currentPlan={currentPlan} onClose={() => setPick(undefined)} />
+          <ChangePlanFlow
+            spaceId={spaceId}
+            pick={pick}
+            currentPlan={currentPlan}
+            entry={entry}
+            onClose={() => setPick(undefined)}
+          />
         )}
       </div>
     </AuthState>

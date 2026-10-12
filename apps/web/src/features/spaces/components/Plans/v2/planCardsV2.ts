@@ -1,6 +1,12 @@
-import { ENTERPRISE_TIER, PLAN_CARD_COPY_V2 } from '../planCatalog'
+import { ENTERPRISE_TIER, PLAN_CARD_COPY_V2 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { formatPlanPrice, getPlanCta, priceSuffix } from '../planTiers'
-import type { CurrentPlan, PlanCta, PlanPick, PlanSeatOption, PlanTier } from '../types'
+import type {
+  CurrentPlan,
+  PlanCta,
+  PlanPick,
+  PlanSeatOption,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 /** v2 cards: "Manage plan" moves to the status panel, Enterprise changes go through sales. */
 export type PlanCtaV2 =

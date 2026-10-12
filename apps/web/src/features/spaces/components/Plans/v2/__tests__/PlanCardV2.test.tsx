@@ -1,5 +1,5 @@
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
+import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanCardV2 } from '../PlanCardV2'
 
 const businessPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({

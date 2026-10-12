@@ -7,12 +7,12 @@ import useChainId from '@/hooks/useChainId'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import TenderlyIcon from '@/public/images/transactions/tenderly-small.svg'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSigner } from '@/hooks/wallets/useWallet'
-import ExternalLink from '@/components/common/ExternalLink'
-import CheckIcon from '@/public/images/common/check.svg'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import CloseIcon from '@/public/images/common/close.svg'
 import {
   getSimulationStatus,
@@ -30,7 +30,7 @@ import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { selectHasOwnTenderly } from '@/store/settingsSlice'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 
 export const _isSimulationSuccessful = ({ isSuccess, isError, isCallTraceError }: SimulationStatus): boolean =>
   isSuccess && !isError && !isCallTraceError

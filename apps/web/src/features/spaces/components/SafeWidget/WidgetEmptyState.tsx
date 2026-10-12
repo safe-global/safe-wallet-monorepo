@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactElement, type ReactNode } from 'react'
 import { motion } from 'motion/react'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 
 interface WidgetEmptyStateProps {
   icon: ReactNode

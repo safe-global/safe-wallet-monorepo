@@ -19,14 +19,16 @@ export const selectQueuedTransactions = createSelector(selectTxQueue, (txQueue) 
   return txQueue.data?.results?.filter(isTransactionQueuedItem)
 })
 
+export const filterQueuedTransactionsByNonce = (page: QueuedItemPage | undefined, nonce?: number) => {
+  return (page?.results.filter(isTransactionQueuedItem) || []).filter((item) => {
+    return isMultisigExecutionInfo(item.transaction.executionInfo) && item.transaction.executionInfo.nonce === nonce
+  })
+}
+
 export const selectQueuedTransactionsByNonce = createSelector(
-  selectQueuedTransactions,
+  (state: RootState) => selectTxQueue(state).data,
   (_: RootState, nonce?: number) => nonce,
-  (queuedTransactions, nonce?: number) => {
-    return (queuedTransactions || []).filter((item) => {
-      return isMultisigExecutionInfo(item.transaction.executionInfo) && item.transaction.executionInfo.nonce === nonce
-    })
-  },
+  filterQueuedTransactionsByNonce,
 )
 
 export const txQueueListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {

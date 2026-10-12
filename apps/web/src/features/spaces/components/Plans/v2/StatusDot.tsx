@@ -1,4 +1,4 @@
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 export const StatusDot = ({ isWarning, className }: { isWarning?: boolean; className?: string }) => (
   <span

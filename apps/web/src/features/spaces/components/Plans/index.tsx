@@ -1,6 +1,13 @@
-import PlanCards from './PlanCards'
+import { PlanLocation } from '@/services/analytics/mixpanel-events'
+import PlanCards, { type PlanCardActions } from './PlanCards'
 import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
-import type { CurrentPlan, Meter, PlanPick, PlanSummary, PlanTier } from './types'
+import type {
+  CurrentPlan,
+  Meter,
+  PlanPick,
+  PlanSummary,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 export default function Plans({
   plan,
@@ -14,6 +21,7 @@ export default function Plans({
   isSubscribing,
   currentPlan,
   readOnly,
+  onCta,
 }: {
   plan: PlanSummary | null
   safeAccounts: Meter | null
@@ -27,7 +35,7 @@ export default function Plans({
   currentPlan?: CurrentPlan
   /** Only admins act on the plan; everyone else sees the plans without buttons. */
   readOnly?: boolean
-}) {
+} & Pick<PlanCardActions, 'onCta'>) {
   return (
     <div className="flex flex-col gap-6">
       <PlanStatusCard
@@ -47,6 +55,8 @@ export default function Plans({
         onManage={onManage}
         isBusy={isSubscribing || isManaging}
         readOnly={readOnly}
+        location={PlanLocation.PLANS_PAGE}
+        onCta={onCta}
       />
     </div>
   )

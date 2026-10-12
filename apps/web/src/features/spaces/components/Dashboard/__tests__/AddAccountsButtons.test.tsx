@@ -61,6 +61,7 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('../../../hooks/useSpacePlan', () => ({
   useSpacePlan: () => ({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() }),
 }))
+jest.mock('../../../hooks/useSpacePlanState', () => ({ useSpacePlanState: () => null }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: () => ({ isLocked: false, isResolving: false, trialPeriodDays: null }),
 }))

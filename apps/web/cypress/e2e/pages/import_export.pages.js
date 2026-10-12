@@ -57,8 +57,10 @@ export function verifyImportMessages() {
   main.checkTextsExistWithinElement(importDialog, importMessages)
 }
 
+// Reads through cy.fixture so the upload comes from the configured fixtures folder.
 export function dragAndDropFile(file) {
-  cy.get(jsonInput).selectFile(file, { action: 'drag-drop', force: true })
+  cy.fixture(file.replace(/^cypress\/fixtures\//, ''), null).as('uploadFile')
+  cy.get(jsonInput).selectFile('@uploadFile', { action: 'drag-drop', force: true })
 }
 export function verifyImportBtnIsVisible() {
   cy.get(dialogImportBtn).scrollIntoView().should('be.visible')

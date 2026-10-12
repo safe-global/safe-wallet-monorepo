@@ -1,5 +1,5 @@
-import InfoIcon from '@/public/images/notifications/info.svg'
-import WarningIcon from '@/public/images/notifications/warning.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
 import SuccessIcon from '@/public/images/notifications/success.svg'
 import { NotificationLink } from '@/components/common/Notifications'
@@ -8,9 +8,9 @@ import type { ReactElement } from 'react'
 import type { Notification } from '@/store/notificationsSlice'
 
 type NotificationVariant = Notification['variant']
-import UnreadBadge from '@/components/common/UnreadBadge'
+import UnreadBadge from '@safe-global/views/components/common/UnreadBadge'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import css from './styles.module.css'
 import classnames from 'classnames'

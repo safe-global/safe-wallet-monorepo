@@ -1,8 +1,8 @@
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { cn } from '@safe-global/views/utils/cn'
 
 const CreateButton = ({ isPrimary, className }: { isPrimary: boolean; className?: string }) => {
   const next = useNewSafeNextParam()

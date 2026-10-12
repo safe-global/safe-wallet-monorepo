@@ -37,8 +37,10 @@ export interface FeatureModuleWithHooks<TProps = Record<string, unknown>> extend
  * Feature with Redux store exports.
  * Features with state MAY export selectors.
  */
-export interface FeatureModuleWithStore<TProps = Record<string, unknown>, TState = unknown>
-  extends FeatureModuleWithHooks<TProps> {
+export interface FeatureModuleWithStore<
+  TProps = Record<string, unknown>,
+  TState = unknown,
+> extends FeatureModuleWithHooks<TProps> {
   /**
    * Selector to get feature state from root state.
    */

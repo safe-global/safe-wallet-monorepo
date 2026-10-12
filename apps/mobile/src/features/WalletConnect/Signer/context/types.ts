@@ -17,7 +17,8 @@ import type { SwitchNetworkResult } from '../hooks/useSwitchNetwork'
 import type { WalletConnectSigningResult } from '../hooks/useWalletConnectSigning'
 
 export interface WalletConnectContextValue
-  extends Pick<ImportSignerFlowResult, 'initiateConnection'>,
+  extends
+    Pick<ImportSignerFlowResult, 'initiateConnection'>,
     Pick<ReconnectFlowResult, 'reconnect'>,
     Pick<SwitchNetworkResult, 'switchNetwork' | 'switchNetworkIfNeeded' | 'isWrongNetwork'>,
     Pick<WalletConnectSigningResult, 'sign' | 'hasProvider'> {

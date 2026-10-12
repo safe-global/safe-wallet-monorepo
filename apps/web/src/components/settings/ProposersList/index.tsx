@@ -1,5 +1,5 @@
-import EnhancedTable from '@/components/common/EnhancedTable'
-import tableCss from '@/components/common/EnhancedTable/styles.module.css'
+import EnhancedTable from '@safe-global/views/components/common/EnhancedTable'
+import tableCss from '@safe-global/views/components/common/EnhancedTable/styles.module.css'
 import CheckWallet from '@/components/common/CheckWallet'
 import SafeProLock from '@/components/common/SafeProLock'
 import Track from '@/components/common/Track'
@@ -17,12 +17,12 @@ import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import AddIcon from '@/public/images/common/add.svg'
-import { SETTINGS_EVENTS } from '@/services/analytics'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { SETTINGS_EVENTS, UpgradeFeature } from '@/services/analytics'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useMemo, useState } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -141,7 +141,11 @@ const ProposersList = () => {
       {isEnabled &&
         (mustUpgradeToSafePro ? (
           <div className="mb-4">
-            <SafeProLock title="Adding proposers requires Safe Pro" href={upgradeHref} />
+            <SafeProLock
+              title="Adding proposers requires Safe Pro"
+              href={upgradeHref}
+              feature={UpgradeFeature.PROPOSERS}
+            />
           </div>
         ) : (
           !isPlanLoading && <AddProposerButton onAdd={onAdd} isUndeployedSafe={isUndeployedSafe} />

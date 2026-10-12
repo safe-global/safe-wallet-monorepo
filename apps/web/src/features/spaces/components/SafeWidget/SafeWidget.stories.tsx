@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ChevronRight, Plus, WalletCards } from 'lucide-react'
 import SafeWidget from './index'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 
 /**
  * SafeWidget - Compound component for Space dashboard widgets.

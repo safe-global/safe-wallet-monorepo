@@ -1,16 +1,16 @@
 import { useState } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Link } from '@/components/ui/link'
-import { List, ListItem } from '@/components/ui/list'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Link } from '@safe-global/views/components/ui/link'
+import { List, ListItem } from '@safe-global/views/components/ui/list'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { Seats } from '../PlanCards'
 import {
   COMPARE_COPY_V2,
@@ -18,8 +18,13 @@ import {
   getPlanContentV2,
   PLAN_CARD_COPY_V2,
   RECOMMENDED_PLAN,
-} from '../planCatalog'
-import type { CurrentPlan, PlanPick, PlanSeatOption, PlanTier } from '../types'
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import type {
+  CurrentPlan,
+  PlanPick,
+  PlanSeatOption,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
 import { getCardSavingV2, getPlanCtaV2, getPlanPriceV2 } from './planCardsV2'
 

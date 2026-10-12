@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
@@ -13,13 +17,13 @@ import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
-import { ENTERPRISE_TIER } from './planCatalog'
+import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import PlanCatalogV2 from './v2/PlanCatalogV2'
 import { InfoTip } from './PlanStatusCard'
-import type { CurrentPlan, PlanPick } from './types'
+import type { CurrentPlan, PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
 export const _endsIn = (daysLeft: number | null): string =>
   daysLeft === null || daysLeft > 1 ? `in ${daysLeft ?? 7} days` : daysLeft === 1 ? 'in 1 day' : 'today'
@@ -65,6 +69,15 @@ const TrialEndingChooser = ({
   const endsAt = currentPlan.periodEndsAt
     ? formatDate(Date.parse(currentPlan.periodEndsAt))
     : 'the end of your free access'
+  const entry = { [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.REMINDER_MODAL }
+  useTrackOnce(
+    SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED,
+    {
+      [MixpanelEventParams.LOCATION]: PlanLocation.REMINDER_MODAL,
+      [MixpanelEventParams.FREE_ACCESS_DAYS_LEFT]: currentPlan.daysLeft ?? undefined,
+    },
+    !isLoading,
+  )
 
   return (
     <>
@@ -110,6 +123,8 @@ const TrialEndingChooser = ({
                 onSubscribe={setPick}
                 isBusy={isRedirecting}
                 readOnly={!isAdmin}
+                location={PlanLocation.REMINDER_MODAL}
+                onCta={() => trackEvent(SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED, entry)}
               />
             )}
 
@@ -131,6 +146,7 @@ const TrialEndingChooser = ({
           spaceId={spaceId}
           pick={pick}
           currentPlan={currentPlan}
+          entry={entry}
           onClose={() => (isChanged ? onClose() : setPick(undefined))}
           onChanged={() => setIsChanged(true)}
         />

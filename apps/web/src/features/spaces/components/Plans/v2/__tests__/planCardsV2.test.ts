@@ -1,5 +1,5 @@
-import { ENTERPRISE_TIER } from '../../planCatalog'
-import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
+import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { getCardSavingV2, getPlanCtaV2, getPlanPriceV2, getYearlySavingV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({

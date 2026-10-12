@@ -1,5 +1,5 @@
 import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import type { SpendingLimitDrawerState } from '../../../resolveState'
+import type { SpendingLimitDrawerState } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import SpendingLimitActions from '../SpendingLimitActions'
 
 const TRANSACTION_LINK = 'https://app.safe.global/transactions/tx?id=0x9f3c'
@@ -146,24 +146,71 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByText('Only signers of this Safe account can edit this spending limit.')).toBeInTheDocument()
-    expect(screen.queryByText('Editing a spending limit is coming soon.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Upgrade to Business to edit spending limits.')).not.toBeInTheDocument()
   })
 
-  it('manage: keeps an unenforced policy out of the edit flow', () => {
-    setup({
-      kind: 'unenforced',
-      action: 'manage',
-      disabled: true,
-      helper: 'The allowance module is not enabled on this Safe account, so this limit is not enforced.',
-    })
+  it('enable: adds the module of an unenforced policy back', async () => {
+    const onEnableModule = jest.fn()
+    const { user } = renderWithUserEvent(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: false,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+        }}
+        onConnectWallet={jest.fn()}
+        onEnableModule={onEnableModule}
+      />,
+    )
 
-    expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(
-      screen.getByText('The allowance module is not enabled on this Safe account, so this limit is not enforced.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Edit' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Add module' }))
+
+    expect(onEnableModule).toHaveBeenCalledTimes(1)
   })
 
-  it('manage: disables editing while no edit flow is supplied', () => {
+  it('enable: disables the action for a non-signer', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: true,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+          helper: 'Only signers of this Safe account can add the module.',
+        }}
+        onConnectWallet={jest.fn()}
+        onEnableModule={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+    expect(screen.getByText('Only signers of this Safe account can add the module.')).toBeInTheDocument()
+  })
+
+  it('enable: disables the action and points to the upgrade while no flow is supplied', () => {
+    render(
+      <SpendingLimitActions
+        state={{
+          kind: 'unenforced',
+          action: 'enable',
+          disabled: false,
+          bannerTitle: 'Spending limit module deleted',
+          bannerLine2: 'Spending limit not applied as module is deleted.',
+        }}
+        onConnectWallet={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Add module' })).toBeDisabled()
+    expect(screen.getByText('Upgrade to Business to add the module.')).toBeInTheDocument()
+  })
+
+  it('manage: disables editing and points to the upgrade while no edit flow is supplied', () => {
     render(
       <SpendingLimitActions
         state={{ kind: 'active', action: 'manage', disabled: false }}
@@ -172,7 +219,7 @@ describe('SpendingLimitActions', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Edit' })).toBeDisabled()
-    expect(screen.getByText('Editing a spending limit is coming soon.')).toBeInTheDocument()
+    expect(screen.getByText('Upgrade to Business to edit spending limits.')).toBeInTheDocument()
   })
 
   describe('copy-link', () => {

@@ -10,7 +10,7 @@ import * as dashboard from '../pages/dashboard.pages.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import safes from '../../fixtures/safes/static.js'
+import sidebar from '../../fixtures/sidebar.js'
 
 let staticSafes = []
 
@@ -42,7 +42,7 @@ describe('Safe selector tests - details and currency', () => {
   it('Verify current safe details are shown in the safe selector trigger', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
     safeNav.verifySafeIconVisible()
-    safeNav.verifySafeSelectorTriggerName(safes.SEP_STATIC_SAFE_9_SHORT)
+    safeNav.verifySafeSelectorTriggerName(sidebar.safe9Short)
     safeNav.verifySafeSelectorThreshold(2, 2)
   })
 

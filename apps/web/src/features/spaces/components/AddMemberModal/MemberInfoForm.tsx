@@ -1,8 +1,8 @@
 import NameInput from '@/components/common/NameInput'
 import { MEMBER_NAME_MAX_LENGTH, NAME_MIN_LENGTH } from '@safe-global/utils/validation/names'
 import { Controller, useFormContext } from 'react-hook-form'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { FieldLabel } from '@/components/ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { FieldLabel } from '@safe-global/views/components/ui/field'
 import { RoleMenuItem } from './index'
 import { MemberRole } from '@/features/spaces'
 

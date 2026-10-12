@@ -4,16 +4,22 @@ import groupBy from 'lodash/groupBy'
 import { useAppDispatch, useAppSelector } from '@/store'
 import type { Notification } from '@/store/notificationsSlice'
 import { closeNotification, readNotification, selectNotifications } from '@/store/notificationsSlice'
-import { Alert, AlertAction, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { Link } from '@/components/ui/link'
-import { Button } from '@/components/ui/button'
+import {
+  Alert,
+  AlertAction,
+  AlertDescription,
+  AlertTitle,
+  AlertSeverityIcon,
+} from '@safe-global/views/components/ui/alert'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Button } from '@safe-global/views/components/ui/button'
 import css from './styles.module.css'
 import NextLink from 'next/link'
 import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'
 import { isRelativeUrl } from '@/utils/url'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 type NotificationVariant = 'success' | 'info' | 'warning' | 'error'
 

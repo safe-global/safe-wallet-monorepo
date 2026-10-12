@@ -1,5 +1,5 @@
 import { blo } from 'blo'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
 
 /**

@@ -1,9 +1,9 @@
 import { type ReactElement, type ReactNode } from 'react'
 import { X } from 'lucide-react'
-import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogOverlay, DialogPortal } from '@safe-global/views/components/ui/dialog'
+import { Button } from '@safe-global/views/components/ui/button'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import ChainIndicator from '@/components/common/ChainIndicator'
 
 import css from './styles.module.css'

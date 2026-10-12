@@ -1,4 +1,8 @@
-import { getCardFeaturesV2, POLICIES, WORKSPACE_2FA } from '../planCatalog'
+import {
+  getCardFeaturesV2,
+  POLICIES,
+  WORKSPACE_2FA,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 
 const SHARED = [
   'Shared address book',

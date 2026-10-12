@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react'
 import { ChevronsUp } from 'lucide-react'
 import classnames from 'classnames'
 import CodeIcon from '@/public/images/apps/code-icon.svg'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
 import { SAFE_APPS_SDK_DOCS_URL } from '@/config/constants'
 import css from './styles.module.css'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 
 const SafeAppsSDKLink = () => {
   const [isMini, setMini] = useState(false)

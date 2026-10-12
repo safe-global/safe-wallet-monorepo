@@ -1,9 +1,9 @@
 import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
 import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import { SeverityIcon } from './SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
@@ -13,7 +13,7 @@ import {
   isTxSimulationEnabled,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
