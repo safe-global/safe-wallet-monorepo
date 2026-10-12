@@ -1,6 +1,6 @@
 # Views package guidelines
 
-`@safe-global/views` holds the web app's presentational components: the shadcn/ui primitives in `src/components/ui/` and the views that only turn props into markup. `apps/web` and `apps/web-tanstack` import them as `@safe-global/views/<path inside src>`. It is web only; mobile does not use it.
+`@safe-global/views` holds the web app's presentational components: the shadcn/ui primitives in `src/components/ui/` and the views that only turn props into markup. `apps/web` imports them as `@safe-global/views/<path inside src>`. It is web only; mobile does not use it.
 
 ## Rules
 

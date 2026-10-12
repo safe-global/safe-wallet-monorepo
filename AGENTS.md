@@ -12,7 +12,6 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                             |
 | `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E (legacy — maintenance only)                                                |
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md) |
-| `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | TanStack Router + Vite migration runtime — reuses `apps/web/src`                       |
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                  |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo + Tamagui                                                                         |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | Shared packages: verification, codegen, dual env vars, theme workflow                  |
@@ -50,11 +49,10 @@ Every workspace's `type-check` script runs `yarn run -T -B tsc --noEmit`, which 
 ## Architecture Overview
 
 - **apps/web** – the main app (Next.js)
-- **apps/web-tanstack** – second runtime for the same code: reuses `apps/web/src` via Vite aliases
 - **apps/mobile** – Expo/React Native
 - **apps/tx-builder** – Safe App running in an iframe — MUI v6, not shadcn
 - **packages/** – `store`, `theme`, `utils` shared by web **and** mobile
-- **packages/views** – presentational views and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`
+- **packages/views** – presentational views and shadcn/ui primitives, used by `apps/web`
 - **config/**, `expo-plugins/*`, `tools/codemods/*` – shared config and tooling workspaces
 
 Subtree-specific caveats live in the Nested guidance table above.
@@ -103,7 +101,7 @@ Every behavioral change must include tests — each platform's file defines the 
 
 Verify your changes with the repo's `verify` scripts before committing — running them is your responsibility:
 
-1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, web-tanstack-, packages-, or config-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md); for `config/` changes see [config/AGENTS.md](config/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
+1. **Scoped check**: `yarn verify:changed` type-checks, lints, prettier-checks and tests changed files — **for `apps/web/` only. It does not auto-detect the workspace**: it defaults to web and silently skips files outside `apps/<workspace>/`, so a mobile-, packages-, or config-only change gets a false green pass. Other workspaces: `node scripts/verify.mjs --changed --workspace=mobile|tx-builder`. For `packages/` changes see [packages/AGENTS.md](packages/AGENTS.md); for `config/` changes see [config/AGENTS.md](config/AGENTS.md). (`SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.)
 
 2. **Full check**: Run `yarn verify:web` for a full check before committing.
 

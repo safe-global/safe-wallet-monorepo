@@ -28,21 +28,6 @@
         "@faker-js/faker"
       ]
     },
-    "apps/web-tanstack": {
-      "entry": [
-        "index.html",
-        "src/main.tsx",
-        "src/router.tsx",
-        "src/routes/**/*.tsx",
-        "vite.config.ts",
-        "plugins/vite-plugin-import-map-integrity.ts",
-        "plugins/vite-plugin-sw-assets.ts",
-        "src/service-worker/sw.ts",
-        "scripts/assert-sri.mjs"
-      ],
-      "project": ["src/**/*.{ts,tsx}", "plugins/**/*.ts"],
-      "ignore": ["**/*.test.{ts,tsx}", "dist/**"]
-    },
     "packages/store": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts"],
