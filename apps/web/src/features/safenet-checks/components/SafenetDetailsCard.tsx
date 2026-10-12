@@ -26,8 +26,6 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL, SafenetOutboundLink } from './SafenetLinks'
 import { SafenetDetailsPanel, SafenetDetailsPanelStack, SafenetPulse } from './SafenetBlocks'
 
-/** Collapsed Safenet verdict card for the transaction details column (design-pass prototype). */
-
 type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
 
 export type SafenetDetailsCardViewProps = {
@@ -49,24 +47,13 @@ const META_TEXT_CLASS = 'text-[var(--color-primary-light)]'
 /** Softer than body copy; still readable on paper (lighter than META_TEXT_CLASS in light mode). */
 const META_SOFT_TEXT_CLASS = 'text-muted-foreground'
 
-const Secondary = ({ children }: { children: ReactNode }): ReactElement => (
-  <Typography variant="paragraph-small" className={META_TEXT_CLASS}>
-    {children}
-  </Typography>
-)
-
 const BodyText = ({ children }: { children: ReactNode }): ReactElement => (
   <Typography variant="paragraph-small" className="text-[var(--color-text-primary)]">
     {children}
   </Typography>
 )
 
-const sentinels = (count: number) => `${count} sentinel${count === 1 ? '' : 's'}`
-
-/**
- * The PRD sentence for states that have no cited rules.
- * A risk with recognised rules renders only in FlaggedRuleBlocks.
- */
+/** The PRD sentence for states without cited rules; flagged rules render in FlaggedRuleBlocks. */
 const ResultBlock = ({
   publicStatus,
   snapshot,
@@ -100,7 +87,9 @@ const ResultBlock = ({
         <BodyText>{copy}</BodyText>
       )}
       {isInFlight && isQueued && (
-        <Secondary>You can sign now and come back to execute once the check is done.</Secondary>
+        <Typography variant="paragraph-small" className={META_TEXT_CLASS}>
+          You can sign now and come back to execute once the check is done.
+        </Typography>
       )}
     </div>
   )
@@ -118,7 +107,7 @@ const FlaggedRuleBlocks = ({ summary }: { summary: RejectionSummary }): ReactEle
             <BodyText>{rule.label}</BodyText>
             <BodyText>{rule.description}</BodyText>
             <Typography variant="paragraph-small" className={META_SOFT_TEXT_CLASS}>
-              Flagged by {sentinels(rule.citedBy)}
+              Flagged by {rule.citedBy} {rule.citedBy === 1 ? 'sentinel' : 'sentinels'}
             </Typography>
           </div>
         ))}
@@ -165,8 +154,7 @@ export const SafenetDetailsCardView = ({
         } as CSSProperties
       }
     >
-      {/* Remounts when a risk lands so the card opens even if it was already on screen. */}
-      <Accordion key={defaultExpanded ? 'open' : 'closed'} defaultValue={defaultExpanded ? ['safenet'] : []}>
+      <Accordion defaultValue={defaultExpanded ? ['safenet'] : []}>
         <AccordionItem value="safenet" className="border-0">
           <AccordionTrigger className={cn(accordionCss.trigger, 'items-center px-4')}>
             <div className="flex w-full flex-row items-center justify-between gap-2">

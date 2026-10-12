@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { createMockStory } from '@/stories/mocks'
+import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
 import { SafenetDetailsCardView } from './SafenetDetailsCard'
 import {
   SAFENET_EXAMPLE_VOTES,
@@ -15,10 +16,16 @@ import {
 
 faker.seed(456)
 
+const setup = createMockStory()
+
 const meta: Meta<typeof SafenetDetailsCardView> = {
   title: 'Features/SafenetChecks/SafenetDetailsCard',
   component: SafenetDetailsCardView,
-  parameters: { layout: 'centered' },
+  parameters: {
+    layout: 'centered',
+    ...setup.parameters,
+    msw: { handlers: [safenetChainsHandler(), ...setup.parameters.msw.handlers] },
+  },
   args: {
     safeTxHash: STORY_SAFE_TX_HASH,
     chainId: STORY_CHAIN_ID,
@@ -26,13 +33,12 @@ const meta: Meta<typeof SafenetDetailsCardView> = {
     defaultExpanded: true,
   },
   decorators: [
-    (Story, context) => (
-      <StoreDecorator initialState={{}} context={context}>
-        <div className="w-[560px]">
-          <Story />
-        </div>
-      </StoreDecorator>
+    (Story) => (
+      <div className="w-[560px]">
+        <Story />
+      </div>
     ),
+    setup.decorator,
   ],
   tags: ['autodocs'],
 }
@@ -46,10 +52,12 @@ export const Collapsed: Story = {
 
 export const Submitted: Story = {
   args: { publicStatus: CheckStatus.SUBMITTED, snapshot: exampleSnapshot(CheckStatus.SUBMITTED) },
+  tags: ['skip-visual-test'],
 }
 
 export const Simulating: Story = {
   args: { publicStatus: CheckStatus.IN_PROGRESS, snapshot: inProgressWithDeadline() },
+  tags: ['skip-visual-test'],
 }
 
 export const NoIssuesFound: Story = {

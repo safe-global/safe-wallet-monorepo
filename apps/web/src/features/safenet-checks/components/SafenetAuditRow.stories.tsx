@@ -5,7 +5,8 @@ import {
   type PublicCheckStatus,
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { StoreDecorator } from '@/stories/storeDecorator'
+import { createMockStory } from '@/stories/mocks'
+import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetAuditRowView } from './SafenetAuditRow'
 import {
@@ -22,23 +23,28 @@ faker.seed(456)
 
 const OWNER = '0x1234567890123456789012345678901234567890'
 
+const setup = createMockStory()
+
 const meta: Meta<typeof SafenetAuditRowView> = {
   title: 'Features/SafenetChecks/SafenetAuditRow',
   component: SafenetAuditRowView,
-  parameters: { layout: 'centered' },
+  parameters: {
+    layout: 'centered',
+    ...setup.parameters,
+    msw: { handlers: [safenetChainsHandler(), ...setup.parameters.msw.handlers] },
+  },
   decorators: [
-    (Story, context) => (
-      <StoreDecorator initialState={{}} context={context}>
-        <div className="bg-card w-[454px] rounded-lg p-4">
-          <AuditLog>
-            <AuditLogHeader />
-            <AuditRow label="Created" actionType="created" address={OWNER} timestamp={STORY_SUBMITTED_AT} />
-            <AuditRow label="Signed (1/2)" actionType="signed" address={OWNER} timestamp={STORY_SUBMITTED_AT} />
-            <Story />
-          </AuditLog>
-        </div>
-      </StoreDecorator>
+    (Story) => (
+      <div className="bg-card w-[454px] rounded-lg p-4">
+        <AuditLog>
+          <AuditLogHeader />
+          <AuditRow label="Created" actionType="created" address={OWNER} timestamp={STORY_SUBMITTED_AT} />
+          <AuditRow label="Signed (1/2)" actionType="signed" address={OWNER} timestamp={STORY_SUBMITTED_AT} />
+          <Story />
+        </AuditLog>
+      </div>
     ),
+    setup.decorator,
   ],
   tags: ['autodocs'],
 }
