@@ -1,21 +1,29 @@
+import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { AttestationVerificationStatus, CheckStatus } from '@safe-global/utils/features/safenet-checks'
+import { AttestationVerificationStatus, CheckStatus, type Hex } from '@safe-global/utils/features/safenet-checks'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import {
   attestedEvent,
   buildBenignSnapshot,
+  buildCheckView,
   buildSnapshot,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
-import { SafenetDetailsCardView } from '../SafenetDetailsCard'
+import SafenetDetailsCard, { SafenetDetailsCardView } from '../SafenetDetailsCard'
 import { SAFENET_ATTESTATION_LINK_LABEL, SAFENET_EXPLORER_LINK_LABEL } from '../SafenetLinks'
 
 jest.mock('@/hooks/useChains', () => ({
   useChain: jest.fn(),
 }))
+jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+  useSafenetCheck: jest.fn(),
+}))
 
 const mockUseChain = useChain as jest.MockedFunction<typeof useChain>
+const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
 
 const HASH = `0x${'ab'.repeat(32)}` as const
 
@@ -196,5 +204,47 @@ describe('SafenetDetailsCardView', () => {
     )
 
     expect(screen.queryByText(/come back to execute/)).not.toBeInTheDocument()
+  })
+})
+
+describe('SafenetDetailsCard', () => {
+  const safeTxHash = faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }) as Hex
+  const chainId = faker.string.numeric(3)
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('renders nothing before the first read resolves', () => {
+    mockUseSafenetCheck.mockReturnValue(buildCheckView({ isLoading: true }))
+
+    const { container } = render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('renders nothing when no check was observed', () => {
+    const snapshot = buildSnapshot({ safeTxHash, status: CheckStatus.UNAVAILABLE })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.UNAVAILABLE, publicStatus: CheckStatus.UNAVAILABLE }),
+    )
+
+    const { container } = render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
+
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('shows the card, collapsed, once a check is read', () => {
+    const snapshot = buildBenignSnapshot({ safeTxHash })
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
+    )
+
+    render(<SafenetDetailsCard safeTxHash={safeTxHash} chainId={chainId} />)
+
+    const card = screen.getByTestId('safenet-details-card')
+    expect(card).toHaveAttribute('data-status', CheckStatus.BENIGN)
+    expect(card).toHaveTextContent('No issues found')
+    expect(screen.getByRole('button', { expanded: false })).toBeInTheDocument()
   })
 })
