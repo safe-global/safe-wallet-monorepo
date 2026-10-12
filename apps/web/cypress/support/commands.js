@@ -67,10 +67,6 @@ const DEFAULT_OPTS = {
 
 const DEFAULT_IFRAME_SELECTOR = 'iframe'
 
-function sleep(timeout) {
-  return new Promise((resolve) => setTimeout(resolve, timeout))
-}
-
 // This command checks that an iframe has loaded onto the page
 // - This will verify that the iframe is loaded to any page other than 'about:blank'
 //   cy.frameLoaded()
@@ -103,42 +99,25 @@ Cypress.Commands.add('frameLoaded', (selector, opts) => {
         message: [selector],
       }).snapshot()
     : null
-  return cy.get(selector, { log: false }).then({ timeout: fullOpts.timeout }, async ($frame) => {
-    log?.set('$el', $frame)
-    if ($frame.length !== 1) {
-      throw new Error(
-        `cypress-iframe commands can only be applied to exactly one iframe at a time.  Instead found ${$frame.length}`,
-      )
-    }
+  const hasNavigated = (location) => {
+    if (!fullOpts.url) return location !== 'about:blank'
+    return typeof fullOpts.url === 'string' ? location.includes(fullOpts.url) : fullOpts.url.test(location)
+  }
 
-    const contentWindow = $frame.prop('contentWindow')
-    const hasNavigated = fullOpts.url
-      ? () =>
-          typeof fullOpts.url === 'string'
-            ? contentWindow.location.toString().includes(fullOpts.url)
-            : fullOpts.url?.test(contentWindow.location.toString())
-      : () => contentWindow.location.toString() !== 'about:blank'
-
-    while (!hasNavigated()) {
-      await sleep(100)
-    }
-
-    if (contentWindow.document.readyState === 'complete') {
-      return $frame
-    }
-
-    const loadLog = Cypress.log({
-      name: 'Frame Load',
-      message: [contentWindow.location.toString()],
-      event: true,
-    }).snapshot()
-    await new Promise((resolve) => {
-      Cypress.$(contentWindow).on('load', resolve)
+  // Re-queries the iframe on every retry: the app can remount it, which detaches the first window
+  return cy
+    .get(selector, { log: false, timeout: fullOpts.timeout })
+    .should(($frame) => {
+      expect($frame, 'one iframe for cypress-iframe commands').to.have.length(1)
+      const contentWindow = $frame.prop('contentWindow')
+      expect(contentWindow, 'iframe window').to.exist
+      expect(hasNavigated(contentWindow.location.toString()), 'iframe navigated').to.be.true
+      expect(contentWindow.document.readyState, 'iframe document').to.equal('complete')
     })
-    loadLog.end()
-    log?.finish()
-    return $frame
-  })
+    .then(($frame) => {
+      log?.set('$el', $frame).end()
+      return $frame
+    })
 })
 
 // This will cause subsequent commands to be executed inside of the given iframe
