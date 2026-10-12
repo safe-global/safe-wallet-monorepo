@@ -152,9 +152,9 @@ export const Empty: Story = (() => {
 })()
 ```
 
-## Transaction mocking (known limitation)
+## Transaction mocking
 
-_Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` before relying on it._ Transaction page stories (Queue, History) have basic MSW handlers but transaction mocking is not fully working: details use `txData: null` to avoid Receipt parsing errors, and expanding details may show incomplete data. Improving this requires matching the CGW `txData` structure the Receipt/Summary components expect.
+`createMockTransactionDetails` in `src/stories/mocks/handlers.ts` returns CGW-shaped `txData` (decoded `transfer` / `addOwnerWithThreshold`, or a native transfer), so the "Transaction details" block and Receipt render in transaction page stories. To key a transaction by a real `safeTxHash` (needed by anything that reads chain data for it, e.g. Safenet), prepend your own queue and tx-details handlers; see `src/stories/pages/safenet/`.
 
 ## Visual regression (Argos)
 

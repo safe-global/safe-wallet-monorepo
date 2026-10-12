@@ -74,6 +74,23 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
   WINDOW_UNCERTAIN: STATUS_UNKNOWN,
 }
 
+/** Compact state labels for the details-card chip; the full state name stays in the card copy. */
+export const CHIP_LABEL: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
+  [CheckStatus.SUBMITTED]: 'Submitted',
+  [CheckStatus.IN_PROGRESS]: 'Simulating',
+  [CheckStatus.BENIGN]: 'No issues found',
+  [CheckStatus.MALICIOUS]: 'Risk detected',
+  [CheckStatus.TIMED_OUT]: 'Check failed',
+}
+
+export const CHIP_VARIANT = {
+  [CheckStatus.SUBMITTED]: 'info',
+  [CheckStatus.IN_PROGRESS]: 'info',
+  [CheckStatus.BENIGN]: 'positive',
+  [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.TIMED_OUT]: 'warning',
+} as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
+
 /** The check's page on the Safenet explorer — per-sentinel detail, not proof of a verdict. */
 export const getSafenetExplorerUrl = (chainId: string, safeTxHash: string): string =>
   `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
