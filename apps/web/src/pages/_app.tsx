@@ -1,6 +1,6 @@
 import Analytics from '@/services/analytics/Analytics'
 import type { ReactNode } from 'react'
-import { type ReactElement, useEffect, useState } from 'react'
+import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
@@ -96,6 +96,7 @@ import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/feat
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
@@ -227,10 +228,10 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 }
 
 // In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
-const DevClientOnlyApp = (props: AppProps): ReactElement | null => {
-  const [isMounted, setIsMounted] = useState(false)
-  useEffect(() => setIsMounted(true), [])
-  return isMounted ? <SafeWalletApp {...props} /> : null
-}
+const DevClientOnlyApp = (props: AppProps): ReactElement => (
+  <RenderAfterMount>
+    <SafeWalletApp {...props} />
+  </RenderAfterMount>
+)
 
 export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp
