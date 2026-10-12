@@ -1,7 +1,7 @@
 import { X } from 'lucide-react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import SearchField from '@/components/common/SearchField'
+import SearchField from '@safe-global/design/components/common/SearchField'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/design/components/ui/select'
 import { Checkbox } from '@safe-global/design/components/ui/checkbox'
 import { Field, FieldLabel } from '@safe-global/design/components/ui/field'

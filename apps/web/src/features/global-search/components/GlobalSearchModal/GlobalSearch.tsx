@@ -1,4 +1,4 @@
-import SearchField from '@/components/common/SearchField'
+import SearchField from '@safe-global/design/components/common/SearchField'
 
 interface GlobalSearchProps {
   value: string
