@@ -1,6 +1,7 @@
 import { extendedSafeInfoBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { render, renderHook, waitFor } from '@/tests/test-utils'
 import { zeroPadValue } from 'ethers'
+import { faker } from '@faker-js/faker'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -1049,16 +1050,7 @@ describe('SignOrExecute hooks', () => {
       const proposeSpy = jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
-      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation(() => {
-        tx.addSignature({
-          signer: '0x12345',
-          data: '0x0001',
-          staticPart: () => '',
-          dynamicPart: () => '',
-          isContractSignature: false,
-        })
-        return Promise.resolve(tx)
-      })
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning')
       const relaySpy = jest.spyOn(txSender, 'dispatchTxRelay').mockImplementation(() => Promise.resolve(undefined))
 
       const { result } = renderHook(() => useTxActions())
@@ -1073,7 +1065,7 @@ describe('SignOrExecute hooks', () => {
       expect(relaySpy).not.toHaveBeenCalled()
     })
 
-    describe('executor approval', () => {
+    describe('wallet execution', () => {
       const setupThreshold1Safe = () => {
         jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
           safe: {
@@ -1110,12 +1102,15 @@ describe('SignOrExecute hooks', () => {
           .spyOn(txSender, 'dispatchTxExecution')
           .mockImplementation((() => Promise.resolve('0xhash')) as unknown as typeof txSender.dispatchTxExecution)
 
-        const { result } = renderHook(() => useTxActions())
-        await result.current.executeTx({ gasPrice: 1, gasLimit: 50000 }, tx, '123')
+        const txOptions = { gasPrice: 1, gasLimit: faker.number.int({ min: 21_000 }) }
 
+        const { result } = renderHook(() => useTxActions())
+        await result.current.executeTx(txOptions, tx, '123')
+
+        const [, executedTx, executedTxOptions] = executeSpy.mock.calls[0]
         expect(signSpy).not.toHaveBeenCalled()
-        expect(executeSpy.mock.calls[0][1]).toBe(tx)
-        expect(executeSpy.mock.calls[0][2]).toEqual({ gasPrice: 1, gasLimit: 50000 })
+        expect(executedTx).toBe(tx)
+        expect(executedTxOptions).toEqual(txOptions)
       })
 
       it('leaves a missing signature to the implicit executor approval', async () => {
@@ -1135,8 +1130,9 @@ describe('SignOrExecute hooks', () => {
         const { result } = renderHook(() => useTxActions())
         await result.current.executeTx({ gasPrice: 1 }, tx)
 
+        const [, executedTx] = executeSpy.mock.calls[0]
         expect(signSpy).not.toHaveBeenCalled()
-        expect(executeSpy.mock.calls[0][1]).toBe(tx)
+        expect(executedTx).toBe(tx)
       })
     })
   })

@@ -6,7 +6,10 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
-import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+
+const mockWalletAddress = faker.finance.ethereumAddress()
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: jest.fn(() => true) }))
@@ -17,28 +20,23 @@ jest.mock('@/hooks/useProposers', () => ({
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,
-  default: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009', chainId: '1' })),
-  useSigner: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009', chainId: '1' })),
+  default: jest.fn(() => ({ address: mockWalletAddress, chainId: '1' })),
+  useSigner: jest.fn(() => ({ address: mockWalletAddress, chainId: '1' })),
 }))
 jest.mock('@/components/tx/shared/hooks', () => ({
   __esModule: true,
   useAlreadySigned: jest.fn(() => false),
 }))
 
-const walletAddress = '0x1234567890000000000000000000000000000009'
-
 const createTxSummary = (confirmationsSubmitted: number, confirmationsRequired: number) =>
-  ({
-    id: faker.string.uuid(),
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce: 0,
-      confirmationsRequired,
-      confirmationsSubmitted,
-      missingSigners: [{ value: walletAddress }],
-    },
-  }) as unknown as Transaction
+  safeTxSummaryBuilder()
+    .with({
+      txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      executionInfo: executionInfoBuilder()
+        .with({ confirmationsSubmitted, confirmationsRequired, missingSigners: [{ value: mockWalletAddress }] })
+        .build(),
+    })
+    .build()
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockUseAlreadySigned = useAlreadySigned as jest.MockedFunction<typeof useAlreadySigned>
