@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import type { UserSession } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import type { EntitlementsResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 
@@ -52,8 +53,12 @@ const entitlements = (sub: Subscription | undefined): EntitlementsResponse => ({
     : [],
 })
 
+const session: UserSession = { id: '1', authMethod: 'siwe' }
+
 /** Keep access checks local and deterministic, without contacting billing services. */
 export const billingHandlers = (subscriptions: Subscription[]) => [
   http.get(/\/v1\/billing\/spaces\/[^/]+\/subscriptions/, () => HttpResponse.json(subscriptions)),
   http.get(/\/v1\/spaces\/[^/]+\/entitlements$/, () => HttpResponse.json(entitlements(subscriptions[0]))),
+  // A 403 from a real backend makes the app check the session; keep the story user signed in
+  http.get(/\/v1\/auth\/me$/, () => HttpResponse.json(session)),
 ]
