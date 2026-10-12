@@ -34,7 +34,7 @@ describe('Batch transaction tests', { defaultCommandTimeout: 30000 }, () => {
 
     it('Verify a second transaction can be added to the batch', () => {
       batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
-      cy.wait(1000)
+      batch.verifyBatchIconCount(1)
       batch.addNewTransactionToBatch(getMockAddress(), currentNonce, funds_first_tx)
       batch.verifyBatchIconCount(2)
       batch.clickOnBatchCounter()
