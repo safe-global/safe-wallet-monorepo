@@ -37,10 +37,9 @@ const SideDrawer = ({
   const smDrawerHidden = useDebounce(!isSmallScreen, 300)
   const router = useRouter()
 
-  // Depends on isSafeAppRoute so entering or leaving a Safe App restores the default: a manual
-  // collapse must not persist onto routes that hide the toggle, where it could not be undone
   useEffect(() => {
-    onToggle(!isSmallScreen)
+    const closeSidebar = isSmallScreen || isSafeAppRoute
+    onToggle(!closeSidebar)
   }, [isSmallScreen, isSafeAppRoute, onToggle])
 
   // Close the drawer whenever the route changes
