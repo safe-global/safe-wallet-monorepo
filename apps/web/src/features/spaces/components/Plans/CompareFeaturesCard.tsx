@@ -21,9 +21,6 @@ import {
 import { FeatureCheck } from './FeatureCheck'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
-const TABLE_ID = `${COMPARE_FEATURES_ID}-table`
-const TITLE_ID = `${COMPARE_FEATURES_ID}-title`
-const PLANS = PLAN_ORDER
 
 /** Collapsed, only the coming-soon rows show in full; the next row fades out under the button. */
 export const VISIBLE_FEATURES = COMPARE_SECTIONS[0].rows.length
@@ -100,7 +97,7 @@ const CompareRow = ({
         )}
       </span>
     </TableHead>
-    {PLANS.map((plan) => (
+    {PLAN_ORDER.map((plan) => (
       <TableCell key={plan} className="px-4 py-3">
         <CompareValue value={row.values[plan]} />
       </TableCell>
@@ -152,7 +149,7 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
       <TableHead scope="col" className="h-11 w-[28%] px-4 py-0 align-middle font-semibold">
         {COMPARE_COPY.featureColumn}
       </TableHead>
-      {PLANS.map((plan) => {
+      {PLAN_ORDER.map((plan) => {
         const isCurrent = plan === currentPlanName
         return (
           <TableHead key={plan} scope="col" className="h-11 px-4 py-0 align-middle font-semibold">
@@ -209,7 +206,7 @@ const CompareSection = ({
       <TableRow className="bg-muted hover:bg-muted">
         <TableHead
           scope="colgroup"
-          colSpan={PLANS.length + 1}
+          colSpan={PLAN_ORDER.length + 1}
           className="h-auto px-4 py-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase"
         >
           {section.title}
@@ -261,7 +258,7 @@ export default function CompareFeaturesCard({
       ref={ref}
       id={COMPARE_FEATURES_ID}
       tabIndex={-1}
-      aria-labelledby={TITLE_ID}
+      aria-labelledby="compare-features-title"
       className="scroll-mt-6 rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
       data-testid="compare-features"
     >
@@ -270,11 +267,11 @@ export default function CompareFeaturesCard({
           <button
             type="button"
             aria-expanded={isExpanded}
-            aria-controls={TABLE_ID}
+            aria-controls="compare-features-table"
             onClick={() => onExpandedChange(!isExpanded)}
             className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <Typography variant="h4" id={TITLE_ID}>
+            <Typography variant="h4" id="compare-features-title">
               {COMPARE_COPY.title}
             </Typography>
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
@@ -290,7 +287,7 @@ export default function CompareFeaturesCard({
 
           <div className="@container relative">
             <div
-              id={TABLE_ID}
+              id="compare-features-table"
               data-testid="compare-features-table"
               style={tableStyle}
               className={cn(
