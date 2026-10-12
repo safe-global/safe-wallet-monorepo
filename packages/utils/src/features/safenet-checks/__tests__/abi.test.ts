@@ -1,8 +1,6 @@
 import {
   CONSENSUS_EVENT_FRAGMENTS,
-  CONSENSUS_PLAIN_EVENT_FRAGMENTS,
   consensusInterface,
-  consensusPlainInterface,
   EVENT_DISPATCH,
   SENTINEL_EVENT_FRAGMENTS,
   TOPICS,
@@ -18,28 +16,12 @@ describe('safenet-checks abi', () => {
     expect(Object.keys(TOPICS)).toHaveLength(EVENT_DISPATCH.length)
   })
 
-  it('covers every declared fragment across all three interfaces', () => {
-    const totalFragments =
-      CONSENSUS_EVENT_FRAGMENTS.length + CONSENSUS_PLAIN_EVENT_FRAGMENTS.length + SENTINEL_EVENT_FRAGMENTS.length
+  it('covers every declared fragment across both interfaces', () => {
+    const totalFragments = CONSENSUS_EVENT_FRAGMENTS.length + SENTINEL_EVENT_FRAGMENTS.length
     expect(EVENT_DISPATCH).toHaveLength(totalFragments)
   })
 
-  // Regression guard: the plain pair was read off the live Gnosis beta
-  // Consensus on 2026-07-28 — what beta actually emits while the sentinels
-  // are not live there. Reading the wrong family silently yields "no events".
-  it('matches the topic0s observed on the deployed Gnosis beta Consensus', () => {
-    expect(consensusPlainInterface.getEvent('TransactionProposed')!.topicHash).toBe(
-      '0xe7427c304b80147290ec649ec1d8881f5fa455e85ba79ecb7dbfc58a56ea0906',
-    )
-    expect(consensusPlainInterface.getEvent('TransactionAttested')!.topicHash).toBe(
-      '0x72272729e643703db011cc155474c30d652f1a68712d921cc263a881efd7bce6',
-    )
-  })
-
-  // Same guard for the relaunched (2026-08) Sepolia Consensus: both topic0s
-  // were read off live logs (proposal tx 0x94b9f9b3…30b1, attestation tx
-  // 0x9ae86704…4ff4b).
-  it('matches the topic0s observed on the relaunched Sepolia Consensus', () => {
+  it('matches the topic0s observed on the Consensus for the Safenet deployment on Gnosis Chain', () => {
     expect(consensusInterface.getEvent('TransactionProposed')!.topicHash).toBe(
       '0x47d867ce4d91d0487fa4d2ac80b13e7466ce53dd018a8eef564fc60c92b53d03',
     )
@@ -55,8 +37,6 @@ describe('safenet-checks abi', () => {
     expect(byName).toEqual({
       'ORACLE_PROPOSED:TransactionProposed': '0x47d867ce4d91d0487fa4d2ac80b13e7466ce53dd018a8eef564fc60c92b53d03',
       'ORACLE_ATTESTED:TransactionAttested': '0x1980afd018b6bb99a313d3b7a88274259621396f9b8acaa712ef114872977357',
-      'PLAIN_PROPOSED:TransactionProposed': '0xe7427c304b80147290ec649ec1d8881f5fa455e85ba79ecb7dbfc58a56ea0906',
-      'PLAIN_ATTESTED:TransactionAttested': '0x72272729e643703db011cc155474c30d652f1a68712d921cc263a881efd7bce6',
       'REQUEST_CREATED:NewRequest': '0x8ec61272960f97d43d7f8f85ed630aa512818577f3d1e548e7627b06dbbbda86',
       'SENTINEL_COMMITTED:Committed': '0x45acbf2626c7d2bd97eb2142a43d392e8f3364c9e140b3d022446155491819d6',
       'SENTINEL_REVEALED:Revealed': '0xd2cdead965dbd376703d9a79240f31f1228055ab42384b68353332fcd2af939a',

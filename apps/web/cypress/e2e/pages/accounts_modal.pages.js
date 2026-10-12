@@ -103,8 +103,15 @@ export function clickSafeOptionsBtn(index = 0) {
   cy.get(nameInput).should('be.visible')
 }
 
+// Search keeps non-matching rows and groups mounted but hidden, so the list checks skip hidden elements.
+const visibleText = ($list) => {
+  const $copy = $list.clone()
+  $copy.find('[hidden], .hidden').remove()
+  return $copy.text()
+}
+
 export function verifyAccountsListContains(name) {
-  cy.get(dropdownScrollArea).should('contain.text', name)
+  cy.get(dropdownScrollArea).should(($list) => expect(visibleText($list)).to.contain(name))
 }
 
 export function typeSafeName(name) {
@@ -161,11 +168,11 @@ export function verifySearchInputAbovePinnedSection() {
 }
 
 export function verifyAccountsListDoesNotContain(text) {
-  cy.get(dropdownScrollArea).should('not.contain.text', text)
+  cy.get(dropdownScrollArea).should(($list) => expect(visibleText($list)).not.to.contain(text))
 }
 
 export function verifyAccountsListItemCount(count) {
-  cy.get(dropdownScrollArea).find(safeItemAddress).should('have.length', count)
+  cy.get(dropdownScrollArea).find(safeItemAddress).filter(':visible').should('have.length', count)
 }
 
 export function verifyPinnedSafeDoesNotExist(address) {

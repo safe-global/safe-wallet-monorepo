@@ -6,12 +6,15 @@ import * as main from '../pages/main.page.js'
 import * as navigation from '../pages/navigation.page'
 import * as nfts from '../pages/nfts.pages.js'
 import { clickOnAssetSwapBtn } from '../pages/swaps.pages.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_1_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer, signer2
+before(() => {
+  signer = walletCredentials.OWNER_1_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Assets 2 tests', () => {
   before(async () => {

@@ -94,29 +94,6 @@ const normalize = (dispatch: TopicDispatch, args: Result, log: RawLog): Normaliz
         oracleDataHash: args.oracleDataHash as Hex,
       }
     }
-    case CheckEventType.PLAIN_PROPOSED:
-      return {
-        ...base,
-        type: CheckEventType.PLAIN_PROPOSED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
-        epoch: str(args.epoch),
-      }
-    case CheckEventType.PLAIN_ATTESTED:
-      return {
-        ...base,
-        type: CheckEventType.PLAIN_ATTESTED,
-        safeTxHash: args.safeTxHash as Hex,
-        chainId: str(args.chainId),
-        safe: args.safe as string,
-        epoch: str(args.epoch),
-        signatureId: args.signatureId as Hex,
-        attestation: {
-          r: { x: str(args.attestation.r.x), y: str(args.attestation.r.y) },
-          z: str(args.attestation.z),
-        },
-      }
     case CheckEventType.REQUEST_CREATED:
       return {
         ...base,

@@ -91,14 +91,6 @@ export const POLL_INTERVAL_LATE_MS = 30_000
 export const LATE_WINDOW_BLOCKS = 720
 
 /**
- * Deadline substitute for the plain path, which emits none: an attestation is
- * expected within this many blocks of the first observed event (~20 min; beta
- * attests within ~5 blocks). Without it, a proposed-but-never-attested check
- * would poll a public RPC at the fast interval forever.
- */
-export const PLAIN_DEADLINE_BLOCKS = 240
-
-/**
  * How long after submission an UNAVAILABLE read keeps polling. Covers the race
  * where the first read lands before the check request is mined; Gnosis blocks
  * every ~5s, so a request mines well inside this window.

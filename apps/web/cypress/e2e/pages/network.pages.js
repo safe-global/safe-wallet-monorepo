@@ -12,7 +12,6 @@ const chainSelectorLoading = '[data-testid="chain-selector-loading"]'
 export const createSafeMsg = (network) => `Successfully added your account on ${network}`
 
 export function clickChainNavigationButton() {
-  cy.wait(1000)
   cy.get(chainNavigationButton).should('be.visible').click()
   cy.get(allNetworksAccordion).should('be.visible')
 }

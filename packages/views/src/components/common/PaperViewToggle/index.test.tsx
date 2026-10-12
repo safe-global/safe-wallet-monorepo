@@ -29,6 +29,12 @@ describe('PaperViewToggle', () => {
     expect(screen.queryByTestId('second-view')).not.toBeInTheDocument()
   })
 
+  it('lets the outlined active view shrink to the panel height so its content scrolls instead of overflowing', () => {
+    render(<PaperViewToggle outlined>{views}</PaperViewToggle>)
+
+    expect(screen.getByRole('tabpanel')).toHaveClass('flex', 'flex-col', 'min-h-0')
+  })
+
   it('switches the view when another tab is selected in the outlined panel', () => {
     render(<PaperViewToggle outlined>{views}</PaperViewToggle>)
 

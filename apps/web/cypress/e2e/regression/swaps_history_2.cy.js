@@ -5,13 +5,12 @@ import * as swaps_data from '../../fixtures/swaps_data.json'
 import * as data from '../../fixtures/txhistory_data_data.json'
 import * as swaps from '../pages/swaps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
+import swapFixtures from '../../fixtures/swaps.js'
 
 let staticSafes = []
 
 const swapsHistory = swaps_data.type.history
 const typeGeneral = data.type.general
-
-const safe = 'sep:0xF184a243925Bf7fb1D64487339FF4F177Fb75644'
 
 describe('Swaps history tests 2', () => {
   before(async () => {
@@ -49,7 +48,7 @@ describe('Swaps history tests 2', () => {
   })
 
   it('Verify swap operation with 2 actions: wrap & swap', { defaultCommandTimeout: 30000 }, () => {
-    cy.visit(constants.transactionUrl + safe + swaps.swapTxs.wrapSwap)
+    cy.visit(constants.transactionUrl + swapFixtures.wrapSwapSafe + swaps.swapTxs.wrapSwap)
     const eq = swaps.createRegex(swapsHistory.COWeqWETH, 'COW')
     const atLeast = swaps.createRegex(swapsHistory.forAtLeastFullCow, 'COW')
 
@@ -69,7 +68,7 @@ describe('Swaps history tests 2', () => {
   })
 
   it('Verify "Cancelled" status for manually cancelled limit orders', { defaultCommandTimeout: 30000 }, () => {
-    const safe = '0x2a73e61bd15b25B6958b4DA3bfc759ca4db249b9'
+    const safe = swapFixtures.cancelledOrderSafe
     cy.visit(constants.transactionUrl + safe + swaps.swapTxs.sellCancelled)
     const uni = swaps.createRegex(swapsHistory.forAtLeastFullUni, 'UNI')
     const eq = swaps.createRegex(swapsHistory.UNIeqCOW, 'K COW')
@@ -87,7 +86,7 @@ describe('Swaps history tests 2', () => {
   })
 
   it('Verify swap operation with 3 actions: wrap & approve & swap', { defaultCommandTimeout: 30000 }, () => {
-    const safe = '0x140663Cb76e4c4e97621395fc118912fa674150B'
+    const safe = swapFixtures.threeActionsSafe
     cy.visit(constants.transactionUrl + safe + swaps.swapTxs.sell3Actions)
     const dai = swaps.createRegex(swapsHistory.forAtLeastFullDai, 'DAI')
     const eq = swaps.createRegex(swapsHistory.DAIeqWETH, 'WETH')

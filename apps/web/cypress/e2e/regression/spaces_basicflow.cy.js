@@ -2,12 +2,15 @@ import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as space from '../pages/spaces.page.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const admin = walletCredentials.OWNER_4_PRIVATE_KEY
-const user = walletCredentials.OWNER_3_PRIVATE_KEY
-const user_address = walletCredentials.OWNER_3_WALLET_ADDRESS
+let admin, user, user_address
+before(() => {
+  admin = walletCredentials.OWNER_4_PRIVATE_KEY
+  user = walletCredentials.OWNER_3_PRIVATE_KEY
+  user_address = walletCredentials.OWNER_3_WALLET_ADDRESS
+})
 
 describe('Spaces basic flow tests', () => {
   before(async () => {
@@ -27,7 +30,6 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
     space.clickOnSpaceSelector(spaceName)
@@ -35,6 +37,7 @@ describe('Spaces basic flow tests', () => {
     space.goToSpaceSettings()
     space.verifySpaceSettingsGeneralLoaded()
     space.editSpace(newSpaceName)
+    space.verifyDeleteBlockedByTrial()
     space.clickOnSpaceSelector(newSpaceName)
     space.spaceExists(newSpaceName)
     space.deleteSpace(newSpaceName)
@@ -51,12 +54,9 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.goToSpaceSafeAccounts()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
-    space.goToSpaceSettings()
-    space.verifySpaceSettingsGeneralLoaded()
     space.deleteSpace(spaceName)
   })
 
@@ -68,7 +68,6 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()
     space.spaceExists(spaceName)
@@ -93,10 +92,6 @@ describe('Spaces basic flow tests', () => {
     cy.clearAllCookies()
     cy.visit(constants.spacesUrl)
     space.signInWithWallet(admin)
-    space.goToSpacesView()
-    space.openSpaceByName(spaceName)
-    space.goToSpaceSettings()
-    space.verifySpaceSettingsGeneralLoaded()
     space.deleteSpace(spaceName)
   })
 })

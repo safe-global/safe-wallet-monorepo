@@ -116,6 +116,7 @@ const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
 const noTxFoundStr = (type) => `0 ${type} transactions found`
+const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
 const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
 const bulkConfirmationText = (tx) =>
@@ -326,7 +327,12 @@ export function deleteTx() {
   cy.get(deleteTxModalBtn).click()
 }
 
+/** Deletes every queued transaction; call it on the queue page. */
 export function deleteAllTx() {
+  cy.get('body', { timeout: 30000 }).should(($body) => {
+    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
+    expect(loaded, 'transaction queue loaded').to.be.true
+  })
   cy.get('body').then(($body) => {
     if ($body.find(transactionItem).length > 0) {
       cy.get(transactionItem).then(($items) => {
@@ -697,10 +703,9 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      cy.wait(3000)
       cy.get(selector)
         .first()
-        .then(($freshElement) => {
+        .should(($freshElement) => {
           verifyTokenSymbol($freshElement, altToken)
         })
     }
@@ -1080,7 +1085,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
