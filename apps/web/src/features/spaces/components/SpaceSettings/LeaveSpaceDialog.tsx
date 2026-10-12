@@ -8,10 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogDescription,
-} from '@/components/ui/alert-dialog'
+} from '@safe-global/views/components/ui/alert-dialog'
 import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -36,7 +36,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE })
       dispatch(
         showNotification({
-          message: `Left workspace ${space.name}.`,
+          message: `Left Workspace ${space.name}.`,
           variant: 'success',
           groupKey: 'leave-space-success',
         }),
@@ -45,7 +45,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
       router.push({ pathname: AppRoutes.welcome.spaces })
     } catch (e) {
       console.error(e)
-      setError('Error leaving the workspace. Please try again.')
+      setError('Error leaving the Workspace. Please try again.')
     }
   }
 
@@ -56,7 +56,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
           <div className="flex items-center justify-center size-10 rounded-full bg-destructive/10 text-destructive shrink-0">
             <LogOut className="size-5" />
           </div>
-          <AlertDialogTitle>Leave workspace</AlertDialogTitle>
+          <AlertDialogTitle>Leave Workspace</AlertDialogTitle>
           <AlertDialogDescription>
             You&apos;ll lose access to <span className="font-semibold text-foreground">{space?.name}</span> immediately.
             An admin can re-invite you later.
@@ -77,7 +77,7 @@ const LeaveSpaceDialog = ({ space, onClose }: { space: GetSpaceResponse | undefi
         <DialogActions
           onCancel={onClose}
           cancelDisabled={isLoading}
-          confirmLabel="Leave workspace"
+          confirmLabel="Leave Workspace"
           onConfirm={onLeave}
           confirmDisabled={isLoading || !space}
           confirmLoading={isLoading}

@@ -19,6 +19,7 @@ exports[`./index.stories DarkMode 1`] = `
           <div
             aria-hidden="true"
             class="gradientFade"
+            style="background: linear-gradient(to left, var(--color-background-paper), transparent);"
           />
           <div
             class="header"
@@ -158,6 +159,7 @@ exports[`./index.stories Default 1`] = `
           <div
             aria-hidden="true"
             class="gradientFade"
+            style="background: linear-gradient(to left, var(--color-background-paper), transparent);"
           />
           <div
             class="header"
@@ -297,6 +299,7 @@ exports[`./index.stories LightMode 1`] = `
           <div
             aria-hidden="true"
             class="gradientFade"
+            style="background: linear-gradient(to left, var(--color-background-paper), transparent);"
           />
           <div
             class="header"
@@ -436,6 +439,7 @@ exports[`./index.stories NarrowViewport 1`] = `
           <div
             aria-hidden="true"
             class="gradientFade"
+            style="background: linear-gradient(to left, var(--color-background-paper), transparent);"
           />
           <div
             class="header"

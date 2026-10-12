@@ -6,13 +6,16 @@ import { useIsAdmin } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Label } from '@safe-global/views/components/ui/label'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()
@@ -60,6 +63,7 @@ const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => 
         }),
       )
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       console.error(e)
       isAwaitingCacheSync.current = false
       setError(getRtkQueryErrorMessage(e as FetchBaseQueryError | SerializedError))

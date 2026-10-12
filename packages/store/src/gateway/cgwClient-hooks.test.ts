@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import type { BaseQueryApi } from '@reduxjs/toolkit/query/react'
 import * as cgwClient from './cgwClient'
 
@@ -57,6 +58,25 @@ describe('cgwClient hooks', () => {
     expect(mockFetch).toHaveBeenCalled()
     const request = mockFetch.mock.calls[0][0] as Request
     expect(request.headers.get('X-Test-Header')).toBe('test-value')
+  })
+
+  it('sends no Content-Type on a GET so the browser skips the CORS preflight', async () => {
+    await cgwClient.dynamicBaseQuery('/v1/test-get', testApi, {})
+
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request
+    expect(request.method).toBe('GET')
+    expect(request.headers.get('Content-Type')).toBeNull()
+    expect(request.headers.get('Accept')).toBe('application/json')
+  })
+
+  it('sends a JSON body with an application/json Content-Type', async () => {
+    const body = { name: faker.lorem.word() }
+
+    await cgwClient.dynamicBaseQuery({ url: '/v1/test-post', method: 'POST', body }, testApi, {})
+
+    const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request
+    expect(request.headers.get('Content-Type')).toBe('application/json')
+    expect(await request.json()).toEqual(body)
   })
 
   it('should call custom handleResponseHook when fetchBaseQuery is used', async () => {

@@ -26,8 +26,6 @@ import { Route as Page403Route } from './routes/403'
 import { Route as Page404Route } from './routes/404'
 import { Route as CookieRoute } from './routes/cookie'
 import { Route as LicensesRoute } from './routes/licenses'
-import { Route as PrivacyRoute } from './routes/privacy'
-import { Route as TermsRoute } from './routes/terms'
 
 // Group B — /settings/*
 import { Route as SettingsAppearanceRoute } from './routes/settings/appearance'
@@ -104,8 +102,6 @@ const routeTree = RootRoute.addChildren([
   Page404Route,
   CookieRoute,
   LicensesRoute,
-  PrivacyRoute,
-  TermsRoute,
   // Group B
   SettingsAppearanceRoute,
   SettingsCookiesRoute,

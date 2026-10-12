@@ -22,6 +22,7 @@ import {
   buildTransactionOptions,
   getDeploymentType,
   getEffectivePayMethod,
+  getNewSafeHomeUrl,
   getNetworkLabel,
   getPaymentMethodLabel,
   getThresholdLabel,
@@ -32,7 +33,7 @@ import css from '@/components/new-safe/create/steps/ReviewStep/styles.module.css
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { useEstimateSafeCreationGas } from '@/components/new-safe/create/useEstimateSafeCreationGas'
 import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCreationStep'
-import ReviewRow from '@/components/new-safe/ReviewRow'
+import ReviewRow from '@safe-global/views/components/new-safe/ReviewRow'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
@@ -54,11 +55,11 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { hasRemainingRelays } from '@/utils/relaying'
 import { isWalletRejection } from '@/utils/wallets'
 import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import classnames from 'classnames'
 import { useRouter } from 'next/router'
@@ -69,10 +70,11 @@ import { useAllSafes } from '@/hooks/safes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
-import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
-import { normalizeSpaceId } from '@/utils/spaces'
-import { AppRoutes } from '@/config/routes'
+import { isAuthenticated } from '@/store/authSlice'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { updateAddressBook } from '../../logic/address-book'
@@ -189,9 +191,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   const [submitError, setSubmitError] = useState<string>()
   const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
-  const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceId = useUrlSpaceId()
+  const isAdminOfActiveSpace = useIsAdmin(spaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
+  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
+  const willStayOutsideSpace =
+    isUserAuthenticated &&
+    spaceId !== null &&
+    isAdminOfActiveSpace &&
+    isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
   const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
   const { showGasFeeEstimation, showInsufficientFundsWarning, showFeeInConfirmationText } = chain
     ? getNativeTokenDisplay(chain)
@@ -259,6 +267,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   }
 
   const handleCreateSafeClick = async () => {
+    let stepUpReturnUrl: string | undefined
+    let isStepUpPending = false
+
     try {
       if (!wallet || !chain || !newSafeProps) return
 
@@ -278,9 +289,29 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
+      // Pay later adds the Safe to the Workspace now, so a step-up there must return to the Safe, not this form.
+      if (spaceId && isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
+        stepUpReturnUrl = getNewSafeHomeUrl(data.networks[0].shortName, safeAddress, spaceId)
+        dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
+      }
+
       const createSafeResults: CreateSafeResult[] = []
-      for (const network of data.networks) {
-        const result = await createSafe(network, replayedSafeWithNonce, safeAddress)
+      for (const [index, network] of data.networks.entries()) {
+        // The step-up replays one request, so the last network adds the Safe to the space for every created network at once.
+        const isLastNetwork = index === data.networks.length - 1
+        const chainIdsToAddToSpace = isLastNetwork
+          ? [
+              ...createSafeResults.filter((r) => r.success && !r.alreadyDeployed).map((r) => r.chain.chainId),
+              network.chainId,
+            ]
+          : []
+        const { stepUpPending, ...result } = await createSafe(
+          network,
+          replayedSafeWithNonce,
+          safeAddress,
+          chainIdsToAddToSpace,
+        )
+        if (stepUpPending) isStepUpPending = true
         createSafeResults.push(result)
       }
 
@@ -301,12 +332,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       gtmSetChainId(chain.chainId)
 
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        if (successfulChains.length === 0) return
+        if (successfulChains.length === 0 || isStepUpPending) return
 
-        await router?.push({
-          pathname: AppRoutes.home,
-          query: { safe: `${successfulChains[0].chain.shortName}:${safeAddress}` },
-        })
+        await router?.push(getNewSafeHomeUrl(successfulChains[0].chain.shortName, safeAddress, spaceId))
 
         // Only counterfactual chains are awaiting activation.
         const awaitingChains = successfulChains.filter((r) => !r.alreadyDeployed)
@@ -335,11 +363,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       console.error(err)
       setSubmitError('Error creating the Safe account. Please try again later.')
     } finally {
+      if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       setIsCreating(false)
     }
   }
 
-  const createSafe = async (chain: Chain, props: ReplayedSafeProps, safeAddress: string): Promise<CreateSafeResult> => {
+  const createSafe = async (
+    chain: Chain,
+    props: ReplayedSafeProps,
+    safeAddress: string,
+    chainIdsToAddToSpace: string[],
+  ): Promise<CreateSafeResult & { stepUpPending?: true }> => {
     if (!wallet) return { chain, safeAddress, success: false }
 
     gtmSetChainId(chain.chainId)
@@ -376,13 +410,17 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
           isUserAuthenticated,
           isAdminOfActiveSpace,
           spaceSafeCount,
+          spaceSafeLimit,
           isMultiChainCreation: isMultiChainDeployment,
+          chainIdsToAddToSpace,
           provider,
           dispatch,
         })
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
+          // Saved for the user; the replay adds it to the space, so it still gets its name.
+          if (result.stepUpPending) return { chain, safeAddress, success: true, stepUpPending: true }
           setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }
@@ -501,7 +539,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      relays={minRelays}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />
@@ -511,6 +549,15 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
             {showNetworkWarning && (
               <div className="mt-6">
                 <NetworkWarning action="create a Safe account" />
+              </div>
+            )}
+
+            {effectivePayMethod === PayMethod.PayLater && willStayOutsideSpace && (
+              <div className="mt-4" data-testid="space-seat-limit-notice">
+                <ErrorMessage level="info">
+                  This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new Safe will be created in My
+                  accounts, outside the Workspace.
+                </ErrorMessage>
               </div>
             )}
 
@@ -544,7 +591,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
                     <ExecutionMethodSelector
                       executionMethod={executionMethod}
                       setExecutionMethod={setExecutionMethod}
-                      relays={minRelays}
+                      offer={{ option: 'FREE_DAILY_LIMIT', disabledReason: null, relays: minRelays, isPro: null }}
                     />
                   }
                 />

@@ -6,14 +6,14 @@ import type { ReactNode } from 'react'
 
 describe('useInitChains', () => {
   it('does not seed chain data into the RTK Query cache', () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
 
     // With build-time prefetch removed, the cgw query cache must start empty.
     expect(store.getState()[cgwClient.reducerPath].queries).toEqual({})
   })
 
   it('dispatches a chains fetch on mount', async () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const dispatchSpy = jest.spyOn(store, 'dispatch')
 
     const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
@@ -28,7 +28,7 @@ describe('useInitChains', () => {
   })
 
   it('cleans up the subscription on unmount', async () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
 
     const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
 

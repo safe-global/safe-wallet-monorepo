@@ -9,6 +9,7 @@ export function memberUserBuilder(): IBuilder<MemberUser> {
     id: 11,
     status: 'ACTIVE',
     email: null,
+    address: null,
   })
 }
 

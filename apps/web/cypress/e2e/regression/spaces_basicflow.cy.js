@@ -27,7 +27,6 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
 
     space.clickOnSpaceSelector(spaceName)
@@ -51,7 +50,6 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.goToSpaceSafeAccounts()
     space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
@@ -68,7 +66,6 @@ describe('Spaces basic flow tests', () => {
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
-    cy.wait(3000)
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.clickOnSpaceSelector()
     space.spaceExists(spaceName)

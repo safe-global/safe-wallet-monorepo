@@ -3,8 +3,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
-import { Errors } from '@/services/exceptions'
-import useLogError from './useLogError'
+import { Errors, logError } from '@/services/exceptions'
 import chains from '@safe-global/utils/config/chains'
 import { useSigner } from './wallets/useWallet'
 import { useSafeSDK } from './coreSDK/safeCoreSDK'
@@ -46,30 +45,34 @@ const useGasLimit = (
       safeTx.signatures.size < threshold,
     )
 
-    // if we are dealing with zksync and the walletAddress is a Safe, we have to do some magic
-    // FIXME a new check to indicate ZKsync chain will be added to the config service and available under Chain
-    if (
-      (safe.chainId === chains.zksync || safe.chainId === chains.lens) &&
-      (await web3ReadOnly.getCode(walletAddress)) !== '0x'
-    ) {
-      return getGasLimitForZkSyncUtil(web3ReadOnly, safeSDK, safeTx, safe.chainId, safe.address.value)
-    }
+    try {
+      // if we are dealing with zksync and the walletAddress is a Safe, we have to do some magic
+      // FIXME a new check to indicate ZKsync chain will be added to the config service and available under Chain
+      if (
+        (safe.chainId === chains.zksync || safe.chainId === chains.lens) &&
+        (await web3ReadOnly.getCode(walletAddress)) !== '0x'
+      ) {
+        return await getGasLimitForZkSyncUtil(web3ReadOnly, safeSDK, safeTx, safe.chainId, safe.address.value)
+      }
 
-    return web3ReadOnly
-      .estimateGas({
+      const gasLimit = await web3ReadOnly.estimateGas({
         to: safeAddress,
         from: walletAddress,
         data: encodedSafeTx,
       })
-      .then((gasLimit) => {
-        // Due to a bug in Nethermind estimation, we need to increment the gasLimit by 30%
-        // when the safeTxGas is defined and not 0. Currently Nethermind is used only for Gnosis Chain.
-        if (currentChainId === chains.gno && hasSafeTxGas) {
-          return incrementByGasMultiplier(gasLimit, GasMultipliers[chains.gno])
-        }
 
-        return gasLimit
-      })
+      // Due to a bug in Nethermind estimation, we need to increment the gasLimit by 30%
+      // when the safeTxGas is defined and not 0. Currently Nethermind is used only for Gnosis Chain.
+      if (currentChainId === chains.gno && hasSafeTxGas) {
+        return incrementByGasMultiplier(gasLimit, GasMultipliers[chains.gno])
+      }
+
+      return gasLimit
+    } catch (e) {
+      // A revert or a throttle is the estimate's expected answer, not a fault.
+      if (!isExpectedEstimationError(e)) logError(Errors._612, e, getRpcErrorContext(web3ReadOnly))
+      throw e
+    }
   }, [
     safeAddress,
     walletAddress,
@@ -82,12 +85,6 @@ const useGasLimit = (
     threshold,
     safe,
   ])
-
-  // Several concurrent owners on the Execute step, one on Sign, so no single
-  // owner sees every failure; `useLogError` collapses them into one report.
-  // A revert or a throttle is the estimate's expected answer, not a fault.
-  const unexpectedGasLimitError = gasLimitError && !isExpectedEstimationError(gasLimitError) ? gasLimitError : undefined
-  useLogError(Errors._612, unexpectedGasLimitError?.message, getRpcErrorContext(web3ReadOnly))
 
   return { gasLimit, gasLimitError, gasLimitLoading }
 }

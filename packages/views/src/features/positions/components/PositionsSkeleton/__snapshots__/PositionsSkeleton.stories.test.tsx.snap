@@ -1,0 +1,432 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./PositionsSkeleton.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="max-w-[800px]"
+    >
+      <div
+        class="flex flex-col gap-4"
+      >
+        <div
+          class="overflow-hidden rounded-xl border border-border bg-card"
+        >
+          <div
+            class="flex w-full flex-col"
+            data-orientation="vertical"
+            data-slot="accordion"
+            dir="ltr"
+            role="region"
+          >
+            <div
+              class="not-last:border-b border-b-0"
+              data-index="0"
+              data-open=""
+              data-orientation="vertical"
+              data-slot="accordion-item"
+            >
+              <h3
+                class="flex"
+                data-index="0"
+                data-open=""
+                data-orientation="vertical"
+              >
+                <button
+                  aria-controls="base-ui-_r_1_"
+                  aria-disabled="false"
+                  aria-expanded="true"
+                  class="focus-visible:ring-ring/50 focus-visible:border-ring focus-visible:after:border-ring **:data-[slot=accordion-trigger-icon]:text-muted-foreground cursor-pointer rounded-md text-left text-sm font-medium focus-visible:ring-[3px] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 group/accordion-trigger relative flex flex-1 justify-between border border-transparent transition-all outline-none disabled:pointer-events-none disabled:opacity-50 data-disabled:pointer-events-none data-disabled:opacity-50 items-center overflow-x-auto px-6 py-4"
+                  data-orientation="vertical"
+                  data-panel-open=""
+                  data-slot="accordion-trigger"
+                  data-value="skeleton"
+                  id="base-ui-_r_2_"
+                  tabindex="0"
+                  type="button"
+                >
+                  <div
+                    class="flex w-full items-center gap-4"
+                  >
+                    <div
+                      class="bg-muted animate-pulse size-10 rounded-md"
+                      data-slot="skeleton"
+                    />
+                    <div
+                      class="flex-1"
+                    >
+                      <div
+                        class="bg-muted rounded-md animate-pulse h-6 w-[120px]"
+                        data-slot="skeleton"
+                      />
+                      <div
+                        class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                        data-slot="skeleton"
+                      />
+                    </div>
+                    <div
+                      class="bg-muted rounded-md animate-pulse h-6 w-[60px]"
+                      data-slot="skeleton"
+                    />
+                  </div>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m6 9 6 6 6-6"
+                    />
+                  </svg>
+                  <svg
+                    aria-hidden="true"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    data-slot="accordion-trigger-icon"
+                    fill="none"
+                    height="24"
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m18 15-6-6-6 6"
+                    />
+                  </svg>
+                </button>
+              </h3>
+              <div
+                aria-labelledby="base-ui-_r_2_"
+                class="data-open:animate-accordion-down data-closed:animate-accordion-up text-sm overflow-hidden"
+                data-index="0"
+                data-open=""
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                id="base-ui-_r_1_"
+                role="region"
+                style="--accordion-panel-height: auto; --accordion-panel-width: auto;"
+              >
+                <div
+                  class="[&_:where(a:hover)]:text-foreground h-(--accordion-panel-height) data-ending-style:h-0 data-starting-style:h-0 [&_a]:underline [&_a]:underline-offset-3 [&>p:not(:last-child)]:mb-4 px-6 pb-4 pt-0"
+                >
+                  <div>
+                    <div
+                      class="w-full mb-4"
+                    >
+                      <div
+                        class="w-full overflow-x-auto md:overflow-x-hidden rounded-t-lg bg-[var(--color-background-paper)] rounded-b-lg"
+                        data-testid="table-container"
+                      >
+                        <div
+                          class="relative w-full overflow-x-auto"
+                          data-slot="table-container"
+                        >
+                          <table
+                            aria-labelledby="tableTitle"
+                            class="w-full caption-bottom text-sm compactTable"
+                            data-slot="table"
+                          >
+                            <thead
+                              class="[&_tr]:border-b"
+                              data-slot="table-header"
+                            >
+                              <tr
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
+                              >
+                                <th
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                                  data-slot="table-head"
+                                  style="width: 25%;"
+                                >
+                                  <span
+                                    class="text-sm"
+                                  >
+                                    Loading...
+                                  </span>
+                                </th>
+                                <th
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                                  data-slot="table-head"
+                                  style="width: 35%; text-align: right;"
+                                >
+                                  <span
+                                    class="text-sm"
+                                  >
+                                    Balance
+                                  </span>
+                                </th>
+                                <th
+                                  class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 text-sm first:pl-3"
+                                  data-slot="table-head"
+                                  style="width: 40%; text-align: right;"
+                                >
+                                  <span
+                                    class="text-sm"
+                                  >
+                                    Value
+                                  </span>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody
+                              class="[&_tr:last-child]:border-0 tableBody"
+                              data-slot="table-body"
+                            >
+                              <tr
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
+                                data-testid="table-row"
+                                tabindex="-1"
+                              >
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-name"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="flex items-center gap-2"
+                                    >
+                                      <div
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-balance"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-value"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
+                                data-testid="table-row"
+                                tabindex="-1"
+                              >
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-name"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="flex items-center gap-2"
+                                    >
+                                      <div
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-balance"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-value"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                              <tr
+                                class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                                data-slot="table-row"
+                                data-testid="table-row"
+                                tabindex="-1"
+                              >
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-name"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="flex items-center gap-2"
+                                    >
+                                      <div
+                                        class="bg-muted animate-pulse size-8 rounded-md"
+                                        data-slot="skeleton"
+                                      />
+                                      <div>
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-6 w-[100px]"
+                                          data-slot="skeleton"
+                                        />
+                                        <div
+                                          class="bg-muted rounded-md animate-pulse h-5 w-[80px]"
+                                          data-slot="skeleton"
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-balance"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[60px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                                <td
+                                  class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 first:pl-3"
+                                  data-slot="table-cell"
+                                  data-testid="table-cell-value"
+                                >
+                                  <div
+                                    class="overflow-hidden transition-all"
+                                  >
+                                    <div
+                                      class="text-right"
+                                    >
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-6 w-[50px]"
+                                        data-slot="skeleton"
+                                      />
+                                      <div
+                                        class="bg-muted rounded-md animate-pulse ml-auto h-4 w-[40px]"
+                                        data-slot="skeleton"
+                                      />
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -65,7 +65,7 @@ test.describe('Spaces — Members table', { tag: '@regression' }, () => {
           `${ns}auth`,
           JSON.stringify({
             sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-            lastUsedSpace: spaceId,
+            landingSpaceHint: spaceId,
             isStoreHydrated: false,
             cfSafeSynced: false,
             isOidcLoginPending: false,

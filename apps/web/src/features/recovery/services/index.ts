@@ -3,7 +3,6 @@ export {
   MAX_RECOVERER_PAGE_SIZE,
   _isMaliciousRecovery,
   _getRecoveryQueueItemTimestamps,
-  _getSafeCreationReceipt,
   _getRecoveryStateItem,
   getRecoveryState,
 } from './recovery-state'

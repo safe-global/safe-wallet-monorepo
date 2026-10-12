@@ -1,9 +1,9 @@
 /**
  * @usedBy pages/balances/index.tsx (StakingBanner, useIsStakingBannerVisible)
  */
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Link } from '@/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Link } from '@safe-global/views/components/ui/link'
 import css from './styles.module.css'
 import StakeIcon from '@/public/images/common/stake.svg'
 import classNames from 'classnames'
@@ -12,9 +12,10 @@ import { useRouter } from 'next/router'
 import NextLink from 'next/link'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
 import useIsStakingBannerVisible from '@/components/dashboard/StakingBanner/useIsStakingBannerVisible'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const LEARN_MORE_LINK = 'https://help.safe.global/articles/7497206492-Safe{Staking}'
 
@@ -23,6 +24,7 @@ const StakingBanner = ({
 }: { large?: boolean; hideLocalStorageKey?: string } = {}) => {
   const isDarkMode = useDarkMode()
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const isStakingBannerVisible = useIsStakingBannerVisible()
 
   const [_, setWidgetHidden] = useLocalStorage<boolean>(hideLocalStorageKey)
@@ -86,7 +88,12 @@ const StakingBanner = ({
               className={classNames(css.stakeButton, 'w-full')}
               render={
                 <NextLink
-                  href={AppRoutes.stake && { pathname: AppRoutes.stake, query: { safe: router.query.safe } }}
+                  href={
+                    AppRoutes.stake && {
+                      pathname: AppRoutes.stake,
+                      query: safeLinkQuery,
+                    }
+                  }
                   rel="noreferrer"
                   onClick={onClick}
                 />

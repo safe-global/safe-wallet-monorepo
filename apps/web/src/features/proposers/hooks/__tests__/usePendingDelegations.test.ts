@@ -68,6 +68,8 @@ describe('usePendingDelegations', () => {
         nestedSafe,
         label,
       }),
+      safeAppInfo: null,
+      safeAppId: null,
     }
   }
 

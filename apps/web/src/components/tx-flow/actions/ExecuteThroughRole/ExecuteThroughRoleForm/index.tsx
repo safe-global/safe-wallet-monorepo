@@ -1,8 +1,8 @@
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import madProps from '@/utils/mad-props'
 import { type ReactElement, type SyntheticEvent, useContext } from 'react'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Separator } from '@safe-global/views/components/ui/separator'
 
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
@@ -14,12 +14,13 @@ import CheckWallet from '@/components/common/CheckWallet'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import AdvancedParams, { useAdvancedParams } from '../../../../tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 
 import css from './styles.module.css'
-import commonCss from '@/components/tx-flow/common/styles.module.css'
+import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
 
 import { pollModuleTransactionId, useExecuteThroughRole, useGasLimit, useMetaTransactions, type Role } from './hooks'
 import { decodeBytes32String } from 'ethers'
@@ -30,8 +31,8 @@ import { assertOnboard, assertWallet } from '@/utils/helpers'
 import { dispatchModuleTxExecution } from '@/services/tx/tx-sender'
 import { Status } from 'zodiac-roles-deployments'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import SplitMenuButton from '@/components/common/SplitMenuButton'
-import { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButton'
+import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '../../../slots'
 import { TxFlowContext } from '../../../TxFlowProvider'
 import type { SubmitCallback } from '../../../TxFlow'
@@ -70,6 +71,7 @@ export const ExecuteThroughRoleForm = ({
   const chainId = currentChain?.chainId || '1'
 
   const { setTxFlow } = useContext(TxModalContext)
+  const scope = useSafeScope()
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const { isSubmitLoading, setIsSubmitLoading, setSubmitError, setIsRejectedByUser } = useContext(TxFlowContext)
 
@@ -126,8 +128,10 @@ export const ExecuteThroughRoleForm = ({
       return
     }
 
+    const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
+
     // On success, forward to the success screen, initially without a txId
-    setTxFlow(<SuccessScreenFlow txHash={txHash} />, undefined, false)
+    setTxFlow(<SuccessScreenFlow txHash={txHash} scope={successScope} />, undefined, false)
 
     // Wait for module tx to be indexed
     const transactionService = currentChain?.transactionService
@@ -138,7 +142,7 @@ export const ExecuteThroughRoleForm = ({
     onSubmitSuccess?.({ txId, isExecuted: true })
 
     // Update the success screen so it shows a link to the transaction
-    setTxFlow(<SuccessScreenFlow txId={txId} />, undefined, false)
+    setTxFlow(<SuccessScreenFlow txId={txId} scope={successScope} />, undefined, false)
   }
 
   const walletCanPay = useWalletCanPay({

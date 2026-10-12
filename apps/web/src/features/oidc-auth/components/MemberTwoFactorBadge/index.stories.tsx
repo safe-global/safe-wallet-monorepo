@@ -12,7 +12,7 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
   createdAt: '2026-04-22T00:00:00.000Z',
   updatedAt: '2026-04-22T00:00:00.000Z',
   ...overrides,
-  user: { id: 99, status: 'ACTIVE', email: null, ...overrides.user },
+  user: { id: 99, status: 'ACTIVE', email: null, address: null, ...overrides.user },
 })
 
 const meta = {

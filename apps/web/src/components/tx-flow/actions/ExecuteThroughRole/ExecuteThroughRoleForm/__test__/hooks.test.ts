@@ -16,7 +16,6 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useGasLimit, useRoles } from '../hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { Errors } from '@/services/exceptions'
-import { __resetUseLogErrorForTests } from '@/hooks/useLogError'
 import { BaseError } from 'viem'
 import type { Transaction } from '@safe-global/types-kit'
 
@@ -127,7 +126,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await new Promise((resolve) => setTimeout(resolve, 25))
 
@@ -149,7 +148,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
@@ -170,7 +169,7 @@ describe('useRoles', () => {
 
     // wait for the Roles mod to be fetched & and the cache state update to be propagated
     await waitFor(() => {
-      expect(fetchRolesModMock).toBeCalled()
+      expect(fetchRolesModMock).toHaveBeenCalled()
     })
     await waitFor(() => expect(result.current).toHaveLength(1))
 
@@ -248,7 +247,6 @@ describe('useGasLimit', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    __resetUseLogErrorForTests()
   })
 
   it('returns the estimate', async () => {
@@ -287,6 +285,10 @@ describe('useGasLimit', () => {
     const { result } = renderWithRejectedEstimate(new Error('HTTP request failed. Status: 500'))
 
     await waitFor(() => expect(result.current.gasLimitError).toBeDefined())
-    expect(mockLogError).toHaveBeenCalledWith(Errors._612, 'HTTP request failed. Status: 500', expect.anything())
+    expect(mockLogError).toHaveBeenCalledWith(
+      Errors._612,
+      expect.objectContaining({ message: 'HTTP request failed. Status: 500' }),
+      expect.anything(),
+    )
   })
 })

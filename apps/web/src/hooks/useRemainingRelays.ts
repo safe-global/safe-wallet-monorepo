@@ -8,7 +8,7 @@ import {
   useLazyRelayGetRelaysRemainingV1Query,
   type RelaysRemaining,
 } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
 
 export const MAX_DAY_RELAYS = 5
 
@@ -19,7 +19,7 @@ export const useRelaysBySafe = (): AsyncResult<RelaysRemaining> => {
   const { data, error, isLoading } = useRelayGetRelaysRemainingV1Query(
     { chainId: chain?.chainId || '', safeAddress: safeAddress || '' },
     {
-      skip: !safeAddress || !chain || !hasFeature(chain, FEATURES.RELAYING),
+      skip: !safeAddress || !chain || !getGasPaymentOptions(chain).includes('FREE_DAILY_LIMIT'),
     },
   )
 
@@ -37,7 +37,7 @@ export const useLeastRemainingRelays = (ownerAddresses: string[]): AsyncResult<R
   const [trigger] = useLazyRelayGetRelaysRemainingV1Query()
 
   return useAsync(() => {
-    if (!chain || !hasFeature(chain, FEATURES.RELAYING)) return
+    if (!chain?.relayer?.safeCreationSponsored) return
 
     return Promise.all(
       ownerAddresses.map((address) => trigger({ chainId: chain.chainId, safeAddress: address }).unwrap()),

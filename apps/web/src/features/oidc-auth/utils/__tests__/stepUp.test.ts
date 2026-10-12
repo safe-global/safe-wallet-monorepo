@@ -1,27 +1,24 @@
+/**
+ * @jest-environment-options {"url": "https://app.safe.global/spaces/members?spaceId=42"}
+ */
 import { GATEWAY_URL } from '@/config/gateway'
+import { navigateTo } from '@/utils/navigation'
 import { startStepUp } from '../stepUp'
 import { OIDC_AUTH_PENDING_KEY } from '../../constants'
 
+jest.mock('@/utils/navigation')
+
 describe('startStepUp', () => {
-  const originalLocation = window.location
-
-  const setLocation = (href: string) => {
-    Object.defineProperty(window, 'location', { writable: true, value: { ...originalLocation, href } })
-  }
-
   beforeEach(() => {
+    jest.clearAllMocks()
     sessionStorage.clear()
-    setLocation('https://app.safe.global/spaces/members?spaceId=42')
-  })
-
-  afterEach(() => {
-    Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
+    window.history.replaceState(null, '', '/spaces/members?spaceId=42')
   })
 
   it('should, when called, redirect to the CGW authorize endpoint with elevate=true', () => {
     startStepUp()
 
-    const url = new URL(window.location.href)
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
     expect(url.origin + url.pathname).toBe(`${GATEWAY_URL}/v1/auth/oidc/authorize`)
     expect(url.searchParams.get('elevate')).toBe('true')
   })
@@ -29,25 +26,31 @@ describe('startStepUp', () => {
   it('should, when no redirect URL is given, return to the current page', () => {
     startStepUp()
 
-    expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
-      'https://app.safe.global/spaces/members?spaceId=42',
-    )
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/members?spaceId=42')
   })
 
   it('should, when a redirect URL is given, return to that URL instead', () => {
     startStepUp('https://app.safe.global/spaces/settings?spaceId=7')
 
-    expect(new URL(window.location.href).searchParams.get('redirect_url')).toBe(
-      'https://app.safe.global/spaces/settings?spaceId=7',
-    )
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/spaces/settings?spaceId=7')
+  })
+
+  it('should, when the redirect is a path, return to that path on the current origin', () => {
+    startStepUp('/welcome/select-safes?spaceId=7')
+
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('redirect_url')).toBe('https://app.safe.global/welcome/select-safes?spaceId=7')
   })
 
   it('should, when the current URL carries stale error params, strip them from the return URL', () => {
-    setLocation('https://app.safe.global/spaces/members?spaceId=42&error=access_denied&error_description=nope')
+    window.history.replaceState(null, '', '/spaces/members?spaceId=42&error=access_denied&error_description=nope')
 
     startStepUp()
 
-    const returnUrl = new URL(new URL(window.location.href).searchParams.get('redirect_url') ?? '')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    const returnUrl = new URL(url.searchParams.get('redirect_url') ?? '')
     expect(returnUrl.searchParams.has('error')).toBe(false)
     expect(returnUrl.searchParams.has('error_description')).toBe(false)
     expect(returnUrl.searchParams.get('spaceId')).toBe('42')
@@ -65,6 +68,7 @@ describe('startStepUp', () => {
 
     startStepUp()
 
-    expect(new URL(window.location.href).searchParams.get('elevate')).toBe('true')
+    const url = new URL(jest.mocked(navigateTo).mock.calls[0][0])
+    expect(url.searchParams.get('elevate')).toBe('true')
   })
 })

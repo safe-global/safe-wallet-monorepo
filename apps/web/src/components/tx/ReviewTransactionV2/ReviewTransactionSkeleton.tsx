@@ -1,5 +1,5 @@
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
 
 const ReviewTransactionSkeleton = () => (
   <TxCard>

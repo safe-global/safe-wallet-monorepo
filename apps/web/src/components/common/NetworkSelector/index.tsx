@@ -1,14 +1,14 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
 import Link from 'next/link'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { SearchInput } from '@/components/ui/search-input'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import partition from 'lodash/partition'
 import { ChevronDownIcon, InfoIcon } from 'lucide-react'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
@@ -19,6 +19,7 @@ import { type KeyboardEvent, type ReactElement, useCallback, useMemo, useRef, us
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
@@ -27,43 +28,32 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
-export const getNetworkLink = (
-  router: NextRouter,
+const KEPT_QUERY_PARAMS = ['safeViewRedirectURL', 'appUrl', 'next'] as const
+
+type KeptQuery = Partial<Record<(typeof KEPT_QUERY_PARAMS)[number], string>>
+
+const pickKeptQuery = (query: NextRouter['query']): KeptQuery =>
+  Object.fromEntries(
+    KEPT_QUERY_PARAMS.flatMap((key) => {
+      const value = query[key]
+      return typeof value === 'string' && value ? [[key, value]] : []
+    }),
+  )
+
+/** Links to the same page on the given chain; keeps only `spaceId` and KEPT_QUERY_PARAMS. */
+export const buildChainSwitchHref = (
+  router: Pick<NextRouter, 'pathname' | 'query'>,
   safeAddress: string,
-  chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
+  { shortName }: Pick<Chain, 'shortName'>,
 ) => {
-  const { shortName } = chainInfo
-  const isSafeOpened = safeAddress !== ''
+  const target = safeAddress ? { safe: `${shortName}:${safeAddress}` } : { chain: shortName }
 
-  const query = (
-    isSafeOpened
-      ? {
-          safe: `${shortName}:${safeAddress}`,
-        }
-      : { chain: shortName }
-  ) as {
-    safe?: string
-    chain?: string
-    safeViewRedirectURL?: string
-    appUrl?: string
-  }
-
-  const route = {
+  return {
     pathname: router.pathname,
-    query,
+    query: withSpaceId({ ...target, ...pickKeptQuery(router.query) }, router.query.spaceId),
   }
-
-  const queryParams = ['safeViewRedirectURL', 'appUrl'] as const
-
-  for (const key of queryParams) {
-    if (router.query?.[key]) {
-      route.query[key] = router.query?.[key].toString()
-    }
-  }
-
-  return route
 }
 
 const UndeployedNetworkMenuItem = ({
@@ -340,7 +330,7 @@ const NetworkSelector = ({
           className={css.menuItem}
         >
           <Link
-            href={getNetworkLink(router, safeAddress, chain)}
+            href={buildChainSwitchHref(router, safeAddress, chain)}
             onClick={() => {
               onSwitchNetwork()
               onChainSelect?.()

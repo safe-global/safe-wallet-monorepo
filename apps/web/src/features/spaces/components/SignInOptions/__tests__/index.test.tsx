@@ -87,11 +87,11 @@ describe('SignInOptions', () => {
     expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
   })
 
-  it('should show "Continue with wallet" text on the wallet button', () => {
+  it('should show "Connect wallet" text on the wallet button', () => {
     mockOidcAuthFeature(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
-    expect(screen.getByText('Continue with wallet')).toBeInTheDocument()
+    expect(screen.getByText('Connect wallet')).toBeInTheDocument()
   })
 })

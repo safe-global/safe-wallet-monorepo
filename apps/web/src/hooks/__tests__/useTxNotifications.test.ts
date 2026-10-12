@@ -16,6 +16,12 @@ import {
 import { CGW_ERROR_FALLBACK } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import useTxNotifications from '../useTxNotifications'
 
+let mockIsTxFlowOpen = false
+
+jest.mock('@/components/tx-flow/useIsTxFlowOpen', () => ({
+  useIsTxFlowOpenRef: () => ({ current: mockIsTxFlowOpen }),
+}))
+
 jest.mock('@/store/notificationsSlice', () => {
   const original = jest.requireActual('@/store/notificationsSlice')
   return {
@@ -24,13 +30,17 @@ jest.mock('@/store/notificationsSlice', () => {
   }
 })
 
-const MOCK_CHAIN = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build()
+const MOCK_CHAIN = chainBuilder().with({ chainId: '1', chainName: 'Ethereum', shortName: 'eth' }).build()
+const MOCK_SEPOLIA = chainBuilder().with({ chainId: '11155111', chainName: 'Sepolia', shortName: 'sep' }).build()
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   useCurrentChain: jest.fn(() => MOCK_CHAIN),
-  default: jest.fn(),
+  default: jest.fn(() => ({ configs: [MOCK_CHAIN, MOCK_SEPOLIA] })),
 }))
+
+const PAGE_SAFE = '0x1111111111111111111111111111111111111111'
+jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: jest.fn(() => PAGE_SAFE) }))
 
 jest.mock('@/hooks/useTxQueue', () => ({
   __esModule: true,
@@ -47,9 +57,10 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: jest.fn(() => null),
 }))
 
+const mockGetTxDetails = jest.fn(() => Promise.resolve({ data: undefined }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/transactions'),
-  useLazyTransactionsGetTransactionByIdV1Query: jest.fn(() => [jest.fn(() => Promise.resolve({ data: undefined }))]),
+  useLazyTransactionsGetTransactionByIdV1Query: jest.fn(() => [mockGetTxDetails]),
 }))
 
 /** The ethers error the Ledger module rejects with, as viem re-wraps it. */
@@ -212,7 +223,7 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
 
     const notification = lastNotification()
     expect(notification.message).toBe('Something went wrong on our end. Try again.')
-    expect(notification.detailedMessage).toBe('Error code CGW-502')
+    expect(notification.detailedMessage).toBeUndefined()
     expect(JSON.stringify(notification)).not.toContain('nginx')
     expect(JSON.stringify(notification)).not.toContain('Bad Gateway')
     expect(JSON.stringify(notification)).not.toContain('<html')
@@ -255,6 +266,154 @@ describe('useTxNotifications — CGW response states (WA-3252)', () => {
     expect(notification.message).not.toBe(CGW_ERROR_FALLBACK)
     // The support reference still carries the status, exactly as the inline
     // alert's code-only reference does.
-    expect(notification.detailedMessage).toBe('Error code CGW-429')
+    expect(notification.detailedMessage).toBeUndefined()
+  })
+})
+
+describe('useTxNotifications — a gas limit below the intrinsic minimum (WA-3523)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it('names the minimum needed and keeps the raw payload out of the toast', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.FAILED, {
+        txId: '0x1',
+        nonce: 1,
+        chainId: '1',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        error: new Error(
+          'The contract function "execTransaction" reverted with the following reason:\nintrinsic gas too low: gas 21000, minimum needed 25484',
+        ),
+      })
+    })
+
+    await waitFor(() => expect(showNotification).toHaveBeenCalled())
+
+    const notification = lastNotification()
+    expect(notification.message).toBe(
+      'Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.',
+    )
+    expect(notification.detailedMessage).toBeUndefined()
+    expect(JSON.stringify(notification)).not.toContain('execTransaction')
+    expect(JSON.stringify(notification)).not.toContain('intrinsic gas')
+  })
+})
+
+describe('useTxNotifications — errors the tx flow already shows inline', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it('raises nothing at all for a failure while a flow is on screen', async () => {
+    mockIsTxFlowOpen = true
+    renderHook(() => useTxNotifications())
+
+    await act(async () => {
+      txDispatch(TxEvent.PROPOSE_FAILED, { error: asError({ status: 502, data: {} }) })
+    })
+
+    expect(showNotification).not.toHaveBeenCalled()
+  })
+
+  it('toasts a failure that arrives with no flow on screen', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSE_FAILED, { error: new Error('boom') })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ variant: 'error' }))
+  })
+
+  it('still toasts a success raised from inside the flow', async () => {
+    mockIsTxFlowOpen = true
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSED, { txId: '0x1', nonce: 1, chainId: '1', safeAddress: PAGE_SAFE })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ variant: 'success' }))
+  })
+})
+
+describe('the Safe a toast links to', () => {
+  const OTHER_SAFE = '0x2222222222222222222222222222222222222222'
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockIsTxFlowOpen = false
+  })
+
+  it("links a proposal to the Safe the event names, not the page's Safe", async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSED, {
+        txId: 'multisig_0x2_0xabc',
+        nonce: 3,
+        chainId: '11155111',
+        safeAddress: OTHER_SAFE,
+      })
+    })
+
+    await waitFor(() =>
+      expect(lastNotification()).toMatchObject({
+        link: { href: { query: { id: 'multisig_0x2_0xabc', safe: `sep:${OTHER_SAFE}` } } },
+      }),
+    )
+    expect(mockGetTxDetails).toHaveBeenCalledWith({ chainId: '11155111', id: 'multisig_0x2_0xabc' })
+  })
+
+  it('does the same for a confirmation, which already named its Safe', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.SIGNATURE_PROPOSED, {
+        txId: 'multisig_0x2_0xdef',
+        nonce: 3,
+        signerAddress: PAGE_SAFE,
+        chainId: '11155111',
+        safeAddress: OTHER_SAFE,
+      })
+    })
+
+    await waitFor(() =>
+      expect(lastNotification()).toMatchObject({ link: { href: { query: { safe: `sep:${OTHER_SAFE}` } } } }),
+    )
+  })
+
+  it('links nowhere when the event names a chain the app does not know, rather than mixing in the page chain', async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.PROPOSED, {
+        txId: 'multisig_0x3_0x999',
+        nonce: 3,
+        chainId: '999',
+        safeAddress: OTHER_SAFE,
+      })
+    })
+
+    await waitFor(() => expect(lastNotification()).toMatchObject({ groupKey: 'multisig_0x3_0x999' }))
+    expect(lastNotification().link).toBeUndefined()
+    expect(mockGetTxDetails).toHaveBeenCalledWith({ chainId: '999', id: 'multisig_0x3_0x999' })
+  })
+
+  it("falls back to the page's Safe for an event that names none", async () => {
+    renderHook(() => useTxNotifications())
+
+    act(() => {
+      txDispatch(TxEvent.SIGN_FAILED, { txId: 'multisig_0x1_0x123', error: new Error('boom') })
+    })
+
+    await waitFor(() =>
+      expect(lastNotification()).toMatchObject({ link: { href: { query: { safe: `eth:${PAGE_SAFE}` } } } }),
+    )
   })
 })

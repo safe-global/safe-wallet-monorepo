@@ -201,6 +201,11 @@ export const selectRpc = createSelector(selectSettings, (settings) => settings.e
 
 export const selectTenderly = createSelector(selectSettings, (settings) => settings.env.tenderly)
 
+/** The user brought their own Tenderly project (URL and access token in Settings › Environment variables). */
+export const selectHasOwnTenderly = createSelector(selectTenderly, (tenderly) =>
+  Boolean(tenderly?.url && tenderly?.accessToken),
+)
+
 export const isEnvInitialState = createSelector([selectSettings, (_, chainId) => chainId], (settings, chainId) => {
   return isEqual(settings.env.tenderly, initialState.env.tenderly) && !settings.env.rpc[chainId]
 })

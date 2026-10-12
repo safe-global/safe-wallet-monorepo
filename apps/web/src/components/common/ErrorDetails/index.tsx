@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import CopyButton from '@/components/common/CopyButton'
 import CopyIcon from '@/public/images/common/copy.svg'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import type { DecodedCustomError } from '@/utils/customErrorRegistry'
 
 /**

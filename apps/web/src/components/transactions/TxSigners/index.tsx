@@ -1,10 +1,10 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ReactElement } from 'react'
 import { Copy } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import TxConfirmations from '@/components/transactions/TxConfirmations'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
 import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
@@ -15,7 +15,7 @@ import {
   isModuleDetailedExecutionInfo,
   isMultisigDetailedExecutionInfo,
 } from '@/utils/transaction-guards'
-import ExplorerFallbackIcon from '@/public/images/common/link.svg'
+import ExplorerFallbackIcon from '@safe-global/views/assets/images/common/link.svg'
 import HashIcon from '@/public/images/common/hash.svg'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -29,7 +29,7 @@ import { useLoadFeature } from '@/features/__core__'
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
-import ExplorerButton from '@/components/common/ExplorerButton'
+import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 

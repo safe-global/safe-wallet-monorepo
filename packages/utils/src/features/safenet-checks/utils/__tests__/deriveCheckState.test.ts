@@ -1,22 +1,18 @@
-import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
 import { deriveCheckState } from '../deriveCheckState'
 import {
   attestedEvent,
   disputeResolvedEvent,
   oracleResultEvent,
-  plainAttestedEvent,
-  plainProposedEvent,
   proposedEvent,
   requestCreatedEvent,
   sentinelCommittedEvent,
   sentinelRevealedEvent,
 } from '../../builders/checkEvents'
-import { decodeLogs } from '../decodeLogs'
 import {
   AttestationVerificationStatus,
   CheckEventType,
   CheckStatus,
+  DisputeOutcome,
   UNVERIFIED_ATTESTATION,
   type AttestationVerification,
   type NormalizedCheckEvent,
@@ -44,40 +40,6 @@ describe('deriveCheckState — precedence table', () => {
 
   it('UNAVAILABLE for an empty event set — nothing was ever proposed for this hash', () => {
     expect(derive([])).toBe(CheckStatus.UNAVAILABLE)
-  })
-
-  describe('non-oracle path (validator-run deterministic checks)', () => {
-    const plain = () => [plainProposedEvent(), plainAttestedEvent()]
-
-    it('BENIGN once the attestation verifies — the validators ran their checks', () => {
-      expect(derive(plain(), '100', verification(AttestationVerificationStatus.VERIFIED))).toBe(CheckStatus.BENIGN)
-    })
-
-    it('never BENIGN on an unverified attestation', () => {
-      expect(derive(plain(), '100', verification(AttestationVerificationStatus.PENDING))).toBe(
-        CheckStatus.AWAITING_VERIFICATION,
-      )
-    })
-
-    it('VERIFICATION_FAILED on a signature that does not verify', () => {
-      expect(derive(plain(), '100', verification(AttestationVerificationStatus.INVALID))).toBe(
-        CheckStatus.VERIFICATION_FAILED,
-      )
-    })
-
-    it('SUBMITTED while only the proposal has landed', () => {
-      expect(derive([plainProposedEvent()])).toBe(CheckStatus.SUBMITTED)
-    })
-
-    it('loses to a negative oracle verdict on the same hash', () => {
-      expect(
-        derive(
-          [plainAttestedEvent(), oracleResultEvent({ approved: false })],
-          '100',
-          verification(AttestationVerificationStatus.VERIFIED),
-        ),
-      ).toBe(CheckStatus.MALICIOUS)
-    })
   })
 
   it('IN_PROGRESS once a request is open, pre-deadline', () => {
@@ -134,6 +96,50 @@ describe('deriveCheckState — precedence table', () => {
   })
 })
 
+describe('Gnosis Chain deployment arbitration', () => {
+  it('settles council denial without OracleResult, even after the deadline', () => {
+    const denied = disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_DENIED })
+    expect(derive([proposedEvent(), request(), denied], '999')).toBe(CheckStatus.MALICIOUS)
+    expect(derive([denied, attestedEvent()], '999', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.MALICIOUS,
+    )
+  })
+
+  it('never approves from a council ruling without an attestation', () => {
+    const approved = disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED })
+    expect(derive([proposedEvent(), request(), approved])).toBe(CheckStatus.IN_PROGRESS)
+  })
+
+  it('keeps a frozen dispute inconclusive before and after its arbitration deadline', () => {
+    const event = { ...disputeResolvedEvent(), type: CheckEventType.DISPUTE_TRIGGERED as const, deadlineBlock: '200' }
+    expect(derive([request(), event], '140')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '160')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '200')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([request(), event], '201')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([event, disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED })], '160')).toBe(
+      CheckStatus.TIMED_OUT,
+    )
+    expect(derive([event, disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_DENIED })], '160')).toBe(
+      CheckStatus.MALICIOUS,
+    )
+    expect(derive([event, attestedEvent()], '201', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.BENIGN,
+    )
+  })
+
+  it.each([
+    CheckEventType.DISPUTE_OUT_OF_SCOPE,
+    CheckEventType.ARBITRATION_TIMED_OUT,
+    CheckEventType.REQUEST_TIMED_OUT,
+  ] as const)('shows %s as inconclusive before the request deadline', (type) => {
+    const event = { ...disputeResolvedEvent(), type, deadlineBlock: '200' }
+    expect(derive([proposedEvent(), request(), event], '140')).toBe(CheckStatus.TIMED_OUT)
+    expect(derive([event, attestedEvent()], '140', verification(AttestationVerificationStatus.VERIFIED))).toBe(
+      CheckStatus.BENIGN,
+    )
+  })
+})
+
 describe('deriveCheckState — head == deadline boundary', () => {
   it('stays IN_PROGRESS at head == deadline (reveal window is inclusive)', () => {
     expect(derive([proposedEvent(), request()], '150')).toBe(CheckStatus.IN_PROGRESS)
@@ -176,37 +182,5 @@ describe('deriveCheckState — order independence', () => {
     const verified = verification(AttestationVerificationStatus.VERIFIED)
     expect(derive([...events].reverse(), '140', verified)).toBe(derive(events, '140', verified))
     expect(derive([...events].reverse(), '140', verified)).toBe(CheckStatus.MALICIOUS)
-  })
-})
-
-describe('deriveCheckState — live-captured beta logs through the real decoder', () => {
-  // The checked-in live pair (an Arbitrum Safe checked on Gnosis beta): decode
-  // the actual deployed bytes, then derive — the two slices composed on real data.
-  const fixture = JSON.parse(
-    readFileSync(join(__dirname, '../../__fixtures__/gnosis-plain-lifecycle.captured.json'), 'utf8'),
-  )
-  const events = decodeLogs(fixture.logs)
-
-  it('verified live pair resolves BENIGN', () => {
-    expect(
-      deriveCheckState({
-        events,
-        attestation: verification(AttestationVerificationStatus.VERIFIED),
-        headBlock: '47445100',
-      }),
-    ).toBe(CheckStatus.BENIGN)
-  })
-
-  it('the same pair without verification is AWAITING_VERIFICATION, never BENIGN', () => {
-    expect(deriveCheckState({ events, attestation: UNVERIFIED_ATTESTATION, headBlock: '47445100' })).toBe(
-      CheckStatus.AWAITING_VERIFICATION,
-    )
-  })
-
-  it('the live proposal alone is SUBMITTED', () => {
-    const proposalOnly = events.filter((event) => event.type === CheckEventType.PLAIN_PROPOSED)
-    expect(deriveCheckState({ events: proposalOnly, attestation: UNVERIFIED_ATTESTATION, headBlock: '47445100' })).toBe(
-      CheckStatus.SUBMITTED,
-    )
   })
 })

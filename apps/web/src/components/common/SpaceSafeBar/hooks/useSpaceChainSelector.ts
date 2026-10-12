@@ -13,6 +13,7 @@ import { useCurrentSpaceId } from '@/features/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ChainInfo } from '@/features/spaces/types'
 import { useSafeBarSafes } from './useSafeBarSafes'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export function useSpaceChainSelector() {
   const { chainSelectorSafes: allSafes } = useSafeBarSafes()
@@ -57,7 +58,10 @@ export function useSpaceChainSelector() {
           [MixpanelEventParams.CHAIN_ID]: chainId,
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${safeAddress}` } })
+      router.push({
+        pathname: AppRoutes.home,
+        query: withSpaceId({ safe: `${chain.shortName}:${safeAddress}` }, spaceId),
+      })
     },
     [chainConfigs, router, safeAddress, spaceId],
   )

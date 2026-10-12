@@ -1,9 +1,9 @@
 import css from '../Dashboard/styles.module.css'
 import Link from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 const UnauthorizedState = () => {
@@ -19,7 +19,7 @@ const UnauthorizedState = () => {
             </Typography>
 
             <Typography color="muted" className="mb-4">
-              Sorry, you don’t have permissions to view this page, as your wallet is not a member of the workspace. Try
+              Sorry, you don’t have permissions to view this page, as your wallet is not a member of the Workspace. Try
               to sign in with a different wallet or go back to the overview.
             </Typography>
 

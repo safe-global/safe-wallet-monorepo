@@ -17,6 +17,9 @@
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
+import { HomePage } from '../../src/pages/home.page'
+import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { SAFES, CHAIN_IDS, LS_NAMESPACE, DROPDOWN_TEST_SPACE } from '../../src/data/constants'
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
@@ -55,28 +58,22 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     // Fake a Spaces session and seed local contacts on two chains. Only the
     // Sepolia local contact should ever load (locals are stored per chain).
     await safePage.addInitScript(
-      ({ ns, spaceId, localBook }) => {
+      ({ ns, spaceId }) => {
         window.localStorage.setItem(
           `${ns}auth`,
           JSON.stringify({
             sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
-            lastUsedSpace: spaceId,
+            landingSpaceHint: spaceId,
             isStoreHydrated: false,
             cfSafeSynced: false,
             isOidcLoginPending: false,
           }),
         )
-        window.localStorage.setItem(`${ns}addressBook`, JSON.stringify(localBook))
       },
-      {
-        ns: LS_NAMESPACE,
-        spaceId: DROPDOWN_TEST_SPACE.id,
-        localBook: {
-          [CHAIN_IDS.sepolia]: { [LOCAL_SEPOLIA.address]: LOCAL_SEPOLIA.name },
-          [CHAIN_IDS.ethereum]: { [LOCAL_MAINNET.address]: LOCAL_MAINNET.name },
-        },
-      },
+      { ns: LS_NAMESPACE, spaceId: DROPDOWN_TEST_SPACE.id },
     )
+    await seedLocalAddressBook(safePage, [LOCAL_SEPOLIA], CHAIN_IDS.sepolia)
+    await seedLocalAddressBook(safePage, [LOCAL_MAINNET], CHAIN_IDS.ethereum)
 
     // Mock auth + spaces endpoints. The workspace address book returns contacts
     // across chains; the frontend is what filters them down to the tx chain.
@@ -106,24 +103,28 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
       }),
     )
     await safePage.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: SPACE.members }))
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
+    await safePage.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
+      route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [SAFES.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
+    )
     await safePage.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
     await safePage.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
 
+    const home = new HomePage(safePage)
+    const sendTokens = new SendTokensPage(safePage)
+
     // Open a Sepolia Safe and connect the owner wallet (enables "New transaction").
-    await safePage.goto(`/home?safe=${SAFES.SEP_OWNER_4_SAFE}`)
+    await home.goto(SAFES.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()
 
     // Open the Send-tokens flow and the recipient dropdown.
-    await expect(safePage.getByTestId('new-tx-btn')).toBeEnabled()
-    await safePage.getByTestId('new-tx-btn').click()
-    await safePage.getByTestId('send-tokens-btn').click()
-    await safePage.getByRole('combobox', { name: /Recipient address/ }).click()
+    await expect(sendTokens.newTxButton).toBeEnabled()
+    await sendTokens.open()
+    await sendTokens.recipientInput.click()
 
     // Wait for the dropdown to populate (the first Sepolia contact renders).
-    const optionByName = (name: string) => safePage.getByTestId('address-item').filter({ hasText: name })
+    const optionByName = (name: string) => sendTokens.suggestion(name)
     await expect(optionByName('WS Sepolia Only')).toBeVisible()
 
     // Sepolia-eligible contacts are suggested.

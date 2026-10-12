@@ -198,6 +198,17 @@ describe('wallets', () => {
       expect(getCodeMock).toHaveBeenCalledTimes(2) // isSmartContract + isEIP7702DelegatedAccount, once each
     })
 
+    it('reads the code from the given provider instead of the URL-chain one', async () => {
+      const scopedGetCode = jest.fn().mockResolvedValue(EMPTY_DATA)
+      const provider = { getCode: scopedGetCode } as unknown as JsonRpcProvider
+
+      const result = await isSmartContractWallet('137', toBeHex('0x1', 20), provider)
+
+      expect(result).toBe(false)
+      expect(scopedGetCode).toHaveBeenCalledTimes(2)
+      expect(getCodeMock).not.toHaveBeenCalled()
+    })
+
     it('should not cache a failed check and retry on the next call', async () => {
       getCodeMock.mockRejectedValueOnce(new Error('Provider not found'))
 

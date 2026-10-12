@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { fn } from 'storybook/test'
+import { mockStarterPlan } from '../mocks/plan'
 import PolicyCatalogue from './index'
 
 /**
- * The empty-state policy catalogue. Mechanisms that have not shipped render as unavailable
- * rather than being hidden, so the page shows the full range of policies from day one.
+ * The empty-state policy catalogue: one card per policy that can be set up, plus the feedback card.
  *
  * Figma: https://www.figma.com/design/cOOeHQK12YR2SAKYKiNW5S/?node-id=15971-30121
  */
@@ -26,4 +27,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+export const Default: Story = {
+  args: { onSelect: fn() },
+}
+
+/** The plan does not include policies: the feedback card is gone and every tile leads to the upgrade. */
+export const Locked: Story = {
+  args: {
+    onSelect: fn(),
+    locked: { ...mockStarterPlan, onUpgrade: fn() },
+  },
+}

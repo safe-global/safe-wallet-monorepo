@@ -1,13 +1,18 @@
 import { useState, useCallback, type ReactElement } from 'react'
 import { Sparkles } from 'lucide-react'
-import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { cn } from '@/utils/cn'
+import {
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@safe-global/views/components/ui/sidebar'
+import { cn } from '@safe-global/views/utils/cn'
 import { icons } from '../config'
 import css from '../styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
 import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -15,19 +20,25 @@ import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
 import { openCookieBanner } from '@/store/popupSlice'
 import { BEAMER_SELECTOR } from '@/services/beamer'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
-import { SafeProFeature, useIsSafeProEnabled, useSafeProSidebarBannerDismissed } from '@/features/safe-pro-announcement'
+import {
+  SafeProFeature,
+  useIsSafeProAnnouncementEnabled,
+  useSafeProSidebarBannerDismissed,
+} from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { reloadPage } from '@/utils/navigation'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -41,11 +52,14 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
     $isReady: isTwoFactorCardLoaded,
     $error: twoFactorCardError,
   } = useLoadFeature(OidcAuthFeature)
-  const isSafeProEnabled = useIsSafeProEnabled()
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  const isSafePro = useIsSafeProEnabled()
   const { pathname } = useRouter()
   const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
   // A failed chunk counts as no banner: its stub then renders nothing for good.
-  const hasSafeProBanner = isSafeProEnabled && pathname !== AppRoutes.spaces.plans && !safeProError
+  // Its copy is pre-launch only, so it retires once Safe Pro is live.
+  const hasSafeProBanner =
+    isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans && !safeProError
   const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
 
   const spaceId = useCurrentSpaceId()
@@ -66,7 +80,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
-    setTimeout(() => location.reload(), 300)
+    setTimeout(reloadPage, 300)
   }
 
   const handleHelpClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
@@ -115,6 +129,7 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
               {hasSafeProBanner && (
                 <SafeProSidebarBanner
                   className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
+                  isShown={showSafeProBanner}
                   onDismiss={dismissSafeProBanner}
                 />
               )}

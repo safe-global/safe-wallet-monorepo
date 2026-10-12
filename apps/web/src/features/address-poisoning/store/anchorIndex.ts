@@ -48,7 +48,6 @@ export const selectAnchorAddresses = createSelector(
  * this selector's output — never in store state or a dispatched action — so it
  * is never poisoned by fetched data and never trips `serializableCheck`.
  */
-export const selectAnchorIndex = createSelector(
-  [selectAnchorAddresses],
-  (anchors): SimilarityIndex => buildSimilarityIndex(anchors),
+export const selectAnchorIndex = createSelector([selectAnchorAddresses], (anchors): SimilarityIndex =>
+  buildSimilarityIndex(anchors),
 )

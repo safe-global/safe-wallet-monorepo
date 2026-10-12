@@ -67,11 +67,11 @@ jobs:
             exit 0
           fi
 
-          # Get all changed source files in web app. The story lookup below
+          # Get all changed source files in the web app and the views package. The story lookup below
           # only checks `.tsx?` extensions, which matches the repo (TS-only
           # stories); keep these two lists in sync.
           ALL_CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" \
-            | grep -E '^apps/web/src/.*\.tsx?$' \
+            | grep -E '^(apps/web|packages/views)/src/.*\.tsx?$' \
             | grep -v '\.test\.' || true)
 
           STORY_FILES=""

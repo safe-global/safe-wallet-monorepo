@@ -4,9 +4,11 @@ import * as addressBook from '../pages/address_book.page'
 import { invalidAddressFormatErrorMsg } from '../pages/load_safe.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { tokenSelector } from './create_tx.pages'
+import { LS_NAMESPACE } from '../../../src/config/constants'
 
 export const spendingLimitsSection = '[data-testid="spending-limit-section"]'
 export const newSpendingLimitBtn = '[data-testid="new-spending-limit"]'
+export const safeProLock = '[data-testid="safe-pro-lock"]'
 const beneficiarySection = '[data-testid="beneficiary-section"]'
 const tokenAmountFld = '[data-testid="token-amount-field"]'
 const tokenAmountSection = '[data-testid="token-amount-section"]'
@@ -42,10 +44,13 @@ export const timePeriodOptions = {
   fiveMin: '5 minutes',
   thirtyMin: '30 minutes',
   oneHr: '1 hour',
+  oneDay: '1 day',
+  oneWeek: '1 week',
+  oneMonth: '1 month',
 }
 
 const getBeneficiaryInput = () => cy.get(beneficiarySection).find('input')
-const automationOwner = ls.addressBookData.sepoliaAddress2[11155111]['0xC16Db0251654C0a72E91B190d81eAD367d2C6fED']
+const automationOwner = ls.addressBookData.sepoliaAddress2[11155111][constants.DEFAULT_OWNER_ADDRESS]
 
 export const actionNames = {
   enableModule: 'enableModule',
@@ -72,10 +77,6 @@ export function verifyOldValuesAreDisplayed() {
 
 export function verifyActionNamesAreDisplayed(names) {
   main.verifyValuesExist(actionItem, names)
-}
-
-export function verifySpendingLimitBtnIsDisabled() {
-  cy.get(newSpendingLimitBtn).should('be.disabled')
 }
 
 export function verifySpendingLimitsIcons() {
@@ -172,7 +173,11 @@ export function verifyDefaultTimeIsSet() {
 }
 
 export function visitSpendingLimitsPage(safe) {
-  cy.visit(constants.setupUrl + safe)
+  cy.visit(constants.setupUrl + safe, {
+    onBeforeLoad(win) {
+      Object.entries(safeProOffStorage).forEach(([key, value]) => win.localStorage.setItem(key, JSON.stringify(value)))
+    },
+  })
   cy.get(spendingLimitsSection, { timeout: 30000 }).should('be.visible')
 }
 
@@ -244,3 +249,9 @@ export function verifyEnableModuleAddress(moduleAddress) {
   cy.get(actionItem).first().click()
   cy.get(actionAccordion).first().contains(moduleAddress).should('be.visible')
 }
+
+/**
+ * Local storage that turns SAFE_PRO off through the feature flag override (dev builds only), so
+ * the Safe Pro gate does not replace the spending limit actions with its upsell.
+ */
+export const safeProOffStorage = { [`${LS_NAMESPACE}featureFlagOverrides`]: { SAFE_PRO: false } }

@@ -54,7 +54,6 @@ describe('Remove Owners tests', () => {
     it('Verify owner deletion transaction has been created', () => {
       owner.waitForConnectionStatus()
       owner.openRemoveOwnerWindow(1)
-      cy.wait(3000)
       createwallet.clickOnNextBtn()
       //This method creates the @removedAddress alias
       owner.getAddressToBeRemoved()

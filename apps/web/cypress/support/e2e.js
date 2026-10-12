@@ -17,6 +17,7 @@
 import '@testing-library/cypress/add-commands'
 import './commands'
 import './safe-apps-commands'
+import './safes/isolated'
 import * as constants from './constants'
 import * as ls from './localstorage_data'
 

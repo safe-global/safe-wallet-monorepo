@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "http://localhost:3000/"}
+ */
 import { renderHook, act } from '@testing-library/react'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
@@ -17,7 +20,7 @@ const mockUseOnboard = useOnboard as jest.MockedFunction<typeof useOnboard>
 const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
 
 describe('useLogout', () => {
-  const originalLocation = window.location
+  const originalLocation = { href: window.location.href }
   let submitSpy: jest.Mock
   let appendChildSpy: jest.SpyInstance
   let removeChildSpy: jest.SpyInstance
@@ -33,11 +36,6 @@ describe('useLogout', () => {
     mockUseOnboard.mockReturnValue({ disconnectWallet: disconnectWalletSpy } as unknown as OnboardAPI)
     mockUseWallet.mockReturnValue(null)
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...originalLocation, origin: 'http://localhost:3000' },
-    })
-
     submitSpy = jest.fn()
     appendChildSpy = jest.spyOn(document.body, 'appendChild').mockImplementation((node) => {
       if (node instanceof HTMLFormElement) {
@@ -52,7 +50,7 @@ describe('useLogout', () => {
   afterEach(() => {
     appendChildSpy.mockRestore()
     removeChildSpy.mockRestore()
-    Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
+    window.history.replaceState(null, '', originalLocation.href)
   })
 
   it('should write logging_out flag to sessionStorage before submitting', () => {

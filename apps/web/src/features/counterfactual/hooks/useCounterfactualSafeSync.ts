@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { getStoreInstance } from '@/store'
-import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace, setCfSafeSynced } from '@/store/authSlice'
+import { isAuthenticated, selectIsStoreHydrated, setCfSafeSynced } from '@/store/authSlice'
 import { addUndeployedSafe, selectUndeployedSafes } from '../store/undeployedSafesSlice'
 import { removePendingCfDelete, selectPendingCfDeletes } from '../store/pendingCfDeletesSlice'
 import { Errors, logError } from '@/services/exceptions'
@@ -13,7 +13,7 @@ import {
   type GetCounterfactualSafesResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
 import { cgwApi as spacesApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { normalizeSpaceId } from '@/utils/spaces'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const SYNC_RETRY_DELAY_MS = 2000
 
@@ -23,14 +23,14 @@ const is404 = (error: unknown): boolean =>
 /**
  * Syncs counterfactual safes from the backend into Redux on app load.
  * Backend is the source of truth. Fetches from both the user endpoint
- * and the space endpoint (if user has an active space) to ensure
+ * and the endpoint of the Workspace in the URL (if any) to ensure
  * all space members can see counterfactual safes.
  */
 const useCounterfactualSafeSync = () => {
   const dispatch = useAppDispatch()
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const isHydrated = useAppSelector(selectIsStoreHydrated)
-  const spaceId = useAppSelector(lastUsedSpace)
+  const spaceId = useUrlSpaceId()
   // Track the last (auth + space) combination we synced. Resyncs when either changes.
   const lastSyncedKey = useRef<string | null>(null)
 
@@ -86,13 +86,8 @@ const useCounterfactualSafeSync = () => {
 
       // Fetch CF safes from user endpoint and space endpoint
       const userQuery = dispatch(counterfactualSafesApi.endpoints.counterfactualSafesGetV1.initiate(undefined))
-      // Guard against persisted/legacy lastUsedSpace values that aren't a clean
-      // UUID or non-empty string — pass through unchanged, null means skip.
-      const resolvedSpaceId = normalizeSpaceId(spaceId)
       const spaceQuery =
-        resolvedSpaceId !== null
-          ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId: resolvedSpaceId }))
-          : null
+        spaceId !== null ? dispatch(spacesApi.endpoints.spaceCounterfactualSafesGetV1.initiate({ spaceId })) : null
 
       try {
         const userResponse = await userQuery.unwrap()

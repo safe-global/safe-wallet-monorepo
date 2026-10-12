@@ -21,5 +21,9 @@ export function safeMsgBuilder(): IBuilder<MessageItem> {
         signature: '',
       },
     ],
+    preparedSignature: null,
+    origin: null,
+    safeAppInfo: null,
+    safeAppId: null,
   })
 }

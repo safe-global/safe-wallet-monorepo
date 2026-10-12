@@ -865,6 +865,8 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
+    safeStaking: features.safeStaking ?? false,
+    safePro: features.safePro ?? false,
   }
 
   // Build handlers array

@@ -16,6 +16,7 @@ import { useGetSpaceAddressBook } from '@/features/spaces'
 jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn((): SpaceAddressBookItemDto[] => []),
+  useSpaceAddressBookState: jest.fn(() => ({ items: [], isLoading: false, isError: false })),
 }))
 
 const mockUseGetSpaceAddressBook = useGetSpaceAddressBook as jest.MockedFunction<typeof useGetSpaceAddressBook>
@@ -282,21 +283,15 @@ describe('AddressBookInput', () => {
       expect(utils.getByLabelText(validationError, { exact: false })).toBeDefined()
     })
 
-    // Clear the input by clicking on the readonly input
+    // Clicking the chip reopens the field for editing: the address stays and every contact is offered
     act(() => {
-      // first click clears input
-      fireEvent.click(utils.getByLabelText(validationError, { exact: false }))
+      fireEvent.click(utils.getByRole('button', { name: /InvalidAddress/ }))
     })
 
-    await waitFor(() => expect(utils.getByLabelText(validationError, { exact: false })).toHaveValue(''))
     const newInput = utils.getByLabelText(validationError, { exact: false })
-    expect(newInput).toBeVisible()
-
-    act(() => {
-      // mousedown opens autocompletion again
-      fireEvent.mouseDown(newInput)
-      fireEvent.mouseUp(newInput)
-    })
+    expect(newInput).toHaveValue(invalidAddress)
+    expect(newInput).toHaveAttribute('aria-expanded', 'true')
+    expect(utils.getByRole('listbox')).toBeInTheDocument()
 
     act(() => {
       fireEvent.click(utils.getByText('ValidAddress'))
@@ -532,6 +527,41 @@ describe('AddressBookInput', () => {
    * that, a keyboard-only user can only reach a contact with a mouse — and otherwise has to hand-type
    * the recipient address, which is exactly what the address book exists to avoid.
    */
+  describe('editing a saved contact', () => {
+    it('offers every contact again when the chip is clicked', () => {
+      const alice = checksumAddress(faker.finance.ethereumAddress())
+      const bob = checksumAddress(faker.finance.ethereumAddress())
+      const { input, utils } = setup(alice, { [alice]: 'Alice', [bob]: 'Bob' })
+
+      expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
+
+      act(() => {
+        fireEvent.click(utils.getByRole('button', { name: /Alice/ }))
+      })
+
+      expect(input).toHaveValue(alice)
+      expect(input).toHaveFocus()
+      // Contacts persisted by other tests leak in via localStorage, so check ours rather than the count.
+      const listbox = utils.getByRole('listbox')
+      expect(within(listbox).getByText('Alice')).toBeInTheDocument()
+      expect(within(listbox).getByText('Bob')).toBeInTheDocument()
+    })
+
+    it('does not suggest contacts for a complete address that is not saved', () => {
+      const alice = checksumAddress(faker.finance.ethereumAddress())
+      const unknown = checksumAddress(faker.finance.ethereumAddress())
+      const { input, utils } = setup(unknown, { [alice]: 'Alice' })
+
+      act(() => {
+        fireEvent.mouseDown(input)
+        fireEvent.mouseUp(input)
+      })
+
+      expect(input).toHaveValue(unknown)
+      expect(utils.queryByRole('listbox')).not.toBeInTheDocument()
+    })
+  })
+
   describe('keyboard navigation', () => {
     const twoContacts = () => {
       const alice = checksumAddress(faker.finance.ethereumAddress())
@@ -553,6 +583,13 @@ describe('AddressBookInput', () => {
       const activeId = input.getAttribute('aria-activedescendant')
       return activeId ? document.getElementById(activeId) : null
     }
+
+    it('keeps the caret out of the tab order since ArrowDown opens the list', () => {
+      const { addressBook } = twoContacts()
+      const { utils } = setup('', addressBook)
+
+      expect(utils.getByTestId('address-book-toggle')).toHaveAttribute('tabindex', '-1')
+    })
 
     it('opens the list and activates the first option on ArrowDown', async () => {
       const { addressBook } = twoContacts()

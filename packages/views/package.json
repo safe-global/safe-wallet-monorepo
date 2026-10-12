@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "name": "@safe-global/views",
+  "version": "1.0.0",
+  "description": "Presentational React views and shadcn/ui primitives shared by the web apps",
+  "scripts": {
+    "lint": "eslint src",
+    "type-check": "yarn run -T -B tsc --noEmit",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.1.0",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@safe-global/protocol-kit": "^8.0.7",
+    "@safe-global/store": "workspace:^",
+    "@safe-global/types-kit": "^4.0.1",
+    "@safe-global/utils": "workspace:^",
+    "class-variance-authority": "^0.7.1",
+    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "ethers": "6.17.0",
+    "input-otp": "^1.4.2",
+    "lucide-react": "^0.563.0",
+    "react-day-picker": "^9.13.0",
+    "react-dropzone": "^14.2.3",
+    "react-resizable-panels": "^4.5.3",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "vaul": "^1.1.2"
+  },
+  "peerDependencies": {
+    "next": "*",
+    "next-themes": "^0.4.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.70.1"
+  }
+}

@@ -43,8 +43,12 @@ const guardRules: GuardRule[] = [
     },
     action: ({ isSpacesPath, query }) => {
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
-      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+      // Keep the Workspace too, so that the welcome page opens it after sign-in
+      const params = new URLSearchParams()
+      if (typeof query.safe === 'string') params.set('safe', query.safe)
+      if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
+      const search = params.toString()
+      return redirect(search ? `${target}?${search}` : target)
     },
   },
 
@@ -113,8 +117,8 @@ export const useFlowActivationGuard: UseGuard = () => {
       // (possibly empty) or a 404 confirming the user has no spaces. On any
       // other error (401/403 from cleared cookies, network failure, 5xx),
       // assume the user has spaces so we don't bounce them into create-space.
-      // The auth listener / reconcileAuth flow will clean up the stale auth
-      // state and re-trigger the guard with a correct isSiweAuthenticated.
+      // forbiddenSessionListener confirms a 403 against /v1/auth/me, clears the
+      // stale auth state and re-triggers the guard with a correct isSiweAuthenticated.
       const isNotFound = !!error && (error as { status?: unknown }).status === 404
       const transientError = !!error && !isNotFound
       if (transientError) {

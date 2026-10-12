@@ -9,6 +9,7 @@ describe('TxSafeAppCard', () => {
       <TxSafeAppCard
         onPress={() => null}
         safeAppInfo={{
+          id: 29,
           name: 'Transaction Builder',
           url: 'http://something.com',
           logoUri: 'https://safe-transaction-assets.safe.global/safe_apps/29/icon.png',
@@ -26,6 +27,7 @@ describe('TxSafeAppCard', () => {
       <TxSafeAppCard
         onPress={() => null}
         safeAppInfo={{
+          id: 29,
           name: 'Transaction Builder',
           url: 'http://something.com',
         }}

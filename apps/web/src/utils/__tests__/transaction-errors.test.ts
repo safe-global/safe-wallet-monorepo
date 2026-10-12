@@ -9,6 +9,7 @@ import {
   isHypernativeGuardRevert,
   isNonceTooLowError,
   isRateLimitError,
+  getGasLimitTooLowMessage,
   isRevertError,
   isExpectedEstimationError,
   GUARD_ERROR_CODES,
@@ -71,6 +72,40 @@ describe('transaction-errors', () => {
       expect(isNonceTooLowError(new Error('execution reverted: GS026'))).toBe(false)
       expect(isNonceTooLowError(null)).toBe(false)
       expect(isNonceTooLowError(undefined)).toBe(false)
+    })
+  })
+
+  describe('getGasLimitTooLowMessage', () => {
+    it('names the minimum the node quoted, even wrapped as a viem revert (WA-3523)', () => {
+      // Real shape: the gas limit set in Advanced parameters is below the tx's
+      // intrinsic cost, and viem wraps the pool rejection as a contract revert.
+      const viemWrapped = new Error(
+        'The contract function "execTransaction" reverted with the following reason:\nintrinsic gas too low: gas 21000, minimum needed 25484',
+      )
+
+      expect(getGasLimitTooLowMessage(viemWrapped)).toBe(
+        'Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.',
+      )
+    })
+
+    it('reads the "want" phrasing some clients use', () => {
+      expect(getGasLimitTooLowMessage(new Error('intrinsic gas too low: have 21000, want 25484'))).toBe(
+        'Gas limit too low. Minimum needed: 25,484. Increase the gas limit and try again.',
+      )
+    })
+
+    it('drops the minimum when the node quoted none', () => {
+      // Besu's phrasing carries no numbers.
+      expect(getGasLimitTooLowMessage(new Error('Intrinsic gas exceeds gas limit'))).toBe(
+        'Gas limit too low. Increase the gas limit and try again.',
+      )
+    })
+
+    it('returns undefined for unrelated errors, including a real revert', () => {
+      expect(getGasLimitTooLowMessage(new Error('execution reverted: GS013'))).toBeUndefined()
+      expect(getGasLimitTooLowMessage(new Error('out of gas'))).toBeUndefined()
+      expect(getGasLimitTooLowMessage(null)).toBeUndefined()
+      expect(getGasLimitTooLowMessage(undefined)).toBeUndefined()
     })
   })
 

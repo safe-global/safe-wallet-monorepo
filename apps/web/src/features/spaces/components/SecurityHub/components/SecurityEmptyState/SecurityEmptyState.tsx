@@ -5,10 +5,10 @@ import { HnSignupFlow } from '@/features/hypernative'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WidgetEmptyState } from '../../../SafeWidget'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import css from './styles.module.css'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 interface EmptyCardItemProps {
   iconNode: React.ReactNode | string
@@ -100,7 +100,7 @@ const SecurityEmptyState = (): ReactElement => {
           className="max-w-[360px] mx-auto py-16"
           icon={<ShieldCheck className="size-6 text-green-500" />}
           text="No accounts to check yet"
-          subtitle="Add a Safe account to this workspace to start running security checks and see its health here."
+          subtitle="Add a Safe account to this Workspace to start running security checks and see its health here."
           action={
             <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.security_page}>
               <AddAccounts buttonVariant="default" buttonLabel="Add account" />

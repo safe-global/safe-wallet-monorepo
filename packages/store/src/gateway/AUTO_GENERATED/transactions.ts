@@ -206,7 +206,7 @@ export type TransactionsGetModuleTransactionsV1ApiArg = {
   cursor?: string
 }
 export type TransactionsAddConfirmationV1ApiResponse =
-  /** status 200 Transaction details with updated confirmation status */ Transaction
+  /** status 200 Transaction details with updated confirmation status */ TransactionDetails
 export type TransactionsAddConfirmationV1ApiArg = {
   /** Chain ID where the Safe is deployed */
   chainId: string
@@ -809,6 +809,7 @@ export type ModuleExecutionDetails = {
   address: AddressInfo
 }
 export type SafeAppInfo = {
+  id: number
   name: string
   url: string
   logoUri?: string | null
@@ -975,6 +976,21 @@ export type TransactionItemPage = {
   previous?: string | null
   results: (TransactionItem | DateLabel)[]
 }
+export type NestedTransactionDto = {
+  to?: string | null
+  value: string
+  data?: string | null
+  /** Operation type: 0 for CALL, 1 for DELEGATE */
+  operation: Operation
+  safeTxGas: string
+  baseGas: string
+  gasPrice: string
+  gasToken?: string | null
+  refundReceiver?: string | null
+  /** The nested Safe's nonce */
+  nonce: string
+  notes?: string | null
+}
 export type ProposeTransactionDto = {
   to: string
   value: string
@@ -991,6 +1007,8 @@ export type ProposeTransactionDto = {
   sender: string
   signature?: string | null
   origin?: string | null
+  /** A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected. */
+  nestedTransaction?: NestedTransactionDto | null
 }
 export type CreationTransaction = {
   created: string

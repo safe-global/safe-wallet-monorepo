@@ -2,10 +2,10 @@ import { type KeyboardEvent, type ReactElement, useCallback, useEffect, useId, u
 import { createPortal } from 'react-dom'
 import { useFormContext, useWatch } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '../AddressInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import css from './styles.module.css'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -18,7 +18,7 @@ import RecipientOption from './RecipientOption'
 import RecipientGroupHeader from './RecipientGroupHeader'
 import useWorkspaceName from './useWorkspaceName'
 import { useAnchoredList } from './useAnchoredList'
-import { usePortalContainerElement } from '@/components/ui/ShadcnProvider'
+import { usePortalContainerElement } from '@safe-global/views/components/ui/ShadcnProvider'
 
 type AddressBookEntry = { label: string; name: string; source: ContactSource; contact: ExtendedContact }
 
@@ -38,10 +38,17 @@ const groupEntriesBySource = (entries: AddressBookEntry[]): [ContactSource, Addr
   return [...groups.entries()]
 }
 
+export interface AddressBookInputProps extends AddressInputProps {
+  canAdd?: boolean
+  /** Contacts to leave out of the suggestions. Typing one is still possible, so the caller keeps its
+      own `validate` for the message. */
+  excludeAddresses?: readonly string[]
+}
+
 /**
  *  Temporary component until revamped safe components are done
  */
-const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canAdd?: boolean }): ReactElement => {
+const AddressBookInput = ({ name, canAdd, excludeAddresses, ...props }: AddressBookInputProps): ReactElement => {
   const listId = useId()
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -56,25 +63,37 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
   const { setValue, control } = useFormContext()
   const addressValue = useWatch({ name, control })
 
-  const allAddressBookEntries = useMemo<AddressBookEntry[]>(
-    () =>
+  // Joined so a caller passing a fresh array each render does not rebuild the list every time.
+  const excludedKey = excludeAddresses?.join(',') ?? ''
+
+  const allAddressBookEntries = useMemo<AddressBookEntry[]>(() => {
+    const excluded = excludedKey ? excludedKey.split(',').filter(Boolean) : []
+
+    return (
       mergedAddressBook.list
         // Only suggest contacts configured for the chain we are sending on
         .filter((entry) => entry.chainIds.includes(chainId))
+        .filter((entry) => !excluded.some((address) => sameAddress(address, entry.address)))
         .map((entry) => ({
           label: entry.address,
           name: entry.name,
           source: entry.source,
           contact: entry,
-        })),
-    [mergedAddressBook, chainId],
+        }))
+    )
+  }, [mergedAddressBook, chainId, excludedKey])
+
+  const isInAddressBook = useMemo(
+    () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
+    [allAddressBookEntries, addressValue],
   )
 
-  // Don't show suggestions from the address book once a valid address has been entered.
+  // A complete unknown address needs no suggestions; a saved contact opened for editing is
+  // offered every contact again so the user can swap it.
   const filteredEntries = useMemo(() => {
-    if (isValidAddress(addressValue)) return []
+    if (isValidAddress(addressValue)) return isInAddressBook ? allAddressBookEntries : []
     return filterEntries(allAddressBookEntries, addressValue ?? '')
-  }, [allAddressBookEntries, addressValue])
+  }, [allAddressBookEntries, addressValue, isInAddressBook])
 
   const groupedEntries = useMemo(() => groupEntriesBySource(filteredEntries), [filteredEntries])
 
@@ -85,11 +104,6 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
 
   // Same set the list renders from, so the click and chevron paths agree with the typed one.
   const hasVisibleOptions = filteredEntries.length > 0
-
-  const isInAddressBook = useMemo(
-    () => allAddressBookEntries.some((entry) => sameAddress(entry.label, addressValue)),
-    [allAddressBookEntries, addressValue],
-  )
 
   const wrapperRef = useRef<HTMLDivElement>(null)
   // The portalled list is not inside wrapperRef, so dismissal has to check it separately or a
@@ -216,10 +230,11 @@ const AddressBookInput = ({ name, canAdd, ...props }: AddressInputProps & { canA
           {...props}
           data-testid={props['data-testid'] ?? 'address-book-input'}
           name={name}
-          focused={props.focused || !addressValue}
+          focused={props.focused ?? !addressValue}
           onOpenListClick={hasVisibleOptions ? handleToggleAutocomplete : undefined}
           isAutocompleteOpen={open}
           onAddressBookClick={canAdd && !isInAddressBook ? onAddressBookClick : undefined}
+          onEdit={() => setOpen(true)}
           role="combobox"
           aria-expanded={showList}
           aria-autocomplete="list"

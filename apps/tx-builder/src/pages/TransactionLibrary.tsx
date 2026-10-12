@@ -32,99 +32,104 @@ const TransactionLibrary = () => {
 
   return (
     <Wrapper centered>
-      <StyledTitle>Your transaction library</StyledTitle>
-
       {batches.length > 0 ? (
-        batches.map((batch) => (
-          <StyledAccordion key={batch.id} compact TransitionProps={{ unmountOnExit: true }}>
-            <StyledAccordionSummary>
-              {/* transactions count  */}
-              <TransactionCounterDot color="primary">
-                <StyledDotText>{batch.transactions.length}</StyledDotText>
-              </TransactionCounterDot>
+        <>
+          <StyledTitle>Your transaction library</StyledTitle>
+          {batches.map((batch) => (
+            <StyledAccordion key={batch.id} compact TransitionProps={{ unmountOnExit: true }}>
+              <StyledAccordionSummary>
+                {/* transactions count  */}
+                <TransactionCounterDot color="primary">
+                  <StyledDotText>{batch.transactions.length}</StyledDotText>
+                </TransactionCounterDot>
 
-              {/* editable batch name */}
-              <StyledBatchTitle>
-                <Tooltip placement="top" title="Edit batch name" backgroundColor="primary" arrow>
-                  <div>
-                    <EditableLabel onEdit={(newBatchName) => renameBatch(batch.id, newBatchName)}>
-                      {batch.name}
-                    </EditableLabel>
-                  </div>
-                </Tooltip>
-              </StyledBatchTitle>
+                {/* editable batch name */}
+                <StyledBatchTitle>
+                  <Tooltip placement="top" title="Edit batch name" backgroundColor="primary" arrow>
+                    <div>
+                      <EditableLabel onEdit={(newBatchName) => renameBatch(batch.id, newBatchName)}>
+                        {batch.name}
+                      </EditableLabel>
+                    </div>
+                  </Tooltip>
+                </StyledBatchTitle>
 
-              {/* batch actions  */}
-              <BatchButtonsContainer>
-                {/* execute batch */}
-                <Tooltip placement="top" title="Execute batch" backgroundColor="primary" arrow>
-                  <div>
-                    <ExecuteBatchButton
-                      type="button"
-                      aria-label="Execute batch"
-                      variant="contained"
-                      color="primary"
+                {/* batch actions  */}
+                <BatchButtonsContainer>
+                  {/* execute batch */}
+                  <Tooltip placement="top" title="Execute batch" backgroundColor="primary" arrow>
+                    <div>
+                      <ExecuteBatchButton
+                        type="button"
+                        aria-label="Execute batch"
+                        variant="contained"
+                        color="primary"
+                        onClick={async (event) => {
+                          event.stopPropagation()
+                          await executeBatch(batch)
+                          navigate(REVIEW_AND_CONFIRM_PATH, {
+                            state: { from: TRANSACTION_LIBRARY_PATH },
+                          })
+                        }}
+                      >
+                        <FixedIcon type={'arrowSentWhite'} />
+                      </ExecuteBatchButton>
+                    </div>
+                  </Tooltip>
+
+                  {/* edit batch */}
+                  <Tooltip placement="top" title="Edit batch" backgroundColor="primary" arrow>
+                    <StyledIconButton
                       onClick={async (event) => {
                         event.stopPropagation()
                         await executeBatch(batch)
-                        navigate(REVIEW_AND_CONFIRM_PATH, {
+                        navigate(getEditBatchUrl(batch.id), {
                           state: { from: TRANSACTION_LIBRARY_PATH },
                         })
                       }}
                     >
-                      <FixedIcon type={'arrowSentWhite'} />
-                    </ExecuteBatchButton>
-                  </div>
-                </Tooltip>
+                      <Icon size="sm" type="edit" color="primary" aria-label="edit batch" />
+                    </StyledIconButton>
+                  </Tooltip>
 
-                {/* edit batch */}
-                <Tooltip placement="top" title="Edit batch" backgroundColor="primary" arrow>
-                  <StyledIconButton
-                    onClick={async (event) => {
-                      event.stopPropagation()
-                      await executeBatch(batch)
-                      navigate(getEditBatchUrl(batch.id), {
-                        state: { from: TRANSACTION_LIBRARY_PATH },
-                      })
-                    }}
-                  >
-                    <Icon size="sm" type="edit" color="primary" aria-label="edit batch" />
-                  </StyledIconButton>
-                </Tooltip>
+                  {/* download batch */}
+                  <Tooltip placement="top" title="Download batch" backgroundColor="primary" arrow>
+                    <StyledIconButton
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        downloadBatch(batch.name, batch.transactions)
+                      }}
+                    >
+                      <Icon size="sm" type="importImg" color="primary" aria-label="Download" />
+                    </StyledIconButton>
+                  </Tooltip>
 
-                {/* download batch */}
-                <Tooltip placement="top" title="Download batch" backgroundColor="primary" arrow>
-                  <StyledIconButton
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      downloadBatch(batch.name, batch.transactions)
-                    }}
-                  >
-                    <Icon size="sm" type="importImg" color="primary" aria-label="Download" />
-                  </StyledIconButton>
-                </Tooltip>
-
-                {/* delete batch */}
-                <Tooltip placement="top" title="Delete Batch" backgroundColor="primary" arrow>
-                  <StyledIconButton
-                    size="small"
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      setBatchToRemove(batch)
-                      openDeleteBatchModal()
-                    }}
-                  >
-                    <Icon size="sm" type="delete" color="error" aria-label="Delete Batch" />
-                  </StyledIconButton>
-                </Tooltip>
-              </BatchButtonsContainer>
-            </StyledAccordionSummary>
-            <AccordionDetails>
-              {/* transactions batch list  */}
-              <TransactionsBatchList transactions={batch.transactions} showTransactionDetails showBatchHeader={false} />
-            </AccordionDetails>
-          </StyledAccordion>
-        ))
+                  {/* delete batch */}
+                  <Tooltip placement="top" title="Delete Batch" backgroundColor="primary" arrow>
+                    <StyledIconButton
+                      size="small"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        setBatchToRemove(batch)
+                        openDeleteBatchModal()
+                      }}
+                    >
+                      <Icon size="sm" type="delete" color="error" aria-label="Delete Batch" />
+                    </StyledIconButton>
+                  </Tooltip>
+                </BatchButtonsContainer>
+              </StyledAccordionSummary>
+              <AccordionDetails>
+                {/* transactions batch list  */}
+                <TransactionsBatchList
+                  transactions={batch.transactions}
+                  showTransactionDetails
+                  showBatchHeader={false}
+                />
+              </AccordionDetails>
+            </StyledAccordion>
+          ))}
+        </>
       ) : (
         <Box display="flex" flexDirection={'column'} alignItems={'center'} height={'100%'} justifyContent="center">
           {/* Empty library Screen */}

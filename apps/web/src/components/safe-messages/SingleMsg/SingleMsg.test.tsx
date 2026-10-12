@@ -1,5 +1,5 @@
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { fireEvent, render, waitFor } from '@/tests/test-utils'
+import { render, waitFor } from '@/tests/test-utils'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as syncSafeMessageSigner from '@/hooks/messages/useSyncSafeMessageSigner'
 
@@ -59,9 +59,8 @@ describe('SingleMsg', () => {
       expect(screen.getByText('Failed to load message')).toBeInTheDocument()
     })
 
-    await waitFor(() => {
-      fireEvent.click(screen.getByText('Details'))
-      expect(screen.getByText('Server error')).toBeInTheDocument()
-    })
+    // The raw error is never offered to the user — there is no Details toggle to open.
+    expect(screen.queryByText('Details')).not.toBeInTheDocument()
+    expect(screen.queryByText('Server error')).not.toBeInTheDocument()
   })
 })

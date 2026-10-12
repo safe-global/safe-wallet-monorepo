@@ -22,7 +22,7 @@ jest.mock('next/image', () => ({
   default: ({ alt }: { alt: string }) => <img alt={alt} />,
 }))
 
-jest.mock('@/components/ui/button', () => ({
+jest.mock('@safe-global/views/components/ui/button', () => ({
   Button: ({ children, className }: { children: ReactNode; className?: string }) => (
     <button type="button" className={className}>
       {children}
@@ -30,11 +30,11 @@ jest.mock('@/components/ui/button', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/typography', () => ({
+jest.mock('@safe-global/views/components/ui/typography', () => ({
   Typography: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@safe-global/views/components/ui/dialog', () => ({
   DialogClose: ({
     children,
     'aria-label': ariaLabel,
@@ -63,13 +63,13 @@ describe('AddToSpacePopupModal', () => {
   it('renders the "Add to Space" title', () => {
     render(<AddToSpacePopupModal />)
 
-    expect(screen.getByText('Add to workspace')).toBeInTheDocument()
+    expect(screen.getByText('Add to Workspace')).toBeInTheDocument()
   })
 
   it('renders all three benefit items', () => {
     render(<AddToSpacePopupModal />)
 
-    expect(screen.getByText('Keep all related Safes in one shared workspace')).toBeInTheDocument()
+    expect(screen.getByText('Keep all related Safes in one shared Workspace')).toBeInTheDocument()
     expect(screen.getByText('Give teams shared context around transactions and activity')).toBeInTheDocument()
     expect(screen.getByText('Streamline coordination across initiators, approvers, and executors')).toBeInTheDocument()
   })
@@ -84,7 +84,7 @@ describe('AddToSpacePopupModal', () => {
     mockRouterQuery = { safe: '1:0xdeadbeef' }
     render(<AddToSpacePopupModal />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Create a workspace/i }))
+    fireEvent.click(screen.getByRole('button', { name: /Create a Workspace/i }))
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: AppRoutes.spaces.createSpace,

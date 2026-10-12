@@ -7,10 +7,12 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { isDomain } from '@/services/ens'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import useNameResolver from '@/components/common/AddressInput/useNameResolver'
-import { cn } from '@/utils/cn'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import useChains from '@/hooks/useChains'
+import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
+import { cn } from '@safe-global/views/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
 import { EMAIL_MAX_LENGTH, INVALID_IDENTIFIER_ERROR, isEmailAddress } from '../../AddMemberModal/utils'
@@ -74,6 +76,9 @@ const MemberInviteRow = ({
   const fieldErrorMessage = errors?.members?.[index]?.identifier?.message
   const debouncedError = useDebounce(fieldErrorMessage, ERROR_DEBOUNCE_MS)
   const displayError = fieldErrorMessage ? debouncedError : undefined
+  const { configs: allNetworks } = useChains()
+  // Space invites are chain-agnostic — resolve ENS on mainnet, not the current Safe chain
+  const ensChain = allNetworks.find((chain) => chain.chainId === String(DEFAULT_MAINNET_CHAIN_ID))
 
   const handleAddressResolved = useCallback(
     (address: string) => {
@@ -87,7 +92,7 @@ const MemberInviteRow = ({
     address: resolvedAddress,
     resolverError,
     resolving,
-  } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue)
+  } = useNameResolver(isEmailAddress(identifierValue.trim()) ? '' : identifierValue, ensChain)
 
   useEffect(() => {
     if (resolvedAddress) handleAddressResolved(resolvedAddress)

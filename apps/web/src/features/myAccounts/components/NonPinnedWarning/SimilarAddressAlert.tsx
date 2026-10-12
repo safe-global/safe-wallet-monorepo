@@ -1,7 +1,7 @@
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { SimilarAddressInfo } from '../../hooks/useNonPinnedSafeWarning.types'
 

@@ -34,7 +34,7 @@ interface TxEvents {
   [TxEvent.SIGNED]: { txId?: string }
   [TxEvent.SIGN_FAILED]: { txId?: string; error: Error }
   [TxEvent.PROPOSE_FAILED]: { error: Error }
-  [TxEvent.PROPOSED]: { txId: string; nonce: number }
+  [TxEvent.PROPOSED]: { txId: string; nonce: number } & SafeContext
   [TxEvent.DELETED]: { safeTxHash: string }
   [TxEvent.SIGNATURE_PROPOSE_FAILED]: { txId: string; error: Error } & SafeContext
   [TxEvent.SIGNATURE_PROPOSED]: { txId: string; nonce: number; signerAddress: string } & SafeContext
@@ -45,6 +45,8 @@ interface TxEvents {
     SafeContext & {
       parentSafeAddress: string
       txHashOrParentSafeTxHash: string
+      executed: boolean
+      method: 'approveHash' | 'execTransaction'
     }
   [TxEvent.EXECUTING]: Id & SafeContext
   [TxEvent.PROCESSING]: Id &
@@ -61,7 +63,7 @@ interface TxEvents {
   [TxEvent.FAILED]: Id & SafeContext & { error: Error }
   [TxEvent.SUCCESS]: Id & SafeContext & { txHash?: string }
   [TxEvent.SAFE_APPS_REQUEST]: { safeAppRequestId: RequestId; safeTxHash: string; txId?: string }
-  [TxEvent.BATCH_ADD]: Id
+  [TxEvent.BATCH_ADD]: { nonce: number }
 }
 
 const txEventBus = new EventBus<TxEvents>()

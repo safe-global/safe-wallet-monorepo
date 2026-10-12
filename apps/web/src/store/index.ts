@@ -16,6 +16,7 @@ import {
   cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
   safeMessagesListener,
+  safeInfoListener,
   swapOrderListener,
   swapOrderStatusListener,
   txHistoryListener,
@@ -24,6 +25,10 @@ import {
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -39,6 +44,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -125,6 +131,7 @@ const middleware: Middleware<{}, RootState>[] = [
 
 const listeners = [
   safeMessagesListener,
+  safeInfoListener,
   txHistoryListener,
   txQueueListener,
   swapOrderListener,
@@ -133,6 +140,11 @@ const listeners = [
   counterfactualSyncListener,
   addressBookListener,
   elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
+  forbiddenSessionListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -180,6 +192,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     }
 
     return nextState
@@ -187,10 +200,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
-type MakeStoreOptions = {
-  skipBroadcast?: boolean
-}
-export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
+export const makeStore = (initialState?: Partial<RootState>) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
@@ -203,9 +213,7 @@ export const makeStore = (initialState?: Partial<RootState>, options?: MakeStore
     preloadedState: initialState,
   })
 
-  if (!options?.skipBroadcast) {
-    listenToBroadcast(store)
-  }
+  listenToBroadcast(store)
 
   setupListeners(store.dispatch)
 

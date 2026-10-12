@@ -4,20 +4,25 @@ import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { cn } from '@/utils/cn'
-import { Typography } from '@/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
-import { resolveStatusTone, SeverityIcon, type SeverityTone } from '../SeverityIcon/SeverityIcon'
+import {
+  resolveStatusTone,
+  SeverityIcon,
+  type SeverityTone,
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
+import type { Cta } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/types'
 
 /** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */
 const toneToCssVar = (color: string): string => `var(--color-${color.replace('.', '-')})`
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
-/** A CTA is either a navigation link (`href`) or an in-app action (`onClick`, e.g. open a tx flow). */
-export type Cta = { label: string } & ({ href: string } | { onClick: () => void })
+export type { Cta } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/types'
 
 /**
  * A row is considered "passing" (bucketed into the accordion) when the user has no action to take.
@@ -135,14 +140,17 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
  * Label precedence: `ScanResult.ctaLabelOverride` → `checkDefs[id].ctaLabel`.
  */
 export const makeBuildCta =
-  (checkDefs: SecurityContract['checkDefs']) =>
+  (checkDefs: SecurityContract['checkDefs'], spaceId: string | null) =>
   (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
     if (!safeQueryParam) return null
     const def = checkDefs[checkId]
     if (!def) return null
     if (result && isPassingStatus(result.status)) return null
     const label = result?.ctaLabelOverride || def.ctaLabel
-    return { label, href: `${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}` }
+    return {
+      label,
+      href: withSpaceIdInUrl(`${def.fixRoute}?safe=${encodeURIComponent(safeQueryParam)}`, spaceId),
+    }
   }
 
 const ctaClassName =

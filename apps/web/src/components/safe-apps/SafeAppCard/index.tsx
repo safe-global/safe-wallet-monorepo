@@ -7,15 +7,16 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import type { NextRouter } from 'next/router'
 
 import type { UrlObject } from 'url'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
 import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { AppRoutes } from '@/config/routes'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SafeAppCardProps = {
   safeApp: SafeAppData
@@ -59,7 +60,7 @@ export default SafeAppCard
 export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
   const shareUrlObj: UrlObject = {
     pathname: AppRoutes.apps.open,
-    query: { safe: router.query.safe, appUrl: safeAppUrl },
+    query: withSpaceId({ safe: router.query.safe, appUrl: safeAppUrl }, router.query.spaceId),
   }
 
   return resolveHref(router, shareUrlObj)

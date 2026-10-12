@@ -205,7 +205,7 @@ describe('getTransactionType', () => {
     it('shows the Safe App name and logo when safeAppInfo is present', () => {
       const logoUri = 'https://apps.safe.global/tx-builder/logo.svg'
       const tx = makeTx({
-        safeAppInfo: { name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder', logoUri },
+        safeAppInfo: { id: 1, name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder', logoUri },
       })
 
       const result = getTransactionType(tx, {})
@@ -216,7 +216,7 @@ describe('getTransactionType', () => {
 
     it('falls back to the Code icon when safeAppInfo has no logo', () => {
       const tx = makeTx({
-        safeAppInfo: { name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder' },
+        safeAppInfo: { id: 1, name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder' },
       })
 
       const result = getTransactionType(tx, {})

@@ -1,11 +1,15 @@
 import type { ReactNode } from 'react'
 import { format } from 'date-fns'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
 import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
-import { getDateFilterValidation, toDateInputValue, toIsoBound } from './dateFilters'
+import {
+  getDateFilterValidation,
+  toDateInputValue,
+  toIsoBound,
+} from '@safe-global/views/features/spaces/components/SpaceActivityLog/dateFilters'
 
 export type ActivityLogFilterState = {
   actorUserId?: number

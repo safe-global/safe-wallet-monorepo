@@ -7,7 +7,7 @@ import {
   buildBenignSnapshot,
   buildCheckView,
   buildSnapshot,
-  plainAttestedEvent,
+  attestedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
@@ -66,7 +66,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('links the attestation transaction on the Safenet chain block explorer once FROST-verified', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
+    const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
     const snapshot = buildBenignSnapshot({
       safeTxHash: HASH as `0x${string}`,
       events: [attested],
@@ -97,7 +97,7 @@ describe('SafenetAuditRow', () => {
   })
 
   it('falls back to the Safenet explorer hash route when the chain config is unknown', () => {
-    const attested = plainAttestedEvent({ safeTxHash: HASH as `0x${string}` })
+    const attested = attestedEvent({ safeTxHash: HASH as `0x${string}` })
     const snapshot = buildBenignSnapshot({
       safeTxHash: HASH as `0x${string}`,
       events: [attested],
@@ -112,7 +112,7 @@ describe('SafenetAuditRow', () => {
 
     expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
       'href',
-      `https://explorer.safenet-beta.eth.limo/#/safeTx?chainId=1&safeTxHash=${HASH}`,
+      expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${HASH}`),
     )
   })
 

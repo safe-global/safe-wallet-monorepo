@@ -4,9 +4,9 @@ import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -31,6 +31,7 @@ import {
 } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export const RoleMenuItem = ({
   role,
@@ -54,8 +55,8 @@ export const RoleMenuItem = ({
         <div style={{ gridArea: 'description' }}>
           <Typography variant="paragraph-small" className="max-w-[300px] break-words whitespace-normal">
             {isAdmin
-              ? 'Admins can create and delete workspaces, invite members, and more.'
-              : 'Can view the workspace data.'}
+              ? 'Admins can create and delete Workspaces, invite members, and more.'
+              : 'Can view the Workspace data.'}
           </Typography>
         </div>
       )}
@@ -162,6 +163,7 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
 
         onClose()
       }
+      if (isElevationRequiredError(response.error)) return
       if (response.error) {
         setError(getRtkQueryErrorMessage(response.error) || 'Invite failed. Please try again.')
       }

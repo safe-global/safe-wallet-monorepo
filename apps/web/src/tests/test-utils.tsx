@@ -55,7 +55,7 @@ const getProviders: (options: {
   initialReduxState?: Partial<RootState>
 }) => React.JSXElementConstructor<{ children: React.ReactNode }> = ({ routerProps, initialReduxState }) =>
   function ProviderComponent({ children }) {
-    const store = makeStore(initialReduxState, { skipBroadcast: true })
+    const store = makeStore(initialReduxState)
 
     // Set the store instance for imperative usage (e.g., in async functions)
     setStoreInstance(store)

@@ -4,7 +4,7 @@ import {
   getCanonicalMultiSendCallOnlyAddress,
 } from '@safe-global/utils/services/contracts/deployments'
 import { getAndValidateSafeSDK, getSafeProvider } from '@/services/tx/tx-sender/sdk'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import {
   SafeProvider,
   getCompatibilityFallbackHandlerContract,
@@ -88,12 +88,9 @@ export const getReadOnlyMultiSendCallOnlyContract = async (
   safeVersion: SafeState['version'],
   chainId?: string,
   implementationAddress?: string,
+  scope?: TxSenderScope,
 ) => {
-  const safeSDK = getSafeSDK()
-  if (!safeSDK) {
-    throw new Error('Safe SDK not found.')
-  }
-
+  const safeSDK = getAndValidateSafeSDK(scope)
   const safeProvider = safeSDK.getSafeProvider()
 
   // For unsupported mastercopies, use the SDK version if available

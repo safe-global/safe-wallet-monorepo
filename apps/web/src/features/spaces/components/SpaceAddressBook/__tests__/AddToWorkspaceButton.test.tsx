@@ -8,11 +8,23 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const IS_ADMIN = true
 const mockUpsert = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [mockUpsert],
+  useAddressBookRequestsCreateRequestV1Mutation: () => [jest.fn()],
 }))
+
+jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
+
+jest.mock('../../../hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => [],
+  useSpaceAddressBookState: () => ({ items: [], isLoading: false, isError: false }),
+}))
+
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -36,7 +48,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' }, '137': { [address]: 'Alice' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => {
       expect(mockUpsert).toHaveBeenCalledWith({
@@ -54,7 +66,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: ' Alice‚Bob ' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => {
       expect(mockUpsert).toHaveBeenCalledWith({
@@ -70,7 +82,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' }, '137': { [address]: 'Alice' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => expect(mockUpsert).toHaveBeenCalled())
 
@@ -85,7 +97,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => expect(mockUpsert).toHaveBeenCalled())
 
@@ -101,7 +113,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => {
       const notifications = getStoreInstance().getState().notifications
@@ -115,7 +127,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Alice' } } },
     })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => {
       const notifications = getStoreInstance().getState().notifications
@@ -126,7 +138,7 @@ describe('AddToWorkspaceButton', () => {
   it('drops the label into the accessible name in the compact layout', () => {
     render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} isCompact />)
 
-    expect(screen.getByRole('button', { name: 'Add to workspace' })).toHaveTextContent('')
+    expect(screen.getByRole('button', { name: 'Add to Workspace' })).toHaveTextContent('')
   })
 
   it('disables the button and skips the mutation when the local name has invalid characters', async () => {
@@ -134,7 +146,7 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
     })
 
-    const button = screen.getByRole('button', { name: 'Add to workspace' })
+    const button = screen.getByRole('button', { name: 'Add to Workspace' })
     expect(button).toBeDisabled()
 
     await userEvent.click(button)
@@ -146,16 +158,16 @@ describe('AddToWorkspaceButton', () => {
       initialReduxState: { addressBook: { '1': { [address]: 'Bad/Name' } } },
     })
 
-    await userEvent.hover(screen.getByRole('button', { name: 'Add to workspace' }).parentElement as HTMLElement)
+    await userEvent.hover(screen.getByRole('button', { name: 'Add to Workspace' }).parentElement as HTMLElement)
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
   })
 
   it('tracks the contact once it is added to the workspace', async () => {
     mockUpsert.mockResolvedValue({ data: {} })
     render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() =>
       expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.LOCAL_CONTACT_ADDED, { Source: 'local_contact_row' }),
@@ -166,7 +178,7 @@ describe('AddToWorkspaceButton', () => {
     mockUpsert.mockResolvedValue({ error: { status: 500 } })
     render(<AddToWorkspaceButton address={address} name="Alice" chainIds={['1']} />)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
 
     await waitFor(() => expect(mockUpsert).toHaveBeenCalled())
     expect(trackEvent).not.toHaveBeenCalled()

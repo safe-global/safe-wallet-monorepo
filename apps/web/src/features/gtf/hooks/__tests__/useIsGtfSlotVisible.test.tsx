@@ -3,10 +3,11 @@ import { renderHook } from '@/tests/test-utils'
 import { useIsGtfSlotVisible } from '../useIsGtfSlotVisible'
 import * as useChainsModule from '@/hooks/useChains'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import type { GasPayer } from '@/utils/gasPayment'
 
-const withTxFlow = (isRejection: boolean) => {
+const withTxFlow = (isRejection: boolean, gasPaymentOption?: GasPayer) => {
   const Wrapper = ({ children }: { children: ReactNode }) => (
-    <TxFlowContext.Provider value={{ isRejection } as never}>{children}</TxFlowContext.Provider>
+    <TxFlowContext.Provider value={{ isRejection, gasPaymentOption } as never}>{children}</TxFlowContext.Provider>
   )
   return Wrapper
 }
@@ -44,6 +45,27 @@ describe('useIsGtfSlotVisible', () => {
     jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
 
     const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(true) })
+
+    expect(result.current).toBe(false)
+  })
+
+  it.each<[GasPayer | undefined, boolean]>([
+    [undefined, true],
+    ['WALLET', true],
+    ['FREE_DAILY_LIMIT', false],
+    ['SUBSCRIPTION', false],
+  ])('with GTF enabled and gas payment option %s returns %s', (gasPaymentOption, expected) => {
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
+
+    const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(false, gasPaymentOption) })
+
+    expect(result.current).toBe(expected)
+  })
+
+  it('returns false with GTF disabled even when the wallet pays', () => {
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+
+    const { result } = renderHook(() => useIsGtfSlotVisible(), { wrapper: withTxFlow(false, 'WALLET') })
 
     expect(result.current).toBe(false)
   })

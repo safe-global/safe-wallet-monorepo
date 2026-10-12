@@ -1,10 +1,10 @@
 import { type SyntheticEvent, useEffect } from 'react'
 import { useCallback, useContext } from 'react'
 import { X as CloseIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Sheet, SheetContent } from '@safe-global/views/components/ui/sheet'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDraftBatch, useUpdateBatch } from '@/features/batching'
 import css from './styles.module.css'
 import { NewTxFlow } from '@/components/tx-flow/flows'
@@ -14,7 +14,7 @@ import Track from '@/components/common/Track'
 import { BATCH_EVENTS } from '@/services/analytics'
 import CheckWallet from '@/components/common/CheckWallet'
 import PlusIcon from '@/public/images/common/plus.svg'
-import EmptyBatch from './EmptyBatch'
+import EmptyBatch from '@safe-global/views/features/batching/components/BatchSidebar/EmptyBatch'
 import BatchTxList from './BatchTxList'
 
 const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: boolean) => void }) => {
@@ -72,11 +72,11 @@ const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: 
       <SheetContent
         side="right"
         showCloseButton={false}
-        overlayClassName="z-[100]"
+        overlayClassName="z-[var(--z-overlay)]"
         size="lg"
         padding="none"
-        // eslint-disable-next-line no-restricted-syntax -- z-[100] stacking + gap-0 (kills base gap-4) + rounded-l-2xl partial-float radius; no tokens
-        className="z-[100] gap-0 rounded-l-2xl"
+        // eslint-disable-next-line no-restricted-syntax -- --z-overlay stacking (above sidebar) + gap-0 (kills base gap-4) + rounded-l-2xl partial-float radius
+        className="z-[var(--z-overlay)] gap-0 rounded-l-2xl"
       >
         <aside className={css.aside}>
           <Typography variant="h4" className="pr-10 font-bold">

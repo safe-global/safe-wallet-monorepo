@@ -1,0 +1,244 @@
+import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import {
+  MOCK_SAFES,
+  asActivePolicy,
+  mockActivatingPolicy,
+  mockActiveSpendingLimit,
+  mockMultiSpenderPolicy,
+  mockPendingPolicy,
+  mockPendingUpdate,
+  mockPolicies,
+  mockPolygonSpendingLimitPolicy,
+  mockProposerPolicy,
+  mockUnenforcedPolicy,
+} from '../../mocks/policies'
+import PoliciesTable from '../index'
+
+const mockResolveSafeName = jest.fn()
+
+jest.mock('@/hooks/useAllAddressBooks', () => ({
+  useAddressBookItem: () => undefined,
+  useSafeNameResolver: () => mockResolveSafeName,
+}))
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({ configs: [{ chainId: '1', shortName: 'eth' }] }),
+  useChain: () => undefined,
+}))
+
+describe('PoliciesTable', () => {
+  beforeEach(() => {
+    mockResolveSafeName.mockReturnValue('')
+  })
+
+  it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
+    mockResolveSafeName.mockImplementation((address: string) =>
+      address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
+    )
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByText('Treasury')).toBeInTheDocument()
+  })
+
+  it('should, when given policies, render the columns the design specifies', () => {
+    render(<PoliciesTable policies={mockPolicies()} />)
+
+    expect(screen.getByRole('columnheader', { name: 'RULE' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'SAFE ACCOUNT' })).toBeInTheDocument()
+    expect(screen.getAllByRole('columnheader').map((header) => header.textContent)).toEqual([
+      'RULE',
+      'SAFE ACCOUNT',
+      'PROPOSER / TOKENS',
+      'NETWORK',
+      'STATUS',
+      '',
+    ])
+  })
+
+  it('should, when given a proposer policy, show the proposer without its grant label in the proposer / tokens column', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    const cell = screen.getByTestId('policy-cell-proposer-tokens')
+
+    expect(within(cell).queryByText('Bob')).not.toBeInTheDocument()
+    expect(within(cell).queryByTestId('policy-tokens')).not.toBeInTheDocument()
+  })
+
+  it('should, when given a spending limit, show its tokens in the proposer / tokens column', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-proposer-tokens')).getByTestId('policy-tokens')).toBeInTheDocument()
+  })
+
+  it('should, when the search hit a spender name, show that name under the tokens', () => {
+    const policy = asActivePolicy(mockMultiSpenderPolicy())
+
+    render(<PoliciesTable policies={[policy]} matchedSpenderNames={new Map([[policy.id, 'Act1']])} />)
+
+    expect(screen.getByTestId('policy-matched-spender')).toHaveTextContent('Spender: Act1')
+  })
+
+  it('should, when the search did not hit a spender name, show no spender line', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} matchedSpenderNames={new Map()} />)
+
+    expect(screen.queryByTestId('policy-matched-spender')).not.toBeInTheDocument()
+  })
+
+  it('should, when a spending limit holds three spenders, render one row rather than three', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(1)
+  })
+
+  it('should, when given a spending limit, derive its rule label and summary from the policy', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    const cell = screen.getByTestId('policy-cell-rule')
+
+    expect(within(cell).getByText('Spending limit')).toBeInTheDocument()
+    expect(within(cell).getByText('3 spenders · 4 limits')).toBeInTheDocument()
+  })
+
+  it('should, when given several policies, render a row for each one', () => {
+    render(<PoliciesTable policies={mockPolicies()} />)
+
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(6)
+  })
+
+  it('should, when the same Safe has the policy on two chains, render one row per chain', () => {
+    render(
+      <PoliciesTable
+        policies={[asActivePolicy(mockMultiSpenderPolicy()), asActivePolicy(mockPolygonSpendingLimitPolicy())]}
+      />,
+    )
+
+    expect(screen.getAllByTestId('policy-cell-rule')).toHaveLength(2)
+    expect(screen.getAllByTestId('policy-cell-network')).toHaveLength(2)
+  })
+
+  it('should, when a policy module is present but not enabled, render it as not enforced', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockUnenforcedPolicy())]} />)
+
+    expect(screen.getByTestId('policy-status-unenforced')).toHaveTextContent('Not enforced')
+    expect(screen.queryByTestId('policy-status-active')).not.toBeInTheDocument()
+  })
+
+  it('should, when a policy is awaiting execution, render it as pending', () => {
+    render(<PoliciesTable policies={[mockPendingPolicy()]} />)
+
+    expect(screen.getByTestId('policy-status-pending')).toHaveTextContent('Pending')
+  })
+
+  it('should, when an executed change is not yet indexed, show it as activating', () => {
+    render(<PoliciesTable policies={[mockActivatingPolicy()]} />)
+
+    expect(screen.getByTestId('policy-status-activating')).toHaveTextContent('Activating')
+  })
+
+  it('should, when a change is queued for an active policy, keep the active row beside the pending one', () => {
+    render(<PoliciesTable policies={[mockActiveSpendingLimit(), mockPendingUpdate()]} />)
+
+    expect(screen.getByTestId('policy-status-active')).toBeInTheDocument()
+    expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
+  })
+
+  it('should, when the policy is a proposer grant, render no token icons', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(screen.queryByTestId('policy-tokens')).not.toBeInTheDocument()
+  })
+
+  it('should, when the policy is a spending limit, render its token icons', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockMultiSpenderPolicy())]} />)
+
+    expect(screen.getByTestId('policy-tokens')).toBeInTheDocument()
+  })
+
+  it('should, when a row is clicked, report the policy it belongs to', () => {
+    const onSelect = jest.fn()
+    const policy = asActivePolicy(mockProposerPolicy())
+
+    render(<PoliciesTable policies={[policy]} onSelect={onSelect} />)
+    fireEvent.click(screen.getByTestId('policy-cell-rule'))
+
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(policy)
+  })
+
+  it('should, when the open button is used, report the policy it belongs to once', () => {
+    const onSelect = jest.fn()
+    const policy = asActivePolicy(mockProposerPolicy())
+
+    render(<PoliciesTable policies={[policy]} onSelect={onSelect} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' }))
+
+    expect(onSelect).toHaveBeenCalledTimes(1)
+    expect(onSelect).toHaveBeenCalledWith(policy)
+  })
+
+  it('should, when rows are selectable, name each open button after its rule and Safe', () => {
+    render(
+      <PoliciesTable
+        policies={[asActivePolicy(mockProposerPolicy()), asActivePolicy(mockMultiSpenderPolicy())]}
+        onSelect={jest.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('button', { name: 'Open Proposer for 0x8675...a19b' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Open Spending limit for 0x8675...a19b' })).toBeInTheDocument()
+  })
+
+  it('should, when rows are selectable, keep them table rows rather than buttons', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} onSelect={jest.fn()} />)
+
+    expect(screen.getAllByRole('row')[1]).not.toHaveAttribute('role', 'button')
+  })
+
+  it('should, when no select handler is given, render no open button', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(screen.queryByTestId('policy-open-button')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['proposer', asActivePolicy(mockProposerPolicy())],
+    ['spending limit', asActivePolicy(mockMultiSpenderPolicy())],
+  ])("should, for a %s policy, link the Safe name to the Safe's settings page", (_, policy) => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[policy]} />)
+
+    expect(
+      within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }),
+    ).toHaveAttribute('href', `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`)
+  })
+
+  it('should, when the Safe has no name, link its address instead', () => {
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: /0x8675/ })).toHaveAttribute(
+      'href',
+      `/settings/setup?safe=eth%3A${MOCK_SAFES.treasury.address}`,
+    )
+  })
+
+  it('should, when the Safe link is clicked, not open the policy', () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+    const onSelect = jest.fn()
+
+    render(<PoliciesTable policies={[asActivePolicy(mockProposerPolicy())]} onSelect={onSelect} />)
+    fireEvent.click(within(screen.getByTestId('policy-cell-applies-to')).getByRole('link', { name: 'Treasury' }))
+
+    expect(onSelect).not.toHaveBeenCalled()
+  })
+
+  it("should, when the Safe's chain is unknown, not link the Safe", () => {
+    mockResolveSafeName.mockReturnValue('Treasury')
+
+    render(<PoliciesTable policies={[asActivePolicy(mockPolygonSpendingLimitPolicy())]} />)
+
+    expect(within(screen.getByTestId('policy-cell-applies-to')).queryByRole('link')).not.toBeInTheDocument()
+  })
+})

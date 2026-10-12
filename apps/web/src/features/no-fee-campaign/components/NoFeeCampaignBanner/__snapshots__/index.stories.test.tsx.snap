@@ -1,8 +1,9 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./NoFeeCampaignBanner.stories Default 1`] = `
 <div
   class="banner"
+  style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
 >
   <div
     class="flex flex-row gap-4 bannerStack"

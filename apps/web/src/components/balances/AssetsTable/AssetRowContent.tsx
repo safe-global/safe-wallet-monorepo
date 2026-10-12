@@ -1,11 +1,11 @@
 import React, { type ReactElement } from 'react'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { FiatChange } from './FiatChange'
+import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
 import { FiatBalance } from './FiatBalance'
 import { PromoButtons } from './PromoButtons'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -15,7 +15,7 @@ import css from './styles.module.css'
 interface AssetRowContentProps {
   item: Balance
   chainId: string
-  isStakingPromoEnabled: boolean
+  isSafenetStakingEnabled: boolean
   isEarnPromoEnabled: boolean
   showMobileValue?: boolean
   showMobileBalance?: boolean
@@ -28,7 +28,7 @@ const isNativeToken = (tokenInfo: Balance['tokenInfo']) => {
 export const AssetRowContent = ({
   item,
   chainId,
-  isStakingPromoEnabled,
+  isSafenetStakingEnabled,
   isEarnPromoEnabled,
   showMobileValue = false,
   showMobileBalance = false,
@@ -64,7 +64,7 @@ export const AssetRowContent = ({
             <PromoButtons
               tokenInfo={item.tokenInfo}
               chainId={chainId}
-              isStakingPromoEnabled={isStakingPromoEnabled}
+              isSafenetStakingEnabled={isSafenetStakingEnabled}
               isEarnPromoEnabled={isEarnPromoEnabled}
             />
           </span>

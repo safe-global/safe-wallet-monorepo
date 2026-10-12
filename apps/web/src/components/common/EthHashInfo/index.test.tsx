@@ -154,25 +154,59 @@ describe('EthHashInfo', () => {
       expect(queryByText('Test')).not.toBeInTheDocument()
       expect(queryByText('Address book name')).not.toBeInTheDocument()
     })
+
+    it('links the name when given an href', () => {
+      const { getByRole } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} href="/settings/setup" />)
+
+      expect(getByRole('link', { name: 'Address book name' })).toHaveAttribute('href', '/settings/setup')
+    })
+
+    it('links the address when given an href and there is no name', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+      const { getByRole } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} href="/settings/setup" />)
+
+      expect(getByRole('link', { name: /0x0000/ })).toHaveAttribute('href', '/settings/setup')
+    })
+
+    it('sets the name in bold when asked to', () => {
+      const { getByTitle } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} boldLabel />)
+
+      expect(getByTitle('Address book name')).toHaveClass('font-bold')
+    })
+
+    it('sets the address in bold when asked to and there is no name', () => {
+      jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockReturnValue(undefined)
+      const { getByText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} boldLabel copyAddress={false} />)
+
+      expect(getByText('0x0000...5AFE').parentElement).toHaveClass('font-bold')
+    })
+
+    it('leaves the label at its normal weight by default', () => {
+      const { getByTitle } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
+
+      expect(getByTitle('Address book name')).not.toHaveClass('font-bold')
+    })
   })
 
   describe('avatar', () => {
     it('renders an avatar by default', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 40px; height: 40px;`,
-      )
+      expect(container.querySelector('.icon')).toHaveStyle({
+        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        width: '40px',
+        height: '40px',
+      })
     })
 
     it('allows for sizing of avatars', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} avatarSize={100} />)
 
-      expect(container.querySelector('.icon')).toHaveAttribute(
-        'style',
-        `background-image: url(${blo(MOCK_SAFE_ADDRESS)}); width: 100px; height: 100px;`,
-      )
+      expect(container.querySelector('.icon')).toHaveStyle({
+        backgroundImage: `url(${blo(MOCK_SAFE_ADDRESS)})`,
+        width: '100px',
+        height: '100px',
+      })
     })
 
     it('renders a custom avatar', () => {
@@ -205,6 +239,23 @@ describe('EthHashInfo', () => {
       const { container } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showAvatar={false} />)
 
       expect(container.querySelector('.icon')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('address tooltip', () => {
+    it('shows the full address instead of the copy hint when asked to', () => {
+      const { getByLabelText, queryByLabelText } = render(
+        <EthHashInfo address={MOCK_SAFE_ADDRESS} showName={false} showAddressTooltip />,
+      )
+
+      expect(getByLabelText(MOCK_SAFE_ADDRESS)).toBeInTheDocument()
+      expect(queryByLabelText('Copy to clipboard')).not.toBeInTheDocument()
+    })
+
+    it('keeps the copy hint by default', () => {
+      const { getByLabelText } = render(<EthHashInfo address={MOCK_SAFE_ADDRESS} showName={false} />)
+
+      expect(getByLabelText('Copy to clipboard')).toBeInTheDocument()
     })
   })
 

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import { Spinner } from '@/components/ui/spinner'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { WalletConnectContext } from '../WalletConnectContext'
 import WcConnectionForm from '../WcConnectionForm'
@@ -11,6 +11,7 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import { AppRoutes } from '@/config/routes'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { Errors, logError } from '@/services/exceptions'
 import { splitError } from '../../services/utils'
 import WcProposalForm from '../WcProposalForm'
@@ -43,6 +44,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
   } = useContext(WalletConnectContext)
   const chainSwitchRequest = wcChainSwitchStore.useStore()
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
 
   const [, setSuggestionDismissed] = useSafeAppSuggestionDismissed()
 
@@ -205,7 +207,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     }
 
     setOpen(false)
-    router.push({ pathname: AppRoutes.apps.index, query: { safe: router.query.safe } }).catch((e) => {
+    router.push({ pathname: AppRoutes.apps.index, query: safeLinkQuery }).catch((e) => {
       logError(Errors._900, (e as Error).message)
     })
   }, [
@@ -215,6 +217,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
     setSuggestionResolved,
     rejectSession,
     router,
+    safeLinkQuery,
     setOpen,
   ])
 

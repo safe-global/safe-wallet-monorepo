@@ -1,5 +1,6 @@
 import { render } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 import GetStartedCard from './index'
 
 const mockConnectWallet = jest.fn()
@@ -41,5 +42,14 @@ describe('GetStartedCard', () => {
     const url = new URL(href, 'http://localhost')
     expect(url.pathname).toBe('/new-safe/load')
     expect(url.searchParams.get('next')).toBe('/welcome/accounts')
+  })
+
+  it('links the Terms and Privacy Policy', () => {
+    const { getByRole } = render(<GetStartedCard />, {
+      routerProps: { pathname: '/welcome/accounts', query: {} },
+    })
+
+    expect(getByRole('link', { name: 'Safe{Wallet} Terms' })).toHaveAttribute('href', TERMS_URL)
+    expect(getByRole('link', { name: /Privacy Policy/ })).toHaveAttribute('href', PRIVACY_URL)
   })
 })

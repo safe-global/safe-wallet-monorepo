@@ -159,7 +159,7 @@ export function verifyTxQueueWidget() {
 
     cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
 
-    cy.contains(`a[data-testid="view-all-link"][href^="${constants.transactionQueueUrl}"]`, viewAllStr)
+    cy.get(viewAllLink).should('exist').and('contain.text', viewAllStr)
   })
 }
 

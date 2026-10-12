@@ -25,11 +25,11 @@ export const AllVariants: Story = {
       </div>
       <div>
         <h3 className="mb-4 text-lg font-semibold">Destructive</h3>
-        <DialogActions confirmLabel="Delete workspace" onConfirm={() => {}} onCancel={() => {}} confirmDestructive />
+        <DialogActions confirmLabel="Delete Workspace" onConfirm={() => {}} onCancel={() => {}} confirmDestructive />
       </div>
       <div>
         <h3 className="mb-4 text-lg font-semibold">Loading</h3>
-        <DialogActions confirmLabel="Create workspace" onConfirm={() => {}} onCancel={() => {}} confirmLoading />
+        <DialogActions confirmLabel="Create Workspace" onConfirm={() => {}} onCancel={() => {}} confirmLoading />
       </div>
       <div>
         <h3 className="mb-4 text-lg font-semibold">Confirm-only</h3>

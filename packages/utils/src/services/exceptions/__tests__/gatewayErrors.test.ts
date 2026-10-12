@@ -4,7 +4,6 @@ import {
   CGW_TOO_MANY_REQUESTS,
   CGW_UNAVAILABLE_FOR_LEGAL_REASONS,
   CGW_UNPROCESSABLE_ENTITY,
-  getCgwErrorCode,
   getCgwErrorMeta,
   shouldAlertOnCgwStatus,
 } from '../gatewayErrors'
@@ -47,12 +46,6 @@ describe('gatewayErrors', () => {
       expect(shouldAlertOnCgwStatus(CGW_UNAVAILABLE_FOR_LEGAL_REASONS)).toBe(false)
       expect(shouldAlertOnCgwStatus(404)).toBe(false)
       expect(shouldAlertOnCgwStatus(undefined)).toBe(false)
-    })
-  })
-
-  describe('getCgwErrorCode', () => {
-    it('builds a support reference that carries the status', () => {
-      expect(getCgwErrorCode(502)).toBe('CGW-502')
     })
   })
 

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
@@ -20,9 +20,10 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
-import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
-import { cn } from '@/utils/cn'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -89,6 +90,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     setLoadingId(requestId)
     try {
       const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({
@@ -102,7 +104,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace address book',
+          message: 'Contact added to Workspace address book',
           variant: 'success',
           groupKey: 'approve-success',
         }),
@@ -160,8 +162,8 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
-                <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
-                <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
+                <TooltipTrigger render={<Badge variant="outline">Already in Workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing Workspace entry for this address.</TooltipContent>
               </Tooltip>
             )}
           </span>

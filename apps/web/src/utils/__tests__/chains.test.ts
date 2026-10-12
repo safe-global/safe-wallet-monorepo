@@ -20,7 +20,7 @@ const safeDeployments = jest.requireActual('@safe-global/safe-deployments/dist/s
 describe('chains', () => {
   beforeAll(() => {
     // Initialize store for tests that use getStoreInstance
-    const testStore = makeStore({}, { skipBroadcast: true })
+    const testStore = makeStore({})
     setStoreInstance(testStore)
   })
 

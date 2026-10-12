@@ -81,7 +81,7 @@ describe('SetupWidget', () => {
   it('renders the widget title', () => {
     render(<SetupWidget />)
 
-    expect(screen.getByText('Set up your workspace')).toBeInTheDocument()
+    expect(screen.getByText('Set up your Workspace')).toBeInTheDocument()
   })
 
   it('renders all four setup steps', () => {
@@ -90,7 +90,7 @@ describe('SetupWidget', () => {
     expect(screen.getByText('Import your address book')).toBeInTheDocument()
     expect(screen.getByText('Add your Safe accounts')).toBeInTheDocument()
     expect(screen.getByText('Invite team members')).toBeInTheDocument()
-    expect(screen.getByText('Explore workspaces')).toBeInTheDocument()
+    expect(screen.getByText('Explore Workspaces')).toBeInTheDocument()
   })
 
   it('renders the dismiss button', () => {
@@ -106,7 +106,7 @@ describe('SetupWidget', () => {
 
     await waitFor(
       () => {
-        expect(screen.queryByText('Set up your workspace')).not.toBeInTheDocument()
+        expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
       },
       { timeout: 3000 },
     )
@@ -140,7 +140,7 @@ describe('SetupWidget', () => {
       'Import your address book',
       'Add your Safe accounts',
       'Invite team members',
-      'Explore workspaces',
+      'Explore Workspaces',
     ]
     const steps = screen
       .getAllByRole('button')
@@ -150,13 +150,13 @@ describe('SetupWidget', () => {
     expect(steps[0]).toHaveTextContent('Import your address book')
     expect(steps[1]).toHaveTextContent('Add your Safe accounts')
     expect(steps[2]).toHaveTextContent('Invite team members')
-    expect(steps[3]).toHaveTextContent('Explore workspaces')
+    expect(steps[3]).toHaveTextContent('Explore Workspaces')
   })
 
   it('opens the Introducing Spaces modal when Explore Spaces is clicked', () => {
     render(<SetupWidget />)
 
-    fireEvent.click(screen.getByText('Explore workspaces'))
+    fireEvent.click(screen.getByText('Explore Workspaces'))
 
     expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
   })
@@ -174,7 +174,7 @@ describe('SetupWidget', () => {
 
     render(<SetupWidget />)
 
-    fireEvent.click(screen.getByText('Explore workspaces'))
+    fireEvent.click(screen.getByText('Explore Workspaces'))
     expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('close-space-info-modal'))
@@ -189,7 +189,7 @@ describe('SetupWidget', () => {
   it('does not mark the space as completed when Explore Spaces modal is closed but steps are incomplete', () => {
     render(<SetupWidget />)
 
-    fireEvent.click(screen.getByText('Explore workspaces'))
+    fireEvent.click(screen.getByText('Explore Workspaces'))
     expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
 
     fireEvent.click(screen.getByTestId('close-space-info-modal'))
@@ -209,7 +209,7 @@ describe('SetupWidget', () => {
 
     render(<SetupWidget />)
 
-    expect(screen.queryByText('Set up your workspace')).not.toBeInTheDocument()
+    expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
   })
 
   it('disables click on completed steps', () => {

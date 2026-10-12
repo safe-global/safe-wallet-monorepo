@@ -81,7 +81,12 @@ export const PrivateKeyContainer = ({ signerAddress }: Props) => {
       }
 
       router.back()
-      Alert.alert('Success', 'Private key has been deleted successfully')
+      Alert.alert(
+        'Private key deleted',
+        result.data?.delegateCleanupSkipped
+          ? 'The signer was removed from this device. Delegate and notification cleanup could not be completed because the private key was unavailable.'
+          : 'Private key has been deleted successfully',
+      )
     } catch (_error) {
       showDeleteFailureAlert('An unexpected error occurred')
     } finally {

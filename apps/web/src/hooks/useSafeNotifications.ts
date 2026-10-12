@@ -3,13 +3,13 @@ import { showNotification, closeNotification } from '@/store/notificationsSlice'
 import useSafeInfo from './useSafeInfo'
 import { useAppDispatch } from '@/store'
 import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 import useIsSafeOwner from './useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
 import { getMastercopyAction } from '@safe-global/utils/services/contracts/safeContracts'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const CLI_LINK = {
   href: 'https://github.com/5afe/safe-cli',
@@ -36,7 +36,7 @@ const useSafeNotifications = (): void => {
   const [dismissedUpdateNotifications, setDismissedUpdateNotifications] =
     useLocalStorage<DismissedUpdateNotifications>(DISMISS_NOTIFICATION_KEY)
   const dispatch = useAppDispatch()
-  const { query } = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
   const { safe, safeAddress } = useSafeInfo()
   const { chainId, version } = safe
   const isOwner = useIsSafeOwner()
@@ -109,7 +109,7 @@ const useSafeNotifications = (): void => {
           : {
               href: {
                 pathname: AppRoutes.settings.setup,
-                query: { safe: query.safe },
+                query: safeLinkQuery,
               },
               title: 'Update Safe account',
             },
@@ -127,7 +127,7 @@ const useSafeNotifications = (): void => {
     isCriticalUpdate,
     isSupportedVersion,
     version,
-    query.safe,
+    safeLinkQuery,
     isOwner,
     safeAddress,
     urlSafeAddress,

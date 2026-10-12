@@ -26,6 +26,7 @@ import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useSafeBarSafes } from './useSafeBarSafes'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const toChainInfo = (chainId: string, chain: Chain | undefined): ChainInfo => ({
   chainId,
@@ -163,6 +164,9 @@ function buildSingleChainItem(
   }
 }
 
+/** The two lists of the Safe selector: the Workspace of the URL, and My accounts. */
+export type DropdownTab = 'workspace' | 'local'
+
 export function useSpaceSafeSelectorItems() {
   const { workspaceSafes, localSafes, isInSpaceContext } = useSafeBarSafes()
   // Union feeds the overview query once; the two lists are mapped to items separately for the tabs.
@@ -236,8 +240,9 @@ export function useSpaceSafeSelectorItems() {
 
   const selectedItemId = effectiveSafeAddress ? `${currentChainId}:${effectiveSafeAddress}` : ''
 
+  // A Safe from the Workspace tab opens in that Workspace; one from My accounts opens outside it.
   const handleItemSelect = useCallback(
-    (itemId: string) => {
+    (itemId: string, tab: DropdownTab) => {
       const colonIndex = itemId.indexOf(':')
       const chainId = itemId.slice(0, colonIndex)
       const address = itemId.slice(colonIndex + 1)
@@ -252,7 +257,10 @@ export function useSpaceSafeSelectorItems() {
           source: 'space_selector',
         },
       )
-      router.push({ pathname: AppRoutes.home, query: { safe: `${chain.shortName}:${address}` } })
+      router.push({
+        pathname: AppRoutes.home,
+        query: withSpaceId({ safe: `${chain.shortName}:${address}` }, tab === 'workspace' ? spaceId : null),
+      })
     },
     [chainConfigs, router, spaceId],
   )

@@ -2,7 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
-import type { SafeItemData, SafeItemDataChain } from '../../types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -31,7 +34,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../BalanceDisplay', () => {
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
   const Mock = () => <div data-testid="balance-display" />
   Mock.displayName = 'BalanceDisplay'
   return { __esModule: true, default: Mock }
@@ -49,7 +52,7 @@ jest.mock('@/components/common/FiatValue', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 
@@ -263,16 +266,20 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
   })
 })
 
-describe('MultiChainSafeItemRow hover highlight', () => {
-  it('takes focus when the summary is hovered so base-ui does not strand the highlight on the previous row', () => {
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+describe('MultiChainSafeItemRow hover', () => {
+  it('does not take focus on hover, so typing in the search input continues', () => {
+    render(
+      <>
+        <input data-testid="search" />
+        <MultiChainSafeItemRow item={createItem(['1', '137'])} />
+      </>,
+    )
+    const search = screen.getByTestId('search')
+    search.focus()
 
-    const trigger = screen.getByRole('button')
-    expect(trigger).not.toHaveFocus()
+    fireEvent.mouseEnter(screen.getByRole('button'))
 
-    fireEvent.mouseEnter(trigger)
-
-    expect(trigger).toHaveFocus()
+    expect(search).toHaveFocus()
   })
 })
 

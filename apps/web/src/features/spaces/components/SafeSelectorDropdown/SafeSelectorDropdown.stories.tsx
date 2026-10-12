@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 const action = (name: string) => fn().mockName(name)
 import SafeSelectorDropdown from './index'
-import type { SafeItemData } from './types'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
@@ -289,7 +289,7 @@ export const ManySafesWithFooter: Story = {
     const items = createMockItems(13)
     const header = (
       <div className="flex items-center gap-1 px-4 pt-3 pb-2">
-        <span className="text-sm font-semibold text-secondary-foreground">Safes in this workspace</span>
+        <span className="text-sm font-semibold text-secondary-foreground">Safes in this Workspace</span>
       </div>
     )
     const footer = (

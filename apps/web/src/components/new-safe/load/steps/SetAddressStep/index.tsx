@@ -1,28 +1,27 @@
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import NameInput from '@/components/common/NameInput'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import NetworkSelector from '@/components/common/NetworkSelector'
 import { useMnemonicSafeName } from '@/hooks/useMnemonicName'
 import { useAddressResolver } from '@/hooks/useAddressResolver'
 import AddressInput from '@/components/common/AddressInput'
-import { largeFormFieldSurfaceClassName } from '@/components/common/formFieldStyles'
+import { largeFormFieldSurfaceClassName } from '@safe-global/views/components/common/formFieldStyles'
 import React from 'react'
 import { useLazySafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useChainId from '@/hooks/useChainId'
 import { useAppSelector } from '@/store'
 import { selectAddedSafes } from '@/store/addedSafesSlice'
 import { LOAD_SAFE_EVENTS, trackEvent } from '@/services/analytics'
-import { AppRoutes } from '@/config/routes'
-import NextLink from 'next/link'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
 
 enum Field {
   name = 'name',
@@ -146,8 +145,15 @@ const SetAddressStep = ({ data, onSubmit, onBack }: StepRenderProps<LoadSafeForm
           </div>
 
           <Typography className="mt-8 block">
-            By continuing you consent to the <Link render={<NextLink href={AppRoutes.terms} />}>terms of use</Link> and{' '}
-            <Link render={<NextLink href={AppRoutes.privacy} />}>privacy policy</Link>.
+            By continuing you consent to the{' '}
+            <ExternalLink href={TERMS_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+              terms of use
+            </ExternalLink>{' '}
+            and{' '}
+            <ExternalLink href={PRIVACY_URL} noIcon className="[&_span]:underline [&_span]:decoration-primary/40">
+              privacy policy
+            </ExternalLink>
+            .
           </Typography>
         </div>
 

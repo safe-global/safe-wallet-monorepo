@@ -5,7 +5,7 @@ import AddressInput from '@/components/common/AddressInput'
 import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import NameInput from '@/components/common/NameInput'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import useChainId from '@/hooks/useChainId'
 import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
@@ -100,7 +100,7 @@ function EntryDialog({
           <div className="p-6">
             {scope === 'workspace' && (
               <p data-testid="entry-scope-notice" className="text-muted-foreground mb-4 text-sm">
-                This name is saved to {workspaceLabel} and is visible to everyone in the workspace.
+                This name is saved to {workspaceLabel} and is visible to everyone in the Workspace.
               </p>
             )}
 

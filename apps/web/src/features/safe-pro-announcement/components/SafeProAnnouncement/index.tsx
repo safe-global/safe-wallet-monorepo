@@ -1,26 +1,21 @@
-import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import { useDarkMode } from '@/hooks/useDarkMode'
+import { MixpanelEventParams } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
+import SafeProHero from '@safe-global/views/components/common/SafeProHero'
 import css from './styles.module.css'
 
 const SafeProAnnouncement = ({ location, onDismiss }: { location: SafeProBannerLocation; onDismiss?: () => void }) => {
-  const isDarkMode = useDarkMode()
+  useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
 
   return (
     <div className="p-1">
-      <div className="relative aspect-[1141/268] w-full overflow-hidden rounded-t-[calc(2rem_-_4px)]">
-        <Image
-          src={`/images/safe-pro/pro-announcement-hero${isDarkMode ? '-dark' : ''}.jpg`}
-          alt="A Workspace from Safe Pro, with its accounts, members and transactions"
-          fill
-          className="object-cover object-top"
-        />
-      </div>
+      <SafeProHero />
 
       <div className="flex flex-col items-center gap-6 px-8 py-6">
         <div className="flex flex-col items-center gap-3">

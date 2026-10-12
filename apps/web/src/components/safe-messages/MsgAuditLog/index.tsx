@@ -1,22 +1,27 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { type ReactElement } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Copy as CopyIcon } from 'lucide-react'
-import TxConfirmations from '@/components/transactions/TxConfirmations'
+import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
 import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import useOrigin from '@/hooks/useOrigin'
 import useAddressBook from '@/hooks/useAddressBook'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
   const addressBook = useAddressBook()
   const router = useRouter()
   const { safe = '' } = router.query
+  const spaceId = useUrlSpaceId()
   const origin = useOrigin()
-  const msgUrl = `${origin}${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${msg.messageHash}`
+  const msgUrl = withSpaceIdInUrl(
+    `${origin}${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${msg.messageHash}`,
+    spaceId,
+  )
   const { confirmations, confirmationsRequired, confirmationsSubmitted, proposedBy, creationTimestamp } = msg
   const isConfirmed = msg.status === 'CONFIRMED'
 
@@ -43,14 +48,16 @@ const MsgAuditLog = ({ msg }: { msg: MessageItem }): ReactElement => {
         }
       />
 
-      <AuditRow
-        label="Created"
-        actionType="created"
-        address={proposedBy.value}
-        name={resolveName(proposedBy.value, proposedBy.name)}
-        timestamp={creationTimestamp}
-        isLast={confirmations.length === 0 && !isConfirmed}
-      />
+      {proposedBy && (
+        <AuditRow
+          label="Created"
+          actionType="created"
+          address={proposedBy.value}
+          name={resolveName(proposedBy.value, proposedBy.name)}
+          timestamp={creationTimestamp}
+          isLast={confirmations.length === 0 && !isConfirmed}
+        />
+      )}
 
       {confirmations.map(({ owner }, idx) => (
         <AuditRow

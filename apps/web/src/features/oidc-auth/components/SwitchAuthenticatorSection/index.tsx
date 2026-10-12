@@ -1,9 +1,9 @@
 import { Plus, Smartphone } from 'lucide-react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { Badge, BadgeDot } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { useAuthenticators } from '../../hooks/useAuthenticators'
 
@@ -52,7 +52,7 @@ const SwitchAuthenticatorSection = () => {
         )}
       </div>
       <Typography variant="paragraph-small" color="muted" className="mb-4 block max-w-[560px]">
-        Required for everyone in this workspace. Signing in takes your email code and a 6-digit code from your
+        Required for everyone in this Workspace. Signing in takes your email code and a 6-digit code from your
         authenticator app.
       </Typography>
 

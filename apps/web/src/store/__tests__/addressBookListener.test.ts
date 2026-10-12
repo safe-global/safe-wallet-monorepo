@@ -13,7 +13,7 @@ const setup = (preloadedAddressBook: AddressBookState = {}) => {
   // listenerMiddlewareInstance, so without clearing first each test would
   // stack another live copy of the listener and fire it N times.
   listenerMiddlewareInstance.clearListeners()
-  return makeStore({ addressBook: preloadedAddressBook }, { skipBroadcast: true })
+  return makeStore({ addressBook: preloadedAddressBook })
 }
 
 const abMessages = (store: ReturnType<typeof setup>) =>

@@ -7,7 +7,7 @@ import type {
   ResolvedSidebarItem,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '../../../types'
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { AppRoutes } from '@/config/routes'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
@@ -93,7 +93,7 @@ jest.mock('../../NavItem', () => ({
     ) : null,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -131,13 +131,13 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   TooltipContent: () => null,
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/views/components/ui/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),
@@ -174,7 +174,7 @@ jest.mock('../../SpaceSelectorDropdown', () => ({
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (
       <button type="button" data-testid="add-safe-to-workspace-button">
-        Add Safe to workspace
+        Add Safe to Workspace
       </button>
     ) : (
       <div data-testid="space-selector-default">Space selector</div>
@@ -269,7 +269,7 @@ describe('SafeSidebarVariant', () => {
     )
 
     expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-    expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+    expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
   })
 
   it('still renders backToSpace workspace header when Safe is counterfactual', () => {
@@ -449,7 +449,7 @@ describe('SafeSidebarVariant', () => {
       )
 
       expect(screen.queryByTestId('add-safe-to-workspace-button')).not.toBeInTheDocument()
-      expect(screen.queryByText('Add Safe to workspace')).not.toBeInTheDocument()
+      expect(screen.queryByText('Add Safe to Workspace')).not.toBeInTheDocument()
     })
 
     it('hides the addToWorkspace section entirely when Safe is counterfactual (undeployed)', () => {

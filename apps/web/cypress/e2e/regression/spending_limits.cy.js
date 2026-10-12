@@ -24,7 +24,9 @@ describe('Spending limits tests', () => {
 
   describe('Connected on the default safe', () => {
     beforeEach(() => {
-      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+        extraStorage: spendinglimit.safeProOffStorage,
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
     })
 
@@ -135,7 +137,9 @@ describe('Spending limits tests', () => {
 
   describe('Other safes and pre-seeded data', () => {
     it('Verify only setAllowance action is shown if allowance was not used', () => {
-      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23)
+      wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_23, {
+        extraStorage: spendinglimit.safeProOffStorage,
+      })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       spendinglimit.clickOnNewSpendingLimitBtn()
       spendinglimit.enterBeneficiaryAddress(signerAddress)
@@ -147,7 +151,10 @@ describe('Spending limits tests', () => {
 
     it('Verify that when multiple assets are available, they are displayed in token dropdown', () => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
-        extraStorage: { [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings },
+        extraStorage: {
+          ...spendinglimit.safeProOffStorage,
+          [constants.localStorageKeys.SAFE_v2__settings]: ls.safeSettings.slimitSettings,
+        },
       })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       navigation.clickOnNewTxBtn()
@@ -158,7 +165,10 @@ describe('Spending limits tests', () => {
 
     it('Verify that beneficiary can be retried from address book', () => {
       wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
-        extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2 },
+        extraStorage: {
+          ...spendinglimit.safeProOffStorage,
+          [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2,
+        },
       })
       cy.get(spendinglimit.spendingLimitsSection).should('be.visible')
       spendinglimit.clickOnNewSpendingLimitBtn()

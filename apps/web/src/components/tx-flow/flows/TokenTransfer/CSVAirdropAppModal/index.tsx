@@ -1,14 +1,14 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { AppRoutes } from '@/config/routes'
 import CSVAirdropLogo from '@/public/images/apps/csv-airdrop-app-logo.svg'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import type { ReactElement } from 'react'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?: string }): ReactElement => {
-  const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
 
   return (
     <ModalDialog
@@ -41,7 +41,7 @@ const CSVAirdropAppModal = ({ onClose, appUrl }: { onClose: () => void; appUrl?:
                 href={{
                   pathname: AppRoutes.apps.open,
                   query: {
-                    safe: router.query.safe,
+                    ...safeLinkQuery,
                     appUrl,
                   },
                 }}

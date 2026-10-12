@@ -46,10 +46,10 @@ jest.mock('@/components/common/TrustedSafesModal', () => ({
 }))
 jest.mock('../DataWidget', () => ({ DataWidget: () => <div data-testid="data-widget" /> }))
 
-const mockUseIsSafeProEnabled = jest.fn()
+const mockUseIsSafeProAnnouncementEnabled = jest.fn()
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'SafeProFeature' },
-  useIsSafeProEnabled: () => mockUseIsSafeProEnabled(),
+  useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -79,7 +79,7 @@ const migrationState = (overrides: Partial<UseMigrationPromptReturn>): UseMigrat
 describe('MyAccountsV2', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseIsSafeProAnnouncementEnabled.mockReturnValue(false)
   })
 
   describe('SAFE_PRO_ANNOUNCEMENT banner', () => {
@@ -90,7 +90,7 @@ describe('MyAccountsV2', () => {
     ])('renders above the %s state when the flag is on', (_label, wallet, migration, testId) => {
       mockWallet.mockReturnValue(wallet)
       mockMigration.mockReturnValue(migrationState(migration))
-      mockUseIsSafeProEnabled.mockReturnValue(true)
+      mockUseIsSafeProAnnouncementEnabled.mockReturnValue(true)
 
       render(<MyAccountsV2 />)
 

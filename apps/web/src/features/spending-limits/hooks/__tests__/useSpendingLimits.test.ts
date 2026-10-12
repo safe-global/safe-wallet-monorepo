@@ -9,8 +9,14 @@ import * as spendingLimitLoader from '../../services/spendingLimitLoader'
 import { faker } from '@faker-js/faker'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { SpendingLimitState } from '../../types'
+import { Errors, logError } from '@/services/exceptions'
 
 jest.mock('../../services/spendingLimitLoader')
+
+jest.mock('@/services/exceptions', () => ({
+  ...jest.requireActual('@/services/exceptions'),
+  logError: jest.fn(),
+}))
 
 const mockLoadSpendingLimits = spendingLimitLoader.loadSpendingLimits as jest.MockedFunction<
   typeof spendingLimitLoader.loadSpendingLimits
@@ -147,6 +153,7 @@ describe('useLoadSpendingLimits', () => {
 
     expect(result.current.error?.message).toBe('Failed to load spending limits')
     expect(result.current.loading).toBe(false)
+    expect(logError).toHaveBeenCalledWith(Errors._609, error, expect.anything())
   })
 
   it('should show loading state while fetching', async () => {

@@ -1,28 +1,24 @@
 # How to update Terms & Conditions
 
-To update the terms and conditions, follow these steps:
+The Terms & Conditions and the Privacy Policy are published on the website, at https://safe.global/terms and
+https://safe.global/privacy. The app only links to them.
 
-1. Export the terms and conditions from Google Docs as a Markdown file.
-2. Replace the content of the src/markdown/terms/terms.md file with the exported content.
-3. If significant changes were made, update the version and last updated date in `version.ts` in the same folder.
+To update the terms:
 
-That’s it!
+1. The legal team edits the Terms story (`legal/terms`) in Storyblok and updates its `last_updated` field. The website
+   rebuilds automatically.
+2. If the change is significant enough that users must accept the terms again, a developer bumps `version` and
+   `lastUpdated` in `src/markdown/terms/version.js` in this repo.
 
-The updated terms and conditions will be displayed in the app with the correct version number and date. A popup banner
-will automatically appear for users who haven’t accepted the new terms.
+`lastUpdated` in `version.js` is the date the cookie and terms banner displays. Nothing links it to the Storyblok
+`last_updated` field, so keep the two in step by hand whenever you bump the version.
 
 ## How does this work?
 
-We rely on the version number from `version.ts`. When the Redux store is rehydrated, we check the version stored in
-the store against the version in the frontmatter. If they differ, we reset the accepted terms, forcing the user to
-accept the new version.
+We rely on the version number from `version.js`. When the Redux store is rehydrated, we check the version stored in
+the store against the version in `version.js`. If they differ, we reset the accepted terms, forcing the user to accept
+the new version.
 
-The Markdown file is automatically converted to HTML and displayed in the app. Note that because the Markdown was
-generated
-from Google Docs, we require the remark-heading-id plugin. Additionally, since Google Docs uses {# ...} syntax, it will
-fail in an MDX file.
-
-For Cypress, we follow a similar process. We read the version from the frontmatter and pass it as an environment
-variable.
-
-For Jest tests, we mock the file and read the version from the mock.
+For Cypress, `cypress.config.js` reads the version from `version.js` and passes it as the
+`CURRENT_COOKIE_TERMS_VERSION` environment variable. The Playwright fixtures and the Jest tests import `version.js`
+directly.

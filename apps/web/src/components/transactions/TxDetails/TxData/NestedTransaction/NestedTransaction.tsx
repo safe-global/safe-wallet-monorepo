@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Card, CardContent } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import { Divider } from '@/components/tx/ColorCodedTxAccordion'
 
@@ -8,13 +8,14 @@ import NestedTransactionIcon from '@/public/images/transactions/nestedTx.svg'
 import { type ReactElement } from 'react'
 import MethodCall from '../DecodedData/MethodCall'
 import { MethodDetails } from '../DecodedData/MethodDetails'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import Track from '@/components/common/Track'
 import Link from 'next/link'
 import { MODALS_EVENTS } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
 import { useSignedHash } from './useSignedHash'
 import { useCurrentChain } from '@/hooks/useChains'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 export const NestedTransaction = ({
   txData,
@@ -26,6 +27,7 @@ export const NestedTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
+  const spaceId = useUrlSpaceId()
   const signedHash = useSignedHash(txData)
   return (
     <div className="flex flex-col gap-4">
@@ -48,10 +50,7 @@ export const NestedTransaction = ({
               <Link
                 href={{
                   pathname: AppRoutes.transactions.tx,
-                  query: {
-                    safe: `${chain?.shortName}:${txData.to.value}`,
-                    id: signedHash,
-                  },
+                  query: withSpaceId({ safe: `${chain?.shortName}:${txData.to.value}`, id: signedHash }, spaceId),
                 }}
                 passHref
                 legacyBehavior

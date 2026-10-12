@@ -1,10 +1,21 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { TableBody, TableHead, TableHeader, TableRow, TableSortIcon, tableVariants } from '@/components/ui/table'
+import {
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableSortIcon,
+  tableVariants,
+} from '@safe-global/views/components/ui/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
+import { cn } from '@safe-global/views/utils/cn'
+import {
+  SAFE_ACCOUNT_COLUMNS,
+  SELECT_COLUMN,
+  type SafeAccountColumnId,
+} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import {
   compareGroups,
   getContextMenuChainIds,
@@ -17,7 +28,7 @@ import {
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
-import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
@@ -44,7 +55,7 @@ export type SafeAccountsSelection = {
   selectedKeys: Set<string>
   /** Fired on a checkbox toggle; `line` is the toggled row (leaf or group), `nextChecked` the desired state. */
   onToggle: (line: AccountLine, nextChecked: boolean) => void
-  /** Global cap reached — unselected leaves and empty groups render disabled. */
+  /** Seat cap reached — unselected leaves and empty groups render disabled, except another chain of a selected address (same seat). */
   isAtLimit?: boolean
   /** Leaf keys to disable (and dim) regardless of the cap — e.g. safes already in the workspace. */
   disabledKeys?: Set<string>
@@ -71,10 +82,11 @@ const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeA
 
   const lockedByReason = Boolean(disabledKeys?.has(line.key))
   const checked = selectedKeys.has(line.key)
+  const holdsSeat = group.children.some((child) => child.key !== line.key && selectedKeys.has(child.key))
   return {
     checked,
     indeterminate: false,
-    disabled: lockedByReason || (Boolean(isAtLimit) && !checked),
+    disabled: lockedByReason || (Boolean(isAtLimit) && !checked && !holdsSeat),
     disabledReason: lockedByReason ? disabledReason : undefined,
     ariaLabel: line.displayName,
   }
@@ -94,6 +106,8 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell. Rows stop navigating so the cell can hold its own controls. */
+  renderName?: (line: AccountLine) => ReactNode
   /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
   similarWarnings?: Map<string, SimilarWarning>
   /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
@@ -147,6 +161,7 @@ export default function SafeAccountsTable({
   columns,
   actionsWidth,
   renderActions,
+  renderName,
   similarWarnings,
   similarityGroups,
   anchorAddresses,
@@ -179,7 +194,8 @@ export default function SafeAccountsTable({
     })
   }, [])
 
-  const { groups } = useSafeAccountRows(items, overviewsByKey)
+  const hasWorkspacesColumn = !columns || columns.includes('workspaces')
+  const { groups } = useSafeAccountRows(items, overviewsByKey, hasWorkspacesColumn)
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
@@ -364,6 +380,7 @@ export default function SafeAccountsTable({
                     warning={similarWarnings?.get(line.address.toLowerCase())}
                     highlighted={Boolean(clusterId)}
                     renderActions={renderActions}
+                    renderName={renderName}
                     onRename={onRename}
                     checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                     onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}

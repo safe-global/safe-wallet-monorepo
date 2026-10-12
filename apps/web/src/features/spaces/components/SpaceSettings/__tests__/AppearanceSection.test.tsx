@@ -13,7 +13,7 @@ jest.mock('@/services/analytics', () => ({
 }))
 
 const renderWithStore = () => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   return {
     store,
     ...render(

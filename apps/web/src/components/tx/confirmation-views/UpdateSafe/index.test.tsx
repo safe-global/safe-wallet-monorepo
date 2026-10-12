@@ -61,7 +61,7 @@ describe('Container', () => {
         chain={chain}
       />,
     )
-    await expect(container.findByText(warningText)).rejects.toThrowError(Error)
+    await expect(container.findByText(warningText)).rejects.toThrow(Error)
     expect(container.queryByText('Current version: 1.1.1')).toBeVisible()
     expect(container.queryByText('New version: 1.4.1')).toBeVisible()
   })
@@ -84,7 +84,7 @@ describe('Container', () => {
         chain={chain}
       />,
     )
-    await expect(container.findByText(warningText)).rejects.toThrowError(Error)
+    await expect(container.findByText(warningText)).rejects.toThrow(Error)
     expect(container.queryByText('Current version: 1.3.0')).toBeVisible()
     expect(container.queryByText('New version: 1.4.1')).toBeVisible()
   })

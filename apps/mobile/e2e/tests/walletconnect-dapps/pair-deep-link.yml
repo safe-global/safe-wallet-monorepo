@@ -1,6 +1,13 @@
 appId: ${APP_ID}
 tags:
   - walletconnect-dapps
+# The "Open in …?" alert is owned by iOS and survives app relaunches, so never leave it behind.
+onFlowComplete:
+  - runFlow:
+      when:
+        visible: 'Open in .*'
+      commands:
+        - tapOn: 'Cancel'
 ---
 # Deep link: a wc:// link is opened while the app runs → WalletKitController pairs
 # it (fake resolves) → synthesise the proposal → proposal sheet opens WITHOUT the
@@ -17,6 +24,13 @@ tags:
 # Open a wc: deep link — handled by WalletKitController's Linking listener, not the scanner.
 - openLink:
     link: 'wc:e2e-deeplink@2?relay-protocol=irn'
+
+# Newer iOS simulators confirm custom-scheme links with a system "Open in …?" alert.
+- runFlow:
+    when:
+      visible: 'Open in .*'
+    commands:
+      - tapOn: 'Open'
 
 # Synthesise the proposal the relay would deliver after pairing.
 - tapOn:

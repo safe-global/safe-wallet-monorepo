@@ -30,4 +30,16 @@ describe('NavTabs', () => {
 
     expect(screen.getByRole('tab', { name: 'Tokens' })).toHaveAttribute('aria-selected', 'true')
   })
+
+  it('keeps the Safe and the Workspace of the URL in every tab link', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    render(<NavTabs tabs={tabs} />, {
+      routerProps: { pathname: AppRoutes.balances.index, query: { safe: 'eth:0x1', spaceId } },
+    })
+
+    expect(screen.getByRole('tab', { name: 'NFTs' })).toHaveAttribute(
+      'href',
+      `${AppRoutes.balances.nfts}?safe=eth%3A0x1&spaceId=${spaceId}`,
+    )
+  })
 })

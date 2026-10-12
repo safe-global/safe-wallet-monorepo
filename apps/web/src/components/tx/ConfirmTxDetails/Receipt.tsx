@@ -1,15 +1,15 @@
 import type { TransactionDetails, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Fragment, useContext, useMemo, type ElementType, type ReactElement, type ReactNode } from 'react'
+import { useContext, useMemo, type ReactElement, type ReactNode } from 'react'
 import { Check } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import TokenIcon from '@/components/common/TokenIcon'
 import useBalances from '@/hooks/useBalances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { PaperViewToggle } from '../../common/PaperViewToggle'
+import { PaperViewToggle } from '@safe-global/views/components/common/PaperViewToggle'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
@@ -34,10 +34,11 @@ type ReceiptProps = {
   txInfo?: TransactionDetails['txInfo']
   grid?: boolean
   withSignatures?: boolean
+  outlined?: boolean
 }
 
-const ScrollWrapper = ({ children }: { children: ReactElement | ReactElement[] }) => (
-  <div className="max-h-[550px] flex-1 overflow-y-auto px-4 pt-2">{children}</div>
+const ScrollWrapper = ({ children, padded = true }: { children: ReactElement | ReactElement[]; padded?: boolean }) => (
+  <div className={cn('max-h-[550px] flex-1 overflow-y-auto', padded && 'px-4 pt-2')}>{children}</div>
 )
 
 const DataStack = ({ children }: { children: ReactNode }) => (
@@ -46,14 +47,20 @@ const DataStack = ({ children }: { children: ReactNode }) => (
   </div>
 )
 
-export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSignatures = false }: ReceiptProps) => {
+export const Receipt = ({
+  safeTxData,
+  txData,
+  txDetails,
+  txInfo,
+  grid,
+  withSignatures = false,
+  outlined = false,
+}: ReceiptProps) => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { safeTx, gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
-
-  const ToWrapper: ElementType = grid ? 'div' : Fragment
 
   const confirmations = useMemo(() => {
     const detailedExecutionInfo = txDetails?.detailedExecutionInfo
@@ -108,37 +115,53 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
   const domainHash = useDomainHash()
   const messageHash = useMessageHash({ safeTxData: displaySafeTxData })
 
+  const toAddress = (
+    <EthHashInfo
+      address={safeTxData.to}
+      avatarSize={20}
+      showPrefix={false}
+      showName={false}
+      shortAddress={false}
+      hasExplorer
+      showAvatar
+      highlight4bytes
+    />
+  )
+
   return (
-    <PaperViewToggle activeView={0} leftAlign={grid}>
+    <PaperViewToggle activeView={0} leftAlign={grid} outlined={outlined}>
       {[
         {
           title: 'Data',
           content: (
-            <ScrollWrapper>
+            <ScrollWrapper padded={!outlined}>
               <DataStack>
                 <TxDetailsRow label="To" grid={grid}>
-                  <ToWrapper>
-                    <NameChip txData={txData} txInfo={txInfo} />
+                  {grid ? (
+                    <div>
+                      <span className="inline-flex -ml-2.5">
+                        <NameChip txData={txData} txInfo={txInfo} />
+                      </span>
 
-                    <Typography
-                      variant="paragraph-small"
-                      className={cn(
-                        '[&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start',
-                        grid ? 'mt-1.5' : 'w-full',
-                      )}
-                    >
-                      <EthHashInfo
-                        address={safeTxData.to}
-                        avatarSize={20}
-                        showPrefix={false}
-                        showName={false}
-                        shortAddress={false}
-                        hasExplorer
-                        showAvatar
-                        highlight4bytes
-                      />
-                    </Typography>
-                  </ToWrapper>
+                      <Typography
+                        variant="paragraph-small"
+                        className="mt-1.5 [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
+                      >
+                        {toAddress}
+                      </Typography>
+                    </div>
+                  ) : (
+                    <>
+                      <NameChip txData={txData} txInfo={txInfo} />
+
+                      <Typography
+                        variant="paragraph-small"
+                        className="w-full [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
+                      >
+                        {toAddress}
+                      </Typography>
+                    </>
+                  )}
                 </TxDetailsRow>
 
                 <TxDetailsRow label="Value" grid={grid}>
@@ -234,7 +257,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
         {
           title: 'Hashes',
           content: (
-            <ScrollWrapper>
+            <ScrollWrapper padded={!outlined}>
               <DataStack>
                 {domainHash && (
                   <TxDetailsRow label="Domain hash" grid={grid}>
@@ -266,7 +289,7 @@ export const Receipt = ({ safeTxData, txData, txDetails, txInfo, grid, withSigna
         {
           title: 'JSON',
           content: (
-            <ScrollWrapper>
+            <ScrollWrapper padded={!outlined}>
               <JsonView data={displaySafeTxData} />
             </ScrollWrapper>
           ),

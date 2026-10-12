@@ -7,7 +7,7 @@ import * as data from '../../fixtures/txhistory_data_data.json'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page'
 import { disconnectedUserErrorMsg } from '../pages/owners.pages'
-import { comboButtonOptions } from '../pages/create_tx.pages'
+import rejectionTransactions from '../../fixtures/rejection-transactions.js'
 
 let staticSafes = []
 
@@ -16,12 +16,6 @@ const signer = walletCredentials.OWNER_3_PRIVATE_KEY
 const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const typeOnchainRejection = data.type.onchainRejection
-
-const onchainRejectionTx =
-  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x13037f442aa430867c6f50799382fe42ae788896e2d032a6849bf07bc87d0fe2'
-
-const onchainRejectionTx2 =
-  '&id=multisig_0x4B8A8Ca9F0002a850CB2c81b205a6D7429a22DEe_0x66460c1f56c55fc2101565cb968a0cf393be0fe84528d7507a81be7125160034'
 
 describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
@@ -72,7 +66,7 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   })
 
   it('Verify a Reject tx name is "On-Chain rejection" in history', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + onchainRejectionTx)
+    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + rejectionTransactions.executed)
     create_tx.verifyTxHeaderDetails([typeOnchainRejection.title])
   })
 
@@ -91,7 +85,7 @@ describe('Transaction queue Reject button tests', { defaultCommandTimeout: 30000
   })
 
   it('Verify 2 Reject tx cannot be created with the same nonce', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_37 + onchainRejectionTx2)
+    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_37 + rejectionTransactions.pending)
     wallet.connectSigner(signer2)
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()

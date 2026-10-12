@@ -6,6 +6,19 @@ export const CATEGORIES = {
   recovery: 'recovery',
 }
 
+export function setSafeScenario(scenario) {
+  const isolatedSafes = Cypress.env('SAFE_E2E_SAFES') ?? {}
+  // Keep references held by spec-level before hooks current after a scenario reset.
+  for (const category of new Set([...Object.keys(isolatedSafes), ...Object.keys(scenario.safes)])) {
+    const safes = (isolatedSafes[category] ??= {})
+    for (const key of Object.keys(safes)) delete safes[key]
+    Object.assign(safes, scenario.safes[category])
+    if (!Object.hasOwn(scenario.safes, category)) delete isolatedSafes[category]
+  }
+  Cypress.env('SAFE_E2E_SAFES', isolatedSafes)
+  Cypress.env('SAFE_E2E_FIXTURES', scenario.fixtures ?? {})
+}
+
 function loadSafesModule(categoryKey) {
   const category = CATEGORIES[categoryKey]
   if (!category) {
@@ -22,6 +35,11 @@ function loadSafesModule(categoryKey) {
 }
 
 export function getSafes(categoryKey) {
+  if (Cypress.env('SAFE_E2E_ISOLATED')) {
+    const safes = Cypress.env('SAFE_E2E_SAFES')?.[categoryKey]
+    if (!safes) throw new Error(`No prepared isolated Safes for category ${categoryKey}`)
+    return Promise.resolve(safes)
+  }
   return loadSafesModule(categoryKey).then((safes) => {
     console.log(`Loaded ${categoryKey}:`, safes)
     return safes

@@ -6,9 +6,11 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { server } from '@/tests/server'
-import { STEP_UP_FAILED_MESSAGE } from '../../constants'
 import { stepUpReturning } from '../../store'
+import { navigateTo } from '@/utils/navigation'
 import { getReplayableAction, replayStepUpAction, saveStepUpTrip, takeStepUpTrip } from '../stepUpReplay'
+
+jest.mock('@/utils/navigation', () => ({ navigateTo: jest.fn() }))
 
 const rejectedMutation = (endpointName: string, originalArgs: unknown) => ({
   type: 'cgwClient/executeMutation/rejected',
@@ -34,6 +36,9 @@ describe('getReplayableAction', () => {
     expect(getReplayableAction(rejectedMutation('membersInviteUserV1', {}))?.endpoint).toBe('membersInviteUserV1')
     expect(getReplayableAction(rejectedMutation('membersUpdateRoleV1', {}))?.endpoint).toBe('membersUpdateRoleV1')
     expect(getReplayableAction(rejectedMutation('membersRemoveUserV1', {}))?.endpoint).toBe('membersRemoveUserV1')
+    expect(getReplayableAction(rejectedMutation('billingUpdateSubscriptionV1', {}))?.endpoint).toBe(
+      'billingUpdateSubscriptionV1',
+    )
     expect(getReplayableAction(rejectedMutation('addressBooksUpsertAddressBookItemsV1', {}))?.endpoint).toBe(
       'addressBooksUpsertAddressBookItemsV1',
     )
@@ -42,6 +47,9 @@ describe('getReplayableAction', () => {
     )
     expect(getReplayableAction(rejectedMutation('addressBookRequestsApproveRequestV1', {}))?.endpoint).toBe(
       'addressBookRequestsApproveRequestV1',
+    )
+    expect(getReplayableAction(rejectedMutation('billingGetCheckoutUrlV1', {}))?.endpoint).toBe(
+      'billingGetCheckoutUrlV1',
     )
   })
 
@@ -130,6 +138,52 @@ describe('step-up trip storage', () => {
 describe('replayStepUpAction', () => {
   beforeEach(() => {
     sessionStorage.clear()
+    jest.mocked(navigateTo).mockClear()
+  })
+
+  it('should, when the replayed request is the checkout URL, send the user to the checkout without a toast', async () => {
+    const spaceId = faker.string.uuid()
+    const paymentLinkId = faker.string.uuid()
+    const checkoutUrl = faker.internet.url()
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/payment-links/${paymentLinkId}/checkout-url`, () =>
+        HttpResponse.json({ url: checkoutUrl }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'billingGetCheckoutUrlV1',
+      args: { spaceId, paymentLinkId, returnUrl: faker.internet.url() },
+    })
+
+    expect(isLeavingPage).toBe(true)
+    expect(navigateTo).toHaveBeenCalledWith(checkoutUrl)
+    expect(selectNotifications(store.getState())).toEqual([])
+  })
+
+  it('should, when the replayed checkout URL request fails, show an error and stay on the page', async () => {
+    const spaceId = faker.string.uuid()
+    const paymentLinkId = faker.string.uuid()
+
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/billing/spaces/${spaceId}/payment-links/${paymentLinkId}/checkout-url`, () =>
+        HttpResponse.json({ message: 'Boom' }, { status: 500 }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'billingGetCheckoutUrlV1',
+      args: { spaceId, paymentLinkId, returnUrl: faker.internet.url() },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(navigateTo).not.toHaveBeenCalled()
+    expect(selectNotifications(store.getState())).toEqual([expect.objectContaining({ variant: 'error' })])
   })
 
   it('should, when the list query is still in flight with two subscribers while the replay completes, fetch the list again so it shows the added Safe', async () => {
@@ -157,7 +211,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
     store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
@@ -197,7 +251,7 @@ describe('replayStepUpAction', () => {
       http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({}, { status: 201 })),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     await store.dispatch(cgwApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
 
     await replayStepUpAction(store.dispatch, {
@@ -238,7 +292,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const replay = replayStepUpAction(store.dispatch, {
       endpoint: 'spaceSafesCreateV1',
       args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: addedSafe }] } },
@@ -277,7 +331,7 @@ describe('replayStepUpAction', () => {
       }),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
     store.dispatch(usersApi.endpoints.usersGetWithWalletsV1.initiate())
 
@@ -296,7 +350,7 @@ describe('replayStepUpAction', () => {
     ])
   })
 
-  it('should, when the replayed mutation is rejected because the session is not elevated, show the step-up failed message without saving another trip', async () => {
+  it('should, when the replayed mutation is rejected because the session is not elevated, stay silent and not save another trip', async () => {
     const spaceId = faker.string.uuid()
 
     server.use(
@@ -305,7 +359,7 @@ describe('replayStepUpAction', () => {
       ),
     )
 
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     store.dispatch(stepUpReturning())
 
     await replayStepUpAction(store.dispatch, {
@@ -314,8 +368,96 @@ describe('replayStepUpAction', () => {
     })
 
     expect(sessionStorage.getItem('oidc_step_up')).toBeNull()
+    expect(selectNotifications(store.getState())).toEqual([])
+  })
+
+  it('should, when the replayed mutation is refused because all seats are used, show the friendly seat warning instead of the gateway text', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json(
+          {
+            code: 'QUOTA_EXCEEDED',
+            feature: 'safe_seats',
+            quota: 20,
+            used: 20,
+            resetsAt: null,
+            message: 'Quota exceeded for safe_seats: 20 of 20 used.',
+          },
+          { status: 402 },
+        ),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
     expect(selectNotifications(store.getState())).toEqual([
-      expect.objectContaining({ message: STEP_UP_FAILED_MESSAGE, variant: 'error' }),
+      expect.objectContaining({
+        message:
+          'Your plan covers 20 Safe accounts and this Workspace already holds 20. Remove one to add another, or upgrade your plan.',
+        variant: 'warning',
+      }),
+    ])
+  })
+
+  it('should, when the replayed mutation fails for another reason, show the gateway error', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json({ message: 'Boom' }, { status: 500 }),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({ message: 'Boom', variant: 'error' }),
+    ])
+  })
+
+  it('should, when the replayed mutation is refused because the plan lacks the feature, show the gateway error', async () => {
+    const spaceId = faker.string.uuid()
+
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () =>
+        HttpResponse.json(
+          {
+            code: 'FEATURE_NOT_GRANTED',
+            feature: 'policies',
+            message: "Feature 'policies' is not available on the current plan.",
+          },
+          { status: 402 },
+        ),
+      ),
+    )
+
+    const store = makeStore()
+
+    const isLeavingPage = await replayStepUpAction(store.dispatch, {
+      endpoint: 'spaceSafesCreateV1',
+      args: { spaceId, createSpaceSafesDto: { safes: [{ chainId: '1', address: faker.finance.ethereumAddress() }] } },
+    })
+
+    expect(isLeavingPage).toBe(false)
+    expect(selectNotifications(store.getState())).toEqual([
+      expect.objectContaining({
+        message: "Feature 'policies' is not available on the current plan.",
+        variant: 'error',
+      }),
     ])
   })
 })

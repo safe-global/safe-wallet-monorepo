@@ -1,14 +1,16 @@
 import type { ReactElement } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 
 import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
-import { Countdown } from '@/components/common/Countdown'
+import { Countdown } from '@safe-global/views/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useAddressBook from '@/hooks/useAddressBook'
+
+import txDetailsCss from '@/components/transactions/TxDetails/styles.module.css'
 
 export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { isExecutable, isExpired, isNext, remainingSeconds } = useRecoveryTxState(item)
@@ -54,7 +56,7 @@ export default function RecoverySigners({ item }: { item: RecoveryQueueItem }): 
         )}
       </AuditLog>
 
-      <div className="flex items-center justify-center gap-2">
+      <div className={txDetailsCss.buttons}>
         <ExecuteRecoveryButton recovery={item} />
         <CancelRecoveryButton recovery={item} />
       </div>

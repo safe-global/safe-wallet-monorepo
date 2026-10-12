@@ -6,12 +6,14 @@ import useLogout from '@/hooks/useLogout'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 import EditMemberDialog from '../../MembersList/EditMemberDialog'
 
 const AccountPage = () => {
@@ -44,7 +46,7 @@ const AccountPage = () => {
       <SpaceSettingsSection data-testid="settings-account-page">
         <SpaceSettingsSectionTitle className="mb-2">Signed in</SpaceSettingsSectionTitle>
         <Typography variant="paragraph-small" color="muted">
-          You&apos;re not signed in to this workspace.
+          You&apos;re not signed in to this Workspace.
         </Typography>
       </SpaceSettingsSection>
     )

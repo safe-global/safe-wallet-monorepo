@@ -1,10 +1,10 @@
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { RotateCcw } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 import { BASE_TX_GAS } from '@/config/constants'
-import { AdvancedField } from './types'
+import { AdvancedField } from '@safe-global/views/components/tx/AdvancedParams/types'
 import NumberField from '@/components/common/NumberField'
 
 const GasLimitInput = ({ recommendedGasLimit }: { recommendedGasLimit?: string }) => {

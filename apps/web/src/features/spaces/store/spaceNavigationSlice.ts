@@ -14,7 +14,7 @@ interface SpaceNavigationState {
    * scoped to the space it belonged to.
    *
    * Deliberately a standalone, NON-persisted slice: this is transient per-tab, per-session
-   * navigation context. Persisting/broadcasting it (as the `auth` slice does for `lastUsedSpace`)
+   * navigation context. Persisting/broadcasting it (as the `auth` slice does for `landingSpaceHint`)
    * would let a stale value from a previous session — or a different browser tab — decide where
    * "back" goes, which is wrong for a back affordance.
    *

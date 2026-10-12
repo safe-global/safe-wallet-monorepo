@@ -27,9 +27,10 @@ const buildState = (sessionExpiresAt: number | null, isStoreHydrated = true): Pa
   ({
     auth: {
       sessionExpiresAt,
-      lastUsedSpace: null,
+      landingSpaceHint: null,
       isStoreHydrated,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     },
   }) as Partial<RootState>
 
@@ -38,14 +39,18 @@ const findNotification = (store: AppStore) =>
 
 const flushMicrotasks = () => act(async () => Promise.resolve())
 
-const renderGuardWithStore = (sessionExpiresAt: number | null, pathname = AppRoutes.welcome.spaces) => {
+const renderGuardWithStore = (
+  sessionExpiresAt: number | null,
+  pathname = AppRoutes.welcome.spaces,
+  isStoreHydrated = true,
+) => {
   let capturedStore: AppStore | undefined
   const result = renderHook(
     () => {
       capturedStore = useStore() as AppStore
       useSessionExpiryGuard()
     },
-    { initialReduxState: buildState(sessionExpiresAt), routerProps: { pathname } },
+    { initialReduxState: buildState(sessionExpiresAt, isStoreHydrated), routerProps: { pathname } },
   )
   if (!capturedStore) throw new Error('store not captured')
   return { ...result, store: capturedStore }
@@ -113,7 +118,17 @@ describe('useSessionExpiryGuard', () => {
     await flushMicrotasks()
 
     expect(store.getState().auth.sessionExpiresAt).toBe(expiresAt)
+    expect(store.getState().auth.isSessionCheckPending).toBe(false)
     expect(findNotification(store)).toBeUndefined()
+  })
+
+  it('marks the session check pending while the /v1/auth/me probe is in flight', async () => {
+    mockUnwrap.mockReturnValue(new Promise(() => {}))
+
+    const { store } = renderGuardWithStore(Date.now() + 60_000, AppRoutes.welcome.spaces, false)
+    await flushMicrotasks()
+
+    expect(store.getState().auth.isSessionCheckPending).toBe(true)
   })
 
   it('clears auth and shows a toast when /v1/auth/me returns 403', async () => {
@@ -264,6 +279,7 @@ describe('useSessionExpiryGuard', () => {
     await flushMicrotasks()
     expect(mockInitiate).toHaveBeenCalledTimes(1)
     first.unmount()
+    localStorage.clear()
 
     // Second mount: same tab, signed out (preloaded null).
     const middle = renderGuardWithStore(null)
@@ -303,7 +319,7 @@ describe('useSessionExpiryGuard', () => {
     const notification = findNotification(store)
     expect(notification).toMatchObject({ message: SESSION_EXPIRED_MESSAGE })
     expect(notification?.link).toBeUndefined()
-    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to workspaces again.')
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to Workspaces again.')
   })
 
   it('clears auth but shows no toast when the session expires outside /welcome/spaces', async () => {
@@ -324,6 +340,7 @@ describe('useSessionExpiryGuard', () => {
       variant: 'info',
       groupKey: SESSION_EXPIRED_GROUP_KEY,
     })
+    expect(SESSION_EXPIRED_MESSAGE).toBe('Your session has expired. Please sign in to Workspaces again.')
   })
 
   it('shows no toast when the mid-tab timer fires outside a workspaces route', async () => {

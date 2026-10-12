@@ -6,9 +6,9 @@ import useAddressBook from '@/hooks/useAddressBook'
 import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { gtmSetChainId } from '@/services/analytics/gtm'
 import { showNotification } from '@/store/notificationsSlice'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { FormProvider, useForm } from 'react-hook-form'
 import { useSafeCreationData } from '../../hooks/useSafeCreationData'
 import useChains from '@/hooks/useChains'
@@ -17,7 +17,7 @@ import { selectRpc } from '@/store/settingsSlice'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { hasMultiChainAddNetworkFeature, predictAddressBasedOnReplayData } from '../../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useRouter } from 'next/router'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -28,9 +28,11 @@ import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { AppRoutes, UNDEPLOYED_SAFE_BLOCKED_ROUTES } from '@/config/routes'
 import type { CreateSafeOnNewChainForm, ReplaySafeDialogProps } from '../../types'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { isAuthenticated, lastUsedSpace } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount } from '@/features/spaces'
-import { normalizeSpaceId } from '@/utils/spaces'
+import { isAuthenticated } from '@/store/authSlice'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import { isSpaceAtSafeLimit } from '@/utils/spaces'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const ReplaySafeDialog = ({
   safeAddress,
@@ -54,9 +56,24 @@ const ReplaySafeDialog = ({
 
   const customRpc = useAppSelector(selectRpc)
   const isUserAuthenticated = useAppSelector(isAuthenticated)
-  const spaceId = useAppSelector(lastUsedSpace)
-  const isAdminOfActiveSpace = useIsAdmin(normalizeSpaceId(spaceId) ?? undefined)
+  const spaceId = useUrlSpaceId()
+  const isAdminOfActiveSpace = useIsAdmin(spaceId ?? undefined)
   const spaceSafeCount = useSpaceSafeCount(spaceId)
+  const { limit: spaceSafeLimit } = useSpaceSafeLimit(spaceId)
+  const { currentData: spaceSafes } = useSpaceSafesGetV1Query(
+    { spaceId: spaceId ?? '' },
+    { skip: !isUserAuthenticated || spaceId === null },
+  )
+  // Seats are per address: another chain of a Safe already in the space takes none.
+  const holdsSeatInSpace = Object.values(spaceSafes?.safes ?? {}).some((addresses) =>
+    addresses.some((address) => sameAddress(address, safeAddress)),
+  )
+  const willStayOutsideSpace =
+    isUserAuthenticated &&
+    spaceId !== null &&
+    isAdminOfActiveSpace &&
+    !holdsSeatInSpace &&
+    isSpaceAtSafeLimit(spaceSafeCount, spaceSafeLimit)
   const dispatch = useAppDispatch()
   const [creationError, setCreationError] = useState<Error>()
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -119,10 +136,17 @@ const ReplaySafeDialog = ({
         isUserAuthenticated,
         isAdminOfActiveSpace,
         spaceSafeCount,
+        spaceSafeLimit,
+        holdsSeatInSpace,
         provider,
         dispatch,
       })
       if (!persistResult.ok) {
+        if (persistResult.stepUpPending) {
+          // Nothing to show, but the dialog must not close as if the network had been added.
+          hasError = true
+          return
+        }
         setCreationError(persistResult.error)
         hasError = true
         dispatch(
@@ -145,6 +169,7 @@ const ReplaySafeDialog = ({
         pathname: UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(router.pathname) ? AppRoutes.home : router.pathname,
         query: {
           safe: `${selectedChain.shortName}:${safeAddress}`,
+          ...(spaceId && { spaceId }),
         },
       })
 
@@ -215,6 +240,15 @@ const ReplaySafeDialog = ({
                 The Safe will use the initial setup of the copied Safe. Any changes to owners, threshold, modules or the
                 Safe&apos;s version will not be reflected in the copy.
               </ErrorMessage>
+
+              {willStayOutsideSpace && (
+                <div data-testid="space-seat-limit-notice">
+                  <ErrorMessage level="info">
+                    This Workspace is at its limit of {spaceSafeLimit} Safe accounts. The new network will be added in
+                    My accounts, outside the Workspace.
+                  </ErrorMessage>
+                </div>
+              )}
 
               {safeCreationDataLoading ? (
                 <div className="flex flex-col items-center gap-2">

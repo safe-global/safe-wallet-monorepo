@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
 import { CircleFadingPlus } from 'lucide-react'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog'
+import { SidebarMenuButton } from '@safe-global/views/components/ui/sidebar'
+import { Dialog, DialogContent, DialogTrigger } from '@safe-global/views/components/ui/dialog'
 import css from '../../styles.module.css'
-import type { SafeWorkspaceHeaderProps } from '../../types'
+import type { SafeWorkspaceHeaderProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 import { BackToSpaceButton } from '../../BackToSpaceButton'
 import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePopupModal'
@@ -40,7 +40,6 @@ export const SafeSidebarWorkspaceHeader = ({
             triggerVariant="addToWorkspace"
             selectedSpace={workspaceHeader.selectedSpace}
             spaces={workspaceHeader.spaces}
-            onSpaceAdded={workspaceHeader.onSpaceAdded}
           />
         )
       }
@@ -53,7 +52,7 @@ export const SafeSidebarWorkspaceHeader = ({
                 size="lg"
                 className={css.addSafeToWorkspaceTrigger}
                 data-testid="add-safe-to-workspace-button"
-                aria-label="Add Safe to workspace"
+                aria-label="Add Safe to Workspace"
                 aria-haspopup="dialog"
               />
             }
@@ -61,7 +60,7 @@ export const SafeSidebarWorkspaceHeader = ({
             <span className={css.addSafeToWorkspaceRing}>
               <CircleFadingPlus className={css.addSafeToWorkspacePlusIcon} />
             </span>
-            <span className={css.addSafeToWorkspaceLabel}>Add Safe to workspace</span>
+            <span className={css.addSafeToWorkspaceLabel}>Add Safe to Workspace</span>
           </DialogTrigger>
           <DialogContent
             padding="none"

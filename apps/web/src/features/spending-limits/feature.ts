@@ -6,7 +6,13 @@ import RemoveSpendingLimitReview from './components/RemoveSpendingLimitReview'
 import ReviewSpendingLimitTx from './components/ReviewSpendingLimitTx'
 import SpendingLimitsLoader from './components/SpendingLimitsLoader'
 import { loadSpendingLimits } from './services/spendingLimitLoader'
-import { createNewSpendingLimitTx, dispatchSpendingLimitTxExecution } from './services/spendingLimitExecution'
+import {
+  createNewSpendingLimitTx,
+  createSpendingLimitEditTx,
+  createSpendingLimitsTx,
+  dispatchSpendingLimitTxExecution,
+} from './services/spendingLimitExecution'
+import { buildSpendingLimitEdit } from './services/spendingLimitEdit'
 
 export default {
   // Components
@@ -21,5 +27,8 @@ export default {
   // Services
   loadSpendingLimits,
   createNewSpendingLimitTx,
+  createSpendingLimitsTx,
+  createSpendingLimitEditTx,
+  buildSpendingLimitEdit,
   dispatchSpendingLimitTxExecution,
 }

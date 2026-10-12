@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
-import { Spinner } from '@/components/ui/spinner'
-import { Card } from '@/components/ui/card'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Card } from '@safe-global/views/components/ui/card'
 import { OVERVIEW_EVENTS, SAFE_APPS_EVENTS, trackEvent, trackSafeAppEvent } from '@/services/analytics'
 import { useSafeAppFromBackend } from '@/hooks/safe-apps/useSafeAppFromBackend'
 import { useSafeAppFromManifest } from '@/hooks/safe-apps/useSafeAppFromManifest'
 import { SafeAppDetails } from '@/components/safe-apps/SafeAppLandingPage/SafeAppDetails'
-import { TryDemo } from '@/components/safe-apps/SafeAppLandingPage/TryDemo'
+import { TryDemo } from '@safe-global/views/components/safe-apps/SafeAppLandingPage/TryDemo'
 import { AppActions } from '@/components/safe-apps/SafeAppLandingPage/AppActions'
 import useWallet from '@/hooks/wallets/useWallet'
 import { AppRoutes } from '@/config/routes'
@@ -78,6 +78,7 @@ const SafeAppLanding = ({ appUrl, chain }: Props) => {
                 <TryDemo
                   demoUrl={{
                     pathname: AppRoutes.apps.open,
+                    // eslint-disable-next-line no-restricted-syntax -- The demo Safe is in no Workspace
                     query: { safe: SAFE_APPS_DEMO_SAFE_MAINNET, appUrl },
                   }}
                   onClick={handleDemoClick}

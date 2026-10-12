@@ -71,4 +71,16 @@ describe('useSafeSpaces', () => {
 
     await waitFor(() => expect(result.current.safeSpaces).toEqual({}))
   })
+
+  it('does not fetch any Space safes while skipped', async () => {
+    const trigger = jest.fn()
+    mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
+    mockUseSpacesGetV1Query.mockReturnValue({ data: undefined, isLoading: false })
+
+    const { result } = renderHook(() => useSafeSpaces(true))
+
+    expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
+    await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
+    expect(trigger).not.toHaveBeenCalled()
+  })
 })

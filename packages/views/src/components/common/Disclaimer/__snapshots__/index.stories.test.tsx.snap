@@ -1,0 +1,196 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./index.stories BlockedAddress 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="max-w-[500px] rounded-lg bg-[var(--color-background-paper)]"
+      >
+        <div
+          class="flex flex-col items-center gap-4 border-b border-[var(--color-border-light)] p-[var(--space-3)]"
+        >
+          <p
+            class="m-0 text-base leading-6 font-normal text-[var(--color-text-secondary)]"
+            data-slot="typography"
+            data-variant="paragraph"
+          >
+            0xD3a484faEa53313eF85b5916C9302a3E304ae622
+          </p>
+          <div
+            class="iconCircle"
+          >
+            <mock-icon
+              class="size-6"
+            />
+          </div>
+          <h3
+            class="m-0 scroll-m-20 text-2xl leading-[28.8px] tracking-normal font-bold"
+            data-slot="typography"
+            data-variant="h3"
+          >
+            Blocked Address
+          </h3>
+          <div
+            class="m-0 text-sm leading-5 font-normal"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            This signer address is blocked by the Safe interface, due to being associated with the blocked activities by the U.S. Department of Treasury in the Specially Designated Nationals (SDN) list.
+          </div>
+        </div>
+        <div
+          class="flex justify-center pt-6 pb-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./index.stories LegalDisclaimer 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="container"
+    >
+      <div
+        class="max-w-[500px] rounded-lg bg-[var(--color-background-paper)]"
+      >
+        <div
+          class="flex flex-col items-center gap-4 border-b border-[var(--color-border-light)] p-[var(--space-3)]"
+        >
+          <div
+            class="iconCircle"
+          >
+            <mock-icon
+              class="size-6"
+            />
+          </div>
+          <h3
+            class="m-0 scroll-m-20 text-2xl leading-[28.8px] tracking-normal font-bold"
+            data-slot="typography"
+            data-variant="h3"
+          >
+            Legal Disclaimer
+          </h3>
+          <div
+            class="m-0 text-sm leading-5 font-normal"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            <div
+              class="disclaimerContainer"
+            >
+              <div
+                class="disclaimerInner"
+              >
+                <p
+                  class="m-0 text-base leading-6 font-normal mb-8"
+                  data-slot="typography"
+                  data-variant="paragraph"
+                >
+                  You are now accessing 
+                  third-party apps
+                  , which we do not own, control, maintain or audit. We are not liable for any loss you may suffer in connection with interacting with the
+                   
+                  apps
+                  , which is at your own risk.
+                </p>
+                <p
+                  class="m-0 text-base leading-6 font-normal mb-8"
+                  data-slot="typography"
+                  data-variant="paragraph"
+                >
+                  You must read our Terms, which contain more detailed provisions binding on you relating to the
+                   
+                  apps
+                  .
+                </p>
+                <p
+                  class="m-0 text-base leading-6 font-normal"
+                  data-slot="typography"
+                  data-variant="paragraph"
+                >
+                  I have read and understood the
+                   
+                  <a
+                    class="underline-offset-4 transition-colors outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 text-primary decoration-primary/40 hover:decoration-current font-bold no-underline hover:text-muted-foreground hover:no-underline"
+                    data-slot="link"
+                    data-variant="default"
+                    href="https://safe.global/terms"
+                    rel="noreferrer noopener"
+                    target="_blank"
+                  >
+                    <span
+                      class="inline-flex cursor-pointer items-center gap-0.5"
+                    >
+                      Terms
+                      <svg
+                        aria-hidden="true"
+                        class="lucide lucide-external-link external-link-icon size-4"
+                        fill="none"
+                        height="24"
+                        stroke="currentColor"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M15 3h6v6"
+                        />
+                        <path
+                          d="M10 14 21 3"
+                        />
+                        <path
+                          d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+                        />
+                      </svg>
+                    </span>
+                  </a>
+                   
+                  and this Disclaimer, and agree to be bound by them.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex justify-center pt-6 pb-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

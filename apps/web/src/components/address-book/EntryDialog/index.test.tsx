@@ -11,7 +11,7 @@ jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 
@@ -93,7 +93,7 @@ describe('EntryDialog scope', () => {
   it('names the workspace it is about to write to, and stays silent for a local write', () => {
     const { unmount } = renderDialog('workspace')
     expect(screen.getByTestId('entry-scope-notice')).toHaveTextContent(
-      'This name is saved to Acme address book and is visible to everyone in the workspace.',
+      'This name is saved to Acme address book and is visible to everyone in the Workspace.',
     )
     unmount()
 

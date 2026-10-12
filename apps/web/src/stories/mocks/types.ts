@@ -41,6 +41,10 @@ export interface FeatureFlags {
   switchAuthenticator?: boolean
   /** TWO_FACTOR_AWARENESS_BANNER - the 2FA awareness card in the Workspaces sidebar (default: false) */
   twoFactorAwarenessBanner?: boolean
+  /** SAFE_STAKING - Safenet SAFE staking entry points (default: false) */
+  safeStaking?: boolean
+  /** SAFE_PRO - Safe Pro plans and billing (default: false) */
+  safePro?: boolean
 }
 
 /**

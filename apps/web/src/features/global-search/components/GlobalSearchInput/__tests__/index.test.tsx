@@ -22,7 +22,7 @@ describe('GlobalSearchInput', () => {
   })
 
   it('sets globalSearch.open to true on click', async () => {
-    const store = makeStore(undefined, { skipBroadcast: true })
+    const store = makeStore()
     const user = userEvent.setup()
 
     rtlRender(

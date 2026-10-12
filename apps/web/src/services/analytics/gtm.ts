@@ -17,6 +17,7 @@ import { SAFE_APPS_SDK_CATEGORY } from './events'
 import { getAbTest } from '../tracking/abTesting'
 import type { AbTest } from '../tracking/abTesting'
 import { AppRoutes } from '@/config/routes'
+import { reloadPage } from '@/utils/navigation'
 
 const commonEventParams = {
   appVersion: APP_VERSION,
@@ -61,7 +62,7 @@ export const gtmDisableCookies = () => {
   })
 
   // Injected script will remain in memory until new session
-  location.reload()
+  reloadPage()
 }
 
 export const gtmSetUserProperty = (name: string, value: string) => {

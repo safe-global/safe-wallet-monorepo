@@ -6,7 +6,7 @@
  *
  * The raw response body is never part of the copy: a gateway can answer with an
  * HTML error page, and rendering that verbatim is what this module exists to
- * prevent. The status is a support reference only (see `getCgwErrorCode`).
+ * prevent, and the status itself is never shown to the user.
  */
 
 /** Shown for every response state we cannot act on: transient, or our own bug. */
@@ -52,12 +52,6 @@ export const getCgwErrorMeta = (status: number | undefined): CgwErrorMeta | unde
   if (status === undefined) return undefined
   return CGW_ERRORS[status] ?? (isServerErrorStatus(status) ? CGW_SERVER_ERROR : undefined)
 }
-
-/**
- * Support reference for the Details panel. Carries the status so support can
- * correlate the report with gateway logs — it never appears in the message.
- */
-export const getCgwErrorCode = (status: number): string => `CGW-${status}`
 
 /** Whether this state should raise an internal alert (a bug on our side). */
 export const shouldAlertOnCgwStatus = (status: number | undefined): boolean =>

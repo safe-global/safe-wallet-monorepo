@@ -87,6 +87,8 @@ const addSpaceAccountManuallyBtn = '[data-testid="add-space-account-manually-but
 const addSpaceAccountManuallyModalBtn = '[data-testid="add-manually-button"]'
 const addAccountsBtn = '[data-testid="add-accounts-button"]'
 const addAddressInput = '[data-testid="add-address-input"]'
+const nameAccountsRegion = '[data-testid="name-accounts-region"]'
+const nameAccountInput = '[data-testid="account-name-input"]'
 const networkSelector = '[data-testid="network-selector"]'
 const networkItem = '[data-testid="network-item"]'
 
@@ -116,9 +118,9 @@ const sidebarProfileSignOutBtn = '[data-testid="sidebar-profile-sign-out"]'
 const continueWithWalletBtn = '[data-testid="continue-with-wallet-btn"]'
 // The signed-out /welcome/spaces keeps the Topbar, which renders its own generic "Connect Wallet"
 // button with the same data-testid as the sign-in card's button — so the card button is matched by
-// its "Continue with wallet" text instead of by index.
+// its "Connect wallet" text instead of by index.
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
-const workspaceWalletBtnText = 'Continue with wallet'
+const workspaceWalletBtnText = 'Connect wallet'
 const onboardV2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'
@@ -162,7 +164,7 @@ export const zeroBalanceRegex = /\$[\u200a\s]*0(?:\.00)?/
 export const txDetailsLabel = 'Transaction details'
 export const pendingTxName = 'Send'
 export const pendingTxStatus = 'Needs confirmation'
-export const deleteSpaceConfirmationMsg = (name) => `Deleted workspace ${name}`
+export const deleteSpaceConfirmationMsg = (name) => `Deleted Workspace ${name}`
 export const acceptInviteConfirmationMsg = (spaceName) => `Accepted invite to ${spaceName}`
 
 // ===========================================
@@ -256,7 +258,7 @@ export function verifyOnSingleSpaceDashboard(spaceName) {
     .should('include', constants.spaceDashboardUrl)
     .and('include', 'spaceId=')
     .and('not.include', onboardingCreateSpacePath)
-  cy.get(spaceSelectorBtn, { timeout: 30000 }).should('be.visible').and('contain.text', spaceName)
+  cy.get(spaceSelectorBtn, { timeout: 30000 }).scrollIntoView().should('be.visible').and('contain.text', spaceName)
 }
 
 export function waitForSpacesWelcomeReady() {
@@ -291,7 +293,7 @@ export function openSpaceByName(name) {
 }
 
 export function clickOnSpaceSelector(spaceName) {
-  cy.get(spaceSelectorBtn, { timeout: 15000 }).should('be.visible').click()
+  cy.get(spaceSelectorBtn, { timeout: 15000 }).scrollIntoView().should('be.visible').click()
   if (spaceName) {
     cy.get(spaceSelectorMenu).contains(spaceName).click()
   }
@@ -349,6 +351,8 @@ export function clickExpandedPanelSubAccountRow(rowIndex, subRowIndex) {
 }
 
 export function clickViewAllAccounts() {
+  // The loading placeholder shares the widget testid and its View all button is replaced once the feature loads.
+  cy.get(spaceDashboardAccountsWidget).find(spaceDashboardAccountsRowSelector).should('exist')
   cy.get(spaceDashboardAccountsWidget).find(widgetViewAllBtn).should('be.visible').click()
 }
 
@@ -569,10 +573,8 @@ export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // The cards may render slightly after the list container, and at the limit the
-  // Create button is disabled. Give the cards a beat to load, then read the count
-  // and delete a space to free a slot before any create attempt.
-  cy.wait(2000)
+  // The list renders its rows together with the container. At the limit the Create button is
+  // disabled, so delete a space to free a slot before any create attempt.
   cy.get('body').then(($body) => {
     if ($body.find(spaceCard).length >= MAX_SPACES) {
       deleteOneSpace()
@@ -604,7 +606,7 @@ export function openAddAccountsToWorkspace() {
     })
 }
 
-export function addAccountManually(address, network) {
+export function addAccountManually(address, network, name = 'E2E account') {
   openAddAccountsToWorkspace()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
   selectNetwork(network)
@@ -612,8 +614,11 @@ export function addAccountManually(address, network) {
   cy.get(addAddressInput).find('input').should('have.value', address)
   cy.get(addSpaceAccountManuallyBtn).should('be.enabled').click()
   cy.get(addAccountsBtn).should('be.enabled').click()
-  // Added accounts land in the Safe accounts table; FullAddress keeps the whole address in the DOM.
+  cy.get(nameAccountsRegion).should('be.visible')
+  cy.get(nameAccountInput).first().clear().type(name)
+  cy.get(addAccountsBtn).should('be.enabled').click()
   cy.contains(accountAddress, address, { timeout: 30000 }).should('be.visible')
+  cy.contains(name, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================
@@ -670,19 +675,10 @@ export function acceptInvite(spaceName, name) {
 // ===========================================
 
 function navigateToCreateSpacePage() {
-  // Wait for the page to settle, then check if we need to click "Create space" or are already on the form
-  cy.url({ timeout: 15000 }).then((url) => {
-    if (url.includes(onboardingCreateSpacePath)) {
-      // Already redirected to create-space form
-      cy.get(orgSpaceInput).should('be.visible')
-    } else {
-      // Still on spaces list — wait a moment for potential auto-redirect
-      cy.wait(3000)
-      cy.url().then((urlAfterWait) => {
-        if (!urlAfterWait.includes(onboardingCreateSpacePath)) {
-          cy.get(createSpaceBtn).should('be.visible').click()
-        }
-      })
+  cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
+  cy.url().then((url) => {
+    if (!url.includes(onboardingCreateSpacePath)) {
+      cy.get(createSpaceBtn).filter(':visible').first().click()
     }
   })
   cy.url().should('include', onboardingCreateSpacePath)

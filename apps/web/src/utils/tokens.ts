@@ -5,17 +5,18 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { ERC721_IDENTIFIER } from '@safe-global/utils/utils/tokens'
 import { type Erc20Token } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { multicall } from '../../../../packages/utils/src/utils/multicall'
-import { type BytesLike } from 'ethers'
+import { type BytesLike, type JsonRpcProvider } from 'ethers'
 
 /**
  * Fetches ERC20 token symbol and decimals from on-chain.
  * @param address address of erc20 token
+ * @param provider defaults to the app-wide read-only provider; a Space-level flow passes the selected Safe's
  */
 export const getERC20TokenInfoOnChain = async (
   address: string | string[],
+  provider: JsonRpcProvider | undefined = getWeb3ReadOnly(),
 ): Promise<Omit<Erc20Token, 'name' | 'logoUri'>[] | undefined> => {
-  const web3 = getWeb3ReadOnly()
-  if (!web3) return
+  if (!provider) return
 
   let tokenAddresses = Array.isArray(address) ? address : [address]
 
@@ -32,7 +33,7 @@ export const getERC20TokenInfoOnChain = async (
     },
   ])
 
-  const results = await multicall(web3, calls)
+  const results = await multicall(provider, calls)
 
   const tokenInfos: Omit<Erc20Token, 'name' | 'logoUri'>[] = []
   for (let i = 0; i < results.length; i += 2) {

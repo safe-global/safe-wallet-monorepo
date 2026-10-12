@@ -18,7 +18,7 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
   createdAt: faker.date.past().toISOString(),
   updatedAt: faker.date.recent().toISOString(),
   ...overrides,
-  user: { id: 99, status: 'ACTIVE', email: null, ...overrides.user },
+  user: { id: 99, status: 'ACTIVE', email: null, address: null, ...overrides.user },
 })
 
 const defaultSetup = createMockStory({

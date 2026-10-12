@@ -1,7 +1,7 @@
 import { type ReactNode, useContext, useState } from 'react'
 import { type NextRouter, useRouter } from 'next/router'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import CancelIcon from '@/public/images/common/cancel.svg'
 import ReplaceTxIcon from '@/public/images/transactions/replace-tx.svg'
@@ -14,10 +14,10 @@ import { TxModalContext } from '../..'
 import TokenTransferFlow from '../TokenTransfer'
 import RejectTx from '../RejectTx'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
 import DeleteTxModal from './DeleteTxModal'
-import ExternalLink from '@/components/common/ExternalLink'
-import ChoiceButton from '@/components/common/ChoiceButton'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ChoiceButton from '@safe-global/views/components/common/ChoiceButton'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
@@ -26,6 +26,7 @@ import Track from '@/components/common/Track'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
 import { useRecommendedNonce } from '@/components/tx/shared/hooks'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MaybeTooltip = ({ title, children }: { title: string; children: ReactNode }) => {
   if (!title) {
@@ -44,7 +45,7 @@ const goToQueue = (router: NextRouter) => {
   if (router.pathname === AppRoutes.transactions.tx) {
     router.push({
       pathname: AppRoutes.transactions.queue,
-      query: { safe: router.query.safe },
+      query: withSpaceId({ safe: router.query.safe }, router.query.spaceId),
     })
   }
 }

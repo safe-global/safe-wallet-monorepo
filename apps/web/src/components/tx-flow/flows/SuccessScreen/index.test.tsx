@@ -15,6 +15,20 @@ jest.mock('@/hooks/useTxDetails', () => ({
   default: () => [undefined, undefined, false],
 }))
 
+jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
+  SafeScopeProvider: ({
+    initial,
+    children,
+  }: {
+    initial?: { chainId: string; safeAddress: string }
+    children: React.ReactNode
+  }) => (
+    <div data-testid="success-scope" data-chain={initial?.chainId} data-safe={initial?.safeAddress}>
+      {children}
+    </div>
+  ),
+}))
+
 const TEST_CHAIN_ID = '11155111'
 const TEST_SAFE_ADDRESS = '0x0000000000000000000000000000000000000001'
 const TX_ID = 'multisig_0xabc'
@@ -212,5 +226,23 @@ describe('SuccessScreen', () => {
 
     // A module tx renders the indexing status; a `groupKey`-only failure must not hijack it
     expect(screen.getByTestId('transaction-status')).toHaveTextContent('Transaction was processed')
+  })
+
+  it("re-mounts the selected Safe's scope when a Space-level flow opened it", () => {
+    render(<SuccessScreen txId={TX_ID} scope={{ chainId: TEST_CHAIN_ID, safeAddress: TEST_SAFE_ADDRESS }} />, {
+      initialReduxState: { pendingTxs: processingTxs },
+    })
+
+    const scope = screen.getByTestId('success-scope')
+    expect(scope).toHaveAttribute('data-chain', TEST_CHAIN_ID)
+    expect(scope).toHaveAttribute('data-safe', TEST_SAFE_ADDRESS)
+    expect(scope.querySelector('[data-testid="transaction-status"]')).toBeInTheDocument()
+  })
+
+  it('mounts no scope for a Safe-level flow', () => {
+    render(<SuccessScreen txId={TX_ID} />, { initialReduxState: { pendingTxs: processingTxs } })
+
+    expect(screen.queryByTestId('success-scope')).not.toBeInTheDocument()
+    expect(screen.getByTestId('transaction-status')).toBeInTheDocument()
   })
 })

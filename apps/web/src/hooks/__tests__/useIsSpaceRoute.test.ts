@@ -1,20 +1,22 @@
 import { renderHook } from '@testing-library/react'
 import { usePathname } from 'next/navigation'
 import { useIsSpaceRoute } from '../useIsSpaceRoute'
-import * as store from '@/store'
 
 jest.mock('next/navigation', () => ({
   usePathname: jest.fn(),
 }))
 
+let mockUrlSpaceId: string | null = null
+jest.mock('@/hooks/useUrlSpaceId', () => ({
+  useUrlSpaceId: () => mockUrlSpaceId,
+}))
+
 const mockUsePathname = usePathname as jest.Mock
 
 describe('useIsSpaceRoute', () => {
-  const mockSpaceId = '42'
-
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.spyOn(store, 'useAppSelector').mockReturnValue(mockSpaceId)
+    mockUrlSpaceId = '11111111-1111-1111-1111-111111111111'
   })
 
   it('returns true on /spaces', () => {
@@ -73,8 +75,8 @@ describe('useIsSpaceRoute', () => {
     expect(result.current).toBe(false)
   })
 
-  it('returns false when there is no last-used space, even on a matching route', () => {
-    jest.spyOn(store, 'useAppSelector').mockReturnValue(undefined)
+  it('returns false when the URL has no Workspace, even on a matching route', () => {
+    mockUrlSpaceId = null
     mockUsePathname.mockReturnValue('/spaces')
     const { result } = renderHook(() => useIsSpaceRoute())
     expect(result.current).toBe(false)

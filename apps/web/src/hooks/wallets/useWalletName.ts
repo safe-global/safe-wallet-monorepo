@@ -1,17 +1,15 @@
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { useChain } from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
-import { selectRpc } from '@/store/settingsSlice'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { lookupAddress } from '@/services/ens'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
+import { ENS_HUB_MAINNET, ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
 
-// ENS primary names live on Ethereum mainnet, so the connected wallet's name always resolves there
-// regardless of which chain the wallet or the currently viewed Safe is on.
-const ENS_CHAIN_ID = '1'
+// Wallet primary names are production ENS records on mainnet, not testnet hubs.
+const MAINNET_ENS_TARGET = { chainId: ENS_HUB_MAINNET, isTestnet: false } as Chain
 
 /**
- * Resolves the connected wallet's ENS name against Ethereum mainnet.
+ * Resolves the connected wallet's ENS primary name against the ENS hub (Ethereum mainnet).
  *
  * Unlike `useAddressResolver`, this does not depend on the currently viewed Safe/route (the wallet
  * chip renders even when no Safe is open) nor on the wallet's connected chain (a testnet/L2 wallet
@@ -19,25 +17,14 @@ const ENS_CHAIN_ID = '1'
  * resolution fails (handled by `lookupAddress`).
  */
 export const useWalletName = (wallet?: ConnectedWallet | null): string | undefined => {
-  const chain = useChain(ENS_CHAIN_ID)
-  const customRpc = useAppSelector(selectRpc)
+  const { provider, isDomainLookupEnabled } = useEnsHubProvider(MAINNET_ENS_TARGET)
   const address = wallet?.address
-  const canResolve = !!chain && !!address && hasFeature(chain, FEATURES.DOMAIN_LOOKUP)
+  const canResolve = isDomainLookupEnabled && !!provider && !!address
 
-  const [ens] = useAsync<string | undefined>(async () => {
-    if (!canResolve || !chain || !address) return undefined
-
-    // Dynamic import to keep ethers out of the main bundle
-    const { createWeb3ReadOnly } = await import('@/hooks/wallets/web3')
-    const provider = createWeb3ReadOnly(chain, customRpc?.[chain.chainId])
-    if (!provider) return undefined
-
-    try {
-      return await lookupAddress(provider, address)
-    } finally {
-      provider.destroy()
-    }
-  }, [canResolve, chain, customRpc, address])
+  const [ens] = useAsync<string | undefined>(() => {
+    if (!canResolve || !provider || !address) return
+    return lookupAddress(provider, address, ETH_COIN_TYPE)
+  }, [canResolve, provider, address])
 
   return ens
 }

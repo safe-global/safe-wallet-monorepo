@@ -2,13 +2,13 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import type { SafeMessageStatus } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
 
-import { Typography } from '@/components/ui/typography'
-import { Spinner } from '@/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import DateTime from '@/components/common/DateTime'
 import MsgType from '@/components/safe-messages/MsgType'
 import SignMsgButton from '@/components/safe-messages/SignMsgButton'
 import useSafeMessageStatus from '@/hooks/messages/useSafeMessageStatus'
-import TxConfirmations from '@/components/transactions/TxConfirmations'
+import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
 
 import css from '@/components/transactions/TxSummary/styles.module.css'
 import useIsSafeMessagePending from '@/hooks/messages/useIsSafeMessagePending'

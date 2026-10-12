@@ -1,0 +1,20 @@
+/* Indeterminate: the page has no progress to report, so the bar sweeps rather than sits at one value. */
+.bar {
+  animation: policies-load 1.6s ease-in-out infinite alternate;
+}
+
+@keyframes policies-load {
+  from {
+    width: 30%;
+  }
+  to {
+    width: 90%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    width: 90%;
+    animation: none;
+  }
+}

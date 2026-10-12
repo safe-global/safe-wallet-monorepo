@@ -71,10 +71,10 @@ export const isEIP7702DelegatedAccount = async (address: string, provider?: Json
 }
 
 export const isSmartContractWallet = memoize(
-  async (chainId: string, address: string): Promise<boolean> => {
+  async (chainId: string, address: string, provider?: JsonRpcProvider): Promise<boolean> => {
     try {
-      const isContract = await isSmartContract(address)
-      const isEIP7702 = await isEIP7702DelegatedAccount(address)
+      const isContract = await isSmartContract(address, provider)
+      const isEIP7702 = await isEIP7702DelegatedAccount(address, provider)
       return isContract && !isEIP7702
     } catch (error) {
       // memoize would otherwise cache the rejected promise for the whole session

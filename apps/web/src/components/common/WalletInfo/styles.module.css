@@ -34,6 +34,13 @@
 
 .address {
   height: 40px;
+  min-width: 0;
+  flex: 1;
+}
+
+.address :global(.ethHashInfo-name) {
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .address div[title] {

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`HexEncodedData should not cut the text in case the limit option is higher than the provided hexData 1`] = `
 <div>

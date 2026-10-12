@@ -1,8 +1,13 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Link } from '@safe-global/views/components/ui/link'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -20,11 +25,11 @@ import CopyButton from '@/components/common/CopyButton'
 import MsgSigners from '@/components/safe-messages/MsgSigners'
 import useDecodedSafeMessage from '@/hooks/messages/useDecodedSafeMessage'
 import useSyncSafeMessageSigner from '@/hooks/messages/useSyncSafeMessageSigner'
-import SuccessMessage from '@/components/tx/SuccessMessage'
+import SuccessMessage from '@safe-global/views/components/tx/SuccessMessage'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
-import InfoBox from '@/components/safe-messages/InfoBox'
+import InfoBox from '@safe-global/views/components/safe-messages/InfoBox'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
@@ -40,7 +45,6 @@ import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 import MsgShareLink from '@/components/safe-messages/MsgShareLink'
 import LinkIcon from '@/public/images/messages/link.svg'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -49,6 +53,7 @@ import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/uti
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
@@ -64,6 +69,10 @@ const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
     proposedBy: {
       value: '',
     },
+    preparedSignature: null,
+    origin: null,
+    safeAppInfo: null,
+    safeAppId: null,
     status: 'NEEDS_CONFIRMATION',
     type: 'MESSAGE',
   }
@@ -172,8 +181,8 @@ const BlindSigningWarning = ({
   isBlindSigningEnabled: boolean
   isBlindSigningPayload: boolean
 }) => {
-  const router = useRouter()
-  const query = router.query.safe ? { safe: router.query.safe } : undefined
+  const safeLinkQuery = useSafeLinkQuery()
+  const query = safeLinkQuery.safe ? safeLinkQuery : undefined
 
   if (!isBlindSigningPayload) {
     return null

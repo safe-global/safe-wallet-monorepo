@@ -2,13 +2,13 @@ import { isMultiChainSafeItem, type SafeItem, type MultiChainSafeItem } from '@/
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { AccountItem } from '@/features/myAccounts'
 import Identicon from '@/components/common/Identicon'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { TriangleAlert, RotateCw } from 'lucide-react'
 import { useMemo, type ReactNode } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import FiatBalance from '@/components/common/FiatBalance'
-import { ThresholdBadge } from '@/components/common/AccountBadges'
+import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import useSafeCardData from '../SelectSafesOnboarding/hooks/useSafeCardData'
 import { useLoadFeature } from '@/features/__core__'
 import { SpacesFeature } from '../../SpacesFeature'
@@ -20,8 +20,9 @@ import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 interface SafeCardReadOnlyProps {
   safe: SafeItem | MultiChainSafeItem
@@ -48,6 +49,7 @@ const SafeCardReadOnly = ({
   action,
 }: SafeCardReadOnlyProps) => {
   const router = useRouter()
+  const spaceId = useUrlSpaceId()
   const isMultiChain = isMultiChainSafeItem(safe)
   const { name, fiatValue, threshold, ownersCount, elementRef, isUndeployed, isActivating } = useSafeCardData(safe)
   const safes = useMemo<SafeItem[]>(
@@ -84,9 +86,7 @@ const SafeCardReadOnly = ({
 
     router.push({
       pathname: AppRoutes.home,
-      query: {
-        safe: `${chain.shortName}:${singleSafe.address}`,
-      },
+      query: withSpaceId({ safe: `${chain.shortName}:${singleSafe.address}` }, spaceId),
     })
   }
 

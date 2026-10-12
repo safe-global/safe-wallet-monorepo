@@ -5,13 +5,20 @@ import { SecurityFeature } from '@/features/security'
 import { useLoadFeature } from '@/features/__core__'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
-import { cn } from '@/utils/cn'
-import { Skeleton } from '@/components/ui/skeleton'
-import type { SelectedSafe, SpaceSafeEntry } from '../../types'
-import { CARD_ROW_CLASS, CELL_BASE, COLUMNS, GRID_COLS, HIDE_BALANCE } from './constants'
+import { cn } from '@safe-global/views/utils/cn'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
+import {
+  CARD_ROW_CLASS,
+  CELL_BASE,
+  COLUMNS,
+  GRID_COLS,
+  HIDE_BALANCE,
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
 import { buildSafeSecurityHref, type GetSafeSecurityHref } from './utils'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SecuritySafesTableProps = {
   safes: SpaceSafeEntry[]
@@ -40,6 +47,7 @@ const SecuritySafesTable = ({
 }: SecuritySafesTableProps): ReactElement => {
   const security = useLoadFeature(SecurityFeature)
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
+  const spaceId = useUrlSpaceId()
   const chainShortNames = useMemo(() => {
     if (!chainsData) return {}
     const map: Record<string, string> = {}
@@ -53,8 +61,8 @@ const SecuritySafesTable = ({
   // Link the Safe name to that Safe's security settings, so navigating back from there returns
   // to the Workspace Security Hub rather than the Home tab. Clicking the row still opens the drawer.
   const getSafeSecurityHref = useCallback<GetSafeSecurityHref>(
-    (address, chainId) => buildSafeSecurityHref(chainShortNames, address, chainId),
-    [chainShortNames],
+    (address, chainId) => buildSafeSecurityHref(chainShortNames, address, chainId, spaceId),
+    [chainShortNames, spaceId],
   )
 
   const [expandedAddresses, setExpandedAddresses] = useState<Set<string>>(new Set())

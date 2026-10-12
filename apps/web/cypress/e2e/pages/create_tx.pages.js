@@ -116,6 +116,7 @@ const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 export const messageNestedStr = `"nestedString": "Test message 3 off-chain"`
 const noTxFoundStr = (type) => `0 ${type} transactions found`
+const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
 const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
 const bulkConfirmationText = (tx) =>
@@ -326,7 +327,12 @@ export function deleteTx() {
   cy.get(deleteTxModalBtn).click()
 }
 
+/** Deletes every queued transaction; call it on the queue page. */
 export function deleteAllTx() {
+  cy.get('body', { timeout: 30000 }).should(($body) => {
+    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
+    expect(loaded, 'transaction queue loaded').to.be.true
+  })
   cy.get('body').then(($body) => {
     if ($body.find(transactionItem).length > 0) {
       cy.get(transactionItem).then(($items) => {
@@ -785,18 +791,7 @@ export function selectCurrentWallet() {
 }
 
 export function verifyRelayerAttemptsAvailable() {
-  // GTF (unlimited relay) chains hide the execution-method selector and the
-  // "free transactions left today" counter in the execute flow. Assert one of the two
-  // valid states explicitly: relay option with its counter, or no selector at all —
-  // a rendered selector without the relay option would be a real bug, not GTF.
-  cy.contains(estimatedFeeStr).should('be.visible')
-  cy.get('body').then(($body) => {
-    if ($body.find(relayExecMethod).length) {
-      cy.contains(transactionsPerHrStr).should('exist')
-    } else {
-      cy.get(connectedWalletExecMethod).should('not.exist')
-    }
-  })
+  cy.contains(transactionsPerHrStr).should('exist')
 }
 
 export function clickOnTokenselectorAndSelectSepoliaEth() {

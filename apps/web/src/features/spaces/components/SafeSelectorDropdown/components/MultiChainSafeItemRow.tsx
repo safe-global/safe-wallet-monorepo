@@ -1,10 +1,10 @@
 import { Eye } from 'lucide-react'
 import type { ReactNode } from 'react'
 import FiatValue from '@/components/common/FiatValue'
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
-import { SelectItem } from '@/components/ui/select'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@safe-global/views/components/ui/collapsible'
+import { SelectItem } from '@safe-global/views/components/ui/select'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
 import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
@@ -15,13 +15,16 @@ import {
   SafeInfoDisplay,
   TOOLTIP_DELAY_MS,
 } from '@/components/common/AccountRow'
-import { cn } from '@/utils/cn'
-import BalanceDisplay from './BalanceDisplay'
-import RowEndColumn from './RowEndColumn'
+import { cn } from '@safe-global/views/utils/cn'
+import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from './SafeRowStats'
-import { focusRowOnHover } from './focusRowOnHover'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeItemDataChain, SafeRenameTarget } from '../types'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+  SafeRenameTarget,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 interface MultiChainSafeItemRowProps {
   item: SafeItemData
@@ -38,6 +41,8 @@ interface MultiChainSafeItemRowProps {
    * outer margin is dropped so the reorderable wrapper controls spacing.
    */
   leading?: ReactNode
+  /** Hides the group (a search non-match) while keeping its network SelectItems mounted. */
+  hidden?: boolean
 }
 
 // Icon-only read-only indicator. The full "Read-only" text widened the row and pushed the explorer
@@ -72,7 +77,7 @@ function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: str
       // pl-11 (avatar 32px + gap-3 12px) aligns the chain name under the parent safe name — the
       // per-chain rows carry no identicon but keep the same threshold / network / pending / balance
       // columns as the summary row. [&>span.absolute]:hidden drops the built-in checkmark span.
-      className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>span.absolute]:hidden"
+      className="group/row flex items-center gap-2 rounded-md px-3 py-3 cursor-pointer hover:bg-muted focus:bg-muted data-[selected]:bg-[var(--color-background-light)] [&[data-selected]:hover]:bg-[var(--color-background-light-hover)] [&[data-selected]:focus]:bg-[var(--color-background-light-hover)] [&>span.absolute]:hidden"
     >
       <div className="flex min-w-0 flex-1 items-center gap-2 pl-11">
         <Typography variant="paragraph-small-medium" className="min-w-0 truncate">
@@ -110,7 +115,7 @@ function NetworkRow({ chain, address }: { chain: SafeItemDataChain; address: str
   )
 }
 
-const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: MultiChainSafeItemRowProps) => {
+const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading, hidden }: MultiChainSafeItemRowProps) => {
   const chainId = item.chains[0]?.chainId ?? ''
   const resolvedName = useSafeDisplayName(item.address, chainId, item.name)
   const chainIds = item.chains.map((chain) => chain.chainId)
@@ -121,12 +126,10 @@ const MultiChainSafeItemRow = ({ item, onRename, isSelected = false, leading }: 
   return (
     // Open by default when this group holds the active chain, so the current network is revealed
     // (and highlighted) without the user expanding it — the summary row itself is never highlighted.
-    <Collapsible defaultOpen={isSelected} className={cn('rounded-lg', !leading && 'my-0.5')}>
+    <Collapsible defaultOpen={isSelected} hidden={hidden} className={cn('rounded-lg', !leading && 'my-0.5')}>
       <CollapsibleTrigger
         // Scroll anchor for the open-to-current-safe behaviour (see SafeDropdownContainer).
         data-current-safe={isSelected ? 'true' : undefined}
-        // Take focus on hover so base-ui's stale grey highlight leaves the previous network row.
-        onMouseEnter={focusRowOnHover}
         className={cn(
           'group/row flex w-full items-center gap-2 rounded-lg py-3 text-left outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring cursor-pointer',
           // A leading grip takes the place of some left padding so its column lines up with single-chain rows.

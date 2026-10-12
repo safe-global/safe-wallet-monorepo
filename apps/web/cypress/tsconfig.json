@@ -1,0 +1,8 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    // Cypress bundles tsconfig-paths 3.x, which cannot resolve `paths` without `baseUrl`.
+    // The app tsconfig dropped it because TypeScript 7 rejects it; only the Cypress bundler reads this file.
+    "baseUrl": ".."
+  }
+}

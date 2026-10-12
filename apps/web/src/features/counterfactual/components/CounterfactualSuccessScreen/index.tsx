@@ -3,9 +3,9 @@ import { safeCreationPendingStatuses } from '../../hooks/safeCreationPendingStat
 import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { Check } from 'lucide-react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { NetworkLogosList } from '@/features/multichain'
@@ -72,17 +72,17 @@ const CounterfactualSuccessScreen = () => {
           <Typography data-testid="account-success-message" variant="h3" className="mb-2 font-bold">
             {isCFCreation ? 'Your account is almost set!' : 'Your account is all set!'}
           </Typography>
-          <Typography variant="paragraph-small">
+          <Typography variant="paragraph-small" as="p">
             {isCFCreation
               ? `Activate the account ${isMultiChain ? 'per network' : ''} to unlock all features of your smart wallet.`
               : 'Start your journey to the smart account security now.'}
           </Typography>
-          <Typography variant="paragraph-small">
+          <Typography variant="paragraph-small" as="p">
             {isCFCreation && isMultiChain
               ? `You can use the address below to receive funds on the selected ${
                   isMultiChain ? 'networks' : 'network'
                 }.`
-              : `Use your address to receive funds ${chainName ? `on ${chainName}` : ''}`}
+              : `Use your address to receive funds${chainName ? ` on ${chainName}` : ''}.`}
           </Typography>
         </div>
 

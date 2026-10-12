@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin } from '@/features/spaces'
+import { useIsAdmin, useIsActiveMember, useIsLastActiveAdmin, useSpaceDeletionGuard } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
-import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 import DeleteSpaceDialog from '../DeleteSpaceDialog'
 import LeaveSpaceDialog from '../LeaveSpaceDialog'
-import SpaceSettingsSection, { SpaceSettingsSectionTitle } from '../SpaceSettingsSection'
+import SpaceSettingsSection, {
+  SpaceSettingsSectionTitle,
+} from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
 
 const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const [deleteOpen, setDeleteOpen] = useState(false)
@@ -16,10 +18,25 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
   const isAdmin = useIsAdmin(space?.uuid)
   const isActiveMember = useIsActiveMember(space?.uuid)
   const isLastActiveAdmin = useIsLastActiveAdmin()
+  const { isDeletionBlocked, blockedReason } = useSpaceDeletionGuard(isAdmin ? (space?.uuid ?? null) : null)
+
+  const deleteButton = (
+    <Button
+      variant="destructive"
+      data-testid="space-delete-button"
+      disabled={isDeletionBlocked}
+      onClick={() => {
+        setDeleteOpen(true)
+        trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
+      }}
+    >
+      Delete Workspace
+    </Button>
+  )
 
   return (
     <SpaceSettingsSection>
-      <SpaceSettingsSectionTitle>Manage workspace</SpaceSettingsSectionTitle>
+      <SpaceSettingsSectionTitle>Manage Workspace</SpaceSettingsSectionTitle>
 
       <div
         className={cn('flex items-center justify-start gap-6 py-4 first:pt-0', isAdmin && 'border-b border-border/60')}
@@ -30,12 +47,12 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               render={
                 <span tabIndex={0}>
                   <Button variant="destructive" data-testid="space-leave-button" disabled>
-                    Leave workspace
+                    Leave Workspace
                   </Button>
                 </span>
               }
             />
-            <TooltipContent side="top">You are the last active admin and cannot leave the workspace.</TooltipContent>
+            <TooltipContent side="top">You are the last active admin and cannot leave the Workspace.</TooltipContent>
           </Tooltip>
         ) : (
           <Button
@@ -47,23 +64,23 @@ const DangerZoneSection = ({ space }: { space: GetSpaceResponse | undefined }) =
               trackEvent({ ...SPACE_EVENTS.LEAVE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
             }}
           >
-            Leave workspace
+            Leave Workspace
           </Button>
         )}
       </div>
 
       {isAdmin && (
         <div className="flex items-center justify-start gap-6 py-4 last:pb-0">
-          <Button
-            variant="destructive"
-            data-testid="space-delete-button"
-            onClick={() => {
-              setDeleteOpen(true)
-              trackEvent({ ...SPACE_EVENTS.DELETE_SPACE_MODAL, label: SPACE_LABELS.space_settings })
-            }}
-          >
-            Delete workspace
-          </Button>
+          {blockedReason ? (
+            <Tooltip>
+              <TooltipTrigger render={<span tabIndex={0}>{deleteButton}</span>} />
+              <TooltipContent side="top" data-testid="space-delete-blocked-tooltip">
+                {blockedReason}
+              </TooltipContent>
+            </Tooltip>
+          ) : (
+            deleteButton
+          )}
         </div>
       )}
 

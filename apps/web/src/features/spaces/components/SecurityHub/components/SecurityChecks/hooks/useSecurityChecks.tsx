@@ -1,5 +1,5 @@
 import { type ReactNode, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
@@ -13,8 +13,18 @@ import {
   sortBySeverity,
   type SectionRow,
 } from '../primitives'
-import { GRADE_TONE, resolveStatusTone, SeverityIcon, type SeverityTone } from '../../SeverityIcon/SeverityIcon'
-import { VULNERABLE_MODULE_INTRO, ZODIAC_VULNERABILITY_CTA, getModuleRowContent } from '../utils'
+import {
+  GRADE_TONE,
+  resolveStatusTone,
+  SeverityIcon,
+  type SeverityTone,
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+import {
+  VULNERABLE_MODULE_INTRO,
+  ZODIAC_VULNERABILITY_CTA,
+  getModuleRowContent,
+} from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/utils'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 export type FailingRow = { key: string; node: ReactNode; grade: SafeGrade }
 
@@ -71,10 +81,11 @@ export const useSecurityChecks = (
 ): UseSecurityChecksResult => {
   const security = useLoadFeature(SecurityFeature)
   const [modulesExpanded, setModulesExpanded] = useState(false)
+  const spaceId = useUrlSpaceId()
 
   const buildCta = useMemo(
-    () => (security.$isReady ? makeBuildCta(security.checkDefs) : null),
-    [security.$isReady, security.checkDefs],
+    () => (security.$isReady ? makeBuildCta(security.checkDefs, spaceId) : null),
+    [security.$isReady, security.checkDefs, spaceId],
   )
 
   const isKnownModuleByName = security.$isReady ? security.isKnownModuleByName : null

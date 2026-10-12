@@ -12,9 +12,10 @@
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "noUncheckedSideEffectImports": false,
+    "types": ["node", "jest", "mdx"],
     "jsx": "preserve",
     "incremental": true,
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@safe-global/safe-apps-sdk/*": ["../../node_modules/@safe-global/safe-apps-sdk/*"],
@@ -24,6 +25,7 @@
       "@safe-global/theme/*": ["../../packages/theme/src/*"],
       "@safe-global/store/*": ["../../packages/store/src/*"],
       "@safe-global/utils/*": ["../../packages/utils/src/*"],
+      "@safe-global/views/*": ["../../packages/views/src/*"],
       "@safe-global/test/*": ["../../config/test/*"],
       "@/storybook/*": ["./.storybook/*"]
     },
@@ -48,7 +50,9 @@
     ".storybook-vite/**/*.tsx",
     "./jest.setup.js",
     "./eslint.config.mjs",
-    "../../config/test/**/*.ts"
+    "../../config/test/**/*.ts",
+    "../../packages/views/src/**/*.ts",
+    "../../packages/views/src/**/*.tsx"
   ],
   "exclude": ["node_modules", "src/types/contracts"]
 }

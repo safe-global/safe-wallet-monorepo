@@ -1,11 +1,11 @@
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import useWallet from '@/hooks/wallets/useWallet'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import WalletIcon from '@/components/common/WalletIcon'
+import WalletIcon from '@safe-global/views/components/common/WalletIcon'
 import { useEffect, useState } from 'react'
 import { WalletMinimal } from 'lucide-react'
 import css from './styles.module.css'
@@ -93,6 +93,7 @@ const WalletLogin = ({
       className={cn(css[buttonStyle], { 'w-full': fullWidth })}
       variant="default"
       size="sm"
+      accentIcon={buttonStyle === 'walletBtnSecondary'}
       data-testid="connect-wallet-btn"
     >
       {buttonStyle === 'walletBtnSecondary' && <WalletMinimal size={18} />}

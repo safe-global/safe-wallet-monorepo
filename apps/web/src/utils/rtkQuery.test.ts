@@ -4,8 +4,8 @@ import {
   getRtkQueryErrorMessage,
   RTK_QUERY_ERROR_MESSAGES,
   getGenericErrorWithStatus,
-  getLegalUnavailabilityMessage,
-  LEGAL_UNAVAILABILITY_FALLBACK,
+  getSafeUnavailableMessage,
+  SAFE_UNAVAILABLE_MESSAGE,
 } from './rtkQuery'
 import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
@@ -60,6 +60,67 @@ describe('getRtkQueryErrorMessage', () => {
     expect(getRtkQueryErrorMessage(error)).toBe('Signer address not authorized')
   })
 
+  it("replaces CGW's seat quota refusal with copy written for users", () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'safe_seats',
+        quota: 20,
+        used: 20,
+        resetsAt: null,
+        message: 'Quota exceeded for safe_seats: 20 of 20 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe(
+      'Your plan covers 20 Safe accounts and this Workspace already holds 20. Remove one to add another, or upgrade your plan.',
+    )
+  })
+
+  it("replaces CGW's sponsored transaction quota refusal with copy written for users", () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'sponsored_transactions',
+        quota: 50,
+        used: 50,
+        resetsAt: '2026-11-01T00:00:00.000Z',
+        message: 'Quota exceeded for sponsored_transactions: 50 of 50 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe(
+      'Your Workspace has used all 50 sponsored transactions of this cycle until Nov 1, 2026. Pay the gas with your connected wallet instead.',
+    )
+  })
+
+  it('surfaces the backend message for a quota refusal on a feature without copy', () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'QUOTA_EXCEEDED',
+        feature: 'address_book_entries',
+        quota: 100,
+        used: 100,
+        resetsAt: null,
+        message: 'Quota exceeded for address_book_entries: 100 of 100 used.',
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe('Quota exceeded for address_book_entries: 100 of 100 used.')
+  })
+
+  it('surfaces the backend message for a 402 that is not a quota refusal', () => {
+    const error: FetchBaseQueryError = {
+      status: 402,
+      data: {
+        code: 'FEATURE_NOT_GRANTED',
+        feature: 'policies',
+        message: "Feature 'policies' is not available on the current plan.",
+      },
+    }
+    expect(getRtkQueryErrorMessage(error)).toBe("Feature 'policies' is not available on the current plan.")
+  })
+
   it('returns a generic message with the status code for an HTTP error with no message', () => {
     const error: FetchBaseQueryError = { status: 400, data: {} }
     expect(getRtkQueryErrorMessage(error)).toBe(getGenericErrorWithStatus(400))
@@ -81,28 +142,31 @@ describe('getRtkQueryErrorMessage', () => {
   })
 })
 
-describe('getLegalUnavailabilityMessage', () => {
-  it('returns the backend reason for a 451 response', () => {
-    const error: FetchBaseQueryError = { status: 451, data: { code: 451, message: 'Unavailable for legal reasons' } }
-    expect(getLegalUnavailabilityMessage(error)).toBe('Unavailable for legal reasons')
+describe('getSafeUnavailableMessage', () => {
+  it('hides the backend reason for a blocked Safe', () => {
+    const error: FetchBaseQueryError = {
+      status: 451,
+      data: { code: 451, message: 'Blocked in your region by provider edge-node-7' },
+    }
+    expect(getSafeUnavailableMessage(error)).toBe(SAFE_UNAVAILABLE_MESSAGE)
   })
 
-  it('falls back to default copy for a 451 response without a message', () => {
+  it('returns the same copy for a 451 without a message', () => {
     const error: FetchBaseQueryError = { status: 451, data: {} }
-    expect(getLegalUnavailabilityMessage(error)).toBe(LEGAL_UNAVAILABILITY_FALLBACK)
+    expect(getSafeUnavailableMessage(error)).toBe(SAFE_UNAVAILABLE_MESSAGE)
   })
 
   it('returns undefined for other HTTP errors', () => {
-    expect(getLegalUnavailabilityMessage({ status: 404, data: { message: 'Safe not found' } })).toBeUndefined()
-    expect(getLegalUnavailabilityMessage({ status: 500, data: {} })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 404, data: { message: 'Safe not found' } })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 500, data: {} })).toBeUndefined()
   })
 
   it('returns undefined for transport-level and serialized errors', () => {
-    expect(getLegalUnavailabilityMessage({ status: 'FETCH_ERROR', error: 'Failed to fetch' })).toBeUndefined()
-    expect(getLegalUnavailabilityMessage({ name: 'Error', message: 'Something serialized' })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ status: 'FETCH_ERROR', error: 'Failed to fetch' })).toBeUndefined()
+    expect(getSafeUnavailableMessage({ name: 'Error', message: 'Something serialized' })).toBeUndefined()
   })
 
   it('returns undefined when there is no error', () => {
-    expect(getLegalUnavailabilityMessage(undefined)).toBeUndefined()
+    expect(getSafeUnavailableMessage(undefined)).toBeUndefined()
   })
 })

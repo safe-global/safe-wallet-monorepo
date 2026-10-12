@@ -1,5 +1,5 @@
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { getCgwErrorInfo, getCgwSupportCode } from './cgw-errors'
+import { getCgwErrorInfo } from './cgw-errors'
 
 const HTML_502 =
   '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>'
@@ -9,14 +9,14 @@ describe('getCgwErrorInfo', () => {
     const info = getCgwErrorInfo(Object.assign(new Error('boom'), { status }))
 
     expect(info?.message).toBe('Something went wrong on our end. Try again.')
-    expect(info?.code).toBe(`CGW-${status}`)
+    expect(info?.status).toBe(status)
   })
 
   it('classifies a 451 as an unavailable Safe Account', () => {
     const info = getCgwErrorInfo(Object.assign(new Error('boom'), { status: 451 }))
 
     expect(info?.message).toBe('This Safe Account is not available.')
-    expect(info?.code).toBe('CGW-451')
+    expect(info?.status).toBe(451)
   })
 
   it('classifies the original 502 defect: an HTML body from a failed CGW request', () => {
@@ -43,12 +43,5 @@ describe('getCgwErrorInfo', () => {
   it('returns undefined for an error with no HTTP status', () => {
     expect(getCgwErrorInfo(new Error('execution reverted'))).toBeUndefined()
     expect(getCgwErrorInfo(undefined)).toBeUndefined()
-  })
-})
-
-describe('getCgwSupportCode', () => {
-  it('returns the support reference for a known state and nothing otherwise', () => {
-    expect(getCgwSupportCode(Object.assign(new Error('boom'), { status: 502 }))).toBe('CGW-502')
-    expect(getCgwSupportCode(new Error('boom'))).toBeUndefined()
   })
 })

@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, type TransitionEvent, useMemo, useState, useEffect, useRef } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Typography } from '@/components/ui/typography'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import {
   ContractStatus,
   RecipientStatus,
@@ -104,7 +104,10 @@ export const AnalysisGroupCard = ({
       }}
     >
       {/* Card header - always visible */}
-      <CollapsibleTrigger render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}>
+      <CollapsibleTrigger
+        nativeButton={false}
+        render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}
+      >
         <div className="flex flex-row items-center gap-2">
           <SeverityIcon severity={primaryResult.severity} muted={!isHighlighted} />
           <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">

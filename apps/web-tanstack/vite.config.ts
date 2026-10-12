@@ -166,6 +166,7 @@ export default defineConfig(({ mode }) => {
         { find: /^@safe-global\/theme\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/theme/src/$1') },
         { find: /^@safe-global\/store\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/store/src/$1') },
         { find: /^@safe-global\/utils\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/utils/src/$1') },
+        { find: /^@safe-global\/views\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/views/src/$1') },
         { find: /^@safe-global\/test\/(.*)$/, replacement: path.resolve(__dirname, '../../config/test/$1') },
 
         // apps/web/src/pages/_app.tsx uses bare `src/...` imports (Next.js baseUrl convention).
@@ -183,7 +184,7 @@ export default defineConfig(({ mode }) => {
       // this, the entire shadcn/Tailwind layer is silently dropped and the
       // PageLayout positioning collapses.
       tailwindcss(),
-      // MDX support for .md/.mdx imports (terms, cookie, privacy pages).
+      // MDX support for .md/.mdx imports (cookie page).
       // Mirrors the remark plugin list apps/web's next.config.mjs uses through
       // @mdx-js/loader. Must run BEFORE react() so React's JSX transform sees
       // the compiled MDX output.

@@ -3,8 +3,9 @@ import useSecurityHubFeatureRedirect from '../useSecurityHubFeatureRedirect'
 import { AppRoutes } from '@/config/routes'
 
 const mockPush = jest.fn()
+let mockQuery: Record<string, string> = {}
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush }),
+  useRouter: () => ({ push: mockPush, query: mockQuery }),
 }))
 
 const mockUseHasFeature = jest.fn()
@@ -15,6 +16,7 @@ jest.mock('@/hooks/useChains', () => ({
 describe('useSecurityHubFeatureRedirect', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockQuery = {}
   })
 
   it('redirects to the spaces home when the SECURITY_HUB flag is explicitly off', () => {
@@ -22,7 +24,17 @@ describe('useSecurityHubFeatureRedirect', () => {
 
     renderHook(() => useSecurityHubFeatureRedirect())
 
-    expect(mockPush).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index })
+    expect(mockPush).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: {} })
+  })
+
+  it('keeps the Workspace of the URL when it redirects', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    mockQuery = { spaceId }
+    mockUseHasFeature.mockReturnValue(false)
+
+    renderHook(() => useSecurityHubFeatureRedirect())
+
+    expect(mockPush).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId } })
   })
 
   it('does not redirect while the chain config is still loading (flag === undefined)', () => {

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "https://app.safe.global/"}
+ */
 import { toBeHex } from 'ethers'
 import { http, HttpResponse } from 'msw'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -24,12 +27,6 @@ const GATEWAY_URL = 'https://safe-client.staging.5afe.dev'
 
 // Set base URL for service worker context (uses direct fetch, not Redux)
 setBaseUrl(GATEWAY_URL)
-
-Object.defineProperty(self, 'location', {
-  value: {
-    origin: 'https://app.safe.global',
-  },
-})
 
 // Helper to mock chains response
 const mockChainsResponse = (chains: Chain[]) => {

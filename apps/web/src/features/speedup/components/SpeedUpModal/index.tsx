@@ -1,8 +1,8 @@
 import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -164,7 +164,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
 
   if (safeTxHasSignatures) {
     return (
-      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction">
+      <ModalDialog open={open} onClose={onCancel} dialogTitle="Speed up transaction" forceBackdrop>
         <div className="p-6">
           <div className="mb-4 flex items-center justify-center">
             <RocketSpeedup className="size-[90px]" />
@@ -213,7 +213,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   }
 
   return (
-    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction">
+    <ModalDialog open={open} onClose={handleClose} dialogTitle="Speed up transaction" forceBackdrop>
       <div className="p-6">
         <div className="mb-4 flex items-center justify-center">
           <RocketSpeedup className="size-[90px]" />

@@ -2,13 +2,18 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { ReactNode, CSSProperties } from 'react'
 import { type ReactElement, memo, useMemo } from 'react'
 import { isNativeTokenTransfer, isTransferTxInfo } from '@/utils/transaction-guards'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import HelpTooltip from './HelpTooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'

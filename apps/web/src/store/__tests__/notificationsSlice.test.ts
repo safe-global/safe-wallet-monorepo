@@ -5,6 +5,7 @@ import {
   readNotification,
   showNotification,
   selectNotifications,
+  selectCenterNotifications,
   type Notification,
 } from '../notificationsSlice'
 import { makeStore } from '@/store'
@@ -97,6 +98,31 @@ describe('notificationsSlice', () => {
       const state = reducer([notification], readNotification({ id: '1' }))
 
       expect(state[0].isRead).toBe(true)
+    })
+  })
+
+  describe('selectCenterNotifications', () => {
+    it('leaves errors out of the notification center', () => {
+      const store = makeStore()
+
+      store.dispatch(showNotification({ message: 'Queued', groupKey: 'a', variant: 'success' }))
+      store.dispatch(showNotification({ message: 'Failed to sign', groupKey: 'b', variant: 'error' }))
+      store.dispatch(showNotification({ message: 'Needs confirmation', groupKey: 'c', variant: 'info' }))
+
+      expect(selectNotifications(store.getState())).toHaveLength(3)
+      expect(selectCenterNotifications(store.getState()).map(({ message }) => message)).toEqual([
+        'Queued',
+        'Needs confirmation',
+      ])
+    })
+
+    it('keeps the same reference until the notifications change', () => {
+      const store = makeStore()
+      store.dispatch(showNotification({ message: 'Queued', groupKey: 'a', variant: 'success' }))
+
+      const first = selectCenterNotifications(store.getState())
+
+      expect(selectCenterNotifications(store.getState())).toBe(first)
     })
   })
 

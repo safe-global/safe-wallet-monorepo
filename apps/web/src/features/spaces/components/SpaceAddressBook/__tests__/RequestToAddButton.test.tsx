@@ -7,11 +7,23 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const IS_ADMIN = false
 const mockCreateRequest = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsCreateRequestV1Mutation: () => [mockCreateRequest],
+  useAddressBooksUpsertAddressBookItemsV1Mutation: () => [jest.fn()],
 }))
+
+jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
+
+jest.mock('../../../hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  default: () => [],
+  useSpaceAddressBookState: () => ({ items: [], isLoading: false, isError: false }),
+}))
+
+jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
@@ -88,7 +100,7 @@ describe('RequestToAddButton', () => {
 
     await userEvent.hover(screen.getByRole('button', { name: 'Request to add' }).parentElement as HTMLElement)
 
-    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the workspace/)).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(/Rename this contact to add it to the Workspace/)).toBeInTheDocument())
   })
 
   it('keeps the button enabled for a valid name', () => {

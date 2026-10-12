@@ -70,12 +70,7 @@ describe('gtm', () => {
 
   describe('gtmTrackSafeApp', () => {
     it('should send correct data to the dataLayer for a Safe App event', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: {
-          pathname: '/apps',
-        },
-      })
+      window.history.replaceState(null, '', '/apps')
 
       const mockEventData = {
         event: EventType.SAFE_APP,

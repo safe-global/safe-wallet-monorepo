@@ -3,9 +3,14 @@ import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
-import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'
+import type {
+  SidebarItemConfig,
+  SidebarVariantContentProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 
@@ -20,7 +25,8 @@ export const SpacesSidebarContent = ({
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
-  const isSafeProEnabled = useHasFeature(FEATURES.SAFE_PRO_ANNOUNCEMENT)
+  const isAnnounced = useIsSafeProAnnouncementEnabled()
+  const isSafePro = useIsSafeProEnabled()
 
   const getLink = (item: SidebarItemConfig) => ({
     pathname: item.href,
@@ -39,8 +45,8 @@ export const SpacesSidebarContent = ({
   }
 
   // Drop flag-gated entries when their chain feature flag is explicitly off. `undefined` means
-  // the chain config is still loading — keep the item to avoid flicker. Plans is the inverse: it
-  // shows only once SAFE_PRO_ANNOUNCEMENT is known to be on, so a slow chain config can't flash it in and out.
+  // the chain config is still loading — keep the item to avoid flicker. Plans is the inverse: it shows
+  // only once either Safe Pro flag is known to be on, so a slow chain config can't flash it in and out.
   const gatedOffHrefs = useMemo(
     () =>
       new Set(
@@ -49,17 +55,20 @@ export const SpacesSidebarContent = ({
             [AppRoutes.spaces.security, isSecurityHubEnabled],
             [AppRoutes.spaces.activity, isAuditLogEnabled],
             [AppRoutes.spaces.policies, isPoliciesEnabled],
-            [AppRoutes.spaces.plans, !!isSafeProEnabled],
+            [AppRoutes.spaces.plans, isAnnounced || isSafePro],
           ] as const
         )
           .filter(([, isEnabled]) => isEnabled === false)
           .map(([href]) => href),
       ),
-    [isSecurityHubEnabled, isAuditLogEnabled, isPoliciesEnabled, isSafeProEnabled],
+    [isSecurityHubEnabled, isAuditLogEnabled, isPoliciesEnabled, isAnnounced, isSafePro],
   )
 
   const filteredSetupGroup = useMemo(
-    () => ({ ...spacesSetupGroup, items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)) }),
+    () => ({
+      ...spacesSetupGroup,
+      items: spacesSetupGroup.items.filter((i) => !gatedOffHrefs.has(i.href)),
+    }),
     [gatedOffHrefs],
   )
 

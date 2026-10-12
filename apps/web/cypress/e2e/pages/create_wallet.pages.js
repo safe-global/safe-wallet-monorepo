@@ -170,6 +170,8 @@ export function clickOnBackBtn() {
 
 export function clickOnSignInToWorkspaceBtn() {
   cy.get(signInToWorkspaceBtn).should('be.visible').click()
+  // Single-network Next is enabled before sign-in finishes; the link disappears once pay later is selected.
+  cy.get(signInToWorkspaceBtn).should('not.exist')
   cy.get(reviewStepNextBtn).should('not.be.disabled')
 }
 
@@ -264,16 +266,7 @@ export function selectMultiNetwork(index, network) {
 
 export function clickOnNetwrokCheckbox() {
   // The checkbox itself is decorative (pointer-events: none); the click handler is on the option row.
-  // Selecting is a toggle — only click if the network isn't already selected
-  // (it's pre-seeded from the connected wallet's chain).
-  cy.get(networkCheckbox)
-    .eq(0)
-    .closest('li[role="option"]')
-    .then(($option) => {
-      if ($option.attr('aria-selected') !== 'true') {
-        cy.wrap($option).click()
-      }
-    })
+  cy.get(networkCheckbox).eq(0).closest('li[role="option"]').click()
 }
 export function enterNetwork(index, network) {
   cy.get('input').eq(index).type(network)

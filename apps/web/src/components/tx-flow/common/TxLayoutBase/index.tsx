@@ -1,12 +1,12 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { type ComponentType, type ReactElement, type ReactNode, useContext } from 'react'
 import classnames from 'classnames'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { ProgressBar } from '@/components/common/ProgressBar'
+import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import { SafeTxContext } from '../../SafeTxProvider'
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
@@ -61,6 +61,8 @@ export type TxLayoutBaseProps = {
   isMessage?: boolean
   isBatch?: boolean
   hideSafeShield?: boolean
+  /** Drops the left status rail — for flows that produce no transaction (e.g. policy grants). */
+  hideStatusRail?: boolean
   /** Zero-based index of the step being shown. */
   step: number
   /** Total number of steps, used to flag the last step to the status widget. */
@@ -94,6 +96,7 @@ const TxLayoutBase = ({
   isMessage = false,
   isBatch = false,
   hideSafeShield = false,
+  hideStatusRail = false,
   step,
   stepCount,
   progress,
@@ -106,7 +109,7 @@ const TxLayoutBase = ({
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
-      {!isReplacement && !isSmallScreen && (
+      {!isReplacement && !hideStatusRail && !isSmallScreen && (
         /* Icons-only below 1200px (see StatusLabel) — the rail gives its 200px back to the card
            rather than squeezing it, since the card is what the user is actually filling in. */
         <div className="w-14 pt-10 min-[1200px]:w-[200px]">

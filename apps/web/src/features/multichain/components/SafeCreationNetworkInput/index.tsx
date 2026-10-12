@@ -4,7 +4,7 @@ import { useCallback, useEffect, type ReactElement } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import { useRouter } from 'next/router'
-import { getNetworkLink } from '@/components/common/NetworkSelector'
+import { buildChainSwitchHref } from '@/components/common/NetworkSelector'
 import { SetNameStepFields } from '@/components/new-safe/create/steps/SetNameStep'
 import { getSafeSingletonDeployments, getSafeToL2SetupDeployments } from '@safe-global/safe-deployments'
 import { getSafeToL2SetupVersion, hasCanonicalDeployment } from '@safe-global/utils/services/contracts/deployments'
@@ -33,8 +33,8 @@ const SafeCreationNetworkInput = ({
   const updateCurrentNetwork = useCallback(
     (chains: Chain[]) => {
       if (chains.length !== 1) return
-      const networkLink = getNetworkLink(router, safeAddress, chains[0])
-      router.replace(networkLink)
+      const href = buildChainSwitchHref(router, safeAddress, chains[0])
+      router.replace(href)
     },
     [router, safeAddress],
   )

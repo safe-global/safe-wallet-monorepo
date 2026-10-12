@@ -3,8 +3,8 @@ import { renderHook } from '@/tests/test-utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { RootState } from '@/store'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
-import type { SafeScopeContextValue } from '@/components/tx-flow/safe-scope/types'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { selectSafeInfo } from '@/store/safeInfoSlice'
 import { makeStore } from '@/store'
@@ -265,7 +265,7 @@ describe('useSafeInfo hook under a SafeScope', () => {
       safeError: state.error,
       safeLoading: state.loading,
     })
-    const store = makeStore(initialReduxState, { skipBroadcast: true })
+    const store = makeStore(initialReduxState)
     const { result } = renderHook(() => useSafeInfo(), { initialReduxState })
     expect(result.current).toEqual(legacy(selectSafeInfo(store.getState())))
   })

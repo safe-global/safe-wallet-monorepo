@@ -35,6 +35,7 @@ import SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import SurveyOnboarding from './components/SurveyOnboarding'
 import SelectSafeModal from './components/SelectSafeModal'
+import SafeWorkspaceSignInDialog from './components/SafeWorkspaceSignInDialog'
 import SecurityHubPage from './components/SecurityHub/Page'
 import SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 import SpacePlansPage from './components/Plans/Page'
@@ -63,6 +64,7 @@ const feature: SpacesContract = {
 
   // Modal components
   SelectSafeModal,
+  SafeWorkspaceSignInDialog,
 
   // Onboarding page components
   CreateSpaceOnboarding,

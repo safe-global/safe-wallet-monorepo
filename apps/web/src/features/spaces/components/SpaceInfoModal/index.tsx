@@ -3,11 +3,17 @@ import type { LucideIcon } from 'lucide-react'
 import { Layers, UsersRound, ShieldAlert, ChevronDown, TrendingUp, ArrowUpRight, X } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 
-import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from '@safe-global/views/components/ui/dialog'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
 import Identicon from '@/components/common/Identicon'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import css from './styles.module.css'
 
 const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/collections/1628654831-workspace?lang=en'
@@ -127,7 +133,7 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
           <div className="flex flex-col justify-center gap-10 p-9 md:p-12">
             <div>
               <DialogTitle className="text-[40px] font-bold leading-[44px] tracking-[-0.04em] text-balance">
-                One workspace for your team.
+                One Workspace for your team.
               </DialogTitle>
 
               <DialogDescription className="mt-3 max-w-[420px] text-base leading-6">
@@ -152,7 +158,7 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
             </div>
 
             <Typography variant="paragraph-small" color="muted">
-              New to workspaces?{' '}
+              New to Workspaces?{' '}
               <a
                 href={SPACE_HELP_ARTICLE_LINK}
                 target="_blank"

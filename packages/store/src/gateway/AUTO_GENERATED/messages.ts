@@ -110,35 +110,45 @@ export type MessageConfirmation = {
   owner: AddressInfo
   signature: string
 }
+export type SafeAppInfo = {
+  id: number
+  name: string
+  url: string
+  logoUri?: string | null
+}
 export type Message = {
   messageHash: string
   status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
-  logoUri?: string | null
-  name?: string | null
+  logoUri: string | null
+  name: string | null
   message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  proposedBy: AddressInfo
+  proposedBy: AddressInfo | null
   confirmations: MessageConfirmation[]
-  preparedSignature?: string | null
-  origin?: string | null
+  preparedSignature: string | null
+  origin: string | null
+  safeAppInfo: SafeAppInfo | null
+  safeAppId: number | null
 }
 export type MessageItem = {
   messageHash: string
   status: 'NEEDS_CONFIRMATION' | 'CONFIRMED'
-  logoUri?: string | null
-  name?: string | null
+  logoUri: string | null
+  name: string | null
   message: string | TypedData
   creationTimestamp: number
   modifiedTimestamp: number
   confirmationsSubmitted: number
   confirmationsRequired: number
-  proposedBy: AddressInfo
+  proposedBy: AddressInfo | null
   confirmations: MessageConfirmation[]
-  preparedSignature?: string | null
-  origin?: string | null
+  preparedSignature: string | null
+  origin: string | null
+  safeAppInfo: SafeAppInfo | null
+  safeAppId: number | null
   type: 'MESSAGE'
 }
 export type DateLabel = {

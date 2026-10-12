@@ -1,6 +1,6 @@
 import type { VaultDepositTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import VaultDepositConfirmation from '../VaultDepositConfirmation'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import TokenAmount from '@/components/common/TokenAmount'
 import { formatPercentage } from '@safe-global/utils/utils/formatters'
 

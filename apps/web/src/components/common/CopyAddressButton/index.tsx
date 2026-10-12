@@ -1,5 +1,5 @@
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactNode, ReactElement } from 'react'
 import CopyButton from '../CopyButton'
 import EthHashInfo from '../EthHashInfo'
@@ -8,10 +8,12 @@ const CopyAddressButton = ({
   address,
   children,
   trusted = true,
+  initialToolTipText,
 }: {
   address: string
   children?: ReactNode
   trusted?: boolean
+  initialToolTipText?: string
 }): ReactElement => {
   const checksummedAddress = checksumAddress(address)
 
@@ -32,7 +34,7 @@ const CopyAddressButton = ({
   )
 
   return (
-    <CopyButton text={address} dialogContent={dialogContent}>
+    <CopyButton text={address} dialogContent={dialogContent} initialToolTipText={initialToolTipText}>
       {children}
     </CopyButton>
   )

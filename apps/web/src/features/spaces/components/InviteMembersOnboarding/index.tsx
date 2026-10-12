@@ -1,9 +1,9 @@
 import { useMemo, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import OnboardingFooter from '@safe-global/views/components/common/OnboardingFooter'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import {
   OnboardingLayout,
   StepCounter,
@@ -24,9 +24,9 @@ const FORM_ID = 'invite-members-form'
 
 const InviteMembersOnboarding = (): ReactElement => {
   const totalSteps = useOnboardingStepCount()
-  const { spaceId, goBack, redirectToNextStep } = useInviteNavigation()
+  const { spaceId, goBack, redirectToNextStep, nextStepUrl } = useInviteNavigation()
   const { control, formState, register, setValue, trigger, fields, append, remove, onSubmit, error, isSubmitting } =
-    useInviteForm(spaceId, redirectToNextStep)
+    useInviteForm(spaceId, redirectToNextStep, nextStepUrl)
 
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
   const { allSafes: spaceSafes } = useSpaceSafes()

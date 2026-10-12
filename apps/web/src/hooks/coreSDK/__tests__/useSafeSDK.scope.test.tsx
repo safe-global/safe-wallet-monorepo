@@ -2,7 +2,7 @@ import { renderHook, act } from '@/tests/test-utils'
 import type { ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import { setSafeSDK, useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const singleton = { id: 'singleton' } as unknown as Safe
 const scoped = { id: 'scoped' } as unknown as Safe
