@@ -18,7 +18,7 @@ import { InputGroupAddon, InputGroupButton } from '@safe-global/design/component
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { _formatNumber } from '@/components/common/NumberField'
+import { _formatNumber } from '@safe-global/design/components/common/NumberField'
 import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAddressBook from '@/hooks/useAddressBook'

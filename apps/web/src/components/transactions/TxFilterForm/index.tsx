@@ -13,7 +13,7 @@ import { trackEvent } from '@/services/analytics'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import { txFilter, useTxFilter, TxFilterType, type TxFilter } from '@/utils/tx-history-filter'
 import { useCurrentChain } from '@/hooks/useChains'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/design/components/common/NumberField'
 
 import css from './styles.module.css'
 import AddressInput from '@/components/common/AddressInput'
