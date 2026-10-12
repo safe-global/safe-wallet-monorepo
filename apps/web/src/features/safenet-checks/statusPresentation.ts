@@ -45,7 +45,7 @@ export const STATUS_PRESENTATION: Record<
   },
   [CheckStatus.TIMED_OUT]: {
     severity: Severity.ERROR,
-    label: 'Safenet check failed',
+    label: 'Check failed',
     copy: 'Safenet check is unavailable. You can still continue.',
   },
 }

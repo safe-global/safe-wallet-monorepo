@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import { useChain } from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
@@ -128,6 +129,19 @@ describe('SafenetAuditRow', () => {
     render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
 
     expect(screen.getByText(formatAuditDateTime(1_785_749_985_000))).toBeInTheDocument()
+  })
+
+  it('renders a Check failed step dated from the deadline block', () => {
+    const timedOutAtMs = faker.date.recent().getTime()
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.TIMED_OUT, timedOutAtMs })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.TIMED_OUT, publicStatus: CheckStatus.TIMED_OUT }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="1" />)
+
+    expect(screen.getByText('Check failed')).toBeInTheDocument()
+    expect(screen.getByText(formatAuditDateTime(timedOutAtMs))).toBeInTheDocument()
   })
 
   it('renders No issues found without a date when the attested header could not be read', () => {

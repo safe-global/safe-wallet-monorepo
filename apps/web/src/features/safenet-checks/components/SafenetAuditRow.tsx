@@ -49,7 +49,7 @@ export type SafenetAuditRowViewProps = {
   isLast?: boolean
 }
 
-/** Safenet audit-log step. Dated from the attested block, so it can read later than Executed below it. */
+/** Safenet audit-log step, dated from the attested or deadline block — can read later than Executed. */
 export const SafenetAuditRowView = ({
   publicStatus,
   snapshot,
@@ -94,7 +94,7 @@ export const SafenetAuditRowView = ({
         actor={actor}
         isLast={isLast}
         // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot.attestedAtMs ?? null}
+        timestamp={snapshot.attestedAtMs ?? snapshot.timedOutAtMs ?? null}
       />
     </div>
   )
