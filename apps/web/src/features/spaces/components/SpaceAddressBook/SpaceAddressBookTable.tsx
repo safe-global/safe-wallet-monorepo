@@ -1,4 +1,4 @@
-import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design/components/ui/tooltip'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -15,8 +15,8 @@ import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
 import PaginatedDataTable, {
   type DataTableColumn,
   type ColumnWidth,
-} from '@safe-global/views/components/common/PaginatedDataTable'
-import { cn } from '@safe-global/views/utils/cn'
+} from '@safe-global/design/components/common/PaginatedDataTable'
+import { cn } from '@safe-global/design/utils/cn'
 import AddressCell from './AddressCell'
 
 export type AddressBookEntry = SpaceAddressBookItemDto & {

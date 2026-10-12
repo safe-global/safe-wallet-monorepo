@@ -4,16 +4,16 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Link } from '@safe-global/views/components/ui/link'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+} from '@safe-global/design/components/ui/accordion'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Link } from '@safe-global/design/components/ui/link'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
+import WarningIcon from '@safe-global/design/assets/images/notifications/warning.svg'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getNativeTokenDisplay, NATIVE_TOKEN_DISPLAY_DEFAULT } from '@safe-global/utils/utils/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { type AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
+import { type AdvancedParameters } from '@safe-global/design/components/tx/AdvancedParams/types'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import classnames from 'classnames'
 import css from './styles.module.css'

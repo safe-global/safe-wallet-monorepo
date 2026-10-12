@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings, ListChecks } from 'lucide-react'
-import { SidebarProvider, Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
+import { SidebarProvider, Sidebar, SidebarHeader } from '@safe-global/design/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
 import { withMockProvider } from '@/storybook/preview'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import type { SpaceItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
+import type { SpaceItem } from '@safe-global/design/features/spaces/components/Sidebar/types'
 import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 
 const mockSpaceId = '1'
 

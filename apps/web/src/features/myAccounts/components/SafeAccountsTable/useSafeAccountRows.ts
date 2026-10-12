@@ -26,7 +26,7 @@ import type {
   AccountGroup,
   AccountLine,
   SafeSortColumn,
-} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+} from '@safe-global/design/features/myAccounts/components/SafeAccountsTable/types'
 
 export type {
   AccountContextMenu,
@@ -34,7 +34,7 @@ export type {
   AccountLine,
   SafeSortColumn,
   SafeSortKeys,
-} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+} from '@safe-global/design/features/myAccounts/components/SafeAccountsTable/types'
 
 /** Every chain a rename from this row would target — one for a single Safe, all of them for a group. */
 export const getContextMenuChainIds = (contextMenu: AccountContextMenu): string[] =>

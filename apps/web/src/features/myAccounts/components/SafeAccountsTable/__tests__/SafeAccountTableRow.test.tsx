@@ -5,7 +5,7 @@ import { useAddressBookWriteScope } from '@/features/spaces'
 import {
   SELECT_COLUMN,
   type SafeAccountColumn,
-} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+} from '@safe-global/design/features/myAccounts/components/SafeAccountsTable/columns'
 import type { AccountLine } from '../useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
@@ -19,7 +19,7 @@ jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: (
 jest.mock('../../AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))
-jest.mock('@safe-global/views/components/common/AccountBadges', () => ({
+jest.mock('@safe-global/design/components/common/AccountBadges', () => ({
   PendingBadge: () => null,
   ThresholdBadge: () => null,
 }))

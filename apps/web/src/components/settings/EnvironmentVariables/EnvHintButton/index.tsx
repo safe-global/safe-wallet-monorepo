@@ -1,12 +1,12 @@
 import { useRouter } from 'next/router'
 import { type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import { TriangleAlert } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import { isEnvInitialState } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 type EnvHintButtonProps = {
   chainId?: string

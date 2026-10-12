@@ -16,7 +16,7 @@ import type {
   SafeAccountEligibility,
   SafeAccountEntry,
   SafeAccountOption,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 

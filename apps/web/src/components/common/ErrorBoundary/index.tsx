@@ -1,14 +1,14 @@
 import NextLink from 'next/link'
 
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Link } from '@safe-global/design/components/ui/link'
 import { IS_PRODUCTION } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
-import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
+import WarningIcon from '@safe-global/design/assets/images/notifications/warning.svg'
 
 import css from '@/components/common/ErrorBoundary/styles.module.css'
-import CircularIcon from '@safe-global/views/components/common/icons/CircularIcon'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import CircularIcon from '@safe-global/design/components/common/icons/CircularIcon'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 interface ErrorBoundaryProps {
   error: Error

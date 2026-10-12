@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Spinner } from '@safe-global/design/components/ui/spinner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import CheckWallet, { type CheckWalletProps } from '@/components/common/CheckWallet'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 type DialogActionsProps = {
   /** Confirm/primary button label (swaps to a spinner while `confirmLoading`). */

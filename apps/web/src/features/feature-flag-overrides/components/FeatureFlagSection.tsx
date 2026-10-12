@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { Card } from '@safe-global/views/components/ui/card'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { cn } from '@safe-global/views/utils/cn'
+import { Card } from '@safe-global/design/components/ui/card'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { cn } from '@safe-global/design/utils/cn'
 import { FeatureFlagRow, GRID } from './FeatureFlagRow'
 import type { FeatureFlagRowData } from '../hooks/useFeatureFlagEditorData'
 

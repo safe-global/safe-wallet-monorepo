@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react'
 import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Input } from '@safe-global/views/components/ui/input'
-import { Link } from '@safe-global/views/components/ui/link'
-import { List, ListItem, ListItemText } from '@safe-global/views/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
-import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Avatar, AvatarFallback } from '@safe-global/design/components/ui/avatar'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Card, CardContent } from '@safe-global/design/components/ui/card'
+import { Input } from '@safe-global/design/components/ui/input'
+import { Link } from '@safe-global/design/components/ui/link'
+import { List, ListItem, ListItemText } from '@safe-global/design/components/ui/list'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/design/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/design/components/ui/tabs'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import { formatPlanPrice, getPlanCta, pickProps, priceSuffix } from './planTiers'
 import type {
   CurrentPlan,
@@ -23,7 +23,7 @@ import type {
   PlanPick,
   PlanSeatOption,
   PlanTier,
-} from '@safe-global/views/features/spaces/components/Plans/types'
+} from '@safe-global/design/features/spaces/components/Plans/types'
 
 type Cycle = 'month' | 'year'
 

@@ -10,9 +10,9 @@ import type { UndeployedSafesState } from '@safe-global/utils/features/counterfa
 import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useAllOwnedSafes from './useAllOwnedSafes'
-import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import type { SafeItem } from '@safe-global/design/hooks/safes/types'
 
-export type { SafeItem } from '@safe-global/views/hooks/safes/types'
+export type { SafeItem } from '@safe-global/design/hooks/safes/types'
 
 export type SafeItems = SafeItem[]
 

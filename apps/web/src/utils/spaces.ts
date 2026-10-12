@@ -1,6 +1,6 @@
-import type { SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
+import type { SafeLimit } from '@safe-global/design/features/spaces/components/SelectedCounter/types'
 
-export type { SafeLimit } from '@safe-global/views/features/spaces/components/SelectedCounter/types'
+export type { SafeLimit } from '@safe-global/design/features/spaces/components/SelectedCounter/types'
 
 /** False when the count or the limit is unknown, or the plan is unlimited. */
 export const isSpaceAtSafeLimit = (safeCount: number | undefined, limit: SafeLimit): boolean =>

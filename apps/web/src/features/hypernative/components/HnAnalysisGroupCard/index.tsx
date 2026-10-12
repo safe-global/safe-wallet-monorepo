@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { AnalysisGroupCard, type AnalysisGroupCardProps } from '@/features/safe-shield'
-import HypernativeLogo from '@safe-global/views/features/hypernative/components/HypernativeLogo'
+import HypernativeLogo from '@safe-global/design/features/hypernative/components/HypernativeLogo'
 
 type HnAnalysisGroupCardProps = Omit<AnalysisGroupCardProps, 'footer'> & {
   overflowRow?: ReactNode

@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode } from 'react'
 import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarActionItem,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 import { NavItem } from '../NavItem'
 
 const mockTrackEvent = jest.fn()
@@ -44,7 +44,7 @@ jest.mock('@/services/analytics/events/earn', () => ({
   EARN_LABELS: { sidebar: 'sidebar' },
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/design/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
@@ -68,7 +68,7 @@ const mockSidebarState: {
 }
 
 // Mock sidebar UI components
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/design/components/ui/sidebar', () => ({
   useSidebar: () => mockSidebarState,
   // The real primitive is an <li>; keep that so assertions about what lives inside the item hold.
   SidebarMenuItem: ({ children, className }: { children: ReactNode; className?: string }) => (

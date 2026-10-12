@@ -16,12 +16,12 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@safe-global/views/components/ui/combobox'
-import { InputGroupAddon, InputGroupButton } from '@safe-global/views/components/ui/input-group'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+} from '@safe-global/design/components/ui/combobox'
+import { InputGroupAddon, InputGroupButton } from '@safe-global/design/components/ui/input-group'
+import { Label } from '@safe-global/design/components/ui/label'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
 import CaretDownIcon from '@/public/images/common/caret-down.svg'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { EMAIL_MAX_LENGTH, isEmailAddress } from './utils'
 import css from './styles.module.css'

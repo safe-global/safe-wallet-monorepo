@@ -4,12 +4,12 @@ import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/format
 import { validateDecimalLength } from '@safe-global/utils/utils/validation'
 import TokenAmount from '@/components/common/TokenAmount'
 import TokenIcon from '@/components/common/TokenIcon'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
 import { describeFrequency } from './frequency'
-import { CHANGE_BADGE } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import type { LimitSummary } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
+import { CHANGE_BADGE } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import type { LimitSummary } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 const TOKEN_ICON_SIZE = 24
 

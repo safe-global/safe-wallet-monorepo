@@ -2,9 +2,9 @@ import { type ReactElement } from 'react'
 import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTransactionExecution } from '@/store/settingsSlice'
-import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { RadioGroup, RadioGroupItem } from '@safe-global/design/components/ui/radio-group'
+import { Label } from '@safe-global/design/components/ui/label'
+import { Typography } from '@safe-global/design/components/ui/typography'
 
 import css from './styles.module.css'
 

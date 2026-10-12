@@ -6,13 +6,13 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
-import { Card } from '@safe-global/views/components/ui/card'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/accordion'
+import { Card } from '@safe-global/design/components/ui/card'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { Code } from 'lucide-react'
 import css from './styles.module.css'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import { useCurrentChain } from '@/hooks/useChains'

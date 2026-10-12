@@ -6,11 +6,11 @@ import {
   SidebarGroupContent,
   SidebarMenu,
   SidebarSeparator,
-} from '@safe-global/views/components/ui/sidebar'
+} from '@safe-global/design/components/ui/sidebar'
 import css from '../../styles.module.css'
 import { sidebarDeveloperGroup } from '../../developerItems'
 import { SidebarDeveloperItem } from './SidebarDeveloperItem'
-import { itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'
+import { itemVariants } from '@safe-global/design/features/spaces/components/Sidebar/constants'
 
 interface SidebarDeveloperGroupProps {
   isLoading?: boolean

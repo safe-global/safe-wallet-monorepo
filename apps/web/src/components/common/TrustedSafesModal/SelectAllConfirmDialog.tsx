@@ -1,7 +1,13 @@
 import { TriangleAlert } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@safe-global/views/components/ui/dialog'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@safe-global/design/components/ui/dialog'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import type { SelectableItem } from './useTrustedSafesModal.types'
 

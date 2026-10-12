@@ -4,22 +4,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '@safe-global/views/components/ui/dropdown-menu'
-import { Switch } from '@safe-global/views/components/ui/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/dropdown-menu'
+import { Switch } from '@safe-global/design/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTokenList, setHideDust, TOKEN_LISTS } from '@/store/settingsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { DUST_THRESHOLD } from '@/config/constants'
 import useHiddenTokens from '@/hooks/useHiddenTokens'
 import Track from '@/components/common/Track'
 import { ASSETS_EVENTS } from '@/services/analytics'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 interface ManageTokensMenuProps {
   onClose: () => void

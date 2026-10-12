@@ -127,8 +127,8 @@ const config: StorybookConfig = {
   stories: [
     '../src/**/*.mdx',
     '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../../../packages/views/src/**/*.mdx',
-    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/design/src/**/*.mdx',
+    '../../../packages/design/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
 
   addons: [

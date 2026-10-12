@@ -1,5 +1,5 @@
 import { createContext, type ReactElement, type ReactNode, useState, useCallback, useRef } from 'react'
-import TxModalDialog from '@safe-global/views/components/common/TxModalDialog'
+import TxModalDialog from '@safe-global/design/components/common/TxModalDialog'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,7 +9,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@safe-global/views/components/ui/alert-dialog'
+} from '@safe-global/design/components/ui/alert-dialog'
 import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'

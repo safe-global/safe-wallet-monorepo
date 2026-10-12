@@ -22,7 +22,7 @@ jest.mock('next/image', () => ({
   default: ({ alt }: { alt: string }) => <img alt={alt} />,
 }))
 
-jest.mock('@safe-global/views/components/ui/button', () => ({
+jest.mock('@safe-global/design/components/ui/button', () => ({
   Button: ({ children, className }: { children: ReactNode; className?: string }) => (
     <button type="button" className={className}>
       {children}
@@ -30,11 +30,11 @@ jest.mock('@safe-global/views/components/ui/button', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/typography', () => ({
+jest.mock('@safe-global/design/components/ui/typography', () => ({
   Typography: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
-jest.mock('@safe-global/views/components/ui/dialog', () => ({
+jest.mock('@safe-global/design/components/ui/dialog', () => ({
   DialogClose: ({
     children,
     'aria-label': ariaLabel,

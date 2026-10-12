@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '@safe-global/design/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -8,10 +8,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@safe-global/views/components/ui/input-otp'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
+} from '@safe-global/design/components/ui/dialog'
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@safe-global/design/components/ui/input-otp'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
 
 const OTP_LENGTH = 6
 

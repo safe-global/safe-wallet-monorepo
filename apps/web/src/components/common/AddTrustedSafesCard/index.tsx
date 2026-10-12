@@ -1,10 +1,10 @@
 import { Settings2 } from 'lucide-react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import AddAccountsChooser from '@/components/common/AddAccountsChooser'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 /**
  * Empty state shown when a wallet is connected but the user has not curated any

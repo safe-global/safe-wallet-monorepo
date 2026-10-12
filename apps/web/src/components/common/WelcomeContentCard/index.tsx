@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
-import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/design/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '@safe-global/design/utils/cn'
 
 /**
  * White rounded surface that lifts the welcome Accounts and Workspaces tab content

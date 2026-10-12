@@ -1,8 +1,8 @@
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { CircleCheckIcon } from 'lucide-react'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { MastercopyWarning, useMastercopyMigration } from '@/features/multichain'
 
 /**

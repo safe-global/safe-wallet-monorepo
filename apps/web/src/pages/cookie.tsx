@@ -5,8 +5,8 @@ import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'
 import SafeCookiePolicy from '@/markdown/cookie/cookie.md'
 import type { MDXComponents } from 'mdx/types'
-import CustomLink from '@safe-global/views/components/common/CustomLink'
-import MarkdownContent from '@safe-global/views/components/common/MarkdownContent'
+import CustomLink from '@safe-global/design/components/common/CustomLink'
+import MarkdownContent from '@safe-global/design/components/common/MarkdownContent'
 import {
   Table as ShadcnTable,
   TableHeader,
@@ -14,7 +14,7 @@ import {
   TableRow,
   TableCell,
   TableHead,
-} from '@safe-global/views/components/ui/table'
+} from '@safe-global/design/components/ui/table'
 
 const Table = (props: ComponentProps<typeof ShadcnTable>) => (
   <ShadcnTable {...props} className="border border-[black]" />

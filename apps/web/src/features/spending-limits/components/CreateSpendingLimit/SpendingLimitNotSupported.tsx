@@ -1,8 +1,8 @@
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { Typography } from '@safe-global/design/components/ui/typography'
 
-import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
+import TxCard from '@safe-global/design/components/tx-flow/common/TxCard'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 

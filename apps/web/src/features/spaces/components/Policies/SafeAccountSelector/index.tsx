@@ -1,15 +1,21 @@
 import { useId, useMemo, type ReactNode } from 'react'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
-import { cn } from '@safe-global/views/utils/cn'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/design/components/ui/alert'
+import { Label } from '@safe-global/design/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectTrigger,
+  SelectValue,
+} from '@safe-global/design/components/ui/select'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import LoadError from '@safe-global/views/features/spaces/components/Policies/components/LoadError'
-import { SKELETON_ROW_COUNT } from '@safe-global/views/features/spaces/components/Policies/constants'
-import NoEligibleAccounts from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
+import LoadError from '@safe-global/design/features/spaces/components/Policies/components/LoadError'
+import { SKELETON_ROW_COUNT } from '@safe-global/design/features/spaces/components/Policies/constants'
+import NoEligibleAccounts from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
   SafeAccountChainRow,
@@ -21,11 +27,11 @@ import {
   INELIGIBILITY_TEXT,
   SAFE_ACCOUNT_SELECTOR_LABEL,
   SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/constants'
 import {
   isSafeAccountGroup,
   type SafeAccountEntry,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {

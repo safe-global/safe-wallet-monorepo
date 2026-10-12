@@ -7,10 +7,10 @@ import classnames from 'classnames'
 import css from './styles.module.css'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
-import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/design/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Sheet, SheetContent } from '@safe-global/views/components/ui/sheet'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Sheet, SheetContent } from '@safe-global/design/components/ui/sheet'
 import { useIsBelowMd, useMediaQuery } from '@/hooks/useMediaQuery'
 
 type SideDrawerProps = {

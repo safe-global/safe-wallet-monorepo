@@ -14,9 +14,9 @@ import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import { useLoadFeature } from '@/features/__core__'
 import { LedgerFeature } from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/views/components/tx-flow/types'
+import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/design/components/tx-flow/types'
 
-export type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'
+export type { SubmitCallback } from '@safe-global/design/components/tx-flow/types'
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void
 
 type TxFlowProps<T extends unknown> = {

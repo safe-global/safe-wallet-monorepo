@@ -1,11 +1,11 @@
 import { CircleCheck } from 'lucide-react'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import HnSignupLayout from '@safe-global/views/features/hypernative/components/HnSignupFlow/HnSignupLayout'
-import css from '@safe-global/views/features/hypernative/components/HnSignupFlow/styles.module.css'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import HnSignupLayout from '@safe-global/design/features/hypernative/components/HnSignupFlow/HnSignupLayout'
+import css from '@safe-global/design/features/hypernative/components/HnSignupFlow/styles.module.css'
 import Track from '@/components/common/Track'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics'
-import HypernativeLogo from '@safe-global/views/features/hypernative/components/HypernativeLogo'
+import HypernativeLogo from '@safe-global/design/features/hypernative/components/HypernativeLogo'
 
 export type HnSignupIntroProps = {
   onGetStarted: () => void

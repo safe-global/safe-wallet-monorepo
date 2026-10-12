@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import { getRenameContactTooltip } from './utils'
 
 const InvalidContactNameTooltip = ({ nameError, children }: { nameError: string; children: ReactNode }) => (

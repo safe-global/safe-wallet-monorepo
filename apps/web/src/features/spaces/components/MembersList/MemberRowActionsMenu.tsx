@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { type MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { EllipsisVertical } from 'lucide-react'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '@safe-global/design/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from '@safe-global/views/components/ui/dropdown-menu'
+} from '@safe-global/design/components/ui/dropdown-menu'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

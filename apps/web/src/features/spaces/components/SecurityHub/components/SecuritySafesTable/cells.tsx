@@ -1,6 +1,6 @@
 import type { GradeSummary } from '@/features/security/types'
-import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+import { Skeleton } from '@safe-global/design/components/ui/skeleton'
+import { DASH } from '@safe-global/design/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { formatBalance } from './utils'
 
 type ScoreCellProps = {

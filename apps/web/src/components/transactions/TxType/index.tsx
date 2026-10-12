@@ -1,7 +1,7 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useTransactionType } from '@/hooks/useTransactionType'
-import css from '@safe-global/views/components/transactions/TxType/styles.module.css'
-import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
+import css from '@safe-global/design/components/transactions/TxType/styles.module.css'
+import SafeAppIconCard from '@safe-global/design/components/safe-apps/SafeAppIconCard'
 import { isValidElement } from 'react'
 
 type TxTypeProps = {

@@ -2,8 +2,8 @@ import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { cn } from '@safe-global/views/utils/cn'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SignedOutStateProps {

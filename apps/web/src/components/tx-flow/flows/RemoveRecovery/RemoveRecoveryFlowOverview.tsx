@@ -1,13 +1,13 @@
 import { useContext, type ReactElement } from 'react'
 
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@safe-global/design/components/tx-flow/common/TxCard'
 import type { RecoveryFlowProps } from '.'
 
 import { TxFlowContext } from '../../TxFlowProvider'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Separator } from '@safe-global/design/components/ui/separator'
 
 export function RemoveRecoveryFlowOverview({ delayModifier }: RecoveryFlowProps): ReactElement {
   const { onNext } = useContext(TxFlowContext)

@@ -1,9 +1,9 @@
 import { ArrowRight, Lock } from 'lucide-react'
-import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { Badge } from '@safe-global/views/components/ui/badge'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import ExternalLink from '@safe-global/design/components/common/ExternalLink'
+import { Badge } from '@safe-global/design/components/ui/badge'
+import { Button } from '@safe-global/design/components/ui/button'
+import { Card, CardContent } from '@safe-global/design/components/ui/card'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import {
   trackEvent,
   MixpanelEventParams,
@@ -16,7 +16,7 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { trackPlanSelectionStarted } from '../../Plans/planSelection'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
+import type { PolicyLock } from '@safe-global/design/features/spaces/components/Policies/policyLock'
 
 type PolicyUpsellBannerProps = Pick<PolicyLock, 'planName' | 'workspaceName' | 'onUpgrade'>
 

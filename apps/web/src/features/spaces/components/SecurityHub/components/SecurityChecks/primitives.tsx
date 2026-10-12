@@ -4,8 +4,8 @@ import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { cn } from '@safe-global/views/utils/cn'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/design/utils/cn'
+import { Typography } from '@safe-global/design/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
 import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
@@ -13,16 +13,16 @@ import {
   resolveStatusTone,
   SeverityIcon,
   type SeverityTone,
-} from '@safe-global/views/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
+} from '@safe-global/design/features/spaces/components/SecurityHub/components/SeverityIcon/SeverityIcon'
 import { withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
-import type { Cta } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/types'
+import type { Cta } from '@safe-global/design/features/spaces/components/SecurityHub/components/SecurityChecks/types'
 
 /** Map a SeverityTone's MUI color token (e.g. 'error.main') to its generated CSS var. */
 const toneToCssVar = (color: string): string => `var(--color-${color.replace('.', '-')})`
 
 export type SectionRow = { key: string; severity: SecurityGrade; isPassing: boolean; node: ReactNode }
 
-export type { Cta } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecurityChecks/types'
+export type { Cta } from '@safe-global/design/features/spaces/components/SecurityHub/components/SecurityChecks/types'
 
 /**
  * A row is considered "passing" (bucketed into the accordion) when the user has no action to take.

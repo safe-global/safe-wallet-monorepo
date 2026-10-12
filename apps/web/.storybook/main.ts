@@ -19,8 +19,8 @@ const config: StorybookConfig = {
   stories: [
     '../src/**/*.mdx',
     '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
-    '../../../packages/views/src/**/*.mdx',
-    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/design/src/**/*.mdx',
+    '../../../packages/design/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
 
   addons: [
@@ -75,7 +75,7 @@ const config: StorybookConfig = {
     // This resolves the "unsupported file type: undefined" error when building Storybook
     ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
 
-    // Stories in packages/views would otherwise get the root react-hook-form, a different copy (and context) than the app's
+    // Stories in packages/design would otherwise get the root react-hook-form, a different copy (and context) than the app's
     ;(config.resolve.alias as Record<string, string>)['react-hook-form'] = path.dirname(
       require.resolve('react-hook-form/package.json'),
     )

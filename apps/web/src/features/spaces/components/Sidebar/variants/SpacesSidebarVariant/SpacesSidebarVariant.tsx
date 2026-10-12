@@ -8,17 +8,17 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarSeparator,
-} from '@safe-global/views/components/ui/sidebar'
+} from '@safe-global/design/components/ui/sidebar'
 import css from '../../styles.module.css'
 import type {
   SpaceSelectorProps,
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
-} from '@safe-global/views/features/spaces/components/Sidebar/types'
+} from '@safe-global/design/features/spaces/components/Sidebar/types'
 import { NavItem } from '../NavItem'
 import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
-import { containerVariants, itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'
+import { containerVariants, itemVariants } from '@safe-global/design/features/spaces/components/Sidebar/constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {
   mainNavItems: ResolvedSidebarNavItem[] | null

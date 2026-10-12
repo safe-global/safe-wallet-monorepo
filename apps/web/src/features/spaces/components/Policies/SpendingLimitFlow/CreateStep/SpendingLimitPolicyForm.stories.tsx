@@ -6,20 +6,20 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockStory } from '@/stories/mocks'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
-import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useSafeScope, useSafeScopeControls } from '@safe-global/design/components/tx-flow/safe-scope'
+import type { SafeScopeTarget } from '@safe-global/design/components/tx-flow/safe-scope'
 import { buildSafeAccountId, groupSafeAccounts } from '../../SafeAccountSelector/utils'
 import type {
   SafeAccountEntry,
   SafeAccountOption,
-} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+} from '@safe-global/design/features/spaces/components/Policies/SafeAccountSelector/types'
 import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */

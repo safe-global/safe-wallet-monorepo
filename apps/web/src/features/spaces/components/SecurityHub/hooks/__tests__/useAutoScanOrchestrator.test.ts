@@ -4,7 +4,7 @@ import type {
   OverviewMap,
   SelectedSafe,
   SpaceSafeEntry,
-} from '@safe-global/views/features/spaces/components/SecurityHub/types'
+} from '@safe-global/design/features/spaces/components/SecurityHub/types'
 
 const autoScanMock = jest.fn()
 let lastServices: unknown = null

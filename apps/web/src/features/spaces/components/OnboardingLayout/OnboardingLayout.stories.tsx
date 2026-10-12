@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { createMockStory } from '@/stories/mocks'
 import { OnboardingLayout, StepCounter, SafeAppMockup } from '.'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Button } from '@safe-global/design/components/ui/button'
 
 const defaultSetup = createMockStory({ shadcn: true })
 

@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/design/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/components/common/EthHashInfo', () => {

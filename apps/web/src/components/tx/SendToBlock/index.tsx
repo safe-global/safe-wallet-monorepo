@@ -1,5 +1,5 @@
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/design/components/tx/FieldsGrid'
 
 const SendToBlock = ({
   address,

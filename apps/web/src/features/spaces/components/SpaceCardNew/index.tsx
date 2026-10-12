@@ -4,9 +4,9 @@ import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/utils/colors'
-import { Card } from '@safe-global/views/components/ui/card'
-import { Typography } from '@safe-global/views/components/ui/typography'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { Card } from '@safe-global/design/components/ui/card'
+import { Typography } from '@safe-global/design/components/ui/typography'
+import { Avatar, AvatarFallback } from '@safe-global/design/components/ui/avatar'
 import SpaceContextMenuNew from './SpaceContextMenuNew'
 
 export const SpaceSummaryNew = ({

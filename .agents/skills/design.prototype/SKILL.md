@@ -18,7 +18,7 @@ allowed-tools:
 
 Create a Storybook prototype from **$ARGUMENTS** using only shadcn/ui components.
 
-**Note:** All shadcn/ui components are already installed and available at `packages/views/src/components/ui/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`).
+**Note:** All shadcn/ui components are already installed and available at `packages/design/src/components/ui/`. Import them directly (e.g., `import { Button } from '@safe-global/design/components/ui/button'`).
 
 ## Step 1: Gather Requirements
 
@@ -43,7 +43,7 @@ If missing, ask:
 
 **Rules**:
 
-- Use only shadcn/ui components from `packages/views/src/components/ui/`
+- Use only shadcn/ui components from `packages/design/src/components/ui/`
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
@@ -67,7 +67,7 @@ DON'T:
 ```tsx
 import * as React from 'react'
 
-import { Card, CardHeader, CardTitle, CardContent } from '@safe-global/views/components/ui/card'
+import { Card, CardHeader, CardTitle, CardContent } from '@safe-global/design/components/ui/card'
 // ... other shadcn imports
 
 export const MyPrototype = (): React.ReactElement => {
@@ -138,7 +138,7 @@ yarn workspace @safe-global/web storybook
 
 ## Project Notes
 
-- **Components Path**: `packages/views/src/components/ui/`
+- **Components Path**: `packages/design/src/components/ui/`
 - **Utility Path**: `apps/web/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
 - **Prototypes Path**: `apps/web/src/features/design-system/prototypes/`

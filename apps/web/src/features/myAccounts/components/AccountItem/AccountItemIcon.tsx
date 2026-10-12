@@ -1,5 +1,5 @@
 import SafeIcon from '@/components/common/SafeIcon'
-import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
+import css from '@safe-global/design/features/myAccounts/components/AccountItems/styles.module.css'
 
 export interface AccountItemIconProps {
   address: string

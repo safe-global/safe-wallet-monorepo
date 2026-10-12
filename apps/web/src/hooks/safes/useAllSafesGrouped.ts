@@ -9,9 +9,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import useAllOwnedSafes from './useAllOwnedSafes'
 import { useAppSelector } from '@/store'
 import { isMultiChainSafeItem } from './isMultiChainSafeItem'
-import type { MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+import type { MultiChainSafeItem } from '@safe-global/design/hooks/safes/types'
 
-export type { MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
+export type { MultiChainSafeItem } from '@safe-global/design/hooks/safes/types'
 
 export type AllSafeItemsGrouped = {
   allSingleSafes: SafeItems | undefined

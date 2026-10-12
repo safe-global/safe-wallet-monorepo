@@ -5,13 +5,13 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from '@safe-global/views/components/ui/accordion'
+} from '@safe-global/design/components/ui/accordion'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 
 import MsgDetails from '@/components/safe-messages/MsgDetails'
 import MsgSummary from '@/components/safe-messages/MsgSummary'
 // Reuse the shared transaction list-item card styling so signed messages match Queue items.
-import css from '@safe-global/views/components/transactions/TxListItem/styles.module.css'
+import css from '@safe-global/design/components/transactions/TxListItem/styles.module.css'
 
 const ITEM_VALUE = 'message'
 

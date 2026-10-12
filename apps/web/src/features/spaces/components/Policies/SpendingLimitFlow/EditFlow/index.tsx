@@ -1,21 +1,21 @@
 import { type ReactElement } from 'react'
-import SpendingLimitIcon from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
+import SpendingLimitIcon from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/SpendingLimitIcon'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
+import { buildSafeScopeKey } from '@safe-global/design/components/tx-flow/safe-scope/utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { TxFlowType } from '@/services/analytics'
-import type { PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
+import type { PolicySafe } from '@safe-global/design/features/spaces/components/Policies/types'
 import CreateSpendingLimitPolicy from '../CreateStep'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
-import { toSpendingLimitFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
+import { toSpendingLimitFormValues } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
 import {
   EDIT_STEP_TITLE,
   FLOW_SUBTITLE,
-} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+} from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import BaselineGate from './BaselineGate'
-import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/design/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 
 const noop = () => {}
 

@@ -1,7 +1,7 @@
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { ScanResult } from '@safe-global/views/features/security/types'
+import type { ScanResult } from '@safe-global/design/features/security/types'
 
-export type { EvidenceItem, ScanResult, SafeGrade } from '@safe-global/views/features/security/types'
+export type { EvidenceItem, ScanResult, SafeGrade } from '@safe-global/design/features/security/types'
 
 export type ScanContext = {
   owners: { value: string; name?: string | null }[]
