@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import { WidgetEmptyState } from '../WidgetEmptyState'
+import { WidgetEmptyState } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetEmptyState'
 
 describe('WidgetEmptyState', () => {
   it('renders the icon and text', () => {

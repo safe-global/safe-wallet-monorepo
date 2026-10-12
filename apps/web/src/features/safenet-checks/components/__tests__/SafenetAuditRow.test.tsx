@@ -9,7 +9,7 @@ import {
   buildSnapshot,
   plainAttestedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
-import { formatAuditDateTime } from '@/components/common/AuditLog'
+import { formatAuditDateTime } from '@safe-global/design/components/common/AuditLog'
 import { SafenetAuditRow } from '../SafenetAuditRow'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({

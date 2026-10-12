@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Skeleton } from '@safe-global/design/components/ui/skeleton'
 import css from '@/components/new-safe/create/steps/StatusStep/styles.module.css'
 import { Circle } from 'lucide-react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/design/components/common/Identicon'
 
 const StatusStep = ({
   isLoading,

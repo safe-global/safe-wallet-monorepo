@@ -1,4 +1,4 @@
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/design/components/common/NumberField'
 import { AutocompleteItem } from '@/components/tx-flow/flows/TokenTransfer/CreateTokenTransfer'
 import { safeFormatUnits, safeParseUnits } from '@safe-global/utils/utils/formatters'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'

@@ -1,12 +1,12 @@
 import type { ReactElement } from 'react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/design/components/ui/alert'
 
-import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader } from '@safe-global/design/components/common/AuditLog'
 import { Countdown } from '@safe-global/design/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import { formatAuditDateTime } from '@/components/common/AuditLog'
+import { formatAuditDateTime } from '@safe-global/design/components/common/AuditLog'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 import useAddressBook from '@/hooks/useAddressBook'
 

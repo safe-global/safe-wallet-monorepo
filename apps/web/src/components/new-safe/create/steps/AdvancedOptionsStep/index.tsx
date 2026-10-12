@@ -17,7 +17,7 @@ import useSyncSafeCreationStep from '@/components/new-safe/create/useSyncSafeCre
 import { ArrowLeft as ArrowBackIcon } from 'lucide-react'
 import layoutCss from '@/components/new-safe/create/styles.module.css'
 import { type SafeVersion } from '@safe-global/types-kit'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/design/components/common/NumberField'
 import { useCurrentChain } from '@/hooks/useChains'
 import { validateAddress } from '@safe-global/utils/utils/validation'
 import useAsync from '@safe-global/utils/hooks/useAsync'

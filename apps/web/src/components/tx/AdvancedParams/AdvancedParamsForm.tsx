@@ -8,7 +8,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { AdvancedField, type AdvancedParameters } from '@safe-global/design/components/tx/AdvancedParams/types'
 import GasLimitInput from './GasLimitInput'
 import ExternalLink from '@safe-global/design/components/common/ExternalLink'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/design/components/common/NumberField'
 
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 

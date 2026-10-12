@@ -23,7 +23,10 @@ jest.mock('@/features/myAccounts', () => ({
     </div>
   ),
 }))
-jest.mock('@/components/common/Identicon', () => ({ __esModule: true, default: () => <div data-testid="identicon" /> }))
+jest.mock('@safe-global/design/components/common/Identicon', () => ({
+  __esModule: true,
+  default: () => <div data-testid="identicon" />,
+}))
 
 const ADDRESS_A = '0xAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA'
 const ADDRESS_B = '0xBbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbB'

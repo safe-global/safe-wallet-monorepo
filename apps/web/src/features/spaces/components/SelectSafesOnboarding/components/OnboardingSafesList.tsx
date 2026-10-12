@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { type AllSafeItems } from '@/hooks/safes'
 import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
+import SecurityBanner from '@safe-global/design/components/common/TrustedSafesModal/SecurityBanner'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']
 

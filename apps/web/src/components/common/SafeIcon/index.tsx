@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { Skeleton } from '@safe-global/design/components/ui/skeleton'
 
 import css from './styles.module.css'
-import Identicon, { type IdenticonProps } from '../Identicon'
+import Identicon, { type IdenticonProps } from '@safe-global/design/components/common/Identicon'
 import { useChain } from '@/hooks/useChains'
 
 interface ThresholdProps {

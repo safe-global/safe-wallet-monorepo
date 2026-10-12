@@ -33,7 +33,7 @@ jest.mock('@/features/myAccounts', () => ({
   ),
 }))
 
-jest.mock('@/components/common/TrustedSafesModal/SecurityBanner', () => ({
+jest.mock('@safe-global/design/components/common/TrustedSafesModal/SecurityBanner', () => ({
   __esModule: true,
   default: () => <div data-testid="security-banner">Verify before you trust</div>,
 }))

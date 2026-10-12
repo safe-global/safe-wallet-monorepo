@@ -22,7 +22,7 @@ import Track from '@/components/common/Track'
 import type { RecoveryStateItem } from '@/features/recovery'
 
 import css from './styles.module.css'
-import NumberField from '@/components/common/NumberField'
+import NumberField from '@safe-global/design/components/common/NumberField'
 import { getDelay, isCustomDelaySelected } from './utils'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
