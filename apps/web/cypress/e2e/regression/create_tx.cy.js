@@ -52,7 +52,7 @@ describe('Create transactions tests', () => {
     createtx.clickOnSendTokensBtn()
     happyPathToStepTwo()
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     cy.contains(tx.relayRemainingAttemptsStr).should('exist')
   })
 })
