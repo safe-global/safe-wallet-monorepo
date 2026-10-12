@@ -1,7 +1,14 @@
 import type { ReactElement, ReactNode } from 'react'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
-import { AnalysisGroupCardItem } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCardItem'
-import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
+const SEVERITY_BAR: Record<Severity, string> = {
+  [Severity.CRITICAL]: 'var(--color-error-main)',
+  [Severity.WARN]: 'var(--color-warning-main)',
+  [Severity.OK]: 'var(--color-success-main)',
+  [Severity.INFO]: 'var(--color-info-main)',
+  [Severity.ERROR]: 'var(--color-warning-main)',
+}
 
 /** Muted inset for the transaction-details Safenet card — same surface as Receipt / PaperViewToggle. */
 export const SafenetDetailsPanel = ({ children }: { children: ReactNode }): ReactElement => (
@@ -16,14 +23,21 @@ export const SafenetDetailsPanelStack = ({ children }: { children: ReactNode }):
   <div className={detailsStackClass}>{children}</div>
 )
 
-/** Gray block with a severity bar, the same component Copilot's checks expand into. */
-export const SafenetBlock = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => (
-  <AnalysisGroupCardItem
-    severity={severity}
-    result={{ severity: severity ?? Severity.INFO, type: ThreatStatus.NO_THREAT, title: '', description: '' }}
-    description={children}
-  />
-)
+/** Gray block with a severity bar, styled like the blocks Copilot's checks expand into. */
+export const SafenetBlock = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => {
+  const borderLeftColor = severity ? SEVERITY_BAR[severity] : 'var(--color-border-main)'
+  return (
+    <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
+      <div className="border-l-4 p-3" style={{ borderLeftColor }}>
+        <div className="flex flex-col gap-4">
+          <Typography variant="paragraph-small" className="break-words text-[var(--color-primary-light)]">
+            {children}
+          </Typography>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /** Running check: a pulsing dot in the slot a severity icon takes once there's a result. */
 export const SafenetPulse = ({ size = 16 }: { size?: 12 | 16 }): ReactElement => (

@@ -13,10 +13,7 @@ export type FlowSafenetCheck = {
   check: SafenetCheckView
 }
 
-/**
- * The check of the transaction open in the tx flow. Reads only once a proposed transaction's
- * submission time is known; every caller shares one cache entry and one chain read.
- */
+/** The open flow's check; reads once its submission time is known, and all callers share one chain read. */
 export const useFlowSafenetCheck = (enabled = true): FlowSafenetCheck => {
   const { txId, txDetails, txDetailsLoading } = useContext(TxFlowContext)
   const safeTxHash = txId ? getSafeTxHashFromTxId(txId) : undefined
