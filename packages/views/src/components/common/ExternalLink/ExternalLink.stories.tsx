@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import ExternalLink from './index'
+import { PlainExternalLinkIcons } from './ExternalLinkIcon'
 
 const meta = {
   title: 'Components/Common/ExternalLink',
@@ -18,6 +19,20 @@ export const Default: Story = {
     href: 'https://safe.global',
     children: 'Visit Safe Global',
   },
+}
+
+export const InsideTransactionFlow: Story = {
+  args: {
+    href: 'https://safe.global',
+    children: 'Visit Safe Global',
+  },
+  decorators: [
+    (Story) => (
+      <PlainExternalLinkIcons>
+        <Story />
+      </PlainExternalLinkIcons>
+    ),
+  ],
 }
 
 export const WithoutIcon: Story = {
