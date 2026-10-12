@@ -2,14 +2,7 @@ import { type MouseEventHandler, type ReactElement } from 'react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { cn } from '@safe-global/views/utils/cn'
 import type { SafeGrade } from '@safe-global/views/features/security/types'
-
-/** Human-readable label per SafeGrade. Shared by every chip in the SecurityHub UI. */
-export const SAFE_GRADE_LABEL: Record<SafeGrade, string> = {
-  critical: 'Critical',
-  at_risk: 'At risk',
-  needs_attention: 'Needs review',
-  passing: 'Healthy',
-}
+import { SAFE_GRADE_LABEL } from './safeGradeLabel'
 
 /** Soft `*-background` pill tint + `*-main` text per grade on the score ramp. */
 const GRADE_PILL_STYLES: Record<SafeGrade, string> = {
@@ -76,3 +69,5 @@ const SafeGradeChip = ({
 }
 
 export default SafeGradeChip
+
+export { SAFE_GRADE_LABEL } from './safeGradeLabel'

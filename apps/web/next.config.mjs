@@ -10,6 +10,7 @@ import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
 import { SriManifestWebpackPlugin } from './plugins/sri-manifest-webpack-plugin.mjs'
+import { remoteViewReplacement } from './plugins/remote-view-plugin.mjs'
 
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
@@ -121,7 +122,10 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config, { dev }) {
+  webpack(config, { dev, webpack }) {
+    const remoteViews = remoteViewReplacement(webpack, __dirname)
+    if (remoteViews) config.plugins.push(remoteViews)
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },

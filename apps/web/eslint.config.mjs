@@ -43,6 +43,8 @@ export default [
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/src/remote-view/generated/',
+      '**/src/remote-view/frame/react-shim.js',
     ],
   },
   ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),

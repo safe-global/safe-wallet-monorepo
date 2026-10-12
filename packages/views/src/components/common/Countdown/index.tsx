@@ -1,18 +1,5 @@
 import type { ReactElement } from 'react'
-
-export function _getCountdown(seconds: number): { days: number; hours: number; minutes: number } {
-  const MINUTE_IN_SECONDS = 60
-  const HOUR_IN_SECONDS = 60 * MINUTE_IN_SECONDS
-  const DAY_IN_SECONDS = 24 * HOUR_IN_SECONDS
-
-  const days = Math.floor(seconds / DAY_IN_SECONDS)
-
-  const remainingSeconds = seconds % DAY_IN_SECONDS
-  const hours = Math.floor(remainingSeconds / HOUR_IN_SECONDS)
-  const minutes = Math.floor((remainingSeconds % HOUR_IN_SECONDS) / MINUTE_IN_SECONDS)
-
-  return { days, hours, minutes }
-}
+import { _getCountdown } from './getCountdown'
 
 export function Countdown({ seconds }: { seconds: number }): ReactElement | null {
   if (seconds <= 0) {
@@ -46,3 +33,5 @@ function TimeLeft({ value, unit }: { value: number; unit: string }): ReactElemen
     </div>
   )
 }
+
+export { _getCountdown } from './getCountdown'

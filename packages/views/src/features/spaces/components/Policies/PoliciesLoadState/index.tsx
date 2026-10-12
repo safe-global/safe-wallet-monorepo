@@ -4,8 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyMedia } from '@safe-global/views/components/ui/empty'
 import { cn } from '@safe-global/views/utils/cn'
 import css from './PoliciesLoadState.module.css'
-
-export const POLICIES_LOAD_ERROR = 'The website failed to load data. Please try again.'
+import { POLICIES_LOAD_ERROR } from './constants'
 
 /** Replaces the page body while CGW is answering, with only the heading left above it. */
 export const PoliciesLoading = (): ReactElement => (
@@ -46,3 +45,5 @@ export const PoliciesLoadError = ({ onReload }: { onReload?: () => void }): Reac
     )}
   </Empty>
 )
+
+export { POLICIES_LOAD_ERROR } from './constants'

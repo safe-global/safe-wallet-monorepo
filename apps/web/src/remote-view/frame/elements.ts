@@ -1,16 +1,19 @@
 import { createRemoteElement } from '@remote-dom/core/elements'
+import { createRemoteComponent } from '@remote-dom/react'
+import { defineHtmlElements } from './html'
 
-export const UiButtonElement = createRemoteElement<object, object, object, { click(event: CustomEvent): void }>({
-  attributes: ['variant', 'size', 'class', 'disabled'],
-  events: ['click'],
-})
+export const UiSlotElement = createRemoteElement({ attributes: ['name'] })
 
 declare global {
   interface HTMLElementTagNameMap {
-    'ui-button': InstanceType<typeof UiButtonElement>
+    'ui-slot': InstanceType<typeof UiSlotElement>
   }
 }
 
+// Marks where the page renders React content the app passed to a view.
+export const Slot = createRemoteComponent('ui-slot', UiSlotElement)
+
 export const defineRemoteElements = () => {
-  customElements.define('ui-button', UiButtonElement)
+  customElements.define('ui-slot', UiSlotElement)
+  defineHtmlElements()
 }

@@ -1,69 +1,54 @@
-import { useEffect, useRef, useState } from 'react'
-import { release, retain, ThreadMessagePort } from '@quilted/threads'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { release, retain } from '@quilted/threads'
 import { RemoteReceiver, RemoteRootRenderer } from '@remote-dom/react/host'
-import type { RemoteConnection } from '@remote-dom/core/elements'
 import { REMOTE_COMPONENTS } from './components'
+import { getSandbox, type RemoteHandle, type RemoteProps } from './sandbox'
+import { toRemoteProps } from './remoteProps'
+import { PropUrlsContext, SlotContext } from './slots'
+import { cssMaps } from './css'
 
-type RemoteProps = Record<string, unknown>
-type WorkerApi = {
-  render: (
-    connection: RemoteConnection,
-    name: string,
-    props: RemoteProps,
-  ) => Promise<{
-    update: (props: RemoteProps) => Promise<void>
-  }>
-}
-
-const FRAME_URL = '/remote-view/frame.html'
-
-// Renders a view from @safe-global/views in a sandboxed worker. Only plain data and callbacks cross;
-// the worker never sees this page, and the page only draws what REMOTE_COMPONENTS allows.
+// Renders a view from @safe-global/views in the sandboxed worker. Only plain data and callbacks cross;
+// React content from the app stays on the page in slots, and the page only draws what REMOTE_COMPONENTS allows.
 export const RemoteView = ({ name, props }: { name: string; props: RemoteProps }) => {
-  const frameRef = useRef<HTMLIFrameElement>(null)
   const [receiver] = useState(() => new RemoteReceiver({ retain, release }))
-  const viewRef = useRef<Promise<{ update: (props: RemoteProps) => Promise<void> }> | null>(null)
-  const propsRef = useRef(props)
-  propsRef.current = props
+  const [stable] = useState(() => new Map<string, (...args: unknown[]) => unknown>())
+  const callbacks = useRef(new Map<string, (...args: unknown[]) => unknown>())
+  const handle = useRef<Promise<RemoteHandle> | null>(null)
+
+  const slots = new Map<string, ReactNode>()
+  const urls = new Set<string>()
+  const nextCallbacks = new Map<string, (...args: unknown[]) => unknown>()
+  const data = toRemoteProps(
+    props,
+    'props',
+    slots,
+    nextCallbacks,
+    stable,
+    (path) => callbacks.current.get(path),
+    urls,
+  ) as RemoteProps
+  callbacks.current = nextCallbacks
+  const dataRef = useRef(data)
+  dataRef.current = data
 
   useEffect(() => {
-    const frame = frameRef.current
-    if (!frame) return
-    const channel = new MessageChannel()
-
-    const start = (event: MessageEvent) => {
-      const target = frame.contentWindow
-      if (!target || event.source !== target || event.data !== 'safe-remote-view-ready') return
-      window.removeEventListener('message', start)
-      target.postMessage('safe-remote-view', '*', [channel.port2])
-      const api = ThreadMessagePort.import<WorkerApi>(channel.port1)
-      channel.port1.start()
-      viewRef.current = api.render(receiver.connection, name, propsRef.current)
-    }
-    window.addEventListener('message', start)
-
+    const view = getSandbox().then((api) => api.render(receiver.connection, name, dataRef.current, cssMaps()))
+    handle.current = view
     return () => {
-      window.removeEventListener('message', start)
-      channel.port1.close()
-      viewRef.current = null
+      handle.current = null
+      view.then((mounted) => mounted.unmount())
     }
   }, [name, receiver])
 
   useEffect(() => {
-    viewRef.current?.then((view) => view.update(props))
-  }, [props])
+    handle.current?.then((view) => view.update(data))
+  })
 
   return (
-    <div className="[contain:paint]">
-      <iframe
-        ref={frameRef}
-        src={FRAME_URL}
-        sandbox="allow-scripts"
-        hidden
-        className="hidden"
-        title={`remote-view-${name}`}
-      />
-      <RemoteRootRenderer receiver={receiver} components={REMOTE_COMPONENTS} />
-    </div>
+    <SlotContext.Provider value={slots}>
+      <PropUrlsContext.Provider value={urls}>
+        <RemoteRootRenderer receiver={receiver} components={REMOTE_COMPONENTS} />
+      </PropUrlsContext.Provider>
+    </SlotContext.Provider>
   )
 }

@@ -36,7 +36,7 @@ const host = await build({
   write: false,
   jsx: 'automatic',
   logLevel: 'error',
-  define: { 'process.env.NODE_ENV': '"production"' },
+  define: { 'process.env.NODE_ENV': process.env.PROBE_DEV ? '"development"' : '"production"' },
 })
 await writeFile(path.join(site, 'host.js'), host.outputFiles[0].text)
 await writeFile(path.join(site, 'index.html'), '<div id="root"></div><script src="/host.js"></script>')
@@ -60,15 +60,35 @@ const siteServer = await listen(async (req, res) => {
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
 const page = await browser.newPage()
+const errors = []
+page.on('pageerror', (error) => errors.push(`page: ${error.message}`))
+page.on('worker', (worker) =>
+  worker.on('console', (message) => message.type() === 'error' && errors.push(`worker: ${message.text()}`)),
+)
 await page.goto(`http://127.0.0.1:${siteServer.address().port}/`)
-await page.locator('#root button').last().click()
+await page
+  .locator('#root button')
+  .last()
+  .click({ timeout: 15000 })
+  .catch((error) => {
+    console.error(errors.join('\n'))
+    throw error
+  })
 await page.waitForTimeout(1500)
 
 const log = await page.evaluate(() => window.__log)
-const drawn = await page.locator('#root').evaluate((root) => ({
-  forbiddenElements: root.querySelectorAll('img, a, script, style').length,
-  styleAttributes: root.querySelectorAll('[style]').length,
-}))
+const drawn = await page.locator('#root').evaluate(
+  (root, leak) => ({
+    forbiddenElements: root.querySelectorAll('script, style, iframe, object, embed, form[action]').length,
+    leakingUrls: [...root.querySelectorAll('[href], [src]')]
+      .map((element) => element.getAttribute('href') ?? element.getAttribute('src'))
+      .filter((url) => url?.startsWith(leak)),
+    unsafeStyles: [...root.querySelectorAll('[style]')].filter((element) =>
+      /url\(/i.test(element.getAttribute('style')),
+    ).length,
+  }),
+  leakUrl,
+)
 await browser.close()
 leakServer.close()
 siteServer.close()
@@ -81,7 +101,8 @@ const failures = [
   ...log.filter((line) => line.includes('ESCAPED')),
   ...(log.some((line) => line.startsWith('callback:')) ? [] : ['callback from the view never reached the page']),
   ...(drawn.forbiddenElements ? ['the page drew an element outside the allowlist'] : []),
-  ...(drawn.styleAttributes ? ['the page drew an inline style'] : []),
+  ...drawn.leakingUrls.map((url) => `the page drew a link or image to ${url}`),
+  ...(drawn.unsafeStyles ? ['the page drew a style that loads a URL'] : []),
   ...leaks.map((url) => `request left the sandbox: ${url}`),
 ]
 if (failures.length) {

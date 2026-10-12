@@ -1,28 +1,58 @@
 // Builds public/remote-view/frame.js: the sandboxed iframe launcher with the remote views worker inlined.
 import { build } from 'esbuild'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { transform as svgr } from '@svgr/core'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
+import { generate } from './remote-view-generate.mjs'
+
 const root = path.dirname(fileURLToPath(import.meta.url))
 const src = path.join(root, '../src/remote-view/frame')
+const viewsSrc = path.join(root, '../../../packages/views/src')
 
-// Views import the real UI primitives; inside the worker they become remote elements the host draws.
-const PRIMITIVES = {
-  'components/ui/button': path.join(src, 'primitives/button.tsx'),
-}
+// Primitives that need the real DOM; inside the worker they become remote elements the page draws.
+const PRIMITIVES = {}
 
-const primitivesPlugin = (viewsEntry) => ({
-  name: 'remote-view-primitives',
+const RUNTIME = path.join(src, 'jsx-runtime.ts')
+const REACT_SHIM = path.join(src, 'react-shim.js')
+const OWN_REACT = new Set([RUNTIME, REACT_SHIM])
+
+const workerPlugin = (viewsEntry) => ({
+  name: 'remote-view-worker',
   setup(builder) {
     for (const [request, file] of Object.entries(PRIMITIVES)) {
       builder.onResolve({ filter: new RegExp(`@safe-global/views/${request}$`) }, () => ({ path: file }))
     }
     if (viewsEntry) builder.onResolve({ filter: /^\.\/views$/ }, () => ({ path: viewsEntry }))
+    // Every JSX call and createElement in the worker, including precompiled libraries, maps HTML tags to remote elements.
+    builder.onResolve({ filter: /^react\/jsx-(dev-)?runtime$/ }, (args) =>
+      OWN_REACT.has(args.importer) ? undefined : { path: RUNTIME },
+    )
+    builder.onResolve({ filter: /^react$/ }, (args) =>
+      OWN_REACT.has(args.importer) ? undefined : { path: REACT_SHIM },
+    )
+    // Class names come from the page's CSS module maps, so they match the stylesheets the page loaded.
+    builder.onLoad({ filter: /\.module\.css$/ }, (args) => ({
+      contents: `import { cssModule } from ${JSON.stringify(path.join(src, 'css.ts'))}\nexport default cssModule(${JSON.stringify(path.relative(viewsSrc, args.path).split(path.sep).join('/'))})`,
+      loader: 'ts',
+      resolveDir: src,
+    }))
+    builder.onLoad({ filter: /\.css$/ }, () => ({ contents: '', loader: 'js' }))
+    // Same SVGR setup as next.config.mjs, so imported SVGs are React components.
+    builder.onLoad({ filter: /\.svg$/ }, async (args) => ({
+      contents: await svgr(
+        await readFile(args.path, 'utf8'),
+        { svgo: false, titleProp: true, jsxRuntime: 'automatic', plugins: ['@svgr/plugin-jsx'] },
+        { filePath: args.path },
+      ),
+      loader: 'jsx',
+    }))
   },
 })
 
 export const buildFrame = async ({ out, viewsEntry, define = {}, production = true }) => {
+  if (!viewsEntry) await generate()
   const common = {
     bundle: true,
     write: false,
@@ -35,7 +65,8 @@ export const buildFrame = async ({ out, viewsEntry, define = {}, production = tr
   const worker = await build({
     ...common,
     entryPoints: [path.join(src, 'worker.tsx')],
-    plugins: [primitivesPlugin(viewsEntry)],
+    loader: { '.png': 'dataurl', '.jpg': 'dataurl', '.webp': 'dataurl' },
+    plugins: [workerPlugin(viewsEntry)],
   })
   const frame = await build({
     ...common,

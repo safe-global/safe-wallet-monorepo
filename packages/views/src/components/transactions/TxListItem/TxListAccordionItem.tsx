@@ -8,8 +8,7 @@ import {
   AccordionTrigger,
 } from '@safe-global/views/components/ui/accordion'
 import css from '@safe-global/views/components/transactions/TxListItem/styles.module.css'
-
-export const TX_LIST_ITEM_VALUE = 'item'
+import { TX_LIST_ITEM_VALUE } from './TxListAccordionItem.constants'
 
 type TxListAccordionItemProps = {
   summary: ReactNode
@@ -81,3 +80,5 @@ const TxListAccordionItem = ({
 }
 
 export default TxListAccordionItem
+
+export { TX_LIST_ITEM_VALUE } from './TxListAccordionItem.constants'

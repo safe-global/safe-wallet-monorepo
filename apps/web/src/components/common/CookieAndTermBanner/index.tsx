@@ -17,7 +17,7 @@ import { COOKIE_AND_TERM_WARNING } from './constants'
 import WarningMessage from '@safe-global/views/components/common/CookieAndTermBanner/WarningMessage'
 import IntroText from './IntroText'
 import CookieOptionsList from './CookieOptionsList'
-import { RemoteView } from '@/remote-view/RemoteView'
+import CookieBannerActions from '@safe-global/views/components/common/CookieAndTermBanner/CookieBannerActions'
 
 /** Overlay chrome for the first-visit popup, matching the other overlays in the design system. */
 export const POPUP_SURFACE = 'bg-popover text-popover-foreground rounded-lg shadow-lg ring-foreground/10 ring-1'
@@ -62,7 +62,7 @@ export const CookieAndTermBanner = ({ warningKey }: { warningKey?: CookieAndTerm
 
         <CookieOptionsList control={control} />
 
-        <RemoteView name="CookieBannerActions" props={{ onAccept: handleAccept, onAcceptAll: handleAcceptAll }} />
+        <CookieBannerActions onAccept={handleAccept} onAcceptAll={handleAcceptAll} />
       </form>
     </div>
   )

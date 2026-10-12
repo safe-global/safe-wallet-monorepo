@@ -2,11 +2,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import EditIcon from '@safe-global/views/assets/images/common/edit.svg'
 import css from './styles.module.css'
 import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
-
-export enum ConfirmationTitleTypes {
-  sign = 'confirm',
-  execute = 'execute',
-}
+import { ConfirmationTitleTypes } from './ConfirmationTitleTypes'
 
 const ConfirmationTitle = ({ isCreation, variant }: { isCreation?: boolean; variant: ConfirmationTitleTypes }) => {
   return (
@@ -26,3 +22,5 @@ const ConfirmationTitle = ({ isCreation, variant }: { isCreation?: boolean; vari
 }
 
 export default ConfirmationTitle
+
+export { ConfirmationTitleTypes } from './ConfirmationTitleTypes'

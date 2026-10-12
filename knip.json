@@ -8,7 +8,11 @@
         "src/service-workers/index.ts",
         "src/remote-view/frame/frame.ts",
         "src/remote-view/frame/worker.tsx",
-        "src/remote-view/frame/primitives/*.tsx"
+        "src/remote-view/frame/jsx-runtime.ts",
+        "src/remote-view/frame/react-shim.js",
+        "src/remote-view/frame/css.ts",
+        "src/remote-view/ClientRemoteView.tsx",
+        "src/remote-view/css.ts"
       ],
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": [
