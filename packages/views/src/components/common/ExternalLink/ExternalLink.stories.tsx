@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import ExternalLink from './index'
-import { PlainExternalLinkIcons } from './ExternalLinkIcon'
+import { PlainExternalLinkIcons } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 
 const meta = {
   title: 'Components/Common/ExternalLink',
