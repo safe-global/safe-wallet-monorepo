@@ -24,7 +24,7 @@ const workerPlugin = (viewsEntry) => ({
     for (const [request, file] of Object.entries(PRIMITIVES)) {
       builder.onResolve({ filter: new RegExp(`@safe-global/views/${request}$`) }, () => ({ path: file }))
     }
-    if (viewsEntry) builder.onResolve({ filter: /^\.\/views$/ }, () => ({ path: viewsEntry }))
+    builder.onResolve({ filter: /^\.\/views$/ }, () => ({ path: viewsEntry }))
     // Every JSX call and createElement in the worker, including precompiled libraries, maps HTML tags to remote elements.
     builder.onResolve({ filter: /^react\/jsx-(dev-)?runtime$/ }, (args) =>
       OWN_REACT.has(args.importer) ? undefined : { path: RUNTIME },
@@ -53,6 +53,7 @@ const workerPlugin = (viewsEntry) => ({
 
 export const buildFrame = async ({ out, viewsEntry, define = {}, production = true }) => {
   if (!viewsEntry) await generate()
+  const views = viewsEntry ?? path.join(src, '../generated/registry.ts')
   const common = {
     bundle: true,
     write: false,
@@ -66,7 +67,7 @@ export const buildFrame = async ({ out, viewsEntry, define = {}, production = tr
     ...common,
     entryPoints: [path.join(src, 'worker.tsx')],
     loader: { '.png': 'dataurl', '.jpg': 'dataurl', '.webp': 'dataurl' },
-    plugins: [workerPlugin(viewsEntry)],
+    plugins: [workerPlugin(views)],
   })
   const frame = await build({
     ...common,

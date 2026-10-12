@@ -1,6 +1,6 @@
 import '@remote-dom/core/polyfill'
 import '@remote-dom/react/polyfill'
-import { createElement, type ElementType } from 'react'
+import { createElement, type ComponentType, type ElementType } from 'react'
 import { createRoot } from 'react-dom/client'
 import { ThreadMessagePort } from '@quilted/threads'
 import { BatchingRemoteConnection, RemoteRootElement, type RemoteConnection } from '@remote-dom/core/elements'
@@ -57,7 +57,7 @@ const render = (
   css: Record<string, Record<string, string>>,
 ) => {
   setCssMaps(css)
-  const View = REMOTE_VIEWS[name]
+  const View = REMOTE_VIEWS[name] as ComponentType<Props> | undefined
   if (!View) throw new Error(`Unknown remote view: ${name}`)
 
   const root = document.createElement('remote-root') as RemoteRootElement
@@ -67,7 +67,7 @@ const render = (
   const reactRoot = createRoot(root)
   const callbacks: Callbacks = { latest: new Map(), stable: new Map() }
   const draw = (next: Props) =>
-    reactRoot.render(createElement(View, fromRemoteProps(next, 'props', callbacks) as never))
+    reactRoot.render(createElement(View, fromRemoteProps(next, 'props', callbacks) as Props))
   draw(props)
   return {
     update: draw,
