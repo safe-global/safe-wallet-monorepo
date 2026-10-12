@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - apps/web/**
-      - apps/web-tanstack/**
       - packages/**
       - yarn.lock
       - package.json
@@ -16,7 +15,6 @@ on:
       - dev
     paths:
       - apps/web/**
-      - apps/web-tanstack/**
       - packages/**
       - yarn.lock
       - package.json

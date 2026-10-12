@@ -20,8 +20,6 @@ report.json
 # production
 /build
 
-# tanstack migration experiment
-apps/web-tanstack/dist/
 .playwright-mcp/
 
 # misc
