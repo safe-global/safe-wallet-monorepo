@@ -138,19 +138,6 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
-    const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
-      assertTx(safeTx)
-      assertProvider(signer?.provider)
-
-      safeTx = await withGtfFeeParams(safeTx)
-
-      // Smart contracts cannot sign transactions off-chain
-      if (await isSmartContractWallet(signer.chainId, signer.address)) {
-        throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
-      }
-      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
-    }
-
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
@@ -231,39 +218,19 @@ export const useTxActions = (): TxActions => {
       assertChainInfo(chain)
 
       // Catch the three GS026 causes (stale nonce, non-signer executor, bad
-      // signature) before anything is signed or broadcast — an on-chain GS026
+      // signature) before anything is broadcast — an on-chain GS026
       // revert would cost the user gas for a guaranteed failure (WA-3005).
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
-      let rePropose = false
-      // Relayed transactions must be fully signed, so request a final signature if needed
+      // A relay has no executor to approve on-chain, so the sign step must have completed the threshold
       if (isRelayed && safeTx.signatures.size < safe.threshold) {
-        safeTx = await signRelayedTx(safeTx)
-        rePropose = true
-      }
-
-      // Hoist SC-wallet check so we can reuse it for the sign guard and dispatchTxExecution
-      const viaSafe = isSafeSigner(signer)
-      const isSmartAccount = !isRelayed
-        ? viaSafe || (await isSmartContractWallet(signer.chainId, signer.address))
-        : false
-
-      // Non-relayed EOA wallets must sign before executing so every transaction is
-      // recorded with an explicit signature before execution. SC wallets (signer.isSafe
-      // or isSmartAccount) use the implicit executor approval path instead.
-      if (!isRelayed && !signer.isSafe && !isSmartAccount && safeTx.signatures.size < safe.threshold) {
-        safeTx = await dispatchTxSigning(safeTx, signer.provider, txId)
-        rePropose = true
-        // The UI-computed gasLimit was estimated with a pre-validated signature (near-zero cost
-        // when executor == owner). EIP-712 verification costs ~3 000 gas more (ecrecover).
-        // Clear the stale limit so sdk.executeTransaction re-estimates with the real signature.
-        txOptions = { ...txOptions, gasLimit: undefined }
+        throw new Error('Cannot relay a transaction that is not fully signed')
       }
 
       // Relayed txs must be known to the service
       if (isRelayed) {
-        if (!txId || rePropose) {
-          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
+        if (!txId) {
+          txId = (await _propose(signer.address, safeTx, origin)).txId
         }
         await dispatchTxRelay(
           safeTx,
@@ -278,9 +245,12 @@ export const useTxActions = (): TxActions => {
         return { txId, isExecuted: true }
       }
 
+      const viaSafe = isSafeSigner(signer)
+      const isSmartAccount = viaSafe || (await isSmartContractWallet(signer.chainId, signer.address))
+
       // A Safe executor never proposes the child tx; the parent proposes it as `nestedTransaction`
-      if (!viaSafe && (!txId || rePropose)) {
-        txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
+      if (!viaSafe && !txId) {
+        txId = (await _propose(signer.address, safeTx, origin)).txId
       }
 
       // Above threshold 1 a Safe executor only queues and gets back a safeTxHash

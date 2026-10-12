@@ -12,7 +12,7 @@ import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
+import { useAlreadySigned, useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import {
@@ -233,12 +233,13 @@ const TxFlowProvider = <T extends unknown>({
         : undefined,
     [signerChainId, signerAddress, signer?.isSafe],
   )
+  const hasSigned = useAlreadySigned(safeTx)
   const willSignBeforeExecute =
-    safe.threshold === 1 &&
     canExecute &&
     !isProposing &&
     !!safeTx &&
-    safeTx.signatures.size === 0 &&
+    !hasSigned &&
+    safeTx.signatures.size === safe.threshold - 1 &&
     !signer?.isSafe &&
     !isSmartContractSigner
 

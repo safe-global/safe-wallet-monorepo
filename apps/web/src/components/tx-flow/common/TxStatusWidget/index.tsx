@@ -55,7 +55,7 @@ const TxStatusWidget = ({
 
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
   const hasSigned = useAlreadySigned(safeTx)
-  const showSignStep = threshold === 1 && !isBatch && !isMessage
+  const showSignStep = canSign && confirmationsSubmitted === threshold - 1 && !isBatch && !isMessage
 
   return (
     <div className="bg-transparent">
