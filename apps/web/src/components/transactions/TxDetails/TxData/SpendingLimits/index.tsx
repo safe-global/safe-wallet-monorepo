@@ -17,11 +17,12 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type SpendingLimitsProps = {
   txData?: TransactionData | null
-  txInfo: CustomTransactionInfo
+  txInfo?: CustomTransactionInfo
   type: SpendingLimitMethods
+  resetsSpent?: boolean
 }
 
-export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElement | null => {
+export const SpendingLimits = ({ txData, type, resetsSpent = false }: SpendingLimitsProps): ReactElement | null => {
   const chain = useCurrentChain()
   const { balances } = useBalances()
   const tokens = useMemo(() => balances.items.map(({ tokenInfo }) => tokenInfo), [balances.items])
@@ -35,8 +36,10 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
     [chain?.chainId, resetTimeMin],
   )
   const tokenInfo = useMemo(
-    () => tokens.find(({ address }) => sameAddress(address, tokenAddress as string)),
-    [tokenAddress, tokens],
+    () =>
+      tokens.find(({ address }) => sameAddress(address, tokenAddress as string)) ??
+      Object.values(txData?.tokenInfoIndex ?? {}).find(({ address }) => sameAddress(address, tokenAddress as string)),
+    [tokenAddress, tokens, txData?.tokenInfoIndex],
   )
 
   if (!txData) return null
@@ -80,6 +83,12 @@ export const SpendingLimits = ({ txData, type }: SpendingLimitsProps): ReactElem
       {isSetAllowanceMethod && (
         <TxDetailsRow label="Reset time" grid>
           <SpendingLimitLabel label={resetTimeLabel || 'One-time spending limit'} isOneTime={!resetTimeLabel} />
+        </TxDetailsRow>
+      )}
+
+      {isSetAllowanceMethod && resetsSpent && (
+        <TxDetailsRow label="Spent amount" grid>
+          <Typography>Reset to 0</Typography>
         </TxDetailsRow>
       )}
     </div>
