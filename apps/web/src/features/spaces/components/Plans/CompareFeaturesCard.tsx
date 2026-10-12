@@ -1,7 +1,6 @@
-import { useLayoutEffect, useRef, useState, type CSSProperties, type Ref, type RefObject } from 'react'
+import { useRef, useState, type CSSProperties, type Ref } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
-import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Link } from '@safe-global/views/components/ui/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
@@ -19,11 +18,12 @@ import {
   type CompareSection,
 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
+import PeekCollapsible from './PeekCollapsible'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
 
 /** Collapsed, only the coming-soon rows show in full; the next row fades out under the button. */
-export const VISIBLE_FEATURES = COMPARE_SECTIONS[0].rows.length
+const VISIBLE_FEATURES = COMPARE_SECTIONS[0].rows.length
 const PEEK_FEATURES = 1
 
 const CompareValue = ({ value }: { value: CompareValue }) => {
@@ -105,43 +105,7 @@ const CompareRow = ({
   </TableRow>
 )
 
-const HEIGHT_TRANSITION = {
-  expand: 'transition-[height] duration-[420ms] ease-soft',
-  collapse: 'transition-[height] duration-[320ms] ease-in-out',
-}
 const SECTION_STAGGER_MS = 45
-
-type TableHeights = { collapsed: number; full: number }
-
-/** Full height, and the height down to the last peeking row, of the table's scroll container. */
-const useTableHeights = (
-  tableRef: RefObject<HTMLTableElement | null>,
-  lastPeekRowRef: RefObject<HTMLTableRowElement | null>,
-  isExpanded: boolean,
-): TableHeights | undefined => {
-  const [heights, setHeights] = useState<TableHeights>()
-
-  useLayoutEffect(() => {
-    const table = tableRef.current
-    const lastPeekRow = lastPeekRowRef.current
-    const container = table?.parentElement
-    if (!table || !lastPeekRow || !container) return
-    const measure = () => {
-      const full = container.offsetHeight
-      const rowBottom = lastPeekRow.getBoundingClientRect().bottom - table.getBoundingClientRect().top
-      // 0 means not laid out yet (e.g. jsdom), so don't clip.
-      setHeights(full > 0 ? { full, collapsed: Math.min(rowBottom, full) } : undefined)
-    }
-    measure()
-    if (typeof ResizeObserver === 'undefined') return
-    const observer = new ResizeObserver(measure)
-    observer.observe(container)
-    observer.observe(table)
-    return () => observer.disconnect()
-  }, [tableRef, lastPeekRowRef, isExpanded])
-
-  return heights
-}
 
 const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: string; isExpanded: boolean }) => (
   <TableHeader className={cn(isExpanded && 'sticky top-0 z-10 bg-card')}>
@@ -246,12 +210,7 @@ export default function CompareFeaturesCard({
   ref?: Ref<HTMLElement>
 }) {
   const [isGuardianOpen, setGuardianOpen] = useState(false)
-  const tableRef = useRef<HTMLTableElement>(null)
   const lastPeekRowRef = useRef<HTMLTableRowElement>(null)
-  const heights = useTableHeights(tableRef, lastPeekRowRef, isExpanded)
-  const tableStyle: CSSProperties | undefined = heights
-    ? { height: isExpanded ? heights.full : heights.collapsed }
-    : undefined
 
   return (
     <section
@@ -263,7 +222,7 @@ export default function CompareFeaturesCard({
       data-testid="compare-features"
     >
       <Card radius="xl" size="none" className="group/compare overflow-clip">
-        <div className="flex flex-col gap-2 p-2">
+        <div className="@container flex flex-col gap-2 p-2">
           <button
             type="button"
             aria-expanded={isExpanded}
@@ -285,56 +244,28 @@ export default function CompareFeaturesCard({
             </span>
           </button>
 
-          <div className="@container relative">
-            <div
-              id="compare-features-table"
-              data-testid="compare-features-table"
-              style={tableStyle}
-              className={cn(
-                // `clip`, not `hidden`, so the sticky header follows the page scroll; it can only once the table fits.
-                'overflow-clip rounded-xl bg-card motion-reduce:transition-none @2xl:[&_[data-slot=table-container]]:overflow-visible',
-                isExpanded ? HEIGHT_TRANSITION.expand : HEIGHT_TRANSITION.collapse,
-              )}
-            >
-              <Table ref={tableRef} className="min-w-160 table-fixed">
-                <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} />
-                {COMPARE_SECTIONS.map((section, index) => (
-                  <CompareSection
-                    key={section.title}
-                    lastPeekRowRef={lastPeekRowRef}
-                    section={section}
-                    index={index}
-                    isExpanded={isExpanded}
-                    onOpenAddOn={() => setGuardianOpen(true)}
-                  />
-                ))}
-              </Table>
-            </div>
-
-            <div
-              inert={isExpanded}
-              aria-hidden={isExpanded || undefined}
-              data-testid="compare-features-fade"
-              className={cn(
-                'absolute inset-x-0 bottom-0 flex h-20 items-end justify-center rounded-b-xl pb-3 transition-opacity duration-300 ease-soft motion-reduce:transition-none',
-                isExpanded ? 'pointer-events-none opacity-0' : 'opacity-100',
-              )}
-            >
-              <div
-                aria-hidden
-                className="absolute inset-0 rounded-b-xl bg-linear-to-b from-card/0 to-card backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                weight="semibold"
-                className="relative"
-                onClick={() => onExpandedChange(true)}
-              >
-                {COMPARE_COPY.showAll}
-              </Button>
-            </div>
-          </div>
+          <PeekCollapsible
+            id="compare-features-table"
+            open={isExpanded}
+            onOpen={() => onExpandedChange(true)}
+            peekUntil={lastPeekRowRef}
+            expandLabel={COMPARE_COPY.showAll}
+            className="rounded-xl bg-card @2xl:[&_[data-slot=table-container]]:overflow-visible"
+          >
+            <Table className="min-w-160 table-fixed">
+              <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} />
+              {COMPARE_SECTIONS.map((section, index) => (
+                <CompareSection
+                  key={section.title}
+                  lastPeekRowRef={lastPeekRowRef}
+                  section={section}
+                  index={index}
+                  isExpanded={isExpanded}
+                  onOpenAddOn={() => setGuardianOpen(true)}
+                />
+              ))}
+            </Table>
+          </PeekCollapsible>
         </div>
       </Card>
       <HnSignupFlow open={isGuardianOpen} onClose={() => setGuardianOpen(false)} />
