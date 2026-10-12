@@ -1,4 +1,5 @@
-import { act, render, screen } from '@/tests/test-utils'
+import type { ReactElement } from 'react'
+import { act, render as renderWithProviders, screen } from '@/tests/test-utils'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
 import { panelSettledDelay } from '../../hooks/useDelayedLoading'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
@@ -14,26 +15,38 @@ import type {
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
-import type { FlowSafenetCheck } from '@/features/safenet-checks/useFlowSafenetCheck'
+import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { multisigExecutionDetailsBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
-
-const flowCheck = (publicStatus: PublicCheckStatus, isLoading = false): FlowSafenetCheck => ({
-  safeTxHash: faker.string.hexadecimal({ length: 64, casing: 'lower' }),
-  submittedAt: 1,
-  isTxDetailsLoading: false,
-  check: buildCheckView({ status: publicStatus, publicStatus, isLoading }),
-})
-const NO_CHECK: FlowSafenetCheck = { ...flowCheck(CheckStatus.UNAVAILABLE), safeTxHash: undefined }
-
-let mockFlowCheck = NO_CHECK
+jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+  useSafenetCheck: jest.fn(),
+}))
 jest.mock('@/features/safenet-checks', () => ({
   ...jest.requireActual('@/features/safenet-checks'),
   useIsSafenetChecksEnabled: () => true,
 }))
-jest.mock('@/features/safenet-checks/useFlowSafenetCheck', () => ({ useFlowSafenetCheck: () => mockFlowCheck }))
+
+const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
+
+let flow: Partial<TxFlowContextType> = {}
+
+const withSafenetCheck = (publicStatus: PublicCheckStatus, isLoading = false) => {
+  const safeTxHash = faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' })
+  const detailedExecutionInfo = multisigExecutionDetailsBuilder().with({ safeTxHash }).build()
+  flow = {
+    txId: `multisig_${faker.finance.ethereumAddress()}_${safeTxHash}`,
+    txDetails: transactionDetailsBuilder().with({ detailedExecutionInfo }).build(),
+  }
+  mockUseSafenetCheck.mockReturnValue(buildCheckView({ status: publicStatus, publicStatus, isLoading }))
+}
+
+const render = (ui: ReactElement) =>
+  renderWithProviders(<TxFlowContext.Provider value={{ ...initialContext, ...flow }}>{ui}</TxFlowContext.Provider>)
 
 // Default empty AsyncResult values
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
@@ -52,7 +65,8 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    mockFlowCheck = NO_CHECK
+    flow = {}
+    mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
     // Mock useCheckSimulation to return no simulation error by default
     jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
@@ -145,7 +159,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('counts a Safenet verdict as a check', () => {
-      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      withSafenetCheck(CheckStatus.BENIGN)
       render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -159,7 +173,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('shows a Safenet risk instead of "all checks passed"', () => {
-      mockFlowCheck = flowCheck(CheckStatus.MALICIOUS)
+      withSafenetCheck(CheckStatus.MALICIOUS)
       render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -535,7 +549,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('waits for a running Safenet check before turning full color', () => {
-      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      withSafenetCheck(CheckStatus.IN_PROGRESS)
       const { container } = render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -550,7 +564,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('waits for the first Safenet read before turning full color', () => {
-      mockFlowCheck = flowCheck(CheckStatus.UNAVAILABLE, true)
+      withSafenetCheck(CheckStatus.UNAVAILABLE, true)
       const { container } = render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -565,7 +579,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('ignores Safenet for a Safe without Pro features', () => {
-      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      withSafenetCheck(CheckStatus.IN_PROGRESS)
       const { container } = render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -581,7 +595,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('waits for a running Safenet check when Safe Pro is off', () => {
-      mockFlowCheck = flowCheck(CheckStatus.IN_PROGRESS)
+      withSafenetCheck(CheckStatus.IN_PROGRESS)
       const { container } = render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -612,7 +626,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('shimmers once Safenet finds no issues', () => {
-      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      withSafenetCheck(CheckStatus.BENIGN)
       const { container } = render(
         <SafeShieldDisplay
           recipient={mockRecipient}
@@ -632,7 +646,7 @@ describe('SafeShieldDisplay', () => {
       ['critical', () => mockCriticalRecipient],
       ['warning', () => mockWarningRecipient],
     ])('never shimmers when the overall result is %s, even if Safenet finds no issues', (_name, recipient) => {
-      mockFlowCheck = flowCheck(CheckStatus.BENIGN)
+      withSafenetCheck(CheckStatus.BENIGN)
       const { container } = render(
         <SafeShieldDisplay
           recipient={recipient()}

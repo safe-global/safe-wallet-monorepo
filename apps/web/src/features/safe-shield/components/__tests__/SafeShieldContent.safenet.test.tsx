@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { SafeShieldContent } from '../SafeShieldContent'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -10,8 +11,7 @@ import * as useChainsModule from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
-// The real Safenet feature chunk mounts inside the widget; simulation rows are isolated below.
-// A missing feature.tsx registry member cannot be caught by the stubbed widget test.
+// The real Safenet feature chunk mounts here, so a missing feature.tsx member fails this test.
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
   useSafenetCheck: jest.fn(),
@@ -30,7 +30,7 @@ const TX_ID = `multisig_0x0000000000000000000000000000000000000123_${HASH}`
 
 const emptyAnalysis: [undefined, undefined, boolean] = [undefined, undefined, false]
 const safeTx = {
-  data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0x', operation: 0 },
+  data: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', operation: 0 },
 } as unknown as SafeTransaction
 
 describe('SafeShieldContent Safenet section integration', () => {

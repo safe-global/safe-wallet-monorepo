@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -19,8 +20,10 @@ jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
 
 jest.mock('@/hooks/useSafeInfo', () => ({
   __esModule: true,
-  default: () => ({ safe: { chainId: '1', threshold: 2 }, safeAddress: '0x0000000000000000000000000000000000000123' }),
+  default: () => ({ safe: { chainId: '1', threshold: 2 }, safeAddress: mockSafeAddress }),
 }))
+
+const mockSafeAddress = faker.finance.ethereumAddress()
 
 const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
 
@@ -258,8 +261,12 @@ describe('SafenetChecksSection', () => {
   })
 
   describe('MALICIOUS', () => {
-    const reveal = (sentinel: string, reason: string | null) =>
-      sentinelRevealedEvent({ sentinel, approved: reason === null, reason: reason ?? '' })
+    const reveal = (reason: string | null) =>
+      sentinelRevealedEvent({
+        sentinel: faker.finance.ethereumAddress(),
+        approved: reason === null,
+        reason: reason ?? '',
+      })
 
     const renderMalicious = (events: ReturnType<typeof reveal>[]) => {
       const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.MALICIOUS, events })
@@ -271,7 +278,7 @@ describe('SafenetChecksSection', () => {
     }
 
     it('titles a single rule with its label and explains it below', () => {
-      const section = renderMalicious([reveal('0x1', 'R-4.6')])
+      const section = renderMalicious([reveal('R-4.6')])
 
       expect(section).toHaveTextContent('Malicious threat detected')
       expect(section).toHaveTextContent('known to be malicious or compromised')
@@ -279,7 +286,7 @@ describe('SafenetChecksSection', () => {
     })
 
     it('uses the PRD description for a settings change (R-4.1)', () => {
-      const section = renderMalicious([reveal('0x1', null), reveal('0x2', 'R-4.1')])
+      const section = renderMalicious([reveal(null), reveal('R-4.1')])
 
       expect(section).toHaveTextContent('Safe account settings change')
       expect(section).toHaveTextContent(
@@ -290,7 +297,7 @@ describe('SafenetChecksSection', () => {
     })
 
     it('lists several rules under one title, most-cited first', () => {
-      renderMalicious([reveal('0x1', 'R-4.4'), reveal('0x2', 'R-4.5'), reveal('0x3', 'R-4.5')])
+      renderMalicious([reveal('R-4.4'), reveal('R-4.5'), reveal('R-4.5')])
 
       // The shared title is announced; each rule gets its own block.
       expect(screen.getByRole('status')).toHaveTextContent('Safenet: Malicious threats detected')
@@ -301,7 +308,7 @@ describe('SafenetChecksSection', () => {
     })
 
     it('falls back to the generic copy for an unrecognised code', () => {
-      const section = renderMalicious([reveal('0x1', 'R-9.9')])
+      const section = renderMalicious([reveal('R-9.9')])
 
       expect(section).toHaveTextContent('Risk detected')
       expect(section).toHaveTextContent('Safenet flagged this address/transaction as malicious')
@@ -309,7 +316,7 @@ describe('SafenetChecksSection', () => {
     })
 
     it('links the explorer, never an attestation', () => {
-      renderMalicious([reveal('0x1', 'R-4.2')])
+      renderMalicious([reveal('R-4.2')])
 
       expect(screen.getByTestId('safenet-explorer-link')).toHaveAccessibleName(SAFENET_EXPLORER_LINK_LABEL)
       expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
