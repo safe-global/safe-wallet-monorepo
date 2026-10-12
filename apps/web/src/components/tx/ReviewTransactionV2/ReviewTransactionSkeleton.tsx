@@ -1,4 +1,6 @@
-import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
+import LoadingSpinner, {
+  SpinnerStatus,
+} from '@safe-global/design/components/new-safe/create/steps/StatusStep/LoadingSpinner'
 import TxCard from '@safe-global/design/components/tx-flow/common/TxCard'
 
 const ReviewTransactionSkeleton = () => (
