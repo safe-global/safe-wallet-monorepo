@@ -67,8 +67,6 @@ const setups = {
   'no-plan': setup,
 }
 
-// --- Network ------------------------------------------------------------------------------
-
 /** Keep simulation enabled so the access stories show the full check list. */
 const chainsHandler = () => {
   const page = safenetChainsPage()
@@ -176,12 +174,7 @@ const handlers = (logs: ReturnType<typeof safenetCheck.submitted>, amountOut: st
   ...setup.parameters.msw.handlers,
 ]
 
-// --- Page ---------------------------------------------------------------------------------
-
-/**
- * The story mocks install an empty Safe SDK, so building the SafeTx would throw.
- * This one builds plain SafeTxs offline; nothing is signed or sent.
- */
+/** The story mocks install an empty Safe SDK; this one builds plain SafeTxs offline and never signs or sends. */
 const storySafeSdk = {
   createTransaction: async ({ transactions: [tx] }: { transactions: SafeTransactionDataPartial[] }) =>
     new EthSafeTransaction({
@@ -264,9 +257,9 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     ...setup.parameters,
-    // Chain reads resolve after mount and the Safenet section fades in.
-    visualTest: { disable: true },
   },
+  // Chain reads resolve after mount and the Safenet section fades in.
+  tags: ['skip-visual-test'],
   play: settle,
 } satisfies Meta<typeof TxFlowPage>
 
