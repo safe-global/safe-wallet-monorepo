@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
 import Disclaimer from '@safe-global/design/components/common/Disclaimer'
-import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
+import WidgetDisclaimer from '@safe-global/design/components/common/WidgetDisclaimer'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import madProps from '@/utils/mad-props'
 

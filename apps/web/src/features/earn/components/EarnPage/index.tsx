@@ -1,5 +1,5 @@
 import Disclaimer from '@safe-global/design/components/common/Disclaimer'
-import WidgetDisclaimer from '@/components/common/WidgetDisclaimer'
+import WidgetDisclaimer from '@safe-global/design/components/common/WidgetDisclaimer'
 import BlockedAddress from '@/components/common/BlockedAddress'
 import useBlockedAddress from '@/hooks/useBlockedAddress'
 import useConsent from '@/hooks/useConsent'
