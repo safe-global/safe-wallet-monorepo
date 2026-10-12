@@ -204,7 +204,7 @@ describe('Receipt To row', () => {
     mockUseGtfFeePreview.mockReturnValue({ data: undefined })
   })
 
-  it('renders the name chip beside the label and the address on a full-width line below', () => {
+  it('renders the name chip beside the label and the address on a right-aligned full-width line below', () => {
     const { getByTestId, getByText } = renderReceipt({})
 
     const chip = getByTestId('name-chip')
@@ -214,6 +214,6 @@ describe('Receipt To row', () => {
     expect(row).toHaveClass('flex-wrap', 'justify-between')
     expect(row?.firstElementChild).toHaveTextContent('To')
     expect(chip.nextElementSibling).toBe(address)
-    expect(address).toHaveClass('w-full')
+    expect(address).toHaveClass('w-full', 'text-right', '[&>*]:justify-end')
   })
 })
