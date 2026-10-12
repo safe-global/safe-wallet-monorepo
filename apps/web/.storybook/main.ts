@@ -75,6 +75,11 @@ const config: StorybookConfig = {
     // This resolves the "unsupported file type: undefined" error when building Storybook
     ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
 
+    // Stories in packages/views would otherwise get the root react-hook-form, a different copy (and context) than the app's
+    ;(config.resolve.alias as Record<string, string>)['react-hook-form'] = path.dirname(
+      require.resolve('react-hook-form/package.json'),
+    )
+
     // Mock next/navigation so app-router hooks (usePathname/useRouter/useSearchParams)
     // resolve without nextjs.appDirectory, which would otherwise disable the
     // pages-router (next/router) mock the rest of the app depends on.

@@ -11,7 +11,6 @@ import { TxModalContext } from '@/components/tx-flow'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-import { useSigner } from '@/hooks/wallets/useWallet'
 import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
@@ -57,7 +56,6 @@ export const SignForm = ({
   } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
-  const signer = useSigner()
 
   const handleOptionChange = (option: string) => {
     onChange?.(option)
@@ -76,8 +74,9 @@ export const SignForm = ({
     onSubmit?.()
 
     let resultTxId: string
+    let isNestedSigning: boolean
     try {
-      resultTxId = await signTx(safeTx, txId, origin)
+      ;({ txId: resultTxId, isNestedSigning } = await signTx(safeTx, txId, origin))
     } catch (_err) {
       const err = asError(_err)
       if (isWalletRejection(err)) {
@@ -99,7 +98,7 @@ export const SignForm = ({
       return
     }
 
-    if (signer?.isSafe) {
+    if (isNestedSigning) {
       setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)
     } else {
       setTxFlow(undefined)

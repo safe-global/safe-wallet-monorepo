@@ -214,8 +214,11 @@ const TxFlowProvider = <T extends unknown>({
   const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
+  // The in-app nested signer's signature only lands once the parent executes it
+  const isNestedSignerAwaitingSignatures = !!signer?.isSafe && (safeTx?.signatures.size ?? 0) < safe.threshold
+
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx)
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isNestedSignerAwaitingSignatures
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
