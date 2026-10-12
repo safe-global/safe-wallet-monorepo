@@ -10,6 +10,7 @@ import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
 import { SriManifestWebpackPlugin } from './plugins/sri-manifest-webpack-plugin.mjs'
+import LavaMoatPlugin from '@lavamoat/webpack'
 
 let withRspack = null
 if (process.env.USE_RSPACK === '1') {
@@ -26,6 +27,30 @@ const SERVICE_WORKERS_PATH = './src/service-workers'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const pkgPath = path.join(__dirname, 'package.json')
+const VIEWS_SRC = path.resolve(__dirname, '../../packages/views/src')
+// Views that need the DOM stay trusted, like before they moved into the package (same list as the SES sandbox).
+const TRUSTED_VIEWS =
+  /components\/ui\/(ShadcnProvider|combobox|input|input-group|search-input|sidebar|sonner)\.tsx$|hooks\/use-(mobile|tablet)\.ts$|utils\/cn\.ts$/
+
+// Next's page entries are loader-only modules with no file. Mark them as excluded like the rest of the app;
+// LavaMoat ignores the exclude loader on requests with inline loaders, so the "!" is dropped from rawRequest.
+class ExcludeNextEntriesPlugin {
+  apply(compiler) {
+    compiler.hooks.thisCompilation.tap('ExcludeNextEntriesPlugin', (compilation) => {
+      compilation.hooks.buildModule.tap('ExcludeNextEntriesPlugin', (module) => {
+        if (module.resource !== '' || !module.loaders?.length) return
+        module.loaders.push({ loader: LavaMoatPlugin.exclude, options: undefined, ident: undefined, type: undefined })
+        module.rawRequest = module.rawRequest.replaceAll('!', '')
+      })
+      // Next's barrel optimisation requests "__barrel_optimize__?names=…!=!/abs/path"; LavaMoat names packages by that request.
+      compilation.hooks.finishModules.tap('ExcludeNextEntriesPlugin', (modules) => {
+        for (const module of modules) {
+          if (module.userRequest?.startsWith('__barrel_optimize__')) module.userRequest = module.resource
+        }
+      })
+    })
+  }
+}
 const data = await readFile(pkgPath, 'utf-8')
 const pkg = JSON.parse(data)
 
@@ -121,7 +146,33 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config, { dev }) {
+  webpack(config, { dev, isServer }) {
+    // Only @safe-global/views runs in a LavaMoat compartment; every other module is excluded and stays trusted.
+    if (!dev && !isServer) {
+      config.module.rules.push({
+        test: /\.[cm]?[jt]sx?$|^__barrel_optimize__/,
+        exclude: (file) => file.startsWith(VIEWS_SRC) && !TRUSTED_VIEWS.test(file),
+        use: [LavaMoatPlugin.exclude],
+      })
+      config.plugins.push(
+        new ExcludeNextEntriesPlugin(),
+        new LavaMoatPlugin({
+          rootDir: __dirname,
+          policyLocation: path.join(__dirname, 'lavamoat'),
+          generatePolicy: process.env.LAVAMOAT_GENERATE === '1',
+          inlineLockdown: /^static\/chunks\/webpack-/,
+          lockdown: {
+            errorTaming: 'unsafe',
+            stackFiltering: 'verbose',
+            overrideTaming: 'severe',
+            consoleTaming: 'unsafe',
+            localeTaming: 'unsafe',
+            domainTaming: 'unsafe',
+          },
+        }),
+      )
+    }
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },

@@ -1,0 +1,38 @@
+diff --git a/dist/ses.cjs b/dist/ses.cjs
+index c10f41b6a6a1bfb63032ebe523063dade9048409..7eedf81ab9edd47c6d2624151809ef8ba94f16e1 100644
+--- a/dist/ses.cjs
++++ b/dist/ses.cjs
+@@ -4514,6 +4514,14 @@ const freezeTypedArray = array => {
+           return;
+         }
+       }
++      if (
++        typeof obj === 'function' &&
++        (prop === 'arguments' || prop === 'caller') &&
++        obj[prop] === null
++      ) {
++        warn(`Tolerating undeletable ${subPath} === null`);
++        return;
++      }
+       error(`failed to delete ${subPath}`, reason);
+     } else {
+       error(`deleting ${subPath} threw`, reason);
+diff --git a/dist/ses.mjs b/dist/ses.mjs
+index c10f41b6a6a1bfb63032ebe523063dade9048409..7eedf81ab9edd47c6d2624151809ef8ba94f16e1 100644
+--- a/dist/ses.mjs
++++ b/dist/ses.mjs
+@@ -4514,6 +4514,14 @@ const freezeTypedArray = array => {
+           return;
+         }
+       }
++      if (
++        typeof obj === 'function' &&
++        (prop === 'arguments' || prop === 'caller') &&
++        obj[prop] === null
++      ) {
++        warn(`Tolerating undeletable ${subPath} === null`);
++        return;
++      }
+       error(`failed to delete ${subPath}`, reason);
+     } else {
+       error(`deleting ${subPath} threw`, reason);

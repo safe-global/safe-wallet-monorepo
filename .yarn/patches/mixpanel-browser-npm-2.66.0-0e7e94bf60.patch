@@ -1,0 +1,28 @@
+diff --git a/dist/mixpanel.cjs.js b/dist/mixpanel.cjs.js
+index ff0bc47ddfbc7289b816864c48febbf7c04257ae..468586b058bd7f1e5f79347ced8298920a9691ab 100644
+--- a/dist/mixpanel.cjs.js
++++ b/dist/mixpanel.cjs.js
+@@ -14291,9 +14291,6 @@ _.encodeDates = function(obj) {
+ };
+ 
+ _.timestamp = function() {
+-    Date.now = Date.now || function() {
+-        return +new Date;
+-    };
+     return Date.now();
+ };
+ 
+diff --git a/dist/mixpanel.module.js b/dist/mixpanel.module.js
+index d9dfa57a630410003cda29831639e88c6333a036..5a1fda9437ebd22972d4a289b1e2e93f29309ec3 100644
+--- a/dist/mixpanel.module.js
++++ b/dist/mixpanel.module.js
+@@ -14289,9 +14289,6 @@ _.encodeDates = function(obj) {
+ };
+ 
+ _.timestamp = function() {
+-    Date.now = Date.now || function() {
+-        return +new Date;
+-    };
+     return Date.now();
+ };
+ 

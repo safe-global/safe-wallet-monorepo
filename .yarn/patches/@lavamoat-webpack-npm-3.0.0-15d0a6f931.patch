@@ -1,0 +1,15 @@
+diff --git a/src/runtime/runtime.js b/src/runtime/runtime.js
+index 3c69d2bf2304b1455f250f151d7fdc169da49f65..69e1e49381df049bbedd99b42b4d27f4801d582e 100644
+--- a/src/runtime/runtime.js
++++ b/src/runtime/runtime.js
+@@ -307,6 +307,10 @@ const lavamoatRuntimeWrapper = (resourceId, runtimeKit) => {
+     return create(null)
+   }
+ 
++  // Package endowments are copied from the root compartment, so it must exist before any package compartment.
++  if (resourceId !== LAVAMOAT.root && !compartmentMap.has(LAVAMOAT.root)) {
++    lavamoatRuntimeWrapper(LAVAMOAT.root, {})
++  }
+   if (!compartmentMap.has(resourceId)) {
+     // Endow original Math and Date, because SES tames them and we don't need that
+     const c = new Compartment({ Math, Date })
