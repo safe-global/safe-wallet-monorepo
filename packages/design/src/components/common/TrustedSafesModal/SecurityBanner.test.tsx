@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import SecurityBanner from './SecurityBanner'
+import SecurityBanner from '@safe-global/design/components/common/TrustedSafesModal/SecurityBanner'
 
 describe('SecurityBanner', () => {
   it('renders the optional title', () => {
