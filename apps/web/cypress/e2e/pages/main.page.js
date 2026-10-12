@@ -49,6 +49,9 @@ export function pollUntil(isReady, timeout) {
   )
 }
 
+// NameInput can miss its 50-character error when keystrokes come with no delay (the Cypress 16 default).
+export const nameTypingOptions = { delay: 10 }
+
 /** Waits for the page to settle before Argos captures the screenshot. */
 export function awaitVisualStability() {
   cy.wait(constants.VISUAL_SETTLE_TIME)

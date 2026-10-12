@@ -1086,7 +1086,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 

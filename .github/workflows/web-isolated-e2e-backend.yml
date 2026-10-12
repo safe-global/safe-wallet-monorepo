@@ -177,6 +177,7 @@ jobs:
           SAFE_E2E_BROWSER: ${{ steps.browser.outputs.path }}
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           SAFE_E2E_RECORD_BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+          SAFE_E2E_SHARD: ${{ matrix.shard }}
           REVERSE_PROXY_UI_PORT: '8080'
 
       - name: Collect redacted container diagnostics

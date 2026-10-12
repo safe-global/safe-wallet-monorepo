@@ -27,6 +27,19 @@ export function requiredChains(selected, specs = isolatedSpecs) {
   return [...new Set(selected.flatMap((spec) => specs[spec]?.chains ?? []))]
 }
 
+const EXPOSED_KEYS = [
+  'SAFE_E2E_ISOLATED',
+  'SAFE_CGW_BASE_URL',
+  'SAFE_TXS_BASE_URL',
+  'TX_BUILDER_URL',
+  'BEAMER_DATA_E2E',
+]
+
+/** The public part of the Cypress environment, which specs read synchronously with Cypress.expose(). */
+export function exposedValues(environment) {
+  return Object.fromEntries(EXPOSED_KEYS.filter((key) => key in environment).map((key) => [key, environment[key]]))
+}
+
 export function cypressEnvironment(env) {
   if (env.SAFE_E2E_ISOLATED !== 'true') {
     return Object.fromEntries(
