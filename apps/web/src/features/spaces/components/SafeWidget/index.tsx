@@ -3,7 +3,7 @@ import { WidgetItem } from './WidgetItem'
 import { WidgetFooter } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetFooter'
 import { WidgetViewAll } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetViewAll'
 import { WidgetItemSkeleton } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetItemSkeleton'
-import { WidgetEmptyState } from './WidgetEmptyState'
+import { WidgetEmptyState } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetEmptyState'
 import { WidgetErrorState } from './WidgetErrorState'
 
 const SafeWidget = Object.assign(SafeWidgetRoot, {
@@ -21,6 +21,6 @@ export type { WidgetItemProps } from './WidgetItem'
 export type { WidgetFooterProps } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetFooter'
 export type { WidgetViewAllProps } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetViewAll'
 export type { WidgetItemSkeletonProps } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetItemSkeleton'
-export type { WidgetEmptyStateProps } from './WidgetEmptyState'
+export type { WidgetEmptyStateProps } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetEmptyState'
 export type { WidgetErrorStateProps } from './WidgetErrorState'
 export default SafeWidget

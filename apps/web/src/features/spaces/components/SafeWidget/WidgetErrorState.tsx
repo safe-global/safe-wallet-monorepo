@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { CircleAlert } from 'lucide-react'
 import { Button } from '@safe-global/design/components/ui/button'
-import { WidgetEmptyState } from './WidgetEmptyState'
+import { WidgetEmptyState } from '@safe-global/design/features/spaces/components/SafeWidget/WidgetEmptyState'
 
 interface WidgetErrorStateProps {
   message?: string
