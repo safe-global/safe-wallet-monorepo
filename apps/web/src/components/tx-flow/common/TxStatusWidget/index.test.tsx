@@ -6,6 +6,7 @@ import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
+import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: jest.fn(() => true) }))
@@ -23,6 +24,21 @@ jest.mock('@/components/tx/shared/hooks', () => ({
   __esModule: true,
   useAlreadySigned: jest.fn(() => false),
 }))
+
+const walletAddress = '0x1234567890000000000000000000000000000009'
+
+const createTxSummary = (confirmationsSubmitted: number, confirmationsRequired: number) =>
+  ({
+    id: faker.string.uuid(),
+    txStatus: 'AWAITING_CONFIRMATIONS',
+    executionInfo: {
+      type: 'MULTISIG',
+      nonce: 0,
+      confirmationsRequired,
+      confirmationsSubmitted,
+      missingSigners: [{ value: walletAddress }],
+    },
+  }) as unknown as Transaction
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockUseAlreadySigned = useAlreadySigned as jest.MockedFunction<typeof useAlreadySigned>
@@ -77,7 +93,21 @@ describe('TxStatusWidget', () => {
     expect(screen.getByText('Sign').closest('li')).not.toHaveClass('incomplete')
   })
 
-  it('shows no Sign step on an m/n Safe', () => {
+  it('shows a Sign step before Execute when the signature completes the threshold of an m/n Safe', () => {
+    renderWidget(3, { txSummary: createTxSummary(2, 3) })
+
+    const labels = screen.getAllByRole('listitem').map((item) => item.textContent)
+
+    expect(labels).toEqual(['Create', 'Confirmed (2 of 3)+1', 'Sign', 'Execute'])
+  })
+
+  it('shows no Sign step on an m/n Safe while other signatures are still missing', () => {
+    renderWidget(3, { txSummary: createTxSummary(1, 3) })
+
+    expect(screen.queryByText('Sign')).not.toBeInTheDocument()
+  })
+
+  it('shows no Sign step when creating a transaction on an m/n Safe', () => {
     renderWidget(2)
 
     expect(screen.queryByText('Sign')).not.toBeInTheDocument()
