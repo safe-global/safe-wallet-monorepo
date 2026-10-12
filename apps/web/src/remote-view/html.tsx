@@ -1,7 +1,7 @@
-import { createElement, useEffect, useRef, type ReactNode, type SyntheticEvent } from 'react'
+import { createElement, useCallback, useEffect, useRef, type ReactNode, type SyntheticEvent } from 'react'
 import { createRemoteComponentRenderer } from '@remote-dom/react/host'
-import { HTML_ATTRIBUTES, HTML_TAGS } from './frame/html'
-import { usePropUrls } from './slots'
+import { DYNAMIC_ATTRIBUTE, HTML_ATTRIBUTES, HTML_TAGS } from './frame/html'
+import { usePropUrls, useViewToken } from './slots'
 
 type Listener = (detail?: unknown) => void
 type ElementProps = Record<string, unknown> & { children?: ReactNode }
@@ -50,10 +50,10 @@ export const isAllowedUrl = (value: string, attribute: string, propOrigins: Set<
   }
 }
 
-const safeAttributes = (props: ElementProps, propOrigins: Set<string>) => {
+export const safeAttributes = (props: ElementProps, propOrigins: Set<string>) => {
   const safe: Record<string, unknown> = {}
   for (const [name, value] of Object.entries(props)) {
-    if (!ATTRIBUTES.has(name) || typeof value !== 'string') continue
+    if ((!ATTRIBUTES.has(name) && !DYNAMIC_ATTRIBUTE.test(name)) || typeof value !== 'string') continue
     if (URL_ATTRIBUTES.has(name) && !isAllowedUrl(value, name, propOrigins)) continue
     // SVG paint and filter references may only point inside the document.
     if (name !== 'remote-style' && /url\s*\(/i.test(value) && !/^url\(#[\w-]+\)$/.test(value.trim())) continue
@@ -83,11 +83,21 @@ const safeAttributes = (props: ElementProps, propOrigins: Set<string>) => {
   return safe
 }
 
-// Only the element the event happened on forwards it; the worker's DOM bubbles it from there.
-const forward = (listener: unknown, detail: (event: SyntheticEvent) => unknown = () => ({})) =>
+// Elements the page drew, by view. Slot content in between belongs to the app or to nested views.
+const drawn = new WeakMap<Element, object>()
+
+const innermostDrawn = (target: EventTarget | null, view: object): Element | null => {
+  let node = target instanceof Node ? (target instanceof Element ? target : target.parentElement) : null
+  while (node && drawn.get(node) !== view) node = node.parentElement
+  return node
+}
+
+// Only the innermost drawn element around the event target forwards it (the target itself, or the element
+// around slot content the user clicked); the worker's DOM bubbles it from there.
+const forward = (view: object, listener: unknown, detail: (event: SyntheticEvent) => unknown = () => ({})) =>
   typeof listener === 'function'
     ? (event: SyntheticEvent) => {
-        if (event.target === event.currentTarget) (listener as Listener)(detail(event))
+        if (innermostDrawn(event.target, view) === event.currentTarget) (listener as Listener)(detail(event))
       }
     : undefined
 
@@ -98,7 +108,15 @@ const fieldDetail = (event: SyntheticEvent) => {
 
 const htmlRenderer = (tag: string) =>
   createRemoteComponentRenderer(({ children, ...props }: ElementProps) => {
-    const ref = useRef<HTMLInputElement>(null)
+    const ref = useRef<HTMLInputElement | null>(null)
+    const view = useViewToken()
+    const register = useCallback(
+      (element: HTMLInputElement | null) => {
+        ref.current = element
+        if (element) drawn.set(element, view)
+      },
+      [view],
+    )
     const attributes = safeAttributes(props, usePropUrls())
     const isField = FIELD_TAGS.has(tag)
 
@@ -112,18 +130,20 @@ const htmlRenderer = (tag: string) =>
     const handlers = {
       onClick: (event: SyntheticEvent) => {
         if (tag === 'a' && !attributes.href) event.preventDefault()
-        forward(props.onClick)?.(event)
+        forward(view, props.onClick)?.(event)
       },
-      onKeyDown: forward(props.onKeydown, (event) => ({ key: (event as unknown as KeyboardEvent).key })),
-      onFocus: forward(props.onFocus),
-      onBlur: forward(props.onBlur),
+      onKeyDown: forward(view, props.onKeydown, (event) => ({ key: (event as unknown as KeyboardEvent).key })),
+      onFocus: forward(view, props.onFocus),
+      onBlur: forward(view, props.onBlur),
+      onLoad: forward(view, props.onLoad),
+      onError: forward(view, props.onError),
       onSubmit: (event: SyntheticEvent) => {
         event.preventDefault()
-        forward(props.onSubmit)?.(event)
+        forward(view, props.onSubmit)?.(event)
       },
       ...(isField && {
-        onInput: forward(props.onInput, fieldDetail),
-        onChange: forward(props.onChange, fieldDetail),
+        onInput: forward(view, props.onInput, fieldDetail),
+        onChange: forward(view, props.onChange, fieldDetail),
       }),
     }
 
@@ -134,7 +154,7 @@ const htmlRenderer = (tag: string) =>
         {
           ...rest,
           ...handlers,
-          ref,
+          ref: register,
           defaultValue: value,
           defaultChecked: checked,
         },
@@ -143,7 +163,7 @@ const htmlRenderer = (tag: string) =>
     }
     return createElement(
       tag,
-      { ...attributes, ...handlers },
+      { ...attributes, ...handlers, ref: register },
       ...(tag === 'br' || tag === 'hr' || tag === 'img' || tag === 'input' ? [] : [children]),
     )
   })

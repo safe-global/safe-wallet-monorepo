@@ -1,12 +1,14 @@
-import { createRemoteElement } from '@remote-dom/core/elements'
+import { createRemoteElement, RemoteFragmentElement } from '@remote-dom/core/elements'
 import { createRemoteComponent } from '@remote-dom/react'
 import { defineHtmlElements } from './html'
+import { UiPrimitiveElement } from './primitive'
 
 export const UiSlotElement = createRemoteElement({ attributes: ['name'] })
 
 declare global {
   interface HTMLElementTagNameMap {
     'ui-slot': InstanceType<typeof UiSlotElement>
+    'ui-primitive': InstanceType<typeof UiPrimitiveElement>
   }
 }
 
@@ -15,5 +17,7 @@ export const Slot = createRemoteComponent('ui-slot', UiSlotElement)
 
 export const defineRemoteElements = () => {
   customElements.define('ui-slot', UiSlotElement)
+  customElements.define('ui-primitive', UiPrimitiveElement)
+  if (!customElements.get('remote-fragment')) customElements.define('remote-fragment', RemoteFragmentElement)
   defineHtmlElements()
 }

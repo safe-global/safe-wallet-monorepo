@@ -86,6 +86,9 @@ const drawn = await page.locator('#root').evaluate(
     unsafeStyles: [...root.querySelectorAll('[style]')].filter((element) =>
       /url\(/i.test(element.getAttribute('style')),
     ).length,
+    missing: ['primitive link', 'render link', 'styled button', 'Accept all'].filter(
+      (text) => !root.innerText.includes(text),
+    ),
   }),
   leakUrl,
 )
@@ -103,6 +106,7 @@ const failures = [
   ...(drawn.forbiddenElements ? ['the page drew an element outside the allowlist'] : []),
   ...drawn.leakingUrls.map((url) => `the page drew a link or image to ${url}`),
   ...(drawn.unsafeStyles ? ['the page drew a style that loads a URL'] : []),
+  ...drawn.missing.map((text) => `the attack view did not render "${text}", so its attack was not tested`),
   ...leaks.map((url) => `request left the sandbox: ${url}`),
 ]
 if (failures.length) {

@@ -201,7 +201,8 @@ const dispatch = (type: string) =>
   function (this: Element & Record<string, unknown>, detail: EventInit = {}) {
     if ('value' in detail) this.value = detail.value
     if ('checked' in detail) this.checked = detail.checked
-    const event = new Event(type, { bubbles: true, cancelable: true }) as Event & Record<string, unknown>
+    const event = new Event(type, { bubbles: type !== 'load' && type !== 'error', cancelable: true }) as Event &
+      Record<string, unknown>
     if (typeof detail.key === 'string') event.key = detail.key
     return event
   }
@@ -210,21 +211,41 @@ const EVENTS = ['click', 'input', 'change', 'keydown', 'submit', 'focus', 'blur'
 
 export const HtmlElement = createRemoteElement({
   attributes: HTML_ATTRIBUTES,
-  events: Object.fromEntries(EVENTS.map((type) => [type, { bubbles: true, dispatchEvent: dispatch(type) }])),
+  events: {
+    ...Object.fromEntries(EVENTS.map((type) => [type, { bubbles: true, dispatchEvent: dispatch(type) }])),
+    // Media events do not bubble; the page only listens when the view does.
+    load: { dispatchEvent: dispatch('load') },
+    error: { dispatchEvent: dispatch('error') },
+  },
 })
 
 const FIELDS = new Set(['input', 'textarea', 'select'])
 
 // Libraries check tagName (Base UI wants a real BUTTON); Remote DOM still serializes the h-* localName.
 // Fields keep their own name so React does not treat them as native inputs and fire onChange twice.
+// data-* and aria-* carry state that styles and tests read (Base UI sets many); they are plain strings, so all pass.
+export const DYNAMIC_ATTRIBUTE = /^(data|aria)-[a-z0-9-]+$/
+
+class ForwardingElement extends HtmlElement {
+  setAttribute(name: string, value: string) {
+    super.setAttribute(name, value)
+    if (DYNAMIC_ATTRIBUTE.test(name)) this.updateRemoteAttribute(name, value)
+  }
+
+  removeAttribute(name: string) {
+    super.removeAttribute(name)
+    if (DYNAMIC_ATTRIBUTE.test(name)) this.updateRemoteAttribute(name)
+  }
+}
+
 export const defineHtmlElements = () => {
   for (const tag of HTML_TAGS) {
     const name = tag.toUpperCase()
     customElements.define(
       `h-${tag.toLowerCase()}`,
       FIELDS.has(tag)
-        ? class extends HtmlElement {}
-        : class extends HtmlElement {
+        ? class extends ForwardingElement {}
+        : class extends ForwardingElement {
             get tagName() {
               return name
             }

@@ -1,5 +1,7 @@
 import { createElement, useEffect } from 'react'
 import CookieBannerActions from '@safe-global/views/components/common/CookieAndTermBanner/CookieBannerActions'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Link } from '@safe-global/views/components/ui/link'
 
 declare const LEAK_URL: string
 
@@ -61,6 +63,11 @@ export const AttackView = ({ report }: { report: Report }) => {
     createElement('a', { href: `${LEAK_URL}/phishing` }, 'phishing link'),
     createElement('div', { style: { backgroundImage: `url(${LEAK_URL}/css)` }, className: 'styled' }, 'styled div'),
     createElement('script', { src: `${LEAK_URL}/script-tag` }),
+    // Primitives the page draws: their props are filtered the same way.
+    createElement(Link, { href: `${LEAK_URL}/primitive-link` }, 'primitive link'),
+    createElement(Button, { render: createElement('a', { href: `${LEAK_URL}/render-link` }) }, 'render link'),
+    createElement(Button, { dangerouslySetInnerHTML: { __html: `<img src="${LEAK_URL}/inner-html">` } }),
+    createElement(Button, { style: { backgroundImage: `url(${LEAK_URL}/primitive-css)` } }, 'styled button'),
     createElement(CookieBannerActions, {
       onAccept: () => report('callback', 'onAccept called'),
       onAcceptAll: () => report('callback', 'onAcceptAll called'),

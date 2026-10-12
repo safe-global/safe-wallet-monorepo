@@ -2,6 +2,7 @@
 import { build } from 'esbuild'
 import { transform as svgr } from '@svgr/core'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { existsSync, readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
@@ -11,8 +12,11 @@ const root = path.dirname(fileURLToPath(import.meta.url))
 const src = path.join(root, '../src/remote-view/frame')
 const viewsSrc = path.join(root, '../../../packages/views/src')
 
-// Primitives that need the real DOM; inside the worker they become remote elements the page draws.
-const PRIMITIVES = {}
+// Primitives that need the real DOM; inside the worker they resolve to generated stand-ins the page draws.
+const primitiveStandIns = () => {
+  const file = path.join(src, '../generated/primitives.json')
+  return existsSync(file) ? JSON.parse(readFileSync(file, 'utf8')) : {}
+}
 
 const RUNTIME = path.join(src, 'jsx-runtime.ts')
 const REACT_SHIM = path.join(src, 'react-shim.js')
@@ -21,9 +25,11 @@ const OWN_REACT = new Set([RUNTIME, REACT_SHIM])
 const workerPlugin = (viewsEntry) => ({
   name: 'remote-view-worker',
   setup(builder) {
-    for (const [request, file] of Object.entries(PRIMITIVES)) {
-      builder.onResolve({ filter: new RegExp(`@safe-global/views/${request}$`) }, () => ({ path: file }))
-    }
+    const standIns = primitiveStandIns()
+    builder.onResolve({ filter: /^@safe-global\/views\/components\/ui\/[a-z-]+$/ }, (args) => {
+      const file = standIns[args.path.split('/').pop()]
+      return file && args.importer !== file ? { path: file } : undefined
+    })
     builder.onResolve({ filter: /^\.\/views$/ }, () => ({ path: viewsEntry }))
     // Every JSX call and createElement in the worker, including precompiled libraries, maps HTML tags to remote elements.
     builder.onResolve({ filter: /^react\/jsx-(dev-)?runtime$/ }, (args) =>

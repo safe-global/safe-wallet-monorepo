@@ -11,3 +11,8 @@ export const useSlot = (name: unknown): ReactNode => {
 export const PropUrlsContext = createContext<Set<string>>(new Set())
 
 export const usePropUrls = () => useContext(PropUrlsContext)
+
+// Identifies one RemoteView, so event forwarding can tell its elements from those of views nested in its slots.
+export const ViewTokenContext = createContext<object>({})
+
+export const useViewToken = () => useContext(ViewTokenContext)

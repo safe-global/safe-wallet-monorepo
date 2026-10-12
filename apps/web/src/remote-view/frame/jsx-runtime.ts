@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as runtime from 'react/jsx-runtime'
-import { HTML_ATTRIBUTES, remoteTag } from './html'
+import { DYNAMIC_ATTRIBUTE, HTML_ATTRIBUTES, remoteTag } from './html'
 
 // JSX runtime for the worker build: HTML and SVG tags become remote `h-*` elements with attribute names
 // the page understands. Everything else is React as usual.
@@ -12,7 +12,10 @@ const ALIASES: Record<string, string> = { className: 'class', htmlFor: 'for', xl
 const kebab = (name: string) => name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`)
 
 const attributeName = (prop: string): string | null =>
-  ALIASES[prop] ?? ATTRIBUTE_BY_LOWER.get(prop.toLowerCase()) ?? ATTRIBUTE_BY_LOWER.get(kebab(prop)) ?? null
+  ALIASES[prop] ??
+  ATTRIBUTE_BY_LOWER.get(prop.toLowerCase()) ??
+  ATTRIBUTE_BY_LOWER.get(kebab(prop)) ??
+  (DYNAMIC_ATTRIBUTE.test(prop) ? prop : null)
 
 const styleString = (style: Record<string, unknown>) =>
   Object.entries(style)
@@ -24,7 +27,8 @@ const styleString = (style: Record<string, unknown>) =>
     .join(';')
 
 type Handler = (event: unknown) => void
-const FIELD_EVENTS: Record<string, string> = { onChange: 'input', onInput: 'input' }
+// React only fires these for real elements, so remote elements get their listeners through a ref.
+const FIELD_EVENTS: Record<string, string> = { onChange: 'input', onInput: 'input', onLoad: 'load', onError: 'error' }
 const PASSTHROUGH = new Set(['children', 'key', 'ref', 'onClick', 'onKeyDown', 'onSubmit', 'onFocus', 'onBlur'])
 
 const toRemoteProps = (props: Record<string, unknown>) => {
@@ -74,8 +78,9 @@ const RemoteField = ({
       }
       for (const [type, handler] of handlers.current) if (type === event.type) handler(synthetic)
     }
-    element.addEventListener('input', listener)
-    return () => element.removeEventListener('input', listener)
+    const types = [...new Set(handlers.current.map(([type]) => type))]
+    types.forEach((type) => element.addEventListener(type, listener))
+    return () => types.forEach((type) => element.removeEventListener(type, listener))
   }, [])
   return runtime.jsx(tag as React.ElementType, { ...props, ref: attach })
 }
