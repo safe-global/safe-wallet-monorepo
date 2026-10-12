@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/design/
 import { Button } from '@safe-global/design/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/design/components/ui/tooltip'
 import TxConfirmations from '@safe-global/design/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@safe-global/design/components/common/AuditLog'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
