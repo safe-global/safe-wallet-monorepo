@@ -65,21 +65,11 @@ export function verifyDataInPendingTx(data) {
 }
 
 export function verifyTxItemInPendingTx(data) {
-  let matchFound = false
-
-  cy.get(pendingTxItem)
-    .each(($item) => {
-      const itemText = $item.text()
-      const isMatch = data.every((tx) => itemText.includes(tx))
-
-      if (isMatch) {
-        matchFound = true
-        return false
-      }
-    })
-    .then(() => {
-      expect(matchFound).to.be.true
-    })
+  // Retries: parts of each item (e.g. the confirmations badge) render a moment after the item itself
+  cy.get(pendingTxItem).should(($items) => {
+    const matchFound = [...$items].some((item) => data.every((tx) => Cypress.$(item).text().includes(tx)))
+    expect(matchFound).to.be.true
+  })
 }
 
 export function verifyEmptyTxSection() {
