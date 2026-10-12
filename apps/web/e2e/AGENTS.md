@@ -8,7 +8,7 @@ Cypress → Playwright migration: follow [docs/CYPRESS_MIGRATION_GUIDE.md](docs/
 
 ## Layout
 
-- `tests/{smoke,regression,api,e2e}/` — specs
+- `tests/{smoke,regression,api,e2e}/` — specs against staging · `tests/isolated/` — specs against the local stack (`playwright.isolated.config.ts`, `src/fixtures/isolated.fixture.ts`)
 - `src/pages/` — page objects · `src/fixtures/` — fixtures · `src/data/` — test data · `src/api/` — API helpers
 
 ## Commands
@@ -19,6 +19,6 @@ CI: smoke + api run on **every PR** touching `apps/web/**` or `packages/**` (`we
 
 ## Isolated backend and Cypress regression
 
-`environment/run.mjs` launches the checked-in Anvil backend and existing Cypress regression specs for assets, Spaces basic flow and rejection. Run helper tests with `yarn workspace @safe-global/web e2e:env:test`. Preserve the fork hash, TXS indexing floor and CGW-visible scenario preconditions. Provider credentials must never reach the wallet or Cypress processes.
+`environment/run.mjs` launches the checked-in Anvil backend, the registered Cypress regression specs (`e2e:env cypress`) and the Playwright specs in `tests/isolated/` (`e2e:env playwright`). New isolated tests are Playwright specs that get their data from a scenario in `environment/scenarios/`. Run helper tests with `yarn workspace @safe-global/web e2e:env:test`. Preserve the fork hash, TXS indexing floor and CGW-visible scenario preconditions. Provider credentials must never reach the wallet, Cypress or Playwright processes.
 
-`web-isolated-e2e-backend.yml` builds the wallet before backend startup and runs Cypress on the same ARM runner. The backend action leaves containers running; the workflow must always attempt cleanup after tests. Native dependency and build caches include runner architecture. Chromium comes from the installed Playwright version. See [local setup](docs/ISOLATED_ENVIRONMENT.md) and [backend guidance](environment/infra/AGENTS.md).
+`web-isolated-e2e-backend.yml` builds the wallet before backend startup and runs Cypress shards plus one Playwright job on the same ARM runner type. The backend action leaves containers running; the workflow must always attempt cleanup after tests. Native dependency and build caches include runner architecture. Chromium comes from the installed Playwright version. See [local setup](docs/ISOLATED_ENVIRONMENT.md) and [backend guidance](environment/infra/AGENTS.md).

@@ -24,6 +24,10 @@ yarn pw:report            # Open last HTML report
 CI=true yarn pw:ci        # Smoke tests with retries, JUnit output
 ```
 
+### Isolated mode (local backend)
+
+Specs in `tests/isolated/` run against the local Docker stack (CGW, Transaction Service, Config Service and an Anvil Sepolia fork), not against staging: `yarn e2e:env playwright`. Setup, scenarios and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#playwright).
+
 ## Project Structure
 
 ```
@@ -34,6 +38,7 @@ e2e/
 │   ├── smoke/                 # Critical path — run on every PR
 │   ├── api/                   # Pure API tests (no browser)
 │   ├── e2e/                   # Full user flows
+│   ├── isolated/              # Run against the local stack (playwright.isolated.config.ts)
 │   └── regression/            # Bug-specific regression tests
 ├── src/                       # Framework code (not tests)
 │   ├── pages/                 # Page interactions (locators + actions, NO assertions)
@@ -99,6 +104,7 @@ Use categories intentionally:
 | `@permissions` | Role-based access tests           | Owner vs non-owner, proposer, threshold-dependent flows.                                    |
 | `@flaky`       | Quarantined flaky tests           | Temporary tag. Flaky tests must be fixed, quarantined, or removed — never ignored silently. |
 | `@migration`   | Migrated from Cypress             | Tracks migration progress. Remove tag once test is stable in Playwright.                    |
+| `@isolated`    | Runs against the local stack      | Lives in `tests/isolated/`. Gets its data from a scenario, never from staging Safes.        |
 
 **Tag must match directory.** A `@smoke` test lives in `tests/smoke/`, a `@api` test in `tests/api/`, etc. If unsure, default to `tests/regression/` — promotion to `tests/smoke/` is a deliberate decision after the test proves stable.
 
@@ -314,4 +320,4 @@ This is a Phase 2 integration. The framework foundation must be stable first. Cu
 
 ## Relationship to Cypress
 
-Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging.
+Playwright runs alongside Cypress during migration. New tests go in Playwright. Existing Cypress tests are migrated gradually. Both frameworks share the same test Safes on Sepolia staging. In isolated mode, both use the same scenario functions in `environment/scenarios/`.
