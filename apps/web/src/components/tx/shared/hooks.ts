@@ -222,13 +222,12 @@ export const useTxActions = (): TxActions => {
       // revert would cost the user gas for a guaranteed failure (WA-3005).
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
-      // A relay has no executor to approve on-chain, so the sign step must have completed the threshold
-      if (isRelayed && safeTx.signatures.size < safe.threshold) {
-        throw new Error('Cannot relay a transaction that is not fully signed')
-      }
-
-      // Relayed txs must be known to the service
       if (isRelayed) {
+        if (safeTx.signatures.size < safe.threshold) {
+          throw new Error('Cannot relay a transaction that is not fully signed')
+        }
+
+        // Relayed txs must be known to the service
         if (!txId) {
           txId = (await _propose(signer.address, safeTx, origin)).txId
         }

@@ -33,7 +33,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSmartContractWallet } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -234,14 +234,10 @@ const TxFlowProvider = <T extends unknown>({
     [signerChainId, signerAddress, signer?.isSafe],
   )
   const hasSigned = useAlreadySigned(safeTx)
-  const willSignBeforeExecute =
-    canExecute &&
-    !isProposing &&
-    !!safeTx &&
-    !hasSigned &&
-    safeTx.signatures.size === safe.threshold - 1 &&
-    !signer?.isSafe &&
-    !isSmartContractSigner
+  const signatureCompletesThreshold =
+    !!safeTx && !hasSigned && isOneSignatureShort(safeTx.signatures.size, safe.threshold)
+  const canSignOffChain = !signer?.isSafe && !isSmartContractSigner
+  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold && canSignOffChain
 
   const continueToExecute = useCallback(
     (txId: string) => {

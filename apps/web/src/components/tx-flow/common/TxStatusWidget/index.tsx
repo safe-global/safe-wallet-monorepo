@@ -4,7 +4,7 @@ import { useContext, type ReactNode } from 'react'
 import CreatedIcon from '@/public/images/messages/created.svg'
 import SignedIcon from '@/public/images/messages/signed.svg'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy } from '@/utils/transaction-guards'
+import { isMultisigExecutionInfo, isSignableBy, isConfirmableBy, isOneSignatureShort } from '@/utils/transaction-guards'
 import classnames from 'classnames'
 import { cn } from '@safe-global/views/utils/cn'
 import css from './styles.module.css'
@@ -55,7 +55,7 @@ const TxStatusWidget = ({
 
   const canSign = txSummary ? isSignableBy(txSummary, wallet?.address || '') : !isProposing
   const hasSigned = useAlreadySigned(safeTx)
-  const showSignStep = canSign && confirmationsSubmitted === threshold - 1 && !isBatch && !isMessage
+  const showSignStep = canSign && isOneSignatureShort(confirmationsSubmitted, threshold) && !isBatch && !isMessage
 
   return (
     <div className="bg-transparent">
