@@ -88,7 +88,6 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
 const mockUseIsSafeProEnabled = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
-jest.mock('../../../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => false }))
 const mockPlans: {
   tierName: string
   isTrialing: boolean
@@ -1202,7 +1201,7 @@ describe('SpaceSelectorDropdown', () => {
     it.each([
       [false, false, null, 'Workspace', false],
       [true, true, 20, 'Free access', false],
-      [true, true, 14, 'Free access · 14 days left', false],
+      [true, true, 14, 'Free access', false],
       [true, true, 7, 'Free access · 7 days left', true],
       [true, true, 1, 'Free access · 1 day left', true],
       [true, true, null, 'Free access', false],

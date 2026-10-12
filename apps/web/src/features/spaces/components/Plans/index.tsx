@@ -1,6 +1,12 @@
+import { useCallback, useRef, useState } from 'react'
+import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
-import PlanCards, { type PlanCardActions } from './PlanCards'
-import PlanStatusCard, { getCurrentBadge } from './PlanStatusCard'
+import CompareFeaturesCard from './CompareFeaturesCard'
+import { PlanCatalog, type PlanCardActions } from './PlanCards'
+import PlanStatusCard from './PlanStatusCard'
+import SalesPromptCard from './SalesPromptCard'
+import { canManagePlan } from './planTiers'
 import type {
   CurrentPlan,
   Meter,
@@ -8,6 +14,8 @@ import type {
   PlanSummary,
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
+
+const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 
 export default function Plans({
   plan,
@@ -36,6 +44,25 @@ export default function Plans({
   /** Only admins act on the plan; everyone else sees the plans without buttons. */
   readOnly?: boolean
 } & Pick<PlanCardActions, 'onCta'>) {
+  const [isCompareExpanded, setCompareExpanded] = useState(false)
+  const compareRef = useRef<HTMLElement>(null)
+  const currentPlanName = tiers.find((tier) => tier.isCurrent)?.name
+
+  const openCompare = useCallback(() => {
+    trackEvent(
+      { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: SAFE_PRO_PLANS_LABELS.compare_features },
+      { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.compare_features },
+    )
+    setCompareExpanded(true)
+    // Wait a frame so the expanded rows are laid out before scrolling to the card.
+    requestAnimationFrame(() => {
+      const card = compareRef.current
+      if (!card) return
+      card.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+      card.focus({ preventScroll: true })
+    })
+  }, [])
+
   return (
     <div className="flex flex-col gap-6">
       <PlanStatusCard
@@ -45,11 +72,10 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        canManage={readOnly ? false : canManage}
+        canManage={readOnly ? false : canManagePlan(canManage, currentPlan)}
       />
-      <PlanCards
+      <PlanCatalog
         tiers={tiers}
-        currentBadge={getCurrentBadge(plan)}
         currentPlan={currentPlan}
         onSubscribe={onSubscribe}
         onManage={onManage}
@@ -57,7 +83,15 @@ export default function Plans({
         readOnly={readOnly}
         location={PlanLocation.PLANS_PAGE}
         onCta={onCta}
+        onCompareFeatures={openCompare}
       />
+      <CompareFeaturesCard
+        ref={compareRef}
+        currentPlanName={currentPlanName}
+        isExpanded={isCompareExpanded}
+        onExpandedChange={setCompareExpanded}
+      />
+      {!readOnly && <SalesPromptCard />}
     </div>
   )
 }

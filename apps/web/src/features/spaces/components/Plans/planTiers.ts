@@ -6,7 +6,11 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import {
+  ENTERPRISE_TIER,
+  PLAN_CARD_COPY,
+  PLAN_ORDER,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -77,8 +81,7 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
 }
 
-/** Without a live plan, `recommended` names the tier that gets the primary "Continue with" button. */
-export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, recommended?: string): PlanCta => {
+export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
       if (!current?.isTrialing) return { kind: 'manage', label: 'Manage plan' }
@@ -95,11 +98,7 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined, rec
     }
   }
   if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) {
-    return recommended && pick.tier.name !== recommended
-      ? { kind: 'change', direction: 'change', label: `Switch to ${pick.tier.name}` }
-      : { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
-  }
+  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
 
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
   const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
@@ -227,3 +226,93 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
+
+/** "Manage plan" lives in the status panel; Enterprise changes go through sales. */
+export type CardCta =
+  | Exclude<PlanCta, { kind: 'manage' }>
+  | { kind: 'current'; label: typeof PLAN_CARD_COPY.currentPlan }
+  | { kind: 'account-team'; label: typeof PLAN_CARD_COPY.accountTeam }
+
+export const getCardCta = (pick: PlanPick, current: CurrentPlan | undefined): CardCta => {
+  if (pick.tier.isCurrent && pick.tier.name === ENTERPRISE_TIER.name) {
+    return { kind: 'account-team', label: PLAN_CARD_COPY.accountTeam }
+  }
+  const cta = getPlanCta(pick, current)
+  if (cta.kind === 'manage') return { kind: 'current', label: PLAN_CARD_COPY.currentPlan }
+  if (cta.kind === 'change' && isCycleSwitch(pick, current)) {
+    return {
+      ...cta,
+      label: pick.tier.billingCycle === 'year' ? PLAN_CARD_COPY.switchToYearly : PLAN_CARD_COPY.switchToMonthly,
+    }
+  }
+  return cta
+}
+
+/** Same plan and Safe count, other billing cycle: the only thing that changes is how often it's billed. */
+const isCycleSwitch = (pick: PlanPick, current: CurrentPlan | undefined): boolean =>
+  current !== undefined &&
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle !== null &&
+  pick.tier.billingCycle !== current.billingCycle &&
+  pick.option.label === current.seatsLabel
+
+/** Show "Manage plan" in the status panel, including trials with a card on file. */
+export const canManagePlan = (canManage: boolean | undefined, currentPlan: CurrentPlan | undefined): boolean =>
+  Boolean(canManage || (currentPlan?.isTrialing && currentPlan.hasPaymentMethod))
+
+/** Hide the static Enterprise card when Enterprise is the current plan. */
+export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {
+  const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
+  return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
+}
+
+export type PlanPrice = { headline: string; suffix: string }
+
+/** Same totals as the launch page: €669/mo, or the full yearly amount per year. */
+export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): PlanPrice => {
+  if (option.price === null) {
+    return {
+      headline: PLAN_CARD_COPY.custom,
+      suffix: PLAN_CARD_COPY.customSuffix,
+    }
+  }
+  return {
+    headline: formatPlanPrice(option.price, tier.currency),
+    suffix: priceSuffix(tier.billingCycle),
+  }
+}
+
+export type YearlySaving = { amount: string; percent: string }
+
+const percentFormat = new Intl.NumberFormat('en', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+/** How much less a yearly price costs than twelve monthly ones; undefined unless both prices exist and it saves. */
+export const getYearlySaving = (
+  twelveMonthsPrice: number | null | undefined,
+  yearlyPrice: number | null | undefined,
+  currency: string,
+): YearlySaving | undefined => {
+  if (twelveMonthsPrice == null || yearlyPrice == null) return undefined
+  const saved = twelveMonthsPrice - yearlyPrice
+  if (saved <= 0) return undefined
+  return { amount: formatPlanPrice(saved, currency), percent: percentFormat.format(saved / twelveMonthsPrice) }
+}
+
+/** A card's yearly saving at the same Safe count; the counterpart card fills in the current plan's price, which the CGW leaves out. */
+export const getCardSaving = (
+  tier: PlanTier,
+  option: PlanSeatOption | undefined,
+  counterpartTier: PlanTier | undefined,
+): YearlySaving | undefined => {
+  if (option?.price == null) return undefined
+  const counterpart = counterpartTier?.options.find((candidate) => candidate.label === option.label)
+  if (tier.billingCycle === 'year') {
+    const twelveMonths = option.originalPrice ?? (counterpart?.price == null ? null : counterpart.price * 12)
+    return getYearlySaving(twelveMonths, option.price, tier.currency)
+  }
+  return getYearlySaving(option.price * 12, counterpart?.price, tier.currency)
+}

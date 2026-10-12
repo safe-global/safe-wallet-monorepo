@@ -52,9 +52,9 @@ import { cn } from '@safe-global/views/utils/cn'
  * - 2026-09-09: Added `variant="brand"` (mint gradient over muted-secondary) for Safe Pro entry points
  * - 2026-09-09: Added `selected` (2px mint border + shadow-lg; transparent border when false) for a picked option
  * - 2026-09-21: Added `elevated` (shadow-lg without the selection border) for the current plan card
- * - 2026-09-28: Added `size="offer"` (28px top, 24px bottom) for the Plans v2 cards
- * - 2026-10-05: Added `bordered` (standard `border-border` outline that keeps the fill variant) for the Plans v2 cards
- * - 2026-10-05: Added `highlightOnHover` (card surface on hover and focus-within) for the Plans v2 cards
+ * - 2026-09-28: Added `size="offer"` (28px top, 24px bottom) for the plan cards
+ * - 2026-10-05: Added `bordered` (standard `border-border` outline that keeps the fill variant) for the plan cards
+ * - 2026-10-05: Added `highlightOnHover` (card surface on hover and focus-within) for the plan cards
  * - 2026-10-07: `highlightOnHover` adds a 2px stroke (border + inset ring, `foreground/25`, `/40` in dark) and `shadow-lg`, matching `selected` without shifting content
  */
 const cardVariants = cva(

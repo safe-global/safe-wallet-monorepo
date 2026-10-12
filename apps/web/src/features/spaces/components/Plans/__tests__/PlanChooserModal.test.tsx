@@ -9,7 +9,6 @@ const mockCheckout = jest.fn()
 const mockNeedsTrim = jest.fn()
 const mockOpenPortal = jest.fn()
 let mockTrimState: Record<string, unknown> = {}
-let mockIsPlansV2 = false
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
@@ -29,7 +28,6 @@ jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
-jest.mock('../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => mockIsPlansV2 }))
 jest.mock('../SelectAccountsStep', () => ({
   __esModule: true,
   default: ({
@@ -71,7 +69,6 @@ const LOCKED_ENTRY = { 'Entry Point': 'locked_modal' }
 describe('PlanChooserModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsPlansV2 = false
     mockTrimState = {}
     mockUseSpaceOffers.mockReturnValue({ paidPlans: PLANS, isLoading: false })
     mockNeedsTrim.mockImplementation((seats: number | null | undefined) => seats != null && 3 > seats)
@@ -107,7 +104,6 @@ describe('PlanChooserModal', () => {
     expect(screen.getByText('Choose a plan to unlock your Workspace.')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
@@ -136,7 +132,7 @@ describe('PlanChooserModal', () => {
   it('asks which Safes stay when the picked plan covers fewer than the Workspace holds', () => {
     render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     expect(mockCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
@@ -145,7 +141,7 @@ describe('PlanChooserModal', () => {
     fireEvent.click(screen.getByText('step-back'))
     expect(screen.getByRole('heading', { name: 'Your Safe Pro free access ended on Dec 5, 2026' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
     fireEvent.click(screen.getByText('step-continue'))
     expect(mockCheckout).toHaveBeenCalledWith(
       SPACE_ID,
@@ -176,29 +172,5 @@ describe('PlanChooserModal', () => {
     rerender(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={null} onBack={jest.fn()} />)
     expect(screen.getByText('There is no plan available for this Workspace right now.')).toBeInTheDocument()
     expect(screen.getByText('We couldn’t start the checkout. Please try again.')).toBeInTheDocument()
-  })
-
-  it('keeps the current plan cards while SAFE_PRO_PLANS_V2 is off', () => {
-    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
-
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
-    expect(screen.queryByTestId('plan-card')).not.toBeInTheDocument()
-  })
-
-  it('shows the v2 plan cards without the compare link while SAFE_PRO_PLANS_V2 is on', () => {
-    mockIsPlansV2 = true
-    render(<PlanChooserModal spaceId={SPACE_ID} reason="lapsed" endedAt={ENDED_AT} onBack={jest.fn()} />)
-
-    expect(screen.getAllByTestId('plan-card').length).toBeGreaterThan(0)
-    expect(screen.queryByText('Need more than 20?')).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Compare all features/ })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Continue with Business' }))
-    expect(mockCheckout).toHaveBeenCalledWith(
-      SPACE_ID,
-      'pl_business',
-      { 'Target Plan': 'business', Seats: 20, 'Billing Period': 'monthly', ...LOCKED_ENTRY },
-      undefined,
-    )
   })
 })

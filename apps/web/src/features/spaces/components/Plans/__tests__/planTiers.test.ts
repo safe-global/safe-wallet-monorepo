@@ -4,14 +4,23 @@ import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/P
 import {
   buildPlanTiers,
   claimTiers,
+  getCardCta,
+  getCardSaving,
   getChangeDirection,
   getPlanCta,
+  getPlanPrice,
+  getYearlySaving,
   _offersToTiers,
   seatsLabel,
   _subscriptionToTier,
   toCurrentPlan,
 } from '../planTiers'
-import type { CurrentPlan, PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
+import type {
+  CurrentPlan,
+  PlanSeatOption,
+  PlanSummary,
+  PlanTier,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 const offer = (overrides: Partial<PlanOffer> & Pick<PlanOffer, 'paymentLinkId' | 'planName'>): PlanOffer => ({
   priceId: `price_${overrides.paymentLinkId}`,
@@ -238,15 +247,6 @@ describe('planTiers', () => {
       label: 'Upgrade to Starter',
     })
     expect(getPlanCta(pick(starter), undefined)).toEqual({ kind: 'subscribe', label: 'Continue with Starter' })
-    expect(getPlanCta(pick(starter), undefined, 'Business')).toEqual({
-      kind: 'change',
-      direction: 'change',
-      label: 'Switch to Starter',
-    })
-    expect(getPlanCta(pick(starter), undefined, 'Starter')).toEqual({
-      kind: 'subscribe',
-      label: 'Continue with Starter',
-    })
     expect(getPlanCta(pick(enterprise), businessPlan)).toEqual({ kind: 'sales', label: 'Talk to sales' })
   })
 
@@ -279,5 +279,170 @@ describe('planTiers', () => {
     })
     expect(merged.isCurrent).toBe(true)
     expect(merged.features).toEqual(['From Stripe', 'In order'])
+  })
+})
+
+const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
+  paymentLinkId: 'pl_b20m',
+  priceId: 'price_b20m',
+  label: '20 Safe accounts',
+  seats: 20,
+  price: 1669,
+  originalPrice: null,
+  ...overrides,
+})
+
+const tier = (overrides: Partial<PlanTier> = {}): PlanTier => ({
+  id: 'Business-month',
+  name: 'Business',
+  currency: 'eur',
+  billingCycle: 'month',
+  options: [option()],
+  features: [],
+  ...overrides,
+})
+
+const currentPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
+  name: 'Business',
+  price: 1669,
+  currency: 'eur',
+  billingCycle: 'month',
+  isTrialing: false,
+  periodEndsAt: null,
+  ...overrides,
+})
+
+const currentBusiness = tier({ id: 'current', isCurrent: true, currentPriceId: 'price_b20m' })
+
+describe('getCardCta', () => {
+  it('shows the plan in force as the greyed-out current plan', () => {
+    expect(getCardCta({ tier: currentBusiness, option: option() }, currentPlan())).toEqual({
+      kind: 'current',
+      label: 'Current plan',
+    })
+    expect(
+      getCardCta(
+        { tier: currentBusiness, option: option() },
+        currentPlan({ isTrialing: true, hasPaymentMethod: true }),
+      ),
+    ).toEqual({ kind: 'current', label: 'Current plan' })
+  })
+
+  it('asks for a payment method during free access without one', () => {
+    expect(getCardCta({ tier: currentBusiness, option: option() }, currentPlan({ isTrialing: true }))).toEqual({
+      kind: 'billing',
+      label: 'Add payment method',
+    })
+  })
+
+  it('keeps the upgrade and switch wording of the launch cards', () => {
+    const starter = tier({
+      id: 'Starter-month',
+      name: 'Starter',
+      options: [option({ priceId: 'price_s2m', price: 189 })],
+    })
+    expect(getCardCta({ tier: starter, option: starter.options[0] }, currentPlan())).toMatchObject({
+      kind: 'change',
+      label: 'Switch to Starter',
+    })
+    expect(getCardCta({ tier: tier(), option: option() }, currentPlan({ name: 'Starter', price: 189 }))).toMatchObject({
+      kind: 'change',
+      label: 'Upgrade to Business',
+    })
+  })
+
+  it('words a move to the other billing cycle at the same Safe count by the cycle', () => {
+    const yearly = tier({
+      id: 'Business-year',
+      billingCycle: 'year',
+      options: [option({ priceId: 'price_b20y', price: 17_990 })],
+    })
+    const inForce = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
+
+    expect(getCardCta({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
+      kind: 'change',
+      label: 'Switch to yearly',
+    })
+    expect(
+      getCardCta({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
+    ).toMatchObject({ kind: 'change', label: 'Switch to 5 Safe accounts' })
+  })
+
+  it('sends Enterprise to sales, or to the account team once it is the plan in force', () => {
+    expect(getCardCta({ tier: ENTERPRISE_TIER, option: ENTERPRISE_TIER.options[0] }, currentPlan())).toEqual({
+      kind: 'sales',
+      label: 'Talk to sales',
+    })
+    const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true, currentPriceId: 'price_b20m' })
+    expect(getCardCta({ tier: currentEnterprise, option: option() }, currentPlan({ name: 'Enterprise' }))).toEqual({
+      kind: 'account-team',
+      label: 'Change via your account team',
+    })
+  })
+})
+
+describe('getPlanPrice', () => {
+  it('shows the monthly total', () => {
+    expect(getPlanPrice(tier(), option({ price: 669 }))).toEqual({
+      headline: '€669',
+      suffix: '/mo',
+    })
+  })
+
+  it('shows the yearly total on a yearly offer', () => {
+    expect(getPlanPrice(tier({ billingCycle: 'year' }), option({ price: 17_424 }))).toEqual({
+      headline: '€17,424',
+      suffix: '/yr',
+    })
+  })
+
+  it('shows custom pricing without a price', () => {
+    expect(getPlanPrice(ENTERPRISE_TIER, ENTERPRISE_TIER.options[0])).toEqual({
+      headline: 'Custom',
+      suffix: 'Annual term',
+    })
+  })
+})
+
+describe('getYearlySaving', () => {
+  it('shows what a year saves against twelve monthly payments', () => {
+    expect(getYearlySaving(1669 * 12, 17_990, 'eur')).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getYearlySaving(189 * 12, 1990, 'eur')).toEqual({ amount: '€278', percent: '12.3%' })
+  })
+
+  it('shows nothing without both prices or without a saving', () => {
+    expect(getYearlySaving(null, 17_990, 'eur')).toBeUndefined()
+    expect(getYearlySaving(20_028, undefined, 'eur')).toBeUndefined()
+    expect(getYearlySaving(12_000, 12_000, 'eur')).toBeUndefined()
+  })
+})
+
+describe('getCardSaving', () => {
+  const yearlyTier = tier({
+    id: 'Business-year',
+    billingCycle: 'year',
+    options: [option({ price: 17_990, originalPrice: 20_028 })],
+  })
+
+  it('shows a yearly card its own saving', () => {
+    expect(getCardSaving(yearlyTier, yearlyTier.options[0], undefined)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
+  it('takes the monthly price from the current plan card when the offers leave it out', () => {
+    const yearlyWithoutReference = option({ price: 17_990, originalPrice: null })
+    const currentMonthly = tier({ id: 'current', isCurrent: true, options: [option({ price: 1669 })] })
+
+    expect(getCardSaving(yearlyTier, yearlyWithoutReference, currentMonthly)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
+  it('shows a monthly card what the same Safe count saves yearly', () => {
+    expect(getCardSaving(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getCardSaving(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
   })
 })

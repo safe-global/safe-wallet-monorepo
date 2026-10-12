@@ -12,14 +12,12 @@ let mockIsAdmin = true
 const mockStartCheckout = jest.fn()
 const mockOpenPortal = jest.fn()
 const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
-let mockIsPlansV2 = false
 
 jest.mock('../../AuthState', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
-jest.mock('../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => mockIsPlansV2 }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 jest.mock('@/features/__core__', () => ({
   useLoadFeature: () => ({ SafeProAnnouncement: () => <div data-testid="safe-pro-announcement" /> }),
@@ -112,7 +110,6 @@ describe('SpacePlansPage', () => {
     jest.clearAllMocks()
     mockIsAdmin = true
     mockUseIsSafeProEnabled.mockReturnValue(true)
-    mockIsPlansV2 = false
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
   })
 
@@ -131,7 +128,7 @@ describe('SpacePlansPage', () => {
     render(<SpacePlansPage spaceId={SPACE_ID} />)
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getByText('Starter')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-card')[0]).toHaveTextContent('Starter')
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Switch to Starter' })).not.toBeInTheDocument()
   })
@@ -142,7 +139,8 @@ describe('SpacePlansPage', () => {
 
     expect(mockUseChangePlan).toHaveBeenCalledWith(SPACE_ID)
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('Business')
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: /Continue with/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
@@ -202,28 +200,6 @@ describe('SpacePlansPage', () => {
       'Entry Point': 'direct',
     })
     expect(screen.queryByTestId('change-plan-dialog')).not.toBeInTheDocument()
-  })
-
-  it('keeps the current plan cards while SAFE_PRO_PLANS_V2 is off', () => {
-    onPlan('Starter', 149, 'active')
-    mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
-    render(<SpacePlansPage spaceId={SPACE_ID} />)
-
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
-    expect(screen.queryByRole('button', { name: 'Current plan' })).not.toBeInTheDocument()
-  })
-
-  it('shows the v2 plan cards, reusing the change-plan dialog, while SAFE_PRO_PLANS_V2 is on', () => {
-    mockIsPlansV2 = true
-    onPlan('Starter', 149, 'active')
-    mockUseSpaceOffers.mockReturnValue({ paidPlans: [BUSINESS], isLoading: false })
-    render(<SpacePlansPage spaceId={SPACE_ID} />)
-
-    expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(1)
-
-    fireEvent.click(screen.getByRole('button', { name: 'Upgrade to Business' }))
-    expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-to', 'Business')
   })
 
   it('tracks the page as viewed with what it showed, and the plan button clicked', () => {

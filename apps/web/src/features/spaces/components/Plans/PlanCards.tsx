@@ -1,23 +1,28 @@
-import { useEffect, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
+import { useState } from 'react'
+import { ArrowDown, ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Input } from '@safe-global/views/components/ui/input'
 import { Link } from '@safe-global/views/components/ui/link'
-import { List, ListItem, ListItemText } from '@safe-global/views/components/ui/list'
+import { List, ListItem } from '@safe-global/views/components/ui/list'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { SAFE_PRO_PRICING_URL } from '@/config/constants'
+import { SAFE_PRO_SERVICE_DESCRIPTIONS_URL, SAFE_PRO_TERMS_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { trackEvent } from '@/services/analytics'
-import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
-import { YEARLY_SAVINGS_LABEL } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { formatPlanPrice, getPlanCta, getVisibleTiers, pickProps, priceSuffix } from './planTiers'
+import {
+  COMPARE_COPY,
+  getCardFeatures,
+  getPlanContent,
+  PLAN_CARD_COPY,
+  RECOMMENDED_PLAN,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanCta as PlanCtaKindOf,
@@ -25,6 +30,9 @@ import type {
   PlanSeatOption,
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
+import { COMPARE_FEATURES_ID } from './CompareFeaturesCard'
+import { FeatureCheck } from './FeatureCheck'
+import { getCardCta, getCardSaving, getCatalogTiers, getPlanPrice, getVisibleTiers, pickProps } from './planTiers'
 
 type Cycle = 'month' | 'year'
 
@@ -34,15 +42,18 @@ const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
   subscribe: PlanCtaKind.CONTINUE_WITH_PLAN,
 }
 
-export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
+/** Mint line behind the support level that draws in while the card is hovered or focused. */
+const SUPPORT_HIGHLIGHT_CLASSES = [
+  'absolute -inset-x-[0.08em] bottom-[calc(2px-0.06em)] -z-10 h-1 origin-left bg-mint',
+  'scale-x-0 transition-transform duration-[450ms] ease-soft motion-reduce:transition-none',
+  'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
+].join(' ')
 
-/** Fixed marketing copy: the saving differs per plan, so the toggle advertises the ceiling rather than a derived figure. */
+/** The current card goes grey while another card is hovered; like every card, it only gets a shadow on hover. */
+const CURRENT_PLAN_CLASSES =
+  'shadow-none transition-[background-color,box-shadow] duration-200 hover:shadow-lg focus-within:shadow-lg motion-reduce:transition-none group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary'
 
-const optionKey = (option: PlanSeatOption) => option.paymentLinkId ?? option.label
-
-/** The option matching a seat size picked on another cycle of the same plan, so the toggle does not reset it. */
-const findSeatOption = (options: PlanSeatOption[], seatsLabel: string | undefined) =>
-  seatsLabel === undefined ? undefined : options.find((option) => option.label === seatsLabel)
+const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
 export const Seats = ({
   options,
@@ -65,7 +76,7 @@ export const Seats = ({
       }}
     >
       <SelectTrigger className="w-full" aria-label={label}>
-        {/* The closed trigger would otherwise print the raw value, the payment link id. */}
+        {/* The closed trigger would otherwise print the raw value, the price id. */}
         <SelectValue>{value.label}</SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -87,11 +98,6 @@ export type PlanCardActions = {
   onManage?: () => void
   isBusy?: boolean
   currentPlan?: CurrentPlan
-  currentBadge?: CurrentBadge
-  /** Without a live plan, the tier that gets the primary button; the others read as a switch. */
-  recommendedPlan?: string
-  /** A question shown under the seats ("Need more than 20?") followed by a link to sales. */
-  salesHint?: (tier: PlanTier) => string | undefined
   /** A viewer who cannot act on the plan (a Workspace member who is not an admin): the cards show no buttons. */
   readOnly?: boolean
   /** Where the catalog is shown, for analytics. */
@@ -100,277 +106,334 @@ export type PlanCardActions = {
   onCta?: (pick: PlanPick, cta: PlanCtaKindOf) => void
 }
 
+/** Outline link to sales, tracked by which card sent the user there. */
+const SalesCta = ({
+  label,
+  kind,
+  onClick,
+}: {
+  label: string
+  kind: 'sales' | 'account-team'
+  onClick?: () => void
+}) => (
+  <Button
+    variant="outline"
+    size="lg"
+    weight="semibold"
+    className="w-full"
+    render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
+    onClick={() => {
+      const location = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
+      trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location }, { [MixpanelEventParams.LOCATION]: location })
+      onClick?.()
+    }}
+  >
+    {label}
+    <ArrowUpRight data-icon="inline-end" />
+  </Button>
+)
+
 const PlanCta = ({
   pick,
+  isPrimary,
   currentPlan,
-  recommendedPlan,
   onSubscribe,
   onManage,
   isBusy,
   location,
   onCta,
-}: { pick: PlanPick } & PlanCardActions) => {
-  const cta = getPlanCta(pick, currentPlan, recommendedPlan)
-  const clicked = () => {
-    trackEvent(SAFE_PRO_EVENTS.PLAN_CTA_CLICKED, {
-      ...pickProps(pick),
-      [MixpanelEventParams.CTA]: CTA_KIND[cta.kind],
-      [MixpanelEventParams.PLAN_IS_CURRENT]: Boolean(pick.tier.isCurrent),
-      [MixpanelEventParams.LOCATION]: location,
-    })
-    onCta?.(pick, cta)
-  }
+}: { pick: PlanPick; isPrimary: boolean } & PlanCardActions) => {
+  const cta = getCardCta(pick, currentPlan)
 
   switch (cta.kind) {
     case 'sales':
+      return <SalesCta label={cta.label} kind={cta.kind} onClick={() => onCta?.(pick, cta)} />
+    case 'account-team':
+      return <SalesCta label={cta.label} kind={cta.kind} />
+    case 'current':
       return (
-        <Button
-          variant="outline"
-          size="lg"
-          weight="semibold"
-          className="w-full"
-          render={
-            <a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" onClick={() => onCta?.(pick, cta)} />
-          }
-        >
+        <Button variant="outline" size="lg" weight="semibold" className="w-full" disabled>
           {cta.label}
         </Button>
       )
     case 'billing':
-      return (
-        <Button
-          size="lg"
-          weight="semibold"
-          accentIcon
-          className="w-full"
-          disabled={isBusy}
-          onClick={() => {
-            clicked()
-            onManage?.()
-          }}
-        >
-          {cta.label}
-          <ArrowRight data-icon="inline-end" />
-        </Button>
-      )
-    case 'manage':
-      return (
-        <Button variant="outline" size="lg" weight="semibold" className="w-full" disabled={isBusy} onClick={onManage}>
-          {cta.label}
-        </Button>
-      )
     case 'subscribe':
-      return (
-        <Button
-          size="lg"
-          weight="semibold"
-          accentIcon
-          className="w-full"
-          disabled={isBusy}
-          onClick={() => {
-            clicked()
-            onSubscribe?.(pick)
-          }}
-        >
-          {cta.label}
-          <ArrowRight data-icon="inline-end" />
-        </Button>
-      )
     case 'change':
       return (
         <Button
-          variant="outline"
+          variant={isPrimary ? 'default' : 'outline'}
           size="lg"
           weight="semibold"
+          accentIcon={isPrimary}
           className="w-full"
           disabled={isBusy}
           onClick={() => {
-            clicked()
-            onSubscribe?.(pick)
+            trackEvent(SAFE_PRO_EVENTS.PLAN_CTA_CLICKED, {
+              ...pickProps(pick),
+              [MixpanelEventParams.CTA]: CTA_KIND[cta.kind],
+              [MixpanelEventParams.PLAN_IS_CURRENT]: Boolean(pick.tier.isCurrent),
+              [MixpanelEventParams.LOCATION]: location,
+            })
+            onCta?.(pick, cta)
+            if (cta.kind === 'billing') onManage?.()
+            else onSubscribe?.(pick)
           }}
         >
           {cta.label}
+          <ArrowRight data-icon="inline-end" />
         </Button>
       )
+    default: {
+      const _exhaustive: never = cta
+      return _exhaustive
+    }
   }
 }
 
 export const PlanCard = ({
   tier,
-  selected,
-  onSelect,
-  onOptionChange,
-  preferredSeats,
-  currentBadge,
-  salesHint,
+  seatsLabel,
+  onSeatsChange,
+  counterpartTier,
+  onSwitchToYearly,
   ...actions
 }: {
   tier: PlanTier
-  selected?: boolean
-  onSelect?: () => void
-  onOptionChange?: (option: PlanSeatOption) => void
-  preferredSeats?: string
+  /** Safe count picked on the other billing cycle, so switching cycles keeps it. */
+  seatsLabel?: string
+  onSeatsChange?: (label: string) => void
+  /** The same plan on the other billing cycle, to compare monthly and yearly prices. */
+  counterpartTier?: PlanTier
+  onSwitchToYearly?: () => void
 } & PlanCardActions) => {
-  const selectable = onSelect !== undefined
-  // In the catalog the plan in force is the one white, raised card; a chooser marks its pick with the mint border.
-  const isCurrentInCatalog = !selectable && Boolean(tier.isCurrent)
-  const currentOption = tier.options.find((candidate) => candidate.priceId === tier.currentPriceId)
-  const preferredOption = findSeatOption(tier.options, preferredSeats)
-  const [option, setOption] = useState<PlanSeatOption | undefined>(preferredOption ?? currentOption ?? tier.options[0])
+  const content = getPlanContent(tier.name)
+  const isPrimary = tier.name === RECOMMENDED_PLAN
+  // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
+  const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
+  // Tracked by key: tiers are rebuilt every render.
+  const [pickedKey, setPickedKey] = useState<string>()
+  const option =
+    tier.options.find((candidate) => optionKey(candidate) === pickedKey) ??
+    tier.options.find((candidate) => candidate.label === seatsLabel) ??
+    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
+    tier.options.find((candidate) => isCurrentPlan && candidate.label === actions.currentPlan?.seatsLabel) ??
+    tier.options[0]
+  const price = option ? getPlanPrice(tier, option) : undefined
+  const isYearly = tier.billingCycle === 'year'
+  const saving = getCardSaving(tier, option, counterpartTier)
+  const features = getCardFeatures(tier.name) ?? tier.features
 
-  useEffect(() => {
-    if (currentOption && !preferredOption) setOption(currentOption)
-  }, [currentOption, preferredOption])
-
-  const price = option?.price ?? null
-  const hint = salesHint?.(tier)
-  const features = option?.features?.length ? option.features : tier.features
-  const changeOption = (next: PlanSeatOption) => {
-    setOption(next)
-    onOptionChange?.(next)
-  }
-
+  // Always render all five rows so the subgrid lines up across cards.
   return (
     <Card
-      variant={isCurrentInCatalog ? 'default' : 'muted-secondary'}
-      elevated={isCurrentInCatalog}
+      variant={isCurrentPlan ? 'default' : 'muted-secondary'}
+      bordered={!isCurrentPlan}
+      selected={isCurrentPlan || undefined}
+      highlightOnHover={!isCurrentPlan}
+      size="offer"
       radius="lg-xl"
-      className={cn('flex-1', selectable && 'cursor-pointer')}
-      selected={selectable ? Boolean(selected) : undefined}
-      role={selectable ? 'radio' : undefined}
-      aria-checked={selectable ? selected : undefined}
-      tabIndex={selectable ? 0 : undefined}
-      onClick={onSelect}
-      onKeyDown={selectable ? (e) => (e.key === 'Enter' || e.key === ' ') && onSelect() : undefined}
-      data-testid={tier.isCurrent ? 'current-plan-card' : undefined}
+      className={cn(
+        'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
+        isCurrentPlan && CURRENT_PLAN_CLASSES,
+      )}
+      data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
+      data-hover-plan={!isCurrentPlan || undefined}
+      data-primary={isPrimary || undefined}
     >
-      <CardContent className="flex flex-1 flex-col">
-        <div className="flex h-full flex-col gap-4">
-          <div className="flex flex-1 flex-col gap-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2">
-                <Typography variant={selectable ? 'paragraph-large-medium' : 'h4'}>{tier.name}</Typography>
-                {tier.isCurrent && currentBadge && (
-                  <Badge variant={currentBadge.variant} size="status" shape="status">
-                    {currentBadge.label}
-                  </Badge>
-                )}
-              </div>
+      <CardContent className="flex min-w-0 flex-col @2xl:@max-4xl:grid @2xl:@max-4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @2xl:@max-4xl:grid-rows-[auto_1fr_auto_auto_auto] @2xl:@max-4xl:gap-x-10 @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
+        <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">
+          <div className="flex items-center gap-2">
+            <Typography variant="h4">{tier.name}</Typography>
+            {isCurrentPlan && (
+              <Badge variant="mint" size="status" shape="status" data-testid="plan-current-badge">
+                {COMPARE_COPY.current}
+              </Badge>
+            )}
+          </div>
+          {content && (
+            <Typography variant="paragraph-small" color="muted">
+              {content.description}
+            </Typography>
+          )}
+        </div>
 
-              <div className="flex items-baseline gap-1">
-                <Typography variant="h4" className={cn(selectable && 'line-through')}>
-                  {price === null ? 'Custom' : formatPlanPrice(price, tier.currency)}
-                </Typography>
-                <Typography color="muted">{price === null ? 'Annual term' : priceSuffix(tier.billingCycle)}</Typography>
-                {selectable && (
-                  <Typography variant="paragraph-large-bold" color="success">
-                    Free
-                  </Typography>
-                )}
-              </div>
+        <div className="mt-5 flex flex-col gap-0.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-3">
+          {price && (
+            <div className="flex items-baseline gap-1">
+              <Typography variant="h3">{price.headline}</Typography>
+              <Typography variant="paragraph-small" color="muted">
+                {price.suffix}
+              </Typography>
             </div>
+          )}
+          {saving && isYearly && (
+            <Typography variant="paragraph-small" className="flex items-center gap-1" data-testid="plan-yearly-saving">
+              <Check aria-hidden className="size-3.5 shrink-0 text-accent-success" />
+              {PLAN_CARD_COPY.savedVsMonthly(saving.amount, saving.percent)}
+            </Typography>
+          )}
+          {saving && !isYearly && onSwitchToYearly && (
+            <Typography variant="paragraph-small">
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                data-testid="plan-yearly-saving"
+                onClick={onSwitchToYearly}
+              >
+                {PLAN_CARD_COPY.saveWithYearly(saving.amount, saving.percent)}
+              </Link>
+            </Typography>
+          )}
+        </div>
 
-            <div className="flex flex-col gap-4">
-              {option && (
-                <div className="flex flex-col gap-1.5">
-                  <Seats options={tier.options} value={option} onChange={changeOption} />
-                  {hint && (
-                    <Typography variant="paragraph-mini" color="muted">
-                      {hint}{' '}
-                      <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-                        Talk to sales <ArrowRight className="inline size-3" />
-                      </Link>
-                    </Typography>
-                  )}
+        <div className="mt-5 flex flex-col gap-2.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-4">
+          {option && (
+            <>
+              <Seats
+                options={tier.options}
+                value={option}
+                onChange={(next) => {
+                  setPickedKey(optionKey(next))
+                  onSeatsChange?.(next.label)
+                }}
+                label={`${PLAN_CARD_COPY.seatsLabel} ${tier.name}`}
+              />
+              {!actions.readOnly && (
+                <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
+                  <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
+                  {isPrimary && <SalesCta label={PLAN_CARD_COPY.talkToSales} kind="sales" />}
                 </div>
               )}
+            </>
+          )}
+        </div>
 
-              <List className="gap-1">
-                {features.map((feature) => (
-                  <ListItem key={feature} size="sm" className="py-0">
-                    <Avatar size="xs">
-                      <AvatarFallback>
-                        <Check className="size-4" strokeWidth={1.5} />
-                      </AvatarFallback>
-                    </Avatar>
-                    <ListItemText primary={feature} />
-                  </ListItem>
-                ))}
-              </List>
-            </div>
+        <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
+          <Separator className="@2xl:@max-4xl:hidden" />
+          <div className="flex flex-col gap-3">
+            {content && <Typography variant="paragraph-small-bold">{PLAN_CARD_COPY.featuresHeading}</Typography>}
+            <List className="gap-3" data-testid="plan-features">
+              {features.map((label) => (
+                <ListItem key={label} size="sm" className="items-start py-0">
+                  <FeatureCheck />
+                  <Typography variant="paragraph-small">{label}</Typography>
+                </ListItem>
+              ))}
+            </List>
           </div>
+        </div>
 
-          {!selectable && !actions.readOnly && option && <PlanCta pick={{ tier, option }} {...actions} />}
+        <div className="mt-6 flex flex-col gap-5 @2xl:@max-4xl:col-span-2 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-5">
+          {content && (
+            <>
+              <Separator />
+              <div className="flex flex-col gap-1" data-testid="plan-support">
+                <Typography variant="paragraph-bold" data-testid="plan-support-level">
+                  <span className="relative isolate">
+                    {content.support.level}
+                    <span aria-hidden className={SUPPORT_HIGHLIGHT_CLASSES} />
+                  </span>{' '}
+                  {PLAN_CARD_COPY.support}
+                </Typography>
+                <Typography variant="paragraph-small" color="muted">
+                  {content.support.detail}
+                </Typography>
+              </div>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
   )
 }
 
-/** Billing-cycle toggle plus one card per visible tier; the Plans page wraps it in a card, dialogs use it bare. */
+export const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'
+
+/** Billing-cycle toggle plus one card per visible tier; the Plans page frames it in a card, dialogs embed it. */
 export function PlanCatalog({
   tiers,
+  onCompareFeatures,
+  embedded,
   ...actions
 }: {
   tiers: PlanTier[]
+  /** Opens and scrolls to the compare card. Without it, the link just jumps to the anchor. */
+  onCompareFeatures?: () => void
+  /** Inside a modal: no card frame and no compare link, as the compare table isn't there. */
+  embedded?: boolean
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
   const [seatsByPlan, setSeatsByPlan] = useState<Record<string, string>>({})
-  const hasYearly = tiers.some((tier) => tier.billingCycle === 'year')
-  const visible = getVisibleTiers(tiers, cycle)
+  const visible = getVisibleTiers(getCatalogTiers(tiers), cycle)
 
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
+  const catalog = (
+    <div className="@container flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-          <TabsList aria-label="Billing cycle">
-            <TabsTrigger value="month">Monthly</TabsTrigger>
-            <TabsTrigger value="year">
-              Yearly
-              {hasYearly && (
-                <Badge variant="brand" size="status" shape="status">
-                  {YEARLY_SAVINGS_LABEL}
-                </Badge>
-              )}
-            </TabsTrigger>
+          <TabsList aria-label={PLAN_CARD_COPY.billingCycleLabel}>
+            <TabsTrigger value="month">{PLAN_CARD_COPY.monthly}</TabsTrigger>
+            <TabsTrigger value="year">{PLAN_CARD_COPY.yearly}</TabsTrigger>
           </TabsList>
         </Tabs>
 
-        <Link href={SAFE_PRO_PRICING_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          Compare all features <ArrowUpRight />
-        </Link>
+        {!embedded && (
+          <Link
+            href={`#${COMPARE_FEATURES_ID}`}
+            variant="muted"
+            className="hidden whitespace-nowrap @2xl:inline"
+            onClick={(event) => {
+              if (!onCompareFeatures) return
+              event.preventDefault()
+              onCompareFeatures()
+            }}
+          >
+            {COMPARE_COPY.title} <ArrowDown />
+          </Link>
+        )}
       </div>
 
-      <div className="flex flex-col gap-4 md:flex-row">
+      {/* One shared row track per card section (the cards subgrid into it), so rows align whatever wraps. */}
+      <div className="group/plans flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
         {visible.map((tier) => (
           <PlanCard
             key={tier.id}
             tier={tier}
-            preferredSeats={seatsByPlan[tier.name]}
-            onOptionChange={(option) => setSeatsByPlan((prev) => ({ ...prev, [tier.name]: option.label }))}
+            seatsLabel={seatsByPlan[tier.name]}
+            onSeatsChange={(label) => setSeatsByPlan((picked) => ({ ...picked, [tier.name]: label }))}
+            counterpartTier={tiers.find(
+              (other) =>
+                other.name === tier.name && other.billingCycle !== null && other.billingCycle !== tier.billingCycle,
+            )}
+            onSwitchToYearly={() => setCycle('year')}
             {...actions}
           />
         ))}
       </div>
+
+      {actions.readOnly && (
+        <Typography variant="paragraph-small" color="muted" align="center">
+          {READ_ONLY_NOTE}
+        </Typography>
+      )}
+
+      <Typography variant="paragraph-mini" color="muted" align="center">
+        {PLAN_CARD_COPY.termsApply}{' '}
+        <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          {PLAN_CARD_COPY.proTerms}
+        </Link>
+        {' · '}
+        <Link href={SAFE_PRO_SERVICE_DESCRIPTIONS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
+          {PLAN_CARD_COPY.serviceDescriptions}
+        </Link>
+      </Typography>
     </div>
   )
-}
 
-export const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'
+  if (embedded) return catalog
 
-export default function PlanCards(props: { tiers: PlanTier[] } & PlanCardActions) {
   return (
-    <Card radius="xl">
-      <CardContent>
-        <div className="flex flex-col gap-6">
-          <PlanCatalog {...props} />
-          {props.readOnly && (
-            <Typography variant="paragraph-small" color="muted" align="center">
-              {READ_ONLY_NOTE}
-            </Typography>
-          )}
-        </div>
-      </CardContent>
+    <Card radius="xl" size="sm">
+      <CardContent>{catalog}</CardContent>
     </Card>
   )
 }

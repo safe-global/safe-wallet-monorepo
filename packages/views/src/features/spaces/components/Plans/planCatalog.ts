@@ -2,13 +2,10 @@ import type { PlanTier } from './types'
 
 export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
 
-/** Largest yearly saving across plans. */
-export const YEARLY_SAVINGS_LABEL = 'Save ~10%'
-
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
 
-export type PlanNameV2 = (typeof PLAN_ORDER)[number]
+export type PlanName = (typeof PLAN_ORDER)[number]
 
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
@@ -16,14 +13,14 @@ export const NAMED_SUPPORT_CONTACT = 'Named support contact'
 export const POLICIES = 'Policies'
 export const PAY_GAS_FROM_SAFE = 'Pay gas fees from Safe account'
 
-export type PlanContentV2 = {
+export type PlanContent = {
   /** Who the plan is for, one line under its name. */
   description: string
   support: { level: string; detail: string }
 }
 
-/** Plans page v2 (SAFE_PRO_PLANS_V2): replaces the Stripe selling points on its cards. */
-export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
+/** Replaces the Stripe selling points on the plan cards. */
+export const PLAN_CONTENT: Record<PlanName, PlanContent> = {
   Starter: {
     description: 'Coordinate your team with a shared home for your Safes and transactions.',
     support: { level: 'Standard', detail: 'In-app and email' },
@@ -38,12 +35,12 @@ export const PLAN_CONTENT_V2: Record<PlanNameV2, PlanContentV2> = {
   },
 }
 
-const isPlanNameV2 = (name: string): name is PlanNameV2 => PLAN_ORDER.some((plan) => plan === name)
+const isPlanName = (name: string): name is PlanName => PLAN_ORDER.some((plan) => plan === name)
 
-type CardFeatureV2 = { from: PlanNameV2; label: string | Record<PlanNameV2, string> }
+type CardFeature = { from: PlanName; label: string | Record<PlanName, string> }
 
 /** Card lists, per the Plans tab feature list. `from` is the first plan that includes it. */
-export const CARD_FEATURES_V2: CardFeatureV2[] = [
+export const CARD_FEATURES: CardFeature[] = [
   {
     from: 'Starter',
     label: {
@@ -63,18 +60,18 @@ export const CARD_FEATURES_V2: CardFeatureV2[] = [
 ]
 
 /** Everything a plan includes, in the same order on every card. */
-export const getCardFeaturesV2 = (name: string): string[] | undefined => {
-  if (!isPlanNameV2(name)) return undefined
+export const getCardFeatures = (name: string): string[] | undefined => {
+  if (!isPlanName(name)) return undefined
   const rank = PLAN_ORDER.indexOf(name)
-  return CARD_FEATURES_V2.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ label }) =>
+  return CARD_FEATURES.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ label }) =>
     typeof label === 'string' ? label : label[name],
   )
 }
 
-export const getPlanContentV2 = (name: string): PlanContentV2 | undefined =>
-  isPlanNameV2(name) ? PLAN_CONTENT_V2[name] : undefined
+export const getPlanContent = (name: string): PlanContent | undefined =>
+  isPlanName(name) ? PLAN_CONTENT[name] : undefined
 
-export const PLAN_CARD_COPY_V2 = {
+export const PLAN_CARD_COPY = {
   savedVsMonthly: (amount: string, percent: string) => `Save ${amount} (${percent}) vs monthly`,
   saveWithYearly: (amount: string, percent: string) => `Save ${amount} (${percent}) with yearly`,
   termsApply: 'Terms apply:',
@@ -98,33 +95,33 @@ export const PLAN_CARD_COPY_V2 = {
 export const SAFENET_CHECKS = 'Safenet checks'
 
 /** `true` is included, `false` is not; a string names what the plan gets. */
-export type CompareValueV2 = boolean | string
+export type CompareValue = boolean | string
 
-export type CompareRowV2 = {
+export type CompareRow = {
   feature: string
   /** Unreleased: a "Soon" chip next to the feature name. */
   isComingSoon?: boolean
   /** Partner add-on: a "Learn more" link next to the feature opens its signup. */
   isAddOn?: boolean
-  values: Record<PlanNameV2, CompareValueV2>
+  values: Record<PlanName, CompareValue>
 }
 
-export type CompareSectionV2 = {
+export type CompareSection = {
   title: string
   /** Shown next to the title while the compare card is hovered. */
   hoverEmoji?: string
-  rows: CompareRowV2[]
+  rows: CompareRow[]
 }
 
-const every = (value: CompareValueV2): Record<PlanNameV2, CompareValueV2> => ({
+const every = (value: CompareValue): Record<PlanName, CompareValue> => ({
   Starter: value,
   Business: value,
   Enterprise: value,
 })
-const fromBusiness: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: true, Enterprise: true }
-const enterpriseOnly: Record<PlanNameV2, CompareValueV2> = { Starter: false, Business: false, Enterprise: true }
+const fromBusiness: Record<PlanName, CompareValue> = { Starter: false, Business: true, Enterprise: true }
+const enterpriseOnly: Record<PlanName, CompareValue> = { Starter: false, Business: false, Enterprise: true }
 
-export const COMPARE_COPY_V2 = {
+export const COMPARE_COPY = {
   title: 'Compare all features',
   featureColumn: 'Features',
   current: 'Current',
@@ -136,7 +133,7 @@ export const COMPARE_COPY_V2 = {
 }
 
 /** The collapsed "Compare all features" card shows the first few rows. */
-export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
+export const COMPARE_SECTIONS: CompareSection[] = [
   {
     title: 'Coming soon',
     hoverEmoji: '👀',
@@ -200,7 +197,7 @@ export const COMPARE_SECTIONS_V2: CompareSectionV2[] = [
   },
 ]
 
-export const SALES_PROMPT_V2 = {
+export const SALES_PROMPT = {
   prompt: 'Not sure which plan fits?',
   action: 'Talk to sales',
 }

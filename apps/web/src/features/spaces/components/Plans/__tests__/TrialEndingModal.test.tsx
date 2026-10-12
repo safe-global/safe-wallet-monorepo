@@ -11,10 +11,8 @@ const mockUseSpaceOffers = jest.fn()
 const mockUseIsAdmin = jest.fn()
 const mockOpenPortal = jest.fn()
 const storage: Record<string, string> = {}
-let mockIsPlansV2 = false
 
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
-jest.mock('../../../hooks/useIsSafeProPlansV2Enabled', () => ({ useIsSafeProPlansV2Enabled: () => mockIsPlansV2 }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))
@@ -126,7 +124,6 @@ const trial = (daysLeft: number, isTrialEndingSoon = daysLeft <= 7) => ({
 describe('TrialEndingModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsPlansV2 = false
     for (const key of Object.keys(storage)) delete storage[key]
     mockUseSpacePlan.mockReturnValue(trial(7))
     mockUseSpaceOffers.mockReturnValue({ paidPlans: [STARTER], isLoading: false })
@@ -173,7 +170,6 @@ describe('TrialEndingModal', () => {
     expect(screen.getByText(/add a payment method by Dec 5, 2026, your Workspace will be locked/)).toBeInTheDocument()
     expect(screen.getByTestId('trial-reminder-tooltip')).toBeInTheDocument()
     expect(screen.queryByText('Enterprise')).not.toBeInTheDocument()
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Talk to sales/ })).toHaveAttribute('href', CONTACT_SALES_URL)
 
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED, {
@@ -236,24 +232,5 @@ describe('TrialEndingModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     expect(screen.queryByRole('heading', { name: 'Your free access will end in 7 days' })).not.toBeInTheDocument()
     expect(storage.safeProTrialReminderSeen).toBe(JSON.stringify({ [SPACE_ID]: true }))
-  })
-
-  it('keeps the current plan cards while SAFE_PRO_PLANS_V2 is off', () => {
-    render(<TrialEndingModal spaceId={SPACE_ID} />)
-
-    expect(screen.getByText('Need more than 20?')).toBeInTheDocument()
-    expect(screen.queryByTestId('plan-card')).not.toBeInTheDocument()
-  })
-
-  it('shows the v2 plan cards without the compare link while SAFE_PRO_PLANS_V2 is on', () => {
-    mockIsPlansV2 = true
-    render(<TrialEndingModal spaceId={SPACE_ID} />)
-
-    expect(screen.getAllByTestId('plan-card').length).toBeGreaterThan(0)
-    expect(screen.queryByText('Need more than 20?')).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: /Compare all features/ })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
-    expect(screen.getByTestId('change-plan-dialog')).toHaveAttribute('data-to', 'Starter')
   })
 })

@@ -12,16 +12,13 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { markTrialReminderSeen, wasTrialReminderSeen } from '../../store/trialReminder'
 import ChangePlanFlow from './ChangePlanFlow'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PlanCatalog } from './PlanCards'
-import { salesHintFor } from './PlanChooserModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import PlanCatalogV2 from './v2/PlanCatalogV2'
 import { InfoTip } from './PlanStatusCard'
 import type { CurrentPlan, PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
@@ -58,7 +55,6 @@ const TrialEndingChooser = ({
   const { openPortal, isRedirecting } = useBillingPortal(spaceId)
   const [pick, setPick] = useState<PlanPick>()
   const [isChanged, setIsChanged] = useState(false)
-  const isPlansV2 = useIsSafeProPlansV2Enabled()
   const tiers = useMemo(
     () =>
       buildPlanTiers(paidPlans, subscription ? { subscription, seatsQuota } : undefined).filter(
@@ -82,7 +78,7 @@ const TrialEndingChooser = ({
   return (
     <>
       <Dialog open={!isChanged} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent size={isPlansV2 ? 'lg' : 'md'} surface="card" padding="sm">
+        <DialogContent size="lg" surface="card" padding="sm">
           <div className="flex flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
               <Typography variant="h3" as={DialogTitle}>
@@ -104,21 +100,11 @@ const TrialEndingChooser = ({
                 <AlertSeverityIcon variant="info" />
                 <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
               </Alert>
-            ) : isPlansV2 ? (
-              <PlanCatalogV2
+            ) : (
+              <PlanCatalog
                 embedded
                 tiers={tiers}
                 currentPlan={currentPlan}
-                onManage={() => void openPortal()}
-                onSubscribe={setPick}
-                isBusy={isRedirecting}
-                readOnly={!isAdmin}
-              />
-            ) : (
-              <PlanCatalog
-                tiers={tiers}
-                currentPlan={currentPlan}
-                salesHint={salesHintFor(tiers)}
                 onManage={() => void openPortal()}
                 onSubscribe={setPick}
                 isBusy={isRedirecting}

@@ -12,12 +12,10 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import AuthState from '../AuthState'
 import Plans from './index'
-import PlansV2 from './v2/PlansV2'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from './planSelection'
 import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
-import { useIsSafeProPlansV2Enabled } from '../../hooks/useIsSafeProPlansV2Enabled'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -43,7 +41,6 @@ const defaultSeats = (tiers: PlanTier[]): number | undefined => {
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useIsSafeProEnabled()
-  const isPlansV2 = useIsSafeProPlansV2Enabled()
   const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const {
     plan,
@@ -60,7 +57,6 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { canChange } = useChangePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
-  const PlansView = isPlansV2 ? PlansV2 : Plans
 
   const currentPlan = useMemo(
     () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
@@ -105,7 +101,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
         ) : isPlanLoading || isOffersLoading ? (
           <PlansSkeleton />
         ) : (
-          <PlansView
+          <Plans
             plan={plan}
             safeAccounts={seats}
             sponsoredTxs={sponsoredTxs}

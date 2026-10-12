@@ -74,21 +74,10 @@ describe('Plans', () => {
     expect(seatsTooltip(undefined, null)).toMatch(/^Your plan covers unlimited Safe accounts/)
   })
 
-  it('advertises the yearly saving as a fixed ceiling, only when a yearly offer exists', () => {
-    const { unmount } = render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} />)
-    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent('Save ~10%')
-    unmount()
-
-    render(
-      <Plans plan={null} {...meters} tiers={buildPlanTiers([{ ...STARTER, offers: STARTER.offers.slice(0, 1) }])} />,
-    )
-    expect(screen.getByRole('tab', { name: /Yearly/ })).toHaveTextContent(/^Yearly$/)
-  })
-
   it.each([
     [null, undefined],
     [active, { label: 'Active', variant: 'brand' }],
-    [trialing(20), { label: 'Free access', variant: 'brand' }],
+    [trialing(20), { label: 'Free access · 20 days left', variant: 'brand' }],
     [trialing(14), { label: 'Free access · 14 days left', variant: 'brand' }],
     [trialing(1), { label: 'Free access · 1 day left', variant: 'warning' }],
     [trialing(7), { label: 'Free access · 7 days left', variant: 'warning' }],
@@ -114,7 +103,7 @@ describe('Plans', () => {
       />,
     )
 
-    expect(screen.getAllByText('Free access · 14 days left')).toHaveLength(2)
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 14 days left')
     expect(
       screen.getByText(/Your free access is active until Dec 6, 2026\. Add a payment method before then/),
     ).toBeInTheDocument()
@@ -132,7 +121,7 @@ describe('Plans', () => {
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
-    expect(screen.getByRole('link', { name: 'Talk to sales' })).toHaveAttribute('href', CONTACT_SALES_URL)
+    expect(screen.getAllByRole('link', { name: 'Talk to sales' })[0]).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('swaps the payment nudge and its button for Manage plan once a payment method is on file', () => {
@@ -147,11 +136,12 @@ describe('Plans', () => {
       />,
     )
 
-    expect(screen.getByText('Active until Dec 6, 2026.')).toBeInTheDocument()
+    expect(screen.getByText('Active until Dec 6, 2026 · 7 days left')).toBeInTheDocument()
     expect(screen.queryByText(/Add a payment method before then/)).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Add payment method' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Manage plan' })).toBeInTheDocument()
     expect(screen.getByTestId('current-plan-card')).toContainElement(
-      screen.getByRole('button', { name: 'Manage plan' }),
+      screen.getByRole('button', { name: 'Current plan' }),
     )
     expect(screen.queryByTestId('trial-disclaimer')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Switch to Starter' })).toBeInTheDocument()
@@ -175,8 +165,8 @@ describe('Plans', () => {
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 7 days left')
   })
 
-  it('counts down the whole free access on the v2 status card', () => {
-    render(<PlanStatusCard plan={trialing(20)} {...meters} appearance="v2" />)
+  it('counts down the whole free access', () => {
+    render(<PlanStatusCard plan={trialing(20)} {...meters} />)
 
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 20 days left')
   })
@@ -195,12 +185,13 @@ describe('Plans', () => {
     expect(screen.getByText('Safe accounts above the limit remain available in My accounts.')).toBeInTheDocument()
   })
 
-  it('renders a paid plan with Manage plan in the header and on its card, and Upgrade to Business on offer', () => {
+  it('renders a paid plan with Manage plan in the header and Upgrade to Business on offer', () => {
     const onManage = jest.fn()
     render(
       <Plans
         plan={{ ...active, name: 'Starter' }}
         {...meters}
+        canManage
         tiers={buildPlanTiers([BUSINESS], { subscription: subscription('Starter', 149), seatsQuota: 2 })}
         onManage={onManage}
         onSubscribe={jest.fn()}
@@ -208,12 +199,11 @@ describe('Plans', () => {
       />,
     )
 
-    expect(screen.getAllByText('Active')).toHaveLength(2)
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Active')
     expect(screen.queryByText(/Safe accounts above the limit/)).not.toBeInTheDocument()
-    expect(screen.getAllByRole('button', { name: 'Manage plan' })).toHaveLength(2)
     expect(screen.getByRole('button', { name: 'Upgrade to Business' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Manage plan' })[1])
+    fireEvent.click(screen.getByRole('button', { name: 'Manage plan' }))
     expect(onManage).toHaveBeenCalled()
   })
 
@@ -231,7 +221,7 @@ describe('Plans', () => {
     )
 
     expect(screen.getByTestId('current-plan-card')).toBeInTheDocument()
-    expect(screen.getByText('Business')).toBeInTheDocument()
+    expect(screen.getAllByTestId('plan-card')[0]).toHaveTextContent('Business')
     expect(screen.queryByRole('button', { name: 'Manage plan' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Upgrade to Business' })).not.toBeInTheDocument()
     expect(
@@ -270,8 +260,6 @@ describe('Plans', () => {
 
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('€499')
     expect(screen.getByTestId('current-plan-card')).toHaveTextContent('20 Safe accounts')
-    expect(screen.getByTestId('current-plan-card')).toHaveClass('bg-card', 'shadow-lg')
-    expect(screen.getByTestId('current-plan-card')).not.toHaveClass('border-mint')
     expect(screen.queryByText('€6,990')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: /Yearly/ }))
@@ -352,8 +340,8 @@ describe('Plans', () => {
 
     expect(screen.getByText('No active plan')).toBeInTheDocument()
     expect(screen.getByText(/Your Workspace is locked until you choose a plan/)).toBeInTheDocument()
-    expect(screen.getByText('—')).toBeInTheDocument()
-    expect(screen.getByText('Unlimited')).toBeInTheDocument()
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Unlimited').length).toBeGreaterThan(0)
     expect(screen.queryByRole('button', { name: /Add payment method|Manage plan/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))

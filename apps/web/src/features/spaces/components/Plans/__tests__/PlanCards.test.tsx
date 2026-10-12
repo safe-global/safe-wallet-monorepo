@@ -1,6 +1,7 @@
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
-import { PlanCardV2 } from '../PlanCardV2'
+import { PlanLocation } from '@/services/analytics/mixpanel-events'
+import { PlanCard } from '../PlanCards'
 
 const businessPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
   name: 'Business',
@@ -41,39 +42,61 @@ const BUSINESS: PlanTier = {
   features: [],
 }
 
-describe('PlanCardV2', () => {
+describe('PlanCard', () => {
   it('opens on the plan in force even when it is not the first Safe count', () => {
-    render(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />)
+    render(
+      <PlanCard
+        location={PlanLocation.PLANS_PAGE}
+        tier={currentTier('price_b10m')}
+        currentPlan={businessPlan({ price: 1099 })}
+      />,
+    )
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('10 Safe accounts')
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
   })
   it('follows a subscription that lands after the card mounted', () => {
-    const { rerender } = render(<PlanCardV2 tier={{ ...currentTier(''), currentPriceId: undefined }} />)
+    const { rerender } = render(
+      <PlanCard location={PlanLocation.PLANS_PAGE} tier={{ ...currentTier(''), currentPriceId: undefined }} />,
+    )
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('5 Safe accounts')
 
-    rerender(<PlanCardV2 tier={currentTier('price_b20m')} currentPlan={businessPlan()} />)
+    rerender(
+      <PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b20m')} currentPlan={businessPlan()} />,
+    )
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
   it('keeps a picked Safe count when the page rebuilds the tiers', async () => {
     const { user, rerender } = renderWithUserEvent(
-      <PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />,
+      <PlanCard
+        location={PlanLocation.PLANS_PAGE}
+        tier={currentTier('price_b10m')}
+        currentPlan={businessPlan({ price: 1099 })}
+      />,
     )
 
     const trigger = screen.getByRole('combobox', { name: 'Safe accounts for Business' })
     await user.click(trigger)
     await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
     await user.click(await screen.findByRole('option', { name: '20 Safe accounts' }))
-    rerender(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan({ price: 1099 })} />)
+    rerender(
+      <PlanCard
+        location={PlanLocation.PLANS_PAGE}
+        tier={currentTier('price_b10m')}
+        currentPlan={businessPlan({ price: 1099 })}
+      />,
+    )
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
   it('marks only the plan in force as current', () => {
-    const { rerender } = render(<PlanCardV2 tier={currentTier('price_b10m')} currentPlan={businessPlan()} />)
+    const { rerender } = render(
+      <PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b10m')} currentPlan={businessPlan()} />,
+    )
     expect(screen.getByTestId('plan-current-badge')).toHaveTextContent('Current')
 
-    rerender(<PlanCardV2 tier={BUSINESS} />)
+    rerender(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
 
     expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
   })
@@ -84,12 +107,18 @@ describe('PlanCardV2', () => {
       billingCycle: 'year',
       options: [option(5, 719_000), option(20, 1_799_000)],
     }
-    render(<PlanCardV2 tier={yearly} currentPlan={businessPlan({ seatsLabel: '20 Safe accounts' })} />)
+    render(
+      <PlanCard
+        location={PlanLocation.PLANS_PAGE}
+        tier={yearly}
+        currentPlan={businessPlan({ seatsLabel: '20 Safe accounts' })}
+      />,
+    )
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
   it('names the support level at the bottom of the card', () => {
-    render(<PlanCardV2 tier={BUSINESS} />)
+    render(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
 
     expect(screen.getByTestId('plan-support-level')).toHaveTextContent('Priority support')
   })

@@ -1,5 +1,5 @@
 import {
-  getCardFeaturesV2,
+  getCardFeatures,
   POLICIES,
   WORKSPACE_2FA,
 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
@@ -13,11 +13,11 @@ const SHARED = [
 ]
 const FROM_BUSINESS = [POLICIES]
 
-describe('getCardFeaturesV2', () => {
+describe('getCardFeatures', () => {
   it('lists the Oct 6 feature list in the same order on every card', () => {
-    expect(getCardFeaturesV2('Starter')).toEqual(['10 sponsored transactions per month', ...SHARED])
-    expect(getCardFeaturesV2('Business')).toEqual(['50 sponsored transactions per month', ...SHARED, ...FROM_BUSINESS])
-    expect(getCardFeaturesV2('Enterprise')).toEqual([
+    expect(getCardFeatures('Starter')).toEqual(['10 sponsored transactions per month', ...SHARED])
+    expect(getCardFeatures('Business')).toEqual(['50 sponsored transactions per month', ...SHARED, ...FROM_BUSINESS])
+    expect(getCardFeatures('Enterprise')).toEqual([
       'Unlimited sponsored transactions',
       ...SHARED,
       ...FROM_BUSINESS,
@@ -27,6 +27,6 @@ describe('getCardFeaturesV2', () => {
   })
 
   it('has no list for an unknown plan', () => {
-    expect(getCardFeaturesV2('Legacy')).toBeUndefined()
+    expect(getCardFeatures('Legacy')).toBeUndefined()
   })
 })

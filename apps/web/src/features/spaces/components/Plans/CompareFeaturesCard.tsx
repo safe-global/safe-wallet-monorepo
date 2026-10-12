@@ -11,12 +11,12 @@ import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@safe-global/views/utils/cn'
 import {
-  COMPARE_COPY_V2,
-  COMPARE_SECTIONS_V2,
-  type CompareRowV2,
-  type CompareValueV2,
+  COMPARE_COPY,
+  COMPARE_SECTIONS,
+  type CompareRow,
+  type CompareValue,
   PLAN_ORDER,
-  type CompareSectionV2,
+  type CompareSection,
 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
 
@@ -26,15 +26,15 @@ const TITLE_ID = `${COMPARE_FEATURES_ID}-title`
 const PLANS = PLAN_ORDER
 
 /** Collapsed, only the coming-soon rows show in full; the next row fades out under the button. */
-export const VISIBLE_FEATURES = COMPARE_SECTIONS_V2[0].rows.length
+export const VISIBLE_FEATURES = COMPARE_SECTIONS[0].rows.length
 const PEEK_FEATURES = 1
 
-const CompareValue = ({ value }: { value: CompareValueV2 }) => {
+const CompareValue = ({ value }: { value: CompareValue }) => {
   if (value === true) {
     return (
       <>
         <FeatureCheck />
-        <span className="sr-only">{COMPARE_COPY_V2.included}</span>
+        <span className="sr-only">{COMPARE_COPY.included}</span>
       </>
     )
   }
@@ -44,7 +44,7 @@ const CompareValue = ({ value }: { value: CompareValueV2 }) => {
         <span aria-hidden className="text-muted-foreground">
           —
         </span>
-        <span className="sr-only">{COMPARE_COPY_V2.notIncluded}</span>
+        <span className="sr-only">{COMPARE_COPY.notIncluded}</span>
       </>
     )
   }
@@ -77,7 +77,7 @@ const CompareRow = ({
   onOpenAddOn,
   ref,
 }: {
-  row: CompareRowV2
+  row: CompareRow
   isFolded: boolean
   onOpenAddOn: () => void
   ref?: Ref<HTMLTableRowElement>
@@ -92,10 +92,10 @@ const CompareRow = ({
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal whitespace-normal">
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {row.feature}
-        {row.isAddOn && <AddOnLink label={COMPARE_COPY_V2.learnMore} onOpen={onOpenAddOn} />}
+        {row.isAddOn && <AddOnLink label={COMPARE_COPY.learnMore} onOpen={onOpenAddOn} />}
         {row.isComingSoon && (
           <Badge variant="subtle" size="status" shape="status">
-            {COMPARE_COPY_V2.soon}
+            {COMPARE_COPY.soon}
           </Badge>
         )}
       </span>
@@ -150,7 +150,7 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
   <TableHeader className={cn(isExpanded && 'sticky top-0 z-10 bg-card')}>
     <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
       <TableHead scope="col" className="h-11 w-[28%] px-4 py-0 align-middle font-semibold">
-        {COMPARE_COPY_V2.featureColumn}
+        {COMPARE_COPY.featureColumn}
       </TableHead>
       {PLANS.map((plan) => {
         const isCurrent = plan === currentPlanName
@@ -160,7 +160,7 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
               {plan}
               {isCurrent && (
                 <Badge variant="mint" size="status" shape="status">
-                  {COMPARE_COPY_V2.current}
+                  {COMPARE_COPY.current}
                 </Badge>
               )}
             </span>
@@ -172,10 +172,10 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
 )
 
 /** Where each section's rows start in the whole table, so the collapsed preview counts rows across sections. */
-const SECTION_FIRST_ROWS = COMPARE_SECTIONS_V2.map((_, index) =>
-  COMPARE_SECTIONS_V2.slice(0, index).reduce((count, section) => count + section.rows.length, 0),
+const SECTION_FIRST_ROWS = COMPARE_SECTIONS.map((_, index) =>
+  COMPARE_SECTIONS.slice(0, index).reduce((count, section) => count + section.rows.length, 0),
 )
-const TOTAL_ROWS = COMPARE_SECTIONS_V2.reduce((count, section) => count + section.rows.length, 0)
+const TOTAL_ROWS = COMPARE_SECTIONS.reduce((count, section) => count + section.rows.length, 0)
 const LAST_PEEK_ROW = Math.min(VISIBLE_FEATURES + PEEK_FEATURES, TOTAL_ROWS) - 1
 
 const CompareSection = ({
@@ -185,7 +185,7 @@ const CompareSection = ({
   onOpenAddOn,
   lastPeekRowRef,
 }: {
-  section: CompareSectionV2
+  section: CompareSection
   index: number
   isExpanded: boolean
   onOpenAddOn: () => void
@@ -200,7 +200,7 @@ const CompareSection = ({
       aria-hidden={isFolded || undefined}
       style={{ '--section-delay': `${80 + (index - 1) * SECTION_STAGGER_MS}ms` } as CSSProperties}
       className={cn(
-        index < COMPARE_SECTIONS_V2.length - 1 && '[&_tr:last-child]:border-b',
+        index < COMPARE_SECTIONS.length - 1 && '[&_tr:last-child]:border-b',
         isFoldable && 'transition-opacity motion-reduce:transition-none',
         isFoldable &&
           (isExpanded ? 'opacity-100 duration-300 delay-(--section-delay) ease-out' : 'opacity-0 duration-150 ease-in'),
@@ -275,7 +275,7 @@ export default function CompareFeaturesCard({
             className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Typography variant="h4" id={TITLE_ID}>
-              {COMPARE_COPY_V2.title}
+              {COMPARE_COPY.title}
             </Typography>
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
               <ChevronDown
@@ -301,7 +301,7 @@ export default function CompareFeaturesCard({
             >
               <Table ref={tableRef} className="min-w-160 table-fixed">
                 <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} />
-                {COMPARE_SECTIONS_V2.map((section, index) => (
+                {COMPARE_SECTIONS.map((section, index) => (
                   <CompareSection
                     key={section.title}
                     lastPeekRowRef={lastPeekRowRef}
@@ -334,7 +334,7 @@ export default function CompareFeaturesCard({
                 className="relative"
                 onClick={() => onExpandedChange(true)}
               >
-                {COMPARE_COPY_V2.showAll}
+                {COMPARE_COPY.showAll}
               </Button>
             </div>
           </div>

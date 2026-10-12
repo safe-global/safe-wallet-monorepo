@@ -8,7 +8,7 @@ import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
 import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { SALES_PROMPT_V2 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { SALES_PROMPT } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 
 const trackSalesPrompt = () =>
   trackEvent(
@@ -25,7 +25,7 @@ export default function SalesPromptCard() {
       <CardContent className="@container">
         <div className="flex items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-            <Typography variant="paragraph-bold">{SALES_PROMPT_V2.prompt}</Typography>
+            <Typography variant="paragraph-bold">{SALES_PROMPT.prompt}</Typography>
             <Button
               variant="outline"
               size="sm"
@@ -33,7 +33,7 @@ export default function SalesPromptCard() {
               render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
               onClick={trackSalesPrompt}
             >
-              {SALES_PROMPT_V2.action}
+              {SALES_PROMPT.action}
               <ArrowUpRight data-icon="inline-end" />
             </Button>
           </div>
