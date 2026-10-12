@@ -6,7 +6,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import { buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { multisigExecutionDetailsBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
+import {
+  moduleExecutionDetailsBuilder,
+  multisigExecutionDetailsBuilder,
+  transactionDetailsBuilder,
+} from '@/tests/builders/transactionDetails'
 import { useFlowSafenetCheck } from '../useFlowSafenetCheck'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
@@ -49,18 +53,30 @@ describe('useFlowSafenetCheck', () => {
     const { result } = renderInFlow({ txId, txDetails })
 
     expect(mockUseSafenetCheck).toHaveBeenLastCalledWith(safeTxHash, execution.submittedAt, target)
-    expect(result.current).toMatchObject({ safeTxHash, submittedAt: execution.submittedAt })
+    expect(result.current).toMatchObject({ safeTxHash, submittedAt: execution.submittedAt, isTxDetailsLoading: false })
   })
 
-  it('does not read before the transaction details arrive', () => {
-    renderInFlow({ txId })
+  it('does not read while the transaction details load', () => {
+    const { result } = renderInFlow({ txId, txDetailsLoading: true })
 
     expect(mockUseSafenetCheck).toHaveBeenLastCalledWith(undefined, undefined, target)
+    expect(result.current).toMatchObject({ safeTxHash, submittedAt: undefined, isTxDetailsLoading: true })
   })
 
   it('does not read when disabled', () => {
     renderInFlow({ txId, txDetails }, false)
 
     expect(mockUseSafenetCheck).toHaveBeenLastCalledWith(undefined, execution.submittedAt, target)
+  })
+
+  it('does not read a module transaction, which has no submission time', () => {
+    const moduleDetails = transactionDetailsBuilder()
+      .with({ txId, detailedExecutionInfo: moduleExecutionDetailsBuilder().build() })
+      .build()
+
+    const { result } = renderInFlow({ txId, txDetails: moduleDetails })
+
+    expect(mockUseSafenetCheck).toHaveBeenLastCalledWith(undefined, undefined, target)
+    expect(result.current.submittedAt).toBeUndefined()
   })
 })
