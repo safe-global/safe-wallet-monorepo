@@ -10,7 +10,7 @@ import type { AllowedFeatures, AllowedFeatureSelection } from '@safe-global/desi
 import { PermissionStatus } from '@safe-global/design/components/safe-apps/types'
 import UnknownAppWarning from '@safe-global/design/components/safe-apps/SafeAppsInfoModal/UnknownAppWarning'
 import { getOrigin } from '../utils'
-import LegalDisclaimerContent from '@/components/common/LegalDisclaimerContent'
+import LegalDisclaimerContent from '@safe-global/design/components/common/LegalDisclaimerContent'
 
 type SafeAppsInfoModalProps = {
   onCancel: () => void
