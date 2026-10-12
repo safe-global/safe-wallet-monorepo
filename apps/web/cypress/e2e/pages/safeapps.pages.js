@@ -10,6 +10,7 @@ export const contractMethodIndex = '[name="contractMethodIndex"]'
 export const saveToLibraryBtn = 'button[aria-label="Save to Library"]'
 export const downloadBatchBtn = 'button[aria-label="Download batch"]'
 export const deleteBatchBtn = 'button[aria-label="Delete Batch"]'
+export const clearTransactionsBtn = '[aria-label="Clear transactions"]'
 export const safeAppsList = '[data-testid="apps-list"]'
 const openSafeAppBtn = '[data-testid="open-safe-app-btn"]'
 const appMessageInput = 'input[placeholder="Message"]'
@@ -101,6 +102,8 @@ export const failedStr = 'Failed'
 const blindSigningStr = 'This request involves blind signing'
 const enableBlindSigningStr = 'Enable blind signing'
 const blindSigningStr2 = 'blind signing'
+const blindSigningAllowedStr = 'Proceed with caution.'
+const blindSigningBlockedStr = 'If you wish to proceed, you must first'
 const signBtnStr = 'Sign'
 
 export const dummyTxStr = 'Trigger dummy tx (safe.txs.send)'
@@ -169,12 +172,10 @@ export function triggetOffChainTx() {
   cy.contains(dummyTxStr).click()
 }
 
-export function verifyBlindSigningEnabled(option) {
-  if (option) {
-    cy.contains(blindSigningStr).should('be.visible')
-  } else {
-    cy.contains(blindSigningStr).should('not.exist')
-  }
+// The warning shows in both states: blocking while the setting is off, a caution once it is on
+export function verifyBlindSigningWarning(settingEnabled) {
+  cy.contains(blindSigningStr).should('be.visible')
+  cy.contains(settingEnabled ? blindSigningAllowedStr : blindSigningBlockedStr).should('be.visible')
 }
 
 export function clickOnBlindSigningOption() {
@@ -182,7 +183,9 @@ export function clickOnBlindSigningOption() {
   // Navigating away from the open message flow asks to discard it. This used to be a
   // native confirm() that Cypress auto-accepted; the themed dialog needs a real click.
   cy.contains('button', 'Discard').click()
-  cy.contains(enableBlindSigningStr).click()
+  cy.contains('label', enableBlindSigningStr).parent().find('[role="checkbox"]').as('blindSigning')
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'false').click()
+  cy.get('@blindSigning').should('have.attr', 'aria-checked', 'true')
 }
 
 export function triggetSignMsg() {
@@ -217,8 +220,10 @@ export function clickOnApp(app) {
   // The card's text sits in a pointer-events-none layer; clicks land on the overlay
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
-  cy.get(`a[aria-label="Open ${app}"]`).first().click()
-  cy.wait(2000)
+  const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
+  // The link takes the Safe from the router query, which stays empty until the router is ready
+  appLink().should('have.attr', 'href').and('include', 'safe=')
+  appLink().click()
 }
 
 export function verifyNoAppsTextPresent() {
