@@ -1,6 +1,7 @@
 import axios from 'axios'
 import getAbi from './getAbi'
 import { ChainInfo } from '@safe-global/safe-apps-sdk'
+import * as env from '../utils/env'
 
 jest.mock('axios')
 const mockedAxios = axios as jest.Mocked<typeof axios>
@@ -32,7 +33,29 @@ const mockAbi = [
 
 describe('getAbi', () => {
   beforeEach(() => {
+    jest.restoreAllMocks()
     jest.clearAllMocks()
+  })
+
+  describe('configured gateway', () => {
+    it('uses the configured gateway as the only ABI provider', async () => {
+      jest.spyOn(env, 'getGatewayUrl').mockReturnValue('http://localhost:8000/cgw/')
+      mockedAxios.get.mockResolvedValueOnce({ data: { contractAbi: { abi: mockAbi } } })
+
+      expect(await getAbi('0x123', mockChainInfo)).toEqual(mockAbi)
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+      expect(mockedAxios.get).toHaveBeenCalledWith('http://localhost:8000/cgw/v1/chains/1/contracts/0x123', {
+        timeout: 10000,
+      })
+    })
+
+    it('returns null without falling back to hosted providers when the gateway fails', async () => {
+      jest.spyOn(env, 'getGatewayUrl').mockReturnValue('http://localhost:8000/cgw')
+      mockedAxios.get.mockRejectedValueOnce(new Error('Unavailable'))
+
+      expect(await getAbi('0x123', mockChainInfo)).toBeNull()
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1)
+    })
   })
 
   describe('Sourcify v2 API', () => {

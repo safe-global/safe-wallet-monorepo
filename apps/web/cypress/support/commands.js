@@ -1,3 +1,5 @@
+import { isRemoteBackendHost } from '../../e2e/environment/cypress.mjs'
+
 let LOCAL_STORAGE_MEMORY = {}
 
 Cypress.Commands.add('saveLocalStorageCache', () => {
@@ -65,10 +67,6 @@ const DEFAULT_OPTS = {
 
 const DEFAULT_IFRAME_SELECTOR = 'iframe'
 
-function sleep(timeout) {
-  return new Promise((resolve) => setTimeout(resolve, timeout))
-}
-
 // This command checks that an iframe has loaded onto the page
 // - This will verify that the iframe is loaded to any page other than 'about:blank'
 //   cy.frameLoaded()
@@ -101,42 +99,25 @@ Cypress.Commands.add('frameLoaded', (selector, opts) => {
         message: [selector],
       }).snapshot()
     : null
-  return cy.get(selector, { log: false }).then({ timeout: fullOpts.timeout }, async ($frame) => {
-    log?.set('$el', $frame)
-    if ($frame.length !== 1) {
-      throw new Error(
-        `cypress-iframe commands can only be applied to exactly one iframe at a time.  Instead found ${$frame.length}`,
-      )
-    }
+  const hasNavigated = (location) => {
+    if (!fullOpts.url) return location !== 'about:blank'
+    return typeof fullOpts.url === 'string' ? location.includes(fullOpts.url) : fullOpts.url.test(location)
+  }
 
-    const contentWindow = $frame.prop('contentWindow')
-    const hasNavigated = fullOpts.url
-      ? () =>
-          typeof fullOpts.url === 'string'
-            ? contentWindow.location.toString().includes(fullOpts.url)
-            : fullOpts.url?.test(contentWindow.location.toString())
-      : () => contentWindow.location.toString() !== 'about:blank'
-
-    while (!hasNavigated()) {
-      await sleep(100)
-    }
-
-    if (contentWindow.document.readyState === 'complete') {
-      return $frame
-    }
-
-    const loadLog = Cypress.log({
-      name: 'Frame Load',
-      message: [contentWindow.location.toString()],
-      event: true,
-    }).snapshot()
-    await new Promise((resolve) => {
-      Cypress.$(contentWindow).on('load', resolve)
+  // Re-queries the iframe on every retry: the app can remount it, which detaches the first window
+  return cy
+    .get(selector, { log: false, timeout: fullOpts.timeout })
+    .should(($frame) => {
+      expect($frame, 'one iframe for cypress-iframe commands').to.have.length(1)
+      const contentWindow = $frame.prop('contentWindow')
+      expect(contentWindow, 'iframe window').to.exist
+      expect(hasNavigated(contentWindow.location.toString()), 'iframe navigated').to.be.true
+      expect(contentWindow.document.readyState, 'iframe document').to.equal('complete')
     })
-    loadLog.end()
-    log?.finish()
-    return $frame
-  })
+    .then(($frame) => {
+      log?.set('$el', $frame).end()
+      return $frame
+    })
 })
 
 // This will cause subsequent commands to be executed inside of the given iframe
@@ -214,6 +195,12 @@ Cypress.Commands.add('enter', (selector, opts) => {
 
 Cypress.Commands.add('setupInterceptors', () => {
   cy.intercept('*', (req) => {
+    if (Cypress.expose('SAFE_E2E_ISOLATED')) {
+      const host = new URL(req.url).hostname
+      if (isRemoteBackendHost(host)) {
+        throw new Error(`Isolated Cypress attempted a remote backend request: ${host}`)
+      }
+    }
     req.headers['Origin'] = 'http://localhost:8080'
     console.log('Intercepted request with headers:', req.headers)
     req.continue()
@@ -249,35 +236,8 @@ function autoTrustSafeFromUrl(url) {
 }
 
 Cypress.Commands.overwrite('visit', (originalFn, url, options = {}) => {
-  const maxRetries = 3
-  let attempt = 0
-
   if (options.skipAutoTrust !== true) {
     autoTrustSafeFromUrl(url)
   }
-
-  function attemptVisit(resolve, reject) {
-    originalFn(url, options)
-      .then((response) => {
-        if (response && response.status === 429) {
-          if (attempt < maxRetries) {
-            attempt++
-            const waitTime = 6000
-            console.warn(
-              `Rate limit (429) detected! Retrying in ${waitTime / 1000} seconds... Attempt ${attempt}/${maxRetries}`,
-            )
-            cy.wait(waitTime).then(() => attemptVisit(resolve, reject))
-          } else {
-            reject(new Error(`cy.visit failed after ${maxRetries + 1} attempts due to 429 rate limit.`))
-          }
-        } else {
-          resolve(response)
-        }
-      })
-      .catch(reject)
-  }
-
-  return new Cypress.Promise((resolve, reject) => {
-    attemptVisit(resolve, reject)
-  })
+  return originalFn(url, options)
 })

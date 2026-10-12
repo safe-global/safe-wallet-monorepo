@@ -1,6 +1,7 @@
 /* eslint-disable */
 
-import { CURRENT_COOKIE_TERMS_VERSION } from './constants.js'
+import { CURRENT_COOKIE_TERMS_VERSION, defaultOwnerAddress } from './constants.js'
+import { aliasedStorage, storageFixture } from './fixture.js'
 
 const cookieState = {
   necessary: true,
@@ -11,7 +12,7 @@ const cookieState = {
 }
 
 export const batchData = {
-  entry0: {
+  entry0: aliasedStorage({
     11155111: {
       '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': [
         {
@@ -186,8 +187,8 @@ export const batchData = {
         },
       ],
     },
-  },
-  entry1: {
+  }),
+  entry1: aliasedStorage({
     11155111: {
       '0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415': [
         {
@@ -277,7 +278,7 @@ export const batchData = {
         },
       ],
     },
-  },
+  }),
 }
 export const visitedSafes = {
   set1: {
@@ -289,29 +290,28 @@ export const visitedSafes = {
   },
 }
 export const addressBookData = {
-  proposers: {
+  proposers: storageFixture('proposers.addressBook', {
     11155111: {
       '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AD Proposer1',
       '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b': 'AD Proposer2',
     },
-  },
-  nestedsafes: {
+  }),
+  nestedsafes: aliasedStorage({
     11155111: {
       '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': 'Main nested safe',
       '0x22e5093F4A75c2E99A8EcabfBF8c5c7fDcaDCf9d': 'Nested safe1',
       '0xE5577b9E75F94C4a900E74F63F79A7968e812208': 'Nested safe2',
     },
-  },
+  }),
   addedSafesImport: {
     11155111: { '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': 'imported-safe' },
   },
   sepoliaAddress1: {
     11155111: { '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'Owner1' },
   },
-  sepoliaAddress2: {
-    11155111: {
-      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'Automation owner',
-    },
+  // Getters, because isolated runs set the default owner after this module loads.
+  get sepoliaAddress2() {
+    return { 11155111: { [defaultOwnerAddress()]: 'Automation owner' } }
   },
   dataSet: {
     5: {
@@ -365,14 +365,14 @@ export const addressBookData = {
       '0x9E6DAfe829431e1892EcF8461FDAd02665170c31': 'Added non-owner',
     },
   },
-  multichain: {
+  multichain: aliasedStorage({
     137: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': 'Multichain polygon',
     },
     11155111: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': 'Multichain Sepolia',
     },
-  },
+  }),
   undeployed: {
     11155111: {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': 'Undeployed Sepolia',
@@ -391,24 +391,28 @@ export const addressBookData = {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': 'Undeployed Sepolia',
     },
   },
-  sortingData: {
-    11155111: {
-      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'AA Safe',
-      '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'BB Safe',
-    },
+  get sortingData() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'AA Safe', '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC': 'BB Safe' },
+    }
   },
   autofillData: {
     11155111: {
       '0x01A9F68e339da12565cfBc47fe7D6EdEcB11C46f': 'David',
     },
   },
-  sameOwnerName: {
-    11155111: {
-      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'Automation owner Sepolia',
-    },
-    1: {
-      '0xC16Db0251654C0a72E91B190d81eAD367d2C6fED': 'Automation owner Eth',
-    },
+  // ETH_FUNDS_SAFE_13 does not have the default owner, so its Ethereum name goes to one of its owners.
+  get ownerNamesPerNetwork() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
+      1: { '0x65F8236309e5A99Ff0d129d04E486EBCE20DC7B0': 'Automation owner Eth' },
+    }
+  },
+  get sameOwnerName() {
+    return {
+      11155111: { [defaultOwnerAddress()]: 'Automation owner Sepolia' },
+      1: { [defaultOwnerAddress()]: 'Automation owner Eth' },
+    }
   },
   safeSchiledAddressBook: {
     137: {
@@ -500,7 +504,7 @@ export const safeSettings = {
 }
 
 export const addedSafes = {
-  set1: {
+  set1: aliasedStorage({
     5: {
       '0x10f999F150a2E7fd356Aa471bCBf0b75aA7b0e2A': {
         owners: [
@@ -586,7 +590,7 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   set2: {
     11155111: {
       '0x6d0b6F96f665Bb4490f9ddb2e450Da2f7e546dC1': {
@@ -700,7 +704,7 @@ export const addedSafes = {
     },
   },
   /** Watchlist safe (safe3short). Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
-  set4: {
+  set4: aliasedStorage({
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
         owners: [],
@@ -719,8 +723,8 @@ export const addedSafes = {
         threshold: 1,
       },
     },
-  },
-  set5: {
+  }),
+  set5: aliasedStorage({
     137: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
         owners: [
@@ -741,9 +745,9 @@ export const addedSafes = {
         threshold: 1,
       },
     },
-  },
+  }),
   /** set5 plus one trusted safe (safe1) on Sepolia - for "Add network" single-safe sidebar test */
-  set5WithSingleSafe: {
+  set5WithSingleSafe: aliasedStorage({
     137: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
         owners: [
@@ -769,9 +773,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** CF safe + undeployed. Includes visited safe SEP_STATIC_SAFE_9 when used with addToAppLocalStorage after visit. */
-  set6_undeployed_safe: {
+  set6_undeployed_safe: aliasedStorage({
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
         owners: [],
@@ -792,9 +796,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Sidebar tests: one trusted safe (safe1) on Sepolia. Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
-  sidebarTrustedSafe1: {
+  sidebarTrustedSafe1: aliasedStorage({
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
         owners: [],
@@ -807,9 +811,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Trusted safes in sidebar-sidebar3.cy.js, sidebar5.cy.js */
-  sidebarTrustedSafe1Safe2: {
+  sidebarTrustedSafe1Safe2: aliasedStorage({
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
         owners: [],
@@ -834,9 +838,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Sidebar tests: safe3 on Sepolia + safe3 on Ethereum (chain 1). Includes visited safe SEP_STATIC_SAFE_9 so overwrite does not drop it. */
-  sidebarTrustedSafe3TwoChains: {
+  sidebarTrustedSafe3TwoChains: aliasedStorage({
     11155111: {
       '0x98705770aF3b18db0a64597F6d4DCe825915fec0': {
         owners: [],
@@ -856,7 +860,7 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Sidebar tests: safe1 + safe2 + safe3 on Sepolia. Includes chain 1 (Ethereum) visited safe for tests that visit MATIC_STATIC_SAFE_28 on eth. */
   sidebarTrustedSafe1Safe2Safe3: {
     11155111: {
@@ -885,7 +889,7 @@ export const addedSafes = {
     },
   },
   /** Sidebar tests: pending-actions safe (SEP_STATIC_SAFE_7) on Sepolia */
-  sidebarTrustedPendingSafe1: {
+  sidebarTrustedPendingSafe1: aliasedStorage({
     11155111: {
       '0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb': {
         owners: [],
@@ -893,9 +897,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Nested safes: parent safe SEP_STATIC_SAFE_39 on Sepolia */
-  nestedParentSafe39: {
+  nestedParentSafe39: aliasedStorage({
     11155111: {
       '0xAD5e4a366cc840120701384fca4Ec9b8bEb47cAD': {
         owners: [],
@@ -903,9 +907,9 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
   /** Nested safes: parent safe SEP_STATIC_SAFE_45 on Sepolia */
-  nestedParentSafe45: {
+  nestedParentSafe45: aliasedStorage({
     11155111: {
       '0x5958B92f412408bF12Bbc8638d524ebe5878E795': {
         owners: [],
@@ -913,11 +917,11 @@ export const addedSafes = {
         ethBalance: '0',
       },
     },
-  },
+  }),
 }
 
 export const pinnedApps = {
-  transactionBuilder: { 11155111: { pinned: [24], opened: [] } },
+  transactionBuilder: storageFixture('pinnedApps.transactionBuilder', { 11155111: { pinned: [24], opened: [] } }),
 }
 
 export const customApps = (url) => ({
@@ -975,7 +979,7 @@ export const pendingCfDeletes = {
 }
 
 export const undeployedSafe = {
-  safe1: {
+  safe1: storageFixture('undeployedSafes', {
     11155111: {
       '0x926186108f74dB20BFeb2b6c888E523C78cb7E00': {
         props: {
@@ -995,7 +999,7 @@ export const undeployedSafe = {
         },
       },
     },
-  },
+  }),
   safes2: {
     1: {
       '0xC96ee38f5A73C8A70b565CB8EA938D2aF913ee3B': {
