@@ -41,15 +41,21 @@ const host = await build({
 await writeFile(path.join(site, 'host.js'), host.outputFiles[0].text)
 await writeFile(path.join(site, 'index.html'), '<div id="root"></div><script src="/host.js"></script>')
 
+const SITE_FILES = {
+  '/': ['index.html', 'text/html'],
+  '/host.js': ['host.js', 'text/javascript'],
+  '/remote-view/frame.html': ['remote-view/frame.html', 'text/html'],
+  '/remote-view/frame.js': ['remote-view/frame.js', 'text/javascript'],
+}
 const siteServer = await listen(async (req, res) => {
-  try {
-    const file = path.join(site, req.url === '/' ? 'index.html' : req.url)
-    res.setHeader('content-type', file.endsWith('.html') ? 'text/html' : 'text/javascript')
-    res.end(await readFile(file))
-  } catch {
+  const entry = SITE_FILES[req.url]
+  if (!entry) {
     res.statusCode = 404
     res.end()
+    return
   }
+  res.setHeader('content-type', entry[1])
+  res.end(await readFile(path.join(site, entry[0])))
 })
 
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH })
