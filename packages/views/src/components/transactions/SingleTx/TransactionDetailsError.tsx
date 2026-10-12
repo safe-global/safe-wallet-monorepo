@@ -2,8 +2,7 @@ import type { ReactElement } from 'react'
 import SafeLogoHalo from '@safe-global/views/components/common/SafeLogoHalo'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyMedia } from '@safe-global/views/components/ui/empty'
-
-export const TX_DETAILS_LOAD_ERROR = 'The website failed to load data. Please try again.'
+import { TX_DETAILS_LOAD_ERROR } from './TransactionDetailsError.constants'
 
 const TransactionDetailsError = ({
   message = TX_DETAILS_LOAD_ERROR,
@@ -31,3 +30,5 @@ const TransactionDetailsError = ({
 )
 
 export default TransactionDetailsError
+
+export { TX_DETAILS_LOAD_ERROR } from './TransactionDetailsError.constants'

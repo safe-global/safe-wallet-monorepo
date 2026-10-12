@@ -4,8 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyMedia } from '@safe-global/views/components/ui/empty'
 import { cn } from '@safe-global/views/utils/cn'
 import css from './LoadState.module.css'
-
-export const SPACE_LOAD_ERROR = 'The website failed to load data. Please try again.'
+import { SPACE_LOAD_ERROR } from './constants'
 
 type LoadStateProps = {
   /** What is loading, for the busy label. */
@@ -47,3 +46,5 @@ export const SpaceLoadError = ({ onReload, testId }: { onReload?: () => void; te
     )}
   </Empty>
 )
+
+export { SPACE_LOAD_ERROR } from './constants'

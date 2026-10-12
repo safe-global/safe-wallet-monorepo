@@ -204,6 +204,7 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    the primitive, don't wrap it.
 6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read
    [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
+7. **Views from `@safe-global/views` run in a sandboxed worker** (spike, `src/remote-view/`). The Next and Vite builds swap every view module for a generated wrapper, so view code never runs on the page; the page only draws allowlisted HTML/SVG with filtered attributes. `scripts/build-remote-view.mjs` (run by `dev`, `start` and `build`) regenerates the wrappers and `public/remote-view/frame.js` — rerun it after changing a view. A view module may export only components; move other values to a plain `.ts` file and re-export them (`export { X } from './x'`), or the generator fails. Views that need the page (overlays, DOM measuring, `next/*`, context) are listed with a reason in `src/remote-view/kept.json`. Unit tests and Storybook render views directly. `yarn workspace @safe-global/web remote-view:probe` must report that all attacks were blocked.
 
 ## Code complexity
 

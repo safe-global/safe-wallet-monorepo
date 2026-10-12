@@ -81,7 +81,8 @@ function processAllHtmlFiles(dirPath, manifestScriptPath) {
   for (const entry of entries) {
     const entryPath = path.join(dirPath, entry.name)
 
-    if (entry.isDirectory()) {
+    // The sandboxed remote-view frame has an opaque origin, so SRI on its scripts would need CORS and block them
+    if (entry.isDirectory() && entryPath !== path.join(OUT_DIR, 'remote-view')) {
       totalProcessed += processAllHtmlFiles(entryPath, manifestScriptPath)
     } else if (entry.isFile() && entry.name.endsWith('.html')) {
       totalProcessed += processHtmlFile(entryPath, manifestScriptPath)

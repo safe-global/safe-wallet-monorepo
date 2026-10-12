@@ -7,6 +7,7 @@
 - **No imports from an app.** Production files must not import `@/…` (apps/web) or anything that holds hooks, store access, SDK calls or analytics. Data and callbacks come in through props. ESLint (`no-restricted-imports`) enforces this; tests and stories are exempt.
 - Inside the package, import other package files as `@safe-global/views/…`.
 - Assets the views render (SVGs, CSS modules) live in the package (`src/assets/`, next to the view). An SVG that the app also serves by URL stays in `apps/web/public` as well.
+- **Views run in a sandboxed worker in the app** (see `apps/web/AGENTS.md`, remote views). A view module under `components/` or `features/` may export only components and types; put constants, enums and helpers in a plain `.ts` file next to it and re-export them (`export { X } from './x'`). Props must be plain data, callbacks or React content; callbacks get no event objects, and their return values arrive as promises. A view that needs the real DOM (refs, measuring, portals) or `next/*` must be listed in `apps/web/src/remote-view/kept.json` with a reason.
 - shadcn primitives are managed with the shadcn CLI from `apps/web` (`components.json` points at this package); read `src/components/ui/README.md` before editing them by hand.
 
 ## Checks

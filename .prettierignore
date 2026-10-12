@@ -30,6 +30,7 @@ apps/web/.swc
 apps/web/out
 apps/web/public
 apps/web/src/config/__generated__/
+apps/web/src/remote-view/generated/
 
 # Web (TanStack)
 apps/web-tanstack/dist

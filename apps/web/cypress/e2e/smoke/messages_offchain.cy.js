@@ -70,7 +70,7 @@ describe('[SMOKE] Offchain Messages tests', () => {
     createTx.clickOnTransactionItemByIndex(1)
     cy.get(createTx.txRowTitle)
       .next()
-      .then(($section) => {
+      .should(($section) => {
         expect($section.text()).to.include(jsonString)
         const count = $section.text().split(jsonString).length - 1
         expect(count).to.eq(3)

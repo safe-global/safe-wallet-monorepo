@@ -13,6 +13,7 @@ import { execSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import { swAssets } from './plugins/vite-plugin-sw-assets'
 import { importMapIntegrity } from './plugins/vite-plugin-import-map-integrity'
+import { remoteViews } from './plugins/vite-plugin-remote-views'
 
 const __dirname = path.dirname(new URL(import.meta.url).pathname)
 const webRoot = path.resolve(__dirname, '../web')
@@ -178,6 +179,7 @@ export default defineConfig(({ mode }) => {
       ],
     },
     plugins: [
+      remoteViews(webRoot),
       // Tailwind v4 — required for `@apply`, `@reference`, and all utility
       // classes used both directly in JSX (`flex flex-wrap items-start ...`)
       // and inside CSS modules (`@apply absolute top-0 right-0`). Without
