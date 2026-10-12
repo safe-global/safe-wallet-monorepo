@@ -111,7 +111,7 @@ describe('Safe creation tests', () => {
     createwallet.waitForConnectionMsgDisappear()
     // Step 2 bounces back to step 1 (useSyncSafeCreationStep) if the wallet hasn't reconnected yet
     owner.waitForConnectionStatus()
-    createwallet.selectMultiNetwork(1, constants.networks.sepolia.toLowerCase())
+    createwallet.ensureMultiNetworkSelected(1, constants.networks.sepolia.toLowerCase())
     createwallet.clickOnYourSafeAccountPreview()
     createwallet.clickOnNextBtn()
     createwallet.clickOnAddNewOwnerBtn()
