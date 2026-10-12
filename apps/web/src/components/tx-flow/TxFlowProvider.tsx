@@ -12,7 +12,7 @@ import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
+import { useAlreadySigned, useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import {
@@ -33,7 +33,7 @@ import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSmartContractWallet } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -233,14 +233,11 @@ const TxFlowProvider = <T extends unknown>({
         : undefined,
     [signerChainId, signerAddress, signer?.isSafe],
   )
-  const willSignBeforeExecute =
-    safe.threshold === 1 &&
-    canExecute &&
-    !isProposing &&
-    !!safeTx &&
-    safeTx.signatures.size === 0 &&
-    !signer?.isSafe &&
-    !isSmartContractSigner
+  const hasSigned = useAlreadySigned(safeTx)
+  const signatureCompletesThreshold =
+    !!safeTx && !hasSigned && isOneSignatureShort(safeTx.signatures.size, safe.threshold)
+  const canSignOffChain = !signer?.isSafe && !isSmartContractSigner
+  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold && canSignOffChain
 
   const continueToExecute = useCallback(
     (txId: string) => {

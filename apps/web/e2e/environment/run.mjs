@@ -129,13 +129,6 @@ export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
   }
 }
 
-// Cypress Cloud accepts one process per group in a build, and each shard runs one process.
-function recordArguments(env) {
-  if (!env.CYPRESS_RECORD_KEY || !env.SAFE_E2E_RECORD_BUILD_ID) return ['--record', 'false']
-  const group = `isolated shard ${env.SAFE_E2E_SHARD || 1}`
-  return ['--record', '--ci-build-id', env.SAFE_E2E_RECORD_BUILD_ID, '--group', group, '--tag', 'isolated']
-}
-
 const cypressConfig = (env, extra) =>
   JSON.stringify({
     baseUrl: env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`,
@@ -155,7 +148,8 @@ export function cypressRunArguments(specs, env = process.env) {
     cypressConfig(env, {}),
     '--spec',
     specs.join(','),
-    ...recordArguments(env),
+    '--record',
+    'false',
     '--reporter',
     'junit',
     '--reporter-options',

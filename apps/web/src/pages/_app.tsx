@@ -113,7 +113,7 @@ setStoreInstance(reduxStore)
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
 // toasts on the login page before the user has signed in.
-const SafeScopedSubscriptions = (): null => {
+export const SafeScopedSubscriptions = (): null => {
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
