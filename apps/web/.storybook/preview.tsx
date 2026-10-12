@@ -2,13 +2,14 @@ import type { Preview } from '@storybook/nextjs'
 import React, { useEffect } from 'react'
 
 import { initialize, mswLoader } from 'msw-storybook-addon'
-import { storybookSimulationHandler } from '../src/stories/mocks/tenderly'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from './shadcn'
 
 // Initialize MSW for API mocking in Storybook
-initialize({ onUnhandledRequest: 'bypass' }, [storybookSimulationHandler])
+initialize({
+  onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+})
 
 // Export decorators for use in individual stories
 // These are not applied globally but can be imported and used per-story
