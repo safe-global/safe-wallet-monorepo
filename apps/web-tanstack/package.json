@@ -5,8 +5,8 @@
   "license": "GPL-3.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node ../web/scripts/build-remote-view.mjs && vite",
+    "build": "node ../web/scripts/build-remote-view.mjs && vite build",
     "preview": "vite preview --port 3001",
     "serve": "sh -c 'npx -y serve dist -p ${PORT:=3001}'",
     "type-check": "yarn run -T -B tsc --noEmit",
