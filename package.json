@@ -42,7 +42,8 @@
     "react-native-quick-base64": "2.2.2",
     "nwsapi": "2.2.16",
     "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch",
-    "@date-fns/tz@npm:^1.4.1": "patch:@date-fns/tz@npm%3A1.4.1#~/.yarn/patches/@date-fns-tz-npm-1.4.1-e102649294.patch"
+    "@date-fns/tz@npm:^1.4.1": "patch:@date-fns/tz@npm%3A1.4.1#~/.yarn/patches/@date-fns-tz-npm-1.4.1-e102649294.patch",
+    "ses@npm:2.3.0": "patch:ses@npm%3A2.3.0#~/.yarn/patches/ses-npm-2.3.0-dc6afde707.patch"
   },
   "devDependencies": {
     "@storybook/builder-webpack5": "^10.6.0",

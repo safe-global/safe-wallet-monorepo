@@ -42145,6 +42145,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ses@patch:ses@npm%3A2.3.0#~/.yarn/patches/ses-npm-2.3.0-dc6afde707.patch":
+  version: 2.3.0
+  resolution: "ses@patch:ses@npm%3A2.3.0#~/.yarn/patches/ses-npm-2.3.0-dc6afde707.patch::version=2.3.0&hash=3c3d25"
+  dependencies:
+    "@endo/cache-map": "npm:^1.1.0"
+    "@endo/env-options": "npm:^1.1.11"
+    "@endo/immutable-arraybuffer": "npm:^2.0.0"
+  checksum: 10/d019121282647f3199619583c57403b28061eaac068895607f1b4bc9f0262178888b6732a3058c0901b00ccf0734a697df7ff8cbfec0fd16d0ddbf344f7c5299
+  languageName: node
+  linkType: hard
+
 "set-blocking@npm:^2.0.0":
   version: 2.0.0
   resolution: "set-blocking@npm:2.0.0"
