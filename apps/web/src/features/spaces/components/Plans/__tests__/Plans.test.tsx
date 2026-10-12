@@ -3,7 +3,7 @@ import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/bil
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
-import { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
+import PlanStatusCard, { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'
 import { buildPlanTiers } from '../planTiers'
 import type { CurrentPlan, PlanSummary } from '../types'
 
@@ -169,6 +169,12 @@ describe('Plans', () => {
       ),
     ).toBeInTheDocument()
     expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 7 days left')
+  })
+
+  it('counts down the whole free access on the v2 status card', () => {
+    render(<PlanStatusCard plan={trialing(20)} {...meters} appearance="v2" />)
+
+    expect(screen.getByTestId('plan-status-badge')).toHaveTextContent('Free access · 20 days left')
   })
 
   it('tells a paid plan at its seat limit where the Safe accounts above it went', () => {

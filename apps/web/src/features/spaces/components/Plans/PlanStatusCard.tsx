@@ -60,7 +60,7 @@ const UsageMeter = ({
       variant={isV2 ? 'muted-secondary' : 'muted'}
       radius={isV2 ? 'lg-xl' : undefined}
       size="sm"
-      hairline={isV2}
+      bordered={isV2}
       className="flex-1"
     >
       <CardContent className="flex items-center justify-between">
@@ -135,13 +135,14 @@ export default function PlanStatusCard({
   isManaging?: boolean
   /** Shows "Manage plan": on by default for a paid plan, and worth keeping for a lapsed one that still has a Stripe portal. */
   canManage?: boolean
-  /** v2 style: hairline tiles, a neutral badge with a status dot, and the countdown in the status line. */
+  /** v2 style: bordered tiles and a neutral badge with a status dot and the countdown. */
   appearance?: 'launch' | 'v2'
 }) {
   const isTrial = plan?.status === 'trialing'
   const endDate = plan?.periodEndsAt ? formatDate(new Date(plan.periodEndsAt).getTime()) : null
   const isV2 = appearance === 'v2'
-  const badge = getCurrentBadge(plan, isV2 ? TRIAL_ENDING_SOON_DAYS : undefined)
+  // v2 shows days left for the whole free access, not just the last week.
+  const badge = getCurrentBadge(plan, isV2 ? Number.POSITIVE_INFINITY : undefined)
   const isEndingSoon = badge?.variant === 'warning'
   const badgeVariant = isV2 ? 'subtle' : badge?.variant
   const text = statusText(plan, endDate, safeAccounts !== null && _remaining(safeAccounts) === 0, isV2)

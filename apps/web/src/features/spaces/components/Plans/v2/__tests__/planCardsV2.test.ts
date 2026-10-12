@@ -1,6 +1,6 @@
 import { ENTERPRISE_TIER } from '../../planCatalog'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '../../types'
-import { _formatPerSafe, getPlanCtaV2, getPlanPriceV2 } from '../planCardsV2'
+import { getCardSavingV2, getPlanCtaV2, getPlanPriceV2, getYearlySavingV2 } from '../planCardsV2'
 
 const option = (overrides: Partial<PlanSeatOption> = {}): PlanSeatOption => ({
   paymentLinkId: 'pl_b20m',
@@ -70,6 +70,23 @@ describe('getPlanCtaV2', () => {
     ).toMatchObject({ kind: 'change', label: 'Upgrade to Business' })
   })
 
+  it('words a move to the other billing cycle at the same Safe count by the cycle', () => {
+    const yearly = tier({
+      id: 'Business-year',
+      billingCycle: 'year',
+      options: [option({ priceId: 'price_b20y', price: 17_990 })],
+    })
+    const inForce = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
+
+    expect(getPlanCtaV2({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
+      kind: 'change',
+      label: 'Switch to yearly',
+    })
+    expect(
+      getPlanCtaV2({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
+    ).toMatchObject({ kind: 'change', label: 'Switch to 5 Safe accounts' })
+  })
+
   it('sends Enterprise to sales, or to the account team once it is the plan in force', () => {
     expect(getPlanCtaV2({ tier: ENTERPRISE_TIER, option: ENTERPRISE_TIER.options[0] }, currentPlan())).toEqual({
       kind: 'sales',
@@ -88,53 +105,63 @@ describe('getPlanPriceV2', () => {
     expect(getPlanPriceV2(tier(), option({ price: 669 }))).toEqual({
       headline: '€669',
       suffix: '/mo',
-      line: 'Billed monthly · excl. VAT',
-      perSafe: '€33.45 per Safe account/mo',
     })
   })
 
-  it('shows the yearly total on a yearly offer, with the per-Safe price as a monthly equivalent', () => {
+  it('shows the yearly total on a yearly offer', () => {
     expect(getPlanPriceV2(tier({ billingCycle: 'year' }), option({ price: 17_424 }))).toEqual({
       headline: '€17,424',
       suffix: '/yr',
-      line: 'Billed yearly · excl. VAT',
-      perSafe: '€72.60 per Safe account/mo',
     })
-  })
-
-  it('leaves out the per-Safe price when the seat count is unknown', () => {
-    expect(getPlanPriceV2(tier(), option({ price: 669, seats: null })).perSafe).toBeUndefined()
   })
 
   it('shows custom pricing without a price', () => {
     expect(getPlanPriceV2(ENTERPRISE_TIER, ENTERPRISE_TIER.options[0])).toEqual({
       headline: 'Custom',
       suffix: 'Annual term',
-      line: 'Pricing by agreement · Billed annually',
     })
   })
 })
 
-describe('_formatPerSafe', () => {
-  it.each([
-    [189, 'month', 2, '€94.50', 189],
-    [669, 'month', 5, '€133.80', 669],
-    [1099, 'month', 10, '€109.90', 1099],
-    [1669, 'month', 20, '€83.45', 1669],
-    [17_424, 'year', 20, '€72.60', 1452],
-  ] as const)(
-    '%s/%s over %s Safes is %s, which multiplies back to the monthly total',
-    (price, cycle, seats, shown, monthly) => {
-      expect(_formatPerSafe(price, cycle, seats, 'eur')).toBe(shown)
-      expect(Number(shown.slice(1)) * seats).toBeCloseTo(monthly, 2)
-    },
-  )
-
-  it('rounds to the nearest cent when the total does not split evenly', () => {
-    expect(_formatPerSafe(1973, 'year', 2, 'eur')).toBe('€82.21')
+describe('getYearlySavingV2', () => {
+  it('shows what a year saves against twelve monthly payments', () => {
+    expect(getYearlySavingV2(1669 * 12, 17_990, 'eur')).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getYearlySavingV2(189 * 12, 1990, 'eur')).toEqual({ amount: '€278', percent: '12.3%' })
   })
 
-  it('drops the cents when the price per Safe is whole', () => {
-    expect(_formatPerSafe(200, 'month', 2, 'eur')).toBe('€100')
+  it('shows nothing without both prices or without a saving', () => {
+    expect(getYearlySavingV2(null, 17_990, 'eur')).toBeUndefined()
+    expect(getYearlySavingV2(20_028, undefined, 'eur')).toBeUndefined()
+    expect(getYearlySavingV2(12_000, 12_000, 'eur')).toBeUndefined()
+  })
+})
+
+describe('getCardSavingV2', () => {
+  const yearlyTier = tier({
+    id: 'Business-year',
+    billingCycle: 'year',
+    options: [option({ price: 17_990, originalPrice: 20_028 })],
+  })
+
+  it('shows a yearly card its own saving', () => {
+    expect(getCardSavingV2(yearlyTier, yearlyTier.options[0], undefined)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
+  it('takes the monthly price from the current plan card when the offers leave it out', () => {
+    const yearlyWithoutReference = option({ price: 17_990, originalPrice: null })
+    const currentMonthly = tier({ id: 'current', isCurrent: true, options: [option({ price: 1669 })] })
+
+    expect(getCardSavingV2(yearlyTier, yearlyWithoutReference, currentMonthly)).toEqual({
+      amount: '€2,038',
+      percent: '10.2%',
+    })
+  })
+
+  it('shows a monthly card what the same Safe count saves yearly', () => {
+    expect(getCardSavingV2(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
+    expect(getCardSavingV2(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
   })
 })

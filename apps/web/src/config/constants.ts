@@ -156,6 +156,7 @@ export const SAFE_PRO_PRICING_URL = `${SAFE_GLOBAL_DOMAIN}/pricing`
 
 export const SAFE_PRO_USER_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-user-terms`
 export const SAFE_PRO_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-terms`
+export const SAFE_PRO_SERVICE_DESCRIPTIONS_URL = `${HELP_CENTER_URL}/articles/4148651106-safe-pro-service-descriptions`
 
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)
