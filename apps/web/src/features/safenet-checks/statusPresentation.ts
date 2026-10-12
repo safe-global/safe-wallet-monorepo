@@ -1,5 +1,10 @@
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
+import {
+  CheckStatus,
+  SAFENET_EXPLORER_URL,
+  type PublicCheckStatus,
+  type UnavailableReason,
+} from '@safe-global/utils/features/safenet-checks'
 
 export type SafenetStatusPresentation = {
   /** Safe Shield severity vocabulary — drives SeverityIcon and its colors. */
@@ -68,6 +73,10 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
   // definite "no check was requested", and never an error tone.
   WINDOW_UNCERTAIN: STATUS_UNKNOWN,
 }
+
+/** The check's page on the Safenet explorer — per-sentinel detail, not proof of a verdict. */
+export const getSafenetExplorerUrl = (chainId: string, safeTxHash: string): string =>
+  `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
 
 /** Section heading for every verdict: the state itself is in the copy. */
 const VERDICT_LABEL = 'Safenet check'

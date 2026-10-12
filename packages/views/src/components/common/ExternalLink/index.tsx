@@ -1,5 +1,5 @@
 import type { ReactElement, ComponentProps } from 'react'
-import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Link } from '@safe-global/views/components/ui/link'
 
