@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/design/components/common/Identicon'
 import TokenIcon from '@/components/common/TokenIcon'
 import { Progress, ProgressIndicator, ProgressTrack } from '@safe-global/design/components/ui/progress'
 import { Typography } from '@safe-global/design/components/ui/typography'

@@ -5,7 +5,7 @@ import { Typography } from '@safe-global/design/components/ui/typography'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import css from './styles.module.css'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/design/components/common/Identicon'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
 

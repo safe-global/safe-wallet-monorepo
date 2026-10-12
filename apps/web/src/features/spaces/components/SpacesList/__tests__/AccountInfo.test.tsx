@@ -48,7 +48,7 @@ jest.mock('@/components/common/InitialsAvatar', () => ({
   default: ({ name }: { name: string }) => <div data-testid="initials-avatar">{name}</div>,
 }))
 
-jest.mock('@/components/common/Identicon', () => ({
+jest.mock('@safe-global/design/components/common/Identicon', () => ({
   __esModule: true,
   default: ({ address }: { address: string }) => <div data-testid="identicon" data-address={address} />,
 }))

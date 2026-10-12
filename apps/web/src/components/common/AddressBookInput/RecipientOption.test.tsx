@@ -9,7 +9,7 @@ jest.mock('@/hooks/useMediaQuery', () => ({
   useMediaQuery: (query: string) => mockUseMediaQuery(query),
 }))
 
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/design/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon">{address}</span>
   return Identicon
 })

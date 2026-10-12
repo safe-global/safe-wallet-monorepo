@@ -12,7 +12,7 @@ import {
 } from '@safe-global/design/components/ui/dialog'
 import { Typography } from '@safe-global/design/components/ui/typography'
 import { Button } from '@safe-global/design/components/ui/button'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/design/components/common/Identicon'
 import { cn } from '@safe-global/design/utils/cn'
 import css from './styles.module.css'
 

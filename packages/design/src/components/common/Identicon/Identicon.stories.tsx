@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import Identicon from './index'
+import Identicon from '@safe-global/design/components/common/Identicon'
 
 const meta = {
   title: 'Components/Common/Identicon',

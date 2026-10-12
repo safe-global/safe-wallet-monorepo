@@ -5,7 +5,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/design/com
 import { Spinner } from '@safe-global/design/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/design/components/common/Identicon'
 import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'

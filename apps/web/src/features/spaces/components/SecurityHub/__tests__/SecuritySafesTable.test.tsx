@@ -31,7 +31,7 @@ jest.mock('@/features/multichain', () => ({
   ),
 }))
 
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/design/components/common/Identicon', () => {
   const MockId = ({ address }: { address: string }) => <span data-testid={`identicon-${address.slice(0, 6)}`} />
   MockId.displayName = 'MockIdenticon'
   return { __esModule: true, default: MockId }
