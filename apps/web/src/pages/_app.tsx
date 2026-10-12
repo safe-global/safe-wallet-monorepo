@@ -1,6 +1,6 @@
 import Analytics from '@/services/analytics/Analytics'
 import type { ReactNode } from 'react'
-import { type ReactElement } from 'react'
+import { type ReactElement, useEffect, useState } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from 'next/dynamic'
@@ -226,4 +226,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
   )
 }
 
-export default SafeWalletApp
+// In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
+const DevClientOnlyApp = (props: AppProps): ReactElement | null => {
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => setIsMounted(true), [])
+  return isMounted ? <SafeWalletApp {...props} /> : null
+}
+
+export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp

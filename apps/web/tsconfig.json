@@ -14,7 +14,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": false,
     "types": ["node", "jest", "mdx"],
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "paths": {
       "@/*": ["./src/*"],
