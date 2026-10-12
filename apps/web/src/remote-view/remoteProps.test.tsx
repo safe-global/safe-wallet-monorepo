@@ -20,6 +20,15 @@ describe('toRemoteProps', () => {
     expect(slots.get('props.memoIcon')).toBe(MemoIcon)
   })
 
+  it('treats functions passed under component prop names as components, even when minified', () => {
+    const minified = () => null
+    const { data } = convert({ icon: minified, items: [{ Icon: minified, onClick: minified }], startIcon: minified })
+
+    expect(data.icon).toEqual({ [COMPONENT_KEY]: 'props.icon' })
+    expect(data.startIcon).toEqual({ [COMPONENT_KEY]: 'props.startIcon' })
+    expect(data.items).toEqual([{ Icon: { [COMPONENT_KEY]: 'props.items.0.Icon' }, onClick: expect.any(Function) }])
+  })
+
   it('keeps React content in slots and sends callbacks as stable functions', () => {
     const content: ReactNode = <b>hi</b>
     const onClick = jest.fn()

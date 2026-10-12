@@ -10,9 +10,13 @@ type Callback = (...args: unknown[]) => unknown
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
 
-// A component passed as a prop (an icon, say): memo/forwardRef objects, or functions named like components.
-const isComponent = (value: unknown): value is ElementType =>
-  (typeof value === 'function' && /^[A-Z]/.test((value as { displayName?: string }).displayName ?? value.name)) ||
+// Minified builds rename functions, so props named like components (icon, Icon, Component, …) count too.
+const COMPONENT_PROP = /^(icon|component)$|(Icon|Component)$/
+
+// A component passed as a prop (an icon, say): memo/forwardRef objects, or functions named or passed like components.
+const isComponent = (value: unknown, key: string): value is ElementType =>
+  (typeof value === 'function' &&
+    (COMPONENT_PROP.test(key) || /^[A-Z]/.test((value as { displayName?: string }).displayName ?? value.name))) ||
   (typeof value === 'object' &&
     value !== null &&
     typeof (value as { $$typeof?: unknown }).$$typeof === 'symbol' &&
@@ -38,7 +42,7 @@ export const toRemoteProps = (
     slots.set(path, value)
     return { [SLOT_KEY]: path }
   }
-  if (isComponent(value)) {
+  if (isComponent(value, path.slice(path.lastIndexOf('.') + 1))) {
     slots.set(path, value)
     return { [COMPONENT_KEY]: path }
   }
