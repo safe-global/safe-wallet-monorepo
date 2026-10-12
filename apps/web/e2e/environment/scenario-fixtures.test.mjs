@@ -1,6 +1,12 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { CATEGORIES, getSafes, setSafeScenario } from '../../cypress/support/safes/safesHandler.js'
+import * as credentials from '../../cypress/support/credentials.js'
+
+const scenarioCredentials = (index) => ({
+  OWNER_4_PRIVATE_KEY: `key-${index}`,
+  OWNER_4_WALLET_ADDRESS: `0xowner-${index}`,
+})
 
 async function fixtureRunner(t, spec, isolated = true) {
   const env = { SAFE_E2E_ISOLATED: isolated }
@@ -11,7 +17,7 @@ async function fixtureRunner(t, spec, isolated = true) {
   })
   const globals = {
     Cypress: {
-      env(key, ...values) {
+      expose(key, ...values) {
         if (values.length) env[key] = values[0]
         return env[key]
       },
@@ -20,7 +26,7 @@ async function fixtureRunner(t, spec, isolated = true) {
     cy: {
       task(name, path, options) {
         calls.push({ name, path, options })
-        return prepare()
+        return prepare().then((scenario) => ({ credentials: scenarioCredentials(calls.length), ...scenario }))
       },
       fixture: async (path) => ({ source: path }),
     },
@@ -49,6 +55,17 @@ async function fixtureRunner(t, spec, isolated = true) {
   }
   return { env, hooks, calls, runBeforeEach, setPrepare: (callback) => (prepare = callback) }
 }
+
+test('shares the scenario owners with a separately bundled spec copy of the credentials', async (t) => {
+  const runner = await fixtureRunner(t, 'cypress/e2e/regression/assets.cy.js')
+  await runner.hooks.before[0]()
+  const specCopy = await import(`../../cypress/support/credentials.js?bundle=spec-${encodeURIComponent(t.name)}`)
+  assert.notEqual(specCopy, credentials)
+  for (const copy of [credentials, specCopy]) {
+    assert.deepEqual(copy.walletCredentials, scenarioCredentials(1))
+    assert.equal(copy.defaultOwnerAddress(), '0xowner-1')
+  }
+})
 
 test('prepares once before spec hooks and reads multiple fixture categories without further tasks', async (t) => {
   const runner = await fixtureRunner(t, 'cypress/e2e/regression/assets.cy.js')

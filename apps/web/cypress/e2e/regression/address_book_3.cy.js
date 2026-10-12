@@ -3,6 +3,7 @@ import * as addressBook from '../pages/address_book.page.js'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
@@ -11,9 +12,10 @@ const NAME_2 = 'Owner2'
 const EDITED_NAME = 'Edited Owner1'
 const duplicateEntry = 'test-sepolia-90'
 const owner1 = 'Automation owner'
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const recipientData = [owner1, constants.DEFAULT_OWNER_ADDRESS]
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Address book tests - 3', () => {
   before(async () => {
@@ -93,7 +95,7 @@ describe('Address book tests - 3', () => {
         extraStorage: { [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sepoliaAddress2 },
       })
       addressBook.clickOnSendBtn()
-      addressBook.verifyRecipientData(recipientData)
+      addressBook.verifyRecipientData([owner1, constants.defaultOwnerAddress()])
     })
   })
 })

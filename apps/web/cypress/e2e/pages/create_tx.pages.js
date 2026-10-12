@@ -703,10 +703,9 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      cy.wait(3000)
       cy.get(selector)
         .first()
-        .then(($freshElement) => {
+        .should(($freshElement) => {
           verifyTokenSymbol($freshElement, altToken)
         })
     }
@@ -1086,7 +1085,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 
