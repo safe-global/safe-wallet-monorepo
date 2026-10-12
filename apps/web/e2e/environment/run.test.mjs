@@ -36,22 +36,13 @@ test('runs CI specs in the selected browser and retains artifacts between specs'
   )
 })
 
-test('records to Cypress Cloud only with a record key and a build id, one group per shard', () => {
-  const specs = ['cypress/e2e/regression/assets.cy.js', 'cypress/e2e/regression/batch_tx.cy.js']
-  const unrecorded = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key' })
-  assert.equal(unrecorded[unrecorded.indexOf('--record') + 1], 'false')
-  const args = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key', SAFE_E2E_RECORD_BUILD_ID: 'run-1' })
-  assert.notEqual(args[args.indexOf('--record') + 1], 'false')
-  assert.equal(args[args.indexOf('--ci-build-id') + 1], 'run-1')
-  assert.equal(args[args.indexOf('--group') + 1], 'isolated shard 1')
-  assert.equal(args[args.indexOf('--spec') + 1], specs.join(','))
-  const shard = cypressRunArguments(specs, {
+test('never records to Cypress Cloud, even with a record key', () => {
+  const args = cypressRunArguments(['cypress/e2e/regression/assets.cy.js'], {
     CYPRESS_RECORD_KEY: 'key',
     SAFE_E2E_RECORD_BUILD_ID: 'run-1',
-    SAFE_E2E_SHARD: '4',
   })
-  assert.equal(shard[shard.indexOf('--group') + 1], 'isolated shard 4')
-  assert.equal(args[args.indexOf('--tag') + 1], 'isolated')
+  assert.equal(args[args.indexOf('--record') + 1], 'false')
+  assert.equal(args.includes('--ci-build-id'), false)
 })
 
 test('keeps local Chrome defaults and passes the selected specs to interactive Cypress', () => {
