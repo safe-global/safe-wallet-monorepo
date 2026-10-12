@@ -6,7 +6,7 @@ import { DYNAMIC_ATTRIBUTE, HTML_ATTRIBUTES, remoteTag } from './html'
 // the page understands. Everything else is React as usual.
 export const Fragment = runtime.Fragment
 
-const ATTRIBUTE_BY_LOWER = new Map(HTML_ATTRIBUTES.map((name) => [name.toLowerCase(), name]))
+const ATTRIBUTE_BY_LOWER = new Map(HTML_ATTRIBUTES.map((name) => [name.toLowerCase(), name.toLowerCase()]))
 const ALIASES: Record<string, string> = { className: 'class', htmlFor: 'for', xlinkHref: 'href' }
 
 const kebab = (name: string) => name.replace(/[A-Z]/g, (char) => `-${char.toLowerCase()}`)

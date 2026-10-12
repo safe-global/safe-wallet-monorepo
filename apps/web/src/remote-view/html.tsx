@@ -6,7 +6,8 @@ import { usePropUrls, useViewToken } from './slots'
 type Listener = (detail?: unknown) => void
 type ElementProps = Record<string, unknown> & { children?: ReactNode }
 
-const ATTRIBUTES = new Set(HTML_ATTRIBUTES)
+// The worker sends lowercase names; this restores the real casing (viewbox → viewBox).
+const CANONICAL = new Map(HTML_ATTRIBUTES.map((name) => [name.toLowerCase(), name]))
 const URL_ATTRIBUTES = new Set(['href', 'src'])
 const FIELD_TAGS = new Set(['input', 'textarea', 'select'])
 const UNSAFE_STYLE = /url\s*\(|expression\s*\(|@import|image-set|\\/i
@@ -53,7 +54,7 @@ export const isAllowedUrl = (value: string, attribute: string, propOrigins: Set<
 export const safeAttributes = (props: ElementProps, propOrigins: Set<string>) => {
   const safe: Record<string, unknown> = {}
   for (const [name, value] of Object.entries(props)) {
-    if ((!ATTRIBUTES.has(name) && !DYNAMIC_ATTRIBUTE.test(name)) || typeof value !== 'string') continue
+    if ((!CANONICAL.has(name) && !DYNAMIC_ATTRIBUTE.test(name)) || typeof value !== 'string') continue
     if (URL_ATTRIBUTES.has(name) && !isAllowedUrl(value, name, propOrigins)) continue
     // SVG paint and filter references may only point inside the document.
     if (name !== 'remote-style' && /url\s*\(/i.test(value) && !/^url\(#[\w-]+\)$/.test(value.trim())) continue
@@ -77,7 +78,7 @@ export const safeAttributes = (props: ElementProps, propOrigins: Set<string>) =>
     if (name === 'target') safe.target = value === '_blank' ? '_blank' : undefined
     else if (name === 'tabindex') safe.tabIndex = Number(value)
     else if (BOOLEANS.has(name)) safe[reactName(name)] = true
-    else safe[reactName(name)] = value
+    else safe[reactName(CANONICAL.get(name) ?? name)] = value
   }
   if (safe.target === '_blank') safe.rel = 'noopener noreferrer'
   return safe

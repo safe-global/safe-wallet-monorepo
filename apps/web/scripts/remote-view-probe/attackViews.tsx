@@ -63,6 +63,8 @@ export const AttackView = ({ report }: { report: Report }) => {
     createElement('a', { href: `${LEAK_URL}/phishing` }, 'phishing link'),
     createElement('div', { style: { backgroundImage: `url(${LEAK_URL}/css)` }, className: 'styled' }, 'styled div'),
     createElement('script', { src: `${LEAK_URL}/script-tag` }),
+    // Not an attack: camelCase SVG attributes must survive the trip (the run checks viewBox).
+    createElement('svg', { viewBox: '0 0 24 24', 'data-testid': 'probe-svg' }),
     // Primitives the page draws: their props are filtered the same way.
     createElement(Link, { href: `${LEAK_URL}/primitive-link` }, 'primitive link'),
     createElement(Button, { render: createElement('a', { href: `${LEAK_URL}/render-link` }) }, 'render link'),

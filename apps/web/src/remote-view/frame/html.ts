@@ -242,8 +242,11 @@ const dispatch = (type: string) =>
 
 const EVENTS = ['click', 'input', 'change', 'keydown', 'submit', 'focus', 'blur']
 
+// Element attribute names are lowercase (setAttribute('viewBox') stores `viewbox`); the page restores the casing.
+export const REMOTE_ATTRIBUTES = HTML_ATTRIBUTES.map((name) => name.toLowerCase())
+
 export const HtmlElement = createRemoteElement({
-  attributes: HTML_ATTRIBUTES,
+  attributes: REMOTE_ATTRIBUTES,
   events: {
     ...Object.fromEntries(EVENTS.map((type) => [type, { bubbles: true, dispatchEvent: dispatch(type) }])),
     // Media events do not bubble; the page only listens when the view does.

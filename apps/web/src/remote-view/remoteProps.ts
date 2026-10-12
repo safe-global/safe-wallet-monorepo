@@ -1,18 +1,29 @@
-import { isValidElement, type ReactNode } from 'react'
+import { isValidElement, type ElementType, type ReactNode } from 'react'
 
 export const SLOT_KEY = '__remoteSlot'
+export const COMPONENT_KEY = '__remoteComponent'
+
+export type Slots = Map<string, ReactNode | ElementType>
 
 type Callback = (...args: unknown[]) => unknown
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype
 
+// A component passed as a prop (an icon, say): memo/forwardRef objects, or functions named like components.
+const isComponent = (value: unknown): value is ElementType =>
+  (typeof value === 'function' && /^[A-Z]/.test((value as { displayName?: string }).displayName ?? value.name)) ||
+  (typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { $$typeof?: unknown }).$$typeof === 'symbol' &&
+    !isValidElement(value))
+
 // Turns app props into data the worker may see: React content becomes a slot the page fills,
-// functions become stable callbacks so re-renders do not create new proxies.
+// components stay on the page too, functions become stable callbacks so re-renders do not create new proxies.
 export const toRemoteProps = (
   value: unknown,
   path: string,
-  slots: Map<string, ReactNode>,
+  slots: Slots,
   callbacks: Map<string, Callback>,
   stable: Map<string, Callback>,
   latest: (path: string) => Callback | undefined,
@@ -26,6 +37,10 @@ export const toRemoteProps = (
   if (isValidElement(value)) {
     slots.set(path, value)
     return { [SLOT_KEY]: path }
+  }
+  if (isComponent(value)) {
+    slots.set(path, value)
+    return { [COMPONENT_KEY]: path }
   }
   if (typeof value === 'function') {
     callbacks.set(path, value as Callback)

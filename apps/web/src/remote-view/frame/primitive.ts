@@ -1,11 +1,13 @@
 import { createElement, isValidElement, type ReactNode } from 'react'
 import { createRemoteElement } from '@remote-dom/core/elements'
 
+const PRIMITIVE = { attributes: ['name'], properties: { props: { type: Object } } } as const
+
 // One remote element for every primitive the page draws (Base UI needs the real DOM: focus, layout, portals).
-export const UiPrimitiveElement = createRemoteElement({
-  attributes: ['name'],
-  properties: { props: { type: Object } },
-})
+export const UiPrimitiveElement = createRemoteElement(PRIMITIVE)
+
+// Draws a component the app passed in props; the page looks it up by prop path.
+export const UiComponentElement = createRemoteElement(PRIMITIVE)
 
 export const ELEMENT_KEY = '__remoteElement'
 
@@ -14,7 +16,7 @@ const isContent = (value: unknown): boolean =>
 
 // Stands in for a primitive inside the worker. Data and callbacks travel as `props`; React content passed in
 // props travels as named slots, which the page hands back to the real primitive under the same prop name.
-export const hostPrimitive = (name: string) => {
+export const hostPrimitive = (name: string, tag = 'ui-primitive') => {
   const Primitive = ({ children, ...props }: Record<string, unknown> & { children?: ReactNode }) => {
     const data: Record<string, unknown> = {}
     const slots: ReactNode[] = []
@@ -28,7 +30,7 @@ export const hostPrimitive = (name: string) => {
       } else if (isContent(value)) slots.push(createElement('remote-fragment', { key, slot: key }, value as ReactNode))
       else data[key] = value
     }
-    return createElement('ui-primitive', { name, props: data }, ...slots, children)
+    return createElement(tag, { name, props: data }, ...slots, children)
   }
   Primitive.displayName = name
   return Primitive

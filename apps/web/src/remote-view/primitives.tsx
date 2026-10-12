@@ -1,10 +1,10 @@
-import { createElement, isValidElement, type ComponentType, type ReactNode } from 'react'
+import { createElement, isValidElement, type ComponentType, type ElementType, type ReactNode } from 'react'
 import { createRemoteComponentRenderer } from '@remote-dom/react/host'
 import { HOST_PRIMITIVES } from './primitiveRegistry'
 import { HTML_TAGS } from './frame/html'
 import { ELEMENT_KEY } from './frame/primitive'
 import { isAllowedUrl, safeAttributes } from './html'
-import { usePropUrls } from './slots'
+import { usePropUrls, useSlotComponent } from './slots'
 
 const DROPPED = new Set(['ref', 'dangerouslySetInnerHTML', 'as'])
 const UNSAFE_STYLE = /url\s*\(|expression\s*\(|@import|image-set/i
@@ -51,20 +51,27 @@ const safeProps = (props: unknown, propOrigins: Set<string>) => {
   return safe
 }
 
-const RemotePrimitive = createRemoteComponentRenderer(
-  ({ name, props, children, ...slots }: Record<string, unknown> & { children?: ReactNode }) => {
-    const propOrigins = usePropUrls()
-    const Primitive =
-      typeof name === 'string' ? (HOST_PRIMITIVES[name] as ComponentType<Record<string, unknown>>) : null
-    if (!Primitive) return null
-    const content = Object.fromEntries(Object.entries(slots).filter(([, value]) => isValidElement(value)))
-    const hasChildren = Array.isArray(children) ? children.length > 0 : children != null
-    return createElement(
-      Primitive,
-      { ...safeProps(props, propOrigins), ...content },
-      ...(hasChildren ? [children] : []),
-    )
-  },
-)
+const usePrimitive = (name: unknown) =>
+  typeof name === 'string' ? (HOST_PRIMITIVES[name] as ComponentType<Record<string, unknown>>) : null
 
-export const PRIMITIVE_COMPONENTS: [string, typeof RemotePrimitive][] = [['ui-primitive', RemotePrimitive]]
+const hostRenderer = (useComponent: (name: unknown) => ElementType | null) =>
+  createRemoteComponentRenderer(
+    ({ name, props, children, ...slots }: Record<string, unknown> & { children?: ReactNode }) => {
+      const propOrigins = usePropUrls()
+      const Primitive = useComponent(name)
+      if (!Primitive) return null
+      const content = Object.fromEntries(Object.entries(slots).filter(([, value]) => isValidElement(value)))
+      const hasChildren = Array.isArray(children) ? children.length > 0 : children != null
+      return createElement(
+        Primitive,
+        { ...safeProps(props, propOrigins), ...content },
+        ...(hasChildren ? [children] : []),
+      )
+    },
+  )
+
+export const PRIMITIVE_COMPONENTS: [string, ReturnType<typeof hostRenderer>][] = [
+  ['ui-primitive', hostRenderer(usePrimitive)],
+  // Components the app passed to a view (icons and the like): app code, drawn with the view's props filtered.
+  ['ui-component', hostRenderer(useSlotComponent)],
+]

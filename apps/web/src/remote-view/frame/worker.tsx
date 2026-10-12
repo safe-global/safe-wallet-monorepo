@@ -6,7 +6,8 @@ import { ThreadMessagePort } from '@quilted/threads'
 import { BatchingRemoteConnection, RemoteRootElement, type RemoteConnection } from '@remote-dom/core/elements'
 import { defineRemoteElements, Slot } from './elements'
 import { REMOTE_VIEWS } from './views'
-import { SLOT_KEY } from '../remoteProps'
+import { COMPONENT_KEY, SLOT_KEY } from '../remoteProps'
+import { hostPrimitive } from './primitive'
 import { setCssMaps } from './css'
 
 customElements.define('remote-root', RemoteRootElement)
@@ -28,7 +29,7 @@ const toCloneable = (value: unknown): unknown => {
 }
 
 type Callback = (...args: unknown[]) => unknown
-type Callbacks = { latest: Map<string, Callback>; stable: Map<string, Callback> }
+type Callbacks = { latest: Map<string, Callback>; stable: Map<string, Callback>; components: Map<string, ElementType> }
 
 // Callbacks keep their identity across updates (one wrapper per prop path calling the latest function),
 // so effects that depend on them do not run again on every render of the page.
@@ -45,6 +46,12 @@ const fromRemoteProps = (value: unknown, path: string, callbacks: Callbacks): un
   if (Array.isArray(value)) return value.map((item, index) => fromRemoteProps(item, `${path}.${index}`, callbacks))
   if (!isPlainObject(value)) return value
   if (typeof value[SLOT_KEY] === 'string') return createElement(Slot as ElementType, { name: value[SLOT_KEY] })
+  const component = value[COMPONENT_KEY]
+  if (typeof component === 'string') {
+    if (!callbacks.components.has(component))
+      callbacks.components.set(component, hostPrimitive(component, 'ui-component'))
+    return callbacks.components.get(component)
+  }
   return Object.fromEntries(
     Object.entries(value).map(([key, item]) => [key, fromRemoteProps(item, `${path}.${key}`, callbacks)]),
   )
@@ -65,7 +72,7 @@ const render = (
   document.body.append(root)
 
   const reactRoot = createRoot(root)
-  const callbacks: Callbacks = { latest: new Map(), stable: new Map() }
+  const callbacks: Callbacks = { latest: new Map(), stable: new Map(), components: new Map() }
   const draw = (next: Props) =>
     reactRoot.render(createElement(View, fromRemoteProps(next, 'props', callbacks) as Props))
   draw(props)

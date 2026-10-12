@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { release, retain } from '@quilted/threads'
 import { RemoteReceiver, RemoteRootRenderer } from '@remote-dom/react/host'
 import { REMOTE_COMPONENTS } from './components'
 import { getSandbox, type RemoteHandle, type RemoteProps } from './sandbox'
-import { toRemoteProps } from './remoteProps'
+import { toRemoteProps, type Slots } from './remoteProps'
 import { PropUrlsContext, SlotContext, ViewTokenContext } from './slots'
 import { cssMaps } from './css'
 
@@ -16,7 +16,7 @@ export const RemoteView = ({ name, props }: { name: string; props: RemoteProps }
   const callbacks = useRef(new Map<string, (...args: unknown[]) => unknown>())
   const handle = useRef<Promise<RemoteHandle> | null>(null)
 
-  const slots = new Map<string, ReactNode>()
+  const slots: Slots = new Map()
   const urls = new Set<string>()
   const nextCallbacks = new Map<string, (...args: unknown[]) => unknown>()
   const data = toRemoteProps(
