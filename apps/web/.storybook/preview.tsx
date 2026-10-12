@@ -116,8 +116,6 @@ const preview: Preview = {
             'Spaces',
             'Static',
             ['Error', 'Legal', 'Handlers'],
-            'Safenet',
-            ['Transaction flow - Active Pro plan', 'Transaction flow - No Plan', 'Transaction details'],
           ],
           'UI',
           'Components',

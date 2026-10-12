@@ -45,8 +45,6 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
-  /** SAFENET_CHECKS - Safenet transaction checks (default: false) */
-  safenetChecks?: boolean
 }
 
 /**
