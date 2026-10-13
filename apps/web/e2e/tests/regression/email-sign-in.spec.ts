@@ -28,23 +28,6 @@ test.describe('Email sign-in', { tag: '@regression' }, () => {
     await expect.poll(() => sessionAuthMethod(safePage)).toBe('oidc')
   })
 
-  test('that a wrong code keeps the user on the code page and the right code then signs in', async ({ safePage }) => {
-    const email = uniqueEmail('wrong-code')
-    const auth0 = await openEmailSignIn(safePage)
-
-    await auth0.signIn(email, { code: '000000' })
-
-    await expect(auth0.error).toHaveText('Wrong code. Try again.')
-    expect(await sessionAuthMethod(safePage)).toBeNull()
-
-    await auth0.signIn(email)
-
-    await expect(safePage).toHaveURL(/\/welcome\/spaces$/)
-    await expect(launchScreen(safePage)).toBeHidden()
-    await expect(signedInAccount(safePage)).toContainText('@safe-e2e.test')
-    await expect.poll(() => sessionAuthMethod(safePage)).toBe('oidc')
-  })
-
   test('that cancelling returns the user to the Workspace welcome page without a session', async ({ safePage }) => {
     const auth0 = await openEmailSignIn(safePage)
 

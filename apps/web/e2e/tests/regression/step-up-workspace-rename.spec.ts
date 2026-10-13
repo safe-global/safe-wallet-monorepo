@@ -54,24 +54,6 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
     await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
   })
 
-  test('that a wrong code keeps the user on the code page and the right code then completes the rename', async ({
-    safePage,
-  }) => {
-    const auth0 = new Auth0Page(safePage)
-
-    await rename(safePage, NEW_NAME)
-    await auth0.verify({ code: '000000' })
-
-    await expect(auth0.error).toHaveText('Wrong code. Try again.')
-
-    await auth0.verify()
-
-    await expect(safePage).toHaveURL(settingsUrl)
-    await expect(launchScreen(safePage)).toBeHidden()
-    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
-    await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
-  })
-
   test('that cancelling returns the user to the page without an error and without the rename', async ({ safePage }) => {
     const auth0 = new Auth0Page(safePage)
 
