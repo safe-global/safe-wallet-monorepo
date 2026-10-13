@@ -18,7 +18,7 @@ exports[`./PromoBanner.stories Default 1`] = `
           alt="Promo image"
           class="bannerImage"
           height="95"
-          src="/img.jpg"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -160,7 +160,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
           alt="Special offer"
           class="bannerImage"
           height="95"
-          src="/img.jpg"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -239,7 +239,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
           alt="Action required"
           class="bannerImage"
           height="95"
-          src="/img.jpg"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -318,7 +318,7 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
           alt="Welcome"
           class="bannerImage"
           height="95"
-          src="/img.jpg"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
