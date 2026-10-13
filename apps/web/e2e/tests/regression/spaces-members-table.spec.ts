@@ -31,6 +31,28 @@ const SPACE = {
   members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
 }
 
+// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
+const LIVE_SUBSCRIPTION = {
+  id: 'sub_e2e',
+  customerId: 'cus_e2e',
+  upstreamCustomerId: 'cus_e2e',
+  plan: {
+    id: 'plan_e2e',
+    currentPrice: 0,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'usd',
+    features: [],
+    type: 'standard',
+    product: null,
+  },
+  status: 'active',
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+}
+
 // Deliberately non-alphabetical so the Name sort is observable.
 const member = (id: number, name: string, email: string) => ({
   id,
@@ -89,6 +111,9 @@ test.describe('Spaces — Members table', { tag: '@regression' }, () => {
     await safePage.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
     await safePage.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
     await safePage.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
+    await safePage.route(/\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/, (route) =>
+      route.fulfill({ json: [LIVE_SUBSCRIPTION] }),
+    )
 
     await safePage.goto(`/spaces/members?spaceId=${SPACE_ID}`)
     await walletPage.acceptCookies()
