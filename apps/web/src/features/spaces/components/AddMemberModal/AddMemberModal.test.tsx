@@ -1,6 +1,4 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { showNotification } from '@/store/notificationsSlice'
 import AddMemberModal from './index'
 
@@ -10,18 +8,6 @@ const mockInviteMembers = jest.fn()
 const mockUseAuthGetMeV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
 const mockUseAddressBook = jest.fn()
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_MEMBER_INVITE_SENT: { action: 'Workspace member invite sent', category: 'spaces' },
-    ADD_MEMBER_MODAL: { action: 'Open add member modal', category: 'spaces' },
-  },
-  SPACE_LABELS: {},
-}))
 
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => mockSpaceId,
@@ -100,44 +86,12 @@ jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   default: () => ({ address: undefined, resolverError: undefined, resolving: false }),
 }))
 
-describe('AddMemberModal tracking', () => {
+describe('AddMemberModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseAuthGetMeV1Query.mockReturnValue({ data: undefined })
     mockUseUsersGetWithWalletsV1Query.mockReturnValue({ currentData: undefined })
     mockUseAddressBook.mockReturnValue({})
-  })
-
-  it('tracks WORKSPACE_MEMBER_INVITE_SENT with workspace_id, user_id and role on submit', async () => {
-    mockInviteMembers.mockResolvedValue({
-      data: [
-        {
-          userId: 1,
-          spaceId: mockSpaceId,
-          name: 'Alice',
-          role: 'MEMBER',
-          status: 'INVITED',
-        },
-      ],
-    })
-
-    render(<AddMemberModal onClose={jest.fn()} />)
-
-    fireEvent.change(screen.getByTestId('member-invitee-identifier-input'), {
-      target: { value: '0x1234567890123456789012345678901234567890' },
-    })
-
-    const submitButton = screen.getByTestId('add-member-modal-button')
-    await waitFor(() => expect(submitButton).not.toBeDisabled())
-    fireEvent.click(submitButton)
-
-    await waitFor(() => {
-      expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: mockSpaceId },
-        { workspace_id: mockSpaceId, user_id: 1, role: 'member' },
-      )
-    })
   })
 
   it('submits email invites with the email field instead of address', async () => {

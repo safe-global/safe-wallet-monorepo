@@ -10,8 +10,6 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Errors, logError } from '@/services/exceptions'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
@@ -60,10 +58,6 @@ export const useAddSafeToSpace = (): UseAddSafeToSpaceResult => {
         variant: 'success',
         groupKey: 'add-safe-to-workspace-success',
       }),
-    )
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-      { workspace_id: spaceId, safe_address: added.address, chain_id: added.chainId },
     )
     void router.replace({ pathname: router.pathname, query: spaceQuery }, undefined, { shallow: true })
   }
