@@ -48,6 +48,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -111,6 +112,12 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const { safe } = useSafeInfo()
 
   const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+  const safenet = useLoadFeature(SafenetChecksFeature)
+  const isSafenetEnabled = useIsSafenetChecksEnabled()
+  const safenetInfo =
+    isSafenetEnabled && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
+      ? txDetails.detailedExecutionInfo
+      : undefined
   const showAuditLog =
     (isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo) && (!isUnsigned || !!proposer)) ||
     isModuleExecution ||
@@ -170,6 +177,14 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
+          {safenetInfo && (
+            <safenet.SafenetDetailsCard
+              safeTxHash={safenetInfo.safeTxHash}
+              chainId={safe.chainId}
+              timestampMs={safenetInfo.submittedAt}
+              isQueued={isQueue}
+            />
+          )}
           <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
             <Summary
               txDetails={txDetails}

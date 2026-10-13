@@ -44,6 +44,7 @@ import {
   getRelayLimitReachedError,
 } from '@safe-global/utils/services/gasPaymentErrors'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
+import { requestSafenetCheck } from '@/features/safenet-checks/services'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
@@ -86,6 +87,7 @@ export const dispatchTxProposal = async ({
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
     txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce, chainId, safeAddress })
+    void requestSafenetCheck({ chainId, safeAddress, safeTxHash })
   }
 
   return proposedTx
@@ -132,6 +134,7 @@ export const dispatchTxConfirmation = async ({
     chainId,
     safeAddress,
   })
+  void requestSafenetCheck({ chainId, safeAddress, safeTxHash })
 
   return confirmedTx
 }

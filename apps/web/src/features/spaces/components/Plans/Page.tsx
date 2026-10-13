@@ -14,7 +14,7 @@ import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { takePlansEntry } from './planSelection'
-import { buildPlanTiers, pickProps, toCurrentPlan } from './planTiers'
+import { buildPlanTiers, toCurrentPlan } from './planTiers'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
@@ -112,7 +112,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             onSubscribe={(picked) => {
               if (canChange) setPick(picked)
               else if (picked.option.paymentLinkId) {
-                void startCheckout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+                void startCheckout(picked.option.paymentLinkId)
               }
             }}
             isSubscribing={isCheckingOut}

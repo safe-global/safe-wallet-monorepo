@@ -12,6 +12,7 @@ export const CREDENTIAL_ROUTES = [
   /\/v1\/auth/,
   /\/v2\/register\/notifications$/,
   /\/v2\/chains\/[^/]+\/notifications\/devices/,
+  /\/v1\/chains\/[^/]+\/safes\/[^/]+\/safenet\/checks$/,
 ]
 
 const IS_BEHIND_IAP = process.env.NEXT_PUBLIC_IS_BEHIND_IAP === 'true'

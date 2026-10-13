@@ -1,6 +1,6 @@
-# Isolated Cypress regression
+# Isolated E2E regression
 
-Runs the existing Cypress specs registered in `e2e/environment/specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
+Runs the existing Cypress specs registered in `e2e/environment/specs.mjs`, and the Playwright specs registered in `e2e/environment/playwright-specs.mjs`, against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
 
 ## Setup
 
@@ -29,6 +29,21 @@ SAFE_E2E_SPECS=regression/assets yarn workspace @safe-global/web e2e:env cypress
 
 `SAFE_E2E_WEB_URL` overrides the default wallet URL, `http://localhost:3080`. `SAFE_E2E_BROWSER` accepts Chrome/Chromium or an executable path and defaults to `chrome`. Headless runs retain videos, screenshots and JUnit reports under `apps/web/e2e/environment/artifacts/cypress/`; starting another headless run clears those artifacts.
 
+## Playwright
+
+The Playwright specs run unchanged on staging and on the local stack, like the Cypress specs. With the stack up and the wallet served as above:
+
+```sh
+yarn workspace @safe-global/web e2e:env playwright
+SAFE_E2E_SPECS=dashboard yarn workspace @safe-global/web e2e:env playwright
+```
+
+`SAFE_E2E_SPECS` filters by file name here. `SAFE_E2E_WORKERS` sets the worker count (default 2). The HTML report, JUnit report, traces and videos of failed tests go to `apps/web/e2e/environment/artifacts/playwright/`; each run clears them first. Open a trace with `yarn workspace @safe-global/web exec playwright show-trace <trace.zip>`.
+
+Specs read their Safes from the `safes` fixture and their wallets from the `credentials` fixture. On staging these are `SAFES` from `e2e/src/data/constants.ts` and `CYPRESS_WALLET_CREDENTIALS`. In isolated runs (`SAFE_E2E_ISOLATED=true`), `e2e/src/fixtures/isolated-data.ts` runs the spec's scenarios once per spec file and worker with four generated owners, and the fixtures return those owners and the deployed Safes. A key of `SAFES` that the registry does not map throws when a spec reads it.
+
+To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order, and `safes` maps each `SAFES` key the spec reads to a static Safe key that those scenarios return. A spec that needs no backend data gets `{}`. Only registered specs run in isolated mode, and `e2e:env:test` fails for an unregistered spec. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. The `fixtures` and `files` that scenarios return for Cypress are not used.
+
 ## Cleanup
 
 Stop the wallet server, then remove the backend containers and volumes:
@@ -49,7 +64,7 @@ The local Sepolia chain enables the features that staging serves to `WALLET_WEB`
 
 ## CI
 
-`.github/workflows/web-isolated-e2e-backend.yml` builds the wallet and the Transaction Builder once. The selected specs run in parallel jobs, each with its own backend. Each job starts its backend while the build runs and waits for the build before it starts Cypress. `node apps/web/e2e/environment/run.mjs plan` splits the selection, honouring `SAFE_E2E_SPECS` and `SAFE_E2E_SHARDS`. Only the shards with specs that need the mainnet or Polygon fork start those forks; the planner fills them up with other specs, so that all shards end at about the same time. Those shards need the `FORK_RPC_URL_MAINNET` and `FORK_RPC_URL_POLYGON` secrets next to `SEPOLIA_FORK_RPC_URL`. Dispatch the workflow manually to run every registered spec. On a pull request, the `isolated-e2e-full` label runs every registered spec in six shards on each push; remove the label to return to the short selection. Each shard runs its specs in one Cypress process. Runs do not record to Cypress Cloud; each shard uploads its videos, screenshots and JUnit reports as a workflow artifact.
+`.github/workflows/web-isolated-e2e-backend.yml` builds the wallet and the Transaction Builder once. The selected specs run in parallel jobs, each with its own backend. Each job starts its backend while the build runs and waits for the build before it starts Cypress. `node apps/web/e2e/environment/run.mjs plan` splits the selection, honouring `SAFE_E2E_SPECS` and `SAFE_E2E_SHARDS`. Only the shards with specs that need the mainnet or Polygon fork start those forks; the planner fills them up with other specs, so that all shards end at about the same time. Those shards need the `FORK_RPC_URL_MAINNET` and `FORK_RPC_URL_POLYGON` secrets next to `SEPOLIA_FORK_RPC_URL`. Dispatch the workflow manually to run every registered spec. On a pull request, the `isolated-e2e-full` label runs every registered spec in six shards on each push; remove the label to return to the short selection. Each shard runs its specs in one Cypress process. Runs do not record to Cypress Cloud; each shard uploads its videos, screenshots and JUnit reports as a workflow artifact. The plan always adds one more job (`runner: playwright`), which runs every Playwright spec on its own Sepolia stack and uploads the Playwright artifacts.
 
 ## Seeded data
 

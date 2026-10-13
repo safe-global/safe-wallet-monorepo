@@ -20,7 +20,7 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
-import { SAFES, CHAIN_IDS, LS_NAMESPACE, DROPDOWN_TEST_SPACE } from '../../src/data/constants'
+import { CHAIN_IDS, LS_NAMESPACE, DROPDOWN_TEST_SPACE } from '../../src/data/constants'
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
 
@@ -54,6 +54,7 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     safePage,
     walletPage,
     credentials,
+    safes,
   }) => {
     // Fake a Spaces session and seed local contacts on two chains. Only the
     // Sepolia local contact should ever load (locals are stored per chain).
@@ -104,7 +105,7 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     )
     await safePage.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: SPACE.members }))
     await safePage.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
-      route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [SAFES.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
+      route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [safes.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
     )
     await safePage.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
     await safePage.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
@@ -113,7 +114,7 @@ test.describe('Recipient dropdown — network filtering', { tag: '@regression' }
     const sendTokens = new SendTokensPage(safePage)
 
     // Open a Sepolia Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(SAFES.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
+    await home.goto(safes.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
     await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
     await expect(walletPage.accountCenter).toBeVisible()

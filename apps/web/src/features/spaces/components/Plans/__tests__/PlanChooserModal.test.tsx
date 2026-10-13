@@ -18,8 +18,7 @@ jest.mock('../../../hooks/billing/useSeatTrimCheckout', () => ({
   useSeatTrimCheckout: (spaceId: string) => ({
     seatCount: 3,
     needsTrim: (seats: number | null | undefined) => mockNeedsTrim(seats),
-    checkout: (paymentLinkId: string, props: unknown, removed?: unknown[]) =>
-      mockCheckout(spaceId, paymentLinkId, props, removed),
+    checkout: (paymentLinkId: string, removed?: unknown[]) => mockCheckout(spaceId, paymentLinkId, removed),
     isBusy: false,
     error: undefined,
     ...mockTrimState,
@@ -121,12 +120,7 @@ describe('PlanChooserModal', () => {
       SAFE_PRO_EVENTS.PLAN_CTA_CLICKED,
       expect.objectContaining({ Location: 'locked_modal' }),
     )
-    expect(mockCheckout).toHaveBeenCalledWith(
-      SPACE_ID,
-      'pl_business',
-      { 'Target Plan': 'business', Seats: 20, 'Billing Period': 'monthly', ...LOCKED_ENTRY },
-      undefined,
-    )
+    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
 
@@ -144,12 +138,7 @@ describe('PlanChooserModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to Starter' }))
     fireEvent.click(screen.getByText('step-continue'))
-    expect(mockCheckout).toHaveBeenCalledWith(
-      SPACE_ID,
-      'pl_starter',
-      { 'Target Plan': 'starter', Seats: 2, 'Billing Period': 'monthly', ...LOCKED_ENTRY },
-      [{ chainId: '1', address: '0xC' }],
-    )
+    expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_starter', [{ chainId: '1', address: '0xC' }])
   })
 
   it('sends a failed payment to the billing portal instead of the catalog', () => {

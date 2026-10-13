@@ -19,7 +19,7 @@ import { DAY_MS } from '../../hooks/billing/subscription'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { claimTiers, formatPlanPrice, pickProps, priceSuffix } from './planTiers'
+import { claimTiers, formatPlanPrice, priceSuffix } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
 import type { PlanTier, SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -181,12 +181,11 @@ export default function ClaimTrialModal({
   const claim = () => {
     if (!tier || !option?.paymentLinkId) return
     if (needsTrim(seats)) setStep('accounts')
-    else void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry })
+    else void checkout(option.paymentLinkId)
   }
 
   const continueToCheckout = (removed: SafeRef[]) => {
-    if (tier && option?.paymentLinkId)
-      void checkout(option.paymentLinkId, { ...pickProps({ tier, option }), ...entry }, removed)
+    if (tier && option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
   }
 
   return (

@@ -5,14 +5,12 @@
  * They run fast, are highly stable, and catch backend regressions early.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { SAFES, CHAIN_IDS } from '../../src/data/constants'
+import { CHAIN_IDS } from '../../src/data/constants'
 
 // Extract the raw address from prefixed format "sep:0xABC..." → "0xABC..."
-const safeAddress = SAFES.SEP_STATIC_SAFE_1.split(':')[1]
-
 test.describe('Safe Info API', { tag: '@api' }, () => {
-  test('should return Safe info with valid structure', async ({ safeApiClient }) => {
-    const info = await safeApiClient.getSafeInfo(safeAddress)
+  test('should return Safe info with valid structure', async ({ safeApiClient, safes }) => {
+    const info = await safeApiClient.getSafeInfo(safes.SEP_STATIC_SAFE_1.split(':')[1])
 
     expect(info.address.value).toBeTruthy()
     expect(info.chainId).toBe(CHAIN_IDS.sepolia)
@@ -20,16 +18,16 @@ test.describe('Safe Info API', { tag: '@api' }, () => {
     expect(info.owners.length).toBeGreaterThan(0)
   })
 
-  test('should return owners as an array of addresses', async ({ safeApiClient }) => {
-    const info = await safeApiClient.getSafeInfo(safeAddress)
+  test('should return owners as an array of addresses', async ({ safeApiClient, safes }) => {
+    const info = await safeApiClient.getSafeInfo(safes.SEP_STATIC_SAFE_1.split(':')[1])
 
     for (const owner of info.owners) {
       expect(owner.value).toMatch(/^0x[a-fA-F0-9]{40}$/)
     }
   })
 
-  test('should return balances for the Safe', async ({ safeApiClient }) => {
-    const balances = await safeApiClient.getBalances(safeAddress)
+  test('should return balances for the Safe', async ({ safeApiClient, safes }) => {
+    const balances = await safeApiClient.getBalances(safes.SEP_STATIC_SAFE_1.split(':')[1])
 
     expect(balances.fiatTotal).toBeDefined()
     expect(balances.items).toBeInstanceOf(Array)
