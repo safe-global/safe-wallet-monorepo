@@ -1,7 +1,7 @@
 /**
  * Email sign-in through the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
-import { expect, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { CGW_BASE_URL, LS_NAMESPACE } from '../data/constants'
 import { Auth0Page } from '../pages/auth0.page'
 
@@ -21,7 +21,10 @@ export async function openEmailSignIn(page: Page): Promise<Auth0Page> {
 export async function signInWithEmail(page: Page, email: string, { secondFactor = true } = {}): Promise<void> {
   const auth0 = await openEmailSignIn(page)
   await auth0.signIn(email, { secondFactor })
-  await page.waitForURL((url) => url.hostname === 'localhost' && !url.pathname.startsWith('/cgw'))
+  const { baseURL } = test.info().project.use
+  if (!baseURL) throw new Error('signInWithEmail needs the baseURL of the wallet')
+  const walletOrigin = new URL(baseURL).origin
+  await page.waitForURL((url) => url.origin === walletOrigin)
   await expect
     .poll(() =>
       page.evaluate(
