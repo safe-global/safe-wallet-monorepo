@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { Link } from '@safe-global/views/components/ui/link'
+import { SAFENET_DOCS_URL } from '../statusPresentation'
 
 export const SAFENET_ATTESTATION_LINK_LABEL = 'View signed attestation'
 export const SAFENET_EXPLORER_LINK_LABEL = 'View on Safenet explorer'
@@ -21,4 +22,10 @@ export const SafenetOutboundLink = ({
       <ArrowUpRight className="size-3.5" aria-hidden />
     </span>
   </Link>
+)
+
+export const SafenetLearnMore = (): ReactElement => (
+  <SafenetOutboundLink href={SAFENET_DOCS_URL} testId="safenet-about-link">
+    Learn more
+  </SafenetOutboundLink>
 )
