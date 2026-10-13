@@ -220,6 +220,17 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
+/** The seat option a card opens on: the user's pick, the price in force, else the Safe count in force on the other cycle. */
+export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
+  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  return (
+    tier.options.find((candidate) => candidate.label === seatsLabel) ??
+    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
+    tier.options.find((candidate) => isCurrentPlan && candidate.label === currentPlan?.seatsLabel) ??
+    tier.options[0]
+  )
+}
+
 /** Tiers for the selected billing cycle. Keeps the current plan if the other cycle has no matching offer. */
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
   tiers.filter((tier) => {

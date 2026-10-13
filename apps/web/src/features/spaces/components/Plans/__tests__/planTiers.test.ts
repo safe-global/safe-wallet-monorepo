@@ -10,6 +10,7 @@ import {
   getChangeDirection,
   getPlanCta,
   getPlanPrice,
+  pickSeatOption,
   _offersToTiers,
   seatsLabel,
   _subscriptionToTier,
@@ -441,5 +442,18 @@ describe('getCatalogTiers', () => {
 
     expect(getCatalogTiers([currentEnterprise, ENTERPRISE_TIER])).toEqual([currentEnterprise])
     expect(getCatalogTiers([currentBusiness, ENTERPRISE_TIER])).toEqual([currentBusiness, ENTERPRISE_TIER])
+  })
+})
+
+describe('pickSeatOption', () => {
+  const five = option({ priceId: 'price_b5m', label: '5 Safe accounts', seats: 5 })
+  const ten = option({ priceId: 'price_b10m', label: '10 Safe accounts', seats: 10 })
+  const monthly = tier({ options: [five, ten] })
+
+  it('opens on the pick, then the price in force, then the Safe count in force, then the first option', () => {
+    expect(pickSeatOption(monthly, undefined, '10 Safe accounts')).toBe(ten)
+    expect(pickSeatOption({ ...monthly, currentPriceId: 'price_b10m' })).toBe(ten)
+    expect(pickSeatOption(monthly, currentPlan({ billingCycle: 'year', seatsLabel: '10 Safe accounts' }))).toBe(ten)
+    expect(pickSeatOption(monthly, currentPlan({ name: 'Starter', seatsLabel: '10 Safe accounts' }))).toBe(five)
   })
 })

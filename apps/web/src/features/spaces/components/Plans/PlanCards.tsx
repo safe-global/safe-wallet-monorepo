@@ -37,6 +37,7 @@ import {
   getPlanPrice,
   getVisibleTiers,
   pickProps,
+  pickSeatOption,
   plansClickParams,
 } from './planTiers'
 
@@ -220,11 +221,7 @@ export const PlanCard = ({
   const isPrimary = tier.name === RECOMMENDED_PLAN
   // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
   const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
-  const option =
-    tier.options.find((candidate) => candidate.label === seatsLabel) ??
-    tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
-    tier.options.find((candidate) => isCurrentPlan && candidate.label === actions.currentPlan?.seatsLabel) ??
-    tier.options[0]
+  const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
   const price = option ? getPlanPrice(tier, option) : undefined
   const isYearly = tier.billingCycle === 'year'
   const saving = getCardSaving(tier, option, counterpartTier)
