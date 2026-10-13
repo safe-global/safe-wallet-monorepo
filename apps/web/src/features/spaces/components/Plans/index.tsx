@@ -14,8 +14,6 @@ import type {
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 
-const prefersReducedMotion = () => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
-
 export default function Plans({
   plan,
   safeAccounts,
@@ -48,13 +46,16 @@ export default function Plans({
   const currentPlanName = tiers.find((tier) => tier.isCurrent)?.name
 
   const openCompare = useCallback(() => {
-    trackPlansClick(SAFE_PRO_PLANS_LABELS.compare_features)
+    trackPlansClick(SAFE_PRO_PLANS_LABELS.compare_features, PlanLocation.PLANS_PAGE)
     setCompareExpanded(true)
     // Wait a frame so the expanded rows are laid out before scrolling to the card.
     requestAnimationFrame(() => {
       const card = compareRef.current
       if (!card) return
-      card.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' })
+      card.scrollIntoView({
+        behavior: window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+        block: 'start',
+      })
       card.focus({ preventScroll: true })
     })
   }, [])

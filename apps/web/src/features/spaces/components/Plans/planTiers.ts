@@ -1,7 +1,7 @@
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, type SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
-import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { BillingPeriod, MixpanelEventParams, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
 import {
   getSubscriptionFeatures,
@@ -29,8 +29,14 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
-export const trackPlansClick = (label: SAFE_PRO_PLANS_LABELS) =>
-  trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, { [MixpanelEventParams.LOCATION]: label })
+/** Mixpanel properties of "Safe Pro Plans Clicked": which control, and on which surface. */
+export const plansClickParams = (label: SAFE_PRO_PLANS_LABELS, location: PlanLocation) => ({
+  [MixpanelEventParams.CTA]: label,
+  [MixpanelEventParams.LOCATION]: location,
+})
+
+export const trackPlansClick = (label: SAFE_PRO_PLANS_LABELS, location: PlanLocation) =>
+  trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, plansClickParams(label, location))
 
 /** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
 export const pickProps = (pick: PlanPick) => ({

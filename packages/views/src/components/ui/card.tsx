@@ -30,6 +30,7 @@ import { cn } from '@safe-global/views/utils/cn'
  *   `selected` (mint border + shadow for a picked option), `elevated` (shadow only, for the one card that stands out),
  *   `bordered` (the standard `border-border` outline on top of any fill variant),
  *   `highlightOnHover` (card surface, a 2px stroke and `shadow-lg` on hover and focus-within, matching `selected`),
+ *   `shadowOnHover` (no resting shadow, `shadow-lg` on hover and focus-within; overrides `selected`'s shadow),
  *   `className` (layout-only: w-*, margins, flex/grid)
  * - CardHeader / CardTitle / CardDescription / CardAction / CardContent / CardFooter: `className`
  *
@@ -56,6 +57,7 @@ import { cn } from '@safe-global/views/utils/cn'
  * - 2026-10-05: Added `bordered` (standard `border-border` outline that keeps the fill variant) for the plan cards
  * - 2026-10-05: Added `highlightOnHover` (card surface on hover and focus-within) for the plan cards
  * - 2026-10-07: `highlightOnHover` adds a 2px stroke (border + inset ring, `foreground/25`, `/40` in dark) and `shadow-lg`, matching `selected` without shifting content
+ * - 2026-10-13: Added `shadowOnHover` for the current plan card
  */
 const cardVariants = cva(
   'bg-card text-card-foreground overflow-hidden text-sm has-[>img:first-child]:pt-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col',
@@ -111,6 +113,10 @@ const cardVariants = cva(
         ],
         false: '',
       },
+      shadowOnHover: {
+        true: 'shadow-none transition-[background-color,box-shadow] duration-200 hover:shadow-lg focus-within:shadow-lg motion-reduce:transition-none',
+        false: '',
+      },
     },
     defaultVariants: {
       variant: 'default',
@@ -137,6 +143,7 @@ function Card<TElement extends React.ElementType = 'div'>({
   elevated,
   bordered,
   highlightOnHover,
+  shadowOnHover,
   ...props
 }: CardProps<TElement>) {
   const Component = as ?? 'div'
@@ -149,7 +156,7 @@ function Card<TElement extends React.ElementType = 'div'>({
       data-surface={surface}
       data-radius={radius}
       className={cn(
-        cardVariants({ size, variant, surface, radius, selected, elevated, bordered, highlightOnHover }),
+        cardVariants({ size, variant, surface, radius, selected, elevated, bordered, highlightOnHover, shadowOnHover }),
         className,
       )}
       {...props}

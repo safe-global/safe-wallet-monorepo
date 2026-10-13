@@ -12,11 +12,16 @@ import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/ta
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SAFE_PRO_SERVICE_DESCRIPTIONS_URL, SAFE_PRO_TERMS_URL } from '@/config/constants'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
-import { PLAN_CONTENT, RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import {
+  COMPARE_FEATURES_ID,
+  PLAN_CONTENT,
+  RECOMMENDED_PLAN,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanCta as PlanCtaKindOf,
@@ -24,7 +29,6 @@ import type {
   PlanSeatOption,
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
-import { COMPARE_FEATURES_ID } from './CompareFeaturesCard'
 import { FeatureCheck } from './FeatureCheck'
 import {
   getCardCta,
@@ -33,7 +37,7 @@ import {
   getPlanPrice,
   getVisibleTiers,
   pickProps,
-  trackPlansClick,
+  plansClickParams,
 } from './planTiers'
 
 type Cycle = 'month' | 'year'
@@ -51,13 +55,9 @@ const SUPPORT_HIGHLIGHT_CLASSES = [
   'group-hover/plan:scale-x-100 group-hover/plan:delay-75 group-focus-within/plan:scale-x-100',
 ].join(' ')
 
-/** The current card goes grey while another card is hovered; like every card, it only gets a shadow on hover. */
-const CURRENT_PLAN_CLASSES =
-  'shadow-none transition-[background-color,box-shadow] duration-200 hover:shadow-lg focus-within:shadow-lg motion-reduce:transition-none group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary'
-
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
-export const Seats = ({
+const Seats = ({
   options,
   value,
   onChange,
@@ -112,27 +112,36 @@ export type PlanCardActions = {
 const SalesCta = ({
   label,
   kind,
+  location,
   onClick,
 }: {
   label: string
   kind: 'sales' | 'account-team'
+  location: PlanLocation
   onClick?: () => void
-}) => (
-  <Button
-    variant="outline"
-    size="lg"
-    weight="semibold"
-    className="w-full"
-    render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
-    onClick={() => {
-      trackPlansClick(kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team)
-      onClick?.()
-    }}
-  >
-    {label}
-    <ArrowUpRight data-icon="inline-end" />
-  </Button>
-)
+}) => {
+  const trackLabel = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
+  return (
+    <Track
+      {...SAFE_PRO_EVENTS.PLANS_CLICKED}
+      label={trackLabel}
+      mixpanelParams={plansClickParams(trackLabel, location)}
+      as="div"
+    >
+      <Button
+        variant="outline"
+        size="lg"
+        weight="semibold"
+        className="w-full"
+        render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
+        onClick={onClick}
+      >
+        {label}
+        <ArrowUpRight data-icon="inline-end" />
+      </Button>
+    </Track>
+  )
+}
 
 const PlanCta = ({
   pick,
@@ -148,9 +157,9 @@ const PlanCta = ({
 
   switch (cta.kind) {
     case 'sales':
-      return <SalesCta label={cta.label} kind={cta.kind} onClick={() => onCta?.(pick, cta)} />
+      return <SalesCta label={cta.label} kind={cta.kind} location={location} onClick={() => onCta?.(pick, cta)} />
     case 'account-team':
-      return <SalesCta label={cta.label} kind={cta.kind} />
+      return <SalesCta label={cta.label} kind={cta.kind} location={location} />
     case 'current':
       return (
         <Button variant="outline" size="lg" weight="semibold" className="w-full" disabled>
@@ -207,7 +216,7 @@ export const PlanCard = ({
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
 } & PlanCardActions) => {
-  const content = PLAN_CONTENT[tier.name]
+  const content = Object.hasOwn(PLAN_CONTENT, tier.name) ? PLAN_CONTENT[tier.name] : undefined
   const isPrimary = tier.name === RECOMMENDED_PLAN
   // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
   const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
@@ -227,16 +236,17 @@ export const PlanCard = ({
       variant={isCurrentPlan ? 'default' : 'muted-secondary'}
       bordered={!isCurrentPlan}
       selected={isCurrentPlan || undefined}
+      shadowOnHover={isCurrentPlan}
       highlightOnHover={!isCurrentPlan}
       size="offer"
       radius="lg-xl"
       className={cn(
         'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
-        isCurrentPlan && CURRENT_PLAN_CLASSES,
+        // The current card goes grey while another card is hovered.
+        isCurrentPlan && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
       )}
       data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
       data-hover-plan={!isCurrentPlan || undefined}
-      data-primary={isPrimary || undefined}
     >
       <CardContent className="flex min-w-0 flex-col @2xl:@max-4xl:grid @2xl:@max-4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @2xl:@max-4xl:grid-rows-[auto_1fr_auto_auto_auto] @2xl:@max-4xl:gap-x-10 @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
         <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">
@@ -296,7 +306,14 @@ export const PlanCard = ({
               {!actions.readOnly && (
                 <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
                   <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && <SalesCta label="Talk to sales" kind="sales" />}
+                  {isPrimary && (
+                    <SalesCta
+                      label="Talk to sales"
+                      kind="sales"
+                      location={actions.location}
+                      onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: 'Talk to sales' })}
+                    />
+                  )}
                 </div>
               )}
             </>

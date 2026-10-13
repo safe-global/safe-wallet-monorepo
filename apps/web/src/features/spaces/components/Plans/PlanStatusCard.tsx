@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import { Fuel, Info, WalletCards } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
-import { Badge } from '@safe-global/views/components/ui/badge'
+import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
-import { cn } from '@safe-global/views/utils/cn'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
 import type { Meter, PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -87,8 +87,6 @@ const UsageMeter = ({
   )
 }
 
-const daysLeftText = (daysLeft: number) => `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`
-
 const statusText = (plan: PlanSummary | null, endDate: string | null, isSeatsFull: boolean): string | null => {
   if (plan === null) {
     return 'Your Workspace is locked until you choose a plan. Your Safe accounts remain available in My accounts.'
@@ -100,7 +98,7 @@ const statusText = (plan: PlanSummary | null, endDate: string | null, isSeatsFul
   return !plan.hasPaymentMethod
     ? `Your free access is active until ${until}. Add a payment method before then or choose another plan to keep your Workspace.`
     : plan.daysLeft != null
-      ? `Active until ${until} · ${daysLeftText(plan.daysLeft)}`
+      ? `Active until ${until} · ${plan.daysLeft} day${maybePlural(plan.daysLeft)} left`
       : `Active until ${until}.`
 }
 
@@ -143,12 +141,8 @@ export default function PlanStatusCard({
                     className="gap-1.5 text-foreground"
                     data-testid="plan-status-badge"
                   >
-                    <span
-                      aria-hidden
-                      className={cn(
-                        'size-1.5 shrink-0 rounded-full',
-                        badge.variant === 'warning' ? 'bg-badge-dot-warning' : 'bg-badge-dot-success',
-                      )}
+                    <BadgeDot
+                      className={badge.variant === 'warning' ? 'bg-badge-dot-warning' : 'bg-badge-dot-success'}
                     />
                     {badge.label}
                   </Badge>

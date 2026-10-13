@@ -5,6 +5,7 @@ import {
   buildPlanTiers,
   claimTiers,
   getCardCta,
+  getCatalogTiers,
   getCardSaving,
   getChangeDirection,
   getPlanCta,
@@ -431,5 +432,14 @@ describe('getCardSaving', () => {
     expect(getCardSaving(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
     expect(getCardSaving(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
     expect(getCardSaving(tier(), option({ price: 1000 }), yearlyTier)).toBeUndefined()
+  })
+})
+
+describe('getCatalogTiers', () => {
+  it('drops the static Enterprise card only when Enterprise is the plan in force', () => {
+    const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true })
+
+    expect(getCatalogTiers([currentEnterprise, ENTERPRISE_TIER])).toEqual([currentEnterprise])
+    expect(getCatalogTiers([currentBusiness, ENTERPRISE_TIER])).toEqual([currentBusiness, ENTERPRISE_TIER])
   })
 })

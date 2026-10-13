@@ -1,4 +1,4 @@
-import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
@@ -121,7 +121,9 @@ describe('Plans', () => {
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
-    expect(screen.getAllByRole('link', { name: 'Talk to sales' })[0]).toHaveAttribute('href', CONTACT_SALES_URL)
+    expect(
+      within(screen.getByTestId('current-plan-card')).getByRole('link', { name: 'Talk to sales' }),
+    ).toHaveAttribute('href', CONTACT_SALES_URL)
   })
 
   it('swaps the payment nudge and its button for Manage plan once a payment method is on file', () => {
@@ -340,8 +342,9 @@ describe('Plans', () => {
 
     expect(screen.getByText('No active plan')).toBeInTheDocument()
     expect(screen.getByText(/Your Workspace is locked until you choose a plan/)).toBeInTheDocument()
-    expect(screen.getAllByText('—').length).toBeGreaterThan(0)
-    expect(screen.getAllByText('Unlimited').length).toBeGreaterThan(0)
+    const meter = (label: string) => within(screen.getByText(label).closest('[data-slot="card"]') as HTMLElement)
+    expect(meter('Safe accounts available').getByText('—')).toBeInTheDocument()
+    expect(meter('Sponsored transactions available').getByText('Unlimited')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Add payment method|Manage plan/ })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Continue with Starter' }))
@@ -349,6 +352,24 @@ describe('Plans', () => {
       tier: expect.objectContaining({ name: 'Starter' }),
       option: expect.objectContaining({ paymentLinkId: 'pl_starter_m', priceId: 'price_pl_starter_m' }),
     })
+  })
+
+  it.each([
+    [1, 'Active until Dec 6, 2026 · 1 day left'],
+    [null, 'Active until Dec 6, 2026.'],
+  ])('words a trial with a card and %p days left as "%s"', (daysLeft, text) => {
+    render(<PlanStatusCard plan={{ ...trialing(7), daysLeft, hasPaymentMethod: true }} {...meters} />)
+
+    expect(screen.getByText(text)).toBeInTheDocument()
+  })
+
+  it('offers the yearly saving on a monthly card and states it on the yearly one', () => {
+    render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} onSubscribe={jest.fn()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Save €180 (10.1%) with yearly' }))
+
+    expect(screen.getByRole('tab', { name: 'Yearly' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByTestId('plan-yearly-saving')).toHaveTextContent('Save €180 (10.1%) vs monthly')
   })
 
   describe('tracking', () => {
@@ -379,6 +400,40 @@ describe('Plans', () => {
         Location: 'plans_page',
       })
     })
+  })
+
+  it.each([
+    ['the plan card', 'current-plan-card', 'talk_to_sales'],
+    ['the sales prompt', 'plans-sales-prompt', 'sales_prompt'],
+  ])('counts Talk to sales on %s as a Plans click', (_, testId, label) => {
+    jest.clearAllMocks()
+    render(
+      <Plans
+        plan={trialing(14)}
+        {...meters}
+        tiers={buildPlanTiers([STARTER], { subscription: subscription('Business', 499), seatsQuota: 20 })}
+        currentPlan={current('Business', 499, true)}
+      />,
+    )
+
+    fireEvent.click(within(screen.getByTestId(testId)).getByRole('link', { name: 'Talk to sales' }))
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label },
+      { CTA: label, Location: 'plans_page' },
+    )
+  })
+
+  it('expands and counts the compare table from the catalog link', () => {
+    jest.clearAllMocks()
+    render(<Plans plan={null} {...meters} tiers={buildPlanTiers([STARTER])} />)
+
+    fireEvent.click(screen.getByRole('link', { name: 'Compare all features' }))
+
+    expect(screen.getByRole('button', { name: 'Compare all features' })).toHaveAttribute('aria-expanded', 'true')
+    expect(trackEvent).toHaveBeenCalledWith(
+      { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: 'compare_features' },
+      { CTA: 'compare_features', Location: 'plans_page' },
+    )
   })
 
   it('keeps the Stripe portal reachable for a lapsed subscription', () => {

@@ -7,8 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { HnSignupFlow } from '@/features/hypernative'
 import { SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
+import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
 import {
+  COMPARE_FEATURES_ID,
   COMPARE_SECTIONS,
   type CompareRow,
   type CompareValue,
@@ -18,8 +20,6 @@ import {
 import { FeatureCheck } from './FeatureCheck'
 import PeekCollapsible from './PeekCollapsible'
 import { trackPlansClick } from './planTiers'
-
-export const COMPARE_FEATURES_ID = 'compare-features'
 
 const CompareValue = ({ value }: { value: CompareValue }) => {
   if (value === true) {
@@ -49,7 +49,7 @@ const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => 
     render={<button type="button" />}
     className="font-semibold"
     onClick={() => {
-      trackPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
+      trackPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on, PlanLocation.PLANS_PAGE)
       onOpen()
     }}
   >
@@ -68,13 +68,7 @@ const CompareRow = ({
   onOpenAddOn: () => void
   ref?: Ref<HTMLTableRowElement>
 }) => (
-  <TableRow
-    ref={ref}
-    inert={isFolded}
-    aria-hidden={isFolded || undefined}
-    data-add-on={row.isAddOn || undefined}
-    className="hover:bg-transparent"
-  >
+  <TableRow ref={ref} inert={isFolded} aria-hidden={isFolded || undefined} className="hover:bg-transparent">
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal whitespace-normal">
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {row.feature}

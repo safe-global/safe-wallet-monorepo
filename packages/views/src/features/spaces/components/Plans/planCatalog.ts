@@ -7,13 +7,12 @@ export const RECOMMENDED_PLAN = 'Business'
 
 type PlanName = (typeof PLAN_ORDER)[number]
 
-export const MEMBERS = 'Members'
-export const WORKSPACE_2FA = 'Workspace 2FA'
-export const NAMED_SUPPORT_CONTACT = 'Named support contact'
-export const POLICIES = 'Policies'
-export const PAY_GAS_FROM_SAFE = 'Pay gas fees from Safe account'
+/** The Plans page anchor the plan catalog links to. */
+export const COMPARE_FEATURES_ID = 'compare-features'
 
-export type PlanContent = {
+const SPONSORED_TXS: Record<PlanName, string> = { Starter: '10', Business: '50', Enterprise: 'Unlimited' }
+
+type PlanContent = {
   /** Who the plan is for, one line under its name. */
   description: string
   /** What the card lists, per the Plans tab feature list. */
@@ -26,35 +25,33 @@ const EVERY_PLAN = [
   'Activity log',
   'Advanced threat analysis',
   'Transaction simulation',
-  WORKSPACE_2FA,
+  'Workspace 2FA',
 ]
 
 /** Replaces the Stripe selling points on the plan cards. */
 export const PLAN_CONTENT: Partial<Record<string, PlanContent>> = {
   Starter: {
     description: 'Coordinate your team with a shared home for your Safes and transactions.',
-    features: ['10 sponsored transactions per month', ...EVERY_PLAN],
+    features: [`${SPONSORED_TXS.Starter} sponsored transactions per month`, ...EVERY_PLAN],
     support: { level: 'Standard', detail: 'In-app and email' },
   },
   Business: {
     description: 'Scale with control. Delegate daily operations with hands-on help.',
-    features: ['50 sponsored transactions per month', ...EVERY_PLAN, POLICIES],
+    features: [`${SPONSORED_TXS.Business} sponsored transactions per month`, ...EVERY_PLAN, 'Policies'],
     support: { level: 'Priority', detail: '+ Guided onboarding' },
   },
   Enterprise: {
     description: 'Tailored to your organization, with custom capacity and commercial terms.',
     features: [
-      'Unlimited sponsored transactions',
+      `${SPONSORED_TXS.Enterprise} sponsored transactions`,
       ...EVERY_PLAN,
-      POLICIES,
+      'Policies',
       'Custom Safe capacity',
       'Tailored contract & billing terms',
     ],
     support: { level: 'Tailored', detail: '+ Customized onboarding' },
   },
 }
-
-export const SAFENET_CHECKS = 'Safenet checks'
 
 /** `true` is included, `false` is not; a string names what the plan gets. */
 export type CompareValue = boolean | string
@@ -83,26 +80,25 @@ const every = (value: CompareValue): Record<PlanName, CompareValue> => ({
 const fromBusiness: Record<PlanName, CompareValue> = { Starter: false, Business: true, Enterprise: true }
 const enterpriseOnly: Record<PlanName, CompareValue> = { Starter: false, Business: false, Enterprise: true }
 
-/** The collapsed "Compare all features" card shows the first few rows. */
 export const COMPARE_SECTIONS: CompareSection[] = [
   {
     title: 'Coming soon',
     hoverEmoji: '👀',
     rows: [
-      { feature: SAFENET_CHECKS, values: fromBusiness, isComingSoon: true },
+      { feature: 'Safenet checks', values: fromBusiness, isComingSoon: true },
       { feature: 'More policies', values: fromBusiness, isComingSoon: true },
-      { feature: PAY_GAS_FROM_SAFE, values: fromBusiness, isComingSoon: true },
+      { feature: 'Pay gas fees from Safe account', values: fromBusiness, isComingSoon: true },
     ],
   },
   {
     title: 'Limits',
     rows: [
       { feature: 'Workspaces', values: every('1') },
-      { feature: MEMBERS, values: every('Unlimited') },
+      { feature: 'Members', values: every('Unlimited') },
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
         feature: 'Eligible sponsored transactions per month',
-        values: { Starter: '10', Business: '50', Enterprise: 'Unlimited' },
+        values: SPONSORED_TXS,
       },
       { feature: 'Sponsoring limit per transaction', values: { Starter: '€5', Business: '€5', Enterprise: '€10' } },
     ],
@@ -113,13 +109,13 @@ export const COMPARE_SECTIONS: CompareSection[] = [
       { feature: 'Shared address book', values: every(true) },
       { feature: 'Workspace activity log', values: every(true) },
       { feature: 'Nested Safe support', values: every(true) },
-      { feature: POLICIES, values: fromBusiness },
+      { feature: 'Policies', values: fromBusiness },
     ],
   },
   {
     title: 'Security & Safe Shield',
     rows: [
-      { feature: WORKSPACE_2FA, values: every(true) },
+      { feature: 'Workspace 2FA', values: every(true) },
       { feature: 'Security Hub', values: every(true) },
       { feature: 'Advanced threat analysis', values: every(true) },
       { feature: 'Transaction simulation', values: every(true) },
@@ -130,7 +126,7 @@ export const COMPARE_SECTIONS: CompareSection[] = [
     rows: [
       { feature: 'In-app and email support', values: every(true) },
       { feature: 'Priority handling within the same severity', values: fromBusiness },
-      { feature: NAMED_SUPPORT_CONTACT, values: enterpriseOnly },
+      { feature: 'Named support contact', values: enterpriseOnly },
       { feature: 'Shared support channel', values: enterpriseOnly },
       {
         feature: 'Defined escalation path',

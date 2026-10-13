@@ -55,6 +55,7 @@ describe('PlanCard', () => {
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('10 Safe accounts')
     expect(screen.getByRole('button', { name: 'Current plan' })).toBeDisabled()
   })
+
   it('follows a subscription that lands after the card mounted', () => {
     const { rerender } = render(
       <PlanCard location={PlanLocation.PLANS_PAGE} tier={{ ...currentTier(''), currentPriceId: undefined }} />,
@@ -67,6 +68,7 @@ describe('PlanCard', () => {
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
+
   it('marks only the plan in force as current', () => {
     const { rerender } = render(
       <PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b10m')} currentPlan={businessPlan()} />,
@@ -77,6 +79,7 @@ describe('PlanCard', () => {
 
     expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
   })
+
   it('opens the other billing cycle on the Safe count of the plan in force', () => {
     const yearly: PlanTier = {
       ...BUSINESS,
@@ -94,6 +97,7 @@ describe('PlanCard', () => {
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
+
   it('names the support level at the bottom of the card', () => {
     render(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
 
