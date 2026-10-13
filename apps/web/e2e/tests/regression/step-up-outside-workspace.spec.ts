@@ -1,10 +1,4 @@
-/**
- * Step-up authentication for the sensitive Workspace actions that start outside a Workspace: from a Safe page and
- * from the Workspace creation wizard. These flows send the step-up back to their own page, not the page the user
- * left, so that the replay can move the user on.
- *
- * The user signs in by email without a second factor, so the gateway answers each action with `elevation_required`.
- */
+// These flows start outside a Workspace and return the step-up to their own page, not the page the user left.
 import type { Browser, Page } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
@@ -54,7 +48,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     await signInWithEmail(safePage, email, { secondFactor: false })
   })
 
-  test('that the Safe is added to a Workspace from its Safe page after the code', async ({
+  test('should add the Safe to the chosen Workspace when the step-up from its Safe page succeeds', async ({
     safePage,
     safes,
     browser,
@@ -74,7 +68,10 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
   })
 
-  test('that a new Workspace from a Safe page receives the Safe after the code', async ({ safePage, safes }) => {
+  test('should add the Safe and open the invite step when the step-up of a wizard from a Safe page succeeds', async ({
+    safePage,
+    safes,
+  }) => {
     await safePage.goto(`/home?safe=${safes.SEP_STATIC_SAFE_1}`)
     await safePage.getByRole('button', { name: 'Add Safe to Workspace' }).click()
     // Without a Workspace, the user is offered to create one.
@@ -93,7 +90,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
   })
 
-  test('that a new Safe created inside a Workspace with pay later joins it after the code', async ({
+  test('should add a new pay-later Safe to the Workspace when the step-up after its creation succeeds', async ({
     safePage,
     browser,
     walletPage,
@@ -121,7 +118,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(newSafe))
   })
 
-  test('that the invitation step of the creation wizard invites the member after the code', async ({ safePage }) => {
+  test('should invite the member and open the last wizard step when the step-up succeeds', async ({ safePage }) => {
     const invitee = uniqueEmail('invitee')
     await safePage.goto('/welcome/create-space')
     await nameNewWorkspace(safePage)

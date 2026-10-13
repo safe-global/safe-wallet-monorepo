@@ -1,13 +1,7 @@
-/**
- * Step-up authentication for the sensitive actions inside a Workspace, end to end against the gateway and the local
- * Auth0. The Workspace rename has its own spec.
- *
- * The user signs in by email without a second factor, so the gateway answers each action with `elevation_required`.
- * After the code, the wallet replays the action on the page the user left and confirms it there. The test data comes
- * from a second session of the same user that signed in with a second factor.
- */
+// The user signs in without a second factor; the test data comes from a second session that has one.
 import type { Browser, Page } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import {
   createWorkspace,
@@ -20,8 +14,8 @@ import {
 } from '../../src/fixtures/email-session'
 import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
 
-const SEPOLIA = '11155111'
-const CONTACT = { name: 'Treasury contact', address: '0x1111111111111111111111111111111111111111' }
+const SEPOLIA = CHAIN_IDS.sepolia
+const CONTACT = { name: 'Treasury contact', address: TEST_ADDRESSES.NON_OWNER }
 
 const prefixless = (prefixedAddress: string): string => prefixedAddress.split(':')[1]
 
@@ -59,7 +53,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await setup.context().close()
   })
 
-  test('that a Safe is added to the Workspace after the code', async ({ safePage, safes }) => {
+  test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
     const address = prefixless(safes.SEP_STATIC_SAFE_1)
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
@@ -81,7 +75,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(address)
   })
 
-  test('that a Safe of the Workspace is renamed after the code', async ({ safePage, safes }) => {
+  test('should rename the Workspace Safe when the step-up succeeds', async ({ safePage, safes }) => {
     const address = prefixless(safes.SEP_STATIC_SAFE_1)
     await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
       safes: [{ chainId: SEPOLIA, address }],
@@ -99,7 +93,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     expect(await workspaceResource(safePage, workspaceId, 'address-book')).toContain('Treasury Safe')
   })
 
-  test('that a Safe is removed from the Workspace after the code', async ({ safePage, safes }) => {
+  test('should remove the Safe from the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
     const address = prefixless(safes.SEP_STATIC_SAFE_1)
     await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/safes`, {
       safes: [{ chainId: SEPOLIA, address }],
@@ -116,7 +110,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     expect(await workspaceResource(safePage, workspaceId, 'safes')).not.toContain(address)
   })
 
-  test('that a member is invited after the code', async ({ safePage }) => {
+  test('should invite the member when the step-up succeeds', async ({ safePage }) => {
     const invitee = uniqueEmail('invitee')
     await safePage.goto(`/spaces/members?spaceId=${workspaceId}`)
 
@@ -141,7 +135,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     const memberRow = (page: Page) => page.getByRole('row').filter({ hasText: MEMBER_NAME })
 
-    test('that the role of a member changes after the code', async ({ safePage }) => {
+    test('should change the member role when the step-up succeeds', async ({ safePage }) => {
       await safePage.goto(`/spaces/members?spaceId=${workspaceId}`)
 
       await memberRow(safePage).getByRole('button', { name: 'Edit member' }).click()
@@ -154,7 +148,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
       await expect(memberRow(safePage)).toContainText('Admin')
     })
 
-    test('that a member is removed after the code', async ({ safePage }) => {
+    test('should remove the member when the step-up succeeds', async ({ safePage }) => {
       await safePage.goto(`/spaces/members?spaceId=${workspaceId}`)
 
       await memberRow(safePage).getByRole('button', { name: 'Remove member' }).click()
@@ -167,7 +161,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     })
   })
 
-  test('that a contact is added to the Workspace address book after the code', async ({ safePage }) => {
+  test('should add the contact to the Workspace address book when the step-up succeeds', async ({ safePage }) => {
     await safePage.goto(`/spaces/address-book?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add shared contact' }).click()
@@ -181,7 +175,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await expect(safePage.getByRole('row').filter({ hasText: CONTACT.name })).toBeVisible()
   })
 
-  test('that a contact is removed from the Workspace address book after the code', async ({ safePage }) => {
+  test('should remove the contact from the Workspace address book when the step-up succeeds', async ({ safePage }) => {
     await gatewayRequest(setup, 'PUT', `/v1/spaces/${workspaceId}/address-book`, {
       items: [{ ...CONTACT, chainIds: [SEPOLIA] }],
     })
@@ -199,7 +193,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await expect(safePage.getByRole('row').filter({ hasText: CONTACT.name })).toBeHidden()
   })
 
-  test('that a contact request of a member is approved after the code', async ({ safePage, browser }) => {
+  test('should approve the contact request of a member when the step-up succeeds', async ({ safePage, browser }) => {
     const member = await joinAsMember(browser, 'Requester')
     await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/address-book/requests`, {
       ...CONTACT,
@@ -217,7 +211,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     expect(await workspaceResource(safePage, workspaceId, 'address-book')).toContain(CONTACT.name)
   })
 
-  test('that the Workspace is deleted from the Workspace list after the code', async ({ safePage }) => {
+  test('should delete the Workspace from the Workspace list when the step-up succeeds', async ({ safePage }) => {
     // Only a Workspace without a subscription that could still bill can be deleted.
     await storeSubscription(workspaceId, { status: 'canceled' })
     await safePage.goto('/welcome/spaces')
