@@ -186,6 +186,45 @@ describe('loadSpendingLimits', () => {
 
     expect(result?.length).toBe(0)
   })
+
+  it('does not name the tokens of deleted allowances, which may no longer be contracts', async () => {
+    const delegate = faker.finance.ethereumAddress()
+    const token = faker.finance.ethereumAddress()
+
+    const web3Provider = createMockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokens')?.selector!,
+          returnType: 'address[]',
+          returnValue: [token],
+        },
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(1)],
+        },
+      ],
+      undefined,
+      '4',
+    )
+    jest.spyOn(spendingLimit, 'getSpendingLimitContract').mockImplementation(
+      jest.fn(() => {
+        return {
+          getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+          getDelegates: jest.fn(() => ({ results: [delegate] })),
+          interface: spendingLimitInterface,
+        } as unknown as AllowanceModule
+      }),
+    )
+    jest.mocked(tokens.getERC20TokenInfoOnChain).mockImplementationOnce(async (addresses) => {
+      if ([addresses].flat().length) throw new Error('could not decode result data')
+      return []
+    })
+
+    const result = await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+
+    expect(result).toEqual([])
+  })
 })
 
 describe('getTokensForDelegates', () => {
@@ -328,7 +367,7 @@ describe('getTokenAllowanceForDelegate', () => {
         {
           signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
           returnType: 'uint256[5]',
-          returnValue: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
+          returnValue: [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
         },
         {
           signature: 'decimals()',

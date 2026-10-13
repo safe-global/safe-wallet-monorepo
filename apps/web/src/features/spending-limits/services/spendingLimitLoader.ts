@@ -39,8 +39,13 @@ export const getTokenAllowances = async (
     (result) => contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0],
   )
 
-  const missingTokenAddresses = tokenAllowances
-    .map((_, index) => allowanceRequests[index].token)
+  // A deleted allowance keeps its token in `getTokens`, and that address may hold no contract to name.
+  const missingTokenAddresses = allowanceRequests
+    .filter((_, index) => {
+      const [amount, , resetTimeMin] = tokenAllowances[index]
+      return amount !== 0n || resetTimeMin !== 0n
+    })
+    .map(({ token }) => token)
     .filter((tokenAddress) => !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress))
 
   const missingTokenInfos = await getERC20TokenInfoOnChain(missingTokenAddresses, provider)
