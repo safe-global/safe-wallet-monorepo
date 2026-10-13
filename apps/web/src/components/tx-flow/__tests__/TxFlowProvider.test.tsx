@@ -226,12 +226,67 @@ describe('TxFlowProvider', () => {
       expect(result.current.canExecute).toBe(true)
     })
 
-    it('keeps the implicit executor approval for a smart-contract signer on an m/n Safe', async () => {
+    it('does not offer execution to a smart-contract last signer on an m/n Safe', async () => {
       mockThreshold(3)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
       const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(2) })
 
-      await waitFor(() => expect(result.current.willSignBeforeExecute).toBe(false))
+      await waitFor(() => expect(result.current.canExecute).toBe(false))
+      expect(result.current.willSignBeforeExecute).toBe(false)
+    })
+
+    it('offers execution of a fully signed tx to a smart-contract signer', async () => {
+      mockThreshold(3)
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(3) })
+
+      await settleSmartContractCheck()
+      expect(result.current.canExecute).toBe(true)
+    })
+  })
+
+  describe('with a Safe connected as the wallet over WalletConnect', () => {
+    const existingTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+
+    beforeEach(() => {
+      jest.mocked(useSigner).mockReturnValue({
+        address: faker.finance.ethereumAddress(),
+        chainId: '1',
+        provider: null,
+        isConnectedSafe: true,
+        threshold: 1,
+      })
+      jest.spyOn(useSafeInfoHook, 'default').mockReturnValue({
+        safe: { ...extendedSafeInfoBuilder().build(), threshold: 1 },
+        safeAddress: faker.finance.ethereumAddress(),
+        safeLoaded: true,
+        safeLoading: false,
+      })
+    })
+
+    afterEach(() => {
+      jest.mocked(useSigner).mockReturnValue(null)
+      jest.restoreAllMocks()
+    })
+
+    it('does not offer execution of a new unsigned tx', () => {
+      const { result } = renderContext({ safeTx: createSafeTx(0) })
+
+      expect(result.current.canExecute).toBe(false)
+      expect(result.current.willExecute).toBe(false)
+      expect(result.current.willSignBeforeExecute).toBe(false)
+    })
+
+    it('does not offer execution of an existing tx still missing signatures', () => {
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(0) })
+
+      expect(result.current.canExecute).toBe(false)
+    })
+
+    it('offers execution of a fully signed tx', () => {
+      const { result } = renderContext({ txId: existingTxId, isExecutable: true, safeTx: createSafeTx(1) })
+
+      expect(result.current.canExecute).toBe(true)
     })
   })
 })
