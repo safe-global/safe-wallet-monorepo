@@ -21,7 +21,8 @@ import { FeatureCheck } from './FeatureCheck'
 import PeekCollapsible from './PeekCollapsible'
 import { trackPlansClick } from './planTiers'
 
-const CompareValue = ({ value }: { value: CompareValue }) => {
+/** One plan's cell in a compare row: a check, a dash, or the plan's own text. Used by CompareTableRow. */
+const CompareCell = ({ value }: { value: CompareValue }) => {
   if (value === true) {
     return (
       <>
@@ -57,7 +58,8 @@ const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => 
   </Link>
 )
 
-const CompareRow = ({
+/** One feature across every plan, with its Soon chip or add-on link. Used by CompareTableSection. */
+const CompareTableRow = ({
   row,
   isFolded,
   onOpenAddOn,
@@ -82,7 +84,7 @@ const CompareRow = ({
     </TableHead>
     {PLAN_ORDER.map((plan) => (
       <TableCell key={plan} className="px-4 py-3">
-        <CompareValue value={row.values[plan]} />
+        <CompareCell value={row.values[plan]} />
       </TableCell>
     ))}
   </TableRow>
@@ -115,7 +117,8 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
   </TableHeader>
 )
 
-const CompareSection = ({
+/** A titled group of rows; folds away while the table is collapsed. Rendered by CompareFeaturesCard. */
+const CompareTableSection = ({
   section,
   index,
   isExpanded,
@@ -162,7 +165,7 @@ const CompareSection = ({
         </TableHead>
       </TableRow>
       {section.rows.map((row, rowIndex) => (
-        <CompareRow
+        <CompareTableRow
           key={row.feature}
           ref={isPeek && rowIndex === 0 ? lastPeekRowRef : undefined}
           row={row}
@@ -232,7 +235,7 @@ export default function CompareFeaturesCard({
             <Table className="min-w-160 table-fixed">
               <CompareHeaderRow currentPlanName={currentPlanName} isExpanded={isExpanded} />
               {COMPARE_SECTIONS.map((section, index) => (
-                <CompareSection
+                <CompareTableSection
                   key={section.title}
                   lastPeekRowRef={lastPeekRowRef}
                   section={section}
