@@ -49,6 +49,7 @@ enum ErrorCodes {
   _640 = '640: Error signing in with Ethereum',
   _650 = '650: Error syncing counterfactual safes with backend',
   _651 = '651: Error adding a Safe to a Workspace',
+  _652 = '652: Error requesting a Safenet check',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',

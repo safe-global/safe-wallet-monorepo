@@ -107,6 +107,51 @@ exports[`./ExternalLink.stories EmptyHref 1`] = `
 </div>
 `;
 
+exports[`./ExternalLink.stories InsideTransactionFlow 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <a
+      class="underline-offset-4 transition-colors hover:underline outline-none rounded-xs focus-visible:ring-ring/50 focus-visible:ring-[3px] [&>svg]:inline [&>svg]:size-4 font-bold text-primary underline decoration-primary/40 hover:text-[var(--color-primary-light)] hover:decoration-current"
+      data-slot="link"
+      data-variant="default"
+      href="https://safe.global"
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      <span
+        class="inline-flex cursor-pointer items-center gap-0.5"
+      >
+        Visit Safe Global
+        <svg
+          aria-hidden="true"
+          class="lucide lucide-arrow-up-right external-link-icon size-4"
+          fill="none"
+          height="24"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          width="24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 7h10v10"
+          />
+          <path
+            d="M7 17 17 7"
+          />
+        </svg>
+      </span>
+    </a>
+  </div>
+</div>
+`;
+
 exports[`./ExternalLink.stories NoChildren 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"

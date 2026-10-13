@@ -10,7 +10,9 @@ import {
   cypressRunArguments,
   missingChainCommands,
   planMatrix,
+  playwrightRunArguments,
   readManifest,
+  stackEnvironment,
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
@@ -36,22 +38,13 @@ test('runs CI specs in the selected browser and retains artifacts between specs'
   )
 })
 
-test('records to Cypress Cloud only with a record key and a build id, one group per shard', () => {
-  const specs = ['cypress/e2e/regression/assets.cy.js', 'cypress/e2e/regression/batch_tx.cy.js']
-  const unrecorded = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key' })
-  assert.equal(unrecorded[unrecorded.indexOf('--record') + 1], 'false')
-  const args = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key', SAFE_E2E_RECORD_BUILD_ID: 'run-1' })
-  assert.notEqual(args[args.indexOf('--record') + 1], 'false')
-  assert.equal(args[args.indexOf('--ci-build-id') + 1], 'run-1')
-  assert.equal(args[args.indexOf('--group') + 1], 'isolated shard 1')
-  assert.equal(args[args.indexOf('--spec') + 1], specs.join(','))
-  const shard = cypressRunArguments(specs, {
+test('never records to Cypress Cloud, even with a record key', () => {
+  const args = cypressRunArguments(['cypress/e2e/regression/assets.cy.js'], {
     CYPRESS_RECORD_KEY: 'key',
     SAFE_E2E_RECORD_BUILD_ID: 'run-1',
-    SAFE_E2E_SHARD: '4',
   })
-  assert.equal(shard[shard.indexOf('--group') + 1], 'isolated shard 4')
-  assert.equal(args[args.indexOf('--tag') + 1], 'isolated')
+  assert.equal(args[args.indexOf('--record') + 1], 'false')
+  assert.equal(args.includes('--ci-build-id'), false)
 })
 
 test('keeps local Chrome defaults and passes the selected specs to interactive Cypress', () => {
@@ -149,10 +142,31 @@ test('plans a GitHub Actions matrix with short spec names and the forks of each 
   }
   assert.deepEqual(planMatrix(undefined, 2, registry), {
     include: [
-      { shard: 1, specs: 'regression/a', chains: '' },
-      { shard: 2, specs: 'regression/b', chains: 'polygon' },
+      { shard: 1, runner: 'cypress', specs: 'regression/a', chains: '' },
+      { shard: 2, runner: 'cypress', specs: 'regression/b', chains: 'polygon' },
+      { shard: 3, runner: 'playwright', specs: '', chains: '' },
     ],
   })
+})
+
+test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({}), config)
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: '' }), config)
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: 'dashboard, owners' }), [...config, 'dashboard', 'owners'])
+})
+
+test('gives both runners the local service URLs and the running forks', () => {
+  const stack = { ...manifest, transactionServiceUrl: 'http://localhost:8000/txs', rpcUrl: 'http://localhost:8545' }
+  const chains = { 137: { rpcUrl: 'http://localhost:8548' } }
+  const env = stackEnvironment('safe-e2e-local', { ...stack, chains }, { PATH: '/bin' })
+  assert.equal(env.PATH, '/bin')
+  assert.equal(env.SAFE_E2E_ISOLATED, 'true')
+  assert.equal(env.SAFE_E2E_PROJECT, 'safe-e2e-local')
+  assert.equal(env.SAFE_TXS_BASE_URL, 'http://localhost:8000/txs')
+  assert.equal(env.SAFE_RPC_URL, 'http://localhost:8545')
+  assert.deepEqual(JSON.parse(env.SAFE_E2E_CHAINS), chains)
+  assert.equal(stackEnvironment('safe-e2e-local', stack, {}).SAFE_E2E_CHAINS, '{}')
 })
 
 test('explains a missing stack instead of failing on the manifest path', async () => {

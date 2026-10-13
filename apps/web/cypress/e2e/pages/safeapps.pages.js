@@ -42,7 +42,7 @@ export const enterABIStr = /Enter ABI/i
 // The ABI field misses the ABI when keystrokes come with no delay (the Cypress 16 default).
 export const abiTypingOptions = { parseSpecialCharSequences: false, delay: 10 }
 export const toAddressStr = /to address/i
-export const tokenAmount = /ETH value */i
+export const tokenAmount = /^(ETH value|Value \(ETH\))/i
 export const dataStr = /data */i
 export const clearTransactionListStr = /Clear transaction list?/i
 export const confirmClearTransactionListStr = /Yes, clear/i
@@ -220,10 +220,7 @@ export function clickOnApp(app) {
   // The card's text sits in a pointer-events-none layer; clicks land on the overlay
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
-  const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
-  // The link takes the Safe from the router query, which stays empty until the router is ready
-  appLink().should('have.attr', 'href').and('include', 'safe=')
-  appLink().click()
+  cy.get(`a[aria-label="Open ${app}"]`).first().click()
 }
 
 export function verifyNoAppsTextPresent() {

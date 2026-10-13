@@ -459,8 +459,8 @@ export class SafenetReader {
   /**
    * Wall-clock time of a block in ms — dates the audit-log step. `eth_getLogs`
    * carries no timestamps, so this is one extra header read on every poll that
-   * observes an attestation, including the slow polls a settled check keeps
-   * making while its arbitration window is open.
+   * observes an attestation or a passed deadline, including the slow polls a
+   * settled check keeps making while its arbitration or late window is open.
    * Returns null on failure: a missing date must never suppress a verdict.
    */
   async blockTimeMs(blockNumber: number): Promise<number | null> {

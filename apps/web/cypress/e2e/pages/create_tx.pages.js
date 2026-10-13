@@ -66,6 +66,7 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
+const signedNotice = '[data-testid="signed-notice"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -933,6 +934,12 @@ export function clickOnNoLaterOption() {
 
 export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
+}
+
+// A 1/n Safe offers Execute only after the signature, on a step that reloads the tx from the gateway
+export function signAndOpenExecuteStep() {
+  cy.get(signBtn).click()
+  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
 }
 
 export function clickOnProposeTransactionBtn() {

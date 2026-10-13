@@ -111,9 +111,10 @@ jobs:
           retention-days: 1
           if-no-files-found: error
 
-  cypress:
+  e2e:
     # Starts next to the build job: setting up the backend takes about as long as the build.
     needs: plan
+    name: ${{ matrix.runner }} ${{ matrix.shard }}
     runs-on: ubuntu-24.04-arm
     permissions:
       contents: read
@@ -136,11 +137,15 @@ jobs:
       - name: Install browser dependencies
         id: browser
         working-directory: apps/web
+        env:
+          RUNNER: ${{ matrix.runner }}
         run: |
           yarn exec playwright install --with-deps --no-shell chromium
-          sudo apt-get install -y libgtk-3-0t64 libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb
-          yarn exec cypress install
-          yarn exec cypress verify
+          if [ "$RUNNER" = cypress ]; then
+            sudo apt-get install -y libgtk-3-0t64 libnotify-dev libnss3 libxss1 libasound2t64 libxtst6 xauth xvfb
+            yarn exec cypress install
+            yarn exec cypress verify
+          fi
           node -e 'console.log("path=" + require("@playwright/test").chromium.executablePath())' >> "$GITHUB_OUTPUT"
 
       - name: Start and validate backend
@@ -189,6 +194,7 @@ jobs:
           timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
 
       - name: Run isolated Cypress shard
+        if: matrix.runner == 'cypress'
         uses: cypress-io/github-action@f790eee7a50d9505912f50c2095510be7de06aa7 # v6.10.9
         with:
           install: false
@@ -199,10 +205,17 @@ jobs:
           command: yarn e2e:env cypress
         env:
           SAFE_E2E_BROWSER: ${{ steps.browser.outputs.path }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          SAFE_E2E_RECORD_BUILD_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-          SAFE_E2E_SHARD: ${{ matrix.shard }}
           REVERSE_PROXY_UI_PORT: '8080'
+
+      - name: Run isolated Playwright specs
+        if: matrix.runner == 'playwright'
+        working-directory: apps/web
+        env:
+          REVERSE_PROXY_UI_PORT: '8080'
+        run: |
+          nohup yarn serve > "$RUNNER_TEMP/wallet.log" 2>&1 &
+          timeout 120 bash -c 'until curl -sf http://localhost:8080 > /dev/null; do sleep 2; done'
+          yarn e2e:env playwright
 
       - name: Collect redacted container diagnostics
         if: always() && steps.backend.outcome != 'skipped'
@@ -237,6 +250,8 @@ jobs:
             apps/web/cypress/snapshots/actual/**/*.png
             apps/web/e2e/environment/artifacts/cypress/videos/**/*.mp4
             apps/web/e2e/environment/artifacts/cypress/reports/*.xml
+            apps/web/e2e/environment/artifacts/playwright/**
+            ${{ runner.temp }}/wallet.log
             ${{ runner.temp }}/isolated-e2e-backend/manifest.json
             ${{ runner.temp }}/isolated-e2e-backend/wallet-ref.txt
             ${{ runner.temp }}/isolated-e2e-backend/containers.txt

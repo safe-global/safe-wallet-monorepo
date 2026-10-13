@@ -28,6 +28,7 @@ apps/web/cypress/downloads
 apps/web/e2e/environment/artifacts
 apps/web/.swc
 apps/web/out
+apps/web/next-env.d.ts
 apps/web/public
 apps/web/src/config/__generated__/
 

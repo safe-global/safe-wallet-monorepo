@@ -27,6 +27,7 @@ import {
   elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
 } from './slices'
@@ -142,6 +143,7 @@ const listeners = [
   elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
   forbiddenSessionListener,

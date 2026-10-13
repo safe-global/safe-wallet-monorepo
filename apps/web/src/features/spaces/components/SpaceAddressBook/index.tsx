@@ -5,8 +5,8 @@ import {
   useIsInvited,
   useIsAdmin,
   useAddressBookSearch,
-  useGetSpaceAddressBook,
-  useGetAddressBookRequests,
+  useSpaceAddressBookState,
+  useAddressBookRequestsState,
 } from '@/features/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
@@ -30,6 +30,7 @@ import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -39,8 +40,20 @@ const SpaceAddressBook = () => {
   const isPrivateAddressBookEnabled = useHasFeature(FEATURES.PRIVATE_ADDRESS_BOOK) ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const addressBookItems = useGetSpaceAddressBook()
-  const pendingRequests = useGetAddressBookRequests()
+  const {
+    items: addressBookItems,
+    isLoading: isAddressBookLoading,
+    isError: isAddressBookError,
+    refetch: refetchAddressBook,
+  } = useSpaceAddressBookState()
+  const {
+    items: pendingRequests,
+    isLoading: isRequestsLoading,
+    isError: isRequestsError,
+    refetch: refetchRequests,
+  } = useAddressBookRequestsState()
+  const isAddressBookSettled = !isAddressBookLoading && !isAddressBookError
+  const isRequestsSettled = !isRequestsLoading && !isRequestsError
   const allLocalAddressBooks = useAllAddressBooks()
 
   const localContacts: AddressBookEntry[] = useMemo(() => {
@@ -116,7 +129,9 @@ const SpaceAddressBook = () => {
           <TabsList variant="underline" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
-                <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
+                <TooltipTrigger render={<span />}>
+                  Workspace contacts{isAddressBookSettled ? ` (${addressBookItems.length})` : ''}
+                </TooltipTrigger>
                 <TooltipContent>Shared contacts visible to everyone in this Workspace</TooltipContent>
               </Tooltip>
             </TabsTrigger>
@@ -130,7 +145,9 @@ const SpaceAddressBook = () => {
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="cursor-pointer">
                   <Tooltip>
-                    <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
+                    <TooltipTrigger render={<span />}>
+                      Pending{isRequestsSettled ? ` (${pendingRequests.length})` : ''}
+                    </TooltipTrigger>
                     <TooltipContent>Contacts you proposed to add to the Workspace</TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
@@ -138,7 +155,7 @@ const SpaceAddressBook = () => {
             )}
           </TabsList>
 
-          {(activeTab === 'workspace' || activeTab === 'mine') && (
+          {(activeTab === 'mine' || (activeTab === 'workspace' && isAddressBookSettled)) && (
             // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
             <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
               {/* Only rendered when it holds an action. An always-present wrapper is still a flex
@@ -167,7 +184,11 @@ const SpaceAddressBook = () => {
 
           <TableCard>
             <TabsContent value="workspace">
-              {searchQuery && filteredAll.length === 0 ? (
+              {isAddressBookLoading ? (
+                <SpaceLoading subject="contacts" testId="address-book-loading" />
+              ) : isAddressBookError ? (
+                <SpaceLoadError onReload={refetchAddressBook} testId="address-book-error" />
+              ) : searchQuery && filteredAll.length === 0 ? (
                 <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
                 <p className="text-muted-foreground p-4 text-sm">No contacts in this Workspace yet.</p>
@@ -188,6 +209,10 @@ const SpaceAddressBook = () => {
                       entries={filteredMine}
                       showAddedBy={false}
                       renderExtraAction={(entry, { isCompact }) => {
+                        // An unread Workspace book cannot tell "already shared" from "not shared yet"
+                        if (!isAddressBookSettled) {
+                          return null
+                        }
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
@@ -220,6 +245,10 @@ const SpaceAddressBook = () => {
                         if (isInvited) {
                           return null
                         }
+                        // An unread request list would show "Request to add" for an open request
+                        if (!isRequestsSettled) {
+                          return null
+                        }
                         return (
                           <RequestToAddButton
                             address={entry.address}
@@ -235,7 +264,13 @@ const SpaceAddressBook = () => {
                 </TabsContent>
 
                 <TabsContent value="pending" className="mt-4 sm:mt-0">
-                  <PendingRequestsTable requests={pendingRequests} />
+                  {isRequestsLoading ? (
+                    <SpaceLoading subject="pending requests" testId="pending-requests-loading" />
+                  ) : isRequestsError ? (
+                    <SpaceLoadError onReload={refetchRequests} testId="pending-requests-error" />
+                  ) : (
+                    <PendingRequestsTable requests={pendingRequests} />
+                  )}
                 </TabsContent>
               </>
             )}
