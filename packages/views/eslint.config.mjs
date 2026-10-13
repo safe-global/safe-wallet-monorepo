@@ -17,6 +17,12 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            {
+              name: 'next/image',
+              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
+            },
+          ],
           patterns: [
             {
               group: ['@/*', '@views/*'],
