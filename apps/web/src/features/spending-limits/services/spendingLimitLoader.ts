@@ -7,6 +7,7 @@ import { type AllowanceModule } from '@safe-global/utils/types/contracts'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 const DEFAULT_TOKEN_INFO = {
   decimals: 18,
@@ -39,9 +40,15 @@ export const getTokenAllowances = async (
     (result) => contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0],
   )
 
+  // The module never forgets a token, so removed limits can point at contracts that are not ERC-20s.
   const missingTokenAddresses = tokenAllowances
-    .map((_, index) => allowanceRequests[index].token)
-    .filter((tokenAddress) => !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress))
+    .map((tokenAllowance, index) => ({ tokenAllowance, token: allowanceRequests[index].token }))
+    .filter(({ tokenAllowance: [amount, , resetTimeMin] }) => !(amount === 0n && resetTimeMin === 0n))
+    .map(({ token }) => token)
+    .filter(
+      (tokenAddress) =>
+        !sameAddress(tokenAddress, ZERO_ADDRESS) && !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress),
+    )
 
   const missingTokenInfos = await getERC20TokenInfoOnChain(missingTokenAddresses, provider)
 
