@@ -2,10 +2,10 @@ import { type ComponentType, lazy, Suspense, useEffect, useState } from 'react'
 
 // Same call shape as next/dynamic, so a file moves off Next by changing only its import path.
 const dynamic = <P extends object>(
-  loader: () => Promise<{ default: ComponentType<P> }>,
+  loader: () => Promise<{ default: ComponentType<P> } | ComponentType<P>>,
   options: { ssr?: boolean } = {},
 ): ComponentType<P> => {
-  const LazyComponent = lazy(loader)
+  const LazyComponent = lazy(() => loader().then((loaded) => ('default' in loaded ? loaded : { default: loaded })))
   const renderOnServer = options.ssr ?? true
 
   const DynamicComponent = (props: P) => {

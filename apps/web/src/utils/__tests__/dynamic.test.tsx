@@ -13,6 +13,14 @@ describe('dynamic', () => {
     expect(await screen.findByText('Hello Safe')).toBeInTheDocument()
   })
 
+  it('should, when the loader resolves to the component itself, render it with its props', async () => {
+    const LazyGreeting = dynamic(() => Promise.resolve(Greeting))
+
+    render(<LazyGreeting name="Safe" />)
+
+    expect(await screen.findByText('Hello Safe')).toBeInTheDocument()
+  })
+
   it('should, when ssr is false, render nothing on the server', () => {
     const LazyGreeting = dynamic(() => Promise.resolve({ default: Greeting }), { ssr: false })
 
