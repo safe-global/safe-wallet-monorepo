@@ -1,9 +1,9 @@
 import { useState, type ReactElement } from 'react'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
-import ChooserRow from '@/components/common/ChooserRow'
+import { ChooserRow } from '@safe-global/views/components/common/ChooserRow'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@safe-global/views/components/ui/dialog'
 import { useSafePageWorkspacePick } from '../../hooks/useSafeWorkspaceAttach'
 import { useAddUrlSpaceId } from '../../hooks/useSafeWorkspaceCheck'
 import type { SafeWorkspacePick } from '@/utils/spaces'
