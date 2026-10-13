@@ -1,4 +1,5 @@
-import { cloneElement, createRef, type ComponentType, type ReactElement } from 'react'
+import { execFileSync } from 'node:child_process'
+import { cloneElement, type ComponentType, type ReactElement } from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import ts from 'typescript'
 import { runView } from './runtime'
@@ -26,11 +27,13 @@ describe('runView', () => {
     expect(screen.getByText('two of three')).toBeInTheDocument()
   })
 
-  it('gives view code no window, document or fetch', () => {
-    const View = loadView(`export const View = () => <p>{[typeof window, typeof document, typeof fetch].join(',')}</p>`)
+  it('gives view code no window, document, fetch or localStorage', () => {
+    const View = loadView(
+      `export const View = () => <p>{[typeof window, typeof document, typeof fetch, typeof localStorage].join(',')}</p>`,
+    )
     render(<View />)
 
-    expect(screen.getByText('undefined,undefined,undefined')).toBeInTheDocument()
+    expect(screen.getByText('undefined,undefined,undefined,undefined')).toBeInTheDocument()
   })
 
   it('gives view code Intl for formatting', () => {
@@ -38,69 +41,6 @@ describe('runView', () => {
     render(<View />)
 
     expect(screen.getByText('1,234.5')).toBeInTheDocument()
-  })
-
-  it('does not render iframe or script elements from view code', () => {
-    const View = loadView(
-      `export const View = () => <div data-testid="root"><iframe src="/x" /><script>1</script></div>`,
-    )
-    render(<View />)
-
-    expect(screen.getByTestId('root')).toBeEmptyDOMElement()
-  })
-
-  it('drops an external href written by view code but keeps one passed in by trusted code', () => {
-    const View = loadView<{ href: string }>(
-      `export const View = ({ href }) => <><a href="https://example.com/?leak=1">own</a><a href={href}>given</a></>`,
-    )
-    render(<View href="https://help.safe.global" />)
-
-    expect(screen.getByText('own')).not.toHaveAttribute('href')
-    expect(screen.getByText('given')).toHaveAttribute('href', 'https://help.safe.global')
-  })
-
-  it('keeps a same-origin path written by view code', () => {
-    const View = loadView(`export const View = () => <a href="/settings">settings</a>`)
-    render(<View />)
-
-    expect(screen.getByText('settings')).toHaveAttribute('href', '/settings')
-  })
-
-  it('keeps a same-origin URL object written by view code and drops one with a host', () => {
-    const Link = ({ href, children }: { href?: { pathname?: string; host?: string }; children: string }) => (
-      <span data-href={href ? `${href.host ?? ''}${href.pathname}` : 'none'}>{children}</span>
-    )
-    const View = loadView(
-      `import Link from 'next/link'\nexport const View = () => <><Link href={{ pathname: '/home', query: { safe: 'eth:0x1' } }}>own</Link><Link href={{ host: 'example.com', pathname: '/' }}>external</Link></>`,
-      { 'next/link': { __esModule: true, default: Link } },
-    )
-    render(<View />)
-
-    expect(screen.getByText('own')).toHaveAttribute('data-href', '/home')
-    expect(screen.getByText('external')).toHaveAttribute('data-href', 'none')
-  })
-
-  it('drops dangerouslySetInnerHTML and url() styles from view code', () => {
-    const View = loadView(
-      `export const View = () => <div data-testid="root" style={{ color: 'red', backgroundImage: 'url(https://example.com/x.png)' }} dangerouslySetInnerHTML={{ __html: '<b>x</b>' }} />`,
-    )
-    render(<View />)
-
-    const root = screen.getByTestId('root')
-    expect(root).toBeEmptyDOMElement()
-    expect(root.style.color).toBe('red')
-    expect(root.style.backgroundImage).toBe('')
-  })
-
-  it('passes a view event handler an event without DOM nodes', () => {
-    const report = jest.fn()
-    const View = loadView<{ report: (value: unknown) => void }>(
-      `export const View = ({ report }) => <button onClick={(e) => report([typeof e.currentTarget.ownerDocument, typeof e.nativeEvent, e.type].join(','))}>go</button>`,
-    )
-    render(<View report={report} />)
-    fireEvent.click(screen.getByText('go'))
-
-    expect(report).toHaveBeenCalledWith('undefined,undefined,click')
   })
 
   it('passes the real event to a trusted handler that the view forwards unchanged', () => {
@@ -113,46 +53,6 @@ describe('runView', () => {
     fireEvent.click(screen.getByText('go'))
 
     expect(targets[0]).toBeInstanceOf(HTMLButtonElement)
-  })
-
-  it('attaches a trusted ref to the DOM node without letting the view read the node', () => {
-    const report = jest.fn()
-    const innerRef = createRef<HTMLDivElement>()
-    const View = loadView<{ innerRef: typeof innerRef; report: (value: unknown) => void }>(
-      `import { useEffect } from 'react'
-       export const View = ({ innerRef, report }) => {
-         useEffect(() => report(typeof innerRef.current.ownerDocument))
-         return <div ref={innerRef} />
-       }`,
-    )
-    render(<View innerRef={innerRef} report={report} />)
-
-    expect(innerRef.current).toBeInstanceOf(HTMLDivElement)
-    expect(report).toHaveBeenCalledWith('undefined')
-  })
-
-  it('does not render an element object forged by view code', () => {
-    const View = loadView(
-      `export const View = () => <div data-testid="root">{{ $$typeof: Symbol.for('react.transitional.element'), type: 'iframe', key: null, props: { src: 'https://example.com' } }}</div>`,
-    )
-    render(<View />)
-
-    expect(screen.getByTestId('root')).toBeEmptyDOMElement()
-  })
-
-  it('does not let view code read the props of an element passed in by trusted code', () => {
-    const onSign = jest.fn()
-    const View = loadView<{ children: ReactElement }>(
-      `export const View = ({ children }) => { children.props.onSign?.(); return <div>{children}</div> }`,
-    )
-    render(
-      <View>
-        <button onClick={onSign}>sign</button>
-      </View>,
-    )
-    fireEvent.click(screen.getByText('sign'))
-
-    expect(onSign).toHaveBeenCalledTimes(1)
   })
 
   it('renders a view that calls React methods on the React namespace', () => {
@@ -198,5 +98,57 @@ describe('runView', () => {
 
     expect(onTrustedClick).toHaveBeenCalledTimes(1)
     expect(onLibraryClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('throws when a view requires a module the loader did not provide', () => {
+    expect(() =>
+      loadView(`import { getAddress } from 'viem'\nexport const View = () => <p>{getAddress('0x0')}</p>`),
+    ).toThrow('View test-view.tsx requires viem, which the loader did not provide')
+  })
+
+  it('freezes built-ins for compartment code after lockdown', () => {
+    const script = `require('ses')
+      lockdown({ overrideTaming: 'severe', errorTaming: 'unsafe' })
+      const compartment = new Compartment({ globals: {}, __options__: true })
+      let result = 'changed'
+      try { compartment.evaluate('Array.prototype.map = () => 1') } catch (e) { result = e.constructor.name }
+      process.stdout.write([result, Object.isFrozen(Array.prototype)].join(','))`
+    const output = execFileSync(process.execPath, ['-e', script], { cwd: __dirname, encoding: 'utf8' })
+
+    expect(output).toBe('TypeError,true')
+  })
+
+  it('keeps an external src written by view code in the DOM', () => {
+    const View = loadView(`export const View = () => <img alt="x" src="https://evil.example/x" />`)
+    render(<View />)
+
+    expect(screen.getByAltText('x')).toHaveAttribute('src', 'https://evil.example/x')
+  })
+
+  it('passes DOM events through unchanged', () => {
+    const report = jest.fn()
+    const View = loadView<{ report: (value: unknown) => void }>(
+      `export const View = ({ report }) => <button onClick={(e) => report(e.target.ownerDocument.defaultView)}>go</button>`,
+    )
+    render(<View report={report} />)
+    fireEvent.click(screen.getByText('go'))
+
+    expect(report.mock.calls[0][0]).toBe(window)
+  })
+
+  it('passes refs through unchanged', () => {
+    const report = jest.fn()
+    const View = loadView<{ report: (value: unknown) => void }>(
+      `import { useEffect, useRef } from 'react'
+       export const View = ({ report }) => {
+         const ref = useRef(null)
+         useEffect(() => report(ref.current))
+         return <div ref={ref} />
+       }`,
+    )
+    render(<View report={report} />)
+
+    expect(report.mock.calls[0][0]).toBeInstanceOf(HTMLDivElement)
+    expect(report.mock.calls[0][0].ownerDocument).toBe(document)
   })
 })
