@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import AssetsHeader from '@/components/balances/AssetsHeader'
@@ -7,7 +6,7 @@ import dynamic from 'next/dynamic'
 
 const DefiPositions = dynamic(() => import('@/features/positions'))
 
-const Positions: NextPage = () => {
+const Positions = () => {
   return (
     <>
       <Head>
