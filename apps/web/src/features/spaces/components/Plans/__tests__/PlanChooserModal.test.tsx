@@ -1,5 +1,4 @@
 import { fireEvent, render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { getStoreInstance } from '@/store'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -122,7 +121,6 @@ describe('PlanChooserModal', () => {
       expect.objectContaining({ Location: 'locked_modal' }),
     )
     expect(mockCheckout).toHaveBeenCalledWith(SPACE_ID, 'pl_business', undefined)
-    expect(getStoreInstance().getState().checkoutEntry).toEqual(LOCKED_ENTRY)
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
 

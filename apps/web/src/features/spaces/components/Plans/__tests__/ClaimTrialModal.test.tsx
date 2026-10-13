@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
-import { getStoreInstance } from '@/store'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -131,7 +130,6 @@ describe('ClaimTrialModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
-    expect(getStoreInstance().getState().checkoutEntry).toEqual(LOGIN_ENTRY)
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
@@ -168,7 +166,6 @@ describe('ClaimTrialModal', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')
-    expect(getStoreInstance().getState().checkoutEntry).toEqual({ 'Entry Point': 'create_workspace' })
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })

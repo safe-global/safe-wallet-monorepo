@@ -14,10 +14,9 @@ export const checkoutTrackingListener = (listenerMiddleware: typeof listenerMidd
     matcher: endpoints.billingGetCheckoutUrlV1.matchFulfilled,
     effect: (action, { getState }) => {
       const { spaceId, paymentLinkId } = action.meta.arg.originalArgs
-      const state = getState()
       const selectLinks = endpoints.billingGetSpacePaymentLinksV1.select({ spaceId })
       // RootState types the shared gateway reducer without the billing tags; the cache entry is the same.
-      const links = selectLinks(state as unknown as Parameters<typeof selectLinks>[0]).data ?? []
+      const links = selectLinks(getState() as unknown as Parameters<typeof selectLinks>[0]).data ?? []
       const offer = groupOffersByPlan(links)
         .flatMap((plan) => plan.offers)
         .find((candidate) => candidate.paymentLinkId === paymentLinkId)
@@ -27,7 +26,7 @@ export const checkoutTrackingListener = (listenerMiddleware: typeof listenerMidd
             option: { seats: typeof offer.seats === 'number' ? offer.seats : null },
           })
         : {}
-      trackEvent(SAFE_PRO_EVENTS.CHECKOUT_STARTED, { ...plan, ...state.checkoutEntry })
+      trackEvent(SAFE_PRO_EVENTS.CHECKOUT_STARTED, plan)
     },
   })
 }
