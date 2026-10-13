@@ -14,7 +14,6 @@
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
-import { SAFES } from '../../src/data/constants'
 import {
   SafeLoadingErrorPage,
   LEGAL_BLOCK_MESSAGE,
@@ -22,22 +21,25 @@ import {
 } from '../../src/pages/safe-loading-error.page'
 
 test.describe('Safe loading error — legal block', { tag: '@regression' }, () => {
-  test('should show the backend reason when CGW bans the Safe with 451', async ({ safePage }) => {
+  test('should show the backend reason when CGW bans the Safe with 451', async ({ safePage, safes }) => {
     const errorScreen = new SafeLoadingErrorPage(safePage)
     await errorScreen.stubSafeInfo(451, { code: 451, message: LEGAL_BLOCK_MESSAGE })
 
-    await errorScreen.goto(SAFES.SEP_STATIC_SAFE_2)
+    await errorScreen.goto(safes.SEP_STATIC_SAFE_2)
 
     await expect(errorScreen.container).toContainText(LEGAL_BLOCK_MESSAGE)
     await expect(errorScreen.container).not.toContainText(GENERIC_LOADING_ERROR)
     await expect(errorScreen.mainPageButton).toBeVisible()
   })
 
-  test('should keep the generic message when the Safe fails to load for another reason', async ({ safePage }) => {
+  test('should keep the generic message when the Safe fails to load for another reason', async ({
+    safePage,
+    safes,
+  }) => {
     const errorScreen = new SafeLoadingErrorPage(safePage)
     await errorScreen.stubSafeInfo(500, { code: 500, message: 'Internal server error' })
 
-    await errorScreen.goto(SAFES.SEP_STATIC_SAFE_2)
+    await errorScreen.goto(safes.SEP_STATIC_SAFE_2)
 
     await expect(errorScreen.container).toContainText(GENERIC_LOADING_ERROR)
     // A raw backend string must never reach the screen for a non-451

@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { playwrightSpecs } from './environment/playwright-specs.mjs'
 
 // Started by `yarn e2e:env playwright`, which sets these values from the running stack.
 const baseURL = process.env.PLAYWRIGHT_BASE_URL
@@ -9,13 +10,15 @@ if (process.env.SAFE_E2E_ISOLATED !== 'true' || !baseURL) {
 const artifacts = './environment/artifacts/playwright'
 
 export default defineConfig({
-  testDir: './tests/isolated',
+  testDir: './tests',
+  testMatch: Object.keys(playwrightSpecs).map((spec) => `**/tests/${spec}`),
   timeout: 120_000,
   expect: { timeout: 30_000 },
-  fullyParallel: true,
+  // The tests of a file share the data its scenarios prepare once, so a file stays in one worker.
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: 0,
-  // Every test gets its own owners and Safes, so workers share the stack safely.
+  // Every spec file gets its own owners and Safes, so workers share the stack safely.
   workers: Number(process.env.SAFE_E2E_WORKERS || 2),
   reporter: [
     ['list'],

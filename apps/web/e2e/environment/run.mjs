@@ -120,7 +120,7 @@ const specName = (spec) => spec.replace(/^cypress\/e2e\/|\.cy\.js$/g, '')
 
 /**
  * The GitHub Actions matrix for the selected specs; each Cypress shard lists its specs and the forks they need.
- * One more entry runs every Playwright spec in e2e/tests/isolated on its own Sepolia stack.
+ * One more entry runs every Playwright spec in playwright-specs.mjs on its own Sepolia stack.
  */
 export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
   const shards = planShards(selectCypressSpecs(selection, registry), shardCount, registry)

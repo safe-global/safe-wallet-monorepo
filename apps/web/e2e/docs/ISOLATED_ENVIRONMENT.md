@@ -1,6 +1,6 @@
 # Isolated E2E regression
 
-Runs the existing Cypress specs registered in `e2e/environment/specs.mjs`, and the Playwright specs in `e2e/tests/isolated/`, against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
+Runs the existing Cypress specs registered in `e2e/environment/specs.mjs`, and the Playwright specs registered in `e2e/environment/playwright-specs.mjs`, against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
 
 ## Setup
 
@@ -31,16 +31,18 @@ SAFE_E2E_SPECS=regression/assets yarn workspace @safe-global/web e2e:env cypress
 
 ## Playwright
 
-The Playwright specs in `e2e/tests/isolated/` use the same stack, wallet server and scenarios. With the stack up and the wallet served as above:
+The Playwright specs run unchanged on staging and on the local stack, like the Cypress specs. With the stack up and the wallet served as above:
 
 ```sh
 yarn workspace @safe-global/web e2e:env playwright
 SAFE_E2E_SPECS=dashboard yarn workspace @safe-global/web e2e:env playwright
 ```
 
-`SAFE_E2E_SPECS` filters by file name here; the Playwright specs are not in `specs.mjs`. `SAFE_E2E_WORKERS` sets the worker count (default 2). The HTML report, JUnit report, traces and videos of failed tests go to `apps/web/e2e/environment/artifacts/playwright/`; each run clears them first. Open a trace with `yarn workspace @safe-global/web exec playwright show-trace <trace.zip>`.
+`SAFE_E2E_SPECS` filters by file name here. `SAFE_E2E_WORKERS` sets the worker count (default 2). The HTML report, JUnit report, traces and videos of failed tests go to `apps/web/e2e/environment/artifacts/playwright/`; each run clears them first. Open a trace with `yarn workspace @safe-global/web exec playwright show-trace <trace.zip>`.
 
-A spec imports `test` from `e2e/src/fixtures/isolated.fixture.ts` and names its scenario with `test.use({ scenarioName: 'prepare<Name>Scenario' })`. Every test gets four fresh owners (`owners.owner1` to `owners.owner4`) and its own Safes (`scenario.safes`), so tests share no state and the workers can run in parallel: owners get their ETH from `anvil_setBalance`, not from a shared account. Scenarios that return `files` replace Cypress fixture files, so Playwright specs cannot use them.
+Specs read their Safes from the `safes` fixture and their wallets from the `credentials` fixture. On staging these are `SAFES` from `e2e/src/data/constants.ts` and `CYPRESS_WALLET_CREDENTIALS`. In isolated runs (`SAFE_E2E_ISOLATED=true`), `e2e/src/fixtures/isolated-data.ts` runs the spec's scenarios once per spec file and worker with four generated owners, and the fixtures return those owners and the deployed Safes. A key of `SAFES` that the registry does not map throws when a spec reads it.
+
+To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order, and `safes` maps each `SAFES` key the spec reads to a static Safe key that those scenarios return. A spec that needs no backend data gets `{}`. Only registered specs run in isolated mode, and `e2e:env:test` fails for an unregistered spec. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. The `fixtures` and `files` that scenarios return for Cypress are not used.
 
 ## Cleanup
 
