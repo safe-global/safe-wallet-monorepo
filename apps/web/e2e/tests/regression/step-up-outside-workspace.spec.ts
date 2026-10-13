@@ -67,7 +67,8 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     await completeStepUp(safePage)
 
     // The Safe opens inside the Workspace it now belongs to.
-    const safePageUrl = new RegExp(`/home\\?safe=${safes.SEP_STATIC_SAFE_1}&spaceId=${workspaceId}$`)
+    const safeParam = safes.SEP_STATIC_SAFE_1.replace(':', '(:|%3A)')
+    const safePageUrl = new RegExp(`/home\\?safe=${safeParam}&spaceId=${workspaceId}$`)
     await expectActionReplayed(safePage, safePageUrl, 'Safe account added')
     await expect(safePage.getByRole('button', { name: 'Add Safe to Workspace' })).toBeHidden()
     expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
@@ -110,10 +111,10 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     await safePage.getByRole('button', { name: 'Create account' }).click()
     await completeStepUp(safePage)
 
-    // The step-up returns to the new Safe, not to the creation form.
+    // The step-up returns to the new Safe, not to the creation form; the router later decodes the `:`.
     await expectActionReplayed(
       safePage,
-      new RegExp(`/home\\?safe=sep%3A0x\\w{40}&spaceId=${workspaceId}$`),
+      new RegExp(`/home\\?safe=sep(:|%3A)0x\\w{40}&spaceId=${workspaceId}$`),
       'Safe account added',
     )
     const newSafe = new URL(safePage.url()).searchParams.get('safe') ?? ''
