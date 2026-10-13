@@ -8,7 +8,7 @@ export const FiatBalance = ({ balanceItem }: { balanceItem: Balance }) => {
 
   return (
     <div className="flex flex-row items-center justify-end gap-1">
-      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} />
+      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} precise />
 
       {isMissingFiatConversion && (
         <Tooltip>

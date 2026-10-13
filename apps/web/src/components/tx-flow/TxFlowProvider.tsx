@@ -35,7 +35,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
-import { isSmartContractWallet } from '@/utils/wallets'
+import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 
 export type TxFlowContextType<T extends unknown = any> = {
@@ -214,30 +214,28 @@ const TxFlowProvider = <T extends unknown>({
   const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
-  // The in-app nested signer's signature only lands once the parent executes it
-  const isNestedSignerAwaitingSignatures = !!signer?.isSafe && (safeTx?.signatures.size ?? 0) < safe.threshold
+  const signerChainId = signer?.chainId
+  const signerAddress = signer?.address
+  const viaSafe = !!signer && isSafeSigner(signer)
+  const [isSmartContractSigner = false] = useAsync(
+    () =>
+      signerChainId && signerAddress && !viaSafe ? isSmartContractWallet(signerChainId, signerAddress) : undefined,
+    [signerChainId, signerAddress, viaSafe],
+  )
+  const signatureCount = safeTx?.signatures.size ?? 0
+
+  // On-chain signatures only count once indexed, so these signers can only execute fully signed txs
+  const isAwaitingOnChainSignatures = (viaSafe || isSmartContractSigner) && signatureCount < safe.threshold
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isNestedSignerAwaitingSignatures
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isAwaitingOnChainSignatures
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
-  // Smart-contract signers cannot sign off-chain, so they keep the implicit executor approval path
-  const signerChainId = signer?.chainId
-  const signerAddress = signer?.address
-  const [isSmartContractSigner = false] = useAsync(
-    () =>
-      signerChainId && signerAddress && !signer?.isSafe
-        ? isSmartContractWallet(signerChainId, signerAddress)
-        : undefined,
-    [signerChainId, signerAddress, signer?.isSafe],
-  )
   const hasSigned = useAlreadySigned(safeTx)
-  const signatureCompletesThreshold =
-    !!safeTx && !hasSigned && isOneSignatureShort(safeTx.signatures.size, safe.threshold)
-  const canSignOffChain = !signer?.isSafe && !isSmartContractSigner
-  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold && canSignOffChain
+  const willSignBeforeExecute =
+    canExecute && !isProposing && !hasSigned && isOneSignatureShort(signatureCount, safe.threshold)
 
   const continueToExecute = useCallback(
     (txId: string) => {

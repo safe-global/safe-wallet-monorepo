@@ -42,7 +42,7 @@ export const enterABIStr = /Enter ABI/i
 // The ABI field misses the ABI when keystrokes come with no delay (the Cypress 16 default).
 export const abiTypingOptions = { parseSpecialCharSequences: false, delay: 10 }
 export const toAddressStr = /to address/i
-export const tokenAmount = /ETH value */i
+export const tokenAmount = /^(ETH value|Value \(ETH\))/i
 export const dataStr = /data */i
 export const clearTransactionListStr = /Clear transaction list?/i
 export const confirmClearTransactionListStr = /Yes, clear/i

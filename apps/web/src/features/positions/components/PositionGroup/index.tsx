@@ -71,7 +71,7 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
         content: (
           <div className="text-right">
             <Typography>
-              <FiatValue value={position.fiatBalance} />
+              <FiatValue value={position.fiatBalance} precise />
             </Typography>
             <Typography variant="paragraph-mini" className="block">
               <FiatChange balanceItem={position} inline />
