@@ -2,6 +2,7 @@ import type { FeatureImplementation } from '@/features/__core__'
 import type SafenetAuditRow from './components/SafenetAuditRow'
 import type SafenetChecksSection from './components/SafenetChecksSection'
 import type SafenetDetailsCard from './components/SafenetDetailsCard'
+import type SafenetDevPropose from './components/SafenetDevPropose'
 
 /**
  * Lazy-loaded surface of the Safenet checks feature. All are PascalCase
@@ -9,10 +10,12 @@ import type SafenetDetailsCard from './components/SafenetDetailsCard'
  * `SafenetAuditRow` is the check's step in the transaction audit log,
  * `SafenetChecksSection` is the check's section in the Safe Shield widget
  * during confirm/execute flows, `SafenetDetailsCard` is the expandable card in
- * a transaction's details.
+ * a transaction's details, and `SafenetDevPropose` is a dev-only control that
+ * proposes a check from the connected wallet (hidden in production builds).
  */
 export interface SafenetChecksContract extends FeatureImplementation {
   SafenetAuditRow: typeof SafenetAuditRow
   SafenetChecksSection: typeof SafenetChecksSection
   SafenetDetailsCard: typeof SafenetDetailsCard
+  SafenetDevPropose: typeof SafenetDevPropose
 }

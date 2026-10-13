@@ -27,6 +27,7 @@ import { CopyDeeplinkLabels } from '@/services/analytics'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
 import { useLoadFeature } from '@/features/__core__'
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { IS_PRODUCTION } from '@/config/constants'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
@@ -344,6 +345,15 @@ const TxSigners = ({
           <AlertSeverityIcon variant="warning" />
           <AlertDescription>This order has expired. Reject this transaction and try again.</AlertDescription>
         </Alert>
+      )}
+
+      {!IS_PRODUCTION && (
+        <safenet.SafenetDevPropose
+          txDetails={txDetails}
+          chainId={safe.chainId}
+          onProposed={safenetCheck.refetch}
+          snapshot={safenetCheck.snapshot}
+        />
       )}
     </AuditLog>
   )
