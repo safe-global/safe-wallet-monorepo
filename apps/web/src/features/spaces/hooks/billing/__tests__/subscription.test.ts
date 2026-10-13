@@ -116,6 +116,6 @@ describe('subscription', () => {
     [1, 'Free access · 1 day left'],
     [0, 'Free access · 0 days left'],
   ])('labels a trial with %p days left as %p', (daysLeft, label) => {
-    expect(trialLabel(daysLeft, 14)).toBe(label)
+    expect(trialLabel(daysLeft)).toBe(label)
   })
 })
