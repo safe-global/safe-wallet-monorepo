@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { Info, SlidersHorizontal, User } from 'lucide-react'
 import { type ReactElement } from 'react'
 import { cn } from '@safe-global/views/utils/cn'

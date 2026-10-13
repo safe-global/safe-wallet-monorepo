@@ -14,7 +14,7 @@ import {
 import { Link } from '@safe-global/views/components/ui/link'
 import { Button } from '@safe-global/views/components/ui/button'
 import css from './styles.module.css'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { ChevronRight, X } from 'lucide-react'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '../Track'

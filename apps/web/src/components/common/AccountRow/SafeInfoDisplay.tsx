@@ -1,6 +1,6 @@
 import { useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { blo } from 'blo'
-import NextLink, { type LinkProps } from 'next/link'
+import NextLink, { type LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'

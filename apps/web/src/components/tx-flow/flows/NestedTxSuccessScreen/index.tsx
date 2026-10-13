@@ -7,7 +7,7 @@ import NestedSafeIcon from '@/public/images/transactions/nestedTx.svg'
 import ArrowDownIcon from '@/public/images/common/arrow-down.svg'
 
 import css from './styles.module.css'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { useAppSelector } from '@/store'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'

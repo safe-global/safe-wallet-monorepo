@@ -1,4 +1,4 @@
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'

@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import Track from '@/components/common/Track'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 

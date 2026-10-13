@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'

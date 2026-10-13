@@ -1,6 +1,6 @@
 import { CTA_HEIGHT, CTA_BUTTON_WIDTH } from '@safe-global/views/components/safe-apps/SafeAppLandingPage/constants'
-import Link from 'next/link'
-import type { LinkProps } from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import DemoAppSVG from '@safe-global/views/assets/images/apps/apps-demo.svg'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'

@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
 import { blo } from 'blo'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'

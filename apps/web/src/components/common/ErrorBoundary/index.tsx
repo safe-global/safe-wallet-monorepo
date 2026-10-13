@@ -1,4 +1,4 @@
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Link } from '@safe-global/views/components/ui/link'

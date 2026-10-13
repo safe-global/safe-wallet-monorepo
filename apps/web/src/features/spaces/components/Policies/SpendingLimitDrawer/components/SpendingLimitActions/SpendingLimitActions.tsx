@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
 import {
   EDIT_LOCKED_HELPER,

@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { EllipsisVertical } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'

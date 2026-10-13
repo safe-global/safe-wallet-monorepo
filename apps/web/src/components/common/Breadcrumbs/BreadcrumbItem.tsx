@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import type { UrlObject } from 'url'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'

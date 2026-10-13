@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from 'react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { SidebarMenuItem, SidebarMenuButton, useSidebar } from '@safe-global/views/components/ui/sidebar'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'

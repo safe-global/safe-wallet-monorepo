@@ -3,7 +3,7 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
 import { useMemo } from 'react'

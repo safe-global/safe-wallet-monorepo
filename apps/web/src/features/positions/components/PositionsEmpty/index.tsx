@@ -1,4 +1,4 @@
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import DefiIcon from '@safe-global/views/assets/images/balances/defi.svg'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'

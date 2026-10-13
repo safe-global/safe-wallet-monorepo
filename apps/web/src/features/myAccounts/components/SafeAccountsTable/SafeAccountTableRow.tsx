@@ -1,6 +1,6 @@
 import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import Link, { type LinkProps } from 'next/link'
+import Link, { type LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { DrawerFooter } from '@/components/common/Drawer'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'

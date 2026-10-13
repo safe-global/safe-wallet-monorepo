@@ -1,6 +1,6 @@
 import { forwardRef, useImperativeHandle, type MouseEvent, type ReactElement } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 
 import { Popover, PopoverContent } from '@safe-global/views/components/ui/popover'

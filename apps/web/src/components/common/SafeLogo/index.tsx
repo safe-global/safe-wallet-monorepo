@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { cn } from '@safe-global/views/utils/cn'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'

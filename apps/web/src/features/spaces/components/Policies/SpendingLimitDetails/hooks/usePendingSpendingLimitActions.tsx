@@ -1,4 +1,4 @@
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'

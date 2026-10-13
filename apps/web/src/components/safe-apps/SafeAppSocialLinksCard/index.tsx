@@ -1,4 +1,4 @@
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { HelpCircle, Github, Send, Twitter } from 'lucide-react'
 import { SafeAppSocialPlatforms } from '@safe-global/store/gateway/types'
 import type { SafeApp as SafeAppData, SafeAppSocialProfile } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'

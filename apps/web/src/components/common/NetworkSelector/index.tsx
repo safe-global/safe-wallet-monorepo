@@ -1,6 +1,6 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Separator } from '@safe-global/views/components/ui/separator'

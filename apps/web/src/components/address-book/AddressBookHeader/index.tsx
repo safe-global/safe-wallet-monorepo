@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { Plus } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import Track from '@/components/common/Track'

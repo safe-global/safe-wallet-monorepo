@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { ArrowRight, Lock } from 'lucide-react'
 import { Alert, AlertDescription } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'

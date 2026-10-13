@@ -1,5 +1,5 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 

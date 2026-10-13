@@ -15,7 +15,7 @@ import {
 } from '@/store/notificationsSlice'
 import NotificationCenterList from '@/components/notification-center/NotificationCenterList'
 import UnreadBadge from '@safe-global/views/components/common/UnreadBadge'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'

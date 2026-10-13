@@ -12,7 +12,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
 

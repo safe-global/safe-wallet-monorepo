@@ -1,4 +1,4 @@
-import NextLink, { type LinkProps } from 'next/link'
+import NextLink, { type LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { Lock } from 'lucide-react'
 import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'

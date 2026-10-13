@@ -1,6 +1,6 @@
 import { Button } from '@safe-global/views/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useState, useRef, useEffect, useMemo } from 'react'
 import type { UrlObject } from 'url'
 import { AppRoutes } from '@/config/routes'

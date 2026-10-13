@@ -17,6 +17,13 @@ export default tseslint.config(
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            {
+              name: 'next/link',
+              message:
+                'Import Link from @safe-global/views/components/common/RouterLink, the one module that binds links to the router.',
+            },
+          ],
           patterns: [
             {
               group: ['@/*', '@views/*'],

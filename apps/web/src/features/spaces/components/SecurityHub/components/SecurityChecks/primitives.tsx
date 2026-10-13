@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowRight, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@safe-global/views/utils/cn'

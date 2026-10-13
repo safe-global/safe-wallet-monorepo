@@ -1,6 +1,6 @@
 import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { AppThunk, RootState } from '@/store'
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import type { ReactNode } from 'react'
 
 export type AlertColor = 'success' | 'info' | 'warning' | 'error'

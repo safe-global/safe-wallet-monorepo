@@ -5,7 +5,7 @@ import { Switch } from '@safe-global/views/components/ui/switch'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Link as ShadcnLink } from '@safe-global/views/components/ui/link'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 

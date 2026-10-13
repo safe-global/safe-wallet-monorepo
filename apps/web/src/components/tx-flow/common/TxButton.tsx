@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 
 import { Button } from '@safe-global/views/components/ui/button'

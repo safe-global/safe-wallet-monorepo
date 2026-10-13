@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { motion } from 'framer-motion'
 import { ChevronDown, ChevronRight, TriangleAlert } from 'lucide-react'
 import type { ScanResult } from '@/features/security/types'

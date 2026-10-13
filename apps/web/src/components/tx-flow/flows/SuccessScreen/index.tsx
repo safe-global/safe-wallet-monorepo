@@ -1,6 +1,6 @@
 import StatusStepper from './StatusStepper'
 import classnames from 'classnames'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import css from '@safe-global/views/components/tx-flow/flows/SuccessScreen/styles.module.css'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'

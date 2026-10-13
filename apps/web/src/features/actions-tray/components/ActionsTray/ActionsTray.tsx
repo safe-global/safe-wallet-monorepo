@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode, Fragment, useCallback, useContext } from 'react'
 import { useRouter } from 'next/router'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { ArrowUpRight, QrCode, Repeat, SquareDashedBottomCode } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Button } from '@safe-global/views/components/ui/button'

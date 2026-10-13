@@ -1,4 +1,4 @@
-import type { LinkProps } from 'next/link'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 
 export const dashboardBannerConfig = {
   title: 'Enforce enterprise-grade security',

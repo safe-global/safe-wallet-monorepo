@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import type { UrlObject } from 'url'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
 import { Link } from '@safe-global/views/components/ui/link'
 

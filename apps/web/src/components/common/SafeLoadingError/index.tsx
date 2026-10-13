@@ -5,7 +5,7 @@ import useSafeUnavailableMessage from '@/hooks/useSafeUnavailableMessage'
 import { useUrlChain } from '@/hooks/useChainId'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import { AppRoutes } from '@/config/routes'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 
 export const GENERIC_LOADING_ERROR = "This Safe account couldn't be loaded"
 export const unsupportedNetworkError = (shortName: string) => `The network "${shortName}" isn't supported`

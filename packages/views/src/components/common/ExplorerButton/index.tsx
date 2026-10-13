@@ -4,7 +4,7 @@ import { buttonVariants } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import LinkIcon from '@safe-global/views/assets/images/common/link.svg'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 
 export type ExplorerButtonProps = {
   title?: string

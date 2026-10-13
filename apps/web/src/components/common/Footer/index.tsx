@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Github } from 'lucide-react'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
 import { AppRoutes } from '@/config/routes'

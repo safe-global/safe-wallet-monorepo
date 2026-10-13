@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import { resolveHref } from 'next/dist/client/resolve-href'
 import classNames from 'classnames'

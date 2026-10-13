@@ -1,5 +1,5 @@
-import NextLink from 'next/link'
-import type { LinkProps } from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { DialogTitle } from '@safe-global/views/components/ui/dialog'

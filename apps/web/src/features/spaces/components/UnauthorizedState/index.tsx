@@ -1,5 +1,5 @@
 import css from '../Dashboard/styles.module.css'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'

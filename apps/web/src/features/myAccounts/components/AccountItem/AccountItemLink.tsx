@@ -1,5 +1,5 @@
 import { type ReactNode, type RefObject } from 'react'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import type { UrlObject } from 'url'
 import classnames from 'classnames'
 import Track from '@/components/common/Track'

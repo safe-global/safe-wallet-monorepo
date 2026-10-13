@@ -3,7 +3,7 @@ import { AppRoutes } from '@/config/routes'
 import CSVAirdropLogo from '@/public/images/apps/csv-airdrop-app-logo.svg'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import type { ReactElement } from 'react'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 

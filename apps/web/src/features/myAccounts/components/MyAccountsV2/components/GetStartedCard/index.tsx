@@ -1,5 +1,5 @@
 import { ExternalLink, Wallet } from 'lucide-react'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import SafeWalletLockup from '@/public/images/safe-wallet-lockup.svg'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
 import Track from '@/components/common/Track'

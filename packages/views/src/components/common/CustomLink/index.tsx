@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef } from 'react'
-import type { LinkProps as NextLinkProps } from 'next/dist/client/link'
-import NextLink from 'next/link'
+import type { LinkProps as NextLinkProps } from '@safe-global/views/components/common/RouterLink'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { Link } from '@safe-global/views/components/ui/link'
 
 const CustomLink: React.FC<

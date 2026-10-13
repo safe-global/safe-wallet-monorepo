@@ -1,5 +1,5 @@
 import { AppRoutes } from '@/config/routes'
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsAdmin } from '../../hooks/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'

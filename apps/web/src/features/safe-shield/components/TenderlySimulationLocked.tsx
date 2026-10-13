@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import NextLink from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
 import { AppRoutes } from '@/config/routes'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'

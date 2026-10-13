@@ -1,7 +1,7 @@
 import classnames from 'classnames'
 import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { isAddress } from 'ethers'
-import NextLink, { type LinkProps } from 'next/link'
+import NextLink, { type LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { Cloud } from 'lucide-react'
 import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { useIsBelowSm } from '@/hooks/useMediaQuery'

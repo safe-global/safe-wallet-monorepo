@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from '@safe-global/views/components/common/RouterLink'
 import { useRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 

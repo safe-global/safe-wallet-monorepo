@@ -3,8 +3,8 @@
  * @usedBy features/recovery/components/RecoveryHeader/index.tsx (WidgetContainer, WidgetBody)
  */
 import type { ComponentProps, ReactElement, ReactNode } from 'react'
-import NextLink from 'next/link'
-import type { LinkProps } from 'next/link'
+import NextLink from '@safe-global/views/components/common/RouterLink'
+import type { LinkProps } from '@safe-global/views/components/common/RouterLink'
 import { Link } from '@safe-global/views/components/ui/link'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { ChevronRight } from 'lucide-react'
