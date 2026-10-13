@@ -14,14 +14,13 @@ import os
 import re
 import socket
 import ssl
-import subprocess
 import sys
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ORDERS_FILE = Path(__file__).with_name("cow_api_orders.json")
-TLS_DIR = Path("/tls")
+KEYS_DIR = Path("/keys")
 UPSTREAM = "api.cow.fi"
 PREFIX = "/sepolia/api/v1"
 SETTLEMENTS_DIR = Path("/tmp/settlements")
@@ -118,25 +117,9 @@ def respond(fixtures, path, offline, upstream=upstream_response):
     return upstream(path)
 
 
-def ensure_certificate():
-    cert, key = TLS_DIR / "cert.pem", TLS_DIR / "key.pem"
-    if not cert.exists():
-        subprocess.run(
-            [
-                "openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "3650",
-                "-subj", "/CN=api.cow.fi", "-addext", "subjectAltName=DNS:api.cow.fi",
-                "-keyout", str(key), "-out", str(cert),
-            ],
-            check=True,
-            capture_output=True,
-        )
-    return cert, key
-
-
 def serve():
     fixtures = load_fixtures()
     offline = os.environ.get("COW_API_OFFLINE") == "true"
-    cert, key = ensure_certificate()
 
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
@@ -152,7 +135,7 @@ def serve():
 
     server = ThreadingHTTPServer(("0.0.0.0", 443), Handler)
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-    context.load_cert_chain(cert, key)
+    context.load_cert_chain(KEYS_DIR / "tls-cert.pem", KEYS_DIR / "tls-key.pem")
     server.socket = context.wrap_socket(server.socket, server_side=True)
     server.serve_forever()
 
