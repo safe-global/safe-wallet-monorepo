@@ -2210,6 +2210,9 @@
           },
           "404": {
             "description": "User not found - the authenticated wallet is not associated with any user"
+          },
+          "409": {
+            "description": "User is the last admin of at least one workspace - promote another admin or delete the workspace first"
           }
         },
         "summary": "Delete user",
@@ -7318,7 +7321,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-527a177",
+    "version": "main-2a92a92",
     "contact": {}
   },
   "tags": [],
