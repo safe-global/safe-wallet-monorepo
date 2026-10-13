@@ -142,3 +142,5 @@ export { default as SafeWidget, WidgetItem } from './components/SafeWidget'
 export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardReadOnly'
 export { DashboardHeader } from './components/Dashboard/DashboardHeader'
 export { default as SpacesLogin } from './components/SpacesLogin'
+
+export { PendingQueuePrototype } from './prototype'

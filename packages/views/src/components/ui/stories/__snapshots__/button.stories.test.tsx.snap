@@ -1,0 +1,1560 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./button.stories AllVariants 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="flex flex-col gap-8"
+    >
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          Variants
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Default
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Secondary
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Outline
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Ghost
+          </button>
+          <button
+            class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Destructive
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          Sizes
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Small
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Default
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Large
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Action
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Submit
+          </button>
+        </div>
+        <p
+          class="mt-2 text-sm text-muted-foreground"
+        >
+          <code>
+            action
+          </code>
+           = toolbar/action-bar pill. 
+          <code>
+            submit
+          </code>
+           = the same pill with a stable min-width for modal/flow submit buttons (label can swap to a spinner without resizing).
+        </p>
+      </div>
+      <div>
+        <h3
+          class="mb-1 text-lg font-semibold"
+        >
+          Action buttons (CTA pattern)
+        </h3>
+        <p
+          class="mb-4 text-sm text-muted-foreground"
+        >
+          The canonical action-bar pattern: 
+          <code>
+            size="action"
+          </code>
+           for one shared height/padding, with
+           
+          <code>
+            variant="default"
+          </code>
+           for the primary action and 
+          <code>
+            variant="secondary"
+          </code>
+           
+          for secondary actions. Used for Send/Receive/Swap, Confirm/Execute, Filter/Export, Save settings, etc.
+          <br />
+          Surface rule: filled 
+          <code>
+            secondary
+          </code>
+           only reads on white/card surfaces (e.g. the dashboard). On the muted page background (e.g. the transactions toolbar) use 
+          <code>
+            variant="outline"
+          </code>
+           — its fill is transparent, so it reads via the border hairline and a translucent hover on any surface. When a secondary action needs a real fill on a coloured or promo surface, use 
+          <code>
+            variant="surface"
+          </code>
+          .
+        </p>
+        <div
+          class="flex flex-wrap items-center gap-3"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-up-right text-green-400"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M7 7h10v10"
+              />
+              <path
+                d="M7 17 17 7"
+              />
+            </svg>
+            Send
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-down-left"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M17 7 7 17"
+              />
+              <path
+                d="M17 17H7V7"
+              />
+            </svg>
+            Receive
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-repeat"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m17 2 4 4-4 4"
+              />
+              <path
+                d="M3 11v-1a4 4 0 0 1 4-4h14"
+              />
+              <path
+                d="m7 22-4-4 4-4"
+              />
+              <path
+                d="M21 13v1a4 4 0 0 1-4 4H3"
+              />
+            </svg>
+            Swap
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          Icon Sizes
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-plus size-3"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="M12 5v14"
+              />
+            </svg>
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-plus size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="M12 5v14"
+              />
+            </svg>
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-9"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-plus size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="M12 5v14"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          With Icons
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-plus size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="M12 5v14"
+              />
+            </svg>
+            Add Item
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Next
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-arrow-right size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 12h14"
+              />
+              <path
+                d="m12 5 7 7-7 7"
+              />
+            </svg>
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-square-dashed size-4"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M5 3a2 2 0 0 0-2 2"
+              />
+              <path
+                d="M19 3a2 2 0 0 1 2 2"
+              />
+              <path
+                d="M21 19a2 2 0 0 1-2 2"
+              />
+              <path
+                d="M5 21a2 2 0 0 1-2-2"
+              />
+              <path
+                d="M9 3h1"
+              />
+              <path
+                d="M9 21h1"
+              />
+              <path
+                d="M14 3h1"
+              />
+              <path
+                d="M14 21h1"
+              />
+              <path
+                d="M3 9v1"
+              />
+              <path
+                d="M21 9v1"
+              />
+              <path
+                d="M3 14v1"
+              />
+              <path
+                d="M21 14v1"
+              />
+            </svg>
+            Label
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          States
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Normal
+          </button>
+          <button
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-disabled=""
+            data-slot="button"
+            disabled=""
+            tabindex="0"
+            type="button"
+          >
+            Disabled
+          </button>
+          <button
+            aria-invalid="true"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Invalid
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          Expanded (menu trigger open)
+        </h3>
+        <div
+          class="flex flex-wrap items-center gap-4"
+        >
+          <button
+            aria-expanded="true"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Outline
+          </button>
+          <button
+            aria-expanded="true"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Secondary
+          </button>
+          <button
+            aria-expanded="true"
+            class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+            data-slot="button"
+            tabindex="0"
+            type="button"
+          >
+            Ghost
+          </button>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          All Variants × Sizes
+        </h3>
+        <div
+          class="flex flex-col gap-4"
+        >
+          <div
+            class="flex items-center gap-4"
+          >
+            <span
+              class="w-24 text-sm text-muted-foreground"
+            >
+              default
+            </span>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              SM
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Default
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              LG
+            </button>
+          </div>
+          <div
+            class="flex items-center gap-4"
+          >
+            <span
+              class="w-24 text-sm text-muted-foreground"
+            >
+              secondary
+            </span>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              SM
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Default
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              LG
+            </button>
+          </div>
+          <div
+            class="flex items-center gap-4"
+          >
+            <span
+              class="w-24 text-sm text-muted-foreground"
+            >
+              outline
+            </span>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              SM
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Default
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              LG
+            </button>
+          </div>
+          <div
+            class="flex items-center gap-4"
+          >
+            <span
+              class="w-24 text-sm text-muted-foreground"
+            >
+              ghost
+            </span>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              SM
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Default
+            </button>
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              LG
+            </button>
+          </div>
+          <div
+            class="flex items-center gap-4"
+          >
+            <span
+              class="w-24 text-sm text-muted-foreground"
+            >
+              destructive
+            </span>
+            <button
+              class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              SM
+            </button>
+            <button
+              class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Default
+            </button>
+            <button
+              class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              LG
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./button.stories Guidelines 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="flex max-w-3xl flex-col gap-8"
+    >
+      <div>
+        <h3
+          class="mb-1 text-lg font-semibold"
+        >
+          The rule
+        </h3>
+        <p
+          class="text-sm text-muted-foreground"
+        >
+          On 
+          <code>
+            &lt;Button&gt;
+          </code>
+          , 
+          <code>
+            className
+          </code>
+           is for 
+          <strong>
+            layout only
+          </strong>
+           (
+          <code>
+            w-full
+          </code>
+          , margins, grid placement). Height, padding, font-size, radius and background belong to the
+           
+          <code>
+            size
+          </code>
+          /
+          <code>
+            variant
+          </code>
+           props — never re-declare them via 
+          <code>
+            className
+          </code>
+          . If no size/variant fits a recurring need, add one to 
+          <code>
+            components/ui/button.tsx
+          </code>
+           instead of overriding at the call site.
+        </p>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          When to use — variant (emphasis)
+        </h3>
+        <div
+          class="overflow-x-auto"
+        >
+          <table
+            class="w-full border-collapse text-sm"
+          >
+            <thead>
+              <tr
+                class="border-border border-b text-left text-muted-foreground"
+              >
+                <th
+                  class="py-2 pr-4 font-medium"
+                >
+                  Variant
+                </th>
+                <th
+                  class="py-2 pr-4 font-medium"
+                >
+                  Use for
+                </th>
+                <th
+                  class="py-2 font-medium"
+                >
+                  Example
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    default
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  The one primary action of a surface/row (Create, Connect, Confirm, Save)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Primary
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    secondary
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Secondary action of equal weight — only on white/card surfaces
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-secondary text-secondary-foreground hover:bg-secondary-hover aria-expanded:bg-secondary-hover aria-expanded:text-secondary-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Secondary
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    outline
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Secondary action on page/toolbar backgrounds; neutral button; dialog Cancel. Transparent fill — reads via its border + shadow
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Outline
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    ghost
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Low-emphasis, repeated, toolbar, list-row, icon/menu-trigger actions
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Ghost
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    destructive
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Destructive action (Delete / Remove / Leave)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="cursor-pointer aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-destructive/10 hover:bg-destructive/20 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/20 text-destructive focus-visible:border-destructive/40 dark:hover:bg-destructive/30 h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    surface
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Card-surface CTA on a coloured / promo surface (Earn, Stake, Add funds)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Surface
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p
+          class="mt-2 text-sm text-muted-foreground"
+        >
+          Rule of thumb: 
+          <strong>
+            at most one filled primary (default) per surface or row
+          </strong>
+           — hierarchy comes from the variant, not from custom colours. Filled 
+          <code>
+            secondary
+          </code>
+           only reads on white/card surfaces; on the muted page background use 
+          <code>
+            outline
+          </code>
+           (transparent fill, border hairline). Use 
+          <code>
+            surface
+          </code>
+           
+          when a secondary action must stay filled on a coloured or promo surface.
+        </p>
+      </div>
+      <div>
+        <h3
+          class="mb-4 text-lg font-semibold"
+        >
+          When to use — size (height / padding)
+        </h3>
+        <div
+          class="overflow-x-auto"
+        >
+          <table
+            class="w-full border-collapse text-sm"
+          >
+            <thead>
+              <tr
+                class="border-border border-b text-left text-muted-foreground"
+              >
+                <th
+                  class="py-2 pr-4 font-medium"
+                >
+                  Size
+                </th>
+                <th
+                  class="py-2 pr-4 font-medium"
+                >
+                  Box
+                </th>
+                <th
+                  class="py-2 pr-4 font-medium"
+                >
+                  Use for
+                </th>
+                <th
+                  class="py-2 font-medium"
+                >
+                  Example
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    action
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-10 px-6
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Prominent CTA / action-bar pill: page-header primary actions, Send/Receive/Swap, Confirm/Execute, Filter/Export
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Action
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    submit
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-10 min-w
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Modal / flow / settings submit (label can swap to a spinner without resizing)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 min-w-[7rem] [&_svg:not([class*='size-'])]:size-5"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Submit
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    xl
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-12
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Full-screen onboarding / flow footer CTA (use via the OnboardingFooter preset)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-12 gap-2 px-6"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    XL
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    lg
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-10
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Large stacked form-step buttons (create-safe flow)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Large
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    default
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-9
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Standard button, default inside content
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Default
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    sm
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-8
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Compact / inline / toolbar, list-row actions, cards, dense headers
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Small
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    xs
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-8
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  sm's box with a 12px label, for controls sitting beside body text
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Extra small
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    2xs
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    h-6
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Persistent per-row action in a dense table; pair with a fixed w-* so a column of them aligns
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-6 gap-1 px-2.5 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    Execute
+                  </button>
+                </td>
+              </tr>
+              <tr
+                class="border-border/60 border-b align-middle"
+              >
+                <td
+                  class="py-3 pr-4"
+                >
+                  <code>
+                    icon*
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  <code>
+                    square
+                  </code>
+                </td>
+                <td
+                  class="py-3 pr-4 text-muted-foreground"
+                >
+                  Icon-only; match the neighbouring text button (icon-sm↔sm, icon↔default)
+                </td>
+                <td
+                  class="py-3"
+                >
+                  <button
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-slot="button"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <svg
+                      aria-hidden="true"
+                      class="lucide lucide-plus"
+                      fill="none"
+                      height="24"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="24"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M5 12h14"
+                      />
+                      <path
+                        d="M12 5v14"
+                      />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h3
+          class="mb-1 text-lg font-semibold"
+        >
+          Do / Don't
+        </h3>
+        <p
+          class="mb-4 text-sm text-muted-foreground"
+        >
+          A real example: the welcome-screen header actions. Buttons meant to be siblings must share one
+           
+          <code>
+            size
+          </code>
+          ; the hierarchy is carried by the 
+          <code>
+            variant
+          </code>
+          .
+        </p>
+        <div
+          class="grid gap-6 sm:grid-cols-2"
+        >
+          <div
+            class="border-border rounded-lg border p-4"
+          >
+            <p
+              class="text-[var(--color-success-main)] mb-3 text-sm font-semibold"
+            >
+              ✓ Do
+            </p>
+            <div
+              class="flex flex-wrap gap-2"
+            >
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-plus"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 12h14"
+                  />
+                  <path
+                    d="M12 5v14"
+                  />
+                </svg>
+                Add
+              </button>
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-2 px-6 [&_svg:not([class*='size-'])]:size-5"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                Create account
+              </button>
+            </div>
+            <p
+              class="mt-3 text-xs text-muted-foreground"
+            >
+              One 
+              <code>
+                size="action"
+              </code>
+               → identical height, padding, font and radius.
+               
+              <code>
+                outline
+              </code>
+               vs 
+              <code>
+                default
+              </code>
+               carries the emphasis. className is layout-only.
+            </p>
+          </div>
+          <div
+            class="border-border rounded-lg border p-4"
+          >
+            <p
+              class="mb-3 text-sm font-semibold text-destructive"
+            >
+              ✗ Don't
+            </p>
+            <div
+              class="flex flex-wrap items-center gap-2"
+            >
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs gap-1 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 h-9 rounded-lg px-4 text-base"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-plus"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M5 12h14"
+                  />
+                  <path
+                    d="M12 5v14"
+                  />
+                </svg>
+                Add
+              </button>
+              <button
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 border border-transparent bg-clip-padding font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-8 gap-1 px-4 in-data-[slot=button-group]:rounded-sm has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 rounded-lg text-base"
+                data-slot="button"
+                tabindex="0"
+                type="button"
+              >
+                Create account
+              </button>
+            </div>
+            <p
+              class="mt-3 text-xs text-muted-foreground"
+            >
+              Same intent, but 
+              <code>
+                size="sm"
+              </code>
+               is overridden by 
+              <code>
+                h-9
+              </code>
+              /
+              <code>
+                text-base
+              </code>
+              /
+              <code>
+                rounded-lg
+              </code>
+               on one and not the other → mismatched height, font and radius. This is exactly the drift the ESLint rule now blocks.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
