@@ -17,8 +17,8 @@ describe('proposal details preview', () => {
     expect(screen.getByText(/"calldata": null/)).toBeVisible()
   })
   it.each([
-    ['treasury-42', 'Transfer', '48.5 ETH'],
-    ['treasury-43', 'Signer change', '3 signatures (unchanged)'],
+    ['treasury-42', 'Send', '48.5 ETH'],
+    ['treasury-43', 'Update', '3 signatures (unchanged)'],
     ['payroll-17', 'Batch', '14 actions'],
   ])('shows distinct transaction details for %s', (id, type, detail) => {
     render(<ProposalTransactionDetails proposal={proposal(id)} />)
@@ -61,5 +61,13 @@ describe('proposal details preview', () => {
       'aria-expanded',
       'false',
     )
+  })
+  it('describes a threshold change instead of a signer change', () => {
+    const threshold = getScenario('conflict-heavy').find((tx) => tx.id === 'treasury-42-threshold')!
+    render(<ProposalTransactionDetails proposal={threshold} />)
+    expect(screen.getByText('Change threshold')).toBeVisible()
+    expect(screen.getByText('3 → 2 signatures')).toBeVisible()
+    expect(screen.queryByText('New signer')).not.toBeInTheDocument()
+    expect(screen.queryByText(/unchanged/)).not.toBeInTheDocument()
   })
 })

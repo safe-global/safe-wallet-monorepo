@@ -11,8 +11,7 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
 import { DrawerList } from '@/components/common/Drawer'
 import { AuditLog, AuditLogHeader, AuditRow, useCopyToClipboard } from '@/components/common/AuditLog'
-import Identicon from '@/components/common/Identicon'
-import { getAccount, getOutstandingSigners, getState } from '../services/model'
+import { getAccount, getOutstandingSigners, getState, getTypeLabel, isSettingsChange } from '../services/model'
 import type { BatchAction, Persona, Proposal } from '../types'
 
 const INITIAL_ACTIONS = 10
@@ -29,34 +28,21 @@ function CopyValue({ value, label }: { value: string; label: string }) {
 export function ProposalSummary({ proposal }: { proposal: Proposal }) {
   const account = getAccount(proposal)
   return (
-    <section className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
-        <Identicon address={account.iconAddress} size={32} />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{account.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {account.network} · Nonce #{proposal.nonce}
-          </p>
-        </div>
-        <Badge variant="outline">{proposal.amount || `${proposal.actions?.length ?? 0} actions`}</Badge>
-      </div>
-      <DrawerList
-        mobileStack
-        items={[
-          {
-            label: 'Safe address',
-            content: (
-              <div className="flex min-w-0 items-center gap-1">
-                <span className="break-all font-mono text-xs">{account.iconAddress}</span>
-                <CopyValue value={account.iconAddress} label="sample Safe address" />
-              </div>
-            ),
-          },
-          { label: 'Recipient', content: proposal.recipient },
-          { label: 'Proposed', content: proposal.age },
-        ]}
-      />
-    </section>
+    <DrawerList
+      mobileStack
+      items={[
+        { label: 'Recipient', content: proposal.recipient },
+        {
+          label: 'Safe address',
+          content: (
+            <div className="flex min-w-0 items-center gap-1">
+              <span className="break-all font-mono text-xs">{account.iconAddress}</span>
+              <CopyValue value={account.iconAddress} label="sample Safe address" />
+            </div>
+          ),
+        },
+      ]}
+    />
   )
 }
 
@@ -112,24 +98,31 @@ function BatchActions({ actions }: { actions: BatchAction[] }) {
 }
 
 export function ProposalTransactionDetails({ proposal }: { proposal: Proposal }) {
-  const isSettings = proposal.amount === 'Safe settings'
+  const account = getAccount(proposal)
+  const change = proposal.settingsChange
   const actions = proposal.actions ?? []
-  const isBatch = actions.length > 0 || proposal.recipient.includes('Batch')
-  const isSwap = proposal.recipient.includes('CoW Swap')
-  const type =
-    proposal.kind === 'cancellation'
-      ? 'Cancellation'
-      : proposal.kind === 'replacement'
-        ? 'Replacement'
-        : isSettings
-          ? 'Signer change'
-          : isBatch
-            ? 'Batch'
-            : isSwap
-              ? 'Swap'
-              : 'Transfer'
+  const type = proposal.kind === 'replacement' ? 'Replacement' : getTypeLabel(proposal)
+  const settingsItems = change
+    ? change.kind === 'addOwner'
+      ? [
+          { label: 'Change', content: 'Add signer' },
+          { label: 'New signer', content: proposal.recipient },
+          { label: 'Threshold', content: `${account.threshold} signatures (unchanged)` },
+        ]
+      : [
+          { label: 'Change', content: 'Change threshold' },
+          { label: 'Threshold', content: `${account.threshold} → ${change.threshold} signatures` },
+        ]
+    : [{ label: 'Change', content: 'Safe settings' }]
+  const transferItems = [
+    { label: 'Destination', content: proposal.recipient },
+    ...(proposal.amount ? [{ label: 'Value', content: proposal.amount }] : []),
+    ...(actions.length || proposal.recipient.includes('Batch')
+      ? [{ label: 'Actions', content: actions.length ? `${actions.length} actions` : 'Not supplied' }]
+      : []),
+  ]
   const raw = {
-    safe: getAccount(proposal).iconAddress,
+    safe: account.iconAddress,
     nonce: proposal.nonce,
     recipientSummary: proposal.recipient,
     amountSummary: proposal.amount,
@@ -146,21 +139,7 @@ export function ProposalTransactionDetails({ proposal }: { proposal: Proposal })
     <section className="space-y-3">
       <DrawerList
         mobileStack
-        items={[
-          { label: 'Type', content: type },
-          { label: isSettings ? 'New signer' : 'Destination', content: proposal.recipient },
-          ...(isSettings || proposal.amount
-            ? [
-                {
-                  label: isSettings ? 'Threshold' : 'Value',
-                  content: isSettings ? `${getAccount(proposal).threshold} signatures (unchanged)` : proposal.amount,
-                },
-              ]
-            : []),
-          ...(isBatch
-            ? [{ label: 'Actions', content: actions.length ? `${actions.length} actions` : 'Not supplied' }]
-            : []),
-        ]}
+        items={[{ label: 'Type', content: type }, ...(isSettingsChange(proposal) ? settingsItems : transferItems)]}
       />
       <Accordion defaultValue={[]}>
         {actions.length > 0 && (

@@ -1,5 +1,8 @@
 import {
   generateBatchActions,
+  getAmountLabel,
+  getTypeLabel,
+  getTransactionLabel,
   getRowAction,
   getStatusLabel,
   getAction,
@@ -80,5 +83,39 @@ describe('prototype queue state', () => {
       'Review',
       'Waiting on signatures',
     ])
+  })
+  it('labels transactions by type and counterparty instead of a free-text title', () => {
+    const heavy = (id: string) => getScenario('conflict-heavy').find((tx) => tx.id === id)!
+    const swap = getScenario('conflict').find((tx) => tx.id === 'treasury-42-swap')!
+    expect([getTransactionLabel(proposal('treasury-42')), getAmountLabel(proposal('treasury-42'))]).toEqual([
+      'Send to Bitwave Payroll',
+      '48.5 ETH',
+    ])
+    expect(getTransactionLabel(proposal('treasury-42'), true)).toBe('Sent to Bitwave Payroll')
+    expect([getTransactionLabel(proposal('payroll-17')), getAmountLabel(proposal('payroll-17'))]).toEqual([
+      'Batch · 14 actions',
+      '32,400 USDC',
+    ])
+    expect(getAmountLabel(heavy('treasury-42-batch'))).toBe('46 actions')
+    expect([getTransactionLabel(proposal('treasury-43')), getAmountLabel(proposal('treasury-43'))]).toEqual([
+      'Add signer Priya',
+      'New signer',
+    ])
+    expect(getTransactionLabel(heavy('treasury-42-threshold'))).toBe('Change threshold to 2')
+    expect([getTransactionLabel(swap), getAmountLabel(swap)]).toEqual(['Swap USDC → ETH', '200,000 USDC → ETH'])
+    expect(getTransactionLabel({ ...proposal('treasury-42'), kind: 'cancellation' })).toBe('On-chain rejection')
+    expect(getTransactionLabel({ ...proposal('payroll-18'), transferDirection: 'incoming' })).toBe('Receive from Deel')
+  })
+  it('never labels a settings change as a send', () => {
+    const generic = { ...proposal('treasury-43'), settingsChange: undefined }
+    expect(getTypeLabel(generic)).toBe('Update')
+    expect(getTransactionLabel(generic)).toBe('Settings change')
+    expect(getAmountLabel(generic)).toBe('Safe settings')
+    expect([getTypeLabel(proposal('treasury-43')), getAmountLabel(proposal('treasury-43'))]).toEqual([
+      'Update',
+      'New signer',
+    ])
+    const threshold = getScenario('conflict-heavy').find((tx) => tx.id === 'treasury-42-threshold')!
+    expect([getTypeLabel(threshold), getAmountLabel(threshold)]).toEqual(['Update', 'Threshold 3 → 2'])
   })
 })

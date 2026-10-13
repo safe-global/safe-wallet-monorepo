@@ -48,22 +48,17 @@ export function proposePreviewAlternative(
   id: string,
   persona: Persona,
   kind: 'cancellation' | 'replacement',
-  replacement?: { title: string; recipient: string; amount: string },
+  replacement?: { recipient: string; amount: string },
 ): { queue: PreviewQueue; proposal?: Proposal } {
   const original = queue.items.find((item) => item.id === id)
   if (!original || persona !== 'owner' || !getAccount(original).owners.includes('Dev')) return { queue }
-  if (
-    kind === 'replacement' &&
-    (!replacement?.title.trim() || !replacement.recipient.trim() || !replacement.amount.trim())
-  )
-    return { queue }
+  if (kind === 'replacement' && (!replacement?.recipient.trim() || !replacement.amount.trim())) return { queue }
   const proposal: Proposal = {
     id: `${original.account}-${original.nonce}-${kind}-${queue.nextProposalId}`,
     account: original.account,
     nonce: original.nonce,
     queueNextNonce: queue.nextNonces[original.account],
     kind,
-    title: kind === 'cancellation' ? `Cancel nonce #${original.nonce}` : replacement!.title.trim(),
     recipient: kind === 'cancellation' ? 'This Safe account' : replacement!.recipient.trim(),
     amount: kind === 'cancellation' ? '0 ETH' : replacement!.amount.trim(),
     age: 'Just now',

@@ -13,12 +13,12 @@ export type Account = {
   nextNonce: number
   threshold: number
 }
+export type SettingsChange = { kind: 'addOwner'; owner: string } | { kind: 'changeThreshold'; threshold: number }
 export type BatchAction = { method: string; to: string; value?: string }
 export type Proposal = {
   id: string
   account: string
   nonce: number
-  title: string
   recipient: string
   amount: string
   age: string
@@ -29,4 +29,5 @@ export type Proposal = {
   transferDirection?: 'incoming' | 'outgoing'
   note?: { text: string; author: string; date: string }
   actions?: BatchAction[]
+  settingsChange?: SettingsChange
 }

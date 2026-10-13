@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import {
   ArrowUpRight,
@@ -24,6 +24,7 @@ import {
   Layers,
   ShieldCheck,
   ShieldAlert,
+  type LucideIcon,
 } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -66,6 +67,7 @@ import Identicon from '@/components/common/Identicon'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Kbd } from '@safe-global/views/components/ui/kbd'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
@@ -79,6 +81,13 @@ import {
   getState,
   matchesFilter,
   clusterByNonce,
+  getSignatureCount,
+  getStatusTone,
+  TYPE_LABELS,
+  type TypeLabel,
+  getAmountLabel,
+  getTransactionLabel,
+  getTypeLabel,
   getRowAction,
   getStatusLabel,
 } from '../services/model'
@@ -108,13 +117,44 @@ const filters: { value: Filter; label: string }[] = [
   { value: 'waiting', label: 'Waiting on transactions' },
 ]
 
-function getTransactionPresentation(tx: Proposal, completed = false) {
-  if (tx.kind === 'cancellation') return { label: 'Cancellation', Icon: CircleX }
-  if (tx.amount === 'Safe settings') return { label: 'Settings', Icon: Settings }
-  if (tx.recipient.includes('CoW Swap')) return { label: completed ? 'Swapped' : 'Swap', Icon: Repeat2 }
-  if (tx.actions?.length) return { label: 'Batch', Icon: Layers }
-  if (tx.transferDirection === 'incoming') return { label: completed ? 'Received' : 'Receive', Icon: ArrowDownLeft }
-  return { label: completed ? 'Sent' : 'Send', Icon: ArrowUpRight }
+const TYPE_ICONS: Record<TypeLabel, LucideIcon> = {
+  Send: ArrowUpRight,
+  Receive: ArrowDownLeft,
+  Swap: Repeat2,
+  Batch: Layers,
+  Update: Settings,
+  'On-chain rejection': CircleX,
+}
+const HISTORY_HOVER: Partial<Record<TypeLabel, string>> = {
+  Send: 'group-hover/history:text-destructive group-focus-visible/history:text-destructive',
+  Receive: 'group-hover/history:text-success-strong group-focus-visible/history:text-success-strong',
+}
+
+function SafeIdentity({
+  address,
+  size,
+  className,
+  children,
+}: {
+  address: string
+  size: number
+  className: string
+  children: ReactNode
+}) {
+  const avatarRef = useRef<HTMLSpanElement>(null)
+  return (
+    <Tooltip delay={150}>
+      <TooltipTrigger render={<div className={className} />}>
+        <span ref={avatarRef} className="flex shrink-0">
+          <Identicon address={address} size={size} />
+        </span>
+        {children}
+      </TooltipTrigger>
+      <TooltipContent anchor={avatarRef} className="break-all font-mono">
+        {address}
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 function PanelSection({ value, title, children }: { value: string; title: string; children: ReactNode }) {
@@ -153,12 +193,13 @@ function PendingQueueView() {
   const [accountFilter, setAccountFilter] = useState<string[]>(accounts.map((account) => account.id))
   const networks = [...new Set(accounts.map((account) => account.network))]
   const [networkFilter, setNetworkFilter] = useState<string[]>(networks)
+  const [typeFilter, setTypeFilter] = useState<string[]>([...TYPE_LABELS])
   const [search, setSearch] = useState('')
   const [stateFilter, setStateFilter] = useState<Filter>('all')
   const [review, setReview] = useState<Proposal | null>(null)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
-  const [replacement, setReplacement] = useState<{ title: string; recipient: string; amount: string } | null>(null)
+  const [replacement, setReplacement] = useState<{ recipient: string; amount: string } | null>(null)
   const [reviewSections, setReviewSections] = useState<string[]>(['summary'])
   const [feedback, setFeedback] = useState('')
   const [copied, setCopied] = useState(false)
@@ -185,8 +226,9 @@ function PendingQueueView() {
   const visible = scoped.filter(
     (tx) =>
       networkFilter.includes(getAccount(tx).network) &&
+      typeFilter.includes(getTypeLabel(tx)) &&
       matchesFilter(tx, stateFilter, persona) &&
-      `${tx.title} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
+      `${getTransactionLabel(tx)} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
         .toLowerCase()
         .includes(search.toLowerCase()),
   )
@@ -221,7 +263,7 @@ function PendingQueueView() {
       setFeedback('Signature added in this preview. Execution may still need other signatures or earlier transactions.')
     } else {
       setReview(null)
-      setFeedback(`${review.title} executed in this preview. Next nonce is #${review.nonce + 1}.`)
+      setFeedback(`${getTransactionLabel(review)} executed in this preview. Next nonce is #${review.nonce + 1}.`)
     }
   }
   const proposeAlternative = (kind: 'cancellation' | 'replacement') => {
@@ -237,6 +279,8 @@ function PendingQueueView() {
 
   const resetFilters = () => {
     setAccountFilter(accounts.map((account) => account.id))
+    setNetworkFilter(networks)
+    setTypeFilter([...TYPE_LABELS])
     setSearch('')
     setStateFilter('all')
   }
@@ -307,23 +351,46 @@ function PendingQueueView() {
             }))
   ).map((section) => ({ ...section, items: clusterByNonce(section.items) }))
 
-  const showSafeColumns = groupBy !== 'safe'
   const columns = [
-    'Transactions',
-    ...(showSafeColumns ? ['Safe'] : []),
-    ...(showSafeColumns && isWide ? ['Network'] : []),
+    'Type',
+    ...(groupBy !== 'safe' ? ['Safe'] : []),
+    ...(groupBy !== 'safe' && isWide ? ['Network'] : []),
     'Signatures',
     ...(isWide ? ['Note'] : []),
     'Status',
     'Action',
   ]
   const columnCount = columns.length
+  const reviewOrder = sections
+    .filter((section) => !(groupBy !== 'none' && collapsedSections.includes(section.id)))
+    .flatMap((section) => section.items)
+  const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
+  const stepReview = (offset: number) => {
+    const next = reviewIndex >= 0 ? reviewOrder[reviewIndex + offset] : undefined
+    if (next) reviewTx(next)
+  }
+
+  useEffect(() => {
+    if (!review) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return
+      if ((event.target as HTMLElement | null)?.closest('input, textarea, select, [contenteditable="true"]')) return
+      if (event.key === 'j') stepReview(1)
+      if (event.key === 'k') stepReview(-1)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  })
+
+  useEffect(() => {
+    document.querySelector('tr[data-state="selected"]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [review?.id])
   const columnWidths: Record<string, string | undefined> = {
-    Safe: 'w-[15%]',
-    Network: 'w-[8%]',
+    Type: isWide ? 'w-56' : 'w-44',
+    Safe: isWide ? 'w-[18%]' : 'w-[22%]',
+    Network: 'w-16',
     Signatures: 'w-24',
     Note: 'w-16',
-    Status: isWide ? 'w-[30%]' : 'w-[26%]',
     Action: 'w-24',
   }
 
@@ -372,7 +439,7 @@ function PendingQueueView() {
     )
   }
 
-  const ReviewIcon = review ? getTransactionPresentation(review).Icon : ArrowUpRight
+  const ReviewIcon = TYPE_ICONS[review ? getTypeLabel(review) : 'Send']
   return (
     <div className="min-h-screen bg-secondary text-foreground">
       <PrototypeFrame>
@@ -464,7 +531,6 @@ function PendingQueueView() {
                 </Alert>
               )}
               <div className="mb-5 flex flex-wrap items-center gap-3">
-                <Button size="action">New transaction</Button>
                 <SearchInput
                   className="min-w-48 flex-1"
                   aria-label="Find a proposal"
@@ -506,6 +572,7 @@ function PendingQueueView() {
                     Filters
                     {(accountFilter.length !== accounts.length ||
                       networkFilter.length !== networks.length ||
+                      typeFilter.length !== TYPE_LABELS.length ||
                       stateFilter !== 'all') && (
                       <Badge variant="secondary" size="default" shape="pill">
                         Active
@@ -519,10 +586,7 @@ function PendingQueueView() {
                         variant="ghost"
                         size="xs"
                         onClick={() => {
-                          setAccountFilter(accounts.map((account) => account.id))
-                          setNetworkFilter(networks)
-                          setStateFilter('all')
-                          setSearch('')
+                          resetFilters()
                           setGroupBy('none')
                         }}
                       >
@@ -576,6 +640,27 @@ function PendingQueueView() {
                           </div>
                         </AccordionContent>
                       </AccordionItem>
+                      <AccordionItem value="types">
+                        <AccordionTrigger>Type</AccordionTrigger>
+                        <AccordionContent>
+                          <div className="space-y-3 pb-3">
+                            {TYPE_LABELS.map((type) => (
+                              <label key={type} className="flex items-center gap-3 text-sm">
+                                <Checkbox
+                                  aria-label={type}
+                                  checked={typeFilter.includes(type)}
+                                  onCheckedChange={(checked) =>
+                                    setTypeFilter(
+                                      checked ? [...typeFilter, type] : typeFilter.filter((value) => value !== type),
+                                    )
+                                  }
+                                />
+                                {type}
+                              </label>
+                            ))}
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
                       <AccordionItem value="status">
                         <AccordionTrigger>Status</AccordionTrigger>
                         <AccordionContent>
@@ -619,6 +704,9 @@ function PendingQueueView() {
                     </Accordion>
                   </PopoverContent>
                 </Popover>
+                <Button size="action" aria-label="New transaction">
+                  New
+                </Button>
               </div>
               {!visible.length && (
                 <Empty className="rounded-2xl border border-border bg-card">
@@ -670,16 +758,18 @@ function PendingQueueView() {
                           >
                             {safeAccount ? (
                               <>
-                                <Identicon address={safeAccount.iconAddress} size={32} />
-                                <span className="flex min-w-0 flex-col">
-                                  <span className="truncate">{section.label}</span>
-                                  <span className="truncate text-xs font-normal text-muted-foreground">
-                                    {safeAccount.network} ·{' '}
-                                    <span className="font-mono" title={safeAccount.iconAddress}>
-                                      {safeAccount.address}
+                                <SafeIdentity
+                                  address={safeAccount.iconAddress}
+                                  size={32}
+                                  className="flex min-w-0 items-center gap-3"
+                                >
+                                  <span className="flex min-w-0 flex-col">
+                                    <span className="truncate">{section.label}</span>
+                                    <span className="truncate text-xs font-normal text-muted-foreground">
+                                      {safeAccount.network} · <span className="font-mono">{safeAccount.address}</span>
                                     </span>
                                   </span>
-                                </span>
+                                </SafeIdentity>
                               </>
                             ) : (
                               <>
@@ -733,7 +823,7 @@ function PendingQueueView() {
                                 <Table
                                   aria-label={grouped ? `${section.label} transactions` : 'Pending transactions'}
                                   variant="panel"
-                                  className="table-fixed max-md:min-w-[760px]"
+                                  className="table-fixed max-md:min-w-[900px]"
                                 >
                                   <colgroup>
                                     {columns.map((label) => (
@@ -750,7 +840,8 @@ function PendingQueueView() {
                                         >
                                           {label === 'Action' ? (
                                             <span className="sr-only">{label}</span>
-                                          ) : !grouped && (label === 'Safe' || label === 'Status') ? (
+                                          ) : (label === 'Safe' && groupBy !== 'safe') ||
+                                            (label === 'Status' && !grouped) ? (
                                             <span className="flex items-center gap-1">
                                               {label}
                                               <Tooltip delay={150}>
@@ -789,23 +880,11 @@ function PendingQueueView() {
                                       const willBeReplaced =
                                         !!replaceHover && conflicts.some((other) => other.id === replaceHover)
                                       const account = getAccount(tx)
-                                      const { label: transactionType, Icon: TransactionIcon } =
-                                        getTransactionPresentation(tx)
-                                      const swapTarget =
-                                        transactionType === 'Swap' ? tx.recipient.split('→')[1]?.trim() : undefined
-                                      const amountOrOperation =
-                                        tx.amount === 'Safe settings'
-                                          ? 'Signer change'
-                                          : tx.actions?.length
-                                            ? [tx.amount, `${tx.actions.length} actions`].filter(Boolean).join(' · ')
-                                            : swapTarget
-                                              ? `${tx.amount} → ${swapTarget}`
-                                              : tx.amount
+                                      const transactionType = getTypeLabel(tx)
+                                      const TransactionIcon = TYPE_ICONS[transactionType]
                                       const status = getStatusLabel(tx, persona)
                                       const rowAction = getRowAction(tx, persona)
-                                      const signatureCount = tx.signers.filter((name) =>
-                                        account.owners.includes(name),
-                                      ).length
+                                      const signatureCount = getSignatureCount(tx)
                                       const transactionIcon = (
                                         <span
                                           className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground"
@@ -822,7 +901,7 @@ function PendingQueueView() {
                                       const noteButton = tx.note && (
                                         <Tooltip delay={150}>
                                           <TooltipTrigger
-                                            aria-label={`Note for ${tx.title}`}
+                                            aria-label={`Note for ${getTransactionLabel(tx)}`}
                                             className="flex shrink-0 items-center text-muted-foreground hover:text-foreground"
                                             onClick={(event) => {
                                               event.stopPropagation()
@@ -841,13 +920,21 @@ function PendingQueueView() {
                                           </TooltipContent>
                                         </Tooltip>
                                       )
-                                      const titleButton = (
+                                      const openButton = (
                                         <button
-                                          className={`block min-w-0 max-w-full truncate text-left text-sm font-medium focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+                                          className={`flex min-w-0 max-w-full items-center gap-3 text-left text-sm font-medium focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
                                           onClick={() => reviewTx(tx)}
-                                          aria-label={`Open ${tx.title}`}
+                                          aria-label={`Open ${getTransactionLabel(tx)}`}
                                         >
-                                          {tx.title}
+                                          {transactionIcon}
+                                          <span className="min-w-0">
+                                            <span className="block truncate">{getTypeLabel(tx)}</span>
+                                            {getAmountLabel(tx) && (
+                                              <span className="mt-0.5 block truncate text-xs font-normal tabular-nums text-muted-foreground">
+                                                {getAmountLabel(tx)}
+                                              </span>
+                                            )}
+                                          </span>
                                         </button>
                                       )
                                       return (
@@ -887,35 +974,35 @@ function PendingQueueView() {
                                           >
                                             <>
                                               <TableCell
-                                                className={`min-w-48 max-w-72 py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:min-w-40 max-md:max-w-44 max-md:border-l-card! max-md:bg-card ${groupSize > 1 ? 'shadow-[inset_2px_0_0_var(--warning-accent)]' : ''}`}
+                                                className={`py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card ${groupSize > 1 ? 'shadow-[inset_2px_0_0_var(--warning-accent)]' : ''}`}
                                               >
-                                                <div className="flex items-center">
-                                                  <span className="mr-3">{transactionIcon}</span>
-                                                  <div className="min-w-0 flex-1">
-                                                    <div className="flex min-w-0 items-center gap-1.5">
-                                                      {titleButton}
-                                                      {!isWide && noteButton}
-                                                    </div>
-                                                    <p className="mt-1 truncate text-xs tabular-nums text-muted-foreground">
-                                                      {amountOrOperation}
-                                                    </p>
-                                                  </div>
+                                                <div className="flex min-w-0 items-center gap-1.5">
+                                                  {openButton}
+                                                  {!isWide && noteButton}
                                                 </div>
                                               </TableCell>
-                                              {showSafeColumns && (
+                                              {groupBy !== 'safe' && (
                                                 <TableCell className="text-xs">
-                                                  <div className="flex items-center gap-2">
-                                                    <Identicon address={account.iconAddress} size={24} />
+                                                  <SafeIdentity
+                                                    address={account.iconAddress}
+                                                    size={24}
+                                                    className="flex min-w-0 items-center gap-2"
+                                                  >
                                                     <div className="min-w-0">
-                                                      <p>{account.name}</p>
+                                                      <p className="truncate">{account.name}</p>
                                                       {!isWide && (
-                                                        <p className="text-muted-foreground">{account.network}</p>
+                                                        <p className="truncate text-muted-foreground">
+                                                          {account.network}
+                                                        </p>
                                                       )}
+                                                      <p className="truncate font-mono text-muted-foreground">
+                                                        {account.address}
+                                                      </p>
                                                     </div>
-                                                  </div>
+                                                  </SafeIdentity>
                                                 </TableCell>
                                               )}
-                                              {showSafeColumns && isWide && (
+                                              {groupBy !== 'safe' && isWide && (
                                                 <TableCell>
                                                   <Tooltip delay={150}>
                                                     <TooltipTrigger
@@ -962,11 +1049,7 @@ function PendingQueueView() {
                                               <TableCell>
                                                 <div className="flex flex-wrap items-center gap-1.5">
                                                   <Badge
-                                                    variant={
-                                                      state.ready || (state.canSign && !state.waiting)
-                                                        ? 'success'
-                                                        : 'warning'
-                                                    }
+                                                    variant={getStatusTone(tx, persona)}
                                                     size="default"
                                                     shape="pill"
                                                   >
@@ -1002,7 +1085,7 @@ function PendingQueueView() {
                                                   size="2xs"
                                                   variant="outline"
                                                   className="w-18"
-                                                  aria-label={`${rowAction} ${tx.title}`}
+                                                  aria-label={`${rowAction} ${getTransactionLabel(tx)}`}
                                                   onMouseEnter={() => conflicts.length && setReplaceHover(tx.id)}
                                                   onMouseLeave={() => setReplaceHover(null)}
                                                   onFocus={() => conflicts.length && setReplaceHover(tx.id)}
@@ -1057,13 +1140,11 @@ function PendingQueueView() {
                   {queue.completed.length ? (
                     <ul className="mt-3 space-y-3">
                       {queue.completed.map((tx) => {
-                        const { label, Icon } = getTransactionPresentation(tx, true)
+                        const type = getTypeLabel(tx)
+                        const Icon = TYPE_ICONS[type]
                         const hoverColor =
-                          label === 'Sent'
-                            ? 'group-hover/history:text-destructive group-focus-visible/history:text-destructive'
-                            : label === 'Received'
-                              ? 'group-hover/history:text-success-strong group-focus-visible/history:text-success-strong'
-                              : 'group-hover/history:text-foreground group-focus-visible/history:text-foreground'
+                          HISTORY_HOVER[type] ??
+                          'group-hover/history:text-foreground group-focus-visible/history:text-foreground'
                         return (
                           <li
                             key={tx.id}
@@ -1074,12 +1155,12 @@ function PendingQueueView() {
                               <span
                                 className={`flex size-6 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground transition-colors ${hoverColor}`}
                                 role="img"
-                                aria-label={label}
+                                aria-label={type}
                               >
                                 <Icon className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
                               </span>
                               <span>
-                                {label} · {tx.title} · #{tx.nonce} · {getAccount(tx).name}
+                                {getTransactionLabel(tx, true)} · #{tx.nonce} · {getAccount(tx).name}
                               </span>
                             </span>
                             <Badge variant="success">Executed in preview</Badge>
@@ -1193,12 +1274,91 @@ function PendingQueueView() {
           </div>
         </div>
 
-        <Drawer resizable mobileFullScreen open={!!review} onClose={() => setReview(null)} ariaLabel={review?.title}>
-          <DrawerHeader className="pr-20 md:pr-30">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-              <ReviewIcon className="size-4" strokeWidth={ICON_STROKE} />
-            </span>
-            <DrawerTitle>{review?.title}</DrawerTitle>
+        <Drawer
+          resizable
+          mobileFullScreen
+          open={!!review}
+          onClose={() => setReview(null)}
+          ariaLabel={review ? getTransactionLabel(review) : undefined}
+        >
+          <DrawerHeader>
+            <div className="flex min-w-0 flex-1 flex-col gap-4">
+              <div className="flex h-9 items-center gap-2 md:pr-12">
+                <Tooltip delay={150}>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="surface"
+                        size="icon"
+                        aria-label="Previous transaction"
+                        disabled={reviewIndex <= 0}
+                        onClick={() => stepReview(-1)}
+                      />
+                    }
+                  >
+                    <ChevronUp />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Previous <Kbd>K</Kbd>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip delay={150}>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        variant="surface"
+                        size="icon"
+                        aria-label="Next transaction"
+                        disabled={reviewIndex < 0 || reviewIndex >= reviewOrder.length - 1}
+                        onClick={() => stepReview(1)}
+                      />
+                    }
+                  >
+                    <ChevronDown />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Next <Kbd>J</Kbd>
+                  </TooltipContent>
+                </Tooltip>
+                <span className="text-xs tabular-nums text-muted-foreground" aria-live="polite">
+                  {reviewIndex >= 0 && `${reviewIndex + 1} of ${reviewOrder.length}`}
+                </span>
+              </div>
+              {review && (
+                <div className="flex min-w-0 flex-col gap-3">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span
+                      className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground"
+                      aria-hidden="true"
+                    >
+                      <ReviewIcon className="size-4" strokeWidth={ICON_STROKE} />
+                    </span>
+                    <div className="min-w-0">
+                      <DrawerTitle size="lg">{getTransactionLabel(review)}</DrawerTitle>
+                      <p className="truncate text-xs tabular-nums text-muted-foreground">{getAmountLabel(review)}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Transaction summary">
+                    <span className="mr-1 flex items-center gap-1.5 text-xs">
+                      <Identicon address={getAccount(review).iconAddress} size={16} />
+                      {getAccount(review).name} · {getAccount(review).network}
+                    </span>
+                    <Badge variant={getStatusTone(review, persona)} size="default" shape="pill">
+                      {getStatusLabel(review, persona)}
+                    </Badge>
+                    <Badge variant="outline" size="default" shape="pill" className="tabular-nums">
+                      #{review.nonce}
+                    </Badge>
+                    <Badge variant="outline" size="default" shape="pill" className="tabular-nums">
+                      {getSignatureCount(review)}/{getAccount(review).threshold} signatures
+                    </Badge>
+                    <Badge variant="outline" size="default" shape="pill" className="text-muted-foreground">
+                      {review.age}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+            </div>
           </DrawerHeader>
           <DrawerBody>
             {review && (
@@ -1232,7 +1392,7 @@ function PendingQueueView() {
                                 className="mt-2 flex w-full items-center justify-between gap-2 text-left text-sm hover:underline"
                                 onClick={() => reviewTx(tx)}
                               >
-                                <span>{tx.title}</span>
+                                <span>{getTransactionLabel(tx)}</span>
                                 <Badge variant="secondary">
                                   {tx.signers.length}/{getAccount(tx).threshold}
                                 </Badge>
@@ -1260,7 +1420,7 @@ function PendingQueueView() {
                         className="flex w-full items-center justify-between gap-2 rounded-lg bg-muted p-3 text-left text-sm hover:underline"
                         onClick={() => reviewTx(tx)}
                       >
-                        <span>{tx.title}</span>
+                        <span>{getTransactionLabel(tx)}</span>
                         <Badge variant="secondary">{tx.amount}</Badge>
                       </button>
                     ))}
@@ -1276,9 +1436,7 @@ function PendingQueueView() {
                       variant="outline"
                       className="w-full"
                       disabled={persona !== 'owner' || !getAccount(review).owners.includes('Dev')}
-                      onClick={() =>
-                        setReplacement({ title: review.title, recipient: review.recipient, amount: review.amount })
-                      }
+                      onClick={() => setReplacement({ recipient: review.recipient, amount: review.amount })}
                     >
                       Replace with another transaction
                     </Button>
@@ -1295,11 +1453,9 @@ function PendingQueueView() {
                         <p className="text-sm">
                           Review the replacement summary. This prototype does not build a signable transaction.
                         </p>
-                        {(['title', 'recipient', 'amount'] as const).map((field) => (
+                        {(['recipient', 'amount'] as const).map((field) => (
                           <label key={field} className="block space-y-1 text-sm">
-                            <span>
-                              {field === 'title' ? 'Transaction title' : field === 'recipient' ? 'Recipient' : 'Amount'}
-                            </span>
+                            <span>{field === 'recipient' ? 'Recipient' : 'Amount'}</span>
                             <Input
                               value={replacement[field]}
                               onChange={(event) => setReplacement({ ...replacement, [field]: event.target.value })}
@@ -1307,9 +1463,7 @@ function PendingQueueView() {
                           </label>
                         ))}
                         <Button
-                          disabled={
-                            !replacement.title.trim() || !replacement.recipient.trim() || !replacement.amount.trim()
-                          }
+                          disabled={!replacement.recipient.trim() || !replacement.amount.trim()}
                           onClick={() => proposeAlternative('replacement')}
                         >
                           Propose replacement in preview
@@ -1333,8 +1487,7 @@ function PendingQueueView() {
                       <span className="flex items-center gap-2">
                         Audit log
                         <Badge variant="outline">
-                          {review.signers.filter((name) => getAccount(review).owners.includes(name)).length}/
-                          {getAccount(review).threshold}
+                          {getSignatureCount(review)}/{getAccount(review).threshold}
                         </Badge>
                       </span>
                     </AccordionTrigger>
@@ -1480,7 +1633,7 @@ function PendingQueueView() {
                       <ol className="mt-3 space-y-1.5">
                         {batch.proposals.map((tx) => (
                           <li key={tx.id} className="flex items-center justify-between gap-3 text-sm">
-                            <span className="truncate">{tx.title}</span>
+                            <span className="truncate">{getTransactionLabel(tx)}</span>
                             <span className="shrink-0 text-xs tabular-nums text-muted-foreground">#{tx.nonce}</span>
                           </li>
                         ))}

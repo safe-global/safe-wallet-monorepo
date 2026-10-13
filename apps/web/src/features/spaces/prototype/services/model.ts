@@ -50,7 +50,6 @@ const proposals: Proposal[] = [
     id: 'payroll-17',
     account: 'payroll',
     nonce: 17,
-    title: 'October payroll',
     recipient: '14 recipients · Batch transfer',
     amount: '32,400 USDC',
     actions: generateBatchActions(14, 'Employee'),
@@ -67,7 +66,6 @@ const proposals: Proposal[] = [
     id: 'treasury-42',
     account: 'treasury',
     nonce: 42,
-    title: 'Contractor payments',
     recipient: 'Bitwave Payroll · 0x1c9f…77aa',
     amount: '48.5 ETH',
     age: '3d ago',
@@ -83,9 +81,9 @@ const proposals: Proposal[] = [
     id: 'treasury-43',
     account: 'treasury',
     nonce: 43,
-    title: 'Add a signer',
     recipient: 'Priya · 0x3e1b…09cd',
     amount: 'Safe settings',
+    settingsChange: { kind: 'addOwner', owner: 'Priya' },
     age: '1d ago',
     signers: ['Ana', 'Max', 'Dev'],
     eligible: true,
@@ -95,7 +93,6 @@ const proposals: Proposal[] = [
     id: 'treasury-44',
     account: 'treasury',
     nonce: 44,
-    title: 'Q4 vendor payment',
     recipient: 'Lightbridge Ltd · 0x4f2a…c81e',
     amount: '125,000 USDC',
     age: '6h ago',
@@ -107,7 +104,6 @@ const proposals: Proposal[] = [
     id: 'payroll-18',
     account: 'payroll',
     nonce: 18,
-    title: 'Payroll services',
     recipient: 'Deel · 0x90ab…12ef',
     amount: '1,200 USDC',
     age: '1h ago',
@@ -118,8 +114,7 @@ const proposals: Proposal[] = [
     id: 'grants-8',
     account: 'grants',
     nonce: 8,
-    title: 'Wave 4 grant',
-    recipient: 'Milestone 2 · 0x55c1…e3f0',
+    recipient: 'Atlas Labs · 0x55c1…e3f0',
     amount: '25,000 ARB',
     age: '4d ago',
     signers: ['Jonas'],
@@ -165,7 +160,6 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
       id: 'treasury-42-swap',
       account: 'treasury',
       nonce: 42,
-      title: 'Rebalance treasury',
       recipient: 'CoW Swap · USDC → ETH',
       amount: '200,000 USDC',
       age: '2d ago',
@@ -185,7 +179,6 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
         id: 'treasury-42-batch',
         account: 'treasury',
         nonce: 42,
-        title: 'Supplier settlement',
         recipient: 'Transaction Builder · Batch',
         amount: '',
         age: '2d ago',
@@ -197,9 +190,9 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
         id: 'treasury-42-owner',
         account: 'treasury',
         nonce: 42,
-        title: 'Add Priya as signer',
-        recipient: 'Priya · 0x3e1b…09cd',
+        recipient: 'Marco · 0x7d2e…41ab',
         amount: 'Safe settings',
+        settingsChange: { kind: 'addOwner', owner: 'Marco' },
         age: '2d ago',
         signers: ['Ana', 'Jonas', 'Lena'],
         eligible: true,
@@ -208,9 +201,9 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
         id: 'treasury-42-threshold',
         account: 'treasury',
         nonce: 42,
-        title: 'Change threshold to 2',
         recipient: 'Treasury Main policy',
         amount: 'Safe settings',
+        settingsChange: { kind: 'changeThreshold', threshold: 2 },
         age: '1d ago',
         signers: ['Max', 'Jonas', 'Lena'],
         eligible: true,
@@ -270,4 +263,43 @@ export const getStatusLabel = (tx: Proposal, persona: Persona) => {
   if (state.waiting) return `Waiting on #${getAccount(tx).nextNonce}`
   if (state.canSign) return 'Ready to sign'
   return 'Waiting on signatures'
+}
+const counterparty = (tx: Proposal) => tx.recipient.split(' · ')[0]
+export const isSwap = (tx: Proposal) => tx.recipient.includes('CoW Swap')
+export const isSettingsChange = (tx: Proposal) => !!tx.settingsChange || tx.amount === 'Safe settings'
+export const TYPE_LABELS = ['Send', 'Receive', 'Swap', 'Batch', 'Update', 'On-chain rejection'] as const
+export type TypeLabel = (typeof TYPE_LABELS)[number]
+export const getTypeLabel = (tx: Proposal): TypeLabel => {
+  if (tx.kind === 'cancellation') return 'On-chain rejection'
+  if (isSettingsChange(tx)) return 'Update'
+  if (tx.actions?.length) return 'Batch'
+  if (isSwap(tx)) return 'Swap'
+  if (tx.transferDirection === 'incoming') return 'Receive'
+  return 'Send'
+}
+export const getTransactionLabel = (tx: Proposal, completed = false) => {
+  if (tx.kind === 'cancellation') return 'On-chain rejection'
+  if (tx.settingsChange?.kind === 'addOwner') return `${completed ? 'Added' : 'Add'} signer ${tx.settingsChange.owner}`
+  if (tx.settingsChange?.kind === 'changeThreshold')
+    return `${completed ? 'Changed' : 'Change'} threshold to ${tx.settingsChange.threshold}`
+  if (isSettingsChange(tx)) return completed ? 'Changed Safe settings' : 'Settings change'
+  if (tx.actions?.length) return `Batch · ${tx.actions.length} actions`
+  if (isSwap(tx)) return `${completed ? 'Swapped' : 'Swap'} ${tx.recipient.split(' · ')[1]}`
+  if (tx.transferDirection === 'incoming') return `${completed ? 'Received' : 'Receive'} from ${counterparty(tx)}`
+  return `${completed ? 'Sent' : 'Send'} to ${counterparty(tx)}`
+}
+export const getAmountLabel = (tx: Proposal) => {
+  if (tx.settingsChange?.kind === 'addOwner') return 'New signer'
+  if (tx.settingsChange?.kind === 'changeThreshold')
+    return `Threshold ${getAccount(tx).threshold} → ${tx.settingsChange.threshold}`
+  if (isSettingsChange(tx)) return 'Safe settings'
+  if (tx.actions?.length) return tx.amount || `${tx.actions.length} actions`
+  const swapTarget = isSwap(tx) ? tx.recipient.split('→')[1]?.trim() : undefined
+  return swapTarget ? `${tx.amount} → ${swapTarget}` : tx.amount
+}
+export const getSignatureCount = (tx: Proposal) =>
+  tx.signers.filter((name) => getAccount(tx).owners.includes(name)).length
+export const getStatusTone = (tx: Proposal, persona: Persona) => {
+  const state = getState(tx, persona)
+  return state.ready || (state.canSign && !state.waiting) ? 'success' : 'warning'
 }

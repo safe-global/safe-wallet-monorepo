@@ -50,18 +50,15 @@ describe('preview queue actions', () => {
     expect(proposePreviewAlternative(queue, 'grants-8', 'owner', 'cancellation').queue).toBe(queue)
     expect(
       proposePreviewAlternative(queue, 'treasury-42', 'owner', 'replacement', {
-        title: ' ',
-        recipient: 'Payee',
+        recipient: ' ',
         amount: '1 ETH',
       }).queue,
     ).toBe(queue)
     const result = proposePreviewAlternative(queue, 'treasury-42', 'owner', 'replacement', {
-      title: 'New payment ',
       recipient: ' Payee',
       amount: '1 ETH ',
     })
     expect(result.proposal).toMatchObject({
-      title: 'New payment',
       recipient: 'Payee',
       amount: '1 ETH',
       kind: 'replacement',
@@ -95,7 +92,6 @@ describe('preview queue actions', () => {
       id: `payroll-bulk-${index}`,
       account: 'payroll',
       nonce: 17 + index,
-      title: `Payment ${index}`,
       recipient: 'Vendor',
       amount: '1 USDC',
       age: '1h ago',
