@@ -130,6 +130,16 @@ describe('AssetsTable', () => {
       expect(screen.getByText('Balance')).toBeInTheDocument()
       expect(screen.getByText('Value')).toBeInTheDocument()
     })
+
+    it('shows the price with two decimals in the list', async () => {
+      const item = balanceBuilder().with({ fiatConversion: '2345.67' }).build()
+      renderAssetsTable({ balances: balancesBuilder().with({ items: [item] }).build() })
+
+      await waitFor(() => {
+        expect(screen.getByText('$ 2,345')).toBeInTheDocument()
+        expect(screen.getByText('.67')).toBeInTheDocument()
+      })
+    })
   })
 
   describe('breakpoint gap regression (WA-3437)', () => {
