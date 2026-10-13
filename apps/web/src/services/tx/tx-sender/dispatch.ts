@@ -61,6 +61,7 @@ export const dispatchTxProposal = async ({
   origin,
   scope,
   nestedTransaction,
+  spaceId,
 }: {
   chainId: string
   safeAddress: string
@@ -70,13 +71,15 @@ export const dispatchTxProposal = async ({
   scope?: TxSenderScope
   // Verified child tx of a nested approveHash, proposed alongside the parent tx
   nestedTransaction?: NestedTxEnvelope
+  // Workspace that alone sees the proposal
+  spaceId?: string
 }): Promise<TransactionDetails> => {
   const safeSDK = getAndValidateSafeSDK(scope)
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
   let proposedTx: TransactionDetails | undefined
   try {
-    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin, nestedTransaction)
+    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin, nestedTransaction, spaceId)
   } catch (error) {
     txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
     throw error

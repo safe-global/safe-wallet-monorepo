@@ -45,6 +45,7 @@ const proposeTx = async (
   safeTxHash: string,
   origin?: string,
   nestedTransaction?: NestedTxEnvelope,
+  spaceId?: string,
 ): Promise<TransactionDetails> => {
   const signatures = tx.signatures.size > 0 ? tx.encodedSignatures() : undefined
 
@@ -73,6 +74,7 @@ const proposeTx = async (
       chainId,
       safeAddress,
       proposeTransactionDto,
+      spaceId,
     }),
   )
 

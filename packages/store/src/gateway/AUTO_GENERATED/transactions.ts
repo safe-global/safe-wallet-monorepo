@@ -106,6 +106,7 @@ const injectedRtkApi = api
           params: {
             trusted: queryArg.trusted,
             cursor: queryArg.cursor,
+            spaceId: queryArg.spaceId,
           },
         }),
         providesTags: ['transactions'],
@@ -134,6 +135,9 @@ const injectedRtkApi = api
           url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.safeAddress}/propose`,
           method: 'POST',
           body: queryArg.proposeTransactionDto,
+          params: {
+            spaceId: queryArg.spaceId,
+          },
         }),
         invalidatesTags: ['transactions'],
       }),
@@ -258,6 +262,8 @@ export type TransactionsGetTransactionQueueV1ApiArg = {
   trusted?: boolean
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** Space UUID. Also returns the transactions only the Space can see. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
 }
 export type TransactionsGetTransactionsHistoryV1ApiResponse =
   /** status 200 Paginated list of historical transactions */ TransactionItemPage
@@ -284,6 +290,8 @@ export type TransactionsProposeTransactionV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Space UUID. Only the Space can then see the transaction. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
   /** Transaction proposal including recipient, value, data, and initial signature */
   proposeTransactionDto: ProposeTransactionDto
 }

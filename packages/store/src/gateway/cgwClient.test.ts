@@ -67,6 +67,43 @@ describe('dynamicBaseQuery', () => {
     expect(result).toEqual({ data: 'objectResult' })
   })
 
+  it('should, when a request outside the credential routes has a spaceId param, include credentials', async () => {
+    mockRawBaseQuery.mockResolvedValue({ data: 'queue' })
+    cgwClient.setBaseUrl('http://example.com')
+    const spaceId = faker.string.uuid()
+    const args: FetchArgs = { url: '/v1/chains/1/safes/0x1/transactions/queued', params: { spaceId } }
+
+    await cgwClient.dynamicBaseQuery(args, api, {})
+
+    expect(mockRawBaseQuery).toHaveBeenCalledWith(
+      {
+        url: 'http://example.com/v1/chains/1/safes/0x1/transactions/queued',
+        params: { spaceId },
+        credentials: 'include',
+      },
+      api,
+      {},
+    )
+  })
+
+  it('should, when a request outside the credential routes has no spaceId param, omit credentials', async () => {
+    mockRawBaseQuery.mockResolvedValue({ data: 'queue' })
+    cgwClient.setBaseUrl('http://example.com')
+    const args: FetchArgs = { url: '/v1/chains/1/safes/0x1/transactions/queued', params: { spaceId: undefined } }
+
+    await cgwClient.dynamicBaseQuery(args, api, {})
+
+    expect(mockRawBaseQuery).toHaveBeenCalledWith(
+      {
+        url: 'http://example.com/v1/chains/1/safes/0x1/transactions/queued',
+        params: { spaceId: undefined },
+        credentials: 'omit',
+      },
+      api,
+      {},
+    )
+  })
+
   describe('404 as an empty list', () => {
     const subscriptionsUrl = '/v1/billing/spaces/e5bfa406-7b05-48fd-9b7e-88a1efb20495/subscriptions'
     const notFound = { error: { status: 404, data: { message: 'Not Found' } }, meta: { request: {}, response: {} } }

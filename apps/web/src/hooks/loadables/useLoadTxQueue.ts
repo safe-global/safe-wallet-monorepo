@@ -6,10 +6,12 @@ import useEffectiveSafeParams from '../useEffectiveSafeParams'
 import { Errors, logError } from '@/services/exceptions'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { getTransactionQueue } from '@/services/transactions'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 
 const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
   const { safe, safeLoaded } = useSafeInfo()
   const { effectiveAddress, effectiveChainId } = useEffectiveSafeParams()
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
   const { txQueuedTag, txHistoryTag } = safe
   const [updatedTxId, setUpdatedTxId] = useState<string>('')
   // N.B. we reload when txQueuedTag/txHistoryTag/updatedTxId changes as txQueuedTag alone is not enough
@@ -22,13 +24,13 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
       // For undeployed safes, return empty once safe info confirms not deployed
       if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTransactionQueue(effectiveChainId, effectiveAddress).catch((e) => {
+      return getTransactionQueue(effectiveChainId, effectiveAddress, { spaceId: privateQueueSpaceId }).catch((e) => {
         logError(Errors._603, e)
         throw e
       })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [effectiveChainId, effectiveAddress, reloadTag, safeLoaded, safe.deployed],
+    [effectiveChainId, effectiveAddress, reloadTag, safeLoaded, safe.deployed, privateQueueSpaceId],
     false,
   )
 
