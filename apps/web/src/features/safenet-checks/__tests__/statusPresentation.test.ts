@@ -28,7 +28,7 @@ describe('resolvePresentation', () => {
   it('claims an absent check only for the reason that proves one', () => {
     // A heuristic window found nothing where it looked. Saying "no check was
     // requested" there would assert a fact the read cannot support.
-    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN).toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED)
+    expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN).not.toEqual(UNAVAILABLE_PRESENTATION.READ_FAILED)
     expect(UNAVAILABLE_PRESENTATION.WINDOW_UNCERTAIN.copy).not.toContain('No Safenet check was requested')
     expect(UNAVAILABLE_PRESENTATION.NO_CHECK.copy).toContain('No Safenet check was requested')
   })
@@ -45,11 +45,11 @@ describe('resolvePresentation', () => {
     expect(resolvePresentation(CheckStatus.UNAVAILABLE, undefined, false)).toBeUndefined()
   })
 
-  it.each(VERDICT_STATUSES)('renders %s with its severity and the section heading', (status) => {
+  it.each(VERDICT_STATUSES)('renders %s with its severity and state name as the heading', (status) => {
     expect(resolvePresentation(status, undefined, true)).toEqual({
       severity: STATUS_PRESENTATION[status].severity,
       copy: STATUS_PRESENTATION[status].copy,
-      label: 'Safenet check',
+      label: STATUS_PRESENTATION[status].label,
       muted: false,
     })
   })

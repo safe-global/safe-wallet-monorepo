@@ -1,4 +1,14 @@
 import type { ReactElement, ReactNode } from 'react'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
+
+const SEVERITY_BAR: Record<Severity, string> = {
+  [Severity.CRITICAL]: 'var(--color-error-main)',
+  [Severity.WARN]: 'var(--color-warning-main)',
+  [Severity.OK]: 'var(--color-success-main)',
+  [Severity.INFO]: 'var(--color-info-main)',
+  [Severity.ERROR]: 'var(--color-warning-main)',
+}
 
 /** Muted inset for the transaction-details Safenet card — same surface as Receipt / PaperViewToggle. */
 export const SafenetDetailsPanel = ({ children }: { children: ReactNode }): ReactElement => (
@@ -12,6 +22,22 @@ const detailsStackClass =
 export const SafenetDetailsPanelStack = ({ children }: { children: ReactNode }): ReactElement => (
   <div className={detailsStackClass}>{children}</div>
 )
+
+/** Gray block with a severity bar, styled like the blocks Copilot's checks expand into. */
+export const SafenetBlock = ({ severity, children }: { severity?: Severity; children: ReactNode }): ReactElement => {
+  const borderLeftColor = severity ? SEVERITY_BAR[severity] : 'var(--color-border-main)'
+  return (
+    <div className="overflow-hidden rounded-[4px] bg-[var(--color-background-main)]">
+      <div className="border-l-4 p-3" style={{ borderLeftColor }}>
+        <div className="flex flex-col gap-4">
+          <Typography variant="paragraph-small" className="break-words text-[var(--color-primary-light)]">
+            {children}
+          </Typography>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 /** Running check: a pulsing dot in the slot a severity icon takes once there's a result. */
 export const SafenetPulse = ({ size = 16 }: { size?: 12 | 16 }): ReactElement => (
