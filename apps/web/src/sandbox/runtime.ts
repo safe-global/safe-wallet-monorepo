@@ -1,5 +1,7 @@
 import 'ses'
-import { inbound, outbound, viewReactModules } from './membrane'
+import * as React from 'react'
+import * as jsxRuntime from 'react/jsx-runtime'
+import * as jsxDevRuntime from 'react/jsx-dev-runtime'
 import { ensureLockdown } from './lockdown'
 
 type ModuleExports = Record<string, unknown>
@@ -12,7 +14,11 @@ const viewConsole = Object.freeze({
   debug: (...args: unknown[]) => console.debug(...args),
 })
 
-let reactModules: Record<string, unknown> | undefined
+const reactModules: Record<string, unknown> = {
+  react: React,
+  'react/jsx-runtime': jsxRuntime,
+  'react/jsx-dev-runtime': jsxDevRuntime,
+}
 
 /**
  * Evaluates one view module (compiled to CommonJS by the view loader) in its own compartment.
@@ -21,7 +27,6 @@ let reactModules: Record<string, unknown> | undefined
  */
 export function runView(code: string, dependencies: Record<string, unknown>, file: string): ModuleExports {
   ensureLockdown()
-  reactModules ??= viewReactModules()
 
   const compartment = new Compartment({
     globals: { console: viewConsole, Date, Math, Intl },
@@ -32,10 +37,10 @@ export function runView(code: string, dependencies: Record<string, unknown>, fil
   )
 
   const require = (specifier: string) => {
-    if (specifier in reactModules!) return reactModules![specifier]
+    if (specifier in reactModules) return reactModules[specifier]
     if (!(specifier in dependencies))
       throw new Error(`View ${file} requires ${specifier}, which the loader did not provide`)
-    return inbound(dependencies[specifier])
+    return dependencies[specifier]
   }
-  return outbound(factory(inbound(require))) as ModuleExports
+  return factory(require) as ModuleExports
 }
