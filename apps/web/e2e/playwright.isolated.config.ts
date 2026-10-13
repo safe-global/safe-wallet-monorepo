@@ -8,6 +8,7 @@ if (process.env.SAFE_E2E_ISOLATED !== 'true' || !baseURL) {
 }
 
 const artifacts = './environment/artifacts/playwright'
+const auth0MockPort = process.env.AUTH0_MOCK_PORT || '8443'
 
 export default defineConfig({
   testDir: './tests',
@@ -33,6 +34,8 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    // The local HTTPS mocks (Auth0, CoW) share a self-signed certificate.
+    ignoreHTTPSErrors: true,
   },
   projects: [
     {
@@ -41,7 +44,12 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // The full Chromium build, which CI installs without the headless shell.
         channel: 'chromium',
-        launchOptions: { args: ['--host-resolver-rules=MAP *.safe-e2e.test 127.0.0.1'] },
+        launchOptions: {
+          // The gateway sends browsers to https://auth.safe-e2e.test (port 443); the mock is published on another port.
+          args: [
+            `--host-resolver-rules=MAP auth.safe-e2e.test 127.0.0.1:${auth0MockPort}, MAP *.safe-e2e.test 127.0.0.1`,
+          ],
+        },
       },
     },
   ],
