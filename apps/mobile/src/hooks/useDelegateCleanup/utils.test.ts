@@ -39,8 +39,8 @@ const queueServiceChain = () =>
 
 describe('useDelegateCleanup utils', () => {
   const mockOwnerAddress = '0x123456789abcdef' as Address
-  const mockDelegateAddress1 = faker.finance.ethereumAddress() as Address
-  const mockDelegateAddress2 = faker.finance.ethereumAddress() as Address
+  const mockDelegateAddress1 = '0xabcdef123456789' as Address
+  const mockDelegateAddress2 = '0xfedcba987654321' as Address
   const mockDelegateAddresses = [mockDelegateAddress1, mockDelegateAddress2]
   const mockChains: Chain[] = [
     {

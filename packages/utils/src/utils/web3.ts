@@ -2,32 +2,24 @@ import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messag
 import type { JsonRpcSigner } from 'ethers'
 import { TypedDataEncoder } from 'ethers'
 import type { TypedDataDomain } from 'ethers'
-import { hashTypedData as viemHashTypedData, isHex } from 'viem'
-import type { Hex } from 'viem'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
+import {
+  hashDelegateTypedData,
+  isQueueServiceDelegateTypedData,
+  normalizeDelegateTypedData,
+} from '@safe-global/utils/services/delegates'
 
-const toHex = (value: string | undefined): Hex | undefined => {
-  if (value === undefined || isHex(value)) return value
-  throw new Error(`Invalid hex value in the typed-data domain: ${value}`)
-}
-
-// viem hashes the domain by its declared `EIP712Domain`, so non-standard keys like the queue service delegate's `safe` work, unlike with ethers
 export const hashTypedData = (typedData: TypedData): string => {
-  const { chainId, salt, verifyingContract } = typedData.domain
-  return viemHashTypedData({
-    ...typedData,
-    domain: {
-      ...typedData.domain,
-      // Coerced like CGW does: viem leaves a string chainId out of a derived domain
-      chainId: chainId == null ? undefined : Number(chainId),
-      salt: toHex(salt),
-      verifyingContract: toHex(verifyingContract),
-    },
-  })
+  // ethers rejects the queue service delegate's non-standard `safe` domain key
+  if (isQueueServiceDelegateTypedData(typedData)) return hashDelegateTypedData(typedData)
+  // `ethers` doesn't require `EIP712Domain` and otherwise throws
+  const { EIP712Domain: _, ...types } = typedData.types
+  return TypedDataEncoder.hash(typedData.domain as TypedDataDomain, types, typedData.message)
 }
 
 export const normalizeTypedData = (typedData: TypedData): TypedData => {
+  if (isQueueServiceDelegateTypedData(typedData)) return normalizeDelegateTypedData(typedData)
   const { EIP712Domain: _, ...types } = typedData.types
   const payload = TypedDataEncoder.getPayload(typedData.domain as TypedDataDomain, types, typedData.message)
 

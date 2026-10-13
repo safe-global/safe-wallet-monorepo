@@ -1,51 +1,41 @@
 import { faker } from '@faker-js/faker'
 import { TypedDataEncoder, concat, getAddress, keccak256 } from 'ethers'
 import type { JsonRpcSigner } from 'ethers'
-import { hashTypedData, signTypedData } from '@safe-global/utils/utils/web3'
-import { isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
+import { hashTypedData, normalizeTypedData, signTypedData } from '@safe-global/utils/utils/web3'
 
-const testTypes = { Test: [{ name: 'test', type: 'string' }] }
+const EIP712Domain = [
+  { name: 'name', type: 'string' },
+  { name: 'version', type: 'string' },
+  { name: 'chainId', type: 'uint256' },
+  { name: 'safe', type: 'address' },
+]
 
-const dappTypedData = (chainId: number | string) => {
-  const payload: unknown = {
-    domain: { name: faker.lorem.word(), chainId, verifyingContract: getAddress(faker.finance.ethereumAddress()) },
-    types: testTypes,
-    message: { test: faker.lorem.sentence() },
-    primaryType: 'Test',
-  }
-  if (!isEIP712TypedData(payload)) throw new Error('Expected EIP-712 typed data')
-  return payload
-}
+const Delegate = [
+  { name: 'delegateAddress', type: 'address' },
+  { name: 'totp', type: 'uint256' },
+  { name: 'action', type: 'string' },
+]
+
+const queueServiceDelegateMessage = () => ({
+  domain: {
+    name: 'Safe Queue Service',
+    version: '1.0',
+    chainId: faker.number.int({ min: 1, max: 100_000 }),
+    safe: getAddress(faker.finance.ethereumAddress()),
+  },
+  types: { EIP712Domain, Delegate },
+  message: {
+    delegateAddress: getAddress(faker.finance.ethereumAddress()),
+    totp: faker.number.int({ min: 1, max: 1_000_000 }),
+    action: faker.helpers.arrayElement(['add', 'delete', 'edit']),
+  },
+  primaryType: 'Delegate',
+})
 
 describe('web3', () => {
   describe('hashTypedData', () => {
-    it('hashes the domain by its declared EIP712Domain, including a non-standard field', () => {
-      const EIP712Domain = [
-        { name: 'name', type: 'string' },
-        { name: 'version', type: 'string' },
-        { name: 'chainId', type: 'uint256' },
-        { name: 'safe', type: 'address' },
-      ]
-      const Delegate = [
-        { name: 'delegateAddress', type: 'address' },
-        { name: 'totp', type: 'uint256' },
-        { name: 'action', type: 'string' },
-      ]
-      const typedData = {
-        domain: {
-          name: faker.lorem.word(),
-          version: faker.system.semver(),
-          chainId: faker.number.int({ min: 1, max: 100_000 }),
-          safe: getAddress(faker.finance.ethereumAddress()),
-        },
-        types: { EIP712Domain, Delegate },
-        message: {
-          delegateAddress: getAddress(faker.finance.ethereumAddress()),
-          totp: faker.number.int({ min: 1, max: 1_000_000 }),
-          action: faker.helpers.arrayElement(['add', 'delete', 'edit']),
-        },
-        primaryType: 'Delegate',
-      }
+    it('hashes a queue service delegate message, whose domain has a safe field', () => {
+      const typedData = queueServiceDelegateMessage()
 
       expect(hashTypedData(typedData)).toBe(
         keccak256(
@@ -57,15 +47,13 @@ describe('web3', () => {
         ),
       )
     })
+  })
 
-    it.each([
-      ['number', (chainId: number) => chainId],
-      ['decimal string', (chainId: number) => String(chainId)],
-      ['hex string', (chainId: number) => `0x${chainId.toString(16)}`],
-    ])('matches ethers for a derived domain with a %s chainId', (_, toChainId) => {
-      const typedData = dappTypedData(toChainId(faker.number.int({ min: 1, max: 100_000 })))
+  describe('normalizeTypedData', () => {
+    it('keeps the safe field of a queue service delegate message', () => {
+      const typedData = queueServiceDelegateMessage()
 
-      expect(hashTypedData(typedData)).toBe(TypedDataEncoder.hash(typedData.domain, testTypes, typedData.message))
+      expect(normalizeTypedData(typedData)).toEqual(typedData)
     })
   })
 

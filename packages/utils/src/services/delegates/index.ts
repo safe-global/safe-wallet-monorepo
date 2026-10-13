@@ -1,8 +1,7 @@
-import { TypedDataEncoder, ZeroAddress } from 'ethers'
+import { TypedDataEncoder, ZeroAddress, concat, keccak256 } from 'ethers'
 import type { SigningKey } from 'ethers'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { hashTypedData } from '@safe-global/utils/utils/web3'
 
 const DELEGATE_DOMAIN_TYPES = [
   { name: 'name', type: 'string' },
@@ -79,9 +78,9 @@ type QueueServiceDelegateTypedData = ReturnType<typeof getQueueServiceDelegateTy
 export type DelegateTypedData =
   QueueServiceDelegateTypedData | ReturnType<typeof getTransactionServiceDelegateTypedData>
 
-export const isQueueServiceDelegateTypedData = (
-  typedData: DelegateTypedData,
-): typedData is QueueServiceDelegateTypedData => typedData.domain.name === QUEUE_SERVICE_DOMAIN_NAME
+export const isQueueServiceDelegateTypedData = (typedData: {
+  domain: { name?: string }
+}): typedData is QueueServiceDelegateTypedData => typedData.domain.name === QUEUE_SERVICE_DOMAIN_NAME
 
 /**
  * Generates the EIP-712 typed data for delegate registration, used by both web and mobile.
@@ -98,7 +97,23 @@ export const getDelegateTypedData = (
     : getTransactionServiceDelegateTypedData(chain.chainId, delegateAddress)
 }
 
-export const hashDelegateTypedData = (typedData: DelegateTypedData): string => hashTypedData(typedData)
+/**
+ * Computes the EIP-712 digest. The queue service digest is computed manually because its domain contains
+ * a non-standard `safe` field that ethers' high-level helpers reject.
+ */
+export const hashDelegateTypedData = (typedData: DelegateTypedData): string => {
+  if (!isQueueServiceDelegateTypedData(typedData)) {
+    return TypedDataEncoder.hash(typedData.domain, typedData.types, typedData.message)
+  }
+
+  const domainSeparator = TypedDataEncoder.hashStruct(
+    'EIP712Domain',
+    { EIP712Domain: DELEGATE_DOMAIN_TYPES },
+    typedData.domain,
+  )
+  const structHash = TypedDataEncoder.hashStruct('Delegate', DELEGATE_MESSAGE_TYPES, typedData.message)
+  return keccak256(concat(['0x1901', domainSeparator, structHash]))
+}
 
 // `Wallet.signTypedData` rejects the queue service's non-standard `safe` domain key, so the raw digest is signed instead.
 export const signDelegateTypedDataWithKey = (signingKey: SigningKey, typedData: DelegateTypedData): string =>
