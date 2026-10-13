@@ -124,7 +124,7 @@ const TxData = ({
     isSupportedSpendingLimitAddress(txInfo, chainId) &&
     isSpendingLimitMethod(txData?.dataDecoded?.method)
   ) {
-    return <SpendingLimits txData={txData} txInfo={txInfo} type={txData?.dataDecoded?.method as SpendingLimitMethods} />
+    return <SpendingLimits txData={txData} type={txData?.dataDecoded?.method as SpendingLimitMethods} />
   }
 
   if (txDetails && isMigrateToL2TxData(txData, chainId)) {

@@ -1,4 +1,4 @@
-import type { CustomTransactionInfo, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { ReactElement } from 'react'
 import React, { useMemo } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -17,7 +17,6 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
 type SpendingLimitsProps = {
   txData?: TransactionData | null
-  txInfo?: CustomTransactionInfo
   type: SpendingLimitMethods
   resetsSpent?: boolean
 }

@@ -23,8 +23,8 @@ export const SpendingLimitBatchSummary = ({ txData, batch }: SpendingLimitBatchS
       <SpendingLimits key={index} txData={{ ...txData, dataDecoded }} type={method} resetsSpent={resetsSpent} />
     ))}
 
-    {batch.removedSpenders.map((spender) => (
-      <div key={spender} className="flex flex-col gap-2">
+    {batch.removedSpenders.map((spender, index) => (
+      <div key={`${spender}-${index}`} className="flex flex-col gap-2">
         <Typography>
           <b>Remove spender:</b>
         </Typography>
