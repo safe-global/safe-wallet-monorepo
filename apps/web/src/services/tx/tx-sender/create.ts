@@ -121,9 +121,10 @@ export const createExistingTx = async (
   txId: string,
   txDetails?: TransactionDetails,
   scope?: TxSenderScope,
+  spaceId?: string,
 ): Promise<SafeTransaction> => {
   // Get the tx details from the backend if not provided
-  txDetails = txDetails || (await getTransactionDetails(chainId, txId))
+  txDetails = txDetails || (await getTransactionDetails(chainId, txId, spaceId))
 
   // Convert them to the Core SDK tx params
   const { txParams, signatures } = extractTxInfo(txDetails)

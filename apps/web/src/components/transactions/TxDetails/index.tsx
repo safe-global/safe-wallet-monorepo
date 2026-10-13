@@ -48,6 +48,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
 import { HypernativeFeature } from '@/features/hypernative'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -246,6 +247,7 @@ const TxDetails = ({
   contrastSurface?: boolean
 }): ReactElement => {
   const chainId = useChainId()
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
   const { safe } = useSafeInfo()
 
   const {
@@ -255,7 +257,7 @@ const TxDetails = ({
     refetch,
     isUninitialized,
   } = useTransactionsGetTransactionByIdV1Query(
-    { chainId: chainId || '', id: txSummary.id || '' },
+    { chainId: chainId || '', id: txSummary.id || '', spaceId: privateQueueSpaceId },
     {
       pollingInterval: isOpenSwapOrder(txSummary.txInfo) ? POLLING_INTERVAL : undefined,
       skipPollingIfUnfocused: true,

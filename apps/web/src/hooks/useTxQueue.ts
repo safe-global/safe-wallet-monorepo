@@ -13,6 +13,7 @@ import useSafeInfo from './useSafeInfo'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useRecoveryQueue } from '../features/recovery/hooks/useRecoveryQueue'
 import { getTransactionQueue } from '@/services/transactions'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 // The Redux queue belongs to the route's Safe, so a Space-level flow fetches its scoped Safe's first page instead.
@@ -45,12 +46,13 @@ const useTxQueue = (
 } => {
   const { safe, safeAddress, safeLoaded } = useSafeInfo()
   const { chainId } = safe
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
 
   // If pageUrl is passed, load a new queue page from the API
   const [page, error, loading] = useAsync<QueuedItemPage>(() => {
     if (!pageUrl || !safeLoaded) return
-    return getTransactionQueue(chainId, safeAddress, undefined, pageUrl)
-  }, [chainId, safeAddress, safeLoaded, pageUrl])
+    return getTransactionQueue(chainId, safeAddress, { spaceId: privateQueueSpaceId }, pageUrl)
+  }, [chainId, safeAddress, safeLoaded, pageUrl, privateQueueSpaceId])
 
   // The latest page of the queue is always in the store
   const queueState = useAppSelector(selectTxQueue)

@@ -32,6 +32,7 @@ import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonc
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 import { GTFFeature } from '@/features/gtf'
 import { mergeGtfFeeParams } from '@/features/gtf/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -85,6 +86,7 @@ export const useTxActions = (): TxActions => {
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const nestedChildTx = flowData?.nestedChildTx
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
 
   return useMemo<TxActions>(() => {
     // While a scoped Safe's SafeState is still loading, `safe` is `defaultSafeInfo` — the scope's own
@@ -115,6 +117,8 @@ export const useTxActions = (): TxActions => {
         origin,
         scope,
         nestedTransaction: nestedChildTx,
+        // A scoped flow acts on a Safe other than the open one, which the Workspace may not hold
+        spaceId: scope ? undefined : privateQueueSpaceId,
       })
     }
 
@@ -286,6 +290,7 @@ export const useTxActions = (): TxActions => {
     gtfSelectedGasToken,
     currency,
     nestedChildTx,
+    privateQueueSpaceId,
   ])
 }
 

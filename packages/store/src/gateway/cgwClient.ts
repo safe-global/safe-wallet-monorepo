@@ -118,7 +118,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
       ? (extraOptions as Record<string, unknown>).forceOmitCredentials
       : false
 
-  const shouldIncludeCredentials = !forceOmitCredentials && isCredentialRoute(urlEnd)
+  // A `spaceId` asks CGW for data only members of the Space may see, which needs the session
+  const hasSpaceIdParam = typeof args !== 'string' && args.params?.spaceId != null
+
+  const shouldIncludeCredentials = !forceOmitCredentials && (isCredentialRoute(urlEnd) || hasSpaceIdParam)
 
   const adjustedArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),

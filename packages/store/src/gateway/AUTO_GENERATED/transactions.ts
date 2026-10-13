@@ -10,7 +10,12 @@ const injectedRtkApi = api
         TransactionsGetTransactionByIdV1ApiResponse,
         TransactionsGetTransactionByIdV1ApiArg
       >({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}` }),
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}`,
+          params: {
+            spaceId: queryArg.spaceId,
+          },
+        }),
         providesTags: ['transactions'],
       }),
       transactionsGetMultisigTransactionsV1: build.query<
@@ -106,6 +111,7 @@ const injectedRtkApi = api
           params: {
             trusted: queryArg.trusted,
             cursor: queryArg.cursor,
+            spaceId: queryArg.spaceId,
           },
         }),
         providesTags: ['transactions'],
@@ -134,6 +140,9 @@ const injectedRtkApi = api
           url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.safeAddress}/propose`,
           method: 'POST',
           body: queryArg.proposeTransactionDto,
+          params: {
+            spaceId: queryArg.spaceId,
+          },
         }),
         invalidatesTags: ['transactions'],
       }),
@@ -157,6 +166,8 @@ export type TransactionsGetTransactionByIdV1ApiArg = {
   chainId: string
   /** Transaction ID (safe transaction hash or multisig transaction ID) */
   id: string
+  /** Space UUID. Also returns a multisig transaction only the Space can see, for a multisig transaction ID. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
 }
 export type TransactionsGetMultisigTransactionsV1ApiResponse =
   /** status 200 Paginated list of multisig transactions */ MultisigTransactionPage
@@ -258,6 +269,8 @@ export type TransactionsGetTransactionQueueV1ApiArg = {
   trusted?: boolean
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
+  /** Space UUID. Also returns the transactions only the Space can see. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
 }
 export type TransactionsGetTransactionsHistoryV1ApiResponse =
   /** status 200 Paginated list of historical transactions */ TransactionItemPage
@@ -284,6 +297,8 @@ export type TransactionsProposeTransactionV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+  /** Space UUID. Only the Space can then see the transaction. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
   /** Transaction proposal including recipient, value, data, and initial signature */
   proposeTransactionDto: ProposeTransactionDto
 }

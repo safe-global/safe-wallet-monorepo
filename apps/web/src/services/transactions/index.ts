@@ -37,7 +37,7 @@ export const getModuleTransactionId = async (chainId: string, safeAddress: strin
 export const getTransactionQueue = async (
   chainId: string,
   safeAddress: string,
-  options?: { trusted?: boolean; cursor?: string },
+  options?: { trusted?: boolean; cursor?: string; spaceId?: string },
   pageUrl?: string,
 ): Promise<QueuedItemPage> => {
   const store = getStoreInstance()
@@ -51,6 +51,7 @@ export const getTransactionQueue = async (
       safeAddress,
       trusted: options?.trusted,
       cursor,
+      spaceId: options?.spaceId,
     },
     {
       forceRefetch: true,

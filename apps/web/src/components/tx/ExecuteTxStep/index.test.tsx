@@ -98,7 +98,7 @@ describe('ExecuteTxStep', () => {
       expect(setSafeTx).toHaveBeenCalledWith(reloadedTx)
       expect(screen.getByTestId('execute-action')).toBeInTheDocument()
     })
-    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, undefined)
+    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, undefined, undefined)
     expect(screen.getByTestId('receipt')).toBeInTheDocument()
   })
 
@@ -203,11 +203,17 @@ describe('ExecuteTxStep', () => {
     renderStep({ afterSigning: true, scope })
 
     await screen.findByTestId('execute-action')
-    expect(mockCreateExistingTx).toHaveBeenCalledWith('1', txId, undefined, {
-      chainId: '1',
-      safeAddress: scope.safeAddress,
-      sdk,
-    })
+    expect(mockCreateExistingTx).toHaveBeenCalledWith(
+      '1',
+      txId,
+      undefined,
+      {
+        chainId: '1',
+        safeAddress: scope.safeAddress,
+        sdk,
+      },
+      undefined,
+    )
   })
 
   it('waits for the selected Safe SDK of a Workspace-level flow before reloading', () => {
