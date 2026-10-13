@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../components/SecuritySafesTable/SecuritySafesTable'
 import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 import type { ScanResult } from '@/features/security/types'
+import { AppRoutes } from '@/config/routes'
 // Helper: mirrors security.scanKey exactly (address.toLowerCase() + chainId). Inlined to
 // avoid a feature-handle mock setup in tests that don't exercise the security feature directly.
 const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:${chainId}`
@@ -10,8 +11,9 @@ const scanKey = (address: string, chainId: string) => `${address.toLowerCase()}:
 // ─── mocks ────────────────────────────────────────────────────────────────────
 
 jest.mock('next/link', () => {
-  const MockLink = ({ children, href, ...rest }: { children: ReactNode; href: string } & Record<string, unknown>) => (
-    <a href={typeof href === 'string' ? href : ''} {...rest}>
+  type Href = string | { pathname: string; query: Record<string, string> }
+  const MockLink = ({ children, href, ...rest }: { children: ReactNode; href: Href } & Record<string, unknown>) => (
+    <a href={typeof href === 'string' ? href : `${href.pathname}?${new URLSearchParams(href.query)}`} {...rest}>
       {children}
     </a>
   )
@@ -231,6 +233,59 @@ describe('SecuritySafesTable', () => {
     renderTable()
     expect(screen.getByText('Healthy')).toBeInTheDocument()
     expect(screen.queryByText(/0 issues found/i)).not.toBeInTheDocument()
+  })
+
+  describe('contract update available', () => {
+    const upgradeAvailable: Partial<ScanResult> = { ...mkResult(), upgradeAvailable: true }
+
+    it('shows an Update link to Settings → Setup next to the Healthy chip', () => {
+      renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      expect(screen.getByText('Healthy')).toBeInTheDocument()
+      const link = screen.getByRole('link', { name: 'Update contracts' })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
+      expect(link).toHaveAttribute('href', expect.stringContaining(encodeURIComponent(`eth:${singleSafe.address}`)))
+    })
+
+    it('does not open the side card when the Update link is clicked', () => {
+      const onViewReport = jest.fn()
+      renderTable({
+        onViewReport,
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      fireEvent.click(screen.getByRole('link', { name: 'Update contracts' }))
+      expect(onViewReport).not.toHaveBeenCalled()
+    })
+
+    it('shows no Update link when the contract version is current', () => {
+      renderTable()
+      expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()
+    })
+
+    it('links the multichain parent and only the affected network row', () => {
+      const scanResults = {
+        ...buildScanResults([{ address: multiSafe.address, chainId: '1' }]),
+        ...buildScanResults([{ address: multiSafe.address, chainId: '137' }], { contract_version: upgradeAvailable }),
+      }
+      renderTable({ safes: [multiSafe], scanResults })
+
+      const parentLink = screen.getByRole('link', { name: 'Update contracts' })
+      expect(parentLink).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(`matic:${multiSafe.address}`)),
+      )
+
+      fireEvent.click(screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!)
+      const links = screen.getAllByRole('link', { name: 'Update contracts' })
+      expect(links).toHaveLength(2)
+      const childRow = screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')!
+      expect(childRow).toContainElement(links[1])
+    })
   })
 
   describe('multichain safes', () => {

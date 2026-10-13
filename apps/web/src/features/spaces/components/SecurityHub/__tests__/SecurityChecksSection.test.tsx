@@ -208,6 +208,37 @@ describe('SecurityChecksSection', () => {
     })
   })
 
+  describe('contract update available', () => {
+    const upgradeResults: Record<string, ScanResult> = {
+      ...allClearResults,
+      contract_version: mkResult({
+        status: 'clear',
+        severity: 'Low',
+        upgradeAvailable: true,
+        evidence: [
+          { label: 'Current version', value: '1.3.0' },
+          { label: 'Latest version', value: '1.4.1' },
+        ],
+      }),
+    }
+
+    it('reads "New contract version available" with the current and latest versions', () => {
+      renderPanel({ results: upgradeResults })
+      expect(screen.queryByText('Contract version is outdated')).not.toBeInTheDocument()
+      fireEvent.click(screen.getByText('New contract version available'))
+      expect(screen.getByText('1.3.0')).toBeInTheDocument()
+      expect(screen.getByText('1.4.1')).toBeInTheDocument()
+    })
+
+    it('offers an Update CTA to Settings → Setup on the passing row', () => {
+      renderPanel({ results: upgradeResults })
+      fireEvent.click(screen.getByText('New contract version available'))
+      const link = screen.getByRole('link', { name: /update/i })
+      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
+      expect(link).toHaveAttribute('href', expect.stringContaining('safe='))
+    })
+  })
+
   describe('multichain row', () => {
     it('promotes a failing multichain check into the top "needs attention" area', () => {
       renderPanel({

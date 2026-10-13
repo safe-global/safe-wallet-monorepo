@@ -14,9 +14,9 @@ const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   ...overrides,
 })
 
-const SAFE_A = '0xA000000000000000000000000000000000000000'
-const SAFE_B = '0xB000000000000000000000000000000000000000'
-const SAFE_MC = '0xC000000000000000000000000000000000000000'
+const SAFE_A = '0xa000000000000000000000000000000000000000'
+const SAFE_B = '0xb000000000000000000000000000000000000000'
+const SAFE_MC = '0xc000000000000000000000000000000000000000'
 
 const single = (address: string, name: string): SpaceSafeEntry => ({
   address,
@@ -59,11 +59,22 @@ const mixedResults = {
   contract_version: mkResult({
     status: 'issue',
     severity: 'High',
-    evidence: [{ label: 'Current version', value: '1.3.0' }],
+    evidence: [{ label: 'Current version', value: '1.1.1' }],
   }),
   guard: mkResult({ status: 'partial', severity: 'Medium' }),
   fallback_handler: mkResult(),
   pending_tx: mkResult(),
+}
+
+const updateAvailable = {
+  ...allClear,
+  contract_version: mkResult({
+    upgradeAvailable: true,
+    evidence: [
+      { label: 'Current version', value: '1.3.0' },
+      { label: 'Latest version', value: '1.4.1' },
+    ],
+  }),
 }
 
 const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
@@ -135,5 +146,30 @@ export const Scanning: Story = {
     onViewReport: () => {},
     gradeFilter: null,
     balanceMap: {},
+  },
+}
+
+export const UpdateAvailable: Story = {
+  args: {
+    safes: [single(SAFE_A, 'Operations Vault'), multichain(SAFE_MC, 'Multichain Vault')],
+    scanResults: {
+      [`${SAFE_A}:1`]: updateAvailable,
+      [`${SAFE_MC}:1`]: allClear,
+      [`${SAFE_MC}:137`]: updateAvailable,
+    },
+    scanTimestamps: {
+      [`${SAFE_A}:1`]: Date.now() - 90_000,
+      [`${SAFE_MC}:1`]: Date.now() - 90_000,
+      [`${SAFE_MC}:137`]: Date.now() - 90_000,
+    },
+    scanningKeys: new Set(),
+    selectedSafe: null,
+    onViewReport: () => {},
+    gradeFilter: null,
+    balanceMap: {
+      [`${SAFE_A}:1`]: '1250000',
+      [`${SAFE_MC}:1`]: '850000',
+      [`${SAFE_MC}:137`]: '15300',
+    },
   },
 }

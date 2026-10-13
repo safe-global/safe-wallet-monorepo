@@ -17,7 +17,7 @@ import {
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
-import { buildSafeSecurityHref, type GetSafeSecurityHref } from './utils'
+import { buildSafeSecurityHref, buildSafeUpdateHref, type GetSafeSecurityHref } from './utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SecuritySafesTableProps = {
@@ -62,6 +62,11 @@ const SecuritySafesTable = ({
   // to the Workspace Security Hub rather than the Home tab. Clicking the row still opens the drawer.
   const getSafeSecurityHref = useCallback<GetSafeSecurityHref>(
     (address, chainId) => buildSafeSecurityHref(chainShortNames, address, chainId, spaceId),
+    [chainShortNames, spaceId],
+  )
+
+  const getSafeUpdateHref = useCallback<GetSafeSecurityHref>(
+    (address, chainId) => buildSafeUpdateHref(chainShortNames, address, chainId, spaceId),
     [chainShortNames, spaceId],
   )
 
@@ -184,6 +189,7 @@ const SecuritySafesTable = ({
                   balanceMap,
                   security,
                   getSafeSecurityHref,
+                  getSafeUpdateHref,
                 }
                 return isMultichain ? (
                   <MultichainSafeRow

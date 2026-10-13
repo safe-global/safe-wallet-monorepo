@@ -39,6 +39,7 @@ export const contractVersionScanner: SecurityScanner = {
       implementationAddress,
       version,
       latestVersion,
+      isNonCriticalUpdate,
       masterCopyDeployer,
       chainId,
       creationInfo,
@@ -77,39 +78,31 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
-    // Outdated — flag any Gnosis-deployed Safe whose version is strictly older than
-    // the chain's latest recommended version. Unlike `MastercopyWarning`'s update branch we do
-    // NOT short-circuit on `isNonCriticalUpdate` (`>= 1.3.0`): the Security Hub must
-    // surface this independently of the dashboard banner, and the comparison must be
-    // network-aware so that future bumps (e.g. 1.5.1) automatically downgrade older
-    // mastercopies on chains where a newer one is recommended. Semver build metadata
-    // (`+L2`, `+Circles`) is intentionally ignored by `<`, so 1.3.0+L2 is treated as
-    // 1.3.0 — outdated when latest is 1.4.1, current when latest is 1.3.0.
-    //
-    // When the version can't be compared (missing or invalid semver) we defer to the
-    // gateway's OUTDATED flag rather than silently marking the Safe as up to date.
+    // Outdated = a Gnosis-deployed Safe older than the chain's latest version. When the version
+    // can't be compared we defer to the gateway's OUTDATED flag rather than assume it is current.
     const versionComparison = compareVersionToLatest(version, latestVersion)
-    if (
-      implementationVersionState === 'OUTDATED' &&
-      masterCopyDeployer === 'Gnosis' &&
-      versionComparison !== 'not-older'
-    ) {
+    const isOutdated =
+      implementationVersionState === 'OUTDATED' && masterCopyDeployer === 'Gnosis' && versionComparison !== 'not-older'
+    const versionEvidence = [
+      { label: 'Current version', value: versionLabel },
+      { label: 'Latest version', value: latestVersion },
+    ]
+
+    // Below 1.3.0 an update is a risk; from 1.3.0 on it is an upgrade between supported versions.
+    if (isOutdated && !isNonCriticalUpdate) {
       const score = 30
       return {
         status: 'issue',
         severity: getSeverityFromScore(score),
         score,
-        evidence: [
-          { label: 'Current version', value: versionLabel },
-          { label: 'Latest version', value: latestVersion },
-        ],
+        evidence: versionEvidence,
         remediation:
           'A newer version is available. Update now to take advantage of new features and the highest security standards.',
         lastChecked: now,
       }
     }
 
-    // Version is current but implementation address is not a recognized Safe deployment
+    // Implementation address is not a recognized Safe deployment
     if (!isKnownImplementation(implementationAddress, chainId)) {
       const score = 30
       return {
@@ -124,6 +117,19 @@ export const contractVersionScanner: SecurityScanner = {
         remediation:
           'The implementation contract address does not match any known official Safe deployment. This could indicate a custom or unofficial build.',
         lastChecked: now,
+      }
+    }
+
+    if (isOutdated) {
+      const score = 100
+      return {
+        status: 'clear',
+        severity: getSeverityFromScore(score),
+        score,
+        evidence: versionEvidence,
+        remediation: '',
+        lastChecked: now,
+        upgradeAvailable: true,
       }
     }
 

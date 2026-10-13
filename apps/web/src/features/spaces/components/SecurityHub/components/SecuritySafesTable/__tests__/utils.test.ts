@@ -1,6 +1,13 @@
 import type { ScanResult, SecurityGrade } from '@/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-import { buildSafeSecurityHref, formatBalance, getAggregateNonPassingCount, getNonPassingCount } from '../utils'
+import {
+  buildSafeSecurityHref,
+  buildSafeUpdateHref,
+  formatBalance,
+  getAggregateNonPassingCount,
+  getNonPassingCount,
+  getUpgradeChainId,
+} from '../utils'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { AppRoutes } from '@/config/routes'
 
@@ -164,5 +171,50 @@ describe('buildSafeSecurityHref', () => {
   it('returns undefined when the chain has no known short name (renders as plain text)', () => {
     expect(buildSafeSecurityHref(chainShortNames, address, '999', null)).toBeUndefined()
     expect(buildSafeSecurityHref({}, address, '1', null)).toBeUndefined()
+  })
+})
+
+describe('getUpgradeChainId', () => {
+  const safe: SpaceSafeEntry = {
+    address: '0xABCDEF1234567890ABCDEF1234567890ABCDEF12',
+    chainId: '1',
+    name: 'Multi',
+    isMultichain: true,
+    chainEntries: [
+      { chainId: '1', isDeployed: true },
+      { chainId: '137', isDeployed: true },
+    ],
+  }
+  const upgradeable = { ...mkResult('clear'), upgradeAvailable: true }
+
+  it('returns the first network whose contract version has an update available', () => {
+    const scanResults = {
+      [scanKey(safe.address, '1')]: { contract_version: mkResult('clear') },
+      [scanKey(safe.address, '137')]: { contract_version: upgradeable },
+    }
+    expect(getUpgradeChainId(safe, scanResults, scanKey)).toBe('137')
+  })
+
+  it('returns undefined when no network needs an update', () => {
+    const scanResults = {
+      [scanKey(safe.address, '1')]: { contract_version: mkResult('clear') },
+    }
+    expect(getUpgradeChainId(safe, scanResults, scanKey)).toBeUndefined()
+  })
+})
+
+describe('buildSafeUpdateHref', () => {
+  const address = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12'
+
+  it("links to the Safe's Settings → Setup in the given Workspace", () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    expect(buildSafeUpdateHref({ '1': 'eth' }, address, '1', spaceId)).toEqual({
+      pathname: AppRoutes.settings.setup,
+      query: { safe: `eth:${address}`, spaceId },
+    })
+  })
+
+  it('returns undefined when the chain has no known short name', () => {
+    expect(buildSafeUpdateHref({}, address, '1', null)).toBeUndefined()
   })
 })

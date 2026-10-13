@@ -26,7 +26,9 @@ import {
   getAggregateSafeGrade,
   getAggregateSummary,
   getNonPassingCount,
+  getUpgradeChainId,
   hasMultichainWarning,
+  hasUpgradeAvailable,
   isAnyChainScanning,
   type GetSafeSecurityHref,
   type RowSecurity,
@@ -51,6 +53,7 @@ export type MultichainSafeRowProps = {
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
   getSafeSecurityHref: GetSafeSecurityHref
+  getSafeUpdateHref: GetSafeSecurityHref
 }
 
 type ChildRowProps = {
@@ -64,6 +67,7 @@ type ChildRowProps = {
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
   getSafeSecurityHref: GetSafeSecurityHref
+  getSafeUpdateHref: GetSafeSecurityHref
 }
 
 /** Per-chain row rendered under an expanded multichain parent. */
@@ -78,6 +82,7 @@ const MultichainChildRow = ({
   balanceMap,
   security,
   getSafeSecurityHref,
+  getSafeUpdateHref,
 }: ChildRowProps) => {
   const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, chain.chainId)
@@ -88,6 +93,7 @@ const MultichainChildRow = ({
   const isSelected = sameAddress(selectedSafe?.address, safe.address) && selectedSafe?.chainId === chain.chainId
   const isScanning = scanningKeys?.has(key)
   const childHref = getSafeSecurityHref(safe.address, chain.chainId)
+  const childUpdateHref = hasUpgradeAvailable(results) ? getSafeUpdateHref(safe.address, chain.chainId) : undefined
   const childName = safe.name || shortenAddress(safe.address)
 
   return (
@@ -128,7 +134,7 @@ const MultichainChildRow = ({
         <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
-        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />
+        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} updateHref={childUpdateHref} />
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {chain.isDeployed ? (
@@ -168,6 +174,7 @@ const MultichainSafeRow = ({
   balanceMap,
   security,
   getSafeSecurityHref,
+  getSafeUpdateHref,
 }: MultichainSafeRowProps) => {
   const { scanKey, getSafeGrade } = security
   const aggregateSummary = getAggregateSummary(safe, scanResults, security)
@@ -175,6 +182,8 @@ const MultichainSafeRow = ({
   const aggregateNonPassing = getAggregateNonPassingCount(safe, scanResults, scanKey)
   const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
   const showMultichainWarning = hasMultichainWarning(safe, scanResults, scanKey)
+  const upgradeChainId = getUpgradeChainId(safe, scanResults, scanKey)
+  const parentUpdateHref = upgradeChainId ? getSafeUpdateHref(safe.address, upgradeChainId) : undefined
   const totalBalance = safe.chainEntries.reduce(
     (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
     0,
@@ -254,7 +263,12 @@ const MultichainSafeRow = ({
           <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </div>
         <div className={CELL_BASE}>
-          <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
+          <StatusCell
+            grade={aggregateGrade}
+            count={aggregateNonPassing}
+            isScanning={aggregateScanning}
+            updateHref={parentUpdateHref}
+          />
         </div>
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>
@@ -273,6 +287,7 @@ const MultichainSafeRow = ({
             balanceMap={balanceMap}
             security={security}
             getSafeSecurityHref={getSafeSecurityHref}
+            getSafeUpdateHref={getSafeUpdateHref}
           />
         ))}
     </Fragment>

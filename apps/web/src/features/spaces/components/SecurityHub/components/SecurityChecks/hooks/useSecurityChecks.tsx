@@ -197,7 +197,11 @@ export const useSecurityChecks = (
     const versionResult = results['contract_version']
     if (versionResult) {
       const ok = isPassingStatus(versionResult.status)
-      const title = ok ? 'Contract version is up to date' : 'Contract version is outdated'
+      const title = versionResult.upgradeAvailable
+        ? 'New contract version available'
+        : ok
+          ? 'Contract version is up to date'
+          : 'Contract version is outdated'
       items.push({
         key: 'version',
         severity: versionResult.severity,

@@ -40,38 +40,58 @@ describe('contractVersionScanner', () => {
     expect(result.ctaLabelOverride).toBe('Migrate')
   })
 
-  it('returns issue for outdated Gnosis-deployed mastercopy (non-L2)', async () => {
+  it('returns issue for an outdated Gnosis-deployed mastercopy below 1.3.0', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({
         implementationVersionState: 'OUTDATED',
         isNonCriticalUpdate: false,
         masterCopyDeployer: 'Gnosis',
-        version: '1.3.0',
-        latestVersion: '1.4.1',
-      }),
-    )
-    expect(result.status).toBe('issue')
-    expect(result.severity).toBe('High')
-  })
-
-  it('returns issue for 1.3.0+L2 when chain latest is 1.4.1 (WA-2370)', async () => {
-    const result = await contractVersionScanner.scan(
-      createMockContext({
-        implementationVersionState: 'OUTDATED',
-        // gateway returns true for 1.3.0+L2 because `>= 1.3.0`; the scanner must
-        // ignore that flag and compare against the chain's latest version instead
-        isNonCriticalUpdate: true,
-        masterCopyDeployer: 'Gnosis',
-        version: '1.3.0+L2',
+        version: '1.1.1',
         latestVersion: '1.4.1',
       }),
     )
     expect(result.status).toBe('issue')
     expect(result.severity).toBe('High')
     expect(result.score).toBe(30)
+    expect(result.upgradeAvailable).toBeUndefined()
   })
 
-  it('returns issue for 1.4.1 when chain latest is 1.5.1 (future upgrade)', async () => {
+  it('returns clear with an available upgrade for an official 1.3.0 mastercopy when latest is 1.4.1', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.3.0',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.severity).toBe('Low')
+    expect(result.score).toBe(100)
+    expect(result.upgradeAvailable).toBe(true)
+    expect(result.evidence).toEqual([
+      { label: 'Current version', value: '1.3.0' },
+      { label: 'Latest version', value: '1.4.1' },
+    ])
+  })
+
+  it('returns clear with an available upgrade for 1.3.0+L2 when chain latest is 1.4.1', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.3.0+L2',
+        latestVersion: '1.4.1',
+      }),
+    )
+    expect(result.status).toBe('clear')
+    expect(result.score).toBe(100)
+    expect(result.upgradeAvailable).toBe(true)
+  })
+
+  it('returns clear with an available upgrade for 1.4.1 when chain latest is 1.5.1', async () => {
     const result = await contractVersionScanner.scan(
       createMockContext({
         implementationVersionState: 'OUTDATED',
@@ -81,8 +101,24 @@ describe('contractVersionScanner', () => {
         latestVersion: '1.5.1',
       }),
     )
+    expect(result.status).toBe('clear')
+    expect(result.upgradeAvailable).toBe(true)
+  })
+
+  it('still flags an outdated 1.3.0 mastercopy whose implementation address is unrecognized', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.3.0',
+        latestVersion: '1.4.1',
+        implementationAddress: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+      }),
+    )
     expect(result.status).toBe('issue')
-    expect(result.severity).toBe('High')
+    expect(result.score).toBe(30)
+    expect(result.upgradeAvailable).toBeUndefined()
   })
 
   it('returns clear for 1.4.1+L2 when chain latest is 1.4.1 (L2 metadata equals latest)', async () => {
@@ -138,6 +174,7 @@ describe('contractVersionScanner', () => {
       }),
     )
     expect(result.status).toBe('clear')
+    expect(result.upgradeAvailable).toBeUndefined()
   })
 
   it('returns clear for outdated non-Gnosis deployer', async () => {

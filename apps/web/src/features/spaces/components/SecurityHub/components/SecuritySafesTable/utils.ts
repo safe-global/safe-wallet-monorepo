@@ -37,6 +37,25 @@ export const buildSafeSecurityHref = (
   spaceId: string | null,
 ): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address, spaceId)
 
+/** Link target for the Status cell's Update link: that Safe's Settings → Setup, where the version upgrade lives. */
+export const buildSafeUpdateHref = (
+  chainShortNames: Record<string, string>,
+  address: string,
+  chainId: string,
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.setup, chainShortNames[chainId], address, spaceId)
+
+export const hasUpgradeAvailable = (results: Record<string, ScanResult> | undefined): boolean =>
+  !!results?.['contract_version']?.upgradeAvailable
+
+/** First network of a multichain Safe whose contract version can be updated, for the parent row's Update link. */
+export const getUpgradeChainId = (
+  safe: SpaceSafeEntry,
+  scanResults: Record<string, Record<string, ScanResult>>,
+  scanKey: SecurityContract['scanKey'],
+): string | undefined =>
+  safe.chainEntries.find((chain) => hasUpgradeAvailable(scanResults[scanKey(safe.address, chain.chainId)]))?.chainId
+
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same
  * count the panel header uses (`applicableCount − passing`), so the column and panel
