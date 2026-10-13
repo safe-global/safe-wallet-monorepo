@@ -214,30 +214,29 @@ const TxFlowProvider = <T extends unknown>({
   const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
-  // The in-app nested signer's signature only lands once the parent executes it
-  const isNestedSignerAwaitingSignatures = !!signer?.isSafe && (safeTx?.signatures.size ?? 0) < safe.threshold
+  const signerChainId = signer?.chainId
+  const signerAddress = signer?.address
+  const isSafeSigner = !!signer?.isSafe || !!signer?.isConnectedSafe
+  const [isSmartContractSigner = false] = useAsync(
+    () =>
+      signerChainId && signerAddress && !isSafeSigner ? isSmartContractWallet(signerChainId, signerAddress) : undefined,
+    [signerChainId, signerAddress, isSafeSigner],
+  )
+
+  // An on-chain signature only lands once it is indexed, so these signers execute only fully signed txs
+  const isOnChainSignerAwaitingSignatures =
+    (isSafeSigner || isSmartContractSigner) && (safeTx?.signatures.size ?? 0) < safe.threshold
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isNestedSignerAwaitingSignatures
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isOnChainSignerAwaitingSignatures
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
-  // Smart-contract signers cannot sign off-chain, so they keep the implicit executor approval path
-  const signerChainId = signer?.chainId
-  const signerAddress = signer?.address
-  const [isSmartContractSigner = false] = useAsync(
-    () =>
-      signerChainId && signerAddress && !signer?.isSafe
-        ? isSmartContractWallet(signerChainId, signerAddress)
-        : undefined,
-    [signerChainId, signerAddress, signer?.isSafe],
-  )
   const hasSigned = useAlreadySigned(safeTx)
   const signatureCompletesThreshold =
     !!safeTx && !hasSigned && isOneSignatureShort(safeTx.signatures.size, safe.threshold)
-  const canSignOffChain = !signer?.isSafe && !isSmartContractSigner
-  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold && canSignOffChain
+  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold
 
   const continueToExecute = useCallback(
     (txId: string) => {
