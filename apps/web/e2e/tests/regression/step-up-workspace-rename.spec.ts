@@ -10,16 +10,12 @@ import { test, expect } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import { createWorkspace, signInWithEmail, uniqueEmail, workspaceName } from '../../src/fixtures/email-session'
 import { Auth0Page } from '../../src/pages/auth0.page'
+import { completeStepUp, expectActionReplayed, launchScreen, toast } from '../../src/fixtures/step-up'
 
 const ORIGINAL_NAME = 'Step-up Workspace'
 const NEW_NAME = 'Renamed after step-up'
 
-// The return from Auth0 is a page load: the app boots again behind its launch screen.
-const launchScreen = (page: Page) => page.getByTestId('launch-screen')
 const nameInput = (page: Page) => page.getByTestId('space-name-input')
-
-// Next.js renders its route announcer with role="alert" too.
-const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
 
 async function rename(page: Page, name: string): Promise<void> {
   await page.getByTestId('space-name-input').fill(name)
@@ -41,15 +37,10 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
   })
 
   test('that the rename completes on the same page after the user enters the code', async ({ safePage }) => {
-    const auth0 = new Auth0Page(safePage)
-
     await rename(safePage, NEW_NAME)
-    await expect(auth0.stepUpHeading).toBeVisible()
-    await auth0.verify()
+    await completeStepUp(safePage)
 
-    await expect(safePage).toHaveURL(settingsUrl)
-    await expect(toast(safePage, 'Workspace updated')).toBeVisible()
-    await expect(launchScreen(safePage)).toBeHidden()
+    await expectActionReplayed(safePage, settingsUrl, 'Workspace updated')
     await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
   })
@@ -81,10 +72,9 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
   })
 
   test('that a second sensitive action right after a step-up needs no new code', async ({ safePage }) => {
-    const auth0 = new Auth0Page(safePage)
     await rename(safePage, NEW_NAME)
-    await auth0.verify()
-    await expect(launchScreen(safePage)).toBeHidden()
+    await completeStepUp(safePage)
+    await expectActionReplayed(safePage, settingsUrl, 'Workspace updated')
     await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
 
     await rename(safePage, 'Renamed again')

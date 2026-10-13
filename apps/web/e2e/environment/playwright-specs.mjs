@@ -35,6 +35,14 @@ export const playwrightSpecs = {
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
   'regression/spaces-members-table.spec.ts': {},
+  'regression/step-up-outside-workspace.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
+  },
+  'regression/step-up-workspace-actions.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+    safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
+  },
   'regression/step-up-workspace-rename.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
