@@ -35,7 +35,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
-import { isSmartContractWallet } from '@/utils/wallets'
+import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 
 export type TxFlowContextType<T extends unknown = any> = {
@@ -216,27 +216,26 @@ const TxFlowProvider = <T extends unknown>({
 
   const signerChainId = signer?.chainId
   const signerAddress = signer?.address
-  const isSafeSigner = !!signer?.isSafe || !!signer?.isConnectedSafe
+  const viaSafe = !!signer && isSafeSigner(signer)
   const [isSmartContractSigner = false] = useAsync(
     () =>
-      signerChainId && signerAddress && !isSafeSigner ? isSmartContractWallet(signerChainId, signerAddress) : undefined,
-    [signerChainId, signerAddress, isSafeSigner],
+      signerChainId && signerAddress && !viaSafe ? isSmartContractWallet(signerChainId, signerAddress) : undefined,
+    [signerChainId, signerAddress, viaSafe],
   )
+  const signatureCount = safeTx?.signatures.size ?? 0
 
-  // An on-chain signature only lands once it is indexed, so these signers execute only fully signed txs
-  const isOnChainSignerAwaitingSignatures =
-    (isSafeSigner || isSmartContractSigner) && (safeTx?.signatures.size ?? 0) < safe.threshold
+  // On-chain signatures only count once indexed, so these signers can only execute fully signed txs
+  const isAwaitingOnChainSignatures = (viaSafe || isSmartContractSigner) && signatureCount < safe.threshold
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isOnChainSignerAwaitingSignatures
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isAwaitingOnChainSignatures
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
   const hasSigned = useAlreadySigned(safeTx)
-  const signatureCompletesThreshold =
-    !!safeTx && !hasSigned && isOneSignatureShort(safeTx.signatures.size, safe.threshold)
-  const willSignBeforeExecute = canExecute && !isProposing && signatureCompletesThreshold
+  const willSignBeforeExecute =
+    canExecute && !isProposing && !hasSigned && isOneSignatureShort(signatureCount, safe.threshold)
 
   const continueToExecute = useCallback(
     (txId: string) => {
