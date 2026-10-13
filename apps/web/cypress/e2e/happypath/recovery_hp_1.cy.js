@@ -6,10 +6,13 @@ import * as tx from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as createtx from '../pages/create_tx.pages.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let recoverySafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Recovery happy path tests 1', () => {
   before(async () => {

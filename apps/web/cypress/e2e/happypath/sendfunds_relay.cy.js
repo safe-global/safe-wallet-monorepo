@@ -13,11 +13,9 @@ import { createSafes } from '../../support/api/utils_protocolkit'
 import { contracts, abi_qtrust, abi_nft_pc2 } from '../../support/api/contracts'
 import * as wallet from '../../support/utils/wallet.js'
 import * as fundSafes from '../../fixtures/safes/funds.json'
+import { walletCredentials } from '../../support/credentials.js'
 
 const transferAmount = '1'
-
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
 
 const tokenAmount2 = '0.00001'
 const netwrok = 'sepolia'
@@ -28,18 +26,21 @@ let apiKit, protocolKitOwner1_S3, protocolKitOwner2_S3, outgoingSafeAddress
 let safes = []
 let safesData = []
 
-const provider = new ethers.InfuraProvider(netwrok, Cypress.env('INFURA_API_KEY'))
-const privateKeys = [walletCredentials.OWNER_1_PRIVATE_KEY, walletCredentials.OWNER_2_PRIVATE_KEY]
-const walletAddress = [walletCredentials.OWNER_1_WALLET_ADDRESS]
-const signers = createSigners(privateKeys, provider)
-
 const contractAddress = contracts.token_qtrust
 const nftContractAddress = contracts.nft_pc2
-const tokenContract = new ethers.Contract(contractAddress, abi_qtrust, provider)
-const nftContract = new ethers.Contract(nftContractAddress, abi_nft_pc2, provider)
 
-const owner1Signer = signers[0]
-const owner2Signer = signers[1]
+let signer, provider, privateKeys, walletAddress, tokenContract, nftContract, owner1Signer, owner2Signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  privateKeys = [walletCredentials.OWNER_1_PRIVATE_KEY, walletCredentials.OWNER_2_PRIVATE_KEY]
+  walletAddress = [walletCredentials.OWNER_1_WALLET_ADDRESS]
+  cy.env(['INFURA_API_KEY']).then(({ INFURA_API_KEY }) => {
+    provider = new ethers.InfuraProvider(netwrok, INFURA_API_KEY)
+    ;[owner1Signer, owner2Signer] = createSigners(privateKeys, provider)
+    tokenContract = new ethers.Contract(contractAddress, abi_qtrust, provider)
+    nftContract = new ethers.Contract(nftContractAddress, abi_nft_pc2, provider)
+  })
+})
 
 function visit(url) {
   cy.visit(url)

@@ -11,7 +11,6 @@ import {
   missingChainCommands,
   planMatrix,
   readManifest,
-  runSpecsSeparately,
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
@@ -37,14 +36,21 @@ test('runs CI specs in the selected browser and retains artifacts between specs'
   )
 })
 
-test('records to Cypress Cloud only with a record key and a build id, one group per spec', () => {
-  const specs = ['cypress/e2e/regression/assets.cy.js']
+test('records to Cypress Cloud only with a record key and a build id, one group per shard', () => {
+  const specs = ['cypress/e2e/regression/assets.cy.js', 'cypress/e2e/regression/batch_tx.cy.js']
   const unrecorded = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key' })
   assert.equal(unrecorded[unrecorded.indexOf('--record') + 1], 'false')
   const args = cypressRunArguments(specs, { CYPRESS_RECORD_KEY: 'key', SAFE_E2E_RECORD_BUILD_ID: 'run-1' })
   assert.notEqual(args[args.indexOf('--record') + 1], 'false')
   assert.equal(args[args.indexOf('--ci-build-id') + 1], 'run-1')
-  assert.equal(args[args.indexOf('--group') + 1], 'isolated regression/assets')
+  assert.equal(args[args.indexOf('--group') + 1], 'isolated shard 1')
+  assert.equal(args[args.indexOf('--spec') + 1], specs.join(','))
+  const shard = cypressRunArguments(specs, {
+    CYPRESS_RECORD_KEY: 'key',
+    SAFE_E2E_RECORD_BUILD_ID: 'run-1',
+    SAFE_E2E_SHARD: '4',
+  })
+  assert.equal(shard[shard.indexOf('--group') + 1], 'isolated shard 4')
   assert.equal(args[args.indexOf('--tag') + 1], 'isolated')
 })
 
@@ -122,44 +128,6 @@ test('runs both backend gates and fails if cleanup fails', async () => {
     /cleanup failed/,
   )
   assert.deepEqual(calls, ['up', 'test', 'smoke', 'logs', 'reset'])
-})
-
-test('runs every spec in its own process and reports each failure after the last spec', async () => {
-  const calls = []
-  await assert.rejects(
-    runSpecsSeparately(
-      ['a.cy.js', 'b.cy.js', 'c.cy.js'],
-      async (spec) => {
-        calls.push(spec)
-        if (spec === 'b.cy.js') throw new Error('yarn failed (2)')
-      },
-      { report: () => {} },
-    ),
-    (error) => error.message === '1 of 3 specs failed:\nb.cy.js (yarn failed (2))',
-  )
-  assert.deepEqual(calls, ['a.cy.js', 'b.cy.js', 'c.cy.js'])
-})
-
-test('passes when every spec passes', async () => {
-  await runSpecsSeparately(['a.cy.js'], async () => {}, { report: () => {} })
-})
-
-test('starts no further spec after an interruption', async () => {
-  const calls = []
-  let interrupted = false
-  await assert.rejects(
-    runSpecsSeparately(
-      ['a.cy.js', 'b.cy.js'],
-      async (spec) => {
-        calls.push(spec)
-        interrupted = true
-        throw new Error('yarn failed (SIGTERM)')
-      },
-      { isInterrupted: () => interrupted, report: () => {} },
-    ),
-    /interrupted/,
-  )
-  assert.deepEqual(calls, ['a.cy.js'])
 })
 
 test('names the fork start command for every selected spec whose chain is not running', () => {

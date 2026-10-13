@@ -8,12 +8,15 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page'
 import { disconnectedUserErrorMsg } from '../pages/owners.pages'
 import rejectionTransactions from '../../fixtures/rejection-transactions.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_3_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer, signer2
+before(() => {
+  signer = walletCredentials.OWNER_3_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 const typeOnchainRejection = data.type.onchainRejection
 
