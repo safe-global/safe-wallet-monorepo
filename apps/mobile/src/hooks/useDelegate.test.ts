@@ -30,9 +30,7 @@ const queueServiceChain = () =>
     .with({ features: [...withoutQueueService(), FEATURES.QUEUE_SERVICE] })
     .build()
 
-// Mock ethers Wallet. Signing now goes through `signingKey.sign()` on the raw
-// EIP-712 digest, and `hashDelegateTypedData` (real impl) calls these ethers
-// helpers — stub them so the digest computation doesn't blow up under the mock.
+// Mock ethers Wallet. Signing goes through `signingKey.sign()` on the raw EIP-712 digest.
 jest.mock('ethers', () => {
   return {
     ...jest.requireActual('ethers'),
@@ -45,16 +43,15 @@ jest.mock('ethers', () => {
 
       static createRandom() {
         return {
-          address: '0xDelegateAddress123',
+          address: jest
+            .requireActual<typeof import('@faker-js/faker')>('@faker-js/faker')
+            .faker.finance.ethereumAddress(),
           privateKey: '0xDelegatePrivateKey123',
         }
       }
     },
     verifyMessage: () => 'mockedVerification',
     ZeroAddress: '0x0000000000000000000000000000000000000000',
-    TypedDataEncoder: { hashStruct: () => `0x${'00'.repeat(32)}`, hash: () => `0x${'00'.repeat(32)}` },
-    concat: () => '0x',
-    keccak256: () => `0x${'00'.repeat(32)}`,
   }
 })
 

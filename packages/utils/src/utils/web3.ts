@@ -2,13 +2,29 @@ import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messag
 import type { JsonRpcSigner } from 'ethers'
 import { TypedDataEncoder } from 'ethers'
 import type { TypedDataDomain } from 'ethers'
+import { hashTypedData as viemHashTypedData, isHex } from 'viem'
+import type { Hex } from 'viem'
 import { adjustVInSignature } from '@safe-global/protocol-kit'
 import { SigningMethod } from '@safe-global/types-kit'
 
+const toHex = (value: string | undefined): Hex | undefined => {
+  if (value === undefined || isHex(value)) return value
+  throw new Error(`Invalid hex value in the typed-data domain: ${value}`)
+}
+
+// viem hashes the domain by its declared `EIP712Domain`, so non-standard keys like the queue service delegate's `safe` work, unlike with ethers
 export const hashTypedData = (typedData: TypedData): string => {
-  // `ethers` doesn't require `EIP712Domain` and otherwise throws
-  const { EIP712Domain: _, ...types } = typedData.types
-  return TypedDataEncoder.hash(typedData.domain as TypedDataDomain, types, typedData.message)
+  const { chainId, salt, verifyingContract } = typedData.domain
+  return viemHashTypedData({
+    ...typedData,
+    domain: {
+      ...typedData.domain,
+      // Coerced like CGW does: viem leaves a string chainId out of a derived domain
+      chainId: chainId == null ? undefined : Number(chainId),
+      salt: toHex(salt),
+      verifyingContract: toHex(verifyingContract),
+    },
+  })
 }
 
 export const normalizeTypedData = (typedData: TypedData): TypedData => {
