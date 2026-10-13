@@ -10,7 +10,9 @@ import {
   cypressRunArguments,
   missingChainCommands,
   planMatrix,
+  playwrightRunArguments,
   readManifest,
+  stackEnvironment,
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
@@ -140,10 +142,31 @@ test('plans a GitHub Actions matrix with short spec names and the forks of each 
   }
   assert.deepEqual(planMatrix(undefined, 2, registry), {
     include: [
-      { shard: 1, specs: 'regression/a', chains: '' },
-      { shard: 2, specs: 'regression/b', chains: 'polygon' },
+      { shard: 1, runner: 'cypress', specs: 'regression/a', chains: '' },
+      { shard: 2, runner: 'cypress', specs: 'regression/b', chains: 'polygon' },
+      { shard: 3, runner: 'playwright', specs: '', chains: '' },
     ],
   })
+})
+
+test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () => {
+  const config = ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts']
+  assert.deepEqual(playwrightRunArguments({}), config)
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: '' }), config)
+  assert.deepEqual(playwrightRunArguments({ SAFE_E2E_SPECS: 'dashboard, owners' }), [...config, 'dashboard', 'owners'])
+})
+
+test('gives both runners the local service URLs and the running forks', () => {
+  const stack = { ...manifest, transactionServiceUrl: 'http://localhost:8000/txs', rpcUrl: 'http://localhost:8545' }
+  const chains = { 137: { rpcUrl: 'http://localhost:8548' } }
+  const env = stackEnvironment('safe-e2e-local', { ...stack, chains }, { PATH: '/bin' })
+  assert.equal(env.PATH, '/bin')
+  assert.equal(env.SAFE_E2E_ISOLATED, 'true')
+  assert.equal(env.SAFE_E2E_PROJECT, 'safe-e2e-local')
+  assert.equal(env.SAFE_TXS_BASE_URL, 'http://localhost:8000/txs')
+  assert.equal(env.SAFE_RPC_URL, 'http://localhost:8545')
+  assert.deepEqual(JSON.parse(env.SAFE_E2E_CHAINS), chains)
+  assert.equal(stackEnvironment('safe-e2e-local', stack, {}).SAFE_E2E_CHAINS, '{}')
 })
 
 test('explains a missing stack instead of failing on the manifest path', async () => {
