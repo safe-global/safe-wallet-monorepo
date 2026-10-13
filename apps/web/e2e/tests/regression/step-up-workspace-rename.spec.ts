@@ -14,6 +14,10 @@ import { Auth0Page } from '../../src/pages/auth0.page'
 const ORIGINAL_NAME = 'Step-up Workspace'
 const NEW_NAME = 'Renamed after step-up'
 
+// The return from Auth0 is a page load: the app boots again behind its launch screen.
+const launchScreen = (page: Page) => page.getByTestId('launch-screen')
+const nameInput = (page: Page) => page.getByTestId('space-name-input')
+
 // Next.js renders its route announcer with role="alert" too.
 const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
 
@@ -45,6 +49,8 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
 
     await expect(safePage).toHaveURL(settingsUrl)
     await expect(toast(safePage, 'Workspace updated')).toBeVisible()
+    await expect(launchScreen(safePage)).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
   })
 
@@ -61,6 +67,8 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
     await auth0.verify()
 
     await expect(safePage).toHaveURL(settingsUrl)
+    await expect(launchScreen(safePage)).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
     await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
   })
 
@@ -71,7 +79,8 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
     await auth0.cancelButton.click()
 
     await expect(safePage).toHaveURL(settingsUrl)
-    await expect(safePage.getByTestId('space-name-input')).toBeVisible()
+    await expect(launchScreen(safePage)).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
     await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
     expect(await workspaceName(safePage, workspaceId)).toBe(ORIGINAL_NAME)
   })
@@ -84,6 +93,8 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
 
     await expect(safePage).toHaveURL(settingsUrl)
     await expect(toast(safePage, 'Verification was not completed')).toBeVisible()
+    await expect(launchScreen(safePage)).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(ORIGINAL_NAME)
     expect(await workspaceName(safePage, workspaceId)).toBe(ORIGINAL_NAME)
   })
 
@@ -91,7 +102,8 @@ test.describe('Step-up for a Workspace rename', { tag: '@regression' }, () => {
     const auth0 = new Auth0Page(safePage)
     await rename(safePage, NEW_NAME)
     await auth0.verify()
-    await expect.poll(() => workspaceName(safePage, workspaceId)).toBe(NEW_NAME)
+    await expect(launchScreen(safePage)).toBeHidden()
+    await expect(nameInput(safePage)).toHaveValue(NEW_NAME)
 
     await rename(safePage, 'Renamed again')
 
