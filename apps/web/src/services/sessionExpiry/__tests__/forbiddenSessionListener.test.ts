@@ -202,6 +202,16 @@ describe('forbiddenSessionListener', () => {
     ],
     ['the route is not credentialed', { signedIn: true, options: { url: `${GATEWAY}/v1/chains/1/relay/0xabc` } }],
     ['the rejection comes from /v1/auth/me itself', { signedIn: true, options: { endpointName: 'authGetMeV1' } }],
+    [
+      'the Safenet check request is refused for a Safe without an eligible Workspace',
+      {
+        signedIn: true,
+        options: {
+          endpointName: 'safenetChecksRequestCheck',
+          url: `${GATEWAY}/v1/chains/1/safes/${faker.finance.ethereumAddress()}/safenet/checks`,
+        },
+      },
+    ],
     ['the action is not a CGW action', { signedIn: true, options: { type: 'gatewayApi/executeQuery/rejected' } }],
   ])('does not probe when %s', async (_, { signedIn, options }) => {
     const store = createTestStore()
