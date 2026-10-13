@@ -1,6 +1,17 @@
+import { faker } from '@faker-js/faker'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { CheckStatus, type PublicCheckStatus, type UnavailableReason } from '@safe-global/utils/features/safenet-checks'
-import { resolvePresentation, STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION } from '../statusPresentation'
+import {
+  CheckStatus,
+  SAFENET_EXPLORER_URL,
+  type PublicCheckStatus,
+  type UnavailableReason,
+} from '@safe-global/utils/features/safenet-checks'
+import {
+  getSafenetExplorerUrl,
+  resolvePresentation,
+  STATUS_PRESENTATION,
+  UNAVAILABLE_PRESENTATION,
+} from '../statusPresentation'
 
 const VERDICT_STATUSES = Object.keys(STATUS_PRESENTATION) as Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>[]
 const UNAVAILABLE_REASONS = Object.keys(UNAVAILABLE_PRESENTATION) as UnavailableReason[]
@@ -47,5 +58,19 @@ describe('resolvePresentation', () => {
     // A failed refetch drops the snapshot under a pinned verdict; the next
     // poll restores it, so the section stays out rather than showing a stub.
     expect(resolvePresentation(status, undefined, false)).toBeUndefined()
+  })
+})
+
+describe('getSafenetExplorerUrl', () => {
+  it("opens the explorer's check page for the Safe's chain and safeTxHash", () => {
+    const chainId = faker.string.numeric(3)
+    const safeTxHash = faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' })
+
+    const url = new URL(getSafenetExplorerUrl(chainId, safeTxHash))
+    const route = new URL(url.hash.slice(1), url.origin)
+
+    expect(`${url.origin}${url.pathname}`).toBe(`${SAFENET_EXPLORER_URL}/`)
+    expect(route.pathname).toBe('/safeTx')
+    expect(Object.fromEntries(route.searchParams)).toEqual({ chainId, safeTxHash })
   })
 })

@@ -10,10 +10,11 @@ import { Builder } from '@/tests/Builder'
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
+const mockUseGetSpaceAddressBook = jest.fn((): { address: string }[] => [])
 jest.mock('@/features/spaces', () => ({
   useCurrentSpaceId: () => '1',
   useIsAdmin: () => true,
-  useGetSpaceAddressBook: () => [],
+  useGetSpaceAddressBook: () => mockUseGetSpaceAddressBook(),
 }))
 const mockApprove = jest.fn()
 const mockReject = jest.fn()
@@ -79,6 +80,18 @@ const requestBuilder = () =>
 describe('PendingRequestsTable', () => {
   beforeEach(() => {
     mockUseIsMobile.mockReturnValue(false)
+    mockUseGetSpaceAddressBook.mockReturnValue([])
+  })
+
+  it('wraps the "Already in Workspace" badge below the name instead of squeezing it', () => {
+    const request = requestBuilder().build()
+    mockUseGetSpaceAddressBook.mockReturnValue([{ address: request.address.toUpperCase() }])
+
+    render(<PendingRequestsTable requests={[request]} />)
+
+    const badge = screen.getByText('Already in Workspace')
+    expect(badge.parentElement).toHaveClass('flex-wrap')
+    expect(badge.parentElement).toContainElement(screen.getByText(request.name))
   })
 
   it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {

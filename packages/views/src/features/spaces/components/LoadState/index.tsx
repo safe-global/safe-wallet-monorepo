@@ -3,13 +3,18 @@ import SafeLogoHalo from '@safe-global/views/components/common/SafeLogoHalo'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyContent, EmptyDescription, EmptyMedia } from '@safe-global/views/components/ui/empty'
 import { cn } from '@safe-global/views/utils/cn'
-import css from './PoliciesLoadState.module.css'
+import css from './LoadState.module.css'
 
-export const POLICIES_LOAD_ERROR = 'The website failed to load data. Please try again.'
+export const SPACE_LOAD_ERROR = 'The website failed to load data. Please try again.'
 
-/** Replaces the page body while CGW is answering, with only the heading left above it. */
-export const PoliciesLoading = (): ReactElement => (
-  <Empty data-testid="policies-loading" role="status" aria-busy aria-live="polite" aria-label="Loading policies">
+type LoadStateProps = {
+  /** What is loading, for the busy label. */
+  subject: string
+  testId: string
+}
+
+export const SpaceLoading = ({ subject, testId }: LoadStateProps): ReactElement => (
+  <Empty data-testid={testId} role="status" aria-busy aria-live="polite" aria-label={`Loading ${subject}`}>
     <EmptyMedia>
       <SafeLogoHalo />
     </EmptyMedia>
@@ -24,18 +29,14 @@ export const PoliciesLoading = (): ReactElement => (
   </Empty>
 )
 
-/**
- * CGW either returns every policy in the space or fails; there is no partial response. Showing the
- * rows that did arrive would tell the user that the missing Safes have no policies, when in fact
- * their state is unknown. So a failure replaces the page body rather than reducing the table.
- */
-export const PoliciesLoadError = ({ onReload }: { onReload?: () => void }): ReactElement => (
-  <Empty data-testid="policies-error" role="alert">
+/** A failure replaces the body: a partial table would read as "the rest do not exist". */
+export const SpaceLoadError = ({ onReload, testId }: { onReload?: () => void; testId: string }): ReactElement => (
+  <Empty data-testid={testId} role="alert">
     <EmptyMedia>
       <SafeLogoHalo />
     </EmptyMedia>
 
-    <EmptyDescription>{POLICIES_LOAD_ERROR}</EmptyDescription>
+    <EmptyDescription>{SPACE_LOAD_ERROR}</EmptyDescription>
 
     {onReload && (
       <EmptyContent>

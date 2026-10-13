@@ -6,14 +6,17 @@ import * as spendinglimit from '../pages/spending_limits.pages'
 import * as navigation from '../pages/navigation.page'
 import { getMockAddress } from '../../support/utils/ethers.js'
 import { selectToken } from '../pages/assets.pages.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00998
 const sendValue2 = 0.0001
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Mass payouts tests', () => {
   before(async () => {

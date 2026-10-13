@@ -17,6 +17,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import css from './styles.module.css'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useSafeLinkQuery, type SafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 type SafeAppCardProps = {
   safeApp: SafeAppData
@@ -38,8 +39,9 @@ const SafeAppCard = ({
   compact = false,
 }: SafeAppCardProps) => {
   const router = useRouter()
+  const safeLinkQuery = useSafeLinkQuery()
 
-  const safeAppUrl = getSafeAppUrl(router, safeApp.url)
+  const safeAppUrl = getSafeAppUrl(router, safeLinkQuery, safeApp.url)
 
   return (
     <SafeAppCardGridView
@@ -57,10 +59,10 @@ const SafeAppCard = ({
 
 export default SafeAppCard
 
-export const getSafeAppUrl = (router: NextRouter, safeAppUrl: string) => {
+export const getSafeAppUrl = (router: NextRouter, { safe, spaceId }: SafeLinkQuery, safeAppUrl: string) => {
   const shareUrlObj: UrlObject = {
     pathname: AppRoutes.apps.open,
-    query: withSpaceId({ safe: router.query.safe, appUrl: safeAppUrl }, router.query.spaceId),
+    query: withSpaceId({ safe, appUrl: safeAppUrl }, spaceId),
   }
 
   return resolveHref(router, shareUrlObj)

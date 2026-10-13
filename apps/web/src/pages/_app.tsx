@@ -96,6 +96,7 @@ import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/feat
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
@@ -113,7 +114,7 @@ setStoreInstance(reduxStore)
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
 // toasts on the login page before the user has signed in.
-const SafeScopedSubscriptions = (): null => {
+export const SafeScopedSubscriptions = (): null => {
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -226,4 +227,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
   )
 }
 
-export default SafeWalletApp
+// In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
+const DevClientOnlyApp = (props: AppProps): ReactElement => (
+  <RenderAfterMount>
+    <SafeWalletApp {...props} />
+  </RenderAfterMount>
+)
+
+export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp

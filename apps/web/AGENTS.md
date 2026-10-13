@@ -204,6 +204,13 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
    the primitive, don't wrap it.
 6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read
    [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
+7. **`next dev` and `next build` need `--webpack`** – Next 16 uses Turbopack by default, and
+   Turbopack ignores the `webpack()` config in `next.config.mjs` (SVGR, SRI, the dev page stub).
+   The `dev`, `dev:full`, `start` and `build` scripts pass the flag; keep it when adding a script.
+8. **The dev server renders every page as empty** – in `next dev`, `next.config.mjs` replaces
+   each page with `scripts/dev-server-page-stub.js` for the server compile, and `_app.tsx`
+   renders nothing until the client mounts (`RenderAfterMount`). Page code never runs on the
+   server in dev. Production builds and the static export do not use the stub.
 
 ## Code complexity
 

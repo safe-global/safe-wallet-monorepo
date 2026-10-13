@@ -151,16 +151,16 @@ export const Receipt = ({
                       </Typography>
                     </div>
                   ) : (
-                    <div className="flex w-full items-center justify-end gap-2">
+                    <>
+                      <NameChip txData={txData} txInfo={txInfo} />
+
                       <Typography
                         variant="paragraph-small"
-                        className="min-w-0 [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
+                        className="w-full text-right [&>*]:justify-end [&_*]:whitespace-normal [&_*]:break-words [&_*]:!items-start"
                       >
                         {toAddress}
                       </Typography>
-
-                      <NameChip txData={txData} txInfo={txInfo} />
-                    </div>
+                    </>
                   )}
                 </TxDetailsRow>
 

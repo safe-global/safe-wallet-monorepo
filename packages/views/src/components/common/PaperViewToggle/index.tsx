@@ -54,7 +54,7 @@ export const PaperViewToggle = ({ children, leftAlign, outlined, activeView = 0 
 
         <div className="flex flex-col" style={{ height: minHeight ? `${minHeight}px` : undefined }} ref={stackRef}>
           {children.map(({ content }, index) => (
-            <TabsContent key={index} value={String(index)}>
+            <TabsContent key={index} value={String(index)} className="flex min-h-0 flex-col">
               {content}
             </TabsContent>
           ))}

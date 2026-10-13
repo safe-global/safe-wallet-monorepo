@@ -129,13 +129,6 @@ export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
   }
 }
 
-// Each spec runs in its own Cypress process, and Cypress Cloud accepts one process per group in a build.
-function recordArguments(specs, env) {
-  if (!env.CYPRESS_RECORD_KEY || !env.SAFE_E2E_RECORD_BUILD_ID) return ['--record', 'false']
-  const group = `isolated ${specs.map(specName).join(',')}`
-  return ['--record', '--ci-build-id', env.SAFE_E2E_RECORD_BUILD_ID, '--group', group, '--tag', 'isolated']
-}
-
 const cypressConfig = (env, extra) =>
   JSON.stringify({
     baseUrl: env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`,
@@ -155,7 +148,8 @@ export function cypressRunArguments(specs, env = process.env) {
     cypressConfig(env, {}),
     '--spec',
     specs.join(','),
-    ...recordArguments(specs, env),
+    '--record',
+    'false',
     '--reporter',
     'junit',
     '--reporter-options',
@@ -171,21 +165,6 @@ export function cypressOpenArguments(specs, env = process.env) {
     '--config',
     cypressConfig(env, { specPattern: specs }),
   ]
-}
-
-// A fresh Cypress process per spec releases the browser memory that a long run keeps.
-export async function runSpecsSeparately(specs, runSpec, { isInterrupted = () => false, report = console.log } = {}) {
-  const failed = []
-  for (const [index, spec] of specs.entries()) {
-    if (isInterrupted()) throw new Error('Cypress run interrupted')
-    report(`[${index + 1}/${specs.length}] ${spec}`)
-    try {
-      await runSpec(spec)
-    } catch (error) {
-      failed.push(`${spec} (${error.message})`)
-    }
-  }
-  if (failed.length) throw new Error(`${failed.length} of ${specs.length} specs failed:\n${failed.join('\n')}`)
 }
 
 export async function checkEnvironment(run, diagnostics = () => {}) {
@@ -273,9 +252,8 @@ async function runCypress(config, runner, manifest, walletEnv) {
     return
   }
   await rm(resolve(webRoot, cypressArtifacts), { recursive: true, force: true })
-  await runSpecsSeparately(specs, (spec) => runner.execute('yarn', cypressRunArguments([spec], env), { env }), {
-    isInterrupted: runner.isInterrupted,
-  })
+  // One process for the whole shard: Cypress starts once, and browser memory management clears between specs.
+  await runner.execute('yarn', cypressRunArguments(specs, env), { env })
 }
 
 async function runWalletAction(config, runner) {

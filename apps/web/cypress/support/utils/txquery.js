@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { stagingCGWUrlv1 } from '../constants'
-function buildQueryUrl({ chainId, safeAddress, transactionType, ...params }) {
+export function buildQueryUrl({ chainId, safeAddress, transactionType, ...params }) {
   const baseUrlMap = {
     incoming: `${stagingCGWUrlv1}/chains/${chainId}/safes/${safeAddress}/incoming-transfers/`,
     multisig: `${stagingCGWUrlv1}/chains/${chainId}/safes/${safeAddress}/multisig-transactions/`,

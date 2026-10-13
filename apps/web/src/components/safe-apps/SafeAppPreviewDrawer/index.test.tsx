@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { SafeAppFeatures, SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
@@ -56,6 +57,8 @@ const safeAppMock: SafeAppData = {
 }
 
 describe('SafeAppPreviewDrawer', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
   it('renders the available networks section as a collapsed logo cluster', async () => {
     render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
@@ -98,6 +101,20 @@ describe('SafeAppPreviewDrawer', () => {
 
     const logos = await screen.findByTestId('network-logos-list')
     expect(logos).toHaveAttribute('data-networks', '1,10')
+  })
+
+  it('links to the app with the Safe of the location while the router query is still empty', async () => {
+    const safe = `sep:${faker.finance.ethereumAddress()}`
+    window.history.replaceState(null, '', `/apps?safe=${safe}`)
+
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />, {
+      routerProps: { query: {} },
+    })
+
+    const href = (await screen.findByTestId('open-safe-app-btn')).getAttribute('href') ?? ''
+    const query = new URLSearchParams(href.split('?')[1])
+    expect(query.get('safe')).toBe(safe)
+    expect(query.get('appUrl')).toBe(safeAppMock.url)
   })
 
   it('renders an empty cluster when none of the app chains are recognized', async () => {

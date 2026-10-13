@@ -8,12 +8,15 @@ import * as ls from '../../support/localstorage_data.js'
 import * as proposer from '../pages/proposers.pages.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
 import proposerData from '../../fixtures/proposers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+let signer, signer2, signerAddress
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signerAddress = walletCredentials.OWNER_4_WALLET_ADDRESS
+})
 const proposerNameAD = 'AD Proposer1'
 const proposerNameAD2 = 'AD Proposer2'
 const migratedProposerName = 'Name held by the Transaction Service'
@@ -24,6 +27,7 @@ describe('Proposers tests', () => {
   })
 
   beforeEach(() => {
+    proposer.disableProposerGating()
     wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
     cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
   })
@@ -119,5 +123,17 @@ describe('Proposers tests', () => {
       cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
       proposer.checkProposerData([proposerNameAD])
     })
+  })
+})
+
+describe('Proposers tests with the Safe Pro gate', () => {
+  before(async () => {
+    staticSafes = await getSafes(CATEGORIES.static)
+  })
+
+  it('Verify Safe Pro replaces the "Add proposer" button when no Workspace plan grants policies', () => {
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_31)
+    cy.contains(owner.safeAccountNonceStr, { timeout: 10000 })
+    proposer.verifyAddProposerIsLocked()
   })
 })
