@@ -427,29 +427,29 @@ const AddAccounts = ({
   return (
     <>
       {externalOpen === undefined && (
-        <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
-          <Button
-            size="lg"
-            className="font-normal"
-            variant={buttonVariant}
-            disabled={!isAdmin}
-            onClick={() => {
-              trackEvent(
-                { ...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED, label: spaceId },
-                { workspace_id: spaceId, entry_point: 'dashboard' },
-              )
-              setOpen(true)
-            }}
-            data-testid="add-space-account-button"
-          >
-            <Plus
-              className={cn('size-4', {
-                'text-green-500': buttonVariant === 'default',
-              })}
-            />
-            {buttonLabel}
-          </Button>
-        </AdminOnlyWorkspaceTooltip>
+        <Track
+          {...SPACE_EVENTS.WORKSPACE_SAFE_LINK_STARTED}
+          label={spaceId}
+          mixpanelParams={{ workspace_id: spaceId, entry_point: 'dashboard' }}
+        >
+          <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="bottom">
+            <Button
+              size="lg"
+              className="font-normal"
+              variant={buttonVariant}
+              disabled={!isAdmin}
+              onClick={() => setOpen(true)}
+              data-testid="add-space-account-button"
+            >
+              <Plus
+                className={cn('size-4', {
+                  'text-green-500': buttonVariant === 'default',
+                })}
+              />
+              {buttonLabel}
+            </Button>
+          </AdminOnlyWorkspaceTooltip>
+        </Track>
       )}
 
       <Dialog open={isOpen} onOpenChange={(next) => !next && handleClose()}>

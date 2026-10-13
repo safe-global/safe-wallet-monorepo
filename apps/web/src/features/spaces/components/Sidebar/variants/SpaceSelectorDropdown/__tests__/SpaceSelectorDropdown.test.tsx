@@ -341,7 +341,7 @@ describe('SpaceSelectorDropdown', () => {
     fireEvent.click(trigger)
     fireEvent.click(screen.getByText('View all'))
 
-    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }))
+    expect(trackEvent).toHaveBeenCalledWith(expect.objectContaining({ label: 'space_selector' }), undefined)
     expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.spaces)
   })
 

@@ -27,7 +27,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@safe-global/views/utils/cn'
 import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
@@ -242,17 +242,17 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
           <div className="flex flex-col items-center gap-4">
             <div className="h-12">
-              <AddSpaceButton
-                label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
-                icon="arrow"
-                disabled={isAtLimit}
-                link
-                onClick={() =>
-                  trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
-                    entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,
-                  })
-                }
-              />
+              <Track
+                {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE }}
+              >
+                <AddSpaceButton
+                  label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
+                  icon="arrow"
+                  disabled={isAtLimit}
+                  link
+                />
+              </Track>
             </div>
 
             <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
@@ -309,9 +309,6 @@ const SpacesList = () => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
 
-  const onAddSpaceBtnClick = () =>
-    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-
   const pendingInviteBanners =
     isUserSignedIn && pendingInvites.length > 0
       ? pendingInvites.map((invitingSpace: GetSpaceResponse) => (
@@ -348,13 +345,12 @@ const SpacesList = () => {
             {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             <WelcomeContentCard className="flex flex-col gap-4">
               <div className="flex justify-end">
-                <AddSpaceButton
-                  size="default"
-                  variant="outline"
-                  label="Create"
-                  disabled={isAtSpacesLimit}
-                  onClick={onAddSpaceBtnClick}
-                />
+                <Track
+                  {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                  mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.WELCOME }}
+                >
+                  <AddSpaceButton size="default" variant="outline" label="Create" disabled={isAtSpacesLimit} />
+                </Track>
               </div>
 
               {pendingInviteBanners}
