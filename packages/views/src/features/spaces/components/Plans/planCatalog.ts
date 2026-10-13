@@ -10,49 +10,6 @@ type PlanName = (typeof PLAN_ORDER)[number]
 /** The Plans page anchor the plan catalog links to. */
 export const COMPARE_FEATURES_ID = 'compare-features'
 
-const SPONSORED_TXS: Record<PlanName, string> = { Starter: '10', Business: '50', Enterprise: 'Unlimited' }
-
-type PlanContent = {
-  /** Who the plan is for, one line under its name. */
-  description: string
-  /** What the card lists, per the Plans tab feature list. */
-  features: string[]
-  support: { level: string; detail: string }
-}
-
-const EVERY_PLAN = [
-  'Shared address book',
-  'Activity log',
-  'Advanced threat analysis',
-  'Transaction simulation',
-  'Workspace 2FA',
-]
-
-/** Replaces the Stripe selling points on the plan cards. */
-export const PLAN_CONTENT: Partial<Record<string, PlanContent>> = {
-  Starter: {
-    description: 'Coordinate your team with a shared home for your Safes and transactions.',
-    features: [`${SPONSORED_TXS.Starter} sponsored transactions per month`, ...EVERY_PLAN],
-    support: { level: 'Standard', detail: 'In-app and email' },
-  },
-  Business: {
-    description: 'Scale with control. Delegate daily operations with hands-on help.',
-    features: [`${SPONSORED_TXS.Business} sponsored transactions per month`, ...EVERY_PLAN, 'Policies'],
-    support: { level: 'Priority', detail: '+ Guided onboarding' },
-  },
-  Enterprise: {
-    description: 'Tailored to your organization, with custom capacity and commercial terms.',
-    features: [
-      `${SPONSORED_TXS.Enterprise} sponsored transactions`,
-      ...EVERY_PLAN,
-      'Policies',
-      'Custom Safe capacity',
-      'Tailored contract & billing terms',
-    ],
-    support: { level: 'Tailored', detail: '+ Customized onboarding' },
-  },
-}
-
 /** `true` is included, `false` is not; a string names what the plan gets. */
 export type CompareValue = boolean | string
 
@@ -98,7 +55,7 @@ export const COMPARE_SECTIONS: CompareSection[] = [
       { feature: 'Safe accounts', values: { Starter: '2', Business: '5, 10 or 20', Enterprise: 'More than 20' } },
       {
         feature: 'Eligible sponsored transactions per month',
-        values: SPONSORED_TXS,
+        values: { Starter: '10', Business: '50', Enterprise: 'Unlimited' },
       },
       { feature: 'Sponsoring limit per transaction', values: { Starter: '€5', Business: '€5', Enterprise: '€10' } },
     ],
@@ -151,6 +108,11 @@ export const ENTERPRISE_TIER: PlanTier = {
   currency: 'eur',
   billingCycle: null,
   options: [{ paymentLinkId: null, priceId: null, label: '20+ Safe accounts', price: null, originalPrice: null }],
+  copy: {
+    subtitle: 'Tailored to your organization, with custom capacity and commercial terms.',
+    supportLevel: 'Tailored',
+    supportDetail: '+ Customized onboarding',
+  },
   features: [
     'Unlimited sponsored transactions',
     'Shared address book',

@@ -17,11 +17,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
-import {
-  COMPARE_FEATURES_ID,
-  PLAN_CONTENT,
-  RECOMMENDED_PLAN,
-} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { COMPARE_FEATURES_ID, RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanCta as PlanCtaKindOf,
@@ -217,7 +213,7 @@ export const PlanCard = ({
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
 } & PlanCardActions) => {
-  const content = Object.hasOwn(PLAN_CONTENT, tier.name) ? PLAN_CONTENT[tier.name] : undefined
+  const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
   const isPrimary = tier.name === RECOMMENDED_PLAN
   // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
   const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
@@ -225,7 +221,7 @@ export const PlanCard = ({
   const price = option ? getPlanPrice(tier, option) : undefined
   const isYearly = tier.billingCycle === 'year'
   const saving = getCardSaving(tier, option, counterpartTier)
-  const features = content?.features ?? tier.features
+  const features = option?.features?.length ? option.features : tier.features
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
@@ -255,9 +251,9 @@ export const PlanCard = ({
               </Badge>
             )}
           </div>
-          {content && (
+          {subtitle && (
             <Typography variant="paragraph-small" color="muted">
-              {content.description}
+              {subtitle}
             </Typography>
           )}
         </div>
@@ -320,7 +316,7 @@ export const PlanCard = ({
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
-            {content && <Typography variant="paragraph-small-bold">What&apos;s included</Typography>}
+            {features.length > 0 && <Typography variant="paragraph-small-bold">What&apos;s included</Typography>}
             <List className="gap-3" data-testid="plan-features">
               {features.map((label) => (
                 <ListItem key={label} size="sm" className="items-start py-0">
@@ -333,20 +329,24 @@ export const PlanCard = ({
         </div>
 
         <div className="mt-6 flex flex-col gap-5 @2xl:@max-4xl:col-span-2 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-5">
-          {content && (
+          {(supportLevel || supportDetail) && (
             <>
               <Separator />
               <div className="flex flex-col gap-1" data-testid="plan-support">
-                <Typography variant="paragraph-bold" data-testid="plan-support-level">
-                  <span className="relative isolate">
-                    {content.support.level}
-                    <span aria-hidden className={SUPPORT_HIGHLIGHT_CLASSES} />
-                  </span>{' '}
-                  support
-                </Typography>
-                <Typography variant="paragraph-small" color="muted">
-                  {content.support.detail}
-                </Typography>
+                {supportLevel && (
+                  <Typography variant="paragraph-bold" data-testid="plan-support-level">
+                    <span className="relative isolate">
+                      {supportLevel}
+                      <span aria-hidden className={SUPPORT_HIGHLIGHT_CLASSES} />
+                    </span>{' '}
+                    support
+                  </Typography>
+                )}
+                {supportDetail && (
+                  <Typography variant="paragraph-small" color="muted">
+                    {supportDetail}
+                  </Typography>
+                )}
               </div>
             </>
           )}

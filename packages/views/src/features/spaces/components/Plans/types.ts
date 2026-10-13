@@ -18,6 +18,9 @@ export type PlanSeatOption = {
   features?: string[]
 }
 
+/** Card copy from the payment link's or subscription's metadata; a part is left out when its key is empty. */
+export type PlanCardCopy = { subtitle?: string; supportLevel?: string; supportDetail?: string }
+
 export type PlanTier = {
   id: string
   name: string
@@ -25,6 +28,7 @@ export type PlanTier = {
   billingCycle: 'month' | 'year' | null
   options: PlanSeatOption[]
   features: string[]
+  copy?: PlanCardCopy
   isCurrent?: boolean
   /** On the current plan's card, the price the subscription is on; the other options are seat changes. */
   currentPriceId?: string | null

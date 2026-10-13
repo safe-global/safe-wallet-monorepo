@@ -1,4 +1,5 @@
 import type { PaymentLink } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import type { PlanCardCopy } from '@safe-global/views/features/spaces/components/Plans/types'
 import type { BillingCycle, PlanGroup, PlanOffer } from './types'
 
 // Stripe metadata vocabulary shared with the CGW (entitlements.constants.ts).
@@ -45,6 +46,15 @@ export const getPlanDescriptions = (metadata: Metadata): string[] => {
   }
 }
 
+const readText = (metadata: Metadata, key: string): string | undefined => metadata[key]?.trim() || undefined
+
+/** The card's subtitle and support line (`planSubtitle`, `planSupportLevel`, `planSupportDetail`). */
+export const getPlanCardCopy = (metadata: Metadata): PlanCardCopy => ({
+  subtitle: readText(metadata, 'planSubtitle'),
+  supportLevel: readText(metadata, 'planSupportLevel'),
+  supportDetail: readText(metadata, 'planSupportDetail'),
+})
+
 const toCycle = (interval: string | undefined): BillingCycle | null =>
   interval === 'month' || interval === 'year' ? interval : null
 
@@ -70,6 +80,7 @@ export const _toPlanOffer = (link: PaymentLink): PlanOffer | null => {
     seats: _getSeats(link),
     trialPeriodDays: link.trialPeriodDays ?? null,
     features: getPlanDescriptions(readMetadata(link)),
+    copy: getPlanCardCopy(readMetadata(link)),
     ..._getPrice(link),
   }
 }

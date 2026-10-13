@@ -98,9 +98,16 @@ describe('PlanCard', () => {
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
   })
 
-  it('names the support level at the bottom of the card', () => {
-    render(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
+  it('shows the subtitle and support line from the plan copy, and nothing when it is empty', () => {
+    const copy = { subtitle: 'Scale with control.', supportLevel: 'Priority', supportDetail: '+ Guided onboarding' }
+    const { rerender } = render(<PlanCard location={PlanLocation.PLANS_PAGE} tier={{ ...BUSINESS, copy }} />)
 
+    expect(screen.getByText('Scale with control.')).toBeInTheDocument()
     expect(screen.getByTestId('plan-support-level')).toHaveTextContent('Priority support')
+    expect(screen.getByText('+ Guided onboarding')).toBeInTheDocument()
+
+    rerender(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
+    expect(screen.queryByText('Scale with control.')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('plan-support')).not.toBeInTheDocument()
   })
 })

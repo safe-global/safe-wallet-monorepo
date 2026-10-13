@@ -3,6 +3,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, type SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import type { PlanGroup, PlanOffer } from '../../hooks/billing/types'
+import { getPlanCardCopy } from '../../hooks/billing/paymentLinks'
 import {
   getSubscriptionFeatures,
   getSubscriptionPlanName,
@@ -152,6 +153,7 @@ export const _offersToTiers = (plans: PlanGroup[]): PlanTier[] =>
           billingCycle: cycle,
           options: offers.map((offer) => toOption(offer, monthlyBySeats.get(String(offer.seats)))),
           features: featuresOf(offers),
+          copy: offers[0].copy,
           trialPeriodDays: offers[0].trialPeriodDays,
         },
       ]
@@ -181,6 +183,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
       },
     ],
     features: features.length > 0 || name !== ENTERPRISE_TIER.name ? features : ENTERPRISE_TIER.features,
+    copy: getPlanCardCopy((subscription.metadata ?? {}) as Record<string, string | null | undefined>),
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }
