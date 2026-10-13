@@ -7,7 +7,9 @@ import {
 } from '@safe-global/utils/features/safe-shield/builders'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import type { ReactNode } from 'react'
+import { getAddress } from 'ethers'
 
 jest.mock('../hooks', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
@@ -226,6 +228,39 @@ describe('SafeShieldContext', () => {
     await waitFor(() => {
       expect(result.current.isRiskConfirmed).toBe(false)
     })
+  })
+
+  it('keeps risk confirmation when the same transaction is reloaded with signatures', async () => {
+    mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.CRITICAL))
+
+    const createdTx = safeTxBuilder().build()
+    const reloadedTx = safeTxBuilder()
+      .with({ data: { ...createdTx.data, to: getAddress(createdTx.data.to) } })
+      .build()
+    reloadedTx.addSignature(safeSignatureBuilder().build())
+
+    let contextSafeTx = createdTx
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <SafeTxContext.Provider value={{ ...mockSafeTxContextValue, safeTx: contextSafeTx }}>
+        <SafeShieldProvider>{children}</SafeShieldProvider>
+      </SafeTxContext.Provider>
+    )
+
+    const { result, rerender } = renderHook(() => useSafeShield(), { wrapper })
+
+    await waitFor(() => {
+      expect(result.current.needsRiskConfirmation).toBe(true)
+    })
+
+    act(() => {
+      result.current.setIsRiskConfirmed(true)
+    })
+
+    contextSafeTx = reloadedTx
+    rerender()
+
+    expect(result.current.safeTx).toBe(reloadedTx)
+    expect(result.current.isRiskConfirmed).toBe(true)
   })
 
   it('should require risk confirmation for critical deadlock', async () => {

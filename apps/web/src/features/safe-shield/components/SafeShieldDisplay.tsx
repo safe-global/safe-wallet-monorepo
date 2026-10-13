@@ -2,7 +2,7 @@ import { useMemo, type ReactElement } from 'react'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type {
   ContractAnalysisResults,

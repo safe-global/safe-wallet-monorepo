@@ -2,7 +2,7 @@ import type { SafeMessageListItem } from '@safe-global/store/gateway/types'
 import type { ReactElement } from 'react'
 
 import { isSafeMessageListDateLabel, isSafeMessageListItem } from '@/utils/safe-message-guards'
-import TxDateLabel from '@/components/transactions/TxDateLabel'
+import TxDateLabel from '@safe-global/views/components/transactions/TxDateLabel'
 import ExpandableMsgItem from '@/components/safe-messages/MsgListItem/ExpandableMsgItem'
 
 const MsgListItem = ({ item }: { item: SafeMessageListItem }): ReactElement | null => {

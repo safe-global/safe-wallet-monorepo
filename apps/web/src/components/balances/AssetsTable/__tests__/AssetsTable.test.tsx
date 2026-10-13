@@ -13,7 +13,7 @@ import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
 import AssetsTable from '../index'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const mockUseSafeTokenEnabled = jest.fn(() => false)
 jest.mock('@/hooks/useSafeTokenEnabled', () => ({ useSafeTokenEnabled: () => mockUseSafeTokenEnabled() }))

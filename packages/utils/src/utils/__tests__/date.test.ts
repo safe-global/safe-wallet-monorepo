@@ -1,4 +1,4 @@
-import { formatDate, getCountdown, getPeriod, parseTimestamp } from '../date'
+import { formatDate, getCountdown, getDetailedPeriod, getPeriod, parseTimestamp } from '../date'
 
 describe('formatDate', () => {
   it('formats a timestamp as an abbreviated date', () => {
@@ -68,5 +68,19 @@ describe('getPeriod', () => {
     expect(getPeriod(90000)).toBe('1 day')
     expect(getPeriod(86400 + 3600)).toBe('1 day')
     expect(getPeriod(86400 + 3600 + 60)).toBe('1 day')
+  })
+})
+
+describe('getDetailedPeriod', () => {
+  it.each([
+    [60, '1 minute'],
+    [3600, '1 hour'],
+    [86400, '1 day'],
+    [86400 * 28, '28 days'],
+    [86400 * 3 + 3600 * 5, '3 days, 5 hours'],
+    [86400 + 3600 + 60 + 1, '1 day, 1 hour, 1 minute, 1 second'],
+    [45, '45 seconds'],
+  ])('formats %d seconds as "%s"', (seconds, expected) => {
+    expect(getDetailedPeriod(seconds)).toBe(expected)
   })
 })

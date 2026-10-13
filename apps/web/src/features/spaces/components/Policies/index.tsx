@@ -1,27 +1,42 @@
 import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
-import ExternalLink from '@/components/common/ExternalLink'
-import { Typography } from '@/components/ui/typography'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import AddPolicyDialog from './AddPolicyDialog'
-import { ADD_POLICY_OPTIONS, type AddPolicyId } from './AddPolicyDialog/options'
+import {
+  ADD_POLICY_OPTIONS,
+  type AddPolicyId,
+} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import PoliciesList from './PoliciesList'
-import { PoliciesLoadError, PoliciesLoading } from './PoliciesLoadState'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
-import type { PolicyLock } from './policyLock'
+import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 import PolicyUpsellBanner from './PolicyUpsellBanner'
 import ProposerIntroDialog from './ProposerIntroDialog'
-import { PROPOSER_INTRO_SEEN_KEY } from './ProposerIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
 import SpendingLimitFlow from './SpendingLimitFlow'
 import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
+import EnableSpendingLimitModuleFlow from './SpendingLimitFlow/EnableModuleFlow'
 import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
-import { SPENDING_LIMIT_INTRO_SEEN_KEY } from './SpendingLimitIntroDialog/constants'
-import { REQUEST_POLICY_FORM_HEIGHT, REQUEST_POLICY_FORM_URL, REQUEST_POLICY_FORM_WIDTH } from './constants'
-import { isPendingPolicy, isProposerPolicy, isSpendingLimitPolicy, type Policy, type PolicySafe } from './types'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
+import {
+  REQUEST_POLICY_FORM_HEIGHT,
+  REQUEST_POLICY_FORM_URL,
+  REQUEST_POLICY_FORM_WIDTH,
+} from '@safe-global/views/features/spaces/components/Policies/constants'
+import {
+  isPendingPolicy,
+  isProposerPolicy,
+  isSpendingLimitPolicy,
+  type Policy,
+  type PolicySafe,
+  type SpendingLimitPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
 interface PoliciesProps {
   /** Supplied by the caller. The page does not fetch. */
@@ -88,12 +103,27 @@ const Policies = ({
     [policies, openPolicy],
   )
   const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
+  const isSpendingLimitLocked = locked?.lockedPolicies.includes('spending-limit')
 
   const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
 
   // The panel is left open: it hides itself while the flow runs, so cancelling lands back on it.
   const editSpendingLimit = useCallback(
     (safe: PolicySafe) => setTxFlow(<EditSpendingLimitFlow safe={safe} />),
+    [setTxFlow],
+  )
+
+  const enableSpendingLimitModule = useCallback(
+    ({ safe, enforcement, data }: Pick<SpendingLimitPolicy, 'safe' | 'enforcement' | 'data'>) => {
+      if (enforcement.via !== 'module') return
+      setTxFlow(
+        <EnableSpendingLimitModuleFlow
+          safe={safe}
+          moduleAddress={enforcement.moduleAddress}
+          spenders={data.spenders}
+        />,
+      )
+    },
     [setTxFlow],
   )
 
@@ -198,9 +228,9 @@ const Policies = ({
       </div>
 
       {isLoading ? (
-        <PoliciesLoading />
+        <SpaceLoading subject="policies" testId="policies-loading" />
       ) : isError ? (
-        <PoliciesLoadError onReload={onRetry} />
+        <SpaceLoadError onReload={onRetry} testId="policies-error" />
       ) : (
         <>
           {locked && (
@@ -253,9 +283,8 @@ const Policies = ({
           policy={openedPolicy}
           isUnlisted={!listedPolicy}
           onClose={closeDetails}
-          onEdit={
-            locked?.lockedPolicies.includes('spending-limit') ? undefined : () => editSpendingLimit(openedPolicy.safe)
-          }
+          onEdit={isSpendingLimitLocked ? undefined : () => editSpendingLimit(openedPolicy.safe)}
+          onEnableModule={isSpendingLimitLocked ? undefined : () => enableSpendingLimitModule(openedPolicy)}
         />
       )}
     </div>

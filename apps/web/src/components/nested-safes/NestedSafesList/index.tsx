@@ -1,6 +1,6 @@
 import { ChevronRight } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import Track from '@/components/common/Track'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
@@ -17,8 +17,8 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { skipToken } from '@reduxjs/toolkit/query'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import WarningIcon from '@/public/images/notifications/warning.svg'
-import { SimilarityGroupContainer } from './SimilarityGroupContainer'
+import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
+import { SimilarityGroupContainer } from '@safe-global/views/components/nested-safes/NestedSafesList/SimilarityGroupContainer'
 
 const MAX_NESTED_SAFES = 5
 

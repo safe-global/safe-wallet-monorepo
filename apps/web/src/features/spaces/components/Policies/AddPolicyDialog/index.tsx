@@ -1,10 +1,14 @@
 import { type ReactElement } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { ADD_POLICY_DISMISSED_LABEL, POLICY_EVENTS } from '@/services/analytics/events/policies'
-import { cn } from '@/utils/cn'
-import AddPolicyOptionButton from './AddPolicyOptionButton'
-import { ADD_POLICY_OPTIONS, type AddPolicyId, type AddPolicyOption } from './options'
+import { cn } from '@safe-global/views/utils/cn'
+import AddPolicyOptionButton from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/AddPolicyOptionButton'
+import {
+  ADD_POLICY_OPTIONS,
+  type AddPolicyId,
+  type AddPolicyOption,
+} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 
 const SINGLE_COLUMN_MAX = 3
 

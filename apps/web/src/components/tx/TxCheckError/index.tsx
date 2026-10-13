@@ -11,7 +11,7 @@ import {
 import { getSpecificContractErrorMessage } from '@safe-global/utils/services/exceptions/contractErrors'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
 

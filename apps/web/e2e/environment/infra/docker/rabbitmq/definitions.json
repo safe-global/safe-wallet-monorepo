@@ -1,0 +1,10 @@
+{
+  "users": [{ "name": "guest", "password": "guest", "tags": ["administrator"] }],
+  "vhosts": [{ "name": "/" }, { "name": "txs-sepolia" }, { "name": "txs-mainnet" }, { "name": "txs-polygon" }],
+  "permissions": [
+    { "user": "guest", "vhost": "/", "configure": ".*", "write": ".*", "read": ".*" },
+    { "user": "guest", "vhost": "txs-sepolia", "configure": ".*", "write": ".*", "read": ".*" },
+    { "user": "guest", "vhost": "txs-mainnet", "configure": ".*", "write": ".*", "read": ".*" },
+    { "user": "guest", "vhost": "txs-polygon", "configure": ".*", "write": ".*", "read": ".*" }
+  ]
+}

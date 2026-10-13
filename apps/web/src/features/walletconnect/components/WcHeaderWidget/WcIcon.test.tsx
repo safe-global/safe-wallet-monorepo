@@ -10,7 +10,7 @@ jest.mock('@/components/common/Track', () => {
   }
 })
 
-jest.mock('@/components/safe-apps/SafeAppIconCard', () => {
+jest.mock('@safe-global/views/components/safe-apps/SafeAppIconCard', () => {
   return {
     __esModule: true,
 

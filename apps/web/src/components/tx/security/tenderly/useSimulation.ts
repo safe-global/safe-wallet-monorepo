@@ -12,7 +12,7 @@ import {
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { Errors, logError } from '@/services/exceptions'
-import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 export const useSimulation = (): UseSimulationReturn => {
   const [simulation, setSimulation] = useState<TenderlySimulation | undefined>()

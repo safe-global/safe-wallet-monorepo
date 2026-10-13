@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@/components/common/Identicon'
@@ -20,8 +20,8 @@ import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
-import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
-import { cn } from '@/utils/cn'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
@@ -158,7 +158,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       // wraps into the width that frees up instead of truncating.
       cell: (req, { isCompact }) => (
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden">
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
@@ -182,7 +182,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'chains',
       header: 'Chains',
-      width: '20%',
+      width: '15%',
       priority: 'secondary',
       minWidth: 90,
       cell: renderChains,
@@ -190,14 +190,14 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
       minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
       id: 'actions',
-      width: '15%',
+      width: '10%',
       align: 'end',
       minWidth: 80,
       cell: (req) =>

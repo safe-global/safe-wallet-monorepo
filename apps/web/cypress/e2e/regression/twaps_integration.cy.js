@@ -4,9 +4,12 @@ import * as swaps from '../pages/swaps.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as swaps_data from '../../fixtures/swaps_data.json'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 let staticSafes = []
 let iframeSelector
@@ -88,7 +91,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Validation Tests
   // ========================================
 
-  it('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
+  // The CoW widget now needs a Cloudflare human check before it quotes. Automation cannot pass it.
+  it.skip('Verify "Insufficient COW balance" message appears when the entered token amount exceeds "Max" balance', () => {
     swaps.acceptLegalDisclaimer()
     cy.wait(4000)
     main.getIframeBody(iframeSelector).within(() => {
@@ -156,7 +160,8 @@ describe('TWAP tests', { defaultCommandTimeout: 30000 }, () => {
   // Order Creation Tests
   // ========================================
 
-  it('Verify order details', { defaultCommandTimeout: 60000 }, () => {
+  // The CoW widget now needs a Cloudflare human check before it quotes. Automation cannot pass it.
+  it.skip('Verify order details', { defaultCommandTimeout: 60000 }, () => {
     const limitPrice = swaps.createRegex(swapOrder.DAIeqCOW, 'COW')
     const widgetFee = swaps.getWidgetFee()
     const slippage = swaps.getWidgetFee()

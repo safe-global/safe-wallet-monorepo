@@ -8,8 +8,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+} from '@safe-global/views/components/ui/dialog'
+import { Button } from '@safe-global/views/components/ui/button'
 import { useAppDispatch } from '@/store'
 import { clearAllOverrides } from '@/features/feature-flag-overrides/store'
 import { useFeatureFlagEditorData } from '../hooks/useFeatureFlagEditorData'

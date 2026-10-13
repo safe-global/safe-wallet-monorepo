@@ -4,7 +4,6 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { gtfFeePreviewEndpoints } from './gtfFeePreview'
 import { proposerSafesEndpoints } from './proposerSafes'
-import { policyTokenInfosEndpoints } from './policyTokenInfos'
 
 async function _buildQueryFn<T>(fn: () => Promise<T>) {
   try {
@@ -30,7 +29,6 @@ export const gatewayApi = createApi({
     ...safeOverviewEndpoints(builder),
     ...gtfFeePreviewEndpoints(builder),
     ...proposerSafesEndpoints(builder),
-    ...policyTokenInfosEndpoints(builder),
   }),
 })
 
@@ -39,5 +37,4 @@ export const {
   useGetMultipleSafeOverviewsQuery,
   useGetGtfFeePreviewQuery,
   useGetProposerSafesQuery,
-  useGetPolicyTokenInfosQuery,
 } = gatewayApi

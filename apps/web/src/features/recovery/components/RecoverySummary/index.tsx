@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 
-import RecoveryType from '../RecoveryType'
-import RecoveryInfo from '../RecoveryInfo'
+import RecoveryType from '@safe-global/views/features/recovery/components/RecoveryType'
+import RecoveryInfo from '@safe-global/views/features/recovery/components/RecoveryInfo'
 import RecoveryStatus from '../RecoveryStatus'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import useWallet from '@/hooks/wallets/useWallet'

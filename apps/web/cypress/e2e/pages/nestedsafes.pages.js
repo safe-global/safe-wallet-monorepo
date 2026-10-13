@@ -2,6 +2,7 @@ import * as constants from '../../support/constants'
 import { setMaxAmount, tokenSelector } from '../pages/create_tx.pages.js'
 import { cardContent } from '../pages/modals.page.js'
 import { addToBatchBtn } from '../pages/create_tx.pages.js'
+import { nameTypingOptions } from '../pages/main.page.js'
 
 const addNestedSafeBtn = '[data-testid="add-nested-safe-button"]'
 const nestedSafeNameInput = '[data-testid="nested-safe-name-input"]'
@@ -112,7 +113,7 @@ export function clickOnAddNestedSafeBtn() {
 
 // The testid lands directly on the <input> element of the shadcn field.
 export function typeName(name) {
-  cy.get(nestedSafeNameInput).clear().type(name).should('have.value', name)
+  cy.get(nestedSafeNameInput).clear().type(name, nameTypingOptions).should('have.value', name)
 }
 
 export function nameInputHasPlaceholder() {

@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type {
   ContractAnalysisResults,
   DeadlockAnalysisResults,
