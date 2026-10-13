@@ -5,7 +5,7 @@ export const PLAN_ORDER = ['Starter', 'Business', 'Enterprise'] as const
 /** The plan the trial and lapsed-Workspace modals lead with. */
 export const RECOMMENDED_PLAN = 'Business'
 
-export type PlanName = (typeof PLAN_ORDER)[number]
+type PlanName = (typeof PLAN_ORDER)[number]
 
 export const MEMBERS = 'Members'
 export const WORKSPACE_2FA = 'Workspace 2FA'
@@ -16,81 +16,43 @@ export const PAY_GAS_FROM_SAFE = 'Pay gas fees from Safe account'
 export type PlanContent = {
   /** Who the plan is for, one line under its name. */
   description: string
+  /** What the card lists, per the Plans tab feature list. */
+  features: string[]
   support: { level: string; detail: string }
 }
 
+const EVERY_PLAN = [
+  'Shared address book',
+  'Activity log',
+  'Advanced threat analysis',
+  'Transaction simulation',
+  WORKSPACE_2FA,
+]
+
 /** Replaces the Stripe selling points on the plan cards. */
-export const PLAN_CONTENT: Record<PlanName, PlanContent> = {
+export const PLAN_CONTENT: Partial<Record<string, PlanContent>> = {
   Starter: {
     description: 'Coordinate your team with a shared home for your Safes and transactions.',
+    features: ['10 sponsored transactions per month', ...EVERY_PLAN],
     support: { level: 'Standard', detail: 'In-app and email' },
   },
   Business: {
     description: 'Scale with control. Delegate daily operations with hands-on help.',
+    features: ['50 sponsored transactions per month', ...EVERY_PLAN, POLICIES],
     support: { level: 'Priority', detail: '+ Guided onboarding' },
   },
   Enterprise: {
     description: 'Tailored to your organization, with custom capacity and commercial terms.',
+    features: [
+      'Unlimited sponsored transactions',
+      ...EVERY_PLAN,
+      POLICIES,
+      'Custom Safe capacity',
+      'Tailored contract & billing terms',
+    ],
     support: { level: 'Tailored', detail: '+ Customized onboarding' },
   },
 }
-
-const isPlanName = (name: string): name is PlanName => PLAN_ORDER.some((plan) => plan === name)
-
-type CardFeature = { from: PlanName; label: string | Record<PlanName, string> }
-
-/** Card lists, per the Plans tab feature list. `from` is the first plan that includes it. */
-export const CARD_FEATURES: CardFeature[] = [
-  {
-    from: 'Starter',
-    label: {
-      Starter: '10 sponsored transactions per month',
-      Business: '50 sponsored transactions per month',
-      Enterprise: 'Unlimited sponsored transactions',
-    },
-  },
-  { from: 'Starter', label: 'Shared address book' },
-  { from: 'Starter', label: 'Activity log' },
-  { from: 'Starter', label: 'Advanced threat analysis' },
-  { from: 'Starter', label: 'Transaction simulation' },
-  { from: 'Starter', label: WORKSPACE_2FA },
-  { from: 'Business', label: POLICIES },
-  { from: 'Enterprise', label: 'Custom Safe capacity' },
-  { from: 'Enterprise', label: 'Tailored contract & billing terms' },
-]
-
-/** Everything a plan includes, in the same order on every card. */
-export const getCardFeatures = (name: string): string[] | undefined => {
-  if (!isPlanName(name)) return undefined
-  const rank = PLAN_ORDER.indexOf(name)
-  return CARD_FEATURES.filter(({ from }) => PLAN_ORDER.indexOf(from) <= rank).map(({ label }) =>
-    typeof label === 'string' ? label : label[name],
-  )
-}
-
-export const getPlanContent = (name: string): PlanContent | undefined =>
-  isPlanName(name) ? PLAN_CONTENT[name] : undefined
-
-export const PLAN_CARD_COPY = {
-  savedVsMonthly: (amount: string, percent: string) => `Save ${amount} (${percent}) vs monthly`,
-  saveWithYearly: (amount: string, percent: string) => `Save ${amount} (${percent}) with yearly`,
-  termsApply: 'Terms apply:',
-  proTerms: 'Safe Pro Terms',
-  serviceDescriptions: 'Service Descriptions',
-  billingCycleLabel: 'Billing cycle',
-  monthly: 'Monthly',
-  yearly: 'Yearly',
-  currentPlan: 'Current plan',
-  switchToYearly: 'Switch to yearly',
-  switchToMonthly: 'Switch to monthly',
-  accountTeam: 'Change via your account team',
-  talkToSales: 'Talk to sales',
-  custom: 'Custom',
-  customSuffix: 'Annual term',
-  support: 'support',
-  featuresHeading: "What's included",
-  seatsLabel: 'Safe accounts for',
-} as const
 
 export const SAFENET_CHECKS = 'Safenet checks'
 
@@ -120,17 +82,6 @@ const every = (value: CompareValue): Record<PlanName, CompareValue> => ({
 })
 const fromBusiness: Record<PlanName, CompareValue> = { Starter: false, Business: true, Enterprise: true }
 const enterpriseOnly: Record<PlanName, CompareValue> = { Starter: false, Business: false, Enterprise: true }
-
-export const COMPARE_COPY = {
-  title: 'Compare all features',
-  featureColumn: 'Features',
-  current: 'Current',
-  soon: 'Soon',
-  included: 'Included',
-  notIncluded: 'Not included',
-  showAll: 'Expand table',
-  learnMore: 'Learn more',
-}
 
 /** The collapsed "Compare all features" card shows the first few rows. */
 export const COMPARE_SECTIONS: CompareSection[] = [
@@ -196,11 +147,6 @@ export const COMPARE_SECTIONS: CompareSection[] = [
     rows: [{ feature: 'Hypernative Guardian', values: every(true), isAddOn: true }],
   },
 ]
-
-export const SALES_PROMPT = {
-  prompt: 'Not sure which plan fits?',
-  action: 'Talk to sales',
-}
 
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
 export const ENTERPRISE_TIER: PlanTier = {

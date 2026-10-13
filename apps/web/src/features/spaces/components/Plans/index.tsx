@@ -1,12 +1,11 @@
 import { useCallback, useRef, useState } from 'react'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
-import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
+import { SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import CompareFeaturesCard from './CompareFeaturesCard'
 import { PlanCatalog, type PlanCardActions } from './PlanCards'
 import PlanStatusCard from './PlanStatusCard'
 import SalesPromptCard from './SalesPromptCard'
-import { canManagePlan } from './planTiers'
+import { trackPlansClick } from './planTiers'
 import type {
   CurrentPlan,
   Meter,
@@ -49,10 +48,7 @@ export default function Plans({
   const currentPlanName = tiers.find((tier) => tier.isCurrent)?.name
 
   const openCompare = useCallback(() => {
-    trackEvent(
-      { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: SAFE_PRO_PLANS_LABELS.compare_features },
-      { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.compare_features },
-    )
+    trackPlansClick(SAFE_PRO_PLANS_LABELS.compare_features)
     setCompareExpanded(true)
     // Wait a frame so the expanded rows are laid out before scrolling to the card.
     requestAnimationFrame(() => {
@@ -72,7 +68,8 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        canManage={readOnly ? false : canManagePlan(canManage, currentPlan)}
+        // Trials with a card on file manage it in the portal too.
+        canManage={!readOnly && (canManage || Boolean(currentPlan?.isTrialing && currentPlan.hasPaymentMethod))}
       />
       <PlanCatalog
         tiers={tiers}

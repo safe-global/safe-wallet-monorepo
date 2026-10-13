@@ -6,11 +6,9 @@ import { Link } from '@safe-global/views/components/ui/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { HnSignupFlow } from '@/features/hypernative'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
-import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
+import { SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { cn } from '@safe-global/views/utils/cn'
 import {
-  COMPARE_COPY,
   COMPARE_SECTIONS,
   type CompareRow,
   type CompareValue,
@@ -19,6 +17,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
 import PeekCollapsible from './PeekCollapsible'
+import { trackPlansClick } from './planTiers'
 
 export const COMPARE_FEATURES_ID = 'compare-features'
 
@@ -27,7 +26,7 @@ const CompareValue = ({ value }: { value: CompareValue }) => {
     return (
       <>
         <FeatureCheck />
-        <span className="sr-only">{COMPARE_COPY.included}</span>
+        <span className="sr-only">Included</span>
       </>
     )
   }
@@ -37,18 +36,12 @@ const CompareValue = ({ value }: { value: CompareValue }) => {
         <span aria-hidden className="text-muted-foreground">
           —
         </span>
-        <span className="sr-only">{COMPARE_COPY.notIncluded}</span>
+        <span className="sr-only">Not included</span>
       </>
     )
   }
   return <>{value}</>
 }
-
-const trackDiscussAddOn = () =>
-  trackEvent(
-    { ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: SAFE_PRO_PLANS_LABELS.discuss_add_on },
-    { [MixpanelEventParams.LOCATION]: SAFE_PRO_PLANS_LABELS.discuss_add_on },
-  )
 
 /** Opens the Guardian signup. */
 const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => (
@@ -56,7 +49,7 @@ const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => 
     render={<button type="button" />}
     className="font-semibold"
     onClick={() => {
-      trackDiscussAddOn()
+      trackPlansClick(SAFE_PRO_PLANS_LABELS.discuss_add_on)
       onOpen()
     }}
   >
@@ -85,10 +78,10 @@ const CompareRow = ({
     <TableHead scope="row" className="h-auto px-4 py-3 font-normal whitespace-normal">
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
         {row.feature}
-        {row.isAddOn && <AddOnLink label={COMPARE_COPY.learnMore} onOpen={onOpenAddOn} />}
+        {row.isAddOn && <AddOnLink label="Learn more" onOpen={onOpenAddOn} />}
         {row.isComingSoon && (
           <Badge variant="subtle" size="status" shape="status">
-            {COMPARE_COPY.soon}
+            Soon
           </Badge>
         )}
       </span>
@@ -107,7 +100,7 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
   <TableHeader className={cn(isExpanded && 'sticky top-0 z-10 bg-card')}>
     <TableRow className="bg-muted-secondary hover:bg-muted-secondary">
       <TableHead scope="col" className="h-11 w-[28%] px-4 py-0 align-middle font-semibold">
-        {COMPARE_COPY.featureColumn}
+        Features
       </TableHead>
       {PLAN_ORDER.map((plan) => {
         const isCurrent = plan === currentPlanName
@@ -117,7 +110,7 @@ const CompareHeaderRow = ({ currentPlanName, isExpanded }: { currentPlanName?: s
               {plan}
               {isCurrent && (
                 <Badge variant="mint" size="status" shape="status">
-                  {COMPARE_COPY.current}
+                  Current
                 </Badge>
               )}
             </span>
@@ -221,7 +214,7 @@ export default function CompareFeaturesCard({
             className="flex w-full items-center justify-between gap-4 rounded-lg px-4 py-3.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Typography variant="h4" id="compare-features-title">
-              {COMPARE_COPY.title}
+              Compare all features
             </Typography>
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
               <ChevronDown
@@ -239,7 +232,7 @@ export default function CompareFeaturesCard({
             open={isExpanded}
             onOpen={() => onExpandedChange(true)}
             peekUntil={lastPeekRowRef}
-            expandLabel={COMPARE_COPY.showAll}
+            expandLabel="Expand table"
             className="rounded-xl bg-card @2xl:[&_[data-slot=table-container]]:overflow-visible"
           >
             <Table className="min-w-160 table-fixed">

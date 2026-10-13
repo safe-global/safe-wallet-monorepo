@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
 import { PlanCard } from '../PlanCards'
@@ -63,29 +63,6 @@ describe('PlanCard', () => {
 
     rerender(
       <PlanCard location={PlanLocation.PLANS_PAGE} tier={currentTier('price_b20m')} currentPlan={businessPlan()} />,
-    )
-
-    expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')
-  })
-  it('keeps a picked Safe count when the page rebuilds the tiers', async () => {
-    const { user, rerender } = renderWithUserEvent(
-      <PlanCard
-        location={PlanLocation.PLANS_PAGE}
-        tier={currentTier('price_b10m')}
-        currentPlan={businessPlan({ price: 1099 })}
-      />,
-    )
-
-    const trigger = screen.getByRole('combobox', { name: 'Safe accounts for Business' })
-    await user.click(trigger)
-    await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
-    await user.click(await screen.findByRole('option', { name: '20 Safe accounts' }))
-    rerender(
-      <PlanCard
-        location={PlanLocation.PLANS_PAGE}
-        tier={currentTier('price_b10m')}
-        currentPlan={businessPlan({ price: 1099 })}
-      />,
     )
 
     expect(screen.getByRole('combobox', { name: 'Safe accounts for Business' })).toHaveTextContent('20 Safe accounts')

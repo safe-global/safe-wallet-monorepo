@@ -7,10 +7,10 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatDate } from '@safe-global/utils/utils/date'
+import { cn } from '@safe-global/views/utils/cn'
 import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../hooks/billing/subscription'
 import { TRIAL_DISCLAIMER } from '../../constants'
 import type { Meter, PlanSummary } from '@safe-global/views/features/spaces/components/Plans/types'
-import { StatusDot } from './StatusDot'
 
 export type CurrentBadge = { label: string; variant: 'brand' | 'warning' }
 
@@ -143,7 +143,13 @@ export default function PlanStatusCard({
                     className="gap-1.5 text-foreground"
                     data-testid="plan-status-badge"
                   >
-                    <StatusDot isWarning={badge.variant === 'warning'} />
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'size-1.5 shrink-0 rounded-full',
+                        badge.variant === 'warning' ? 'bg-badge-dot-warning' : 'bg-badge-dot-success',
+                      )}
+                    />
                     {badge.label}
                   </Badge>
                 )}

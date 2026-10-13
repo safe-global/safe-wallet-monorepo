@@ -9,7 +9,6 @@ import {
   getChangeDirection,
   getPlanCta,
   getPlanPrice,
-  getYearlySaving,
   _offersToTiers,
   seatsLabel,
   _subscriptionToTier,
@@ -404,19 +403,6 @@ describe('getPlanPrice', () => {
   })
 })
 
-describe('getYearlySaving', () => {
-  it('shows what a year saves against twelve monthly payments', () => {
-    expect(getYearlySaving(1669 * 12, 17_990, 'eur')).toEqual({ amount: '€2,038', percent: '10.2%' })
-    expect(getYearlySaving(189 * 12, 1990, 'eur')).toEqual({ amount: '€278', percent: '12.3%' })
-  })
-
-  it('shows nothing without both prices or without a saving', () => {
-    expect(getYearlySaving(null, 17_990, 'eur')).toBeUndefined()
-    expect(getYearlySaving(20_028, undefined, 'eur')).toBeUndefined()
-    expect(getYearlySaving(12_000, 12_000, 'eur')).toBeUndefined()
-  })
-})
-
 describe('getCardSaving', () => {
   const yearlyTier = tier({
     id: 'Business-year',
@@ -444,5 +430,6 @@ describe('getCardSaving', () => {
   it('shows a monthly card what the same Safe count saves yearly', () => {
     expect(getCardSaving(tier(), option(), yearlyTier)).toEqual({ amount: '€2,038', percent: '10.2%' })
     expect(getCardSaving(tier(), option({ label: '5 Safe accounts' }), yearlyTier)).toBeUndefined()
+    expect(getCardSaving(tier(), option({ price: 1000 }), yearlyTier)).toBeUndefined()
   })
 })

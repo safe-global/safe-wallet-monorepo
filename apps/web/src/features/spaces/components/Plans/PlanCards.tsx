@@ -16,13 +16,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS, SAFE_PRO_PLANS_LABELS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams, PlanCtaKind, type PlanLocation } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
-import {
-  COMPARE_COPY,
-  getCardFeatures,
-  getPlanContent,
-  PLAN_CARD_COPY,
-  RECOMMENDED_PLAN,
-} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { PLAN_CONTENT, RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanCta as PlanCtaKindOf,
@@ -32,7 +26,15 @@ import type {
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { COMPARE_FEATURES_ID } from './CompareFeaturesCard'
 import { FeatureCheck } from './FeatureCheck'
-import { getCardCta, getCardSaving, getCatalogTiers, getPlanPrice, getVisibleTiers, pickProps } from './planTiers'
+import {
+  getCardCta,
+  getCardSaving,
+  getCatalogTiers,
+  getPlanPrice,
+  getVisibleTiers,
+  pickProps,
+  trackPlansClick,
+} from './planTiers'
 
 type Cycle = 'month' | 'year'
 
@@ -123,8 +125,7 @@ const SalesCta = ({
     className="w-full"
     render={<a href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer" />}
     onClick={() => {
-      const location = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
-      trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label: location }, { [MixpanelEventParams.LOCATION]: location })
+      trackPlansClick(kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team)
       onClick?.()
     }}
   >
@@ -199,21 +200,18 @@ export const PlanCard = ({
   ...actions
 }: {
   tier: PlanTier
-  /** Safe count picked on the other billing cycle, so switching cycles keeps it. */
+  /** Safe count picked on this plan, on either billing cycle. */
   seatsLabel?: string
   onSeatsChange?: (label: string) => void
   /** The same plan on the other billing cycle, to compare monthly and yearly prices. */
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
 } & PlanCardActions) => {
-  const content = getPlanContent(tier.name)
+  const content = PLAN_CONTENT[tier.name]
   const isPrimary = tier.name === RECOMMENDED_PLAN
   // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
   const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
-  // Tracked by key: tiers are rebuilt every render.
-  const [pickedKey, setPickedKey] = useState<string>()
   const option =
-    tier.options.find((candidate) => optionKey(candidate) === pickedKey) ??
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
     tier.options.find((candidate) => isCurrentPlan && candidate.label === actions.currentPlan?.seatsLabel) ??
@@ -221,7 +219,7 @@ export const PlanCard = ({
   const price = option ? getPlanPrice(tier, option) : undefined
   const isYearly = tier.billingCycle === 'year'
   const saving = getCardSaving(tier, option, counterpartTier)
-  const features = getCardFeatures(tier.name) ?? tier.features
+  const features = content?.features ?? tier.features
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
@@ -246,7 +244,7 @@ export const PlanCard = ({
             <Typography variant="h4">{tier.name}</Typography>
             {isCurrentPlan && (
               <Badge variant="mint" size="status" shape="status" data-testid="plan-current-badge">
-                {COMPARE_COPY.current}
+                Current
               </Badge>
             )}
           </div>
@@ -269,7 +267,7 @@ export const PlanCard = ({
           {saving && isYearly && (
             <Typography variant="paragraph-small" className="flex items-center gap-1" data-testid="plan-yearly-saving">
               <Check aria-hidden className="size-3.5 shrink-0 text-accent-success" />
-              {PLAN_CARD_COPY.savedVsMonthly(saving.amount, saving.percent)}
+              Save {saving.amount} ({saving.percent}) vs monthly
             </Typography>
           )}
           {saving && !isYearly && onSwitchToYearly && (
@@ -280,7 +278,7 @@ export const PlanCard = ({
                 data-testid="plan-yearly-saving"
                 onClick={onSwitchToYearly}
               >
-                {PLAN_CARD_COPY.saveWithYearly(saving.amount, saving.percent)}
+                Save {saving.amount} ({saving.percent}) with yearly
               </Link>
             </Typography>
           )}
@@ -292,16 +290,13 @@ export const PlanCard = ({
               <Seats
                 options={tier.options}
                 value={option}
-                onChange={(next) => {
-                  setPickedKey(optionKey(next))
-                  onSeatsChange?.(next.label)
-                }}
-                label={`${PLAN_CARD_COPY.seatsLabel} ${tier.name}`}
+                onChange={(next) => onSeatsChange?.(next.label)}
+                label={`Safe accounts for ${tier.name}`}
               />
               {!actions.readOnly && (
                 <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
                   <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && <SalesCta label={PLAN_CARD_COPY.talkToSales} kind="sales" />}
+                  {isPrimary && <SalesCta label="Talk to sales" kind="sales" />}
                 </div>
               )}
             </>
@@ -311,7 +306,7 @@ export const PlanCard = ({
         <div className="mt-6 flex flex-col gap-6 @2xl:@max-4xl:col-start-2 @2xl:@max-4xl:row-span-4 @2xl:@max-4xl:row-start-1 @2xl:@max-4xl:mt-0">
           <Separator className="@2xl:@max-4xl:hidden" />
           <div className="flex flex-col gap-3">
-            {content && <Typography variant="paragraph-small-bold">{PLAN_CARD_COPY.featuresHeading}</Typography>}
+            {content && <Typography variant="paragraph-small-bold">What&apos;s included</Typography>}
             <List className="gap-3" data-testid="plan-features">
               {features.map((label) => (
                 <ListItem key={label} size="sm" className="items-start py-0">
@@ -333,7 +328,7 @@ export const PlanCard = ({
                     {content.support.level}
                     <span aria-hidden className={SUPPORT_HIGHLIGHT_CLASSES} />
                   </span>{' '}
-                  {PLAN_CARD_COPY.support}
+                  support
                 </Typography>
                 <Typography variant="paragraph-small" color="muted">
                   {content.support.detail}
@@ -370,9 +365,9 @@ export function PlanCatalog({
     <div className="@container flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <Tabs value={cycle} onValueChange={(value) => setCycle(value as Cycle)}>
-          <TabsList aria-label={PLAN_CARD_COPY.billingCycleLabel}>
-            <TabsTrigger value="month">{PLAN_CARD_COPY.monthly}</TabsTrigger>
-            <TabsTrigger value="year">{PLAN_CARD_COPY.yearly}</TabsTrigger>
+          <TabsList aria-label="Billing cycle">
+            <TabsTrigger value="month">Monthly</TabsTrigger>
+            <TabsTrigger value="year">Yearly</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -387,7 +382,7 @@ export function PlanCatalog({
               onCompareFeatures()
             }}
           >
-            {COMPARE_COPY.title} <ArrowDown />
+            Compare all features <ArrowDown />
           </Link>
         )}
       </div>
@@ -417,13 +412,13 @@ export function PlanCatalog({
       )}
 
       <Typography variant="paragraph-mini" color="muted" align="center">
-        {PLAN_CARD_COPY.termsApply}{' '}
+        Terms apply:{' '}
         <Link href={SAFE_PRO_TERMS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          {PLAN_CARD_COPY.proTerms}
+          Safe Pro Terms
         </Link>
         {' · '}
         <Link href={SAFE_PRO_SERVICE_DESCRIPTIONS_URL} target="_blank" rel="noopener noreferrer" variant="muted">
-          {PLAN_CARD_COPY.serviceDescriptions}
+          Service Descriptions
         </Link>
       </Typography>
     </div>
