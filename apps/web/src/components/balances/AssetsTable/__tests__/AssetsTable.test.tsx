@@ -133,7 +133,11 @@ describe('AssetsTable', () => {
 
     it('shows the price with two decimals in the list', async () => {
       const item = balanceBuilder().with({ fiatConversion: '2345.67' }).build()
-      renderAssetsTable({ balances: balancesBuilder().with({ items: [item] }).build() })
+      renderAssetsTable({
+        balances: balancesBuilder()
+          .with({ items: [item] })
+          .build(),
+      })
 
       await waitFor(() => {
         expect(screen.getByText('$ 2,345')).toBeInTheDocument()
