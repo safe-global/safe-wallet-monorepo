@@ -9,7 +9,7 @@ import { Provider } from 'react-redux'
 import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
-import { AppProviders } from '@/pages/_app'
+import { AppProviders, SafeScopedSubscriptions } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
@@ -25,18 +25,12 @@ import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import useTxNotifications from '@/hooks/useTxNotifications'
-import useSafeNotifications from '@/hooks/useSafeNotifications'
-import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
-import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
-import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useTxTracking } from '@/hooks/useTxTracking'
-import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
@@ -89,7 +83,7 @@ const StepUpSplash = (): ReactElement | null => {
   return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
 }
 
-const InitApp = (): null => {
+const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
   useAdjustUrl()
@@ -99,21 +93,16 @@ const InitApp = (): null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useTxNotifications()
-  useSafeMessageNotifications()
-  useSafeNotifications()
-  useTxPendingStatuses()
-  useSafeMessagePendingStatuses()
-  useTxTracking()
-  useSafeMsgTracking()
   useBeamer()
   useVisitedSafes()
-  usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
   useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
-  return null
+  useUnlockBodyScroll()
+  useRememberSpace()
+
+  return <SafeScopedSubscriptions />
 }
 
 // Memoized subtree — bails out of re-render when pathname and outlet are

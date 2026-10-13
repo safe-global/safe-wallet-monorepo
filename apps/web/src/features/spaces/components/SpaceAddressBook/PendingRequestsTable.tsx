@@ -158,7 +158,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       // wraps into the width that frees up instead of truncating.
       cell: (req, { isCompact }) => (
         <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden">
             <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
             {spaceAddresses.has(req.address.toLowerCase()) && (
               <Tooltip>
@@ -182,7 +182,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'chains',
       header: 'Chains',
-      width: '20%',
+      width: '15%',
       priority: 'secondary',
       minWidth: 90,
       cell: renderChains,
@@ -190,14 +190,14 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
       minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
       id: 'actions',
-      width: '15%',
+      width: '10%',
       align: 'end',
       minWidth: 80,
       cell: (req) =>

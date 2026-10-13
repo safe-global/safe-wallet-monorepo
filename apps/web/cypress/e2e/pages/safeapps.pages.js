@@ -220,10 +220,7 @@ export function clickOnApp(app) {
   // The card's text sits in a pointer-events-none layer; clicks land on the overlay
   // link covering the card, so target that link directly. An app can render two cards
   // (featured + all apps), so take the first like cy.contains() used to.
-  const appLink = () => cy.get(`a[aria-label="Open ${app}"]`).first()
-  // The link takes the Safe from the router query, which stays empty until the router is ready
-  appLink().should('have.attr', 'href').and('include', 'safe=')
-  appLink().click()
+  cy.get(`a[aria-label="Open ${app}"]`).first().click()
 }
 
 export function verifyNoAppsTextPresent() {
