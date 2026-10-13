@@ -2,7 +2,7 @@ import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/mess
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isAddress } from 'ethers'
 import { isTotpValid } from '@/features/proposers/utils/totp'
-import { isQueueServiceDelegateTypedData } from '@safe-global/utils/services/delegates'
+import { isQueueServiceDelegateMessage } from '@safe-global/utils/services/delegates'
 import type { DelegationOrigin, PendingDelegation } from '@/features/proposers/types'
 
 export type DelegationWithTimestamp = PendingDelegation & { _timestamp: number }
@@ -40,7 +40,7 @@ const DELEGATION_ACTIONS = new Map<unknown, DelegationOrigin['action']>([
  * typed data is the source; the origin only identifies messages stored by the transaction service.
  */
 export function parseDelegation({ message, origin }: Pick<MessageItem, 'message' | 'origin'>): DelegationOrigin | null {
-  if (typeof message === 'string' || !isQueueServiceDelegateTypedData(message)) {
+  if (typeof message === 'string' || !isQueueServiceDelegateMessage(message)) {
     return parseDelegationOrigin(origin)
   }
 
