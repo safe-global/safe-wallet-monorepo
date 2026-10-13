@@ -71,10 +71,6 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
-    // Mock next/image to bypass the image loader stub that fails on static imports
-    // This resolves the "unsupported file type: undefined" error when building Storybook
-    ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
-
     // Stories in packages/views would otherwise get the root react-hook-form, a different copy (and context) than the app's
     ;(config.resolve.alias as Record<string, string>)['react-hook-form'] = path.dirname(
       require.resolve('react-hook-form/package.json'),

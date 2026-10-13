@@ -19,12 +19,8 @@ exports[`./HnMiniTxBanner.stories Default 1`] = `
           <img
             alt="Guardian badge"
             class="bannerImage"
-            data-nimg="1"
-            decoding="async"
             height="32"
-            loading="lazy"
             src="/images/hypernative/guardian-badge.svg"
-            style="color: transparent;"
             width="32"
           />
           <div

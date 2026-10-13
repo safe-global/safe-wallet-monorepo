@@ -4,7 +4,6 @@ import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
-import Image from 'next/image'
 import WorkspacesEmptyIllustration from '@/public/images/spaces/workspaces_empty.png'
 import WorkspacesEmptyIllustrationDark from '@/public/images/spaces/workspaces_empty_dark.webp'
 import SafeMarkIcon from '@safe-global/views/assets/images/logo-no-text.svg'
@@ -230,8 +229,8 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
             ))}
           </div>
 
-          <Image
-            src={isDarkMode ? WorkspacesEmptyIllustrationDark : WorkspacesEmptyIllustration}
+          <img
+            src={isDarkMode ? WorkspacesEmptyIllustrationDark.src : WorkspacesEmptyIllustration.src}
             alt="Workspace dashboard showing accounts grouped by Workspace"
             className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
           />

@@ -22,7 +22,7 @@ export const Default: Story = {
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: SpacesIllustration.src,
     imageAlt: 'Promo image',
   },
 }
@@ -46,7 +46,7 @@ export const WithCustomColors: Story = {
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: SpacesIllustration.src,
     imageAlt: 'Special offer',
     customFontColor: '#FFD700',
     customBackground: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -60,7 +60,7 @@ export const WithoutDismiss: Story = {
     ctaLabel: 'Get started',
     href: '#',
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
-    imageSrc: SpacesIllustration,
+    imageSrc: SpacesIllustration.src,
     imageAlt: 'Welcome',
   },
 }
@@ -83,7 +83,7 @@ export const WithOnClick: Story = {
     onCtaClick: () => alert('Button clicked!'),
     trackingEvents: { action: 'Click promo banner', category: 'overview' },
     onDismiss: () => {},
-    imageSrc: SpacesIllustration,
+    imageSrc: SpacesIllustration.src,
     imageAlt: 'Action required',
   },
 }

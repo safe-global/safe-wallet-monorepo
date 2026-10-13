@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -98,7 +97,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </div>
 
             <div className="relative hidden items-center justify-center bg-[var(--color-background-main)] sm:flex md:w-5/12">
-              <Image src={EarnIllustrationLight} alt="Earn illustration" width={239} height={239} />
+              <img src={EarnIllustrationLight.src} alt="Earn illustration" width={239} height={239} />
             </div>
           </div>
         </CardContent>
