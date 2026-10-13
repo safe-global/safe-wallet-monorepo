@@ -25,6 +25,28 @@ const SPACE = {
   members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
 }
 
+// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
+const LIVE_SUBSCRIPTION = {
+  id: 'sub_e2e',
+  customerId: 'cus_e2e',
+  upstreamCustomerId: 'cus_e2e',
+  plan: {
+    id: 'plan_e2e',
+    currentPrice: 0,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'usd',
+    features: [],
+    type: 'standard',
+    product: null,
+  },
+  status: 'active',
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+}
+
 async function seedWorkspaceSession(page: Page): Promise<void> {
   await page.addInitScript(
     ({ ns, spaceId }) => {
@@ -56,6 +78,9 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
   )
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
   await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
+  await page.route(/\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/, (route) =>
+    route.fulfill({ json: [LIVE_SUBSCRIPTION] }),
+  )
 }
 
 async function gateSafeRemoval(page: Page): Promise<void> {
