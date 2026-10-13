@@ -131,8 +131,8 @@ describe('AssetsTable', () => {
       expect(screen.getByText('Value')).toBeInTheDocument()
     })
 
-    it('shows the price with two decimals in the list', async () => {
-      const item = balanceBuilder().with({ fiatConversion: '2345.67' }).build()
+    it('shows the price and value with two decimals in the list', async () => {
+      const item = balanceBuilder().with({ fiatConversion: '2345.67', fiatBalance: '9876.54' }).build()
       renderAssetsTable({
         balances: balancesBuilder()
           .with({ items: [item] })
@@ -142,6 +142,8 @@ describe('AssetsTable', () => {
       await waitFor(() => {
         expect(screen.getByText('$ 2,345')).toBeInTheDocument()
         expect(screen.getByText('.67')).toBeInTheDocument()
+        expect(screen.getAllByText('$ 9,876')[0]).toBeInTheDocument()
+        expect(screen.getAllByText('.54')[0]).toBeInTheDocument()
       })
     })
   })
