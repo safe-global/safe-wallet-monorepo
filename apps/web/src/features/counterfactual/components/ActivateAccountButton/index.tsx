@@ -1,5 +1,5 @@
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import React, { useContext } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'

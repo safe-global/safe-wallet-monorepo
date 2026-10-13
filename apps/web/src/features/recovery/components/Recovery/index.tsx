@@ -1,4 +1,4 @@
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
 
 // Lazy load the heavy recovery components to keep them out of the main bundle
