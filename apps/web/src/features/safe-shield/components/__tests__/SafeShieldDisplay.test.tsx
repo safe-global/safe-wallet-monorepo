@@ -12,9 +12,20 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
+import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
+import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
+jest.mock('@/features/safenet-checks', () => ({
+  ...jest.requireActual('@/features/safenet-checks'),
+  useSafenetShieldState: jest.fn(),
+}))
+
+const mockSafenetState = (state: Partial<SafenetShieldState> = {}) =>
+  jest
+    .mocked(useSafenetShieldState)
+    .mockReturnValue({ check: { shown: false, passed: false }, risk: undefined, ...state })
 
 // Default empty AsyncResult values
 const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, false]
@@ -33,6 +44,7 @@ describe('SafeShieldDisplay', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSafenetState()
 
     // Mock useCheckSimulation to return no simulation error by default
     jest.spyOn(useCheckSimulation, 'useCheckSimulation').mockReturnValue({
@@ -110,7 +122,8 @@ describe('SafeShieldDisplay', () => {
       expect(screen.getByText('3 of 3 checks passed')).toBeInTheDocument()
     })
 
-    it('counts the locked Pro checks as not passed without Safe Pro', () => {
+    it('counts the locked Pro checks, Safenet included, as not passed without Safe Pro', () => {
+      mockSafenetState({ check: { shown: true, passed: false } })
       render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
@@ -121,7 +134,36 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(screen.getByText('1 of 2 checks passed')).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 checks passed')).toBeInTheDocument()
+    })
+
+    it('counts a Safenet verdict as a check', () => {
+      mockSafenetState({ check: { shown: true, passed: true } })
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByText('4 of 4 checks passed')).toBeInTheDocument()
+    })
+
+    it('shows a Safenet risk instead of "all checks passed"', () => {
+      mockSafenetState({ risk: { severity: Severity.CRITICAL, title: 'Risk detected' } })
+      render(
+        <SafeShieldDisplay
+          recipient={mockRecipient}
+          contract={mockContract}
+          threat={mockThreat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      expect(screen.getByTestId('safe-shield-status')).toHaveTextContent('Risk detected')
+      expect(screen.queryByText(/checks passed/i)).not.toBeInTheDocument()
     })
 
     it('should show "Risk detected" when there are critical issues', () => {
