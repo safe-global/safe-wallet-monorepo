@@ -10,7 +10,12 @@ const injectedRtkApi = api
         TransactionsGetTransactionByIdV1ApiResponse,
         TransactionsGetTransactionByIdV1ApiArg
       >({
-        query: (queryArg) => ({ url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}` }),
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/transactions/${queryArg.id}`,
+          params: {
+            spaceId: queryArg.spaceId,
+          },
+        }),
         providesTags: ['transactions'],
       }),
       transactionsGetMultisigTransactionsV1: build.query<
@@ -161,6 +166,8 @@ export type TransactionsGetTransactionByIdV1ApiArg = {
   chainId: string
   /** Transaction ID (safe transaction hash or multisig transaction ID) */
   id: string
+  /** Space UUID. Also returns a multisig transaction only the Space can see, for a multisig transaction ID. Requires a session of a Space member, and the Safe registered to the Space */
+  spaceId?: string
 }
 export type TransactionsGetMultisigTransactionsV1ApiResponse =
   /** status 200 Paginated list of multisig transactions */ MultisigTransactionPage

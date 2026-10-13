@@ -9,10 +9,15 @@ import { getStoreInstance } from '@/store'
  *
  * @param chainId - The chain ID where the transaction exists
  * @param txId - The transaction ID (safe transaction hash or multisig transaction ID)
+ * @param spaceId - The Workspace whose private transactions may be returned
  * @returns The transaction details
  * @throws Error if the store is not initialized or if the request fails
  */
-export const getTransactionDetails = async (chainId: string, txId: string): Promise<TransactionDetails> => {
+export const getTransactionDetails = async (
+  chainId: string,
+  txId: string,
+  spaceId?: string,
+): Promise<TransactionDetails> => {
   const store = getStoreInstance()
 
   const result = await store
@@ -21,6 +26,7 @@ export const getTransactionDetails = async (chainId: string, txId: string): Prom
         {
           chainId,
           id: txId,
+          spaceId,
         },
         {
           // Prevent caching in RTK Query, always fetch fresh data

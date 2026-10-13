@@ -5413,6 +5413,15 @@
               "example": "multisig_0x1234567890123456789012345678901234567890_0x5678...",
               "type": "string"
             }
+          },
+          {
+            "name": "spaceId",
+            "required": false,
+            "in": "query",
+            "description": "Space UUID. Also returns a multisig transaction only the Space can see, for a multisig transaction ID. Requires a session of a Space member, and the Safe registered to the Space",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

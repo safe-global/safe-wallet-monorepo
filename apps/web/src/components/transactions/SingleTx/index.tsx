@@ -20,6 +20,7 @@ import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useHnQueueAssessment } from '@/features/hypernative'
 import { reloadPage } from '@/utils/navigation'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 
 const SingleTxGrid = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement => {
   const tx: ModuleTransaction = makeTxFromDetails(txDetails)
@@ -45,6 +46,7 @@ const SingleTx = () => {
   const transactionId = Array.isArray(id) ? id[0] : id
   const { safe, safeAddress } = useSafeInfo()
   const { setTx } = useHnQueueAssessment()
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
 
   const {
     data: txDetails,
@@ -55,6 +57,7 @@ const SingleTx = () => {
     {
       chainId: safe.chainId || '',
       id: transactionId || '',
+      spaceId: privateQueueSpaceId,
     },
     {
       skip: !transactionId || !safe.chainId,

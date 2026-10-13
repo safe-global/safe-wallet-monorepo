@@ -19,6 +19,7 @@ import useTxPreview from '../confirmation-views/useTxPreview'
 import useChainId from '@/hooks/useChainId'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { createExistingTx } from '@/services/tx/tx-sender'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
 
@@ -37,6 +38,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   const safeLinkQuery = useSafeLinkQuery()
   const [txPreview] = useTxPreview(safeTx?.data)
   const [isReloaded, setIsReloaded] = useState(false)
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
 
   const scopeSafeAddress = scope?.safeAddress
   const scopeSdk = scope?.sdk
@@ -49,13 +51,14 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   useEffect(() => {
     if (!txId) return
     if (txSenderScope && !txSenderScope.sdk) return
-    createExistingTx(chainId, txId, undefined, txSenderScope)
+    // A scoped flow acts on a Safe other than the open one, which the Workspace may not hold
+    createExistingTx(chainId, txId, undefined, txSenderScope, txSenderScope ? undefined : privateQueueSpaceId)
       .then((signedTx) => {
         setSafeTx(signedTx)
         setIsReloaded(true)
       })
       .catch(setSafeTxError)
-  }, [txId, chainId, txSenderScope, setSafeTx, setSafeTxError])
+  }, [txId, chainId, txSenderScope, setSafeTx, setSafeTxError, privateQueueSpaceId])
 
   const executeLater = () => {
     setTxFlow(undefined)

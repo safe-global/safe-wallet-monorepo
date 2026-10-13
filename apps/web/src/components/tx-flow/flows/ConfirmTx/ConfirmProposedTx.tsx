@@ -6,6 +6,7 @@ import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { usePrivateQueueSpaceId } from '@/features/spaces'
 
 const SIGN_TEXT = 'Sign this transaction.'
 const EXECUTE_TEXT = 'Submit the form to execute this transaction.'
@@ -15,6 +16,7 @@ const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): Reac
   const chainId = useChainId()
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
   const { txId, txNonce, onlyExecute, isExecutable } = useContext(TxFlowContext)
+  const privateQueueSpaceId = usePrivateQueueSpaceId()
 
   useEffect(() => {
     if (txNonce !== undefined) {
@@ -24,9 +26,9 @@ const ConfirmProposedTx = ({ children, ...props }: ReviewTransactionProps): Reac
 
   useEffect(() => {
     if (txId) {
-      createExistingTx(chainId, txId).then(setSafeTx).catch(setSafeTxError)
+      createExistingTx(chainId, txId, undefined, undefined, privateQueueSpaceId).then(setSafeTx).catch(setSafeTxError)
     }
-  }, [txId, chainId, setSafeTx, setSafeTxError])
+  }, [txId, chainId, setSafeTx, setSafeTxError, privateQueueSpaceId])
 
   const text = !onlyExecute ? (isExecutable ? SIGN_EXECUTE_TEXT : SIGN_TEXT) : EXECUTE_TEXT
 
