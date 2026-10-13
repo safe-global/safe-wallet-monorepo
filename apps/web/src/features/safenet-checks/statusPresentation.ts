@@ -74,6 +74,14 @@ export const UNAVAILABLE_PRESENTATION: Record<UnavailableReason, Pick<SafenetSta
   WINDOW_UNCERTAIN: STATUS_UNKNOWN,
 }
 
+export const CHIP_VARIANT = {
+  [CheckStatus.SUBMITTED]: 'info',
+  [CheckStatus.IN_PROGRESS]: 'info',
+  [CheckStatus.BENIGN]: 'positive',
+  [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.TIMED_OUT]: 'warning',
+} as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
+
 /** The check's page on the Safenet explorer — per-sentinel detail, not proof of a verdict. */
 export const getSafenetExplorerUrl = (chainId: string, safeTxHash: string): string =>
   `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
