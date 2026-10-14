@@ -5,11 +5,11 @@ import { decodeCustomError } from '@/utils/customErrorRegistry'
 import { getBlockExplorerLink } from '@/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ErrorDetails from '@/components/common/ErrorDetails'
 import { getLedgerDeviceError, getLedgerSupportReference } from '@/services/onboard/ledger-errors'
-import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
+import { Alert, AlertDescription, AlertTitle, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { cn } from '@safe-global/views/utils/cn'
 
 const alertVariant: Record<'error' | 'warning' | 'info', 'destructive' | 'warning' | 'info'> = {
   error: 'destructive',

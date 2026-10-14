@@ -25,6 +25,8 @@ import {
   type SpendingLimitMethods,
 } from '@/utils/transaction-guards'
 import { SpendingLimits } from '@/components/transactions/TxDetails/TxData/SpendingLimits'
+import { SpendingLimitBatchSummary } from '@/components/transactions/TxDetails/TxData/SpendingLimits/SpendingLimitBatchSummary'
+import { getSpendingLimitBatch } from '@/components/transactions/TxDetails/TxData/SpendingLimits/spendingLimitBatch'
 import type { PropsWithChildren, ReactElement } from 'react'
 import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejection'
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
@@ -122,7 +124,7 @@ const TxData = ({
     isSupportedSpendingLimitAddress(txInfo, chainId) &&
     isSpendingLimitMethod(txData?.dataDecoded?.method)
   ) {
-    return <SpendingLimits txData={txData} txInfo={txInfo} type={txData?.dataDecoded?.method as SpendingLimitMethods} />
+    return <SpendingLimits txData={txData} type={txData?.dataDecoded?.method as SpendingLimitMethods} />
   }
 
   if (txDetails && isMigrateToL2TxData(txData, chainId)) {
@@ -141,9 +143,9 @@ const TxData = ({
     return <SafeUpdate txData={txData} />
   }
 
-  return !!children ? (
-    <>{children}</>
-  ) : (
+  const spendingLimitBatch = getSpendingLimitBatch(txData, chainId)
+
+  const defaultTxData = (
     <>
       <DecodedData txData={txData} toInfo={isCustomTxInfo(txInfo) ? txInfo.to : txData?.to} />
 
@@ -156,6 +158,17 @@ const TxData = ({
           />
         </ObservabilityErrorBoundary>
       )}
+    </>
+  )
+
+  return (
+    <>
+      {txData && spendingLimitBatch && (
+        <div className="mb-4 border-b border-border pb-4">
+          <SpendingLimitBatchSummary txData={txData} batch={spendingLimitBatch} />
+        </div>
+      )}
+      {children ? children : defaultTxData}
     </>
   )
 }

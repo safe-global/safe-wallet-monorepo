@@ -1,18 +1,18 @@
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import TxCard from '@/components/tx-flow/common/TxCard'
-import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeScope } from '@/components/tx-flow/safe-scope/context'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { Execute } from '@/components/tx-flow/actions/Execute'
 import { Receipt } from '../ConfirmTxDetails/Receipt'
 import useTxPreview from '../confirmation-views/useTxPreview'
@@ -23,9 +23,9 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
 
 /**
- * Execute step for a fully signed transaction: after the sign step of a 1/n Safe, or straight from
- * the queue. The transaction is reloaded from the gateway so gas is estimated against the real
- * signatures before executing.
+ * Execute step for a fully signed transaction: after the signature that completes the threshold, or
+ * straight from the queue. The transaction is reloaded from the gateway so gas is estimated against
+ * the real signatures before executing.
  */
 export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
   const chainId = useChainId()

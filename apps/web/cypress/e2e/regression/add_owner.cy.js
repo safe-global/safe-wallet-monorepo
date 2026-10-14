@@ -5,10 +5,13 @@ import * as addressBook from '../pages/address_book.page'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Add Owners tests', () => {
   before(async () => {
@@ -57,7 +60,7 @@ describe('Add Owners tests', () => {
     it('Verify default threshold value. Verify correct threshold calculation', () => {
       owner.openManageSignersWindow()
       owner.clickOnAddSignerBtn()
-      owner.typeOwnerAddressManage(1, constants.DEFAULT_OWNER_ADDRESS)
+      owner.typeOwnerAddressManage(1, constants.defaultOwnerAddress())
       owner.verifyThreshold(1, 2)
     })
 

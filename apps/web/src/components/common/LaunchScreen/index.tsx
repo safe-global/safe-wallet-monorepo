@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactElement } from 'react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useLaunchScreen } from './useLaunchScreen'
 import css from './LaunchScreen.module.css'
 

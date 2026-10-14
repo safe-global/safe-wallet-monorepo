@@ -2,9 +2,12 @@ import * as constants from '../../support/constants.js'
 import * as space from '../pages/spaces.page.js'
 import * as wallet from '../../support/utils/wallet.js'
 import staticSpaces from '../../fixtures/spaces/staticSpaces.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const owner = walletCredentials.OWNER_1_PRIVATE_KEY
+let owner
+before(() => {
+  owner = walletCredentials.OWNER_1_PRIVATE_KEY
+})
 
 describe('Spaces dashboard tests', () => {
   beforeEach(() => {

@@ -1,9 +1,9 @@
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import WarningIcon from '@/public/images/notifications/warning.svg'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
+import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 
 type DetailsProps = {
   app: SafeAppData

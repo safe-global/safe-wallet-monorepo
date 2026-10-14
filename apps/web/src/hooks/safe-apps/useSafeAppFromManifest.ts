@@ -4,7 +4,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { fetchSafeAppFromManifest } from '@/services/safe-apps/manifest'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import type { SafeAppDataWithPermissions } from '@/components/safe-apps/types'
+import type { SafeAppDataWithPermissions } from '@safe-global/views/components/safe-apps/types'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 type UseSafeAppFromManifestReturnType = {

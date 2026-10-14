@@ -4,10 +4,13 @@ import * as createwallet from '../pages/create_wallet.pages'
 import * as owner from '../pages/owners.pages'
 import * as wallet from '../../support/utils/wallet.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_2_PRIVATE_KEY
+})
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('CF Safe creation happy path tests', () => {
   beforeEach(() => {
@@ -15,18 +18,18 @@ describe('CF Safe creation happy path tests', () => {
     // Required for data layer
     cy.clearLocalStorage()
     main.acceptCookies()
-    getEvents()
   })
 
   it('CF creation happy path. GA safe_created', () => {
     createwallet.connectWalletAndCreateSafe(signer)
+    // Connecting reloads the page, so capture the data layer of the page that creates the Safe.
+    getEvents()
     createwallet.clickOnNextBtn()
     createwallet.clickOnNextBtn()
     // Creating a counterfactual (pay-later) Safe now requires signing into a workspace first, which
     // selects the pay-later method and enables the review step's Next button.
     createwallet.clickOnSignInToWorkspaceBtn()
     createwallet.clickOnReviewStepNextBtn()
-    cy.wait(1000)
     main.getAddedSafeAddressFromLocalStorage(constants.networkKeys.sepolia, 0).then((address) => {
       const safe_created = [
         {

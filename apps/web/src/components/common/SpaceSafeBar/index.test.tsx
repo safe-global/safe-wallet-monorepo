@@ -25,7 +25,8 @@ jest.mock('@/features/spaces', () => ({
   useIsQualifiedSafe: jest.fn(() => false),
   useCurrentSpaceId: () => undefined,
   useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
-  matchesSafeSearch: jest.requireActual('@/features/spaces/components/SafeSelectorDropdown/utils').matchesSafeSearch,
+  matchesSafeSearch: jest.requireActual('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils')
+    .matchesSafeSearch,
   get SafeSelectorDropdown() {
     return jest.requireMock('@/features/spaces/components/SafeSelectorDropdown').default
   },
@@ -69,7 +70,8 @@ jest.mock('@/features/spaces/components/SafeSelectorDropdown', () => {
     const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
     const onSearchValueChange = props.onSearchValueChange as ((value: string) => void) | undefined
     const onItemRename = props.onItemRename as
-      ((target: { address: string; name: string; chainIds: string[] }) => void) | undefined
+      | ((target: { address: string; name: string; chainIds: string[] }) => void)
+      | undefined
     return (
       <div
         data-testid="safe-selector-dropdown"

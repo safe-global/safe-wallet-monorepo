@@ -2,7 +2,7 @@ import type {
   NativeStakingDepositTransactionInfo,
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import FieldsGrid from '@/components/tx/FieldsGrid'
+import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import SendAmountBlock from '@/components/tx-flow/flows/TokenTransfer/SendAmountBlock'
 import StakingConfirmationTxDeposit from './StakingConfirmationTxDeposit'
 

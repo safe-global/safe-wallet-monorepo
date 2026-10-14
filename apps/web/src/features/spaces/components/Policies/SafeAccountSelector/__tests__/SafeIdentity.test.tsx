@@ -4,7 +4,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import SafeIdentity from '../components/SafeIdentity'
 
 // Render the tooltip primitives inline so the wired content is assertable without a portal.
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ render: element, children }: { render?: ReactElement; children?: ReactNode }) => (
     <>

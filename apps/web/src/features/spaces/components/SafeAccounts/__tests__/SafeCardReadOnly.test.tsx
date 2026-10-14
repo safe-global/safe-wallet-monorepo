@@ -28,6 +28,7 @@ jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: mockChains }),
   useChain: (chainId: string) => mockChains.find((chain) => chain.chainId === chainId),
+  useHasFeature: () => false,
 }))
 
 jest.mock('@/hooks/useSafeAddress', () => ({

@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 
 import { AuditLog, AuditRow, AuditLogHeader } from '@/components/common/AuditLog'
-import { Countdown } from '@/components/common/Countdown'
+import { Countdown } from '@safe-global/views/components/common/Countdown'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'

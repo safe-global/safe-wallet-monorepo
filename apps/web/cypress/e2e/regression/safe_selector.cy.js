@@ -10,17 +10,20 @@ import * as dashboard from '../pages/dashboard.pages.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
-import safes from '../../fixtures/safes/static.js'
+import sidebar from '../../fixtures/sidebar.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const newSafeName = 'Added safe 3'
 const addedSafe900 = 'Added safe 900'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
+let signer, signer1, signer2
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer1 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_3_PRIVATE_KEY
+})
 
 describe('Safe selector tests - connect wallet prompt', () => {
   before(async () => {
@@ -42,7 +45,7 @@ describe('Safe selector tests - details and currency', () => {
   it('Verify current safe details are shown in the safe selector trigger', () => {
     cy.visit(constants.homeUrl + staticSafes.SEP_STATIC_SAFE_9)
     safeNav.verifySafeIconVisible()
-    safeNav.verifySafeSelectorTriggerName(safes.SEP_STATIC_SAFE_9_SHORT)
+    safeNav.verifySafeSelectorTriggerName(sidebar.safe9Short)
     safeNav.verifySafeSelectorThreshold(2, 2)
   })
 

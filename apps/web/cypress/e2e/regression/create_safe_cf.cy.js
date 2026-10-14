@@ -5,11 +5,14 @@ import * as owner from '../pages/owners.pages'
 import * as ls from '../../support/localstorage_data.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_2_PRIVATE_KEY
+})
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('CF Safe regression tests', () => {
   before(async () => {

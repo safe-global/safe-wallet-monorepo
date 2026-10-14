@@ -34,7 +34,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(true),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   TooltipTrigger: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
   TooltipContent: ({ children }: { children?: ReactNode }) => <div>{children}</div>,

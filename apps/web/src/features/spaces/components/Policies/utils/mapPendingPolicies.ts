@@ -9,7 +9,7 @@ import type {
   PolicySafe,
   PolicySpender,
   SpendingLimitPolicy,
-} from '../types'
+} from '@safe-global/views/features/spaces/components/Policies/types'
 import { toPolicyToken } from './toPolicyToken'
 
 type PendingChange = PendingPolicyDto['data']['changes'][number]

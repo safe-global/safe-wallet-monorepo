@@ -3,9 +3,9 @@ import { useRouter } from 'next/router'
 import { CirclePlus, Plus } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useNewSafeNextParam } from '@/components/new-safe/getReturnUrl'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ChooserRow } from '@/components/common/ChooserRow'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { ChooserRow } from '@safe-global/views/components/common/ChooserRow'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 
 interface AddAccountsChooserProps {

@@ -46,7 +46,7 @@ const hasInconclusiveResult = (events: ReadonlyArray<NormalizedCheckEvent>): boo
   )
 
 const hasAnyProposal = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
-  events.some((event) => event.type === CheckEventType.ORACLE_PROPOSED || event.type === CheckEventType.PLAIN_PROPOSED)
+  events.some((event) => event.type === CheckEventType.ORACLE_PROPOSED)
 
 const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean =>
   events.some(
@@ -83,15 +83,6 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
   // self-authenticating, and a targeted window can clip the proposal.
   const attested = events.some((event) => event.type === CheckEventType.ORACLE_ATTESTED)
   if (attested) {
-    if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
-    if (attestation.status === AttestationVerificationStatus.INVALID) return CheckStatus.VERIFICATION_FAILED
-    return CheckStatus.AWAITING_VERIFICATION
-  }
-
-  // Non-oracle path: the validator set's own checks passed — BENIGN, but only
-  // on a verified signature, exactly like the oracle path.
-  const plainAttested = events.some((event) => event.type === CheckEventType.PLAIN_ATTESTED)
-  if (plainAttested) {
     if (attestation.status === AttestationVerificationStatus.VERIFIED) return CheckStatus.BENIGN
     if (attestation.status === AttestationVerificationStatus.INVALID) return CheckStatus.VERIFICATION_FAILED
     return CheckStatus.AWAITING_VERIFICATION

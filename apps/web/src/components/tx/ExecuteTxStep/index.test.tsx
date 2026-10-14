@@ -9,8 +9,8 @@ import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import { AppRoutes } from '@/config/routes'
 import type Safe from '@safe-global/protocol-kit'
-import { SafeScopeContext } from '@/components/tx-flow/safe-scope/context'
-import type { SafeScope } from '@/components/tx-flow/safe-scope/types'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { chainBuilder } from '@/tests/builders/chains'
 
 jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: jest.fn() }))

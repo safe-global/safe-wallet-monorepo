@@ -1,3 +1,4 @@
+import replacementTransactions from '../../fixtures/replacement-transactions.js'
 import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
 import * as swaps from '../pages/swaps.pages.js'
@@ -6,14 +7,14 @@ import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as navigation from '../pages/navigation.page.js'
 import { spendingLimitTxOption } from '../pages/spending_limits.pages'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
-
-const sendQueueTx =
-  '&id=multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x539c9c2cd63bae1e4f84f71ef9aa7aea1fd8edb82b089c741cffad99843d0884'
+let signer2
+before(() => {
+  signer2 = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 describe('Transaction queue Replace button tests', { defaultCommandTimeout: 30000 }, () => {
   before(async () => {
@@ -55,7 +56,7 @@ describe('Transaction queue Replace button tests', { defaultCommandTimeout: 3000
   })
 
   it('Verify there is no spending limit option in Send funds form when replacing a tx', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + sendQueueTx)
+    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + replacementTransactions.withAllowance)
     wallet.connectSigner(signer2)
     create_tx.clickOnRejectBtn()
     create_tx.verifyTxRejectModalVisible()

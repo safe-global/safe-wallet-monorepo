@@ -182,19 +182,36 @@ describe('Execute slot', () => {
     })
   })
 
-  it('keeps Execute for the last signer on an m/n Safe', async () => {
+  const renderLastSignerOfTwoSlotIds = () => {
     mockSafe(2)
     mockUseImmediatelyExecutable.mockReturnValue(false)
 
-    const { result } = renderSlotIds({
+    return renderSlotIds({
       safeTx: buildSafeTx({ signed: false, otherSignatures: 1 }),
       txId: 'multisig_0x1_0x2',
       isExecutable: true,
     })
+  }
 
+  it('offers only Sign for the last signer on an m/n Safe', async () => {
+    const { result } = renderLastSignerOfTwoSlotIds()
+
+    await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
     await waitFor(() => {
-      expect(result.current).toContain('execute')
       expect(result.current).toContain('sign')
+      expect(result.current).not.toContain('execute')
+    })
+  })
+
+  it('offers only Sign for a smart-account last signer on an m/n Safe', async () => {
+    mockIsSmartContractWallet.mockResolvedValue(true)
+
+    const { result } = renderLastSignerOfTwoSlotIds()
+
+    await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
+    await waitFor(() => {
+      expect(result.current).toContain('sign')
+      expect(result.current).not.toContain('execute')
     })
   })
 
@@ -214,23 +231,40 @@ describe('Execute slot', () => {
     })
   })
 
-  it('keeps Execute for a nested Safe signer on a 1/n Safe', async () => {
+  it('offers only Sign for a nested Safe signer on a 1/n Safe', async () => {
     mockSigner({ isSafe: true })
 
     const { result } = renderSlotIds({ safeTx: buildSafeTx({ signed: false }) })
+
+    await waitFor(() => {
+      expect(result.current).toContain('sign')
+      expect(result.current).not.toContain('execute')
+    })
+  })
+
+  it('offers Execute for a nested Safe signer once the transaction is fully signed', async () => {
+    mockSigner({ isSafe: true })
+
+    const { result } = renderSlotIds({
+      safeTx: buildSafeTx({ signed: false, otherSignatures: 1 }),
+      txId: 'multisig_0x1_0x2',
+      isExecutable: true,
+    })
 
     await waitFor(() => {
       expect(result.current).toContain('execute')
     })
   })
 
-  it('keeps Execute for a smart-account signer on a 1/n Safe', async () => {
+  it('offers only Sign for a smart-account signer on a 1/n Safe', async () => {
     mockIsSmartContractWallet.mockResolvedValue(true)
 
     const { result } = renderSlotIds({ safeTx: buildSafeTx({ signed: false }) })
 
+    await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
     await waitFor(() => {
-      expect(result.current).toContain('execute')
+      expect(result.current).toContain('sign')
+      expect(result.current).not.toContain('execute')
     })
   })
 })

@@ -19,7 +19,7 @@ jest.mock('@/services/analytics', () => ({
 
 // Render the Base UI popover content inline so the trigger does not need to be
 // opened (the real component renders content into a portal only when open).
-jest.mock('@/components/ui/popover', () => ({
+jest.mock('@safe-global/views/components/ui/popover', () => ({
   Popover: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   PopoverTrigger: ({ children, 'aria-label': ariaLabel }: { children: ReactNode; 'aria-label'?: string }) => (
     <button aria-label={ariaLabel}>{children}</button>
@@ -31,7 +31,7 @@ jest.mock('@/components/ui/popover', () => ({
 
 // TooltipTrigger composes the popover trigger through `render`; cloning it with the
 // children keeps the real trigger element (and its aria-label) in the tree.
-jest.mock('@/components/ui/tooltip', () => {
+jest.mock('@safe-global/views/components/ui/tooltip', () => {
   const { cloneElement } = jest.requireActual<typeof ReactModule>('react')
   return {
     Tooltip: ({ children }: { children: ReactNode }) => <div>{children}</div>,

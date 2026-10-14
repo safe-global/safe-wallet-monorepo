@@ -649,7 +649,10 @@ describe('TxSigners (Audit Log)', () => {
   })
 
   describe('Safenet audit step', () => {
-    const { useHasFeature } = jest.requireMock('@/hooks/useChains') as { useHasFeature: jest.Mock }
+    const { useHasFeature, useChain } = jest.requireMock('@/hooks/useChains') as {
+      useHasFeature: jest.Mock
+      useChain: jest.Mock
+    }
     const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
       useSafenetCheck: jest.Mock
     }
@@ -683,11 +686,11 @@ describe('TxSigners (Audit Log)', () => {
       useHasFeature.mockReturnValue(true)
       mockSafeInfo({ chainId: '1', threshold: 1, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
       const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const { buildBenignSnapshot, plainAttestedEvent } = jest.requireActual(
+      const { buildBenignSnapshot, attestedEvent } = jest.requireActual(
         '@safe-global/utils/features/safenet-checks/builders',
       )
       const { AttestationVerificationStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const attested = plainAttestedEvent({ safeTxHash: safenetTxHash })
+      const attested = attestedEvent({ safeTxHash: safenetTxHash })
       useSafenetCheck.mockReturnValue({
         snapshot: buildBenignSnapshot({
           safeTxHash: safenetTxHash,
@@ -704,6 +707,14 @@ describe('TxSigners (Audit Log)', () => {
         isFetching: false,
         isStale: false,
         refetch: jest.fn(),
+      })
+      // The Safenet chain's explorer builds the attestation link.
+      useChain.mockReturnValue({
+        blockExplorerUriTemplate: {
+          txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+          address: 'https://gnosisscan.io/address/{{address}}',
+          api: '',
+        },
       })
       const { txDetails, txSummary } = buildSafenetTx()
 
@@ -723,7 +734,7 @@ describe('TxSigners (Audit Log)', () => {
       )
       expect(screen.getByTestId('safenet-attestation-link')).toHaveAttribute(
         'href',
-        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
+        `https://gnosisscan.io/tx/${attested.transactionHash}`,
       )
     }, 15_000)
 

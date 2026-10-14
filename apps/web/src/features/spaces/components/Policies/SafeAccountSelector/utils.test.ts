@@ -1,5 +1,8 @@
 import { buildSafeAccountId, groupSafeAccounts } from './utils'
-import { isSafeAccountGroup, type SafeAccountOption } from './types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'

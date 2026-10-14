@@ -31,6 +31,44 @@ const SPACE = {
   members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
 }
 
+// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
+const LIVE_SUBSCRIPTION = {
+  id: 'sub_e2e',
+  customerId: 'cus_e2e',
+  upstreamCustomerId: 'cus_e2e',
+  plan: {
+    id: 'plan_e2e',
+    currentPrice: 0,
+    originalPrice: null,
+    paymentMethod: 'fiat',
+    currency: 'usd',
+    features: [],
+    type: 'standard',
+    product: null,
+  },
+  status: 'active',
+  createdAt: 0,
+  startAt: 0,
+  cancelledAt: null,
+  cancelAt: null,
+}
+
+const MEMBERSHIP = {
+  id: 1,
+  role: 'ADMIN',
+  status: 'ACTIVE',
+  name: 'Admin',
+  invitedBy: null,
+  createdAt: '',
+  updatedAt: '',
+  user: { id: 1, status: 'ACTIVE' },
+}
+
+const ENTITLEMENTS = {
+  plan: { id: 'plan_e2e', name: 'Business', cycleEndsAt: null, status: 'active' },
+  entitlements: [],
+}
+
 // Deliberately non-alphabetical so the Name sort is observable.
 const member = (id: number, name: string, email: string) => ({
   id,
@@ -89,6 +127,20 @@ test.describe('Spaces — Members table', { tag: '@regression' }, () => {
     await safePage.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
     await safePage.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
     await safePage.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
+    await safePage.route(/\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/, (route) =>
+      route.fulfill({ json: [LIVE_SUBSCRIPTION] }),
+    )
+    // Session-scoped calls of the Workspace pages; unmocked, the gateway answers 403 and the app re-checks the session.
+    await safePage.route(/\/v1\/users\/counterfactual-safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
+    await safePage.route(/\/v1\/spaces\/[^/]+\/counterfactual-safes(\?.*)?$/, (route) =>
+      route.fulfill({ json: { safes: {} } }),
+    )
+    await safePage.route(/\/v1\/spaces\/[^/]+\/membership(\?.*)?$/, (route) => route.fulfill({ json: MEMBERSHIP }))
+    await safePage.route(/\/v1\/spaces\/[^/]+\/entitlements(\?.*)?$/, (route) => route.fulfill({ json: ENTITLEMENTS }))
+    await safePage.route(/\/v1\/spaces\/[^/]+\/address-book(\?.*)?$/, (route) =>
+      route.fulfill({ json: { spaceUuid: SPACE_ID, data: [] } }),
+    )
+    await safePage.route(/\/v1\/billing\/spaces\/[^/]+\/payment-links(\?.*)?$/, (route) => route.fulfill({ json: [] }))
 
     await safePage.goto(`/spaces/members?spaceId=${SPACE_ID}`)
     await walletPage.acceptCookies()

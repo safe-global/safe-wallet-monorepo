@@ -4,13 +4,16 @@ import * as createtx from '../../e2e/pages/create_tx.pages'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import * as tx from '../../e2e/pages/transactions.page'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 function happyPathToStepTwo() {
   createtx.typeRecipientAddress(constants.EOA)
@@ -49,7 +52,7 @@ describe('Create transactions tests', () => {
     createtx.clickOnSendTokensBtn()
     happyPathToStepTwo()
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     cy.contains(tx.relayRemainingAttemptsStr).should('exist')
   })
 })

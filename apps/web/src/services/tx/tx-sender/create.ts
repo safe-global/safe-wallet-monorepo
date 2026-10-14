@@ -7,7 +7,7 @@ import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 
 /**
  * Create a transaction from raw params

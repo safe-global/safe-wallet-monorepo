@@ -13,7 +13,7 @@ import {
   getSafenetReader,
   mergeMonotonic,
   type AttestationVerification,
-  type AttestedCheckEvent,
+  type OracleAttestedEvent,
   type SafenetCheckSnapshot,
   type SafenetReader,
 } from '@safe-global/utils/features/safenet-checks'
@@ -44,7 +44,7 @@ const VERIFICATION_RANK: Record<AttestationVerificationStatus, number> = {
   [AttestationVerificationStatus.UNVERIFIED]: 0,
 }
 
-type SelectedAttestation = { event: AttestedCheckEvent; attestation: AttestationVerification }
+type SelectedAttestation = { event: OracleAttestedEvent; attestation: AttestationVerification }
 
 /**
  * Verify candidates in order and stop at the first signature that verifies. An
@@ -53,7 +53,7 @@ type SelectedAttestation = { event: AttestedCheckEvent; attestation: Attestation
  */
 const selectAttestation = async (
   reader: SafenetReader,
-  candidates: ReadonlyArray<AttestedCheckEvent>,
+  candidates: ReadonlyArray<OracleAttestedEvent>,
 ): Promise<SelectedAttestation | null> => {
   let best: SelectedAttestation | null = null
   for (const event of candidates) {
@@ -64,6 +64,16 @@ const selectAttestation = async (
     if (attestation.status === AttestationVerificationStatus.VERIFIED) break
   }
   return best
+}
+
+/** Dates a check past its deadline from the deadline block — one header read per poll until polling stops. */
+const timedOutAtMs = async (
+  reader: SafenetReader,
+  status: CheckStatus,
+  { deadlineBlock, headBlock }: Pick<SafenetCheckSnapshot, 'deadlineBlock' | 'headBlock'>,
+): Promise<number | null> => {
+  const pastDeadline = deadlineBlock !== null && headBlock !== null && BigInt(headBlock) > BigInt(deadlineBlock)
+  return status === CheckStatus.TIMED_OUT && pastDeadline ? reader.blockTimeMs(Number(deadlineBlock)) : null
 }
 
 const configuredRpcUrl = (rpcUri: RpcUri | undefined): string => {
@@ -146,6 +156,7 @@ export const safenetCheckApi = createApi({
             headBlock: read.headBlock,
             attestation,
             attestedAtMs,
+            timedOutAtMs: await timedOutAtMs(reader, status, read),
             aimedAtMs,
             windowCoverage: read.windowCoverage,
             events,

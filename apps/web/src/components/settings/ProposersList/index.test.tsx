@@ -110,6 +110,21 @@ describe('ProposersList', () => {
     expect(button).not.toBeDisabled()
   })
 
+  it('marks the Add proposer button with the Pro tag only when the plan gate asks for it', () => {
+    const { getByTestId, queryByTestId, rerender } = render(<ProposersList />)
+    expect(queryByTestId('pro-tag')).not.toBeInTheDocument()
+
+    mockUsePlanGate.mockReturnValue({
+      mustUpgradeToSafePro: false,
+      isLoading: false,
+      showProTag: true,
+      upgradeHref: '/spaces/plans',
+    })
+    rerender(<ProposersList />)
+
+    expect(getByTestId('add-proposer-btn')).toContainElement(getByTestId('pro-tag'))
+  })
+
   it('should enable the Add proposer button when user is a nested Safe owner', () => {
     ;(useIsSafeOwner as jest.MockedFunction<typeof useIsSafeOwner>).mockReturnValue(false)
     mockUseNestedSafeOwners.mockReturnValue([faker.finance.ethereumAddress()])

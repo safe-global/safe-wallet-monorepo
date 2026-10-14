@@ -1,7 +1,7 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TxProposalChip } from '@/features/proposers'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import css from './styles.module.css'
@@ -11,10 +11,10 @@ import { isMultisigExecutionInfo, isTxQueued } from '@/utils/transaction-guards'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import classNames from 'classnames'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
-import MaliciousTxWarning from '../MaliciousTxWarning'
+import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import QueueActions from './QueueActions'
 import useIsPending from '@/hooks/useIsPending'
-import TxConfirmations from '../TxConfirmations'
+import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
 import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -26,7 +26,6 @@ import {
   HypernativeFeature,
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 type TxSummaryProps = {
@@ -39,8 +38,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
-  const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
@@ -57,8 +54,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
-  // Bulk-group rows hide the cell via CSS; skipping the mount also skips the chain read.
-  const showSafenetStatus = isSafenetEnabled && isQueue && !isBulkGroup && !!safeTxHash
 
   return (
     <div
@@ -71,7 +66,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.bulkGroup]: isBulkGroup,
         [css.untrusted]: showWarning,
         [css.withAssessment]: showAssessment,
-        [css.withSafenet]: showSafenetStatus,
       })}
       id={tx.id}
     >
@@ -133,12 +127,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       {showAssessment && safeTxHash && (
         <div style={{ gridArea: 'assessment' }} className={css.assessment}>
           <HnQueueAssessment safeTxHash={safeTxHash} assessment={assessment} isAuthenticated={isAuthenticated} />
-        </div>
-      )}
-
-      {showSafenetStatus && safeTxHash && (
-        <div style={{ gridArea: 'safenet' }} className={css.safenet}>
-          <safenet.SafenetQueueStatus safeTxHash={safeTxHash} timestampMs={tx.timestamp} />
         </div>
       )}
 

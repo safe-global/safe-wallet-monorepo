@@ -57,7 +57,7 @@ jest.mock('@/components/common/ModalDialog', () => ({
   default: ({ children, open }: { children: React.ReactNode; open: boolean }) => (open ? <div>{children}</div> : null),
 }))
 
-jest.mock('@/components/common/ExternalLink', () => ({
+jest.mock('@safe-global/views/components/common/ExternalLink', () => ({
   __esModule: true,
   default: ({ children }: { children: React.ReactNode }) => <a>{children}</a>,
 }))

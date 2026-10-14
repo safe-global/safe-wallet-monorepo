@@ -1,6 +1,6 @@
 import FiatValue from '@/components/common/FiatValue'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 export const FiatBalance = ({ balanceItem }: { balanceItem: Balance }) => {
@@ -8,7 +8,7 @@ export const FiatBalance = ({ balanceItem }: { balanceItem: Balance }) => {
 
   return (
     <div className="flex flex-row items-center justify-end gap-1">
-      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} />
+      <FiatValue value={isMissingFiatConversion ? null : balanceItem.fiatBalance} precise />
 
       {isMissingFiatConversion && (
         <Tooltip>

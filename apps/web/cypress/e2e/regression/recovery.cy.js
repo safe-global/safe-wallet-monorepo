@@ -9,12 +9,16 @@ import * as wallet from '../../support/utils/wallet.js'
 import * as modules from '../pages/modules.page.js'
 import * as navigation from '../pages/navigation.page.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
+import recoveryData from '../../fixtures/recovery.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let recoverySafes,
   staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const guardian = walletCredentials.OWNER_2_PRIVATE_KEY
+let signer, guardian
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  guardian = walletCredentials.OWNER_2_PRIVATE_KEY
+})
 
 describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   before(() => {
@@ -121,7 +125,7 @@ describe('Recovery regression tests', { defaultCommandTimeout: 50000 }, () => {
   })
 
   it('Verify initial and edited recovery settings', () => {
-    const address = '0x9445...F1BA'
+    const address = recoveryData.recoverer
     const settings = [address, recovery.recoveryOptions.fiveSixDays, recovery.recoveryOptions.never]
     const confirmationData = [recovery.recoveryOptions.fiveMin, recovery.recoveryOptions.oneHr]
     cy.visit(constants.securityUrl + recoverySafes.SEP_RECOVERY_SAFE_4)
