@@ -5,8 +5,8 @@
  * the real provider. This mock only submits the call from an impersonated relayer account and reports the
  * task status; the transaction hash is the task ID.
  */
-import { isMain, json, postJson, requiredEnv, serve } from './http.ts'
-import type { Reply, Request } from './http.ts'
+import { UpstreamUnreachable, isMain, json, postJson, requiredEnv, serve } from './http.ts'
+import type { MockRequest, Reply } from './http.ts'
 
 // The relay task states the gateway passes on to the wallet.
 export const SUBMITTED = 110
@@ -17,6 +17,7 @@ export const RELAYER = '0x5afe00000000000000000000000000000000beef'
 const RELAYER_BALANCE = `0x${(10n ** 21n).toString(16)}`
 const TASK_STATUS = /^\/safe-transactions\/(0x[0-9a-fA-F]{64})\/status$/
 const RPC_TIMEOUT_MS = 60_000
+const PORT = 8092
 
 export class RpcError extends Error {}
 
@@ -69,9 +70,9 @@ async function knowsTransaction(url: string, taskId: string, rpc: Rpc): Promise<
   try {
     return (await rpc(url, 'eth_getTransactionByHash', [taskId])) !== null
   } catch (error) {
-    // An unreachable fork cannot hold the task; a JSON-RPC error is a real failure.
-    if (error instanceof RpcError) throw error
-    return false
+    // An unreachable fork cannot hold the task; any other failure is real.
+    if (error instanceof UpstreamUnreachable) return false
+    throw error
   }
 }
 
@@ -88,7 +89,7 @@ async function taskStatus(taskId: string, rpcUrls: Map<string, string>, rpc: Rpc
 }
 
 export async function dispatch(
-  { method, path, body }: Pick<Request, 'method' | 'path' | 'body'>,
+  { method, path, body }: Pick<MockRequest, 'method' | 'path' | 'body'>,
   rpcUrls: Map<string, string>,
   rpc: Rpc = jsonRpc,
 ): Promise<Reply> {
@@ -103,7 +104,7 @@ export async function dispatch(
 
 if (isMain(import.meta.url)) {
   const rpcUrls = parseRpcUrls(requiredEnv('RELAY_RPC_URLS'))
-  serve(8092, async (request) => {
+  serve(PORT, async (request) => {
     try {
       return await dispatch(request, rpcUrls)
     } catch (error) {

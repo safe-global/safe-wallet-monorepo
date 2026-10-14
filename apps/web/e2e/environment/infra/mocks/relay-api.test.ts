@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { INCLUDED, RELAYER, REVERTED, RpcError, SUBMITTED, dispatch, parseRpcUrls } from './relay-api.ts'
 import type { Rpc } from './relay-api.ts'
+import { UpstreamUnreachable } from './http.ts'
 
 const SEPOLIA = 'http://anvil:8545'
 const MAINNET = 'http://anvil-mainnet:8547'
@@ -42,15 +43,18 @@ describe('relay API', () => {
     assert.deepEqual(rpc.calls[2], [SEPOLIA, 'eth_sendTransaction', [{ from: RELAYER, to: '0x1', data: '0x6a76' }]])
   })
 
-  it('rejects unknown chains, incomplete calls and failing calls', async () => {
-    const [status, payload] = await call('POST', '/safe-transactions', fakeRpc({}), {
-      chainId: 137,
-      to: '0x1',
-      data: '0x',
-    })
+  it('rejects a chain without a local fork', async () => {
+    const body = { chainId: 137, to: '0x1', data: '0x' }
+    const [status, payload] = await call('POST', '/safe-transactions', fakeRpc({}), body)
     assert.equal(status, 400)
     assert.match(message(payload), /137/)
+  })
+
+  it('rejects a call without data', async () => {
     assert.equal((await call('POST', '/safe-transactions', fakeRpc({}), { chainId: 1, to: '0x1' }))[0], 400)
+  })
+
+  it('rejects a call that the fork reverts', async () => {
     const rpc = fakeRpc({ [`${SEPOLIA} eth_sendTransaction`]: new RpcError('execution reverted') })
     const [revertStatus, revert] = await call('POST', '/safe-transactions', rpc, {
       chainId: '11155111',
@@ -78,8 +82,13 @@ describe('relay API', () => {
   })
 
   it('answers 404 for unknown tasks and skips unreachable forks', async () => {
-    const rpc = fakeRpc({ [`${MAINNET} eth_getTransactionByHash`]: new TypeError('fetch failed') })
+    const rpc = fakeRpc({ [`${MAINNET} eth_getTransactionByHash`]: new UpstreamUnreachable('No answer: TypeError') })
     assert.equal((await call('GET', `/safe-transactions/${TASK}/status`, rpc))[0], 404)
+  })
+
+  it('fails a status lookup on an error that is not an unreachable fork', async () => {
+    const rpc = fakeRpc({ [`${MAINNET} eth_getTransactionByHash`]: new TypeError('a bug') })
+    await assert.rejects(call('GET', `/safe-transactions/${TASK}/status`, rpc), /a bug/)
   })
 
   it('fails a status lookup that gets a JSON-RPC error', async () => {
