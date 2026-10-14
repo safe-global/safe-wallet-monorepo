@@ -26,7 +26,6 @@ import {
   getAggregateSafeGrade,
   getAggregateSummary,
   getNonPassingCount,
-  getUpgradeChainId,
   hasMultichainWarning,
   hasUpgradeAvailable,
   isAnyChainScanning,
@@ -182,8 +181,6 @@ const MultichainSafeRow = ({
   const aggregateNonPassing = getAggregateNonPassingCount(safe, scanResults, scanKey)
   const aggregateScanning = isAnyChainScanning(safe, scanningKeys, scanKey)
   const showMultichainWarning = hasMultichainWarning(safe, scanResults, scanKey)
-  const upgradeChainId = getUpgradeChainId(safe, scanResults, scanKey)
-  const parentUpdateHref = upgradeChainId ? getSafeUpdateHref(safe.address, upgradeChainId) : undefined
   const totalBalance = safe.chainEntries.reduce(
     (sum, c) => sum + (Number(balanceMap[scanKey(safe.address, c.chainId)]) || 0),
     0,
@@ -263,12 +260,7 @@ const MultichainSafeRow = ({
           <ScoreCell summary={aggregateSummary} isScanning={aggregateScanning} />
         </div>
         <div className={CELL_BASE}>
-          <StatusCell
-            grade={aggregateGrade}
-            count={aggregateNonPassing}
-            isScanning={aggregateScanning}
-            updateHref={parentUpdateHref}
-          />
+          <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
         </div>
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>

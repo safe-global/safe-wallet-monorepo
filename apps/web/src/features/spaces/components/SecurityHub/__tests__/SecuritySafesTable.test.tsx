@@ -267,24 +267,41 @@ describe('SecuritySafesTable', () => {
       expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()
     })
 
-    it('links the multichain parent and only the affected network row', () => {
+    it('links each network that needs an update, not the collapsed multichain row', () => {
+      const chains = [
+        { address: multiSafe.address, chainId: '1' },
+        { address: multiSafe.address, chainId: '137' },
+      ]
+      renderTable({
+        safes: [multiSafe],
+        scanResults: buildScanResults(chains, { contract_version: upgradeAvailable }),
+      })
+
+      expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()
+
+      fireEvent.click(screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!)
+      const links = screen.getAllByRole('link', { name: 'Update contracts' })
+      expect(links).toHaveLength(2)
+      expect(screen.getByTestId('chain-1').closest('[data-testid="security-safe-row"]')).toContainElement(links[0])
+      expect(links[0]).toHaveAttribute('href', expect.stringContaining(encodeURIComponent(`eth:${multiSafe.address}`)))
+      expect(screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')).toContainElement(links[1])
+      expect(links[1]).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(`matic:${multiSafe.address}`)),
+      )
+    })
+
+    it('shows no link on a network row whose contract version is current', () => {
       const scanResults = {
         ...buildScanResults([{ address: multiSafe.address, chainId: '1' }]),
         ...buildScanResults([{ address: multiSafe.address, chainId: '137' }], { contract_version: upgradeAvailable }),
       }
       renderTable({ safes: [multiSafe], scanResults })
 
-      const parentLink = screen.getByRole('link', { name: 'Update contracts' })
-      expect(parentLink).toHaveAttribute(
-        'href',
-        expect.stringContaining(encodeURIComponent(`matic:${multiSafe.address}`)),
-      )
-
       fireEvent.click(screen.getAllByText('Multi Safe')[0].closest('[data-testid="security-safe-row"]')!)
       const links = screen.getAllByRole('link', { name: 'Update contracts' })
-      expect(links).toHaveLength(2)
-      const childRow = screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')!
-      expect(childRow).toContainElement(links[1])
+      expect(links).toHaveLength(1)
+      expect(screen.getByTestId('chain-137').closest('[data-testid="security-safe-row"]')).toContainElement(links[0])
     })
   })
 
