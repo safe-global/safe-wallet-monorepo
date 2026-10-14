@@ -12,7 +12,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { cn } from '@safe-global/views/utils/cn'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ScoreCell } from './cells'
+import { BalanceCell, ScoreCell, UpdateCell } from './cells'
 import {
   CARD_ROW_CLASS,
   CELL_BASE,
@@ -133,7 +133,10 @@ const MultichainChildRow = ({
         <ScoreCell summary={summary} isScanning={isScanning} />
       </div>
       <div className={CELL_BASE}>
-        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} updateHref={childUpdateHref} />
+        <StatusCell grade={childGrade} count={childStatusCount} isScanning={isScanning} />
+      </div>
+      <div className={CELL_BASE}>
+        <UpdateCell href={childUpdateHref} />
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {chain.isDeployed ? (
@@ -262,6 +265,7 @@ const MultichainSafeRow = ({
         <div className={CELL_BASE}>
           <StatusCell grade={aggregateGrade} count={aggregateNonPassing} isScanning={aggregateScanning} />
         </div>
+        <div className={CELL_BASE} />
         <div className={cn(CELL_BASE, 'justify-end')} />
       </motion.div>
 

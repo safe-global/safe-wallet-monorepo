@@ -1,10 +1,7 @@
-import Link from 'next/link'
-import { ArrowRight } from 'lucide-react'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import type { SafeGrade } from '@/features/security/types'
-import type { SafeHref } from '@/features/spaces/utils/safeHref'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
@@ -16,26 +13,12 @@ export type StatusCellProps = {
   /** Total non-passing applicable checks. Ignored when grade is `passing` (chip reads "Healthy"). */
   count?: number
   isScanning?: boolean
-  /** Settings → Setup link shown next to the chip when a newer contract version is available. */
-  updateHref?: SafeHref
 }
 
 const formatNonPassingLabel = (grade: SafeGrade, count: number): string =>
   `${SAFE_GRADE_LABEL[grade]} · ${count} issue${maybePlural(count)} found`
 
-const UpdateLink = ({ href }: { href: SafeHref }) => (
-  <Link
-    href={href}
-    aria-label="Update contracts"
-    onClick={(e) => e.stopPropagation()}
-    className="group inline-flex shrink-0 items-center gap-1 rounded text-xs font-bold text-primary no-underline hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-  >
-    Update
-    <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
-  </Link>
-)
-
-const StatusCell = ({ grade, count, isScanning, updateHref }: StatusCellProps) => {
+const StatusCell = ({ grade, count, isScanning }: StatusCellProps) => {
   if (!grade) {
     // Width chosen to comfortably fit the longest expected label ("Needs review · 99 issues found").
     if (isScanning) return <Skeleton className="h-5 w-40 rounded-md" />
@@ -58,20 +41,11 @@ const StatusCell = ({ grade, count, isScanning, updateHref }: StatusCellProps) =
       `StatusCell: grade=${grade} but count=0 — getSafeGrade and the count source disagree. Falling back to Healthy.`,
     )
   }
+  if (grade === 'passing' || safeCount === 0) {
+    return <SafeGradeChip grade="passing" ariaLabel={SAFE_GRADE_LABEL.passing} />
+  }
   const label = formatNonPassingLabel(grade, safeCount)
-  const chip =
-    grade === 'passing' || safeCount === 0 ? (
-      <SafeGradeChip grade="passing" ariaLabel={SAFE_GRADE_LABEL.passing} />
-    ) : (
-      <SafeGradeChip grade={grade} label={label} ariaLabel={label} />
-    )
-  if (!updateHref) return chip
-  return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
-      {chip}
-      <UpdateLink href={updateHref} />
-    </div>
-  )
+  return <SafeGradeChip grade={grade} label={label} ariaLabel={label} />
 }
 
 export default StatusCell

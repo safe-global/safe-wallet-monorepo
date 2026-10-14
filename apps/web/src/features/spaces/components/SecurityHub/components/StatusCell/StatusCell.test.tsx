@@ -1,5 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { AppRoutes } from '@/config/routes'
+import { render, screen } from '@testing-library/react'
 import StatusCell from './StatusCell'
 
 describe('StatusCell', () => {
@@ -50,34 +49,6 @@ describe('StatusCell', () => {
       expect(screen.queryByText(/At risk/)).not.toBeInTheDocument()
       expect(warn).toHaveBeenCalledWith(expect.stringContaining('grade=at_risk but count=0'))
       warn.mockRestore()
-    })
-  })
-
-  describe('update link', () => {
-    const updateHref = { pathname: AppRoutes.settings.setup, query: { safe: 'eth:0x1234' } }
-
-    it('renders an Update link to Settings → Setup next to the chip', () => {
-      render(<StatusCell grade="passing" count={0} updateHref={updateHref} />)
-      expect(screen.getByLabelText('Healthy')).toBeInTheDocument()
-      const link = screen.getByRole('link', { name: 'Update contracts' })
-      expect(link).toHaveTextContent('Update')
-      expect(link).toHaveAttribute('href', expect.stringContaining(AppRoutes.settings.setup))
-    })
-
-    it('stops the click from reaching the row', () => {
-      const onRowClick = jest.fn()
-      render(
-        <div onClick={onRowClick}>
-          <StatusCell grade="passing" count={0} updateHref={updateHref} />
-        </div>,
-      )
-      fireEvent.click(screen.getByRole('link', { name: 'Update contracts' }))
-      expect(onRowClick).not.toHaveBeenCalled()
-    })
-
-    it('renders no link without an updateHref', () => {
-      render(<StatusCell grade="passing" count={0} />)
-      expect(screen.queryByRole('link')).not.toBeInTheDocument()
     })
   })
 })

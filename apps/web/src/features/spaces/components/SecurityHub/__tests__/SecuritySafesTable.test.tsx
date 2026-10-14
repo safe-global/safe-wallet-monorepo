@@ -250,6 +250,20 @@ describe('SecuritySafesTable', () => {
       expect(link).toHaveAttribute('href', expect.stringContaining(encodeURIComponent(`eth:${singleSafe.address}`)))
     })
 
+    it('puts the Update link in its own column, not in the Status cell', () => {
+      const { container } = renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: upgradeAvailable,
+        }),
+      })
+      const link = screen.getByRole('link', { name: 'Update contracts' })
+      expect(screen.getByLabelText('Healthy').parentElement).not.toContainElement(link)
+
+      const row = screen.getByText('My Vault').closest('[data-testid="security-safe-row"]')!
+      const header = container.querySelector('.min-w-\\[960px\\]')!.firstElementChild!
+      expect(row.children).toHaveLength(header.children.length)
+    })
+
     it('does not open the side card when the Update link is clicked', () => {
       const onViewReport = jest.fn()
       renderTable({

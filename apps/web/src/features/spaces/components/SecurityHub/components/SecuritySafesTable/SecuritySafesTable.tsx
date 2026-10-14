@@ -158,6 +158,8 @@ const SecuritySafesTable = ({
                 <div className={CELL_BASE}>
                   <Skeleton className="h-5 w-20 rounded-full" />
                 </div>
+                {/* Update */}
+                <div className={CELL_BASE} />
                 {/* Chevron */}
                 <div className={cn(CELL_BASE, 'justify-end')}>
                   <Skeleton className="size-5 rounded" />

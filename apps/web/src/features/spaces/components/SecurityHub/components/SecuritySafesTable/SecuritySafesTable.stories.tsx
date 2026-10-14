@@ -77,6 +77,12 @@ const updateAvailable = {
   }),
 }
 
+const atRiskWithUpdate = {
+  ...updateAvailable,
+  guard: mkResult({ status: 'partial', severity: 'Medium' }),
+  pending_tx: mkResult({ status: 'issue', severity: 'High' }),
+}
+
 const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
 
 const meta = {
@@ -151,14 +157,16 @@ export const Scanning: Story = {
 
 export const UpdateAvailable: Story = {
   args: {
-    safes: [single(SAFE_A, 'Operations Vault'), multichain(SAFE_MC, 'Multichain Vault')],
+    safes: [single(SAFE_A, 'Operations Vault'), single(SAFE_B, 'Treasury'), multichain(SAFE_MC, 'Multichain Vault')],
     scanResults: {
       [`${SAFE_A}:1`]: updateAvailable,
+      [`${SAFE_B}:1`]: atRiskWithUpdate,
       [`${SAFE_MC}:1`]: allClear,
       [`${SAFE_MC}:137`]: updateAvailable,
     },
     scanTimestamps: {
       [`${SAFE_A}:1`]: Date.now() - 90_000,
+      [`${SAFE_B}:1`]: Date.now() - 90_000,
       [`${SAFE_MC}:1`]: Date.now() - 90_000,
       [`${SAFE_MC}:137`]: Date.now() - 90_000,
     },
@@ -168,6 +176,7 @@ export const UpdateAvailable: Story = {
     gradeFilter: null,
     balanceMap: {
       [`${SAFE_A}:1`]: '1250000',
+      [`${SAFE_B}:1`]: '45200',
       [`${SAFE_MC}:1`]: '850000',
       [`${SAFE_MC}:137`]: '15300',
     },

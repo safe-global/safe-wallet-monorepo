@@ -14,8 +14,8 @@ export const ROW_VARIANTS = {
  * must stay in sync with these tracks.
  */
 export const GRID_COLS = [
-  'grid-cols-[minmax(0,1fr)_9%_10%_18%_9%]',
-  'sm:grid-cols-[minmax(0,1fr)_9%_9%_10%_18%_9%]',
+  'grid-cols-[minmax(0,1fr)_11%_10%_minmax(13rem,16%)_5rem_9%]',
+  'sm:grid-cols-[minmax(0,1fr)_11%_9%_10%_minmax(13rem,16%)_5rem_9%]',
 ].join(' ')
 
 /**
@@ -41,5 +41,6 @@ export const COLUMNS: { label: string; hideClass: string; align?: 'right' }[] = 
   { label: 'Balance', hideClass: HIDE_BALANCE },
   { label: 'Score', hideClass: '' },
   { label: 'Status', hideClass: '' },
+  { label: '', hideClass: '' },
   { label: '', hideClass: '', align: 'right' },
 ]
