@@ -43,10 +43,10 @@ import { Route as SpacesIndexRoute } from './routes/spaces'
 import { Route as SpacesAddressBookRoute } from './routes/spaces/address-book'
 import { Route as SpacesCreateSpaceRoute } from './routes/spaces/create-space'
 import { Route as SpacesMembersRoute } from './routes/spaces/members'
+import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
-import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
 import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
@@ -117,10 +117,10 @@ const routeTree = RootRoute.addChildren([
   SpacesAddressBookRoute,
   SpacesCreateSpaceRoute,
   SpacesMembersRoute,
+  SpacesPoliciesRoute,
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,
   SpacesActivityRoute,
-  SpacesPoliciesRoute,
   SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,

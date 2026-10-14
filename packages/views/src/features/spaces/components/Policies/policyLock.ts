@@ -13,7 +13,7 @@ export type PolicyLock = {
   workspaceName: string
   /** The policies the plan does not include. Setting one up leads to the upgrade. */
   lockedPolicies: PolicyId[]
-  /** Without it the locked tiles show no counter. */
-  accountCounts?: Record<PolicyId, PolicyAccountCount>
+  /** Only the gated policies have a count; a tile without one shows no counter. */
+  accountCounts?: Partial<Record<PolicyId, PolicyAccountCount>>
   onUpgrade: () => void
 }

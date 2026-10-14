@@ -13,3 +13,4 @@ export {
   apiSliceWithChainsConfig,
   initialState as chainsInitialState,
 } from './chains'
+export { policiesApi, usePoliciesGetActivePoliciesV1Query } from './policies'
