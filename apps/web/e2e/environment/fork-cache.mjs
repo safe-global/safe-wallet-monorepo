@@ -24,7 +24,7 @@ export function mergeForkCaches([first, ...rest]) {
   for (const [address, account] of Object.entries(merged.accounts)) {
     if (isEmptyAccount(account) && !merged.storage[address]) delete merged.accounts[address]
   }
-  // The stack removes the code of these contracts at start (align_fork_clock.py), so nothing reads their storage.
+  // The stack removes the code of these contracts at start (mocks/align-fork-clock.ts), so nothing reads their storage.
   for (const address of SYSTEM_CONTRACTS) delete merged.storage[address]
   return merged
 }
