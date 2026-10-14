@@ -17,6 +17,7 @@ const sideBarIcon = '[data-testid="ChevronRightIcon"]'
 const sidebarCheckIcon = '[data-testid="CheckIcon"]'
 const addressStepNextBtn = '[data-testid="load-safe-next-btn"]'
 const ownerName = '[data-testid="owner-name"]'
+const ownerNameInput = `input${ownerName}, ${ownerName} input`
 const networkSelectorItem = '[data-testid="network-selector-item"]'
 const selectContent = '[data-slot="select-content"]'
 const addressSection = '[data-testid="address-section"]'
@@ -40,10 +41,7 @@ export function verifyAddresFormatIsValid() {
 }
 
 function getOwnerNameInput(index) {
-  return cy
-    .get(ownerName)
-    .eq(index)
-    .then(($el) => ($el.is('input') ? cy.wrap($el) : cy.wrap($el.find('input'))))
+  return cy.get(ownerNameInput).eq(index)
 }
 
 export function clickOnAddNewOwnerBtn() {

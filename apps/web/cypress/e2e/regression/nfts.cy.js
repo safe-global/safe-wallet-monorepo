@@ -89,6 +89,7 @@ describe('NFTs tests', () => {
 
   // Added to prod
   it('Verify Send NFT transaction has been created', () => {
+    createTx.cleanTransactionQueue(nftsSafes.SEP_NFT_SAFE_1, signer)
     wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + nftsSafes.SEP_NFT_SAFE_1)
     nfts.verifyInitialNFTData()
     nfts.selectNFTs(1)
@@ -98,7 +99,6 @@ describe('NFTs tests', () => {
     nfts.clikOnNextBtn()
     createTx.clickOnContinueSignTransactionBtn()
     createTx.clickOnSignTransactionBtn()
-    createTx.waitForProposeRequest()
     createTx.clickViewTransaction()
     createTx.verifySingleTxPage()
     createTx.verifyQueueLabel()

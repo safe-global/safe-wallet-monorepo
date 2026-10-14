@@ -19,8 +19,8 @@ const transferAmount = '1'
 
 const tokenAmount2 = '0.00001'
 const netwrok = 'sepolia'
-const network_pref = 'sep:'
 const unit_eth = 'ether'
+const onChainTimeout = 180000
 let apiKit, protocolKitOwner1_S3, protocolKitOwner2_S3, outgoingSafeAddress
 
 let safes = []
@@ -29,21 +29,61 @@ let safesData = []
 const contractAddress = contracts.token_qtrust
 const nftContractAddress = contracts.nft_pc2
 
-let signer, provider, privateKeys, walletAddress, tokenContract, nftContract, owner1Signer, owner2Signer
+let signer, provider, privateKeys, walletAddress, tokenContract, nftContract, owner1Signer
 before(() => {
   signer = walletCredentials.OWNER_4_PRIVATE_KEY
   privateKeys = [walletCredentials.OWNER_1_PRIVATE_KEY, walletCredentials.OWNER_2_PRIVATE_KEY]
-  walletAddress = [walletCredentials.OWNER_1_WALLET_ADDRESS]
+  walletAddress = walletCredentials.OWNER_1_WALLET_ADDRESS
   cy.env(['INFURA_API_KEY']).then(({ INFURA_API_KEY }) => {
     provider = new ethers.InfuraProvider(netwrok, INFURA_API_KEY)
-    ;[owner1Signer, owner2Signer] = createSigners(privateKeys, provider)
+    ;[owner1Signer] = createSigners(privateKeys, provider)
     tokenContract = new ethers.Contract(contractAddress, abi_qtrust, provider)
     nftContract = new ethers.Contract(nftContractAddress, abi_nft_pc2, provider)
   })
 })
 
-function visit(url) {
-  cy.visit(url)
+function verifyRelayAttemptsLeft(safeAddress) {
+  main.getRelayRemainingAttempts(safeAddress).then((remainingAttempts) => {
+    if (remainingAttempts < 1) {
+      throw new Error(main.noRelayAttemptsError)
+    }
+  })
+}
+
+async function returnNftToSafe(safeAddress, tokenId) {
+  const holder = await nftContract.ownerOf(tokenId)
+  if (holder.toLowerCase() !== walletAddress.toLowerCase()) return
+  const transfer = await nftContract.connect(owner1Signer).safeTransferFrom(holder, safeAddress, tokenId, {
+    gasLimit: 200000,
+  })
+  await transfer.wait()
+}
+
+async function returnTokenToSafe(safeAddress, amount) {
+  const transfer = await tokenContract.connect(owner1Signer).transfer(safeAddress, amount, { gasLimit: 200000 })
+  await transfer.wait()
+}
+
+async function refillFromOutgoingSafe(targetSafe, amount) {
+  const safeTransaction = await protocolKitOwner1_S3.createTransaction({
+    transactions: [{ to: targetSafe, data: '0x', value: amount }],
+  })
+  const safeTxHash = await protocolKitOwner1_S3.getTransactionHash(safeTransaction)
+  const senderSignature = await protocolKitOwner1_S3.signHash(safeTxHash)
+
+  await apiKit.proposeTransaction({
+    safeAddress: outgoingSafeAddress,
+    safeTransactionData: safeTransaction.data,
+    safeTxHash,
+    senderAddress: await owner1Signer.getAddress(),
+    senderSignature: senderSignature.data,
+  })
+
+  const signature = await protocolKitOwner2_S3.signHash(safeTxHash)
+  await apiKit.confirmTransaction(safeTxHash, signature.data)
+
+  const safeTx = await apiKit.getTransaction(safeTxHash)
+  await protocolKitOwner1_S3.executeTransaction(safeTx)
 }
 
 // TODO: Relay only allows 5 txs per day.
@@ -76,142 +116,68 @@ describe('Send funds with relay happy path tests', { defaultCommandTimeout: 3000
   })
 
   it('Verify tx creation and execution of NFT with relay', () => {
-    cy.wait(2000)
-    const originatingSafe = safesData.SEP_FUNDS_SAFE_9.substring(4)
-    function executeTransactionFlow(fromSafe, toSafe) {
-      return cy.visit(constants.balanceNftsUrl + fromSafe).then(() => {
-        wallet.connectSignerViaStorage(signer)
-        nfts.selectNFTs(1)
-        nfts.sendNFT()
-        nfts.typeRecipientAddress(toSafe)
-        nfts.clikOnNextBtn()
-        tx.executeFlow_2()
-        cy.wait(5000)
-      })
-    }
+    const originatingSafe = safesData.SEP_FUNDS_SAFE_9
+    const nftTokenId = 2
 
-    cy.wrap(null)
-      .then(() => {
-        return main.fetchCurrentNonce(network_pref + originatingSafe)
-      })
-      .then(async (currentNonce) => {
-        return main.getRelayRemainingAttempts(originatingSafe).then((remainingAttempts) => {
-          if (remainingAttempts < 1) {
-            throw new Error(main.noRelayAttemptsError)
-          }
-          executeTransactionFlow(originatingSafe, walletAddress.toString(), transferAmount).then(async () => {
-            const contractWithWallet = nftContract.connect(owner1Signer)
-            const tx = await contractWithWallet.safeTransferFrom(walletAddress.toString(), originatingSafe, 2, {
-              gasLimit: 200000,
-            })
-            await tx.wait()
-            main.verifyNonceChange(network_pref + originatingSafe, currentNonce + 1)
-            navigation.clickOnWalletExpandMoreIcon()
-            navigation.clickOnDisconnectBtn()
-          })
-        })
-      })
+    verifyRelayAttemptsLeft(originatingSafe.substring(4))
+    cy.wrap(null).then({ timeout: onChainTimeout }, () => returnNftToSafe(originatingSafe.substring(4), nftTokenId))
+    main.fetchCurrentNonce(originatingSafe).then((currentNonce) => {
+      wallet.connectSignerViaStorage(signer, constants.balanceNftsUrl + originatingSafe)
+      nfts.selectNFTs(1)
+      nfts.sendNFT()
+      nfts.typeRecipientAddress(walletAddress)
+      nfts.clikOnNextBtn()
+      tx.signAndExecuteWithRelay()
+
+      main.verifyNonceChange(originatingSafe, currentNonce + 1)
+      cy.wrap(null).then({ timeout: onChainTimeout }, () => returnNftToSafe(originatingSafe.substring(4), nftTokenId))
+      navigation.clickOnWalletExpandMoreIcon()
+      navigation.clickOnDisconnectBtn()
+    })
   })
 
   it('Verify tx creation and execution of native token with relay', () => {
-    cy.wait(2000)
-    const targetSafe = safesData.SEP_FUNDS_SAFE_1.substring(4)
-    function executeTransactionFlow(fromSafe, toSafe, tokenAmount) {
-      visit(constants.BALANCE_URL + fromSafe)
-      wallet.connectSignerViaStorage(signer)
+    const targetSafe = safesData.SEP_FUNDS_SAFE_1
+
+    verifyRelayAttemptsLeft(targetSafe.substring(4))
+    main.fetchCurrentNonce(targetSafe).then((currentNonce) => {
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + targetSafe)
       assets.clickOnSendBtn(0)
-      loadsafe.inputOwnerAddress(0, toSafe)
+      loadsafe.inputOwnerAddress(0, walletAddress)
       assets.checkSelectedToken(constants.tokenAbbreviation.sep)
-      assets.enterAmount(tokenAmount)
+      assets.enterAmount(tokenAmount2)
       navigation.clickOnNewTxBtnS()
-      tx.executeFlow_2()
-      cy.wait(5000)
-    }
-    cy.wrap(null)
-      .then(() => {
-        return main.fetchCurrentNonce(network_pref + targetSafe)
-      })
-      .then(async (currentNonce) => {
-        return main.getRelayRemainingAttempts(targetSafe).then(async (remainingAttempts) => {
-          if (remainingAttempts < 1) {
-            throw new Error(main.noRelayAttemptsError)
-          }
-          executeTransactionFlow(targetSafe, walletAddress.toString(), tokenAmount2)
-          const amount = ethers.parseUnits(tokenAmount2, unit_eth).toString()
-          const safeTransactionData = {
-            to: targetSafe,
-            data: '0x',
-            value: amount.toString(),
-          }
+      tx.signAndExecuteWithRelay()
 
-          const safeTransaction = await protocolKitOwner1_S3.createTransaction({ transactions: [safeTransactionData] })
-          const safeTxHash = await protocolKitOwner1_S3.getTransactionHash(safeTransaction)
-          const senderSignature = await protocolKitOwner1_S3.signHash(safeTxHash)
-          const safeAddress = outgoingSafeAddress
-
-          await apiKit.proposeTransaction({
-            safeAddress,
-            safeTransactionData: safeTransaction.data,
-            safeTxHash,
-            senderAddress: await owner1Signer.getAddress(),
-            senderSignature: senderSignature.data,
-          })
-
-          const pendingTransactions = await apiKit.getPendingTransactions(safeAddress)
-          const safeTxHashofExistingTx = pendingTransactions.results[0].safeTxHash
-
-          const signature = await protocolKitOwner2_S3.signHash(safeTxHashofExistingTx)
-          await apiKit.confirmTransaction(safeTxHashofExistingTx, signature.data)
-
-          const safeTx = await apiKit.getTransaction(safeTxHashofExistingTx)
-          await protocolKitOwner2_S3.executeTransaction(safeTx)
-          main.verifyNonceChange(network_pref + targetSafe, currentNonce + 1)
-          navigation.clickOnWalletExpandMoreIcon()
-          navigation.clickOnDisconnectBtn()
-        })
-      })
+      main.verifyNonceChange(targetSafe, currentNonce + 1)
+      cy.wrap(null).then({ timeout: onChainTimeout }, () =>
+        refillFromOutgoingSafe(targetSafe.substring(4), ethers.parseUnits(tokenAmount2, unit_eth).toString()),
+      )
+      navigation.clickOnWalletExpandMoreIcon()
+      navigation.clickOnDisconnectBtn()
+    })
   })
 
   it('Verify tx creation and execution of non-native token with with relay', () => {
-    cy.wait(2000)
-    const originatingSafe = safesData.SEP_FUNDS_SAFE_2.substring(4)
-    const amount = ethers.parseUnits(transferAmount, unit_eth).toString()
+    const originatingSafe = safesData.SEP_FUNDS_SAFE_2
 
-    function executeTransactionFlow(fromSafe, toSafe) {
-      visit(constants.BALANCE_URL + fromSafe)
-      wallet.connectSignerViaStorage(signer)
+    verifyRelayAttemptsLeft(originatingSafe.substring(4))
+    main.fetchCurrentNonce(originatingSafe).then((currentNonce) => {
+      wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + originatingSafe)
       assets.toggleShowAllTokens(true)
       assets.toggleHideDust(false)
       assets.clickOnSendBtn(1)
-
-      loadsafe.inputOwnerAddress(0, toSafe)
-      assets.enterAmount(1)
+      loadsafe.inputOwnerAddress(0, walletAddress)
+      assets.enterAmount(transferAmount)
       navigation.clickOnNewTxBtnS()
-      tx.executeFlow_2()
-      cy.wait(5000)
-    }
+      tx.signAndExecuteWithRelay()
 
-    cy.wrap(null)
-      .then(() => {
-        return main.fetchCurrentNonce(network_pref + originatingSafe)
-      })
-      .then(async (currentNonce) => {
-        return main.getRelayRemainingAttempts(originatingSafe).then(async (remainingAttempts) => {
-          if (remainingAttempts < 1) {
-            throw new Error(main.noRelayAttemptsError)
-          }
-          executeTransactionFlow(originatingSafe, walletAddress.toString(), transferAmount)
-
-          const contractWithWallet = tokenContract.connect(signers[0])
-          const tx = await contractWithWallet.transfer(originatingSafe, amount, {
-            gasLimit: 200000,
-          })
-
-          await tx.wait()
-          main.verifyNonceChange(network_pref + originatingSafe, currentNonce + 1)
-          navigation.clickOnWalletExpandMoreIcon()
-          navigation.clickOnDisconnectBtn()
-        })
-      })
+      main.verifyNonceChange(originatingSafe, currentNonce + 1)
+      cy.wrap(null).then({ timeout: onChainTimeout }, () =>
+        returnTokenToSafe(originatingSafe.substring(4), ethers.parseUnits(transferAmount, unit_eth)),
+      )
+      navigation.clickOnWalletExpandMoreIcon()
+      navigation.clickOnDisconnectBtn()
+    })
   })
 })

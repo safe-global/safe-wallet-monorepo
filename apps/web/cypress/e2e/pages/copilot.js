@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants'
 import { continueSignBtn, clickOnConfirmTransactionBtn } from './create_tx.pages'
+import { safeProOffStorage } from './spending_limits.pages'
 import * as main from './main.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import safes from '../../fixtures/safes/static.js'
@@ -340,18 +341,17 @@ export function navigateToTransactionAndSetupCopilot(
 
   const safe = safeAddress || safes.MATIC_STATIC_SAFE_30
 
-  // clearLocalStorage above wipes the cookie consent seeded in the global beforeEach,
-  // so re-seed it before load to keep the cookies popup from covering the widget
-  cy.visit(constants.transactionUrl + safe + transactionId, {
+  const extraStorage = addressBookData
+    ? { ...safeProOffStorage, [constants.localStorageKeys.SAFE_v2__addressBook]: addressBookData }
+    : safeProOffStorage
+
+  walletUtils.connectSignerViaStorage(signer, constants.transactionUrl + safe + transactionId, {
+    extraStorage,
+    // clearLocalStorage above wipes the cookie consent seeded in the global beforeEach
     onBeforeLoad: (win) => {
       win.localStorage.setItem(constants.localStorageKeys.SAFE_v2_cookies, ls.cookies.acceptedCookies)
-      if (addressBookData) {
-        win.localStorage.setItem(constants.localStorageKeys.SAFE_v2__addressBook, JSON.stringify(addressBookData))
-      }
     },
   })
-
-  walletUtils.connectSignerViaStorage(signer)
 
   clickOnConfirmTransactionBtn()
   verifySafeShieldDisplayed()
