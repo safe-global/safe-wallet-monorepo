@@ -76,7 +76,7 @@ const ReviewSpendingLimitPolicy = ({ onSubmit, children }: ReviewTransactionProp
   }
 
   return (
-    <ReviewTransaction title={REVIEW_STEP_TITLE} onSubmit={handleSubmit}>
+    <ReviewTransaction title={REVIEW_STEP_TITLE} onSubmit={handleSubmit} withDecodedData={false}>
       {summary && <SpendingLimitSummary policy={summary} />}
       {children}
     </ReviewTransaction>
