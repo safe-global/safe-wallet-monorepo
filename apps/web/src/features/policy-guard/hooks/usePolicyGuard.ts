@@ -1,8 +1,12 @@
 import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query/react'
+import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useChain } from '@/hooks/useChains'
+import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getPolicyGuardAddress } from '../services/policyEngineDeployments'
 import { isSafeVersionSupported } from '../services/allowlistAvailability'
@@ -14,9 +18,29 @@ type ModuleGuardRead = { safeKey: string } & ({ moduleGuard: string } | { error:
 
 export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolean; error?: Error }
 
-export const usePolicyGuard = (): UsePolicyGuardResult => {
-  const { safe, safeAddress, safeLoaded, safeLoading } = useSafeInfo()
-  const web3ReadOnly = useWeb3ReadOnly()
+export type PolicyGuardTarget = { chainId: string; safeAddress: string }
+
+/** Reads the open Safe by default; pass a target to read any other Safe */
+export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult => {
+  const currentSafe = useSafeInfo()
+  const currentProvider = useWeb3ReadOnly()
+  const {
+    currentData: targetSafe,
+    isFetching: targetSafeLoading,
+    isError: isTargetSafeError,
+  } = useSafesGetSafeV1Query(target ?? skipToken)
+  const targetChain = useChain(target?.chainId ?? '')
+  const targetProvider = useMemo(() => (targetChain ? createWeb3ReadOnly(targetChain) : undefined), [targetChain])
+
+  const { safe, safeAddress, safeLoaded, safeLoading } = target
+    ? {
+        safe: targetSafe ?? { chainId: target.chainId, version: undefined, guard: undefined, txHistoryTag: undefined },
+        safeAddress: target.safeAddress,
+        safeLoaded: !!targetSafe,
+        safeLoading: targetSafeLoading,
+      }
+    : currentSafe
+  const web3ReadOnly = target ? targetProvider : currentProvider
   const policyGuardAddress = getPolicyGuardAddress(safe.chainId)
   const isSupported = isSafeVersionSupported(safe.version)
   const shouldRead = safeLoaded && !!policyGuardAddress && isSupported
@@ -40,7 +64,8 @@ export const usePolicyGuard = (): UsePolicyGuardResult => {
   // Data is kept across re-reads of the same Safe; a read for another Safe is ignored
   const currentRead = read?.safeKey === safeKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
-  const error = currentRead && 'error' in currentRead ? currentRead.error : undefined
+  const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
+  const error = target && isTargetSafeError && !targetSafeLoading ? new Error('Failed to load the Safe') : readError
 
   const state = useMemo((): PolicyGuardState | undefined => {
     if (!safeLoaded || !policyGuardAddress) return

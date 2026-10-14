@@ -18,5 +18,5 @@ export type {
 } from './types'
 export { PolicyOperation } from './types'
 export { usePolicyGuard } from './hooks/usePolicyGuard'
-export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'
+export type { UsePolicyGuardResult, PolicyGuardTarget } from './hooks/usePolicyGuard'
 export { useIsAllowlistEnabled, useIsAllowlistAvailableInSpace } from './hooks/useAllowlistAvailability'
