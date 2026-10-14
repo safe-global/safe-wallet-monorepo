@@ -89,6 +89,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
   const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
+  const safeShieldTxKey = safeShieldTx ? JSON.stringify(safeShieldTx.data).toLowerCase() : undefined
 
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
@@ -119,7 +120,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTx, safeAnalysis, deadlockResults, hasPoisoning])
+  }, [primaryThreatSeverity, safeShieldTxKey, safeAnalysis, deadlockResults, hasPoisoning])
 
   return (
     <SafeShieldContext.Provider

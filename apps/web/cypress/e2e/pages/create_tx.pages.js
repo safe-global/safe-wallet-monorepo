@@ -66,6 +66,7 @@ const toggleUntrustedBtn = '[data-testid="toggle-untrusted"]'
 const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
+const signedNotice = '[data-testid="signed-notice"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -703,10 +704,9 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
 
     // Verify token symbol (altToken parameter)
     if (altToken) {
-      cy.wait(3000)
       cy.get(selector)
         .first()
-        .then(($freshElement) => {
+        .should(($freshElement) => {
           verifyTokenSymbol($freshElement, altToken)
         })
     }
@@ -936,6 +936,12 @@ export function clickOnSignTransactionBtn() {
   cy.get(signBtn).click()
 }
 
+// A 1/n Safe offers Execute only after the signature, on a step that reloads the tx from the gateway
+export function signAndOpenExecuteStep() {
+  cy.get(signBtn).click()
+  cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
+}
+
 export function clickOnProposeTransactionBtn() {
   cy.get(proposeTransactionBtn).click()
 }
@@ -1086,7 +1092,7 @@ export function verifyBulkTxHistoryBlock(order, tx, actions) {
 
 export function verifyBulkExecuteBtnIsDisabled() {
   cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  cy.get('button').contains(bulkExecuteBtnStr).parent().trigger('mouseenter', { force: true })
+  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
   cy.contains(disabledBultExecuteBtnTooltip).should('exist')
 }
 

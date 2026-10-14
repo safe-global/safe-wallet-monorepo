@@ -29,13 +29,14 @@ python3 scripts/test_env.py smoke
 
 Default endpoints:
 
-| Service | URL                             |
-| ------- | ------------------------------- |
-| Anvil   | `http://localhost:8545`         |
-| CGW     | `http://localhost:8000/cgw`     |
-| TXS     | `http://localhost:8000/txs/api` |
-| Decoder | `http://localhost:8000/decoder` |
-| Billing | `http://localhost:8000/billing` |
+| Service | URL                                             |
+| ------- | ----------------------------------------------- |
+| Anvil   | `http://localhost:8545`                         |
+| CGW     | `http://localhost:8000/cgw`                     |
+| TXS     | `http://localhost:8000/txs/api`                 |
+| Decoder | `http://localhost:8000/decoder`                 |
+| Billing | `http://localhost:8000/billing`                 |
+| Auth0   | `https://auth.safe-e2e.test` (`127.0.0.1:8443`) |
 
 Use `python3 scripts/test_env.py status` to inspect containers. `python3 scripts/test_env.py logs [service...] [--tail N|all]` prints container logs with every fork provider URL replaced by `<fork-provider>`. Remove the project's containers and volumes with `python3 scripts/test_env.py reset`; `status`, `down` and `reset` work without a provider URL. Reset before starting a new fork so backend databases remain consistent with chain state.
 
@@ -51,6 +52,7 @@ The CoW API mock answers unrecorded requests with 404 (`COW_API_OFFLINE: 'true'`
 | `SAFE_E2E_PROJECT`     | Exported project name; defaults to `safe-e2e-local` and must start with `safe-e2e-` |
 | `RPC_PORT`             | Local Anvil port; defaults to `8545`                                                |
 | `REVERSE_PROXY_PORT`   | Local API port; defaults to `8000`                                                  |
+| `AUTH0_MOCK_PORT`      | Local port of the Auth0 mock; defaults to `8443`                                    |
 | `FORK_RPC_URL_MAINNET` | Archive RPC URL for the optional mainnet profile                                    |
 | `FORK_RPC_URL_POLYGON` | Archive RPC URL for the optional Polygon profile                                    |
 

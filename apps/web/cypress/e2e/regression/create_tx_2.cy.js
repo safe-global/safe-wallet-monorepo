@@ -2,13 +2,16 @@ import * as constants from '../../support/constants.js'
 import * as createtx from '../pages/create_tx.pages.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
 
 const sendValue = 0.00002
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+})
 
 function happyPathToStepTwo() {
   createtx.typeRecipientAddress(constants.EOA)
@@ -32,7 +35,7 @@ describe('Create transactions tests 2', () => {
     happyPathToStepTwo()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
     createtx.setAdvancedExecutionParams()
@@ -44,7 +47,7 @@ describe('Create transactions tests 2', () => {
     happyPathToStepTwo()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     createtx.selectCurrentWallet()
     createtx.openExecutionParamsModal()
     createtx.verifyAndSubmitExecutionParams()
@@ -56,7 +59,7 @@ describe('Create transactions tests 2', () => {
     createtx.verifyNativeTokenTransfer()
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
-    createtx.selectComboButtonOption('execute')
+    createtx.signAndOpenExecuteStep()
     createtx.verifyRelayerAttemptsAvailable()
   })
 })

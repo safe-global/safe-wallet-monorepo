@@ -80,7 +80,7 @@ export function verifyExistingOwnerName(index, name) {
 }
 
 export function typeExistingOwnerName(name) {
-  cy.get(singleOwnerNameInput).clear().type(name)
+  cy.get(singleOwnerNameInput).clear().type(name, main.nameTypingOptions)
   main.verifyInputValue(singleOwnerNameInput, name)
 }
 
@@ -222,7 +222,6 @@ export function typeOwnerAddress(address) {
       const typedValue = $input.val()
       expect(address).to.contain(typedValue)
     })
-  cy.wait(1000)
 }
 //Type the signer address into the 'Signer Address' field on the Manage Signers page, defined by the index (owners.index.address)
 export function typeOwnerAddressManage(index, address) {
@@ -230,13 +229,13 @@ export function typeOwnerAddressManage(index, address) {
 }
 //Type the signer name for one field pages
 export function typeOwnerName(name) {
-  cy.get(newOwnerName).clear().type(name)
+  cy.get(newOwnerName).clear().type(name, main.nameTypingOptions)
   main.verifyInputValue(newOwnerName, name)
 }
 
 //Type the signer name into the "Signer Name" field for manage signers
 export function typeOwnerNameManage(index, name) {
-  cy.get(existingOwnerNameInput(index)).clear().type(name)
+  cy.get(existingOwnerNameInput(index)).clear().type(name, main.nameTypingOptions)
   main.verifyInputValue(existingOwnerNameInput(index), name)
 }
 

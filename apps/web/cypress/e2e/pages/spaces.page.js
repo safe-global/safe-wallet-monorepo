@@ -21,6 +21,9 @@ const spaceSettingsGeneralPage = '[data-testid="settings-general-page"]'
 const spaceEditInput = '[data-testid="space-name-input"]'
 const spaceSaveBtn = '[data-testid="space-save-button"]'
 const spaceDeleteBtn = '[data-testid="space-delete-button"]'
+const spaceDeleteBlockedTooltip = '[data-testid="space-delete-blocked-tooltip"]'
+const subscriptionsEndpoint = '**/v1/billing/spaces/*/subscriptions*'
+const deleteBlockedByTrialStr = 'Cancel the subscription before deleting this Workspace.'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceConfirmNameInput = '[data-testid="space-confirm-name-input"]'
 // The welcome "Workspaces" list renders one SpaceRow per space (reworked from the old SpaceCard).
@@ -285,13 +288,6 @@ export function goToSpacesView() {
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
-export function openSpaceByName(name) {
-  // From the Spaces View list, open the space whose row carries this name (call goToSpacesView first
-  // if a single-space account may have auto-redirected into a dashboard).
-  cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible').click()
-  cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl).and('include', 'spaceId=')
-}
-
 export function clickOnSpaceSelector(spaceName) {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).scrollIntoView().should('be.visible').click()
   if (spaceName) {
@@ -547,24 +543,57 @@ export function editSpace(newName) {
   cy.contains(updateSuccessMsg).should('be.visible')
 }
 
-export function deleteSpace(name) {
-  cy.get(spaceDeleteBtn).click({ force: true })
+export function verifyDeleteBlockedByTrial() {
+  cy.get(spaceDeleteBtn).should('be.disabled')
+  main.hoverUntilTooltipOpen(() => cy.get(spaceDeleteBtn).parent())
+  cy.get(spaceDeleteBlockedTooltip).should('contain', deleteBlockedByTrialStr)
+}
+
+const SPACE_MENU_ATTEMPTS = 3
+
+// A click that comes right after the list renders can be lost, so click again until the menu opens.
+function openSpaceMenu(name, attemptsLeft = SPACE_MENU_ATTEMPTS) {
+  cy.contains(spaceCard, name).find(spaceCardContextMenuBtn).click({ force: true })
+  main
+    .pollUntil(() => Cypress.$(contectMenuRemoveBtn).length > 0, 3000)
+    .then((opened) => {
+      if (opened) return
+      if (attemptsLeft <= 1) throw new Error(`The menu of Workspace ${name} did not open`)
+      openSpaceMenu(name, attemptsLeft - 1)
+    })
+}
+
+// New Workspaces start on a trial, and only a Workspace without a live subscription can be deleted. A test
+// cannot cancel the trial, so the Workspaces list gets none. The rows read it for their plan badge too, so
+// it must apply before the list loads, or the rows render again and close the menu.
+function loadSpacesWithoutSubscriptions() {
+  cy.intercept('GET', subscriptionsEndpoint, { body: [] })
+  cy.visit(constants.spacesUrl)
+}
+
+function removeSpace(name) {
+  openSpaceMenu(name)
+  // A menu item is a div, so its disabled state is an attribute.
+  cy.get(contectMenuRemoveBtn).should('not.have.attr', 'data-disabled')
+  cy.get(contectMenuRemoveBtn).click()
   cy.get(spaceConfirmNameInput).type(name)
   cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
+}
+
+/** Deletes the Workspace from the Workspaces list. */
+export function deleteSpace(name) {
+  loadSpacesWithoutSubscriptions()
+  cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible')
+  removeSpace(name)
   cy.contains(spaceCard, name).should('not.exist')
 }
 
 const MAX_SPACES = 10
 
 function deleteOneSpace() {
-  cy.get(spaceCard).then(($cards) => {
-    const firstCardName = $cards.first().find(spaceCardName).text().trim()
-    cy.wrap($cards.first()).within(() => {
-      cy.get(spaceCardContextMenuBtn).click({ force: true })
-    })
-    cy.get(contectMenuRemoveBtn).click({ force: true })
-    cy.get(spaceConfirmNameInput).type(firstCardName)
-    cy.get(spaceConfirmDeleteBtn).should('be.enabled').click()
+  loadSpacesWithoutSubscriptions()
+  cy.get(spaceCard, { timeout: 30000 }).then(($cards) => {
+    removeSpace($cards.first().find(spaceCardName).text().trim())
     cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
   })
 }

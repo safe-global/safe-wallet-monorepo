@@ -31,6 +31,7 @@ jest.mock('@/components/common/Track', () => ({
 
 jest.mock('@/services/analytics/events/spaces', () => ({
   SPACE_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/spaces').SPACE_EVENTS,
     REMOVE_MEMBER_MODAL: { action: 'Open remove member modal' },
     WORKSPACE_MEMBER_INVITE_RENEWED: { action: 'Workspace member invite renewed' },
   },

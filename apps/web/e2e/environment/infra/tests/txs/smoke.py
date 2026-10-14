@@ -1,8 +1,11 @@
 import json
 import os
 import time
+import urllib.parse
+import uuid
 
 import requests
+import urllib3
 from eth_account import Account
 from safe_eth.eth import EthereumClient
 from safe_eth.eth.ethereum_network import EthereumNetwork
@@ -119,6 +122,56 @@ def verify_proposal_lifecycle(client, owner, recipient, safe_address):
     assert client.w3.eth.get_balance(recipient.address) == 10**16
 
 
+AUTH0 = "https://auth.safe-e2e.test"
+# Any loopback URL passes the gateway's redirect check; nothing listens on it.
+WALLET = "http://localhost:3080/"
+
+
+def gateway(session, method, path, **kwargs):
+    response = session.request(method, f"{CGW}{path}", allow_redirects=False, timeout=10, **kwargs)
+    # The gateway's cookies are Secure; browsers send them to http://localhost, but not this client to http://nginx.
+    for cookie in session.cookies:
+        cookie.secure = False
+    return response
+
+
+def oidc_round_trip(session, query, form):
+    """Runs the browser's authorize → Auth0 form → callback steps and returns the gateway's final redirect."""
+    response = gateway(session, "GET", "/v1/auth/oidc/authorize", params=query)
+    assert response.status_code == 302, response.text
+    authorize = urllib.parse.urlsplit(response.headers["Location"])
+    assert f"{authorize.scheme}://{authorize.netloc}" == AUTH0, authorize
+    params = dict(urllib.parse.parse_qsl(authorize.query))
+    response = session.post(
+        f"{AUTH0}/authorize", data={**params, **form, "action": "verify"}, allow_redirects=False, verify=False,
+        timeout=10,
+    )
+    assert response.status_code == 302, response.text
+    callback = urllib.parse.urlsplit(response.headers["Location"])
+    response = gateway(session, "GET", "/v1/auth/oidc/callback", params=dict(urllib.parse.parse_qsl(callback.query)))
+    assert response.status_code == 302, response.text
+    return response.headers["Location"]
+
+
+def verify_email_sign_in_and_step_up():
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+    session = requests.Session()
+    email = f"smoke-{uuid.uuid4().hex[:12]}@safe-e2e.test"
+    form = {"email": email, "code": "123456", "skip_mfa": "on"}
+    landed = oidc_round_trip(session, {"redirect_url": WALLET, "connection": "email"}, form)
+    assert landed == WALLET, landed
+    space = gateway(session, "POST", "/v1/spaces", json={"name": "Smoke step-up"})
+    assert space.status_code in (200, 201), space.text
+    rename = f"/v1/spaces/{space.json()['uuid']}"
+    refused = gateway(session, "PATCH", rename, json={"name": "Smoke renamed"})
+    assert refused.status_code == 403 and "elevation_required" in refused.text, refused.text
+    landed = oidc_round_trip(session, {"redirect_url": WALLET, "elevate": "true"}, {"code": "123456"})
+    assert "error" not in urllib.parse.urlsplit(landed).query, landed
+    renamed = gateway(session, "PATCH", rename, json={"name": "Smoke renamed"})
+    assert renamed.ok, renamed.text
+    print("Email sign-in and step-up verified through CGW and the local Auth0", flush=True)
+
+
 def verify_indexing_floor():
     indexing = requests.get("http://fork-rpc:8546/status", timeout=10).json()
     assert indexing["logRequests"] > 0
@@ -133,6 +186,7 @@ def main():
     owner = Account.create()
     recipient = Account.create()
     verify_decoder(client, recipient)
+    verify_email_sign_in_and_step_up()
     safe_address, creation_block = create_safe(client, owner)
     path = f"/v1/chains/{CHAIN_ID}/safes/{safe_address}"
     wait_json(path, lambda data: data["threshold"] == 1 and data["nonce"] == 0)

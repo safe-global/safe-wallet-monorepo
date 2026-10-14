@@ -40,7 +40,10 @@ export const trackPlansClick = (label: SAFE_PRO_PLANS_LABELS, location: PlanLoca
   trackEvent({ ...SAFE_PRO_EVENTS.PLANS_CLICKED, label }, plansClickParams(label, location))
 
 /** The analytics properties naming a picked plan, shared by every event that records a plan choice. */
-export const pickProps = (pick: PlanPick) => ({
+export const pickProps = (pick: {
+  tier: Pick<PlanTier, 'name' | 'billingCycle'>
+  option: Pick<PlanPick['option'], 'seats'>
+}) => ({
   [MixpanelEventParams.TARGET_PLAN]: pick.tier.name.toLowerCase(),
   [MixpanelEventParams.SEATS]: pick.option.seats ?? undefined,
   [MixpanelEventParams.BILLING_PERIOD]:

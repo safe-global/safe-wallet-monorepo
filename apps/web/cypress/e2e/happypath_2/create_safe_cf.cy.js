@@ -4,10 +4,13 @@ import * as createwallet from '../pages/create_wallet.pages'
 import * as owner from '../pages/owners.pages'
 import * as wallet from '../../support/utils/wallet.js'
 import { getEvents, events, checkDataLayerEvents } from '../../support/utils/gtag.js'
+import { walletCredentials } from '../../support/credentials.js'
 
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
+let signer
+before(() => {
+  signer = walletCredentials.OWNER_2_PRIVATE_KEY
+})
 // DO NOT use OWNER_2_PRIVATE_KEY for safe creation. Used for CF safes.
-const signer = walletCredentials.OWNER_2_PRIVATE_KEY
 
 describe('CF Safe creation happy path tests', () => {
   beforeEach(() => {

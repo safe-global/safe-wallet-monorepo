@@ -89,7 +89,7 @@ describe('Load Safe tests 2', () => {
     it('Verify correct owner names are displayed for certain networks', () => {
       cy.visit(constants.loadNewSafeSepoliaUrl, {
         onBeforeLoad: seedStorage({
-          [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.sameOwnerName,
+          [constants.localStorageKeys.SAFE_v2__addressBook]: ls.addressBookData.ownerNamesPerNetwork,
         }),
       })
       safe.clickNetworkSelector(constants.networks.sepolia)

@@ -7,6 +7,7 @@ const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
+import type { SignerWallet } from '@/components/common/WalletProvider'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'
@@ -69,6 +70,8 @@ export const isEIP7702DelegatedAccount = async (address: string, provider?: Json
   const code = await getAccountCode(address, provider)
   return code.startsWith(EIP_7702_DELEGATED_ACCOUNT_PREFIX)
 }
+
+export const isSafeSigner = (signer: SignerWallet): boolean => Boolean(signer.isSafe) || Boolean(signer.isConnectedSafe)
 
 export const isSmartContractWallet = memoize(
   async (chainId: string, address: string, provider?: JsonRpcProvider): Promise<boolean> => {

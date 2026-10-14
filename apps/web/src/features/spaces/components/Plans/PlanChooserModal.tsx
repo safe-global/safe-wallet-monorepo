@@ -19,7 +19,7 @@ import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PlanCatalog } from './PlanCards'
 import { InfoTip } from './PlanStatusCard'
-import { buildPlanTiers, pickProps } from './planTiers'
+import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
@@ -73,7 +73,7 @@ export default function PlanChooserModal({
   const subscribe = (picked: PlanPick) => {
     if (!picked.option.paymentLinkId) return
     if (needsTrim(picked.option.seats)) setPick(picked)
-    else void checkout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+    else void checkout(picked.option.paymentLinkId)
   }
 
   return (
@@ -87,7 +87,7 @@ export default function PlanChooserModal({
               onBack={() => setPick(undefined)}
               onContinue={(removed) => {
                 if (trimming.option.paymentLinkId) {
-                  void checkout(trimming.option.paymentLinkId, { ...pickProps(trimming), ...entry }, removed)
+                  void checkout(trimming.option.paymentLinkId, removed)
                 }
               }}
               isSubmitting={isBusy}

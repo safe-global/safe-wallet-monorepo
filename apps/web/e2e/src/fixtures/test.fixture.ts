@@ -13,9 +13,10 @@
  */
 import { test as base, expect, type Page, type TestInfo } from '@playwright/test'
 import { SafeApiClient } from '../api/safe-api-client'
-import { LS_KEYS, STAGING_CGW_URL } from '../data/constants'
+import { LS_KEYS, SAFES, STAGING_CGW_URL } from '../data/constants'
 import { WalletPage } from '../pages/wallet.page'
 import { getWalletCredentials, type WalletCredentials } from '../data/credentials'
+import { isIsolated, isolatedSpecData, type Safes } from './isolated-data'
 import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
 // Cookie consent state — mirrors Cypress localstorage_data.js.
@@ -179,9 +180,14 @@ type SafeFixtures = {
   safeApiClient: SafeApiClient
   /** Wallet page object — connect a private-key wallet and SiWE login */
   walletPage: WalletPage
-  /** Parsed wallet credentials (lazy — only parses env when a test uses it) */
+  /** Parsed wallet credentials (lazy — only parses env when a test uses it); the scenario's owners in isolated runs */
   credentials: WalletCredentials
+  /** SAFES on staging; the Safes the spec's scenarios deployed in isolated runs */
+  safes: Safes
 }
+
+// Scenarios deploy and index Safes before the first test of a spec file.
+const ISOLATED_DATA_TIMEOUT_MS = 600_000
 
 // ---------------------------------------------------------------------------
 // Extended test with Safe-specific fixtures
@@ -210,9 +216,19 @@ export const test = base.extend<SafeFixtures>({
     await use(new WalletPage(safePage))
   },
 
-  credentials: async ({}, use) => {
-    await use(getWalletCredentials())
-  },
+  credentials: [
+    async ({}, use, testInfo) => {
+      await use(isIsolated ? (await isolatedSpecData(testInfo)).credentials : getWalletCredentials())
+    },
+    { timeout: ISOLATED_DATA_TIMEOUT_MS },
+  ],
+
+  safes: [
+    async ({}, use, testInfo) => {
+      await use(isIsolated ? (await isolatedSpecData(testInfo)).safes : SAFES)
+    },
+    { timeout: ISOLATED_DATA_TIMEOUT_MS },
+  ],
 })
 
 // Re-export expect so tests only need one import

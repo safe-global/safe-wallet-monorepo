@@ -7,12 +7,15 @@ import * as tx from '../pages/transactions.page.js'
 import * as assets from '../pages/assets.pages.js'
 import { getMockAddress } from '../../support/utils/ethers.js'
 import proposerData from '../../fixtures/proposers.js'
+import { walletCredentials } from '../../support/credentials.js'
 
 let staticSafes = []
-const walletCredentials = JSON.parse(Cypress.env('CYPRESS_WALLET_CREDENTIALS'))
-const signer = walletCredentials.OWNER_4_PRIVATE_KEY
-const signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
-const signer3 = walletCredentials.OWNER_3_PRIVATE_KEY
+let signer, signer2, signer3
+before(() => {
+  signer = walletCredentials.OWNER_4_PRIVATE_KEY
+  signer2 = walletCredentials.OWNER_1_PRIVATE_KEY
+  signer3 = walletCredentials.OWNER_3_PRIVATE_KEY
+})
 const sendValue = 0.000001
 
 describe('Proposers 2 tests', () => {

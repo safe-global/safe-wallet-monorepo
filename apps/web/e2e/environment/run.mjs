@@ -10,7 +10,8 @@ import { isolatedSpecs } from './specs.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const cypressArtifacts = 'e2e/environment/artifacts/cypress'
-const walletActions = ['dev', 'build', 'cypress', 'cypress-open']
+const playwrightArtifacts = 'e2e/environment/artifacts/playwright'
+const walletActions = ['dev', 'build', 'cypress', 'cypress-open', 'playwright']
 const actions = new Set(['up', 'down', 'reset', 'status', 'logs', 'config', 'test', 'smoke', 'indexing', 'check'])
 for (const action of [...walletActions, 'plan']) actions.add(action)
 
@@ -117,28 +118,26 @@ export function missingChainCommands(specs, manifest, infrastructure, registry =
 
 const specName = (spec) => spec.replace(/^cypress\/e2e\/|\.cy\.js$/g, '')
 
-/** The GitHub Actions matrix for the selected specs; each shard lists its specs and the forks they need. */
+/**
+ * The GitHub Actions matrix for the selected specs; each Cypress shard lists its specs and the forks they need.
+ * One more entry runs every Playwright spec in playwright-specs.mjs on its own Sepolia stack.
+ */
 export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
   const shards = planShards(selectCypressSpecs(selection, registry), shardCount, registry)
-  return {
-    include: shards.map(({ specs, chains }, index) => ({
-      shard: index + 1,
-      specs: specs.map(specName).join(','),
-      chains: chains.join(' '),
-    })),
-  }
+  const cypress = shards.map(({ specs, chains }, index) => ({
+    shard: index + 1,
+    runner: 'cypress',
+    specs: specs.map(specName).join(','),
+    chains: chains.join(' '),
+  }))
+  return { include: [...cypress, { shard: cypress.length + 1, runner: 'playwright', specs: '', chains: '' }] }
 }
 
-// Each spec runs in its own Cypress process, and Cypress Cloud accepts one process per group in a build.
-function recordArguments(specs, env) {
-  if (!env.CYPRESS_RECORD_KEY || !env.SAFE_E2E_RECORD_BUILD_ID) return ['--record', 'false']
-  const group = `isolated ${specs.map(specName).join(',')}`
-  return ['--record', '--ci-build-id', env.SAFE_E2E_RECORD_BUILD_ID, '--group', group, '--tag', 'isolated']
-}
+const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
 
 const cypressConfig = (env, extra) =>
   JSON.stringify({
-    baseUrl: env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`,
+    baseUrl: webUrl(env),
     retries: 0,
     video: true,
     trashAssetsBeforeRuns: false,
@@ -155,7 +154,8 @@ export function cypressRunArguments(specs, env = process.env) {
     cypressConfig(env, {}),
     '--spec',
     specs.join(','),
-    ...recordArguments(specs, env),
+    '--record',
+    'false',
     '--reporter',
     'junit',
     '--reporter-options',
@@ -173,19 +173,22 @@ export function cypressOpenArguments(specs, env = process.env) {
   ]
 }
 
-// A fresh Cypress process per spec releases the browser memory that a long run keeps.
-export async function runSpecsSeparately(specs, runSpec, { isInterrupted = () => false, report = console.log } = {}) {
-  const failed = []
-  for (const [index, spec] of specs.entries()) {
-    if (isInterrupted()) throw new Error('Cypress run interrupted')
-    report(`[${index + 1}/${specs.length}] ${spec}`)
-    try {
-      await runSpec(spec)
-    } catch (error) {
-      failed.push(`${spec} (${error.message})`)
-    }
+/** `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all. */
+export function playwrightRunArguments(env = process.env) {
+  const filters = env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : []
+  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...filters]
+}
+
+/** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
+export function stackEnvironment(project, manifest, walletEnv) {
+  return {
+    ...walletEnv,
+    SAFE_E2E_ISOLATED: 'true',
+    SAFE_E2E_PROJECT: project,
+    SAFE_TXS_BASE_URL: manifest.transactionServiceUrl,
+    SAFE_RPC_URL: manifest.rpcUrl,
+    SAFE_E2E_CHAINS: JSON.stringify(manifest.chains ?? {}),
   }
-  if (failed.length) throw new Error(`${failed.length} of ${specs.length} specs failed:\n${failed.join('\n')}`)
 }
 
 export async function checkEnvironment(run, diagnostics = () => {}) {
@@ -260,22 +263,20 @@ async function runCypress(config, runner, manifest, walletEnv) {
   if (missing.length) {
     throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
   }
-  const env = {
-    ...walletEnv,
-    SAFE_E2E_ISOLATED: 'true',
-    SAFE_E2E_PROJECT: config.project,
-    SAFE_TXS_BASE_URL: manifest.transactionServiceUrl,
-    SAFE_RPC_URL: manifest.rpcUrl,
-    SAFE_E2E_CHAINS: JSON.stringify(manifest.chains ?? {}),
-  }
+  const env = stackEnvironment(config.project, manifest, walletEnv)
   if (config.action === 'cypress-open') {
     await runner.execute('yarn', cypressOpenArguments(specs, env), { env })
     return
   }
   await rm(resolve(webRoot, cypressArtifacts), { recursive: true, force: true })
-  await runSpecsSeparately(specs, (spec) => runner.execute('yarn', cypressRunArguments([spec], env), { env }), {
-    isInterrupted: runner.isInterrupted,
-  })
+  // One process for the whole shard: Cypress starts once, and browser memory management clears between specs.
+  await runner.execute('yarn', cypressRunArguments(specs, env), { env })
+}
+
+async function runPlaywright(config, runner, manifest, walletEnv) {
+  const env = { ...stackEnvironment(config.project, manifest, walletEnv), PLAYWRIGHT_BASE_URL: webUrl(process.env) }
+  await rm(resolve(webRoot, playwrightArtifacts), { recursive: true, force: true })
+  await runner.execute('yarn', playwrightRunArguments(env), { env })
 }
 
 async function runWalletAction(config, runner) {
@@ -283,6 +284,7 @@ async function runWalletAction(config, runner) {
   const env = { ...walletEnvironment(manifest), PORT: process.env.SAFE_E2E_WEB_PORT || '3080' }
   await assertEnvironmentReady(manifest)
   if (config.action.startsWith('cypress')) await runCypress(config, runner, manifest, env)
+  else if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
   else await runner.execute('yarn', [config.action], { env })
 }
 

@@ -1,6 +1,6 @@
-# Isolated Cypress regression
+# Isolated E2E regression
 
-Runs the existing Cypress specs registered in `e2e/environment/specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
+Runs the existing Cypress specs registered in `e2e/environment/specs.mjs`, and the Playwright specs registered in `e2e/environment/playwright-specs.mjs`, against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. The CI workflow selects a subset; see `.github/workflows/web-isolated-e2e-backend.yml`.
 
 ## Setup
 
@@ -29,6 +29,23 @@ SAFE_E2E_SPECS=regression/assets yarn workspace @safe-global/web e2e:env cypress
 
 `SAFE_E2E_WEB_URL` overrides the default wallet URL, `http://localhost:3080`. `SAFE_E2E_BROWSER` accepts Chrome/Chromium or an executable path and defaults to `chrome`. Headless runs retain videos, screenshots and JUnit reports under `apps/web/e2e/environment/artifacts/cypress/`; starting another headless run clears those artifacts.
 
+## Playwright
+
+The Playwright specs run unchanged on staging and on the local stack, like the Cypress specs. With the stack up and the wallet served as above:
+
+```sh
+yarn workspace @safe-global/web e2e:env playwright
+SAFE_E2E_SPECS=dashboard yarn workspace @safe-global/web e2e:env playwright
+```
+
+`SAFE_E2E_SPECS` filters by file name here. `SAFE_E2E_WORKERS` sets the worker count (default 2). The HTML report, JUnit report, traces and videos of failed tests go to `apps/web/e2e/environment/artifacts/playwright/`; each run clears them first. Open a trace with `yarn workspace @safe-global/web exec playwright show-trace <trace.zip>`.
+
+Specs read their Safes from the `safes` fixture and their wallets from the `credentials` fixture. On staging these are `SAFES` from `e2e/src/data/constants.ts` and `CYPRESS_WALLET_CREDENTIALS`. In isolated runs (`SAFE_E2E_ISOLATED=true`), `e2e/src/fixtures/isolated-data.ts` runs the spec's scenarios once per spec file and worker with four generated owners, and the fixtures return those owners and the deployed Safes. A key of `SAFES` that the registry does not map throws when a spec reads it.
+
+To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order, and `safes` maps each `SAFES` key the spec reads to a static Safe key that those scenarios return. A spec that needs no backend data gets `{}`. Only registered specs run in isolated mode, and `e2e:env:test` fails for an unregistered spec. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. The `fixtures` and `files` that scenarios return for Cypress are not used.
+
+Email sign-in and step-up specs run only in isolated mode, against `auth0-mock`. `email-sign-in.spec.ts` signs in through the UI; every other spec starts signed in: `signInWithEmail` in `e2e/src/fixtures/email-session.ts` signs in through the gateway and the mock from Node, optionally without a second factor so the next sensitive action asks for a step-up, and gives the page the gateway's and the mock's session cookies. `createEmailSession` signs the same user in again with a second factor, so test data created through the gateway needs no step-up; `storeSubscription` gives a Workspace its plan at once. `e2e/src/fixtures/step-up.ts` answers the step-up and checks the replayed action, and `e2e/src/pages/auth0.page.ts` drives the mock's page. The local nginx returns the caller's origin and allows credentials, as the hosted gateway does, so the browser keeps the session cookie on gateway calls; specs that fake a session with `page.route` must mock every session-scoped call the page makes, or the gateway's 403 makes the app re-check the session.
+
 ## Cleanup
 
 Stop the wallet server, then remove the backend containers and volumes:
@@ -49,7 +66,7 @@ The local Sepolia chain enables the features that staging serves to `WALLET_WEB`
 
 ## CI
 
-`.github/workflows/web-isolated-e2e-backend.yml` builds the wallet and the Transaction Builder once. It then runs the selected specs in parallel jobs, each with its own backend. `node apps/web/e2e/environment/run.mjs plan` splits the selection, honouring `SAFE_E2E_SPECS` and `SAFE_E2E_SHARDS`. Specs that need the mainnet or Polygon fork get their own shards. Those shards need the `FORK_RPC_URL_MAINNET` and `FORK_RPC_URL_POLYGON` secrets next to `SEPOLIA_FORK_RPC_URL`. Dispatch the workflow manually to run every registered spec. On a pull request, the `isolated-e2e-full` label runs every registered spec in six shards on each push; remove the label to return to the short selection. With `CYPRESS_RECORD_KEY` set, each spec records to Cypress Cloud as its own group under one build per workflow run.
+`.github/workflows/web-isolated-e2e-backend.yml` builds the wallet and the Transaction Builder once. The selected specs run in parallel jobs, each with its own backend. Each job starts its backend while the build runs and waits for the build before it starts Cypress. `node apps/web/e2e/environment/run.mjs plan` splits the selection, honouring `SAFE_E2E_SPECS` and `SAFE_E2E_SHARDS`. Only the shards with specs that need the mainnet or Polygon fork start those forks; the planner fills them up with other specs, so that all shards end at about the same time. Those shards need the `FORK_RPC_URL_MAINNET` and `FORK_RPC_URL_POLYGON` secrets next to `SEPOLIA_FORK_RPC_URL`. Dispatch the workflow manually to run every registered spec. On a pull request, the `isolated-e2e-full` label runs every registered spec in six shards on each push; remove the label to return to the short selection. Each shard runs its specs in one Cypress process. Runs do not record to Cypress Cloud; each shard uploads its videos, screenshots and JUnit reports as a workflow artifact. The plan always adds one more job (`runner: playwright`), which runs every Playwright spec on its own Sepolia stack and uploads the Playwright artifacts.
 
 ## Seeded data
 
@@ -71,6 +88,7 @@ The local Sepolia chain enables the features that staging serves to `WALLET_WEB`
 - `cow-api` answers as `api.cow.fi` for the gateway with recorded orders and returns 404 for anything else (`COW_API_OFFLINE`); without that flag it forwards unknown requests to the real API, for recording. Scenarios register replayed settlements in it.
 - `relay-api` stands in for the relay provider and executes relayed transactions on the fork. The chain config offers `FREE_DAILY_LIMIT` relaying and sponsored Safe creation, plus `SUBSCRIPTION` relaying for Safes in a Workspace on a plan.
 - `billing-api` stands in for the billing service, so `SAFE_PRO` is on as in production. Every Workspace has the staging Business trial, which the mock announces to the gateway with a signed webhook the first time the gateway reads it; the gateway then writes the Workspace's entitlements. Scenarios store a plan with `POST /billing/__test/customers/<space uuid>/subscriptions` (optional `plan` of `business` or `starter`, `status` and `metadata`), which returns once the gateway has applied it.
+- `auth0-mock` answers as `auth.safe-e2e.test` for email sign-in and step-up, so the gateway runs with `FF_OIDC_AUTH` and `FF_MFA_STEP_UP`. Its `/authorize` page asks for the email (sign-in only) and a code, which is always `123456`; any other code shows an error, and Cancel returns Auth0's `access_denied` cancellation. "Sign in without a second factor" issues a token without `amr`, so the next sensitive action asks for a step-up; "Do not report the second factor" leaves `amr` out of a step-up, which the gateway must refuse. HTTP clients post the same form; `tests/txs/smoke.py` signs in and steps up this way. The browser reaches the mock at `127.0.0.1:${AUTH0_MOCK_PORT:-8443}`, which needs a host mapping for `auth.safe-e2e.test` with that port. `mock-keys` creates one self-signed certificate for `api.cow.fi` and `auth.safe-e2e.test`, which the gateway trusts, and the mock's token signing key. The isolated gateway raises the sign-in and Workspace-creation rate limits, which specs would otherwise reach.
 - Specs whose `chains` in `specs.mjs` name chain 1 or 137 need the mainnet or Polygon fork. Start them with `scripts/test_env.py up --chain mainnet` or `--chain polygon`.
 - Each Anvil forks from a `fork-upstream` proxy that forwards to the secret RPC URL, so its fork cache has the same name for every provider and key. `infra/fork-cache/` holds the committed fork-block state; `test_env.py` copies it into `infra/.anvil-cache` before Anvil starts, and Anvil writes what it fetches on top when it stops. Delete `infra/.anvil-cache` to start again from the committed state.
 - To refresh the committed cache, download the `.anvil-cache` folders that a full CI run uploads with each shard, and merge them per chain with `node apps/web/e2e/environment/fork-cache.mjs <committed file> <cache that Anvil wrote through the proxy> [more caches]`. The proxy's `GET /status` counts the requests that still reached the provider. All three forks usually share one provider key; bursts of new accounts can exhaust its quota.
