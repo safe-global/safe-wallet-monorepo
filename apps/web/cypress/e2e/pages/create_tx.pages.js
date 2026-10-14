@@ -329,7 +329,38 @@ export function deleteTx() {
   cy.get(deleteTxModalBtn).click()
 }
 
-/** Deletes every queued transaction; call it on the queue page. */
+function loadQueuedTxs(expectedCount) {
+  cy.get(transactionItem, { timeout: 30000 }).then(($items) => {
+    const count = $items.length
+    if (count === expectedCount) return
+    cy.get(transactionItem).last().scrollIntoView()
+    main
+      .pollUntil(() => Cypress.$(transactionItem).length !== count, 10000)
+      .then((changed) => {
+        if (changed) {
+          loadQueuedTxs(expectedCount)
+        } else if (expectedCount !== undefined) {
+          expect(count, 'queued transactions').to.equal(expectedCount)
+        }
+      })
+  })
+}
+
+function deleteQueuedTxsFromLast(expectedCount) {
+  loadQueuedTxs(expectedCount)
+  cy.get(transactionItem).then(($items) => {
+    const remaining = $items.length - 1
+    cy.get(transactionItem).last().click({ force: true })
+    deleteTx()
+    if (remaining === 0) {
+      cy.contains(emptyQueueStr, { timeout: 30000 }).should('be.visible')
+      return
+    }
+    deleteQueuedTxsFromLast(remaining)
+  })
+}
+
+/** Deletes every queued transaction, last nonce first; call it on the queue page. */
 export function deleteAllTx() {
   cy.get('body', { timeout: 30000 }).should(($body) => {
     const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
@@ -337,12 +368,7 @@ export function deleteAllTx() {
   })
   cy.get('body').then(($body) => {
     if ($body.find(transactionItem).length > 0) {
-      cy.get(transactionItem).then(($items) => {
-        for (let i = $items.length - 1; i >= 0; i--) {
-          cy.wrap($items[i]).click({ force: true })
-          deleteTx()
-        }
-      })
+      deleteQueuedTxsFromLast()
     }
   })
 }

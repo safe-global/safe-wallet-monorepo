@@ -56,9 +56,11 @@ export function mockEnsName(name, prefixedAddress) {
     }
     req.continue((res) => {
       if (!Array.isArray(res.body)) return
-      res.body = res.body.map((entry) => {
+      res.body.forEach((entry) => {
         const index = payloads.findIndex((payload) => payload.id === entry.id)
-        return index >= 0 && results[index] !== undefined ? toResponse(index) : entry
+        if (index < 0 || results[index] === undefined) return
+        delete entry.error
+        entry.result = results[index]
       })
     })
   })

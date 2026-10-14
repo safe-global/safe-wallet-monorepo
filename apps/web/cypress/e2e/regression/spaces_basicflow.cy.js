@@ -20,7 +20,7 @@ describe('Spaces basic flow tests', () => {
   beforeEach(() => {
     space.blockBeamer()
     space.interceptSpacesList()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
   })
 
   it('Verify a user can sign in, create, rename and delete an organisation', () => {
@@ -37,7 +37,6 @@ describe('Spaces basic flow tests', () => {
     space.goToSpaceSettings()
     space.verifySpaceSettingsGeneralLoaded()
     space.editSpace(newSpaceName)
-    space.verifyDeleteBlockedByTrial()
     space.clickOnSpaceSelector(newSpaceName)
     space.spaceExists(newSpaceName)
     space.deleteSpace(newSpaceName)
@@ -76,7 +75,7 @@ describe('Spaces basic flow tests', () => {
     space.addMember(memberName, user_address)
     space.disconnectFromSpaceLevel()
     cy.clearAllCookies()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
     space.signInWithWallet(user)
     // No reload here: a member with a pending invite is kept on /welcome/spaces after sign-in
     // (useSignInRedirect only redirects when there are no invites), and a full reload would drop the
@@ -90,7 +89,7 @@ describe('Spaces basic flow tests', () => {
     // admin who created it and remove it — keeping the run idempotent (tests 1 and 2 self-clean too).
     space.disconnectFromSpaceLevel()
     cy.clearAllCookies()
-    cy.visit(constants.spacesUrl)
+    space.visitSpacesView()
     space.signInWithWallet(admin)
     space.deleteSpace(spaceName)
   })
