@@ -1,9 +1,22 @@
 /**
- * Email sign-in through the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
+ * Email sessions of the local Auth0 of the isolated stack, and the Workspace data such a user starts from.
  */
-import { expect, test, type Page } from '@playwright/test'
+import { expect, request, test, type APIResponse, type BrowserContext, type Page } from '@playwright/test'
 import { CGW_BASE_URL, LS_NAMESPACE } from '../data/constants'
-import { Auth0Page } from '../pages/auth0.page'
+import { AUTH0_CODE, Auth0Page } from '../pages/auth0.page'
+
+/** The gateway sends browsers here; playwright.isolated.config.ts maps the name to the published port of the mock. */
+const AUTH0_HOST = 'auth.safe-e2e.test'
+const AUTH0_MOCK_URL = `https://127.0.0.1:${process.env.AUTH0_MOCK_PORT || '8443'}`
+const GATEWAY_SESSION_COOKIE = 'access_token'
+const AUTH0_SESSION_COOKIE = 'auth0_session'
+// SESSION_LIFETIME_MS of the wallet's authSlice, which imports too much of the app to load here.
+const WALLET_SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
+
+type Cookie = Parameters<BrowserContext['addCookies']>[0][number]
+
+/** A signed-in user: the gateway's session cookie, and the local Auth0's, which a step-up reads the email from. */
+export type EmailSession = { email: string; cookies: Cookie[] }
 
 export const uniqueEmail = (prefix: string): string =>
   `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@safe-e2e.test`
@@ -17,77 +30,171 @@ export async function openEmailSignIn(page: Page): Promise<Auth0Page> {
   return auth0
 }
 
-/** Signs in and waits until the wallet has stored the session, so that a later page load starts signed in. */
-export async function signInWithEmail(page: Page, email: string, { secondFactor = true } = {}): Promise<void> {
-  const auth0 = await openEmailSignIn(page)
-  await auth0.signIn(email, { secondFactor })
+function walletOrigin(): string {
   const { baseURL } = test.info().project.use
-  if (!baseURL) throw new Error('signInWithEmail needs the baseURL of the wallet')
-  const walletOrigin = new URL(baseURL).origin
-  await page.waitForURL((url) => url.origin === walletOrigin)
-  await expect
-    .poll(() =>
-      page.evaluate(
-        (key) => JSON.parse(localStorage.getItem(key) ?? '{}').sessionExpiresAt ?? null,
-        `${LS_NAMESPACE}auth`,
-      ),
-    )
-    .not.toBeNull()
+  if (!baseURL) throw new Error('The email sign-in needs the baseURL of the wallet')
+  return new URL(baseURL).origin
+}
+
+function toSameSite(value: string): Cookie['sameSite'] {
+  const sameSite = { none: 'None', lax: 'Lax', strict: 'Strict' } as const
+  const key = value.toLowerCase()
+  return key in sameSite ? sameSite[key as keyof typeof sameSite] : undefined
+}
+
+/** The named cookie of a response, for the browser to keep under `domain`. */
+function responseCookie(response: APIResponse, name: string, domain: string): Cookie {
+  const header = response
+    .headersArray()
+    .filter(({ name: header }) => header.toLowerCase() === 'set-cookie')
+    .map(({ value }) => value)
+    .find((value) => value.startsWith(`${name}=`))
+  if (!header) throw new Error(`${response.url()} set no ${name} cookie`)
+  const [pair, ...attributes] = header.split(';').map((part) => part.trim())
+  const cookie: Cookie = { name, value: pair.slice(name.length + 1), domain, path: '/' }
+  for (const attribute of attributes) {
+    const [key, value = ''] = attribute.split('=')
+    if (key.toLowerCase() === 'httponly') cookie.httpOnly = true
+    if (key.toLowerCase() === 'secure') cookie.secure = true
+    if (key.toLowerCase() === 'samesite') cookie.sameSite = toSameSite(value)
+  }
+  return cookie
+}
+
+function redirectTarget(response: APIResponse): string {
+  const location = response.headers()['location']
+  if (response.status() !== 302 || !location) {
+    throw new Error(`${response.url()} answered ${response.status()} instead of a redirect`)
+  }
+  return location
+}
+
+/**
+ * Signs in through the gateway and the local Auth0 without a browser, so a test can open its page signed in. The
+ * gateway mints the session as it does for a browser; with `secondFactor: false`, its sensitive calls need a step-up.
+ */
+export async function createEmailSession(email: string, { secondFactor = true } = {}): Promise<EmailSession> {
+  // The mock's certificate is self-signed, as for the browser (`ignoreHTTPSErrors` in playwright.isolated.config.ts).
+  const api = await request.newContext({ ignoreHTTPSErrors: true, maxRedirects: 0 })
+  try {
+    const authorize = new URL(`${CGW_BASE_URL}/v1/auth/oidc/authorize`)
+    authorize.searchParams.set('redirect_url', `${walletOrigin()}/welcome/spaces`)
+    authorize.searchParams.set('connection', 'email')
+    const auth0Url = new URL(redirectTarget(await api.get(authorize.toString())))
+    // Node cannot resolve the mock's name, so the form goes to its published port under that name.
+    const signIn = await api.post(`${AUTH0_MOCK_URL}/authorize`, {
+      headers: { Host: AUTH0_HOST },
+      form: {
+        ...Object.fromEntries(auth0Url.searchParams),
+        email,
+        code: AUTH0_CODE,
+        action: 'verify',
+        ...(secondFactor ? {} : { skip_mfa: 'on' }),
+      },
+    })
+    const callback = await api.get(redirectTarget(signIn))
+    redirectTarget(callback)
+    return {
+      email,
+      cookies: [
+        responseCookie(callback, GATEWAY_SESSION_COOKIE, new URL(CGW_BASE_URL).hostname),
+        responseCookie(signIn, AUTH0_SESSION_COOKIE, AUTH0_HOST),
+      ],
+    }
+  } finally {
+    await api.dispose()
+  }
+}
+
+/** Starts the page signed in, as the wallet keeps a session: the cookies, and the expiry in its stored auth state. */
+export async function signInWithEmail(page: Page, email: string, { secondFactor = true } = {}): Promise<EmailSession> {
+  const session = await createEmailSession(email, { secondFactor })
+  await page.context().addCookies(session.cookies)
+  const auth = {
+    sessionExpiresAt: Date.now() + WALLET_SESSION_LIFETIME_MS,
+    landingSpaceHint: null,
+    isStoreHydrated: false,
+    cfSafeSynced: false,
+    isOidcLoginPending: false,
+    isSessionCheckPending: false,
+  }
+  // Only into an empty store: the script runs on every page load, also after the return from a step-up.
+  await page.addInitScript(
+    ({ key, value }) => {
+      if (window.localStorage.getItem(key) === null) window.localStorage.setItem(key, value)
+    },
+    { key: `${LS_NAMESPACE}auth`, value: JSON.stringify(auth) },
+  )
+  return session
 }
 
 type Workspace = { uuid: string; name: string }
 
-/** Calls the gateway from the page, so the session cookie and the app's origin go with the request. */
-async function gatewayFetch(
-  page: Page,
+/** Calls the gateway with the session's cookie; a session with a second factor needs no step-up. */
+export async function gatewayRequest(
+  session: EmailSession,
   method: string,
   path: string,
   body?: unknown,
-): Promise<{ status: number; text: string }> {
-  return page.evaluate(
-    async ({ url, method, body }) => {
-      const response = await fetch(url, {
-        method,
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: body === undefined ? undefined : JSON.stringify(body),
-      })
-      return { status: response.status, text: await response.text() }
-    },
-    { url: `${CGW_BASE_URL}${path}`, method, body },
-  )
-}
-
-async function gatewayRequest(page: Page, method: string, path: string, body?: unknown): Promise<unknown> {
-  const { status, text } = await gatewayFetch(page, method, path, body)
-  if (status >= 400) throw new Error(`${method} ${path} returned ${status}: ${text}`)
+): Promise<unknown> {
+  const gatewayHost = new URL(CGW_BASE_URL).hostname
+  const cookie = session.cookies
+    .filter(({ domain }) => domain === gatewayHost)
+    .map(({ name, value }) => `${name}=${value}`)
+    .join('; ')
+  const response = await fetch(`${CGW_BASE_URL}${path}`, {
+    method,
+    headers: { 'Content-Type': 'application/json', Cookie: cookie },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  const text = await response.text()
+  if (!response.ok) throw new Error(`${method} ${path} returned ${response.status}: ${text}`)
   return text ? JSON.parse(text) : undefined
 }
 
-export async function createWorkspace(page: Page, name: string): Promise<Workspace> {
-  const workspace = await gatewayRequest(page, 'POST', '/v1/spaces', { name })
+export async function createWorkspace(session: EmailSession, name: string): Promise<Workspace> {
+  const workspace = await gatewayRequest(session, 'POST', '/v1/spaces', { name })
   if (typeof workspace !== 'object' || workspace === null || !('uuid' in workspace) || !('name' in workspace)) {
     throw new Error(`POST /v1/spaces returned no Workspace: ${JSON.stringify(workspace)}`)
   }
   const created = { uuid: String(workspace.uuid), name: String(workspace.name) }
   // The router guard sends a Workspace URL away until the gateway's (cached) Workspace list contains it.
   await expect
-    .poll(async () => JSON.stringify(await gatewayRequest(page, 'GET', '/v1/spaces')), { timeout: 30_000 })
+    .poll(async () => JSON.stringify(await gatewayRequest(session, 'GET', '/v1/spaces')), { timeout: 30_000 })
     .toContain(created.uuid)
   return created
 }
 
-export async function workspaceName(page: Page, uuid: string): Promise<string> {
-  const workspace = await gatewayRequest(page, 'GET', `/v1/spaces/${uuid}`)
+/** Stores the Workspace's plan in the local billing service, which returns once the gateway has applied it. */
+export async function storeSubscription(uuid: string, subscription: { status?: string } = {}): Promise<void> {
+  const url = `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscription),
+  })
+  if (!response.ok) throw new Error(`POST ${url} returned ${response.status}: ${await response.text()}`)
+}
+
+/** The gateway's answer for a resource of the Workspace (`safes`, `members`, `address-book`), as text. */
+export async function workspaceResource(session: EmailSession, uuid: string, resource: string): Promise<string> {
+  return JSON.stringify(await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}/${resource}`))
+}
+
+export async function workspaceName(session: EmailSession, uuid: string): Promise<string> {
+  const workspace = await gatewayRequest(session, 'GET', `/v1/spaces/${uuid}`)
   if (typeof workspace !== 'object' || workspace === null || !('name' in workspace)) {
     throw new Error(`GET /v1/spaces/${uuid} returned no name`)
   }
   return String(workspace.name)
 }
 
-/** How the gateway session was signed in (`oidc` for email), or null without a session. */
+/** How the browser's gateway session was signed in (`oidc` for email), or null without a session. */
 export async function sessionAuthMethod(page: Page): Promise<string | null> {
-  const { status, text } = await gatewayFetch(page, 'GET', '/v1/auth/me')
+  const { status, text } = await page.evaluate(async (url) => {
+    const response = await fetch(url, { credentials: 'include' })
+    return { status: response.status, text: await response.text() }
+  }, `${CGW_BASE_URL}/v1/auth/me`)
   if (status === 403) return null
   const session: unknown = JSON.parse(text)
   return typeof session === 'object' && session !== null && 'authMethod' in session ? String(session.authMethod) : null
