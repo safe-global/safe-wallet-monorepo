@@ -1,16 +1,17 @@
 // The user signs in without a second factor; the test data comes from a second session that has one.
-import type { Browser, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { CHAIN_IDS, TEST_ADDRESSES } from '../../src/data/constants'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import {
   createWorkspace,
+  createEmailSession,
   gatewayRequest,
-  openEmailSession,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  type EmailSession,
 } from '../../src/fixtures/email-session'
 import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
 
@@ -22,35 +23,30 @@ const prefixless = (prefixedAddress: string): string => prefixedAddress.split(':
 test.describe('Step-up for the actions inside a Workspace', { tag: '@regression' }, () => {
   test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
 
-  let email: string
   let workspaceId: string
   /** The same user, signed in with a second factor, for test data. */
-  let setup: Page
+  let setup: EmailSession
 
   const pageUrl = (path: string) => new RegExp(`${path}\\?spaceId=${workspaceId}$`)
 
-  /** Invites a new user, who accepts; returns that member's own session, which the caller closes. */
-  async function joinAsMember(browser: Browser, name: string): Promise<Page> {
+  /** Invites a new user, who accepts; returns that member's session. */
+  async function joinAsMember(name: string): Promise<EmailSession> {
     const memberEmail = uniqueEmail('member')
     await gatewayRequest(setup, 'POST', `/v1/spaces/${workspaceId}/members/invite`, {
       users: [{ type: 'email', email: memberEmail, role: 'MEMBER', name }],
     })
-    const member = await openEmailSession(browser, memberEmail, { secondFactor: false })
+    const member = await createEmailSession(memberEmail, { secondFactor: false })
     await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
     return member
   }
 
-  test.beforeEach(async ({ safePage, browser }) => {
-    email = uniqueEmail('step-up-actions')
+  test.beforeEach(async ({ safePage }) => {
+    const email = uniqueEmail('step-up-actions')
     await signInWithEmail(safePage, email, { secondFactor: false })
-    setup = await openEmailSession(browser, email)
+    setup = await createEmailSession(email)
     workspaceId = (await createWorkspace(setup, 'Step-up actions')).uuid
     // The default trial reaches the gateway late; a stored plan gives the Workspace its Safe seats now.
     await storeSubscription(workspaceId)
-  })
-
-  test.afterEach(async () => {
-    await setup.context().close()
   })
 
   test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
@@ -72,7 +68,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Safe account added')
     await expect(safePage.getByRole('row').filter({ hasText: 'Treasury Safe' })).toBeVisible()
-    expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(address)
+    expect(await workspaceResource(setup, workspaceId, 'safes')).toContain(address)
   })
 
   test('should rename the Workspace Safe when the step-up succeeds', async ({ safePage, safes }) => {
@@ -90,7 +86,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Address book updated')
     await expect(safePage.getByRole('row').filter({ hasText: 'Treasury Safe' })).toBeVisible()
-    expect(await workspaceResource(safePage, workspaceId, 'address-book')).toContain('Treasury Safe')
+    expect(await workspaceResource(setup, workspaceId, 'address-book')).toContain('Treasury Safe')
   })
 
   test('should remove the Safe from the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
@@ -107,7 +103,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     await expectActionReplayed(safePage, pageUrl('/spaces/safe-accounts'), 'Safe account removed')
     await expect(safePage.getByRole('button', { name: 'Safe Account actions' })).toBeHidden()
-    expect(await workspaceResource(safePage, workspaceId, 'safes')).not.toContain(address)
+    expect(await workspaceResource(setup, workspaceId, 'safes')).not.toContain(address)
   })
 
   test('should invite the member when the step-up succeeds', async ({ safePage }) => {
@@ -123,14 +119,14 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     await expectActionReplayed(safePage, pageUrl('/spaces/members'), 'Invitation sent')
     await expect(safePage.getByRole('tab', { name: 'Pending (1)' })).toBeVisible()
-    expect(await workspaceResource(safePage, workspaceId, 'members')).toContain(invitee)
+    expect(await workspaceResource(setup, workspaceId, 'members')).toContain(invitee)
   })
 
   test.describe('with a second active member', () => {
     const MEMBER_NAME = 'Second member'
 
-    test.beforeEach(async ({ browser }) => {
-      await (await joinAsMember(browser, MEMBER_NAME)).context().close()
+    test.beforeEach(async () => {
+      await joinAsMember(MEMBER_NAME)
     })
 
     const memberRow = (page: Page) => page.getByRole('row').filter({ hasText: MEMBER_NAME })
@@ -157,7 +153,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
       await expectActionReplayed(safePage, pageUrl('/spaces/members'), 'Member removed')
       await expect(memberRow(safePage)).toBeHidden()
-      expect(await workspaceResource(safePage, workspaceId, 'members')).not.toContain(MEMBER_NAME)
+      expect(await workspaceResource(setup, workspaceId, 'members')).not.toContain(MEMBER_NAME)
     })
   })
 
@@ -193,13 +189,12 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
     await expect(safePage.getByRole('row').filter({ hasText: CONTACT.name })).toBeHidden()
   })
 
-  test('should approve the contact request of a member when the step-up succeeds', async ({ safePage, browser }) => {
-    const member = await joinAsMember(browser, 'Requester')
+  test('should approve the contact request of a member when the step-up succeeds', async ({ safePage }) => {
+    const member = await joinAsMember('Requester')
     await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/address-book/requests`, {
       ...CONTACT,
       chainIds: [SEPOLIA],
     })
-    await member.context().close()
     await safePage.goto(`/spaces/address-book?spaceId=${workspaceId}`)
 
     await safePage.getByRole('tab', { name: 'Pending (1)' }).click()
@@ -208,7 +203,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
 
     await expectActionReplayed(safePage, pageUrl('/spaces/address-book'), 'Address book request approved')
     await expect(safePage.getByRole('tab', { name: 'Workspace contacts (1)' })).toBeVisible()
-    expect(await workspaceResource(safePage, workspaceId, 'address-book')).toContain(CONTACT.name)
+    expect(await workspaceResource(setup, workspaceId, 'address-book')).toContain(CONTACT.name)
   })
 
   test('should delete the Workspace from the Workspace list when the step-up succeeds', async ({ safePage }) => {

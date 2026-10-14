@@ -1,14 +1,14 @@
 // These flows start outside a Workspace and return the step-up to their own page, not the page the user left.
-import type { Browser, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { isIsolated } from '../../src/fixtures/isolated-data'
 import {
   createWorkspace,
-  openEmailSession,
   signInWithEmail,
   storeSubscription,
   uniqueEmail,
   workspaceResource,
+  type EmailSession,
 } from '../../src/fixtures/email-session'
 import { completeStepUp, expectActionReplayed } from '../../src/fixtures/step-up'
 
@@ -32,28 +32,24 @@ async function nameNewWorkspace(page: Page): Promise<void> {
 test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@regression' }, () => {
   test.skip(!isIsolated, 'Needs the local Auth0 of the isolated stack')
 
-  let email: string
+  let user: EmailSession
 
-  /** Creates a Workspace with a plan through a second session of the user that needs no step-up. */
-  async function prepareWorkspace(browser: Browser): Promise<string> {
-    const setup = await openEmailSession(browser, email)
-    const workspaceId = (await createWorkspace(setup, WORKSPACE_NAME)).uuid
+  /** Creating a Workspace needs no step-up, so the user's own session prepares it, with a plan. */
+  async function prepareWorkspace(): Promise<string> {
+    const workspaceId = (await createWorkspace(user, WORKSPACE_NAME)).uuid
     await storeSubscription(workspaceId)
-    await setup.context().close()
     return workspaceId
   }
 
   test.beforeEach(async ({ safePage }) => {
-    email = uniqueEmail('step-up-outside')
-    await signInWithEmail(safePage, email, { secondFactor: false })
+    user = await signInWithEmail(safePage, uniqueEmail('step-up-outside'), { secondFactor: false })
   })
 
   test('should add the Safe to the chosen Workspace when the step-up from its Safe page succeeds', async ({
     safePage,
     safes,
-    browser,
   }) => {
-    const workspaceId = await prepareWorkspace(browser)
+    const workspaceId = await prepareWorkspace()
     await safePage.goto(`/home?safe=${safes.SEP_STATIC_SAFE_1}`)
 
     await safePage.getByRole('button', { name: 'Add Safe to Workspace' }).click()
@@ -65,7 +61,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     const safePageUrl = new RegExp(`/home\\?safe=${safeParam}&spaceId=${workspaceId}$`)
     await expectActionReplayed(safePage, safePageUrl, 'Safe account added')
     await expect(safePage.getByRole('button', { name: 'Add Safe to Workspace' })).toBeHidden()
-    expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
+    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
   })
 
   test('should add the Safe and open the invite step when the step-up of a wizard from a Safe page succeeds', async ({
@@ -87,16 +83,15 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     // The replay moves the user on to the next step of the wizard.
     await expectActionReplayed(safePage, /\/welcome\/invite-members\?/, 'Safe account added')
     expect(urlSpaceId(safePage)).toBe(workspaceId)
-    expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
+    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(prefixless(safes.SEP_STATIC_SAFE_1))
   })
 
   test('should add a new pay-later Safe to the Workspace when the step-up after its creation succeeds', async ({
     safePage,
-    browser,
     walletPage,
     credentials,
   }) => {
-    const workspaceId = await prepareWorkspace(browser)
+    const workspaceId = await prepareWorkspace()
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add accounts' }).click()
@@ -115,7 +110,7 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
       'Safe account added',
     )
     const newSafe = new URL(safePage.url()).searchParams.get('safe') ?? ''
-    expect(await workspaceResource(safePage, workspaceId, 'safes')).toContain(prefixless(newSafe))
+    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(prefixless(newSafe))
   })
 
   test('should invite the member and open the last wizard step when the step-up succeeds', async ({ safePage }) => {
@@ -132,6 +127,6 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
 
     // The replay moves the user on to the last step of the wizard.
     await expectActionReplayed(safePage, new RegExp(`/welcome/survey\\?spaceId=${workspaceId}$`), 'Invitation sent')
-    expect(await workspaceResource(safePage, workspaceId, 'members')).toContain(invitee)
+    expect(await workspaceResource(user, workspaceId, 'members')).toContain(invitee)
   })
 })
