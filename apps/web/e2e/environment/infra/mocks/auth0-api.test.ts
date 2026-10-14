@@ -3,7 +3,7 @@ import { generateKeyPairSync, verify } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { beforeEach, describe, it } from 'node:test'
 import { Auth0, CANCELLED, CODE, MFA_ACR, SESSION_COOKIE, dispatch, rs256, userId } from './auth0-api.ts'
-import type { Headers, Reply } from './http.ts'
+import type { HeaderMap, Reply } from './http.ts'
 
 const ISSUER = 'https://auth.safe-e2e.test/'
 const CLIENT = { client_id: 'client', client_secret: 'secret' }
@@ -31,19 +31,19 @@ describe('Auth0 mock', () => {
   function request(
     method: string,
     path: string,
-    options: { query?: Record<string, string>; form?: Record<string, string>; headers?: Headers } = {},
+    options: { query?: Record<string, string>; form?: Record<string, string>; headers?: HeaderMap } = {},
   ): Reply {
     const body = new URLSearchParams(options.form ?? {}).toString()
     const query = new URLSearchParams(options.query ?? {})
     return dispatch({ method, path, query, headers: options.headers ?? {}, body }, auth0, { keys: [] })
   }
 
-  function submit(fields: Record<string, string>, headers: Headers = {}): Reply {
+  function submit(fields: Record<string, string>, headers: HeaderMap = {}): Reply {
     const form = { redirect_uri: CALLBACK, state: 'state-1', action: 'verify', ...fields }
     return request('POST', '/authorize', { form, headers })
   }
 
-  function signIn(fields: Record<string, string> = {}): { code: string; session: Headers } {
+  function signIn(fields: Record<string, string> = {}): { code: string; session: HeaderMap } {
     const reply = submit({ email: EMAIL, code: CODE, ...fields })
     assert.equal(reply.status, 302)
     return { code: locationQuery(reply).code, session: { cookie: reply.headers['Set-Cookie'].split(';')[0] } }
@@ -58,7 +58,7 @@ describe('Auth0 mock', () => {
     return claims(exchange(locationQuery(reply).code)[1].id_token)
   }
 
-  function managementToken(): Headers {
+  function managementToken(): HeaderMap {
     const reply = request('POST', '/oauth/token', { form: { grant_type: 'client_credentials', ...CLIENT } })
     return { authorization: `Bearer ${JSON.parse(reply.body).access_token}` }
   }
@@ -82,7 +82,7 @@ describe('Auth0 mock', () => {
     const reply = submit({ email: EMAIL, code: '000000' })
     assert.equal(reply.status, 200)
     assert.match(reply.body, /role="alert">Wrong code. Try again./)
-    assert.equal(auth0.codes.size, 0)
+    assert.equal(reply.headers.Location, undefined)
   })
 
   it('returns the documented cancellation with the state', () => {

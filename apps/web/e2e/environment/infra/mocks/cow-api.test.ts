@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { PREFIX, fixtureResponse, loadFixtures, registerSettlement, respond } from './cow-api.ts'
+import { PREFIX, recordedReply, loadFixtures, registerSettlement, dispatch } from './cow-api.ts'
 import type { Settlements, Upstream } from './cow-api.ts'
 import type { Reply } from './http.ts'
 
@@ -15,7 +15,7 @@ const TX_HASH = `0x${'ab'.repeat(32)}`
 const fixtures = loadFixtures()
 
 function get(path: string, settlements: Settlements = new Map()): [number, Record<string, unknown>] | undefined {
-  const reply = fixtureResponse(fixtures, settlements, PREFIX + path)
+  const reply = recordedReply(fixtures, settlements, PREFIX + path)
   return reply && [reply.status, JSON.parse(reply.body)]
 }
 
@@ -66,13 +66,13 @@ describe('CoW API mock', () => {
     assert.equal(get(`/app_data/0x${'00'.repeat(32)}`), undefined)
     assert.equal(get(`/transactions/0x${'00'.repeat(32)}/orders`), undefined)
     assert.equal(get('/orders/not-a-uid'), undefined)
-    assert.equal(fixtureResponse(fixtures, new Map(), '/mainnet/api/v1/orders/x'), undefined)
+    assert.equal(recordedReply(fixtures, new Map(), '/mainnet/api/v1/orders/x'), undefined)
   })
 
   it('answers unrecorded requests without the real API in offline mode', async () => {
     const upstream = recordingUpstream()
     const options = { fixtures, settlements: new Map(), offline: true, upstream }
-    const reply = await respond(request('GET', `${PREFIX}/orders/${UNRECORDED_UID}`), options)
+    const reply = await dispatch(request('GET', `${PREFIX}/orders/${UNRECORDED_UID}`), options)
     assert.deepEqual([reply.status, JSON.parse(reply.body).errorType], [404, 'NotFound'])
     assert.deepEqual(upstream.paths, [])
   })
@@ -80,10 +80,10 @@ describe('CoW API mock', () => {
   it('forwards only unrecorded requests in recording mode', async () => {
     const upstream = recordingUpstream()
     const options = { fixtures, settlements: new Map(), offline: false, upstream }
-    assert.equal((await respond(request('GET', `${PREFIX}/orders/${RECORDED_UID}?extra=1`), options)).status, 200)
+    assert.equal((await dispatch(request('GET', `${PREFIX}/orders/${RECORDED_UID}?extra=1`), options)).status, 200)
     assert.deepEqual(upstream.paths, [])
     const unrecorded = `${PREFIX}/orders/${UNRECORDED_UID}?extra=1`
-    assert.equal((await respond(request('GET', unrecorded), options)).status, 200)
+    assert.equal((await dispatch(request('GET', unrecorded), options)).status, 200)
     assert.deepEqual(upstream.paths, [unrecorded])
   })
 
@@ -91,7 +91,7 @@ describe('CoW API mock', () => {
     const settlements: Settlements = new Map()
     const options = { fixtures, settlements, offline: true }
     const body = JSON.stringify({ txHash: TX_HASH, uids: [RECORDED_UID.toUpperCase().replace('0X', '0x')] })
-    assert.equal((await respond(request('POST', '/__test/settlements', body), options)).status, 200)
+    assert.equal((await dispatch(request('POST', '/__test/settlements', body), options)).status, 200)
     const [status, orders] = get(`/transactions/${TX_HASH}/orders`, settlements) ?? []
     assert.equal(get(`/transactions/0x${'cd'.repeat(32)}/orders`, settlements), undefined)
     assert.equal(status, 200)
@@ -103,7 +103,7 @@ describe('CoW API mock', () => {
     const settlements: Settlements = new Map()
     const options = { fixtures, settlements, offline: true }
     const malformed = JSON.stringify({ txHash: TX_HASH, uids: ['not-a-uid'] })
-    assert.equal((await respond(request('POST', '/__test/settlements', malformed), options)).status, 400)
+    assert.equal((await dispatch(request('POST', '/__test/settlements', malformed), options)).status, 400)
     assert.throws(() => registerSettlement(settlements, 'not-a-hash', [RECORDED_UID]))
     registerSettlement(settlements, TX_HASH, [UNRECORDED_UID])
     assert.throws(() => get(`/transactions/${TX_HASH}/orders`, settlements), /unrecorded order/)

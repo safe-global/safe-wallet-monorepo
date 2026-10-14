@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:net'
 import type { AddressInfo } from 'node:net'
-import { after, before, describe, it } from 'node:test'
+import { afterEach, beforeEach, describe, it } from 'node:test'
 import { dispatch, forkRpc, validateRequest } from './fork-rpc.ts'
 import type { Forward } from './fork-rpc.ts'
 import { serve } from './http.ts'
@@ -28,12 +28,13 @@ async function closedPortUrl(): Promise<string> {
 }
 
 describe('fork RPC server', () => {
-  const logged: string[] = []
+  let logged: string[]
   let upstream: string
   let url: string
   let close: () => void
 
-  before(async () => {
+  beforeEach(async () => {
+    logged = []
     upstream = await closedPortUrl()
     const server = serve(
       0,
@@ -44,7 +45,7 @@ describe('fork RPC server', () => {
     close = () => server.close()
   })
 
-  after(() => close())
+  afterEach(() => close())
 
   async function post(body: string): Promise<number> {
     const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body })

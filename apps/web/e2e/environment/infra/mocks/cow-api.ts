@@ -10,11 +10,12 @@
  */
 import { readFileSync } from 'node:fs'
 import { request as httpsRequest } from 'node:https'
-import { isMain, json, localRequest, serve } from './http.ts'
-import type { Reply, Request } from './http.ts'
+import { isMain, json, localRequest, readText, serveTls } from './http.ts'
+import type { MockRequest, Reply } from './http.ts'
 
 const ORDERS_FILE = new URL('./cow-api-orders.json', import.meta.url)
 const UPSTREAM = 'api.cow.fi'
+const PORT = 443
 export const PREFIX = '/sepolia/api/v1'
 const SETTLEMENTS_PATH = '/__test/settlements'
 const UID = /^0x[0-9a-f]{112}$/
@@ -62,7 +63,7 @@ function settlementOrders(fixtures: Fixtures, settlements: Settlements, txHash: 
 }
 
 /** Returns the recorded response, or undefined when the request has no recording. */
-export function fixtureResponse(fixtures: Fixtures, settlements: Settlements, path: string): Reply | undefined {
+export function recordedReply(fixtures: Fixtures, settlements: Settlements, path: string): Reply | undefined {
   if (path === '/health') return json(200, { ready: true })
   if (!path.startsWith(`${PREFIX}/`)) return undefined
   const rest = path.slice(PREFIX.length + 1).toLowerCase()
@@ -95,12 +96,8 @@ function getUpstream(host: string, path: string): Promise<Reply> {
   return new Promise((resolve, reject) => {
     const options = { host, servername: UPSTREAM, path, headers: { Host: UPSTREAM, Accept: 'application/json' } }
     const request = httpsRequest(options, (response) => {
-      const chunks: Buffer[] = []
-      response.on('data', (chunk: Buffer) => chunks.push(chunk))
-      response.on('end', () => {
-        const headers = { 'Content-Type': 'application/json' }
-        resolve({ status: response.statusCode ?? 502, headers, body: Buffer.concat(chunks).toString() })
-      })
+      const headers = { 'Content-Type': 'application/json' }
+      readText(response).then((body) => resolve({ status: response.statusCode ?? 502, headers, body }), reject)
     })
     request.setTimeout(UPSTREAM_TIMEOUT_MS, () => request.destroy(new Error('Upstream timeout')))
     request.on('error', reject)
@@ -129,12 +126,12 @@ function storeSettlement(settlements: Settlements, body: string): Reply {
   }
 }
 
-export async function respond(
-  { method, path, query, body }: Pick<Request, 'method' | 'path' | 'query' | 'body'>,
+export async function dispatch(
+  { method, path, query, body }: Pick<MockRequest, 'method' | 'path' | 'query' | 'body'>,
   { fixtures, settlements, offline, upstream = realApi }: CowOptions,
 ): Promise<Reply> {
   if (method === 'POST' && path === SETTLEMENTS_PATH) return storeSettlement(settlements, body)
-  const recorded = fixtureResponse(fixtures, settlements, path)
+  const recorded = recordedReply(fixtures, settlements, path)
   if (recorded) return recorded
   const fullPath = query.size ? `${path}?${query}` : path
   if (offline) return json(404, { errorType: 'NotFound', description: `No recorded response for ${fullPath}` })
@@ -143,7 +140,7 @@ export async function respond(
 
 async function registerWithServer(txHash: string, uids: string[]): Promise<void> {
   const body = JSON.stringify({ txHash, uids })
-  const reply = await localRequest(443, SETTLEMENTS_PATH, { method: 'POST', body, servername: UPSTREAM })
+  const reply = await localRequest(PORT, SETTLEMENTS_PATH, { method: 'POST', body, servername: UPSTREAM })
   if (reply.status !== 200) throw new Error(`The CoW API mock refused the settlement: ${reply.body}`)
 }
 
@@ -158,6 +155,6 @@ if (isMain(import.meta.url)) {
       settlements: new Map(),
       offline: process.env.COW_API_OFFLINE === 'true',
     }
-    serve(443, (request) => respond(request, options), true)
+    serveTls(PORT, (request) => dispatch(request, options))
   }
 }

@@ -10,8 +10,10 @@
  */
 import { createHash, createPrivateKey, createPublicKey, randomBytes, sign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-import { KEYS_DIR, isMain, json, requiredEnv, serve } from './http.ts'
-import type { Headers, Reply, Request } from './http.ts'
+import { KEYS_DIR, isMain, json, requiredEnv, serveTls } from './http.ts'
+import type { HeaderMap, MockRequest, Reply } from './http.ts'
+import { signJwt } from './jwt.ts'
+import type { Signer } from './jwt.ts'
 
 export const CODE = '123456'
 export const CANCELLED = { error: 'access_denied', error_description: 'User has canceled the interaction.' }
@@ -19,17 +21,16 @@ export const MFA_ACR = 'http://schemas.openid.net/pape/policies/2007/06/multi-fa
 export const SESSION_COOKIE = 'auth0_session'
 const KEY_ID = 'safe-e2e-local'
 const TOKEN_LIFETIME_SECONDS = 3600
+// The gateway calls https://AUTH0_DOMAIN without a port.
+const PORT = 443
 const FORM_FIELDS = ['redirect_uri', 'state', 'acr_values', 'ext-enroll-otp']
 
-export type Signer = (message: Buffer) => Buffer
 export type Jwks = { keys: Record<string, string>[] }
 type Form = Record<string, string>
 type Grant = { email: string; mfa: boolean }
+/** `mfa`: the token reports a second factor; `enroll`: the user adds another authenticator. */
+type SecondFactor = { mfa: boolean; enroll: boolean }
 type AuthenticationMethod = { id: string; type: string; name: string }
-
-function base64url(data: Buffer | string): string {
-  return Buffer.from(data).toString('base64url')
-}
 
 function randomToken(): string {
   return randomBytes(24).toString('base64url')
@@ -45,7 +46,7 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => entities[character])
 }
 
-function redirect(url: string, params: Form, headers: Headers = {}): Reply {
+function redirect(url: string, params: Form, headers: HeaderMap = {}): Reply {
   const separator = url.includes('?') ? '&' : '?'
   return { status: 302, headers: { Location: url + separator + new URLSearchParams(params), ...headers }, body: '' }
 }
@@ -89,7 +90,7 @@ export class Auth0 {
   readonly clientId: string
   readonly clientSecret: string
   readonly signer: Signer
-  readonly codes = new Map<string, Grant>()
+  private readonly codes = new Map<string, Grant>()
   private readonly sessions = new Map<string, string>()
   private readonly managementTokens = new Set<string>()
   private readonly authenticators = new Map<string, AuthenticationMethod[]>()
@@ -101,7 +102,7 @@ export class Auth0 {
     this.signer = signer
   }
 
-  issueCode(email: string, mfa: boolean, enroll: boolean): string {
+  issueCode(email: string, { mfa, enroll }: SecondFactor): string {
     const code = randomToken()
     this.codes.set(code, { email, mfa })
     if (mfa) {
@@ -154,7 +155,6 @@ export class Auth0 {
 }
 
 function idToken(auth0: Auth0, { email, mfa }: Grant, now: number): string {
-  const header = base64url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }))
   const claims: Record<string, unknown> = {
     iss: auth0.issuer,
     aud: auth0.clientId,
@@ -165,18 +165,17 @@ function idToken(auth0: Auth0, { email, mfa }: Grant, now: number): string {
     exp: now + TOKEN_LIFETIME_SECONDS,
   }
   if (mfa) claims.amr = ['mfa']
-  const signingInput = `${header}.${base64url(JSON.stringify(claims))}`
-  return `${signingInput}.${base64url(auth0.signer(Buffer.from(signingInput)))}`
+  return signJwt({ alg: 'RS256', typ: 'JWT', kid: KEY_ID }, claims, auth0.signer)
 }
 
-function stepUp(form: Form, headers: Headers, auth0: Auth0): Reply {
+function stepUp(form: Form, headers: HeaderMap, auth0: Auth0): Reply {
   const email = auth0.sessionEmail(cookieValue(headers.cookie, SESSION_COOKIE))
   if (email === undefined) return html(200, formPage(form, 'Your session has expired. Sign in again.'))
-  const code = auth0.issueCode(email, !form.omit_amr, form['ext-enroll-otp'] === 'true')
+  const code = auth0.issueCode(email, { mfa: !form.omit_amr, enroll: form['ext-enroll-otp'] === 'true' })
   return redirect(form.redirect_uri, { code, state: form.state ?? '' })
 }
 
-function submitAuthorize(form: Form, headers: Headers, auth0: Auth0): Reply {
+function submitAuthorize(form: Form, headers: HeaderMap, auth0: Auth0): Reply {
   const redirectUri = form.redirect_uri ?? ''
   const state = form.state ?? ''
   if (!/^https?:\/\//.test(redirectUri)) return html(400, '<p>Missing redirect_uri</p>')
@@ -185,7 +184,7 @@ function submitAuthorize(form: Form, headers: Headers, auth0: Auth0): Reply {
   if (form.acr_values === MFA_ACR) return stepUp(form, headers, auth0)
   const email = form.email ?? ''
   if (!email.includes('@')) return html(200, formPage(form, 'Enter an email address.'))
-  const code = auth0.issueCode(email, !form.skip_mfa, false)
+  const code = auth0.issueCode(email, { mfa: !form.skip_mfa, enroll: false })
   const cookie = `${SESSION_COOKIE}=${auth0.startSession(email)}; Path=/; Secure; HttpOnly; SameSite=Lax`
   return redirect(redirectUri, { code, state }, { 'Set-Cookie': cookie })
 }
@@ -208,7 +207,7 @@ function exchangeToken(form: Form, auth0: Auth0): Reply {
   })
 }
 
-function management(method: string, path: string, headers: Headers, auth0: Auth0): Reply {
+function management(method: string, path: string, headers: HeaderMap, auth0: Auth0): Reply {
   if (!auth0.isManagementToken(headers.authorization)) return json(401, { message: 'Invalid Management API token' })
   const [user, resource, methodId, ...rest] = path.slice('/api/v2/users/'.length).split('/')
   const userKey = decodeURIComponent(user)
@@ -224,7 +223,7 @@ function management(method: string, path: string, headers: Headers, auth0: Auth0
 
 /** Returns the reply to an Auth0 request; request headers have lower-case names. */
 export function dispatch(
-  request: Pick<Request, 'method' | 'path' | 'query' | 'headers' | 'body'>,
+  request: Pick<MockRequest, 'method' | 'path' | 'query' | 'headers' | 'body'>,
   auth0: Auth0,
   jwks: Jwks,
 ): Reply {
@@ -257,6 +256,6 @@ if (isMain(import.meta.url)) {
   const issuer = `https://${requiredEnv('AUTH0_DOMAIN')}/`
   const { signer, jwks } = rs256(readFileSync(`${KEYS_DIR}/auth0-signing-key.pem`))
   const auth0 = new Auth0(issuer, requiredEnv('AUTH0_CLIENT_ID'), requiredEnv('AUTH0_CLIENT_SECRET'), signer)
-  serve(443, (request) => dispatch(request, auth0, jwks), true)
+  serveTls(PORT, (request) => dispatch(request, auth0, jwks))
   console.error(`Local Auth0 for ${issuer}`)
 }

@@ -1,6 +1,7 @@
 import { isMain, json, serve } from './http.ts'
-import type { Reply, Request } from './http.ts'
+import type { MockRequest, Reply } from './http.ts'
 
+const PORT = 8091
 const RATES: Record<string, number> = { usd: 2000, eur: 1800 }
 const NATIVE_RATES: Record<string, Record<string, number>> = {
   ethereum: RATES,
@@ -23,7 +24,7 @@ function nativePrices(query: URLSearchParams): Reply {
   return json(200, prices)
 }
 
-export function fixtureResponse({ path, query }: Pick<Request, 'path' | 'query'>): Reply {
+export function dispatch({ path, query }: Pick<MockRequest, 'path' | 'query'>): Reply {
   if (path === '/health') return json(200, { ready: true })
   if (path === '/simple/supported_vs_currencies') return json(200, Object.keys(RATES))
   if (path === '/simple/price') return nativePrices(query)
@@ -31,4 +32,4 @@ export function fixtureResponse({ path, query }: Pick<Request, 'path' | 'query'>
   return json(404, { error: 'No provider fixture' })
 }
 
-if (isMain(import.meta.url)) serve(8091, fixtureResponse)
+if (isMain(import.meta.url)) serve(PORT, dispatch)

@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { fixtureResponse } from './price-fixtures.ts'
+import { dispatch } from './price-fixtures.ts'
 
 function get(url: string): [number, unknown] {
   const { pathname, searchParams } = new URL(url, 'http://prices')
-  const reply = fixtureResponse({ path: pathname, query: searchParams })
+  const reply = dispatch({ path: pathname, query: searchParams })
   return [reply.status, JSON.parse(reply.body)]
 }
 

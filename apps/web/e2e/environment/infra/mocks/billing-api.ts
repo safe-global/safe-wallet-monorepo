@@ -8,7 +8,9 @@
  */
 import { createECDH, createPrivateKey, sign } from 'node:crypto'
 import { isMain, json, postJson, requiredEnv, serve } from './http.ts'
-import type { Reply, Request } from './http.ts'
+import type { MockRequest, Reply } from './http.ts'
+import { base64url, signJwt } from './jwt.ts'
+import type { Signer } from './jwt.ts'
 
 export const PRODUCT_ID = 'prod_UwFCHLTTR3EAkt'
 const PERIOD_START = 1767225600 // 2026-01-01T00:00:00Z
@@ -19,6 +21,7 @@ const TOKEN_LIFETIME_SECONDS = 3600
 const WEBHOOK_ATTEMPTS = 5
 const WEBHOOK_TIMEOUT_MS = 30_000
 const DEFAULT_PLAN = 'business'
+const PORT = 8093
 
 type Plan = { price: { id: string; currentPrice: number }; metadata: Record<string, string> }
 
@@ -87,7 +90,6 @@ export type Subscription = {
 type Overrides = { plan?: string; status?: string; metadata?: Record<string, string> }
 
 export type Announce = (subscription: Subscription) => Promise<void>
-export type Signer = (message: Buffer) => Buffer
 
 class UnknownPlan extends Error {}
 
@@ -158,10 +160,6 @@ export function subscriptionEvent(subscription: Subscription, created: number): 
   }
 }
 
-function base64url(data: Buffer | string): string {
-  return Buffer.from(data).toString('base64url')
-}
-
 /** Signs with the P-256 test key, given as its private scalar in hex. */
 export function es256Signer(privateKeyHex: string): Signer {
   const ecdh = createECDH('prime256v1')
@@ -182,7 +180,6 @@ export function es256Signer(privateKeyHex: string): Signer {
 
 /** The service token the gateway's BillingWebhookAuthGuard accepts (iss = aud = its own issuer). */
 export function serviceToken(issuer: string, signer: Signer, now: number): string {
-  const header = base64url(JSON.stringify({ alg: 'ES256', typ: 'JWT' }))
   const claims = {
     iss: issuer,
     sub: 'billing-service',
@@ -191,8 +188,7 @@ export function serviceToken(issuer: string, signer: Signer, now: number): strin
     exp: now + TOKEN_LIFETIME_SECONDS,
     roles: [SERVICE_ACCESS_ROLE],
   }
-  const signingInput = `${header}.${base64url(JSON.stringify(claims))}`
-  return `${signingInput}.${base64url(signer(Buffer.from(signingInput)))}`
+  return signJwt({ alg: 'ES256', typ: 'JWT' }, claims, signer)
 }
 
 /** Subscriptions by customer, and the webhook that announces them to the gateway. */
@@ -244,9 +240,8 @@ async function storeSubscription(billing: Billing, customer: string, body: strin
   }
 }
 
-/** Returns the reply to a billing service request. */
 export async function dispatch(
-  { method, path, query, body }: Pick<Request, 'method' | 'path' | 'query' | 'body'>,
+  { method, path, query, body }: Pick<MockRequest, 'method' | 'path' | 'query' | 'body'>,
   billing: Billing,
 ): Promise<Reply> {
   if (method === 'GET' && path === '/health') return json(200, { ready: true })
@@ -287,7 +282,7 @@ if (isMain(import.meta.url)) {
   const billing = new Billing(
     announcer(requiredEnv('BILLING_WEBHOOK_URL'), requiredEnv('BILLING_WEBHOOK_JWT_ISSUER'), signer),
   )
-  serve(8093, async (request) => {
+  serve(PORT, async (request) => {
     try {
       return await dispatch(request, billing)
     } catch (error) {
