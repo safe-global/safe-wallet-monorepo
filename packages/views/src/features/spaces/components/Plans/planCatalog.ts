@@ -120,7 +120,7 @@ export const ENTERPRISE_TIER: PlanTier = {
     'Advanced threat analysis',
     'Transaction simulation',
     'MFA authentication',
-    'Policy engine',
+    'Policies',
     'Transaction proposers',
     'Custom Safe capacity',
     'Multiple workspaces',
