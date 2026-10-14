@@ -262,6 +262,16 @@ describe('SecuritySafesTable', () => {
       expect(onViewReport).not.toHaveBeenCalled()
     })
 
+    it('shows the Update link next to a non-passing chip too', () => {
+      renderTable({
+        scanResults: buildScanResults([{ address: singleSafe.address, chainId: '1' }], {
+          contract_version: { ...mkResult('partial'), severity: 'Medium', upgradeAvailable: true },
+        }),
+      })
+      expect(screen.getByText('Needs review · 1 issue found')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Update contracts' })).toBeInTheDocument()
+    })
+
     it('shows no Update link when the contract version is current', () => {
       renderTable()
       expect(screen.queryByRole('link', { name: 'Update contracts' })).not.toBeInTheDocument()

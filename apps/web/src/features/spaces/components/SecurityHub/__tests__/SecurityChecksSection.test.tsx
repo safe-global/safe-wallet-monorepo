@@ -230,6 +230,21 @@ describe('SecurityChecksSection', () => {
       expect(screen.getByText('1.4.1')).toBeInTheDocument()
     })
 
+    it('keeps a failing title when the Safe can be updated but has another finding', () => {
+      renderPanel({
+        results: {
+          ...allClearResults,
+          contract_version: mkResult({ status: 'partial', severity: 'Medium', upgradeAvailable: true }),
+        },
+      })
+      expect(screen.queryByText('New contract version available')).not.toBeInTheDocument()
+      fireEvent.click(screen.getByText('Contract version is outdated'))
+      expect(screen.getByRole('link', { name: /update/i })).toHaveAttribute(
+        'href',
+        expect.stringContaining(AppRoutes.settings.setup),
+      )
+    })
+
     it('offers an Update CTA to Settings → Setup on the passing row', () => {
       renderPanel({ results: upgradeResults })
       fireEvent.click(screen.getByText('New contract version available'))

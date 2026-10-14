@@ -270,6 +270,36 @@ describe('contractVersionScanner', () => {
       label: 'Original implementation',
       value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
     })
+    expect(result.upgradeAvailable).toBeUndefined()
+    expect(result.remediation).not.toContain('up to date')
+  })
+
+  it('keeps the unrecognized original implementation finding on a Safe that can be updated', async () => {
+    const result = await contractVersionScanner.scan(
+      createMockContext({
+        implementationVersionState: 'OUTDATED',
+        isNonCriticalUpdate: true,
+        masterCopyDeployer: 'Gnosis',
+        version: '1.3.0',
+        latestVersion: '1.4.1',
+        creationInfo: {
+          factoryAddress: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+          creator: '0x1234',
+          masterCopy: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF',
+          transactionHash: '0xabc',
+        },
+      }),
+    )
+    expect(result.status).toBe('partial')
+    expect(result.score).toBe(60)
+    expect(result.upgradeAvailable).toBe(true)
+    expect(result.evidence).toEqual([
+      { label: 'Current version', value: '1.3.0' },
+      { label: 'Latest version', value: '1.4.1' },
+      { label: 'Original implementation', value: '0xDEADBEEFDEADBEEFDEADBEEFDEADBEEFDEADBEEF' },
+      { label: 'Status', value: 'Deployed with unrecognized implementation' },
+    ])
+    expect(result.remediation).not.toContain('up to date')
   })
 
   it('returns clear when creation master copy is a known deployment', async () => {

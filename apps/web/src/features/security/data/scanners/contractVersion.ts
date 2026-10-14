@@ -120,6 +120,25 @@ export const contractVersionScanner: SecurityScanner = {
       }
     }
 
+    // Check if original deployment used a recognized implementation
+    if (creationInfo?.masterCopy && !isKnownImplementation(creationInfo.masterCopy, chainId)) {
+      const score = 60
+      return {
+        status: 'partial',
+        severity: getSeverityFromScore(score),
+        score,
+        evidence: [
+          ...(isOutdated ? versionEvidence : [{ label: 'Current version', value: versionLabel }]),
+          { label: 'Original implementation', value: creationInfo.masterCopy },
+          { label: 'Status', value: 'Deployed with unrecognized implementation' },
+        ],
+        remediation:
+          'This Safe was originally deployed with an unrecognized implementation contract. Its current implementation is an official Safe deployment, but the deployment origin could not be verified.',
+        lastChecked: now,
+        ...(isOutdated && { upgradeAvailable: true }),
+      }
+    }
+
     if (isOutdated) {
       const score = 100
       return {
@@ -130,24 +149,6 @@ export const contractVersionScanner: SecurityScanner = {
         remediation: '',
         lastChecked: now,
         upgradeAvailable: true,
-      }
-    }
-
-    // Check if original deployment used a recognized implementation
-    if (creationInfo?.masterCopy && !isKnownImplementation(creationInfo.masterCopy, chainId)) {
-      const score = 60
-      return {
-        status: 'partial',
-        severity: getSeverityFromScore(score),
-        score,
-        evidence: [
-          { label: 'Current version', value: versionLabel },
-          { label: 'Original implementation', value: creationInfo.masterCopy },
-          { label: 'Status', value: 'Deployed with unrecognized implementation' },
-        ],
-        remediation:
-          'This Safe was originally deployed with an unrecognized implementation contract. The current version is up to date, but the deployment origin could not be verified.',
-        lastChecked: now,
       }
     }
 
