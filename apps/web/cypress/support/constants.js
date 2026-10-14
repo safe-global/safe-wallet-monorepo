@@ -121,7 +121,7 @@ export const stagingCGWAllTokensBalances = '/balances/USD?trusted=false&exclude_
 
 export const usersEndpoint = '**/v1/users'
 export const counterfactualSafesEndpoint = '**/v1/users/counterfactual-safes'
-export const spacesEndpoint = '**/**/spaces*'
+export const spacesEndpoint = '**/v1/spaces'
 export const spacesGetOneEndpoint = '**/v1/spaces/*'
 export const spacesMembersEndpoint = '**/v1/spaces/*/members'
 export const spacesSafesEndpoint = '**/v1/spaces/*/safes'

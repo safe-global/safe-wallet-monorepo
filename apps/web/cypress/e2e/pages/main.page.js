@@ -116,12 +116,13 @@ export function selectDropdownOption(itemSelector, text) {
 export function hoverUntilTooltipOpen(getTrigger, retries = 5) {
   const attempt = (left) => {
     getTrigger().trigger('mouseenter', { force: true })
-    cy.wait(300)
-    getTrigger().then(($trigger) => {
-      if ($trigger.attr('data-popup-open') !== undefined) return
-      if (left <= 0) throw new Error('Tooltip never opened')
-      attempt(left - 1)
-    })
+    getTrigger().then(($trigger) =>
+      pollUntil(() => $trigger.attr('data-popup-open') !== undefined, 2000).then((opened) => {
+        if (opened) return
+        if (left <= 0) throw new Error('Tooltip never opened')
+        attempt(left - 1)
+      }),
+    )
   }
   attempt(retries)
 }

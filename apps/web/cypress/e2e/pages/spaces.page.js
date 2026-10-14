@@ -127,6 +127,7 @@ const workspaceWalletBtnText = 'Connect wallet'
 const onboardV2 = 'onboard-v2'
 const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'
+const siweVerifyEndpoint = '**/v1/auth/verify'
 
 // -- Onboarding --
 const orgSpaceInput = '[data-testid="space-name-input"]'
@@ -204,10 +205,10 @@ export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
 }
 
-// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Continue
-// with wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
-// <wallet>" button that runs SIWE, which finishes signing into the workspace.
+// Full workspace sign-in from the signed-out /welcome/spaces card. A signer connected through the
+// card's "Connect wallet" button starts SIWE by itself; the sign-in is done once the card is gone.
 export function signInWithWallet(signer) {
+  cy.intercept('POST', siweVerifyEndpoint).as('siweVerify')
   cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
   cy.get(onboardV2, { timeout: 30000 }).shadow().find('button').contains('Private key').click()
   cy.get(pkInput, { timeout: 30000 }).then(($input) => {
@@ -215,9 +216,8 @@ export function signInWithWallet(signer) {
     cy.wrap($input).trigger('input').trigger('change')
   })
   cy.get(pkConnectBtn).click()
-  // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
-  // see content" gate), each with a continue-with-wallet-btn — click the visible one.
-  cy.get(continueWithWalletBtn, { timeout: 30000 }).filter(':visible').first().click()
+  cy.wait('@siweVerify', { timeout: 30000 }).its('response.statusCode').should('eq', 200)
+  cy.get(`${continueWithWalletBtn}:visible`, { timeout: 30000 }).should('not.exist')
 }
 
 export function clickOnUseOldUiBtn() {
@@ -272,14 +272,23 @@ export function visitSpaceDashboard(spaceId) {
   cy.visit(constants.spaceDashboardUrl + String(spaceId))
 }
 
+// After a sign-in, a list with one Workspace and no invites redirects to that Workspace's dashboard.
+function waitForSignInRedirect() {
+  cy.get(`${orgList}, ${createSpaceBtn}, ${spaceSelectorBtn}`, { timeout: 30000 })
+    .filter(':visible')
+    .should('have.length.at.least', 1)
+  cy.get('body').then(($body) => {
+    if ($body.find(spaceCard).length === 1 && $body.find(inviteBanner).length === 0) {
+      cy.url({ timeout: 30000 }).should('include', constants.spaceDashboardUrl)
+    }
+  })
+}
+
+// Call right after signInWithWallet. The dashboard has no Create button, so leave it through the logo.
 export function goToSpacesView() {
-  // When the account has a single space, sign-in auto-redirects into the space
-  // dashboard where the Create button is absent — click the top-left logo to
-  // return to the Spaces View. Wait for the spaces list to resolve first so the
-  // welcome page has rendered before we read whether the Create button exists;
-  // otherwise we misread the in-flight page as a space dashboard.
   cy.wait('@spacesList', { timeout: 60000 })
-  cy.url({ timeout: 30000 }).then((url) => {
+  waitForSignInRedirect()
+  cy.url().then((url) => {
     if (url.includes(constants.spaceDashboardUrl)) {
       cy.get(sidebarLogo).should('be.visible').click()
       cy.url().should('include', constants.spacesUrl)
@@ -288,11 +297,8 @@ export function goToSpacesView() {
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 }
 
-export function clickOnSpaceSelector(spaceName) {
+export function clickOnSpaceSelector() {
   cy.get(spaceSelectorBtn, { timeout: 15000 }).scrollIntoView().should('be.visible').click()
-  if (spaceName) {
-    cy.get(spaceSelectorMenu).contains(spaceName).click()
-  }
 }
 
 export function disconnectFromSpaceLevel() {
@@ -316,6 +322,8 @@ function openSpaceSection(sidebarSelector, pathFragment) {
   cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible')
   cy.get(sidebarSelector).click()
   cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
+  // The URL changes first. The old page, with buttons of the same testids, stays until the item is active.
+  cy.get(sidebarSelector, { timeout: 30000 }).should('have.attr', 'data-active')
 }
 
 export function goToSpaceSettings() {
