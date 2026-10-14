@@ -67,7 +67,7 @@ const StatusCell = ({ grade, count, isScanning, updateHref }: StatusCellProps) =
     )
   if (!updateHref) return chip
   return (
-    <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+    <div className="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1">
       {chip}
       <UpdateLink href={updateHref} />
     </div>
