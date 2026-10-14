@@ -12,7 +12,7 @@ import { OnboardingTooltip } from '@/components/common/OnboardingTooltip'
 import { Chip } from '@safe-global/views/components/common/Chip'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import OnlyOwnerOrProposer from '@/components/common/OnlyOwnerOrProposer'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 const getCsvExportFileName = () => {
@@ -47,10 +47,7 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
     ? { backgroundColor: 'static.main', color: 'secondary.main' }
     : { backgroundColor: 'secondary.main', color: 'static.main' }
 
-  const onClick = () => {
-    setOpenExportModal(true)
-    trackEvent(TX_LIST_EVENTS.CSV_EXPORT_CLICKED)
-  }
+  const onClick = () => setOpenExportModal(true)
 
   useEffect(() => {
     if (exportJobId && !exportTimeout.current) {
@@ -146,10 +143,12 @@ const CsvTxExportButton = ({ hasActiveFilter }: CsvTxExportProps): ReactElement 
         <div>
           <OnlyOwnerOrProposer placement="top">
             {(isOk) => (
-              <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
-                {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
-                {exportJobId ? 'Exporting' : 'Export'}
-              </Button>
+              <Track {...TX_LIST_EVENTS.CSV_EXPORT_CLICKED}>
+                <Button variant="outline" size="action" onClick={onClick} disabled={!isOk || !!exportJobId}>
+                  {exportJobId ? <Spinner className="size-5" /> : <ExportIcon className="size-5" />}
+                  {exportJobId ? 'Exporting' : 'Export'}
+                </Button>
+              </Track>
             )}
           </OnlyOwnerOrProposer>
         </div>
