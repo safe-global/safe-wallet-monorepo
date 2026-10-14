@@ -9,6 +9,7 @@ export const playwrightSpecs = {
     scenarios: ['prepareBasicScenario'],
     safes: { SEP_STATIC_SAFE_1: 'SEP_STATIC_SAFE_0' },
   },
+  'regression/email-sign-in.spec.ts': {},
   'regression/assets-table.spec.ts': {
     scenarios: ['prepareAssetsScenario', 'prepareProposersScenario'],
     safes: { SEP_ASSETS_SAFE: 'SEP_STATIC_SAFE_2', SEP_PROPOSER_SAFE: 'SEP_STATIC_SAFE_31' },
@@ -34,6 +35,7 @@ export const playwrightSpecs = {
     safes: { SEP_OWNER_4_SAFE: 'SEP_STATIC_SAFE_6' },
   },
   'regression/spaces-members-table.spec.ts': {},
+  'regression/step-up-workspace-rename.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

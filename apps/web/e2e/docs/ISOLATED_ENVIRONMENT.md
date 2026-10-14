@@ -44,6 +44,8 @@ Specs read their Safes from the `safes` fixture and their wallets from the `cred
 
 To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order, and `safes` maps each `SAFES` key the spec reads to a static Safe key that those scenarios return. A spec that needs no backend data gets `{}`. Only registered specs run in isolated mode, and `e2e:env:test` fails for an unregistered spec. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. The `fixtures` and `files` that scenarios return for Cypress are not used.
 
+Email sign-in and step-up specs run only in isolated mode, against `auth0-mock`. `e2e/src/fixtures/email-session.ts` signs in through the mock (`signInWithEmail`, optionally without a second factor, so the next sensitive action asks for a step-up) and creates Workspace data by calling the gateway from the page; `e2e/src/pages/auth0.page.ts` drives the mock's page. The local nginx returns the caller's origin and allows credentials, as the hosted gateway does, so the browser keeps the session cookie on gateway calls; specs that fake a session with `page.route` must mock every session-scoped call the page makes, or the gateway's 403 makes the app re-check the session.
+
 ## Cleanup
 
 Stop the wallet server, then remove the backend containers and volumes:
