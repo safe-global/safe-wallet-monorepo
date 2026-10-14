@@ -124,5 +124,6 @@ export default defineConfig({
   },
 
   chromeWebSecurity: false,
+  forceHttp1: environment.SAFE_E2E_ISOLATED !== true,
   expose: { ...exposedValues(environment), CURRENT_COOKIE_TERMS_VERSION: version },
 })

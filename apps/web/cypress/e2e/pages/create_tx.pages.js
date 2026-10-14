@@ -67,6 +67,7 @@ const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
 const signedNotice = '[data-testid="signed-notice"]'
+const executeLaterBtn = '[data-testid="execute-later-btn"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -783,13 +784,6 @@ export function verifyTooltipMessage(message) {
   cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
 }
 
-export function selectCurrentWallet() {
-  cy.contains(estimatedFeeStr).should('be.visible')
-  // The option only renders once the relay quota has loaded — wait for it, then confirm it is selected.
-  cy.get(connectedWalletExecMethod, { timeout: 30000 }).click()
-  cy.get(connectedWalletExecMethod).find('[role="radio"]').should('have.attr', 'aria-checked', 'true')
-}
-
 export function verifyRelayerAttemptsAvailable() {
   cy.contains(transactionsPerHrStr).should('exist')
 }
@@ -942,6 +936,11 @@ export function signAndOpenExecuteStep() {
   cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
 }
 
+export function clickOnExecuteLaterBtn() {
+  cy.get(executeLaterBtn).click()
+  cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
+}
+
 export function clickOnProposeTransactionBtn() {
   cy.get(proposeTransactionBtn).click()
 }
@@ -972,21 +971,7 @@ export function clickOnConfirmBtn(index) {
 }
 
 export function clickOnExecuteBtn(index) {
-  cy.wait(2000)
-  cy.get(transactionItem)
-    .eq(index)
-    .within(() => {
-      cy.get('button')
-        .contains(executeBtnStr)
-        .then((elements) => {
-          cy.wrap(elements[0]).click()
-        })
-    })
-}
-
-export function waitForProposeRequest() {
-  cy.intercept('POST', constants.proposeEndpoint).as('ProposeTx')
-  cy.wait('@ProposeTx')
+  cy.get(transactionItem, { timeout: 30000 }).eq(index).find(executeTxBtn).should('be.enabled').click()
 }
 
 const submitTxErrorMsg = 'Could not submit the transaction. Try again.'
@@ -1209,8 +1194,8 @@ export function switchToSignerAndConfirm(signer) {
   walletUtils.connectSigner(signer)
   clickOnConfirmTransactionBtn()
   clickOnContinueSignTransactionBtn()
-  selectComboButtonOption('sign')
-  clickOnSignTransactionBtn()
+  signAndOpenExecuteStep()
+  clickOnExecuteLaterBtn()
 }
 
 export function deleteTransactionAndSwitchToSigner(signer) {
@@ -1227,7 +1212,6 @@ export function createAddOwnerTransaction(safeAddress, signer, ownerAddress, own
   owner.openManageSignersWindow()
   owner.clickOnAddSignerBtn()
   owner.typeOwnerAddressManage(ownerIndex, ownerAddress)
-  changeNonce(1)
   owner.clickOnNextBtnManage()
   owner.verifyConfirmTransactionWindowDisplayed()
   clickOnContinueSignTransactionBtn()

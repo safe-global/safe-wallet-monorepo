@@ -1,5 +1,6 @@
 import * as constants from '../../support/constants.js'
 import * as createtx from '../pages/create_tx.pages.js'
+import * as tx from '../pages/transactions.page.js'
 import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as wallet from '../../support/utils/wallet.js'
 import { walletCredentials } from '../../support/credentials.js'
@@ -26,7 +27,8 @@ describe('Create transactions tests 2', () => {
   })
 
   beforeEach(() => {
-    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
+    wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_6)
+    createtx.deleteAllTx()
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
   })
@@ -36,7 +38,7 @@ describe('Create transactions tests 2', () => {
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
     createtx.signAndOpenExecuteStep()
-    createtx.selectCurrentWallet()
+    tx.selectConnectedWalletIfOffered()
     createtx.openExecutionParamsModal()
     createtx.setAdvancedExecutionParams()
     createtx.displayAdvancedDetails()
@@ -48,7 +50,7 @@ describe('Create transactions tests 2', () => {
     createtx.changeNonce('5')
     createtx.clickOnContinueSignTransactionBtn()
     createtx.signAndOpenExecuteStep()
-    createtx.selectCurrentWallet()
+    tx.selectConnectedWalletIfOffered()
     createtx.openExecutionParamsModal()
     createtx.verifyAndSubmitExecutionParams()
   })

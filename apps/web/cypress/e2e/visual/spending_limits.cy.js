@@ -21,7 +21,9 @@ describe('[VISUAL] Spending limits screenshots', { defaultCommandTimeout: 60000,
 
   beforeEach(() => {
     mockVisualTestApis()
-    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8)
+    wallet.connectSignerViaStorage(signer, constants.setupUrl + staticSafes.SEP_STATIC_SAFE_8, {
+      extraStorage: spendinglimit.safeProOffStorage,
+    })
     owner.waitForConnectionStatus()
     spendinglimit.clickOnNewSpendingLimitBtn()
     main.awaitVisualStability()

@@ -79,6 +79,7 @@ export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 // -- Safe accounts page --
 const safeAccountsPageTitle = 'Safe accounts'
+const safeAccountsPageHeading = 'h2'
 // The Safe accounts page now renders the shared SafeAccountsTable; count only top-level rows
 // (multichain children render only when a group is expanded).
 const safeAccountsTableRow = '[data-testid="account-table-row"]:not([data-variant="child"])'
@@ -101,6 +102,7 @@ const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
 const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
+const membersTab = '[data-testid="members-tab"]'
 
 // -- Address book page --
 const addressBookTabRole = '[role="tab"]'
@@ -136,6 +138,7 @@ const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const surveyOptionCard = '[data-testid="survey-option-card"]'
 const surveyFinishBtn = '[data-testid="survey-finish-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
+const spacesCreateSpacePath = '/spaces/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
 const onboardingInviteMembersPath = '/welcome/invite-members'
 const onboardingSurveyPath = '/welcome/survey'
@@ -218,6 +221,7 @@ export function signInWithWallet(signer) {
   // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
   // see content" gate), each with a continue-with-wallet-btn — click the visible one.
   cy.get(continueWithWalletBtn, { timeout: 30000 }).filter(':visible').first().click()
+  cy.get(continueWithWalletBtn, { timeout: 60000 }).should('not.exist')
 }
 
 export function clickOnUseOldUiBtn() {
@@ -324,10 +328,12 @@ export function goToSpaceSettings() {
 
 export function goToSpaceMembers() {
   openSpaceSection(sidebarItemTeam, '/spaces/members')
+  cy.get(membersTab, { timeout: 30000 }).should('be.visible')
 }
 
 export function goToSpaceSafeAccounts() {
   openSpaceSection(sidebarItemAccounts, '/spaces/safe-accounts')
+  cy.contains(safeAccountsPageHeading, safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================
@@ -705,12 +711,15 @@ export function acceptInvite(spaceName, name) {
 
 function navigateToCreateSpacePage() {
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
-  cy.url().then((url) => {
-    if (!url.includes(onboardingCreateSpacePath)) {
+  cy.location('pathname').then((pathname) => {
+    if (pathname === onboardingCreateSpacePath || pathname === spacesCreateSpacePath) return
+    cy.get('body').then(($body) => {
+      const hasSpaces = $body.find(`${spaceCard}, ${inviteBanner}`).length > 0
+      const expectedPath = hasSpaces ? spacesCreateSpacePath : onboardingCreateSpacePath
       cy.get(createSpaceBtn).filter(':visible').first().click()
-    }
+      cy.location('pathname', { timeout: 30000 }).should('eq', expectedPath)
+    })
   })
-  cy.url().should('include', onboardingCreateSpacePath)
   cy.get(orgSpaceInput).should('be.visible')
 }
 
