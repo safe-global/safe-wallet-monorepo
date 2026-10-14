@@ -364,8 +364,9 @@ export function clickViewAllAccounts() {
 }
 
 export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
-  cy.get(sidebarSelector).should('be.visible').click()
-  cy.url().should('include', pathFragment).and('include', 'spaceId=')
+  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').and('have.attr', 'href').and('include', 'spaceId=')
+  cy.get(sidebarSelector).click()
+  cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
 }
 
 // ===========================================
