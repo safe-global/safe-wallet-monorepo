@@ -75,7 +75,7 @@ describe('Auth0 mock', () => {
   it('escapes the authorize parameters it carries through the form', () => {
     const page = request('GET', '/authorize', { query: { redirect_uri: CALLBACK, state: '"><script>' } }).body
     assert.match(page, /value="&quot;&gt;&lt;script&gt;"/)
-    assert.doesNotMatch(page, /<script>/)
+    assert.doesNotMatch(page, /<script/i)
   })
 
   it('shows an error for a wrong code and issues nothing', () => {

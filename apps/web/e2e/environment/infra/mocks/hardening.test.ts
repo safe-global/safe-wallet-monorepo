@@ -5,12 +5,15 @@ import { listenHost } from './http.ts'
 
 // The mocks need nothing else. A process, a file write or a third-party package in a mock fails this test.
 const ALLOWED_IMPORTS = new Set(['node:crypto', 'node:fs', 'node:http', 'node:https', 'node:url'])
+// From node:fs a mock may only read, so every other binding of the module is refused.
+const ALLOWED_FS_IMPORT = /^\{\s*readFileSync\s*\}$/
 const FORBIDDEN = [
   /\beval\s*\(/,
   /\bnew Function\b/,
-  /\b(writeFile|appendFile|mkdir|rmdir|unlink|rename|copyFile|createWriteStream)(Sync)?\b/,
   /\brequire\s*\(/,
   /\bimport\s*\(/,
+  /\bgetBuiltinModule\b/,
+  /\bprocess\.binding\b/,
 ]
 
 const directory = new URL('./', import.meta.url)
@@ -21,6 +24,13 @@ const compose = readFileSync(new URL('../docker-compose.test.yml', import.meta.u
 
 function imports(source: string): string[] {
   return [...source.matchAll(/^import\s[^'"]*['"]([^'"]+)['"]/gm)].map((match) => match[1])
+}
+
+/** The import clauses of `node:fs`, such as `{ readFileSync }` or `* as fs`. */
+function fsImportClauses(source: string): string[] {
+  return [...source.matchAll(/^import\s+([^'"]*?)\s+from\s+['"](?:node:)?fs(?:\/promises)?['"]/gm)].map((match) =>
+    match[1].trim(),
+  )
 }
 
 /** Splits Compose into its top-level `x-` anchors and its services, by name. */
@@ -52,6 +62,9 @@ describe('mock hardening', () => {
 
     it(`${name} starts no process, writes no file and evaluates no code`, () => {
       for (const pattern of FORBIDDEN) assert.doesNotMatch(source, pattern, `${name} matches ${pattern}`)
+      for (const clause of fsImportClauses(source)) {
+        assert.match(clause, ALLOWED_FS_IMPORT, `${name} imports ${clause} from node:fs; only readFileSync is allowed`)
+      }
     })
   }
 
