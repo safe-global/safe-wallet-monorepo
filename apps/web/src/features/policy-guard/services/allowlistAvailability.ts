@@ -1,0 +1,22 @@
+import semverSatisfies from 'semver/functions/satisfies'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import type { AllowlistEligibility } from '../types'
+import { getPolicyGuardAddress } from './policyEngineDeployments'
+
+const MIN_ALLOWLIST_SAFE_VERSION = '1.5.0'
+
+export const isAllowlistEnabled = (chain: Pick<Chain, 'chainId' | 'features'>): boolean =>
+  hasFeature(chain, FEATURES.POLICY_RECIPIENT_ALLOWLIST) && !!getPolicyGuardAddress(chain.chainId)
+
+export const isSafeVersionSupported = (version?: string | null): boolean =>
+  !!version && semverSatisfies(version, `>=${MIN_ALLOWLIST_SAFE_VERSION}`)
+
+export const isSafeEligibleForAllowlist = (
+  safe: { version?: string | null },
+  chain: Pick<Chain, 'chainId' | 'features'> | undefined,
+): AllowlistEligibility => {
+  if (!chain || !isAllowlistEnabled(chain)) return { eligible: false, reason: 'chain-not-enabled' }
+  if (!isSafeVersionSupported(safe.version)) return { eligible: false, reason: 'version-unsupported' }
+  return { eligible: true }
+}
