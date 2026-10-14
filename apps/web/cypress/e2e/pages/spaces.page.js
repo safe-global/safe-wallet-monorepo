@@ -205,8 +205,9 @@ export function clickOnSignInBtn() {
   cy.get(continueWithWalletBtn).click()
 }
 
-// Full workspace sign-in from the signed-out /welcome/spaces card. A signer connected through the
-// card's "Connect wallet" button starts SIWE by itself; the sign-in is done once the card is gone.
+// Full workspace sign-in from the signed-out /welcome/spaces card. Clicking the card's "Continue
+// with wallet" button opens onboard; after injecting the signer the card flips to a "Continue with
+// <wallet>" button that runs SIWE. The sign-in is done once the verify succeeds and the card is gone.
 export function signInWithWallet(signer) {
   cy.intercept('POST', siweVerifyEndpoint).as('siweVerify')
   cy.contains(connectWalletBtn, workspaceWalletBtnText, { timeout: 30000 }).should('be.visible').click()
@@ -216,6 +217,9 @@ export function signInWithWallet(signer) {
     cy.wrap($input).trigger('input').trigger('change')
   })
   cy.get(pkConnectBtn).click()
+  // The page renders more than one sign-in card (the workspace card plus the generic "Sign in to
+  // see content" gate), each with a continue-with-wallet-btn — click the visible one.
+  cy.get(continueWithWalletBtn, { timeout: 30000 }).filter(':visible').first().click()
   cy.wait('@siweVerify', { timeout: 30000 }).its('response.statusCode').should('eq', 200)
   cy.get(`${continueWithWalletBtn}:visible`, { timeout: 30000 }).should('not.exist')
 }
