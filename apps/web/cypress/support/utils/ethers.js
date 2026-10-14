@@ -38,27 +38,34 @@ const ensCallResult = (payload, name, address) => {
   return undefined
 }
 
+const fetchRpcResponses = async (url, payloads) => {
+  if (payloads.length === 0) return []
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(payloads),
+  })
+  const body = await response.json()
+  return Array.isArray(body) ? body : [body]
+}
+
 export function mockEnsName(name, prefixedAddress) {
   const address = ethers.getAddress(prefixedAddress.split(':').pop())
-  cy.intercept('POST', '**', (req) => {
+  cy.intercept('POST', '**', async (req) => {
     const isBatch = Array.isArray(req.body)
     const payloads = isBatch ? req.body : [req.body]
     const results = payloads.map((payload) => ensCallResult(payload, name, address))
     if (results.every((result) => result === undefined)) return
 
-    const toResponse = (index) => ({ jsonrpc: '2.0', id: payloads[index].id, result: results[index] })
-    if (results.every((result) => result !== undefined)) {
-      req.reply({ body: isBatch ? payloads.map((_, index) => toResponse(index)) : toResponse(0) })
-      return
-    }
-    req.continue((res) => {
-      const upstream = typeof res.body === 'string' ? JSON.parse(res.body) : res.body
-      if (!Array.isArray(upstream)) return
-      const body = upstream.map((entry) => {
-        const index = payloads.findIndex((payload) => payload.id === entry.id)
-        return index >= 0 && results[index] !== undefined ? toResponse(index) : entry
-      })
-      res.send(res.statusCode, body)
-    })
+    const upstream = await fetchRpcResponses(
+      req.url,
+      payloads.filter((_, index) => results[index] === undefined),
+    )
+    const body = payloads.map((payload, index) =>
+      results[index] === undefined
+        ? upstream.find((entry) => entry.id === payload.id)
+        : { jsonrpc: '2.0', id: payload.id, result: results[index] },
+    )
+    req.reply({ body: isBatch ? body : body[0] })
   })
 }

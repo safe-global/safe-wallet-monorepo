@@ -49,13 +49,16 @@ describe('Spaces basic flow tests', () => {
     // fresh empty workspace, add into it, then delete it — keeping the run idempotent regardless of
     // what previous runs left in the account. The Safe accounts page is the persistent add entry point.
     const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
+    const accountAddress = staticSafes.SEP_STATIC_SAFE_35.substring(4)
+    const accountName = 'E2E account'
 
     space.signInWithWallet(admin)
     space.goToSpacesView()
     space.ensureReadyToCreateSpace()
     space.createSpaceViaOnboardingWithSkip(spaceName)
     space.goToSpaceSafeAccounts()
-    space.addAccountManually(staticSafes.SEP_STATIC_SAFE_35.substring(4), constants.networks.sepolia)
+    space.stubAddingSafeToSpace(accountAddress, constants.networkKeys.sepolia, accountName)
+    space.addAccountManually(accountAddress, constants.networks.sepolia, accountName)
     space.deleteSpace(spaceName)
   })
 

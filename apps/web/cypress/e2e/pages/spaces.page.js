@@ -633,6 +633,39 @@ export function openAddAccountsToWorkspace() {
     })
 }
 
+export function stubAddingSafeToSpace(address, chainId, name) {
+  let isAdded = false
+  cy.intercept('POST', constants.spacesSafesEndpoint, (req) => {
+    isAdded = true
+    req.reply({ statusCode: 201, body: {} })
+  })
+  cy.intercept('GET', constants.spacesSafesEndpoint, (req) => {
+    if (isAdded) req.reply({ body: { safes: { [chainId]: [address] } } })
+  })
+  cy.intercept('GET', constants.spacesAddressBookEndpoint, (req) => {
+    if (!isAdded) return
+    const now = new Date().toISOString()
+    req.reply({
+      body: {
+        spaceUuid: req.url.split('/spaces/')[1].split('/')[0],
+        data: [
+          {
+            name,
+            address,
+            chainIds: [chainId],
+            createdBy: '',
+            createdByUserId: 0,
+            lastUpdatedBy: '',
+            lastUpdatedByUserId: 0,
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
+      },
+    })
+  })
+}
+
 export function addAccountManually(address, network, name = 'E2E account') {
   openAddAccountsToWorkspace()
   cy.get(addSpaceAccountManuallyModalBtn).should('be.visible').click()
