@@ -7,7 +7,7 @@ import { signTypedData } from './signTypedData'
 
 describe('signTypedData', () => {
   it('signs queue service delegate typed data despite its non-standard domain', async () => {
-    const wallet = Wallet.createRandom()
+    const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
     const chain = chainBuilder()
       .with({ features: [FEATURES.QUEUE_SERVICE] })
       .build()
@@ -19,7 +19,7 @@ describe('signTypedData', () => {
   })
 
   it('signs other typed data with the standard EIP-712 encoding', async () => {
-    const wallet = Wallet.createRandom()
+    const wallet = new Wallet(faker.string.hexadecimal({ length: 64, casing: 'lower' }))
     const chain = chainBuilder().with({ features: [] }).build()
     const typedData = getDelegateTypedData(chain, faker.finance.ethereumAddress())
 
