@@ -17,7 +17,7 @@ import {
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
-import { buildSafeSecurityHref, type GetSafeSecurityHref } from './utils'
+import { buildSafeSecurityHref, buildSafeUpdateHref, type GetSafeHref } from './utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SecuritySafesTableProps = {
@@ -60,8 +60,13 @@ const SecuritySafesTable = ({
 
   // Link the Safe name to that Safe's security settings, so navigating back from there returns
   // to the Workspace Security Hub rather than the Home tab. Clicking the row still opens the drawer.
-  const getSafeSecurityHref = useCallback<GetSafeSecurityHref>(
+  const getSafeSecurityHref = useCallback<GetSafeHref>(
     (address, chainId) => buildSafeSecurityHref(chainShortNames, address, chainId, spaceId),
+    [chainShortNames, spaceId],
+  )
+
+  const getSafeUpdateHref = useCallback<GetSafeHref>(
+    (address, chainId) => buildSafeUpdateHref(chainShortNames, address, chainId, spaceId),
     [chainShortNames, spaceId],
   )
 
@@ -153,6 +158,8 @@ const SecuritySafesTable = ({
                 <div className={CELL_BASE}>
                   <Skeleton className="h-5 w-20 rounded-full" />
                 </div>
+                {/* Update */}
+                <div className={CELL_BASE} />
                 {/* Chevron */}
                 <div className={cn(CELL_BASE, 'justify-end')}>
                   <Skeleton className="size-5 rounded" />
@@ -184,6 +191,7 @@ const SecuritySafesTable = ({
                   balanceMap,
                   security,
                   getSafeSecurityHref,
+                  getSafeUpdateHref,
                 }
                 return isMultichain ? (
                   <MultichainSafeRow

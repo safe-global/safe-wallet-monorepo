@@ -20,6 +20,8 @@ export type ScanResult = {
    * related Safe and has no directly removable module).
    */
   vulnerableModules?: string[]
+  /** Set by the contract version scanner when a passing Safe can still update to a newer official version. */
+  upgradeAvailable?: boolean
 }
 
 /** Per-Safe grade based on its worst check result. */

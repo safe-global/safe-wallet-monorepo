@@ -9,7 +9,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@safe-global/views/utils/cn'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import StatusCell from '../StatusCell/StatusCell'
-import { BalanceCell, ScoreCell } from './cells'
+import { BalanceCell, ScoreCell, UpdateCell } from './cells'
 import {
   CARD_ROW_CLASS,
   CELL_BASE,
@@ -17,7 +17,7 @@ import {
   HIDE_BALANCE,
   ROW_VARIANTS,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
-import { getNonPassingCount, type GetSafeSecurityHref, type RowSecurity } from './utils'
+import { getNonPassingCount, hasUpgradeAvailable, type GetSafeHref, type RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 export type SingleSafeRowProps = {
@@ -31,7 +31,8 @@ export type SingleSafeRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 /** Row for a Safe deployed on exactly one chain. */
@@ -46,6 +47,7 @@ const SingleSafeRow = ({
   balanceMap,
   security,
   getSafeSecurityHref,
+  getSafeUpdateHref,
 }: SingleSafeRowProps) => {
   const { scanKey, computeSummary, getSafeGrade } = security
   const key = scanKey(safe.address, safe.chainId)
@@ -56,6 +58,7 @@ const SingleSafeRow = ({
   const isSelected = selectedSafe?.address === safe.address && selectedSafe?.chainId === safe.chainId
   const isScanning = scanningKeys?.has(key)
   const safeHref = getSafeSecurityHref(safe.address, safe.chainId)
+  const updateHref = hasUpgradeAvailable(results) ? getSafeUpdateHref(safe.address, safe.chainId) : undefined
   const isDeployed = safe.chainEntries[0]?.isDeployed !== false
   const safeName = safe.name || shortenAddress(safe.address)
 
@@ -115,6 +118,9 @@ const SingleSafeRow = ({
       </div>
       <div className={CELL_BASE}>
         <StatusCell grade={grade} count={statusCount} isScanning={isScanning} />
+      </div>
+      <div className={CELL_BASE}>
+        <UpdateCell href={updateHref} />
       </div>
       <div className={cn(CELL_BASE, 'justify-end')}>
         {isDeployed ? (
