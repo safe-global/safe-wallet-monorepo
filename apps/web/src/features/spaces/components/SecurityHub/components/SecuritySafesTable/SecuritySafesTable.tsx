@@ -17,7 +17,7 @@ import {
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import SingleSafeRow from './SingleSafeRow'
 import MultichainSafeRow from './MultichainSafeRow'
-import { buildSafeSecurityHref, buildSafeUpdateHref, type GetSafeSecurityHref } from './utils'
+import { buildSafeSecurityHref, buildSafeUpdateHref, type GetSafeHref } from './utils'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SecuritySafesTableProps = {
@@ -60,12 +60,12 @@ const SecuritySafesTable = ({
 
   // Link the Safe name to that Safe's security settings, so navigating back from there returns
   // to the Workspace Security Hub rather than the Home tab. Clicking the row still opens the drawer.
-  const getSafeSecurityHref = useCallback<GetSafeSecurityHref>(
+  const getSafeSecurityHref = useCallback<GetSafeHref>(
     (address, chainId) => buildSafeSecurityHref(chainShortNames, address, chainId, spaceId),
     [chainShortNames, spaceId],
   )
 
-  const getSafeUpdateHref = useCallback<GetSafeSecurityHref>(
+  const getSafeUpdateHref = useCallback<GetSafeHref>(
     (address, chainId) => buildSafeUpdateHref(chainShortNames, address, chainId, spaceId),
     [chainShortNames, spaceId],
   )

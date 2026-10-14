@@ -17,7 +17,7 @@ import {
   HIDE_BALANCE,
   ROW_VARIANTS,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
-import { getNonPassingCount, hasUpgradeAvailable, type GetSafeSecurityHref, type RowSecurity } from './utils'
+import { getNonPassingCount, hasUpgradeAvailable, type GetSafeHref, type RowSecurity } from './utils'
 import type { SelectedSafe, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 export type SingleSafeRowProps = {
@@ -31,8 +31,8 @@ export type SingleSafeRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
-  getSafeUpdateHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 /** Row for a Safe deployed on exactly one chain. */

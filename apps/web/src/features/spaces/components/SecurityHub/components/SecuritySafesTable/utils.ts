@@ -21,8 +21,8 @@ export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
 export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
-/** Builder returning a Safe's security settings URL for a given (address, chainId), or undefined if the chain has no short name. */
-export type GetSafeSecurityHref = (address: string, chainId: string) => SafeHref | undefined
+/** Builder returning a link to one of a Safe's pages for a given (address, chainId), or undefined if the chain has no short name. */
+export type GetSafeHref = (address: string, chainId: string) => SafeHref | undefined
 
 /**
  * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.

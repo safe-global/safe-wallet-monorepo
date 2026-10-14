@@ -29,7 +29,7 @@ import {
   hasMultichainWarning,
   hasUpgradeAvailable,
   isAnyChainScanning,
-  type GetSafeSecurityHref,
+  type GetSafeHref,
   type RowSecurity,
 } from './utils'
 import type {
@@ -51,8 +51,8 @@ export type MultichainSafeRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
-  getSafeUpdateHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 type ChildRowProps = {
@@ -65,8 +65,8 @@ type ChildRowProps = {
   scanningKeys?: Set<string>
   balanceMap: Record<string, string | undefined>
   security: RowSecurity
-  getSafeSecurityHref: GetSafeSecurityHref
-  getSafeUpdateHref: GetSafeSecurityHref
+  getSafeSecurityHref: GetSafeHref
+  getSafeUpdateHref: GetSafeHref
 }
 
 /** Per-chain row rendered under an expanded multichain parent. */
