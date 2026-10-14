@@ -78,7 +78,7 @@ async function answer(handle: Handler, message: IncomingMessage, response: Serve
     if (error instanceof RequestTooLarge) {
       reply = json(413, { message: error.message })
     } else {
-      console.error(`${message.method} ${message.url} failed:`, error)
+      console.error('%s %s failed:', message.method, message.url, error)
       reply = json(500, { message: String(error) })
     }
   }
