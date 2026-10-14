@@ -17,6 +17,10 @@ const untrustedFallbackHandlerWarning = '[data-testid="untrusted-fallback-handle
 const txCompletedStr = 'Transaction was successful'
 const EXECUTION_METHOD_SETTLE_MS = 10000
 export const relayRemainingAttemptsStr = 'free transactions left today'
+const relaysRemainingEndpoint = '**/v1/chains/*/relay/*'
+const chainsListEndpoint = /\/v[12]\/chains(\?|$)/
+const freeDailyRelayOption = 'FREE_DAILY_LIMIT'
+const mockedDailyRelays = { remaining: 5, limit: 5 }
 
 export const fallbackhandlerTx = fixtureGetters('fallbackHandlers', {
   illegalContract:
@@ -121,4 +125,25 @@ export function executeSignedTxWithConnectedWallet() {
   cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
   selectConnectedWalletIfOffered()
   executeAndFinish()
+}
+
+export function mockFreeDailyRelay() {
+  cy.intercept('GET', relaysRemainingEndpoint, { body: mockedDailyRelays })
+  cy.intercept('GET', chainsListEndpoint, (req) => {
+    req.continue((res) => {
+      if (!Array.isArray(res.body?.results)) return
+      const results = res.body.results.map((chain) =>
+        chain.relayer
+          ? {
+              ...chain,
+              relayer: {
+                ...chain.relayer,
+                gasPaymentOptions: [...new Set([...(chain.relayer.gasPaymentOptions ?? []), freeDailyRelayOption])],
+              },
+            }
+          : chain,
+      )
+      res.send(res.statusCode, { ...res.body, results })
+    })
+  })
 }

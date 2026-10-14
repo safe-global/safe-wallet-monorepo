@@ -48,6 +48,7 @@ describe('Create transactions tests', () => {
   it('Verify relay is available on tx execution', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
     createtx.cleanTransactionQueue(safe, signer)
+    tx.mockFreeDailyRelay()
     wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + safe)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()

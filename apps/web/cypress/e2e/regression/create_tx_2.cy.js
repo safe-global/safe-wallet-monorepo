@@ -28,6 +28,7 @@ describe('Create transactions tests 2', () => {
 
   beforeEach(() => {
     createtx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_6, signer)
+    tx.mockFreeDailyRelay()
     wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
