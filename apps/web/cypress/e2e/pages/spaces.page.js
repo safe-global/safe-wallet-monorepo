@@ -599,11 +599,15 @@ export function deleteSpace(name) {
 
 const MAX_SPACES = 10
 
+const createSpaceBtnAtLimit = `${createSpaceBtn}[aria-disabled="true"]`
+const SPACES_LIMIT_SETTLE_MS = 5000
+
 function deleteOneSpace() {
   visitSpacesView()
   cy.get(spaceCard, { timeout: 30000 }).then(($cards) => {
     removeSpace($cards.first().find(spaceCardName).text().trim())
     cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+    cy.get(createSpaceBtnAtLimit, { timeout: 30000 }).should('not.exist')
   })
 }
 
@@ -611,13 +615,15 @@ export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // The list renders its rows together with the container. At the limit the Create button is
-  // disabled, so delete a space to free a slot before any create attempt.
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length >= MAX_SPACES) {
-      deleteOneSpace()
-    }
-  })
+  // Rows and the limit wait for the user's memberships, which load after the list container.
+  main
+    .pollUntil(
+      () => Cypress.$(createSpaceBtnAtLimit).length > 0 || Cypress.$(spaceCard).length >= MAX_SPACES,
+      SPACES_LIMIT_SETTLE_MS,
+    )
+    .then((isAtLimit) => {
+      if (isAtLimit) deleteOneSpace()
+    })
 
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
@@ -752,6 +758,7 @@ function navigateToCreateSpacePage() {
     cy.get('body').then(($body) => {
       const hasSpaces = $body.find(`${spaceCard}, ${inviteBanner}`).length > 0
       const expectedPath = hasSpaces ? spacesCreateSpacePath : onboardingCreateSpacePath
+      cy.get(createSpaceBtn, { timeout: 30000 }).filter(':visible').first().should('not.have.attr', 'aria-disabled')
       cy.get(createSpaceBtn).filter(':visible').first().click()
       cy.location('pathname', { timeout: 30000 }).should('eq', expectedPath)
     })
