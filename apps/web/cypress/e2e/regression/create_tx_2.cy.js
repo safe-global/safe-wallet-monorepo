@@ -27,8 +27,8 @@ describe('Create transactions tests 2', () => {
   })
 
   beforeEach(() => {
-    wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_6)
-    createtx.deleteAllTx()
+    createtx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_6, signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
   })

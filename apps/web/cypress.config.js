@@ -103,6 +103,9 @@ export default defineConfig({
       })
 
       on('after:spec', async (spec, results) => {
+        results?.tests
+          ?.filter((test) => test.state === 'failed')
+          .forEach((test) => console.log(`\n✖ ${test.title.join(' > ')}\n${test.displayError}\n`))
         await scenarioFixtures?.cleanup()
         if (!config.env.SAFE_E2E_ISOLATED && results && results.video) {
           const failures = results.tests.some((test) => test.attempts.some((attempt) => attempt.state === 'failed'))

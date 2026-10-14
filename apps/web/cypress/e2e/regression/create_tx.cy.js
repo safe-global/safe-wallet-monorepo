@@ -29,8 +29,8 @@ describe('Create transactions tests', () => {
 
   // Added to prod
   it('Verify submitting a tx and that clicking on notification shows the transaction in queue', () => {
-    wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + staticSafes.SEP_STATIC_SAFE_6)
-    createtx.deleteAllTx()
+    createtx.cleanTransactionQueue(staticSafes.SEP_STATIC_SAFE_6, signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + staticSafes.SEP_STATIC_SAFE_6)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     happyPathToStepTwo()
@@ -47,8 +47,8 @@ describe('Create transactions tests', () => {
 
   it('Verify relay is available on tx execution', () => {
     let safe = main.changeSafeChainName(staticSafes.MATIC_STATIC_SAFE_28, 'sep')
-    wallet.connectSignerViaStorage(signer, constants.transactionQueueUrl + safe)
-    createtx.deleteAllTx()
+    createtx.cleanTransactionQueue(safe, signer)
+    wallet.connectSignerViaStorage(signer, constants.BALANCE_URL + safe)
     createtx.clickOnNewtransactionBtn()
     createtx.clickOnSendTokensBtn()
     happyPathToStepTwo()

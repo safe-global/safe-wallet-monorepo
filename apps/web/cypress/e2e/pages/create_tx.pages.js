@@ -6,6 +6,7 @@ import { dataRow } from '../pages/tables.page'
 import * as navigation from './navigation.page'
 import * as walletUtils from '../../support/utils/wallet.js'
 import * as owner from './owners.pages'
+import { ethers } from 'ethers'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const policyChangeWarning = '[data-testid="threshold-warning"]'
@@ -328,38 +329,7 @@ export function deleteTx() {
   cy.get(deleteTxModalBtn).click()
 }
 
-function loadQueuedTxs(expectedCount) {
-  cy.get(transactionItem, { timeout: 30000 }).then(($items) => {
-    const count = $items.length
-    if (count === expectedCount) return
-    cy.get(transactionItem).last().scrollIntoView()
-    main
-      .pollUntil(() => Cypress.$(transactionItem).length !== count, 10000)
-      .then((changed) => {
-        if (changed) {
-          loadQueuedTxs(expectedCount)
-        } else if (expectedCount !== undefined) {
-          expect(count, 'queued transactions').to.equal(expectedCount)
-        }
-      })
-  })
-}
-
-function deleteQueuedTxsFromLast(expectedCount) {
-  loadQueuedTxs(expectedCount)
-  cy.get(transactionItem).then(($items) => {
-    const remaining = $items.length - 1
-    cy.get(transactionItem).last().click({ force: true })
-    deleteTx()
-    if (remaining === 0) {
-      cy.contains(emptyQueueStr, { timeout: 30000 }).should('be.visible')
-      return
-    }
-    deleteQueuedTxsFromLast(remaining)
-  })
-}
-
-/** Deletes every queued transaction, last nonce first; call it on the queue page. */
+/** Deletes every queued transaction; call it on the queue page. */
 export function deleteAllTx() {
   cy.get('body', { timeout: 30000 }).should(($body) => {
     const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
@@ -367,7 +337,12 @@ export function deleteAllTx() {
   })
   cy.get('body').then(($body) => {
     if ($body.find(transactionItem).length > 0) {
-      deleteQueuedTxsFromLast()
+      cy.get(transactionItem).then(($items) => {
+        for (let i = $items.length - 1; i >= 0; i--) {
+          cy.wrap($items[i]).click({ force: true })
+          deleteTx()
+        }
+      })
     }
   })
 }
@@ -1206,11 +1181,59 @@ export function checkThatComboButtonOptionIsNotPresent(option) {
   })
 }
 //Functions for the happy path flow
-export function cleanTransactionQueue(safeAddress, signer) {
-  walletUtils.connectSignerViaStorage(signer, constants.transactionQueueUrl + safeAddress)
-  deleteAllTx()
-  navigation.clickOnWalletExpandMoreIcon()
-  navigation.clickOnDisconnectBtn()
+const deleteRequestDomainNames = ['Safe Queue Service', 'Safe Transaction Service']
+
+function getQueuedSafeTxHashes(url, safeTxHashes = []) {
+  return cy.request(url).then(({ body }) => {
+    const pageHashes = body.results
+      .filter((item) => item.type === 'TRANSACTION')
+      .map((item) => item.transaction.id.split('_').pop())
+    const allHashes = [...safeTxHashes, ...pageHashes]
+    if (!body.next) return allHashes
+    const { pathname, search } = new URL(body.next)
+    return getQueuedSafeTxHashes(`${constants.stagingCGWUrl}${pathname.slice(1)}${search}`, allHashes)
+  })
+}
+
+function deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, domainNames = deleteRequestDomainNames) {
+  const [name, ...fallbackNames] = domainNames
+  const domain = { name, version: '1.0', chainId: Number(chainId), verifyingContract: safeAddress }
+  const types = {
+    DeleteRequest: [
+      { name: 'safeTxHash', type: 'bytes32' },
+      { name: 'totp', type: 'uint256' },
+    ],
+  }
+  const message = { safeTxHash, totp: Math.floor(Date.now() / 3600e3) }
+
+  cy.wrap(null)
+    .then(() => proposer.signTypedData(domain, types, message))
+    .then((signature) =>
+      cy.request({
+        method: 'DELETE',
+        url: `${constants.stagingCGWUrlv1}/chains/${chainId}/transactions/${safeTxHash}`,
+        body: { signature },
+        failOnStatusCode: false,
+      }),
+    )
+    .then(({ status }) => {
+      if (status < 300) return
+      expect(fallbackNames, `delete ${safeTxHash} (HTTP ${status})`).not.to.be.empty
+      deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer, fallbackNames)
+    })
+}
+
+/** Deletes every queued transaction of a Sepolia Safe through the API, signed by their proposer. */
+export function cleanTransactionQueue(prefixedSafeAddress, proposerPrivateKey) {
+  const chainId = constants.networkKeys.sepolia
+  const safeAddress = ethers.getAddress(prefixedSafeAddress.split(':').pop())
+  const proposer = new ethers.Wallet(proposerPrivateKey)
+
+  getQueuedSafeTxHashes(`${constants.stagingCGWUrlv1}/chains/${chainId}/safes/${safeAddress}/transactions/queued`).then(
+    (safeTxHashes) => {
+      safeTxHashes.reverse().forEach((safeTxHash) => deleteQueuedTxViaApi(chainId, safeAddress, safeTxHash, proposer))
+    },
+  )
 }
 
 export function switchToSignerAndConfirm(signer) {
