@@ -12,6 +12,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useBalances from '@/hooks/useBalances'
 import useGasLimit from '@/hooks/useGasLimit'
 import useGasPrice from '@/hooks/useGasPrice'
+import { useSafeProAccess } from '@/features/spaces'
 import { useGtfFeePreview } from './useGtfFeePreview'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
 import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
@@ -153,7 +154,10 @@ export const useFeesPreview = (): FeesPreviewData => {
   // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
   // — render the signer-pays variant: free execution fee, no
   // gas-token selector, and no call to the preview endpoint.
-  const feePreviewAvailable = isGtfFeePreviewAvailable(chain)
+  // Paying from the Safe is a Safe Pro feature: without a live plan on the current Workspace the
+  // section renders as signer-pays, as on a chain that cannot quote.
+  const { hasProFeatures, isLoading: isProLoading } = useSafeProAccess()
+  const feePreviewAvailable = isGtfFeePreviewAvailable(chain) && hasProFeatures && !isProLoading
   const isSignerMode =
     !isConfirmation &&
     (!IS_RELAYING_LIVE || !feePreviewAvailable || gtfPaymentMode === 'signer' || candidates.length === 0)

@@ -1,0 +1,62 @@
+.container {
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.method {
+  padding: var(--space-2) var(--space-2) var(--space-1) var(--space-2);
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  color: var(--color-text-secondary);
+}
+
+.radioGroup {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.radioLabel {
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space-1) / 2);
+  white-space: nowrap;
+}
+
+.safeLogo {
+  width: 20px;
+  height: 20px;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  background-color: var(--color-background-main);
+  border-top: 1px solid var(--color-border-light);
+}
+
+.tokenRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.upsell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--color-background-main);
+  border-top: 1px solid var(--color-border-light);
+}

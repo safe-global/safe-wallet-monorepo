@@ -36,6 +36,9 @@ import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { useLoadFeature } from '@/features/__core__'
+import { GTFFeature, useGasPayerSelection } from '@/features/gtf'
+import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
   safeTx,
@@ -85,9 +88,31 @@ export const ExecuteForm = ({
 
   const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ safeTx })
   const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
-  const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
+  const { gasPayer: offeredGasPayer, sponsorSpaceId: offeredSponsorSpaceId } = getGasPayment(offer, executionMethod)
+
+  // One selector for the three gas payers where the chain lists PAY_FROM_SAFE; the sponsored/wallet one elsewhere.
+  const { GasPayerSelector, $isReady: isGtfReady } = useLoadFeature(GTFFeature)
+  const selection = useGasPayerSelection({ safeTx, offer })
+  const isPayFromSafe = selection.choice === 'PAY_FROM_SAFE'
+  const showsGasPayerSelector =
+    isGtfReady && (selection.isLocked || selection.canPayFromSafe || selection.mustUpgradeToPayFromSafe)
+
+  // Paying from the Safe relays through the public route, never against a Workspace allowance: the
+  // Safe refunds the relayer on-chain (`handlePayment()`), and `WorkspaceRelayer` refuses such payloads.
+  const gasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : offeredGasPayer
+  const sponsorSpaceId = isPayFromSafe ? null : offeredSponsorSpaceId
   const willRelay = gasPayer !== 'WALLET'
-  const showExecutionSelector = offer !== null || showsProUpsell
+  const showExecutionSelector = !showsGasPayerSelector && (offer !== null || showsProUpsell)
+
+  // Keep the selector and the execution method in step while the legacy selector is the one rendered.
+  useEffect(() => {
+    if (showsGasPayerSelector) {
+      setExecutionMethod(selection.choice === 'SPONSORED' ? ExecutionMethod.RELAY : ExecutionMethod.WALLET)
+    }
+  }, [showsGasPayerSelector, selection.choice])
+
+  // Safe Shield simulates the payload the user is about to sign, fee params included.
+  useSafeShieldForTxData(isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
 
   useEffect(() => {
     setGasPaymentOption(gasPayer)
@@ -181,6 +206,7 @@ export const ExecuteForm = ({
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
+    selection.isQuoteLoading ||
     isSubmitLoading ||
     disableSubmit ||
     isExecutionLoop ||
@@ -191,7 +217,11 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
+        <div
+          className={classNames(commonCss.params, {
+            [css.noBottomBorderRadius]: showExecutionSelector || showsGasPayerSelector,
+          })}
+        >
           <AdvancedParams
             willExecute
             params={advancedParams}
@@ -199,6 +229,7 @@ export const ExecuteForm = ({
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
             willRelay={willRelay}
+            feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
             noFeeCampaign={
               offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
                 ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
@@ -206,7 +237,11 @@ export const ExecuteForm = ({
             }
           />
 
-          {showExecutionSelector && (
+          {showsGasPayerSelector ? (
+            <div className={css.noTopBorder}>
+              <GasPayerSelector offer={offer} showsProUpsell={showsProUpsell} selection={selection} />
+            </div>
+          ) : showExecutionSelector ? (
             <div className={css.noTopBorder}>
               <ExecutionMethodSelector
                 executionMethod={executionMethod}
@@ -215,7 +250,7 @@ export const ExecuteForm = ({
                 showsProUpsell={showsProUpsell}
               />
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Error messages */}

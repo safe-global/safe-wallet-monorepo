@@ -1,4 +1,4 @@
-import type { ReactElement, SyntheticEvent } from 'react'
+import type { ReactElement, ReactNode, SyntheticEvent } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Link } from '@/components/ui/link'
@@ -33,6 +33,8 @@ type GasParamsProps = {
   onEdit?: () => void
   gasLimitError?: Error
   willRelay?: boolean
+  /** Replaces the estimated fee in the header when the fee is shown elsewhere (e.g. paid from the Safe). */
+  feeLabel?: ReactNode
   noFeeCampaign?: {
     isEligible: boolean
     remaining: number
@@ -47,6 +49,7 @@ export const _GasParams = ({
   onEdit,
   gasLimitError,
   willRelay,
+  feeLabel,
   noFeeCampaign,
   chain,
 }: GasParamsProps & { chain?: Chain }): ReactElement => {
@@ -121,7 +124,7 @@ export const _GasParams = ({
                         </Tooltip>
                       </>
                     ) : (
-                      <span>{willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`}</span>
+                      <span>{feeLabel ?? (willRelay ? 'Free' : `${totalFee} ${chain?.nativeCurrency.symbol}`)}</span>
                     )}
                   </div>
                 )}

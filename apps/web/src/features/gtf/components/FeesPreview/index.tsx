@@ -40,7 +40,7 @@ const SignerFeeTooltip = (): ReactElement => (
   </Tooltip>
 )
 
-const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
+export const TotalOutgoingSection = ({ totalOutgoing }: { totalOutgoing: TotalOutgoing }): ReactElement => (
   <div className={css.totalOutgoing}>
     <Typography variant="paragraph-small-bold">Total outgoing</Typography>
     <div className={css.totalOutgoingValue}>
@@ -89,7 +89,7 @@ const PaymentSourceSelector = ({
   </DropdownMenu>
 )
 
-const GasTokenSelector = ({
+export const GasTokenSelector = ({
   availableGasTokens,
   selectedGasToken,
   onGasTokenChange,
