@@ -30,13 +30,10 @@ const ensCallResult = (payload, name, address) => {
   if (target === ENS_MOCK_RESOLVER && call?.name === 'addr' && call.args[0] === node) {
     return ensInterface.encodeFunctionResult('addr', [address])
   }
-  if (
-    target === ENS_UNIVERSAL_RESOLVER &&
-    call?.name === 'reverse' &&
-    call.args[0] === address.toLowerCase() &&
-    call.args[1] === ETH_COIN_TYPE
-  ) {
-    return ensInterface.encodeFunctionResult('reverse', [name, ENS_MOCK_RESOLVER, ENS_MOCK_RESOLVER])
+  if (target === ENS_UNIVERSAL_RESOLVER && call?.name === 'reverse' && call.args[1] === ETH_COIN_TYPE) {
+    return call.args[0] === address.toLowerCase()
+      ? ensInterface.encodeFunctionResult('reverse', [name, ENS_MOCK_RESOLVER, ENS_MOCK_RESOLVER])
+      : ensInterface.encodeFunctionResult('reverse', ['', ethers.ZeroAddress, ethers.ZeroAddress])
   }
   return undefined
 }
