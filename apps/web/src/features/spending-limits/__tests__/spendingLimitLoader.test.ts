@@ -12,7 +12,7 @@ import * as tokens from '@/utils/tokens'
 
 jest.mock('@/utils/tokens', () => ({
   ...jest.requireActual('@/utils/tokens'),
-  getERC20TokenInfoOnChain: jest.fn(async () => []),
+  getERC20TokenInfoOnChain: jest.fn(),
 }))
 
 const spendingLimitInterface = AllowanceModule__factory.createInterface()
@@ -21,10 +21,16 @@ const mockModule = {
   value: '0x1',
 }
 
+beforeEach(() => {
+  jest.clearAllMocks()
+  jest.mocked(tokens.getERC20TokenInfoOnChain).mockResolvedValue([])
+})
+
 describe('loadSpendingLimits', () => {
   beforeEach(() => {
     jest.resetModules()
     jest.resetAllMocks()
+    jest.mocked(tokens.getERC20TokenInfoOnChain).mockResolvedValue([])
   })
 
   it('should return undefined if no spending limit module address was found', async () => {
@@ -143,7 +149,7 @@ describe('loadSpendingLimits', () => {
     await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
 
     // ethers checksums addresses when ABI-decoding them, so compare against the checksummed form
-    expect(tokens.getERC20TokenInfoOnChain).toHaveBeenCalledWith([getAddress(token)], web3Provider)
+    expect(tokens.getERC20TokenInfoOnChain).toHaveBeenCalledWith(getAddress(token), web3Provider)
   })
 
   it('should filter out empty allowances', async () => {
@@ -378,7 +384,7 @@ describe('getTokenAllowanceForDelegate', () => {
       [],
     )
 
-    expect(tokens.getERC20TokenInfoOnChain).toHaveBeenCalledWith([], mockProvider)
+    expect(tokens.getERC20TokenInfoOnChain).not.toHaveBeenCalled()
     expect(result.token).toEqual({ address: ZERO_ADDRESS, decimals: 18, symbol: '' })
   })
 
@@ -422,5 +428,51 @@ describe('getTokenAllowanceForDelegate', () => {
         [],
       ),
     ).resolves.toHaveLength(1)
+  })
+
+  it('should not fail other allowances when an active allowance token is not a contract', async () => {
+    const { getERC20TokenInfoOnChain: realGetERC20TokenInfoOnChain } =
+      jest.requireActual<typeof tokens>('@/utils/tokens')
+    jest
+      .mocked(tokens.getERC20TokenInfoOnChain)
+      .mockImplementationOnce(realGetERC20TokenInfoOnChain)
+      .mockImplementationOnce(realGetERC20TokenInfoOnChain)
+
+    const mockContract = {
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+      interface: spendingLimitInterface,
+    } as unknown as AllowanceModule
+    const eoaToken = faker.finance.ethereumAddress()
+    const erc20Token = faker.finance.ethereumAddress()
+    const mockProvider = mockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(1)],
+        },
+        { signature: 'decimals()', returnType: 'raw', returnValue: '0x', to: eoaToken },
+        { signature: 'symbol()', returnType: 'raw', returnValue: '0x', to: eoaToken },
+        { signature: 'decimals()', returnType: 'uint8', returnValue: 6, to: erc20Token },
+        { signature: 'symbol()', returnType: 'string', returnValue: 'USDC', to: erc20Token },
+      ],
+      undefined,
+      '5',
+    )
+    const delegate = faker.finance.ethereumAddress()
+
+    const [eoaResult, erc20Result] = await getTokenAllowances(
+      mockContract,
+      mockProvider,
+      ZERO_ADDRESS,
+      [
+        { delegate, token: eoaToken },
+        { delegate, token: erc20Token },
+      ],
+      [],
+    )
+
+    expect(eoaResult.token).toEqual({ address: eoaToken, decimals: 18, symbol: '' })
+    expect(erc20Result.token).toMatchObject({ address: erc20Token, decimals: 6, symbol: 'USDC' })
   })
 })

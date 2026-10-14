@@ -40,7 +40,7 @@ export const getTokenAllowances = async (
     (result) => contract.interface.decodeFunctionResult('getTokenAllowance', result.returnData)[0],
   )
 
-  // The module never forgets a token, so removed limits can point at contracts that are not ERC-20s.
+  // Removed limits are discarded later, so their tokens aren't looked up.
   const missingTokenAddresses = tokenAllowances
     .map((tokenAllowance, index) => ({ tokenAllowance, token: allowanceRequests[index].token }))
     .filter(({ tokenAllowance: [amount, , resetTimeMin] }) => !(amount === 0n && resetTimeMin === 0n))
@@ -50,7 +50,12 @@ export const getTokenAllowances = async (
         !sameAddress(tokenAddress, ZERO_ADDRESS) && !getTokenInfoFromBalances(tokenInfoFromBalances, tokenAddress),
     )
 
-  const missingTokenInfos = await getERC20TokenInfoOnChain(missingTokenAddresses, provider)
+  // One lookup per token, so a non-ERC-20 token address can't fail the others.
+  const missingTokenInfos = (
+    await Promise.all(
+      missingTokenAddresses.map((address) => getERC20TokenInfoOnChain(address, provider).catch(() => undefined)),
+    )
+  ).flatMap((tokenInfos) => tokenInfos ?? [])
 
   return tokenAllowances.map((tokenAllowance, index) => {
     const { delegate, token } = allowanceRequests[index]
@@ -58,7 +63,7 @@ export const getTokenAllowances = async (
     return {
       beneficiary: delegate,
       token: getTokenInfoFromBalances(tokenInfoFromBalances, token) ||
-        missingTokenInfos?.find((tokenInfo) => sameAddress(tokenInfo.address, token)) || {
+        missingTokenInfos.find((tokenInfo) => sameAddress(tokenInfo.address, token)) || {
           ...DEFAULT_TOKEN_INFO,
           address: token,
         },
