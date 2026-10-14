@@ -12,6 +12,7 @@ import { fixtureGetters } from '../../support/fixture.js'
 export const inputCurrencyInput = '[id="input-currency-input"]'
 export const outputCurrencyInput = '[id="output-currency-input"]'
 const tokenList = '[id="tokens-list"]'
+const currencySelectBtn = '.open-currency-select-button'
 export const swapBtn = '[id="swap-button"]'
 const exceedFeesChkbox = 'input[id="fees-exceed-checkbox"]'
 const settingsBtn = 'button[id="open-settings-dialog-button"]'
@@ -367,14 +368,13 @@ export function verifySelectedInputCurrancy(option) {
 
 function selectCurrency(inputSelector, option) {
   cy.get(inputSelector).within(() => {
-    cy.get('button')
-      .eq(0)
+    cy.get(currencySelectBtn)
       .invoke('text')
       .then(($value) => {
         cy.log('*** Currency value ' + $value)
         if (!$value.includes(option)) {
           cy.log('*** Currency value is different from specified')
-          cy.get('button').eq(0).trigger('mouseover').trigger('click')
+          cy.get(currencySelectBtn).trigger('mouseover').trigger('click')
           cy.wrap(true).as('isAction')
         } else {
           cy.wrap(false).as('isAction')

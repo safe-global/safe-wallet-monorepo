@@ -55,13 +55,13 @@ export function mockEnsName(name, prefixedAddress) {
       return
     }
     req.continue((res) => {
-      if (!Array.isArray(res.body)) return
-      res.body.forEach((entry) => {
+      const upstream = typeof res.body === 'string' ? JSON.parse(res.body) : res.body
+      if (!Array.isArray(upstream)) return
+      const body = upstream.map((entry) => {
         const index = payloads.findIndex((payload) => payload.id === entry.id)
-        if (index < 0 || results[index] === undefined) return
-        delete entry.error
-        entry.result = results[index]
+        return index >= 0 && results[index] !== undefined ? toResponse(index) : entry
       })
+      res.send(res.statusCode, body)
     })
   })
 }
