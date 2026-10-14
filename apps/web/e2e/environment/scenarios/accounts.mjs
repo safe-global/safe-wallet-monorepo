@@ -4,7 +4,7 @@ import { prepareAssetsScenario } from './assets.mjs'
 import { prepareBasicScenario } from './basic.mjs'
 import { registerContract } from './contracts.mjs'
 import { setEnsName } from './ens.mjs'
-import { addDelegates } from './proposers.mjs'
+import { addDelegates, stagingProposers } from './proposers.mjs'
 import { createSafe, openSafe, proposeTransaction, safeService } from './safe.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
 import { trustToken } from './tokens.mjs'
@@ -24,10 +24,7 @@ async function queueTransfer(env, owners, safe, nonce) {
 
 // OWNER_4 and OWNER_1 propose for SEP_STATIC_SAFE_31, as on staging.
 async function addStagingProposers(env, owners, safe) {
-  await addDelegates(env, safeService(env, addressOf(safe)), [
-    { delegate: owners.owner4.address, delegator: owners.owner4, label: 'Proposer 1' },
-    { delegate: owners.owner1.address, delegator: owners.owner3, label: 'Proposer 2' },
-  ])
+  await addDelegates(env, safeService(env, addressOf(safe)), stagingProposers(owners))
 }
 
 async function transactionBuilderId(env) {

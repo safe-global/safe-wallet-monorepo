@@ -8,9 +8,7 @@ import requests
 import urllib3
 from eth_account import Account
 from safe_eth.eth import EthereumClient
-from safe_eth.eth.ethereum_network import EthereumNetwork
 from safe_eth.safe import Safe
-from safe_eth.safe.api.transaction_service_api import TransactionServiceApi
 from safe_eth.safe.multi_send import MultiSend, MultiSendOperation, MultiSendTx
 
 
@@ -122,9 +120,7 @@ def verify_proposal_lifecycle(client, owner, recipient, safe_address):
     delete_proposal(owner, safe_address, safe_tx_hash)
     wait_json(queued, lambda data: safe_tx_hash not in json.dumps(data))
     print("Signed proposal deletion verified through CGW and the Queue Service", flush=True)
-    # Scenarios still seed the Transaction Service; the Queue Service must pick that up from events.
-    api = TransactionServiceApi(EthereumNetwork(CHAIN_ID), client, base_url="http://nginx:8000/txs")
-    api.post_transaction(tx)
+    propose(owner, safe_address, tx, safe_tx_hash)
     wait_json(queued, lambda data: safe_tx_hash in json.dumps(data))
     execution, _ = tx.execute(owner.key.hex())
     assert client.w3.eth.wait_for_transaction_receipt(execution)["status"] == 1

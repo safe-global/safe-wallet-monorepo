@@ -1,28 +1,24 @@
 import Safe from '@safe-global/protocol-kit'
-import { createWalletClient, http } from 'viem'
-import { privateKeyToAccount } from 'viem/accounts'
-import { sepolia } from 'viem/chains'
 import { createSafe, executeTransaction } from './safe.mjs'
+import { addDelegateToQueue, proposeToQueue } from './gateway.mjs'
 import { waitUntil } from './indexing.mjs'
 import { SEPOLIA, short } from './chain.mjs'
 
+/**
+ * The proposers of staging SEP_STATIC_SAFE_31. The Queue Service refuses a delegate that is its own delegator, so
+ * OWNER_3 adds OWNER_4 (staging: OWNER_4 itself) and OWNER_4 adds OWNER_1; OWNER_4 stays a proposer and a creator.
+ * The Queue Service lists the newest first and the specs find a row by the first address match, so OWNER_4 is last.
+ */
+export const stagingProposers = (owners) => [
+  { delegate: owners.owner1.address, delegator: owners.owner4, label: 'Proposer 2' },
+  { delegate: owners.owner4.address, delegator: owners.owner3, label: 'Proposer 1' },
+]
+
 export async function addDelegates(env, context, delegates) {
-  for (const { delegate, delegator, label } of delegates) {
-    await context.api.addSafeDelegate({
-      safeAddress: context.safeAddress,
-      delegateAddress: delegate,
-      delegatorAddress: delegator.address,
-      signer: createWalletClient({
-        account: privateKeyToAccount(delegator.privateKey),
-        chain: sepolia,
-        transport: http(env.SAFE_RPC_URL),
-      }),
-      label,
-    })
-  }
+  for (const delegate of delegates) await addDelegateToQueue(context, delegate)
   await waitUntil(
     env,
-    `${env.SAFE_CGW_BASE_URL}/v2/chains/${context.chainId}/delegates?safe=${context.safeAddress}`,
+    `${env.SAFE_CGW_BASE_URL}/v3/chains/${context.chainId}/delegates?safe=${context.safeAddress}`,
     (result) => result.results?.length === delegates.length,
   )
 }
@@ -44,12 +40,11 @@ async function proposeAsDelegate(env, context, delegate) {
     transactions: [{ to: delegate.address, value: '1', data: '0x' }],
   })
   const hash = await context.safe.getTransactionHash(transaction)
-  await context.api.proposeTransaction({
-    safeAddress: context.safeAddress,
-    safeTransactionData: transaction.data,
-    safeTxHash: hash,
-    senderAddress: delegate.address,
-    senderSignature: (await delegateSafe.signHash(hash)).data,
+  await proposeToQueue(context, {
+    data: transaction.data,
+    hash,
+    sender: delegate.address,
+    signature: (await delegateSafe.signHash(hash)).data,
   })
   const id = `multisig_${context.safeAddress}_${hash}`
   await waitUntil(
@@ -68,10 +63,7 @@ export async function prepareProposersScenario(env, owners) {
     const proposals = await createSafe(env, owners, shared)
     contexts.push(proposals)
     await executeOnce(proposals, owners)
-    await addDelegates(env, proposals, [
-      { delegate: owners.owner4.address, delegator: owners.owner4, label: 'Proposer 1' },
-      { delegate: owners.owner1.address, delegator: owners.owner3, label: 'Proposer 2' },
-    ])
+    await addDelegates(env, proposals, stagingProposers(owners))
     const proposedTx = await proposeAsDelegate(env, proposals, owners.owner1)
     const nested = await createSafe(env, owners, shared)
     contexts.push(nested)
