@@ -5,7 +5,7 @@ Docker Compose environment for validating Safe APIs against a pinned Anvil Sepol
 ## Requirements
 
 - Docker with Compose v2 and an ARM64 host. The pinned CGW image is ARM64-only.
-- Python 3.9 or later.
+- Python 3.9 or later for `scripts/test_env.py`. The mocks in `mocks/` are TypeScript and run in the pinned Node image, so the host needs no Node.
 - A Sepolia RPC endpoint with archive access at the block pinned in `test-images.env`.
 
 ## Local setup
@@ -39,6 +39,8 @@ Default endpoints:
 | Auth0   | `https://auth.safe-e2e.test` (`127.0.0.1:8443`) |
 
 Use `python3 scripts/test_env.py status` to inspect containers. `python3 scripts/test_env.py logs [service...] [--tail N|all]` prints container logs with every fork provider URL replaced by `<fork-provider>`. Remove the project's containers and volumes with `python3 scripts/test_env.py reset`; `status`, `down` and `reset` work without a provider URL. Reset before starting a new fork so backend databases remain consistent with chain state.
+
+Check the mocks with `yarn workspace @safe-global/web e2e:env:test`, which type-checks `mocks/` and runs its tests.
 
 The CoW API mock answers unrecorded requests with 404 (`COW_API_OFFLINE: 'true'` in Compose). Set it to `false` to forward them to the real `api.cow.fi` while capturing new recordings.
 
