@@ -125,6 +125,5 @@ export const ENTERPRISE_TIER: PlanTier = {
     'Custom Safe capacity',
     'Multiple workspaces',
     'Tailored contract & billing terms',
-    'Tailored support + customized onboarding',
   ],
 }

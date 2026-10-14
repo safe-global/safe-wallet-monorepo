@@ -165,6 +165,7 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
   const name = getSubscriptionPlanName(subscription) ?? 'Safe Pro'
   const features = getSubscriptionFeatures(subscription)
   const seats = currentSeats(subscription, seatsQuota) ?? null
+  const isEnterpriseFallback = features.length === 0 && name === ENTERPRISE_TIER.name
 
   return {
     id: 'current',
@@ -182,8 +183,10 @@ export const _subscriptionToTier = (subscription: Subscription, seatsQuota: numb
         features,
       },
     ],
-    features: features.length > 0 || name !== ENTERPRISE_TIER.name ? features : ENTERPRISE_TIER.features,
-    copy: getPlanCardCopy((subscription.metadata ?? {}) as Record<string, string | null | undefined>),
+    features: isEnterpriseFallback ? ENTERPRISE_TIER.features : features,
+    copy: isEnterpriseFallback
+      ? ENTERPRISE_TIER.copy
+      : getPlanCardCopy((subscription.metadata ?? {}) as Record<string, string | null | undefined>),
     isCurrent: true,
     currentPriceId: subscription.plan.id,
   }

@@ -120,7 +120,10 @@ describe('planTiers', () => {
       options: [expect.objectContaining({ label: 'Unlimited Safe accounts' })],
       features: ['Custom perk'],
     })
-    expect(_subscriptionToTier(subscription({ name: 'Enterprise' }), null).features).toEqual(ENTERPRISE_TIER.features)
+    expect(_subscriptionToTier(subscription({ name: 'Enterprise' }), null)).toMatchObject({
+      features: ENTERPRISE_TIER.features,
+      copy: ENTERPRISE_TIER.copy,
+    })
     expect(_subscriptionToTier(subscription({ name: null }), undefined)).toMatchObject({
       name: 'Safe Pro',
       options: [expect.objectContaining({ label: 'Safe accounts' })],
