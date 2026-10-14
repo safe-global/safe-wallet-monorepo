@@ -32,7 +32,7 @@ CHAIN_STEPS = (
     ("start", ("txs-scheduler-{}", "txs-web-{}")),
     ("run", ("cfg-chain-{}", "decoder-chain-{}")),
 )
-INIT_JOBS = ("anvil-init", "txs-init", "cfg-init", "decoder-init")
+INIT_JOBS = ("mock-keys", "anvil-init", "txs-init", "cfg-init", "decoder-init")
 TXS_CHECKS = {
     "test": ["manage.py", "test", "/fork-tests", "--noinput"],
     "smoke": ["/fork-tests/smoke.py"],
