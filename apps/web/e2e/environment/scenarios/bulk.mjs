@@ -5,6 +5,7 @@ import { multiSend, send, waitForNextSecond } from './chain.mjs'
 import { buildSwapSettlementSafe } from './cow.mjs'
 import { registerToken } from './tokens.mjs'
 import { waitForQueued, waitUntil } from './indexing.mjs'
+import { confirmInQueue } from './gateway.mjs'
 
 // A staging owner without a test wallet; it only appears as an added or removed owner.
 const otherOwner = '0x9445deb174C1eCbbfce8d31D33F438B8e7a0F1BA'
@@ -78,7 +79,7 @@ async function propose(context, transaction, [proposer, ...confirmers]) {
   const { hash } = await proposeTransaction(context, transaction, {
     proposer: { safe: proposer.sdk, signer: proposer },
   })
-  for (const { sdk } of confirmers) await context.api.confirmTransaction(hash, (await sdk.signHash(hash)).data)
+  for (const { sdk } of confirmers) await confirmInQueue(context, hash, (await sdk.signHash(hash)).data)
   return hash
 }
 

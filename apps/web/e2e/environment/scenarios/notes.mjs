@@ -1,4 +1,5 @@
 import { createSafe, executeTransaction, openSafe, proposeTransaction } from './safe.mjs'
+import { addMessageToQueue } from './gateway.mjs'
 import { rebuildStagingSafes } from './staging-safes.mjs'
 import { waitUntil } from './indexing.mjs'
 import { addressOf, SEPOLIA, short } from './chain.mjs'
@@ -6,7 +7,7 @@ import { addressOf, SEPOLIA, short } from './chain.mjs'
 async function addPendingMessage(env, owners, safe, message) {
   const context = await openSafe(env, owners.owner4, addressOf(safe))
   const signed = await context.safe.signMessage(context.safe.createMessage(message))
-  await context.api.addMessage(context.safeAddress, { message, signature: signed.encodedSignatures() })
+  await addMessageToQueue(context, message, signed.encodedSignatures())
   await waitUntil(env, `${context.path}/messages`, (result) => result.results.some((item) => item.message === message))
 }
 

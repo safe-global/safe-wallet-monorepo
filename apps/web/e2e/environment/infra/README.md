@@ -2,7 +2,7 @@
 
 Docker Compose environment for validating Safe APIs against a pinned Anvil Sepolia fork. Includes Client Gateway (CGW), Transaction Service (TXS), Queue Service, Config Service, Decoder Service and Events Service. Backend checks cover deployment registration, indexing from the fork block and the Safe transaction lifecycle through CGW. Wallet builds and browser tests are outside this workflow.
 
-CGW runs with `FF_SAFE_QUEUE_SERVICE` on, and the chains have the `QUEUE_SERVICE` feature: queued transactions, confirmations, deletions, messages and v3 delegates go to the Queue Service; executed history still comes from TXS. Scenarios seed TXS, and the Queue Service worker copies those records from the TXS events.
+CGW runs with `FF_SAFE_QUEUE_SERVICE` on, and the chains have the `QUEUE_SERVICE` feature: queued transactions, confirmations, deletions, messages and v3 delegates go to the Queue Service; executed history still comes from TXS. Scenarios write queued data through CGW, as the wallet does, so it exists only in the Queue Service; its worker reads the TXS events to mark queued transactions as executed.
 
 ## Requirements
 
