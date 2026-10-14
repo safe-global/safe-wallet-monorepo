@@ -97,6 +97,8 @@ export const SAFE_MANAGEMENT_FUNCTIONS: SafeManagementFunction[] = [
 
 export const SAFE_MANAGEMENT_SELECTORS: string[] = SAFE_MANAGEMENT_FUNCTIONS.map((fn) => fn.selector)
 
+export const SAFE_MANAGEMENT_FUNCTION_IDS: string[] = SAFE_MANAGEMENT_FUNCTIONS.map((fn) => fn.id)
+
 export const safeManagementFunctionBySelector = (selector: string): SafeManagementFunction | undefined =>
   SAFE_MANAGEMENT_FUNCTIONS.find((fn) => fn.selector.toLowerCase() === selector.toLowerCase())
 

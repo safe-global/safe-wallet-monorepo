@@ -6,14 +6,28 @@
  * they live in the space address book and the frontend resolves them.
  */
 
-export type PolicyType = 'spending-limit' | 'recovery' | 'proposer'
+export type PolicyType =
+  'spending-limit' | 'recovery' | 'proposer' | 'token-allowlist' | 'multisend' | 'safe-management'
 
 /**
  * How the policy is enforced. A proposer grant is enforced by no contract, so it has no module
  * address and nothing to link to. This is on the wire so that components can branch on it instead
  * of checking the policy type.
  */
-export type PolicyEnforcement = { via: 'module'; moduleAddress: string } | { via: 'offchain'; source: 'delegates' }
+export type PolicyEnforcement =
+  | { via: 'module'; moduleAddress: string }
+  | { via: 'offchain'; source: 'delegates' }
+  | { via: 'guard'; access?: PolicyAccess }
+
+/**
+ * The `(target, selector, operation)` the policy guard keys a policy by. Absent on a row that
+ * groups several accesses, as the Safe-management row does.
+ */
+export type PolicyAccess = {
+  target: string
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+}
 
 /** CGW has no Safe ID. A Safe is identified by its chain and its address. */
 export type PolicySafe = {
@@ -101,11 +115,41 @@ type PolicyBase = {
   enabled: boolean
 }
 
+/** One allowlist per token: CGW reports a policy per `(token, transfer)` access. */
+export type TokenAllowlistPolicyData = {
+  token: PolicyTokenInfo
+  recipients: Array<{ address: string; permission: 'ONCE' | 'ALWAYS' }>
+}
+
+/** The multisend policy takes no payload: it only re-enters the engine for each call in a batch. */
+export type MultiSendPolicyData = Record<string, never>
+
+/** One management change the Safe still permits, named by its selector. */
+export type SafeManagementChange = {
+  selector: string
+  /** From the known management functions; absent for a selector the client does not recognise. */
+  label?: string
+}
+
+/**
+ * The guard keys one policy per selector, but a reader thinks in terms of one rule per Safe, so
+ * the row groups every permitted change together.
+ */
+export type SafeManagementPolicyData = {
+  changes: SafeManagementChange[]
+  /** How many management changes exist in all, so the row can say what is left out. */
+  total: number
+}
+
 export type SpendingLimitPolicy = PolicyBase & { type: 'spending-limit'; data: SpendingLimitPolicyData }
+export type TokenAllowlistPolicy = PolicyBase & { type: 'token-allowlist'; data: TokenAllowlistPolicyData }
+export type MultiSendPolicy = PolicyBase & { type: 'multisend'; data: MultiSendPolicyData }
+export type SafeManagementPolicy = PolicyBase & { type: 'safe-management'; data: SafeManagementPolicyData }
 export type RecoveryPolicy = PolicyBase & { type: 'recovery'; data: RecoveryPolicyData }
 export type ProposerPolicy = PolicyBase & { type: 'proposer'; data: ProposerPolicyData }
 
-export type ActivePolicy = SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy
+export type ActivePolicy =
+  SpendingLimitPolicy | RecoveryPolicy | ProposerPolicy | TokenAllowlistPolicy | MultiSendPolicy | SafeManagementPolicy
 
 /** What a queued Safe transaction would do to a policy once it executes. */
 export type PendingPolicyOperation = 'create' | 'update' | 'remove'
@@ -134,6 +178,12 @@ export type PolicyStatus = 'active' | 'pending' | 'activating' | 'unenforced' | 
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
+
+/** The guard-enforced rows: one access each, configured through the SafePolicyGuard. */
+export type GuardPolicy = Extract<Policy, { type: 'token-allowlist' | 'multisend' | 'safe-management' }>
+
+export const isGuardPolicy = (policy: Policy): policy is GuardPolicy =>
+  policy.type === 'token-allowlist' || policy.type === 'multisend' || policy.type === 'safe-management'
 
 export const isPendingPolicy = (policy: Policy): policy is PendingPolicy =>
   policy.status === 'pending' || policy.status === 'activating'

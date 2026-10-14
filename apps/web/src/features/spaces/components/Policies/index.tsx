@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo, useState, type ComponentType, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { TxModalContext } from '@/components/tx-flow'
@@ -10,6 +10,7 @@ import {
   ADD_POLICY_OPTIONS,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
+import GuardPolicyDrawer from './GuardPolicyDrawer'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -18,7 +19,6 @@ import {
   type PolicyCatalogueId,
   type PolicyWizardId,
 } from '@safe-global/views/features/spaces/components/Policies/PolicyCatalogue/catalogue'
-import PoliciesBySafe from './PoliciesBySafe'
 import CosignerPolicyFlow from './CosignerPolicy'
 import ERC20TransferPolicyFlow from './ERC20TransferPolicy'
 import FallbackPolicyFlow from './FallbackPolicy'
@@ -43,6 +43,7 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
+  isGuardPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -67,7 +68,7 @@ interface PoliciesProps {
   locked?: PolicyLock
 }
 
-const WIZARDS: Record<PolicyWizardId, () => ReactElement> = {
+const WIZARDS: Record<PolicyWizardId, ComponentType<{ safe?: PolicySafe }>> = {
   accountRecovery: RecoveryFlow,
   tokenWithdraw: ERC20TransferPolicyFlow,
   cosigner: CosignerPolicyFlow,
@@ -77,6 +78,12 @@ const WIZARDS: Record<PolicyWizardId, () => ReactElement> = {
 }
 
 const isWizardId = (value: unknown): value is PolicyWizardId => typeof value === 'string' && value in WIZARDS
+
+const parsePolicySafe = (value: unknown): PolicySafe | undefined => {
+  if (typeof value !== 'string') return undefined
+  const [chainId, address] = value.split(':')
+  return chainId && address ? { chainId, address } : undefined
+}
 
 const openRequestPolicyForm = () => {
   const left = window.screenX + Math.max(0, (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2)
@@ -116,7 +123,7 @@ const PoliciesOverview = ({
   const isSettled = !isLoading && !isError
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isGuardPolicy(policy)) setOpenPolicy(policy)
   }, [])
 
   const closeDetails = useCallback(() => setOpenPolicy(null), [])
@@ -288,10 +295,6 @@ const PoliciesOverview = ({
           ) : (
             <PolicyCatalogue onSelect={handleSelect} locked={locked} />
           )}
-
-          <div className="mt-10">
-            <PoliciesBySafe />
-          </div>
         </>
       )}
 
@@ -317,6 +320,10 @@ const PoliciesOverview = ({
         }}
         onProceed={proceedToProposerFlow}
       />
+
+      {openedPolicy && isGuardPolicy(openedPolicy) && (
+        <GuardPolicyDrawer policy={openedPolicy} onClose={closeDetails} />
+      )}
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
@@ -345,7 +352,7 @@ const Policies = (props: PoliciesProps): ReactElement => {
 
   if (isWizardId(wizard)) {
     const Wizard = WIZARDS[wizard]
-    return <Wizard />
+    return <Wizard safe={parsePolicySafe(router.query.policySafe)} />
   }
 
   return <PoliciesOverview {...props} />

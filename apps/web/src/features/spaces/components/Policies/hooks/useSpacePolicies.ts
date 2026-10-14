@@ -22,7 +22,13 @@ import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 /** The types the table renders. Asking for the rest would only return rows it cannot show. */
-export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = ['spending-limit', 'proposer']
+export const TABLE_POLICY_TYPES: SpacePoliciesGetActivePoliciesV1ApiArg['types'] = [
+  'spending-limit',
+  'proposer',
+  'erc20-transfer',
+  'multisend',
+  'allow',
+]
 
 /** Proposer grants take effect off chain at once, so only spending limits can be pending. */
 export const PENDING_POLICY_TYPES: SpacePoliciesGetPendingPoliciesV1ApiArg['types'] = ['spending-limit']

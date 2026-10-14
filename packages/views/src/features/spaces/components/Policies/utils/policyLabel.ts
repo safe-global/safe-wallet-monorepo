@@ -8,6 +8,9 @@ import {
   type PolicyTokenInfo,
 } from '../types'
 
+export const ALLOWLIST_NO_RECIPIENTS = 'No recipients allowed'
+export const MULTISEND_SUMMARY = 'Every call inside a batch'
+
 /**
  * Labels are derived from the policy. CGW returns no policy name, so a row cannot fall back to an
  * empty or placeholder label. The table column and the detail panel title use the same functions
@@ -36,6 +39,9 @@ export const POLICY_TYPE_LABELS = {
   'spending-limit': 'Spending limit',
   recovery: 'Account recovery',
   proposer: 'Proposer',
+  'token-allowlist': 'Token recipient allowlist',
+  multisend: 'Batched transactions',
+  'safe-management': 'Safe management',
 } as const
 
 export const formatTokenAmount = (amount: string, token: PolicyTokenInfo): string =>
@@ -87,6 +93,18 @@ export const getPolicySummary = (policy: Policy): string => {
 
   if (hasRecoveryData(policy)) {
     return `${formatDays(policy.data.reviewWindowSeconds)} review window`
+  }
+
+  if (policy.type === 'token-allowlist') {
+    const count = policy.data.recipients.length
+    return count === 0 ? ALLOWLIST_NO_RECIPIENTS : `${count} recipient${maybePlural(count)} allowed`
+  }
+
+  if (policy.type === 'multisend') return MULTISEND_SUMMARY
+
+  if (policy.type === 'safe-management') {
+    const { changes, total } = policy.data
+    return `${changes.length} of ${total} change${maybePlural(total)} allowed`
   }
 
   return 'Never expires'
