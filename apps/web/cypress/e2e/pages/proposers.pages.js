@@ -114,19 +114,15 @@ export function confirmProposerDeletion(index) {
 }
 
 export function deleteAllProposers() {
-  cy.get('body').then(($body) => {
-    if ($body.find(deleteProposerBtn).length > 0) {
-      cy.get(deleteProposerBtn)
-        .should('be.enabled')
-        .then(($items) => {
-          for (let i = 0; i < $items.length; i++) {
-            cy.wrap($items[i]).click({ force: true })
-            confirmProposerDeletion(0)
-          }
-        })
+  getProposersSection().then(($section) => {
+    const count = $section.find(deleteProposerBtn).length
+    for (let i = 0; i < count; i++) {
+      getProposersSection().find(deleteProposerBtn).first().should('be.enabled').click()
+      confirmProposerDeletion(0)
+      cy.get(confrimDeleteProposerBtn).should('not.exist')
     }
-    main.verifyElementsCount(deleteProposerBtn, 0)
   })
+  main.verifyElementsCount(deleteProposerBtn, 0)
 }
 
 export function verifyAddProposerBtnIsDisabled() {

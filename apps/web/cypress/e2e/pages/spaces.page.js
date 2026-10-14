@@ -1,6 +1,7 @@
 import * as constants from '../../support/constants.js'
 import * as main from './main.page.js'
 import * as navigation from './navigation.page.js'
+import { safeProOffStorage } from './spending_limits.pages.js'
 
 // ===========================================
 // Selectors
@@ -20,10 +21,6 @@ const spaceSelectorMenu = '[data-testid="space-selector-menu"]'
 const spaceSettingsGeneralPage = '[data-testid="settings-general-page"]'
 const spaceEditInput = '[data-testid="space-name-input"]'
 const spaceSaveBtn = '[data-testid="space-save-button"]'
-const spaceDeleteBtn = '[data-testid="space-delete-button"]'
-const spaceDeleteBlockedTooltip = '[data-testid="space-delete-blocked-tooltip"]'
-const subscriptionsEndpoint = '**/v1/billing/spaces/*/subscriptions*'
-const deleteBlockedByTrialStr = 'Cancel the subscription before deleting this Workspace.'
 const spaceConfirmDeleteBtn = '[data-testid="space-confirm-delete-button"]'
 const spaceConfirmNameInput = '[data-testid="space-confirm-name-input"]'
 // The welcome "Workspaces" list renders one SpaceRow per space (reworked from the old SpaceCard).
@@ -79,6 +76,7 @@ export const sidebarItemSettings = '[data-testid="sidebar-item-settings"]'
 
 // -- Safe accounts page --
 const safeAccountsPageTitle = 'Safe accounts'
+const safeAccountsPageHeading = 'h2'
 // The Safe accounts page now renders the shared SafeAccountsTable; count only top-level rows
 // (multichain children render only when a group is expanded).
 const safeAccountsTableRow = '[data-testid="account-table-row"]:not([data-variant="child"])'
@@ -101,6 +99,7 @@ const addMemberModalBtn = '[data-testid="add-member-modal-button"]'
 const memberAddressInput = '[data-testid="member-invitee-identifier-input"]'
 const memberNameInput = '[data-testid="member-name-input"]'
 const pendingMembersTab = '[data-testid="pending-members-tab"]'
+const membersTab = '[data-testid="members-tab"]'
 
 // -- Address book page --
 const addressBookTabRole = '[role="tab"]'
@@ -136,6 +135,7 @@ const inviteMembersSkipBtn = '[data-testid="invite-members-skip-button"]'
 const surveyOptionCard = '[data-testid="survey-option-card"]'
 const surveyFinishBtn = '[data-testid="survey-finish-button"]'
 const onboardingCreateSpacePath = '/welcome/create-space'
+const spacesCreateSpacePath = '/spaces/create-space'
 const onboardingSelectSafesPath = '/welcome/select-safes'
 const onboardingInviteMembersPath = '/welcome/invite-members'
 const onboardingSurveyPath = '/welcome/survey'
@@ -236,6 +236,14 @@ export function visitClassicView(url) {
   cy.visit(url, { onBeforeLoad: bypassSpacesLogin })
 }
 
+export function visitSpacesView() {
+  cy.visit(constants.spacesUrl, {
+    onBeforeLoad: (win) => {
+      Object.entries(safeProOffStorage).forEach(([key, value]) => win.localStorage.setItem(key, JSON.stringify(value)))
+    },
+  })
+}
+
 export function blockBeamer() {
   // Block the Beamer widget script so its announcement popup never renders and
   // covers onboarding buttons. Call before cy.visit().
@@ -324,10 +332,12 @@ export function goToSpaceSettings() {
 
 export function goToSpaceMembers() {
   openSpaceSection(sidebarItemTeam, '/spaces/members')
+  cy.get(membersTab, { timeout: 30000 }).should('be.visible')
 }
 
 export function goToSpaceSafeAccounts() {
   openSpaceSection(sidebarItemAccounts, '/spaces/safe-accounts')
+  cy.contains(safeAccountsPageHeading, safeAccountsPageTitle, { timeout: 30000 }).should('be.visible')
 }
 
 // ===========================================
@@ -353,8 +363,9 @@ export function clickViewAllAccounts() {
 }
 
 export function verifySidebarItemNavigates(sidebarSelector, pathFragment) {
-  cy.get(sidebarSelector).should('be.visible').click()
-  cy.url().should('include', pathFragment).and('include', 'spaceId=')
+  cy.get(sidebarSelector, { timeout: 30000 }).should('be.visible').and('have.attr', 'href').and('include', 'spaceId=')
+  cy.get(sidebarSelector).click()
+  cy.url({ timeout: 30000 }).should('include', pathFragment).and('include', 'spaceId=')
 }
 
 // ===========================================
@@ -543,12 +554,6 @@ export function editSpace(newName) {
   cy.contains(updateSuccessMsg).should('be.visible')
 }
 
-export function verifyDeleteBlockedByTrial() {
-  cy.get(spaceDeleteBtn).should('be.disabled')
-  main.hoverUntilTooltipOpen(() => cy.get(spaceDeleteBtn).parent())
-  cy.get(spaceDeleteBlockedTooltip).should('contain', deleteBlockedByTrialStr)
-}
-
 const SPACE_MENU_ATTEMPTS = 3
 
 // A click that comes right after the list renders can be lost, so click again until the menu opens.
@@ -563,14 +568,6 @@ function openSpaceMenu(name, attemptsLeft = SPACE_MENU_ATTEMPTS) {
     })
 }
 
-// New Workspaces start on a trial, and only a Workspace without a live subscription can be deleted. A test
-// cannot cancel the trial, so the Workspaces list gets none. The rows read it for their plan badge too, so
-// it must apply before the list loads, or the rows render again and close the menu.
-function loadSpacesWithoutSubscriptions() {
-  cy.intercept('GET', subscriptionsEndpoint, { body: [] })
-  cy.visit(constants.spacesUrl)
-}
-
 function removeSpace(name) {
   openSpaceMenu(name)
   // A menu item is a div, so its disabled state is an attribute.
@@ -582,7 +579,7 @@ function removeSpace(name) {
 
 /** Deletes the Workspace from the Workspaces list. */
 export function deleteSpace(name) {
-  loadSpacesWithoutSubscriptions()
+  visitSpacesView()
   cy.contains(spaceCard, name, { timeout: 30000 }).should('be.visible')
   removeSpace(name)
   cy.contains(spaceCard, name).should('not.exist')
@@ -590,11 +587,15 @@ export function deleteSpace(name) {
 
 const MAX_SPACES = 10
 
+const createSpaceBtnAtLimit = `${createSpaceBtn}[aria-disabled="true"]`
+const SPACES_LIMIT_SETTLE_MS = 5000
+
 function deleteOneSpace() {
-  loadSpacesWithoutSubscriptions()
+  visitSpacesView()
   cy.get(spaceCard, { timeout: 30000 }).then(($cards) => {
     removeSpace($cards.first().find(spaceCardName).text().trim())
     cy.get(spaceCard, { timeout: 10000 }).should('have.length.lessThan', MAX_SPACES)
+    cy.get(createSpaceBtnAtLimit, { timeout: 30000 }).should('not.exist')
   })
 }
 
@@ -602,13 +603,15 @@ export function ensureReadyToCreateSpace() {
   // Wait for the page to settle: either the spaces list or the create button must be visible
   cy.get(`${orgList}, ${createSpaceBtn}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
 
-  // The list renders its rows together with the container. At the limit the Create button is
-  // disabled, so delete a space to free a slot before any create attempt.
-  cy.get('body').then(($body) => {
-    if ($body.find(spaceCard).length >= MAX_SPACES) {
-      deleteOneSpace()
-    }
-  })
+  // Rows and the limit wait for the user's memberships, which load after the list container.
+  main
+    .pollUntil(
+      () => Cypress.$(createSpaceBtnAtLimit).length > 0 || Cypress.$(spaceCard).length >= MAX_SPACES,
+      SPACES_LIMIT_SETTLE_MS,
+    )
+    .then((isAtLimit) => {
+      if (isAtLimit) deleteOneSpace()
+    })
 
   // Wait for either the create button or the create-space form to settle after deletion/redirect
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
@@ -633,6 +636,39 @@ export function openAddAccountsToWorkspace() {
       cy.get(addSpaceAccountToWorkspaceBtn).should('not.have.attr', 'aria-disabled')
       cy.get(addSpaceAccountToWorkspaceBtn).click({ force: true })
     })
+}
+
+export function stubAddingSafeToSpace(address, chainId, name) {
+  let isAdded = false
+  cy.intercept('POST', constants.spacesSafesEndpoint, (req) => {
+    isAdded = true
+    req.reply({ statusCode: 201, body: {} })
+  })
+  cy.intercept('GET', constants.spacesSafesEndpoint, (req) => {
+    if (isAdded) req.reply({ body: { safes: { [chainId]: [address] } } })
+  })
+  cy.intercept('GET', constants.spacesAddressBookEndpoint, (req) => {
+    if (!isAdded) return
+    const now = new Date().toISOString()
+    req.reply({
+      body: {
+        spaceUuid: req.url.split('/spaces/')[1].split('/')[0],
+        data: [
+          {
+            name,
+            address,
+            chainIds: [chainId],
+            createdBy: '',
+            createdByUserId: 0,
+            lastUpdatedBy: '',
+            lastUpdatedByUserId: 0,
+            createdAt: now,
+            updatedAt: now,
+          },
+        ],
+      },
+    })
+  })
 }
 
 export function addAccountManually(address, network, name = 'E2E account') {
@@ -705,12 +741,16 @@ export function acceptInvite(spaceName, name) {
 
 function navigateToCreateSpacePage() {
   cy.get(`${createSpaceBtn}, ${orgSpaceInput}`, { timeout: 30000 }).filter(':visible').should('have.length.at.least', 1)
-  cy.url().then((url) => {
-    if (!url.includes(onboardingCreateSpacePath)) {
+  cy.location('pathname').then((pathname) => {
+    if (pathname === onboardingCreateSpacePath || pathname === spacesCreateSpacePath) return
+    cy.get('body').then(($body) => {
+      const hasSpaces = $body.find(`${spaceCard}, ${inviteBanner}`).length > 0
+      const expectedPath = hasSpaces ? spacesCreateSpacePath : onboardingCreateSpacePath
+      cy.get(createSpaceBtn, { timeout: 30000 }).filter(':visible').first().should('not.have.attr', 'aria-disabled')
       cy.get(createSpaceBtn).filter(':visible').first().click()
-    }
+      cy.location('pathname', { timeout: 30000 }).should('eq', expectedPath)
+    })
   })
-  cy.url().should('include', onboardingCreateSpacePath)
   cy.get(orgSpaceInput).should('be.visible')
 }
 

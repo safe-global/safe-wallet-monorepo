@@ -200,7 +200,7 @@ export function clickOnSendBtnAssetsTable(index) {
     .eq(index)
     .find(assetsTableActionsCell)
     .within(() => {
-      cy.get(sendBtn).should('be.visible').click()
+      cy.get(sendBtn, { timeout: 30000 }).should('be.visible').and('be.enabled').click()
     })
 }
 
