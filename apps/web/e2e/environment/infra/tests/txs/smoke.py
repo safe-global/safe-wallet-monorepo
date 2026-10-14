@@ -79,10 +79,21 @@ def fund_safe(client, owner, safe_address):
     assert client.w3.eth.wait_for_transaction_receipt(funding)["status"] == 1
 
 
+def propose(owner, safe_address, tx, safe_tx_hash):
+    proposed = requests.post(f"{CGW}/v1/chains/{CHAIN_ID}/transactions/{safe_address}/propose", json={
+        "to": tx.to, "value": str(tx.value), "data": "0x" + tx.data.hex() if tx.data else None,
+        "operation": tx.operation, "nonce": str(tx.safe_nonce), "safeTxGas": str(tx.safe_tx_gas),
+        "baseGas": str(tx.base_gas), "gasPrice": str(tx.gas_price), "gasToken": tx.gas_token,
+        "refundReceiver": tx.refund_receiver, "safeTxHash": safe_tx_hash, "sender": owner.address,
+        "signature": "0x" + tx.signatures.hex().removeprefix("0x"),
+    }, timeout=10)
+    assert proposed.ok, f"CGW proposal failed: HTTP {proposed.status_code}: {proposed.text}"
+
+
 def delete_proposal(owner, safe_address, safe_tx_hash):
     deletion = owner.sign_typed_data(
         domain_data={
-            "name": "Safe Transaction Service", "version": "1.0",
+            "name": "Safe Queue Service", "version": "1.0",
             "chainId": CHAIN_ID, "verifyingContract": safe_address,
         },
         message_types={"DeleteRequest": [
@@ -105,13 +116,14 @@ def verify_proposal_lifecycle(client, owner, recipient, safe_address):
     queued = path + "/transactions/queued"
     tx = Safe(safe_address, client).build_multisig_tx(recipient.address, 10**16, b"", safe_nonce=0)
     tx.sign(owner.key.hex())
-    api = TransactionServiceApi(EthereumNetwork(CHAIN_ID), client, base_url="http://nginx:8000/txs")
-    api.post_transaction(tx)
     safe_tx_hash = "0x" + tx.safe_tx_hash.hex().removeprefix("0x")
+    propose(owner, safe_address, tx, safe_tx_hash)
     wait_json(queued, lambda data: safe_tx_hash in json.dumps(data))
     delete_proposal(owner, safe_address, safe_tx_hash)
     wait_json(queued, lambda data: safe_tx_hash not in json.dumps(data))
-    print("Signed proposal deletion verified through CGW", flush=True)
+    print("Signed proposal deletion verified through CGW and the Queue Service", flush=True)
+    # Scenarios still seed the Transaction Service; the Queue Service must pick that up from events.
+    api = TransactionServiceApi(EthereumNetwork(CHAIN_ID), client, base_url="http://nginx:8000/txs")
     api.post_transaction(tx)
     wait_json(queued, lambda data: safe_tx_hash in json.dumps(data))
     execution, _ = tx.execute(owner.key.hex())

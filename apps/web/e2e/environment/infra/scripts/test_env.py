@@ -33,6 +33,9 @@ CHAIN_STEPS = (
     ("run", ("cfg-chain-{}", "decoder-chain-{}")),
 )
 INIT_JOBS = ("mock-keys", "anvil-init", "txs-init", "cfg-init", "decoder-init")
+# The Queue Service reads the chain list once per 30 minutes and never on a miss.
+QUEUE_SERVICES = ("queue-web", "queue-worker")
+WALLET_FEATURES = ("DELETE_TX", "QUEUE_SERVICE")
 TXS_CHECKS = {
     "test": ["manage.py", "test", "/fork-tests", "--noinput"],
     "smoke": ["/fork-tests/smoke.py"],
@@ -249,10 +252,13 @@ def check_stack(manifest):
     chain_id = str(manifest["chainId"])
     url = f'{manifest["gatewayUrl"]}/v2/chains?serviceKey=WALLET_WEB'
     if not any(
-        str(chain["chainId"]) == chain_id and "DELETE_TX" in chain["features"]
+        str(chain["chainId"]) == chain_id
+        and all(feature in chain["features"] for feature in WALLET_FEATURES)
         for chain in read_json(url)["results"]
     ):
-        raise RuntimeError("Wallet v2 chain config is missing the fork or DELETE_TX feature")
+        raise RuntimeError(
+            f"Wallet v2 chain config is missing the fork or a feature of {WALLET_FEATURES}"
+        )
     read_json(f'{manifest["transactionServiceUrl"]}/v1/about/indexing/')
     return block_hash
 
@@ -289,6 +295,8 @@ def chain_step_commands(compose, name):
         else:
             wait = ["--wait"] if mode == "wait" else []
             commands.append(compose + ["up", "--detach", "--no-deps"] + wait + names)
+    commands.append(compose + ["restart"] + list(QUEUE_SERVICES))
+    commands.append(compose + ["up", "--detach", "--no-deps", "--wait"] + list(QUEUE_SERVICES))
     return commands
 
 

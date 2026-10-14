@@ -148,6 +148,14 @@ x-auth0-client: &auth0-client
   AUTH0_DOMAIN: auth.safe-e2e.test
   AUTH0_CLIENT_ID: safe-e2e-local
   AUTH0_CLIENT_SECRET: local-test-only-auth0-secret
+x-queue: &queue
+  image: ${QUEUE_IMAGE:?Load test-images.env}
+  environment:
+    DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
+    RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
+    CONFIG_SERVICE_URL: http://nginx:8000/cfg
+    # Scenarios seed the Transaction Service; the worker copies those records from its events.
+    ENABLE_MIGRATION_EVENT_PROCESSING: 'true'
 volumes:
   nginx-shared-txs:
   nginx-shared-cfg:
@@ -496,6 +504,32 @@ services:
       interval: 5s
       timeout: 10s
       retries: 30
+  # Runs the migrations, so the worker starts after it.
+  queue-web:
+    <<: *queue
+    depends_on:
+      postgres:
+        condition: service_healthy
+      general-rabbitmq:
+        condition: service_healthy
+    command: docker/web/run_web.sh
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://127.0.0.1:8888/health/ready',
+          timeout=5)
+      interval: 5s
+      timeout: 10s
+      retries: 30
+  queue-worker:
+    <<: *queue
+    depends_on:
+      queue-web:
+        condition: service_healthy
+    command: docker/workers/run_tx_service_sync.sh
   cgw-web:
     image: ${CGW_IMAGE:?Load test-images.env}
     env_file:
@@ -504,7 +538,8 @@ services:
       AMQP_URL: amqp://general-rabbitmq:5672
       USE_TX_SERVICE_VPC_URL: 'true'
       FF_FILTER_VALUE_PARSING: 'true'
-      FF_SAFE_QUEUE_SERVICE: 'false'
+      FF_SAFE_QUEUE_SERVICE: 'true'
+      SAFE_QUEUE_SERVICE_BASE_URI: http://queue-web:8888
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
@@ -569,6 +604,8 @@ services:
       redis:
         condition: service_healthy
       decoder-web:
+        condition: service_healthy
+      queue-web:
         condition: service_healthy
       postgres:
         condition: service_healthy

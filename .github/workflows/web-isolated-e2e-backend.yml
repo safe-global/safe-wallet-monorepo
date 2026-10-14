@@ -119,6 +119,7 @@ jobs:
     permissions:
       contents: read
       actions: read
+      packages: read
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -147,6 +148,14 @@ jobs:
             yarn exec cypress verify
           fi
           node -e 'console.log("path=" + require("@playwright/test").chromium.executablePath())' >> "$GITHUB_OUTPUT"
+
+      # The Queue Service image is a private package.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
 
       - name: Start and validate backend
         id: backend
@@ -230,7 +239,7 @@ jobs:
           mkdir -p "$output"
           docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
             --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
-          for service in cgw-web decoder-web txs-web txs-worker-indexer; do
+          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker; do
             python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
           done
 
