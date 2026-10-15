@@ -210,3 +210,30 @@ export const SizeLg: Story = {
     ),
   },
 }
+
+export const Resizable: Story = {
+  args: { resizable: true, size: 'lg', ariaLabel: 'Resizable drawer' },
+  render: (args) => (
+    <Drawer {...args}>
+      <DrawerHeader>
+        <DrawerTitle>Resizable panel</DrawerTitle>
+      </DrawerHeader>
+      <DrawerBody>
+        <Paragraphs count={12} />
+      </DrawerBody>
+      <DrawerFooter>
+        <Button>Review transaction</Button>
+      </DrawerFooter>
+    </Drawer>
+  ),
+}
+
+export const Responsive: Story = {
+  ...Resizable,
+  args: { ...Resizable.args, mobileFullScreen: true, ariaLabel: 'Responsive drawer' },
+}
+
+export const Mobile: Story = {
+  ...Responsive,
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+}
