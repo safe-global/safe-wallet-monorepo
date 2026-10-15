@@ -9,7 +9,6 @@ import * as owner from './owners.pages'
 import { ethers } from 'ethers'
 
 export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
-export const policyChangeWarning = '[data-testid="threshold-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
@@ -38,7 +37,6 @@ const collapseAllBtn = '[data-testid="collapse-all-btn"]'
 export const txRowTitle = '[data-testid="tx-row-title"]'
 const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
-const requiredConfirmation = '[data-testid="required-confirmations"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
 export const proposalStatus = '[data-testid="proposal-status"]'
@@ -103,7 +101,6 @@ const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
-export const hashesText = 'Hashes'
 const transactionsPerHrStr = 'free transactions left today'
 const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
@@ -205,9 +202,6 @@ export function checkHashesExist(count) {
     })
 }
 
-export function clickOnHashes() {
-  cy.contains(hashesText).click()
-}
 export function clickOnReplaceTxOption() {
   cy.get(replaceChoiceBtn).find('button').click()
 }
@@ -419,26 +413,6 @@ export function clickOnSendTokensBtn() {
 export function verifyNumberOfTransactions(count) {
   cy.get(txDate).should('have.length.at.least', count)
   cy.get(transactionItem).should('have.length.at.least', count)
-}
-
-export function checkRequiredThreshold(count) {
-  cy.get(requiredConfirmation).should('be.visible').and('include.text', count)
-}
-
-export function verifyAddressNotCopied(index, data) {
-  cy.get(copyIcon)
-    .parent()
-    .eq(index)
-    .trigger('click')
-    .wait(1000)
-    .then(() =>
-      cy.window().then((win) => {
-        win.navigator.clipboard.readText().then((text) => {
-          expect(text).not.to.contain(data)
-        })
-      }),
-    )
-  cy.get(untrustedTokenWarningModal).should('be.visible')
 }
 
 export function verifyWarningModalVisible() {
