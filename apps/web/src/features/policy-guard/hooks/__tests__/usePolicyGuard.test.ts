@@ -107,6 +107,21 @@ describe('usePolicyGuard', () => {
     expect(result.current).toEqual({ state: undefined, isLoading: false, error: rpcError })
   })
 
+  it('keeps the error while a retry is in flight', () => {
+    mockSafe()
+    const rpcError = new Error('rpc down')
+    mockModuleGuard({ currentData: undefined, isError: false, isFetching: true, error: rpcError })
+    const { result } = renderHook(() => usePolicyGuard())
+    expect(result.current).toEqual({ state: undefined, isLoading: false, error: rpcError })
+  })
+
+  it('returns the last read state without an error when a later read fails', () => {
+    mockSafe()
+    mockModuleGuard({ currentData: ZERO_ADDRESS, isError: true, error: new Error('rpc down') })
+    const { result } = renderHook(() => usePolicyGuard())
+    expect(result.current).toEqual({ state: { status: 'none' }, isLoading: false, error: undefined })
+  })
+
   it.each([
     ['the flag is off', () => mockChain([]), {}],
     ['the chain has no deployment', () => {}, { chainId: '1' }],

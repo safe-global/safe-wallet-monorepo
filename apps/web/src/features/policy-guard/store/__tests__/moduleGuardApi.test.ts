@@ -90,4 +90,28 @@ describe('moduleGuardApi.getModuleGuard', () => {
     mockStorage(jest.fn().mockRejectedValue(rpcError))
     await expect(read(store).unwrap()).rejects.toBe(rpcError)
   })
+
+  it('keeps the previous error on the entry while it is read again', async () => {
+    const store = await setupStore()
+    const rpcError = new Error('rpc down')
+    let resolveRetry: (value: string) => void = () => {}
+    mockStorage(
+      jest
+        .fn()
+        .mockRejectedValueOnce(rpcError)
+        .mockReturnValueOnce(new Promise<string>((resolve) => (resolveRetry = resolve))),
+    )
+    const args = { chainId: '11155111', safeAddress: SAFE, txHistoryTag: '1' }
+    const subscription = store.dispatch(moduleGuardApi.endpoints.getModuleGuard.initiate(args))
+    await subscription.unwrap().catch(() => {})
+
+    const retry = subscription.refetch()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    const pending = moduleGuardApi.endpoints.getModuleGuard.select(args)(store.getState())
+    expect(pending.status).toBe('pending')
+    expect(pending.error).toBe(rpcError)
+
+    resolveRetry(slotOf(GUARD))
+    await retry
+  })
 })

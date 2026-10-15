@@ -64,7 +64,8 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
     : undefined
   const moduleGuardQuery = useGetModuleGuardQuery(readArgs ?? skipToken)
   const moduleGuard = moduleGuardQuery.currentData
-  const readError = moduleGuardQuery.isError ? (moduleGuardQuery.error as Error) : undefined
+  // The last error stays during a retry, and a failed re-read doesn't hide a value already read
+  const readError = moduleGuard ? undefined : (moduleGuardQuery.error as Error | undefined)
 
   const state = useMemo((): PolicyGuardState | undefined => {
     if (!safeLoaded) return
