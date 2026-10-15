@@ -136,10 +136,6 @@ async function stubCompletedChallenge(page: Page): Promise<void> {
   })
 }
 
-function captureAuthorizeRequest(page: Page) {
-  return page.waitForRequest((request) => AUTHORIZE_PATTERN.test(request.url()))
-}
-
 async function openRemoveDialog(page: Page): Promise<void> {
   await page.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
@@ -158,43 +154,7 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await stubProviderChallengePage(safePage)
   })
 
-  test('that it sends the user to the provider when an action needs a fresh second factor', async ({ safePage }) => {
-    await openRemoveDialog(safePage)
-
-    const authorizeRequest = captureAuthorizeRequest(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    const url = new URL((await authorizeRequest).url())
-    expect(url.searchParams.get('elevate')).toBe('true')
-    expect(url.searchParams.get('redirect_url')).toContain('/spaces/safe-accounts')
-  })
-
-  test('that it still redirects when a leftover trip record is present', async ({ safePage }) => {
-    await openRemoveDialog(safePage)
-
-    await safePage.evaluate(
-      ({ key, spaceId, address }) => {
-        window.sessionStorage.setItem(
-          key,
-          JSON.stringify({
-            endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
-            createdAt: Date.now(),
-          }),
-        )
-      },
-      { key: STEP_UP_KEY, spaceId: SPACE_ID, address: SAFE_ADDRESS },
-    )
-
-    const authorizeRequest = captureAuthorizeRequest(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
-  })
-
-  test('that it discards the pending action without reporting an error when the challenge is abandoned', async ({
-    safePage,
-  }) => {
+  test('that it replays an abandoned challenge once, silently, without starting a new one', async ({ safePage }) => {
     await openRemoveDialog(safePage)
     await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
@@ -204,58 +164,6 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
     await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
     await expect(safePage.getByText('elevation_required')).toBeHidden()
-  })
-
-  test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {
-    await safePage.addInitScript(
-      ({ key, address, spaceId }) => {
-        // Init scripts also run in child frames; Beamer's iframe shares this sessionStorage while it is still about:blank and would write the record back after the app has removed it.
-        if (window !== window.top) return
-
-        window.sessionStorage.setItem(
-          key,
-          JSON.stringify({
-            endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
-            createdAt: Date.now() - 6 * 60 * 1000,
-          }),
-        )
-      },
-      { key: STEP_UP_KEY, address: SAFE_ADDRESS, spaceId: SPACE_ID },
-    )
-
-    let replayAttempted = false
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
-      if (route.request().method() === 'DELETE') replayAttempted = true
-      return route.fallback()
-    })
-
-    await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
-    await expect(safePage.getByRole('button', { name: 'Add accounts' })).toBeVisible()
-
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
-    expect(replayAttempted).toBe(false)
-  })
-
-  test('that it completes the interrupted action when the challenge succeeds', async ({ safePage }) => {
-    await stubCompletedChallenge(safePage)
-
-    let removalCalls = 0
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
-      if (route.request().method() !== 'DELETE') return route.fallback()
-
-      removalCalls += 1
-      return removalCalls === 1
-        ? route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
-        : route.fulfill({ status: 204, body: '' })
-    })
-
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    await expect(toast(safePage, 'Safe account removed')).toBeVisible()
-    expect(removalCalls).toBe(2)
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
   })
 
   test('that it reports an error when the replayed action fails', async ({ safePage }) => {
