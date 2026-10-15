@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent, trackMixpanelEvent, MixpanelEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
+import { SAFE_PRO_INTRO_URL } from '@/config/constants'
 import SafeProWorkspacesBanner from '../index'
 
 jest.mock('@/services/analytics', () => ({
@@ -10,43 +10,29 @@ jest.mock('@/services/analytics', () => ({
   trackMixpanelEvent: jest.fn(),
 }))
 
-let mockIsLive = false
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsLive }))
-
 describe('SafeProWorkspacesBanner', () => {
-  beforeEach(() => {
-    mockIsLive = false
-  })
-
   it('tracks viewed on mount and clicked, with the location it is given', () => {
     render(<SafeProWorkspacesBanner location="my_accounts" />)
     fireEvent.click(screen.getByRole('link', { name: 'Learn more' }))
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { Location: 'my_accounts' })
     expect(trackMixpanelEvent).toHaveBeenCalledWith(MixpanelEvent.SAFE_PRO_BANNER_CLICKED, {
       Location: 'my_accounts',
-      'Destination URL': SAFE_PRO_ANNOUNCEMENT_URL,
+      'Destination URL': SAFE_PRO_INTRO_URL,
     })
-  })
-
-  it('speaks in the past once Safe Pro is live', () => {
-    mockIsLive = true
-    render(<SafeProWorkspacesBanner />)
-
-    expect(screen.getByText('Workspaces moved to Safe Pro on Oct 6, 2026')).toBeInTheDocument()
   })
 
   it('renders the headline and the supporting line', () => {
     render(<SafeProWorkspacesBanner />)
 
-    expect(screen.getByText('Workspaces move to Safe Pro on Oct 6, 2026')).toBeInTheDocument()
+    expect(screen.getByText('Safe Pro: 30 days of Business free. No card.')).toBeInTheDocument()
     expect(screen.getByText('Your Safe accounts remain free in My accounts.')).toBeInTheDocument()
   })
 
-  it('points the Learn more CTA at the announcement in a safe new tab', () => {
+  it('points the Learn more CTA at the Safe Pro intro post in a safe new tab', () => {
     render(<SafeProWorkspacesBanner />)
 
     const cta = screen.getByRole('link', { name: 'Learn more' })
-    expect(cta).toHaveAttribute('href', SAFE_PRO_ANNOUNCEMENT_URL)
+    expect(cta).toHaveAttribute('href', 'https://safe.global/blog/introducing-safe-pro')
     expect(cta).toHaveAttribute('target', '_blank')
     expect(cta).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.getAllByRole('link')).toHaveLength(1)
