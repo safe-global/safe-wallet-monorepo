@@ -1,7 +1,15 @@
 import type { JsonRpcProvider } from 'ethers'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { logError } from '@/services/exceptions'
 import { MODULE_GUARD_STORAGE_SLOT } from '../constants'
 
 export const readModuleGuard = async (provider: JsonRpcProvider, safeAddress: string): Promise<string> => {
-  const slot = await provider.getStorage(safeAddress, MODULE_GUARD_STORAGE_SLOT)
-  return `0x${slot.slice(-40)}`
+  try {
+    const slot = await provider.getStorage(safeAddress, MODULE_GUARD_STORAGE_SLOT)
+    return checksumAddress(`0x${slot.slice(2).padStart(64, '0').slice(-40)}`)
+  } catch (error) {
+    logError(ErrorCodes._653, error)
+    throw error
+  }
 }
