@@ -27,9 +27,9 @@ import type {
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
 import {
-  getCardCta,
   getCardSaving,
   getCatalogTiers,
+  getPlanCta,
   getPlanPrice,
   getVisibleTiers,
   pickProps,
@@ -150,7 +150,7 @@ const PlanCta = ({
   location,
   onCta,
 }: { pick: PlanPick; isPrimary: boolean } & PlanCardActions) => {
-  const cta = getCardCta(pick, currentPlan)
+  const cta = getPlanCta(pick, currentPlan)
 
   switch (cta.kind) {
     case 'sales':

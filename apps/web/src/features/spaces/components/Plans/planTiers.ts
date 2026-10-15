@@ -92,13 +92,21 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
 }
 
+/** Same plan and Safe count, other billing cycle: the only thing that changes is how often it's billed. */
+const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle !== null &&
+  pick.tier.billingCycle !== current.billingCycle &&
+  pick.option.label === current.seatsLabel
+
+/** The card button. "Manage plan" lives in the status card; Enterprise changes go through sales. */
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
+    if (pick.tier.name === ENTERPRISE_TIER.name) return { kind: 'account-team', label: 'Change via your account team' }
     if (pick.option.priceId === pick.tier.currentPriceId || !pick.option.paymentLinkId) {
-      if (!current?.isTrialing) return { kind: 'manage', label: 'Manage plan' }
-      return current.hasPaymentMethod
-        ? { kind: 'manage', label: 'Manage plan' }
-        : { kind: 'billing', label: 'Add payment method' }
+      return current?.isTrialing && !current.hasPaymentMethod
+        ? { kind: 'billing', label: 'Add payment method' }
+        : { kind: 'current', label: 'Current plan' }
     }
     // Another seat size of the same plan: a change, worded by seats rather than by plan name.
     const direction = getChangeDirection(current, pick)
@@ -111,9 +119,16 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
   if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
   if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
 
+  const direction = getChangeDirection(current, pick)
+  if (isCycleSwitch(pick, current)) {
+    return {
+      kind: 'change',
+      direction,
+      label: pick.tier.billingCycle === 'year' ? 'Switch to yearly' : 'Switch to monthly',
+    }
+  }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
   const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
-  const direction = getChangeDirection(current, pick)
   return {
     kind: 'change',
     direction,
@@ -253,35 +268,6 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
-
-/** "Manage plan" lives in the status panel; Enterprise changes go through sales. */
-export type CardCta =
-  | Exclude<PlanCta, { kind: 'manage' }>
-  | { kind: 'current'; label: 'Current plan' }
-  | { kind: 'account-team'; label: 'Change via your account team' }
-
-export const getCardCta = (pick: PlanPick, current: CurrentPlan | undefined): CardCta => {
-  if (pick.tier.isCurrent && pick.tier.name === ENTERPRISE_TIER.name) {
-    return { kind: 'account-team', label: 'Change via your account team' }
-  }
-  const cta = getPlanCta(pick, current)
-  if (cta.kind === 'manage') return { kind: 'current', label: 'Current plan' }
-  if (cta.kind === 'change' && isCycleSwitch(pick, current)) {
-    return {
-      ...cta,
-      label: pick.tier.billingCycle === 'year' ? 'Switch to yearly' : 'Switch to monthly',
-    }
-  }
-  return cta
-}
-
-/** Same plan and Safe count, other billing cycle: the only thing that changes is how often it's billed. */
-const isCycleSwitch = (pick: PlanPick, current: CurrentPlan | undefined): boolean =>
-  current !== undefined &&
-  pick.tier.name === current.name &&
-  pick.tier.billingCycle !== null &&
-  pick.tier.billingCycle !== current.billingCycle &&
-  pick.option.label === current.seatsLabel
 
 /** Hide the static Enterprise card when Enterprise is the current plan. */
 export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {

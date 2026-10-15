@@ -4,7 +4,6 @@ import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/P
 import {
   buildPlanTiers,
   claimTiers,
-  getCardCta,
   getCatalogTiers,
   getCardSaving,
   getChangeDirection,
@@ -175,7 +174,7 @@ describe('planTiers', () => {
     ])
   })
 
-  it('turns another seat size of the current plan into a change, and the current one into managing it', () => {
+  it('turns another seat size of the current plan into a change, and the current one into the current plan', () => {
     const [, business] = buildPlanTiers([BUSINESS], {
       subscription: subscription({ id: 'price_b20m' }),
       seatsQuota: 20,
@@ -183,8 +182,8 @@ describe('planTiers', () => {
     const [smaller, current, bigger] = business.options
 
     expect(getPlanCta({ tier: business, option: current }, businessPlan)).toEqual({
-      kind: 'manage',
-      label: 'Manage plan',
+      kind: 'current',
+      label: 'Current plan',
     })
     expect(getPlanCta({ tier: business, option: bigger }, { ...businessPlan, price: 499 })).toEqual({
       kind: 'change',
@@ -231,14 +230,14 @@ describe('planTiers', () => {
     const [starter, current, enterprise] = buildPlanTiers([STARTER], { subscription: subscription(), seatsQuota: 20 })
     const pick = (tier: typeof starter) => ({ tier, option: tier.options[0] })
 
-    expect(getPlanCta(pick(current), businessPlan)).toEqual({ kind: 'manage', label: 'Manage plan' })
+    expect(getPlanCta(pick(current), businessPlan)).toEqual({ kind: 'current', label: 'Current plan' })
     expect(getPlanCta(pick(current), { ...businessPlan, isTrialing: true })).toEqual({
       kind: 'billing',
       label: 'Add payment method',
     })
     expect(getPlanCta(pick(current), { ...businessPlan, isTrialing: true, hasPaymentMethod: true })).toEqual({
-      kind: 'manage',
-      label: 'Manage plan',
+      kind: 'current',
+      label: 'Current plan',
     })
     expect(getPlanCta(pick(starter), businessPlan)).toEqual({
       kind: 'change',
@@ -318,14 +317,14 @@ const currentPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
 
 const currentBusiness = tier({ id: 'current', isCurrent: true, currentPriceId: 'price_b20m' })
 
-describe('getCardCta', () => {
+describe('getPlanCta on a card', () => {
   it('shows the plan in force as the greyed-out current plan', () => {
-    expect(getCardCta({ tier: currentBusiness, option: option() }, currentPlan())).toEqual({
+    expect(getPlanCta({ tier: currentBusiness, option: option() }, currentPlan())).toEqual({
       kind: 'current',
       label: 'Current plan',
     })
     expect(
-      getCardCta(
+      getPlanCta(
         { tier: currentBusiness, option: option() },
         currentPlan({ isTrialing: true, hasPaymentMethod: true }),
       ),
@@ -333,7 +332,7 @@ describe('getCardCta', () => {
   })
 
   it('asks for a payment method during free access without one', () => {
-    expect(getCardCta({ tier: currentBusiness, option: option() }, currentPlan({ isTrialing: true }))).toEqual({
+    expect(getPlanCta({ tier: currentBusiness, option: option() }, currentPlan({ isTrialing: true }))).toEqual({
       kind: 'billing',
       label: 'Add payment method',
     })
@@ -345,11 +344,11 @@ describe('getCardCta', () => {
       name: 'Starter',
       options: [option({ priceId: 'price_s2m', price: 189 })],
     })
-    expect(getCardCta({ tier: starter, option: starter.options[0] }, currentPlan())).toMatchObject({
+    expect(getPlanCta({ tier: starter, option: starter.options[0] }, currentPlan())).toMatchObject({
       kind: 'change',
       label: 'Switch to Starter',
     })
-    expect(getCardCta({ tier: tier(), option: option() }, currentPlan({ name: 'Starter', price: 189 }))).toMatchObject({
+    expect(getPlanCta({ tier: tier(), option: option() }, currentPlan({ name: 'Starter', price: 189 }))).toMatchObject({
       kind: 'change',
       label: 'Upgrade to Business',
     })
@@ -363,22 +362,22 @@ describe('getCardCta', () => {
     })
     const inForce = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
 
-    expect(getCardCta({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
+    expect(getPlanCta({ tier: yearly, option: yearly.options[0] }, inForce)).toMatchObject({
       kind: 'change',
       label: 'Switch to yearly',
     })
     expect(
-      getCardCta({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
+      getPlanCta({ tier: yearly, option: option({ label: '5 Safe accounts', price: 7190 }) }, inForce),
     ).toMatchObject({ kind: 'change', label: 'Switch to 5 Safe accounts' })
   })
 
   it('sends Enterprise to sales, or to the account team once it is the plan in force', () => {
-    expect(getCardCta({ tier: ENTERPRISE_TIER, option: ENTERPRISE_TIER.options[0] }, currentPlan())).toEqual({
+    expect(getPlanCta({ tier: ENTERPRISE_TIER, option: ENTERPRISE_TIER.options[0] }, currentPlan())).toEqual({
       kind: 'sales',
       label: 'Talk to sales',
     })
     const currentEnterprise = tier({ id: 'current', name: 'Enterprise', isCurrent: true, currentPriceId: 'price_b20m' })
-    expect(getCardCta({ tier: currentEnterprise, option: option() }, currentPlan({ name: 'Enterprise' }))).toEqual({
+    expect(getPlanCta({ tier: currentEnterprise, option: option() }, currentPlan({ name: 'Enterprise' }))).toEqual({
       kind: 'account-team',
       label: 'Change via your account team',
     })

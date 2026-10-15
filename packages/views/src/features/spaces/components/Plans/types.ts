@@ -59,7 +59,8 @@ export type PlanChangeDirection = 'upgrade' | 'downgrade' | 'change'
 /** What a plan card's button does: manage the current plan, move to another one, buy one, or contact sales. */
 export type PlanCta =
   | { kind: 'billing'; label: 'Add payment method' }
-  | { kind: 'manage'; label: 'Manage plan' }
+  | { kind: 'current'; label: 'Current plan' }
+  | { kind: 'account-team'; label: 'Change via your account team' }
   | { kind: 'change'; label: string; direction: PlanChangeDirection }
   | { kind: 'subscribe'; label: string }
   | { kind: 'sales'; label: 'Talk to sales' }
