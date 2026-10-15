@@ -34,7 +34,7 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useSpacePlan } from '../../../../hooks/useSpacePlan'
 import { useSpacesSafeEligibility } from '../../../../hooks/useSpacesSafeEligibility'
-import { TRIAL_ENDING_SOON_DAYS, trialLabel } from '../../../../hooks/billing/subscription'
+import { trialLabel } from '../../../../hooks/billing/subscription'
 
 export const SAFE_ALREADY_IN_WORKSPACE_TOOLTIP = 'Safe is already in this Workspace'
 export const NO_PLAN_TOOLTIP = 'Choose a plan for this Workspace to add Safe accounts'
@@ -63,11 +63,7 @@ export const SpaceSelectorDropdown = ({
   const spaceName = selectedSpace?.name ?? ''
   const isSafePro = useIsSafeProEnabled()
   const { tierName, isTrialing, isTrialEndingSoon, plan } = useSpacePlan()
-  const planLabel = !isSafePro
-    ? 'Workspace'
-    : isTrialing
-      ? trialLabel(plan?.daysLeft, TRIAL_ENDING_SOON_DAYS)
-      : tierName
+  const planLabel = !isSafePro ? 'Workspace' : isTrialing ? trialLabel(plan?.daysLeft) : tierName
   const displayName = truncateSpaceName(spaceName, SPACE_SELECTOR_NAME_MAX_LENGTH)
   const initial = spaceName.charAt(0).toUpperCase()
   const selectedSpaceColor = spaceName ? getDeterministicColor(spaceName) : undefined
