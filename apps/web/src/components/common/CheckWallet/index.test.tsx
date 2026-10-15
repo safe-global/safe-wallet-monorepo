@@ -32,7 +32,7 @@ const SDK_LOADING = 'Still loading. Try again in a moment.'
 type GateProps = Omit<CheckWalletProps, 'children'>
 
 const renderButton = (props: GateProps = {}) =>
-  render(<CheckWallet {...props}>{(isOk) => <button disabled={!isOk}>Continue</button>}</CheckWallet>)
+  render(<CheckWallet {...props}>{(ok) => <button disabled={!ok}>Continue</button>}</CheckWallet>)
 
 describe('CheckWallet', () => {
   beforeEach(() => {
@@ -168,5 +168,70 @@ describe('CheckWallet', () => {
     const { getByText } = renderButton()
 
     expect(getByText('Continue')).not.toBeDisabled()
+  })
+
+  it.each(['owner', 'proposer'] as const)(
+    'should enable the button for %s when spending limits are allowed',
+    (role) => {
+      mockRole(role)
+
+      const { getByText } = renderButton({ allowSpendingLimit: true })
+
+      expect(getByText('Continue')).not.toBeDisabled()
+    },
+  )
+
+  it.each(['nonOwner', 'disconnected'] as const)(
+    'should disable the button for %s when spending limits are allowed',
+    (role) => {
+      mockRole(role)
+
+      const { getByText } = renderButton({ allowSpendingLimit: true })
+
+      expect(getByText('Continue')).toBeDisabled()
+    },
+  )
+
+  it('should disable the button for a disconnected wallet even when non-owners are allowed', () => {
+    mockRole('disconnected')
+
+    const { getByText, getByLabelText } = renderButton({ allowNonOwner: true })
+
+    expect(getByText('Continue')).toBeDisabled()
+    expect(getByLabelText(NOT_CONNECTED)).toBeInTheDocument()
+  })
+
+  it('should enable a nested owner who is a proposer if proposers are not allowed', () => {
+    mockRole('nestedOwner', { isProposer: true })
+
+    const { getByText } = renderButton({ allowProposer: false })
+
+    expect(getByText('Continue')).not.toBeDisabled()
+  })
+
+  it('should give a non-owner on the right network the not-owner reason', () => {
+    mockRole('nonOwner')
+
+    const { getByText, getByLabelText } = renderButton({ checkNetwork: true })
+
+    expect(getByText('Continue')).toBeDisabled()
+    expect(getByLabelText(NOT_OWNER)).toBeInTheDocument()
+  })
+
+  it('should ignore the wrong network when the network is not checked', () => {
+    mockRole('wrongChain')
+
+    const { getByText } = renderButton()
+
+    expect(getByText('Continue')).not.toBeDisabled()
+  })
+
+  it('should disable the button without a tooltip when noTooltip is set', () => {
+    mockRole('nonOwner')
+
+    const { getByText, queryByLabelText } = renderButton({ noTooltip: true })
+
+    expect(getByText('Continue')).toBeDisabled()
+    expect(queryByLabelText(NOT_OWNER)).not.toBeInTheDocument()
   })
 })
