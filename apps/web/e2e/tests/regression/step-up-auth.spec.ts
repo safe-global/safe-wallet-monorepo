@@ -1,5 +1,24 @@
 import type { Page } from '@playwright/test'
+import type { AuthGetMeV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import type {
+  BillingGetSpacePaymentLinksV1ApiResponse,
+  BillingGetSubscriptionsV1ApiResponse,
+} from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import type { CounterfactualSafesGetV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
+import type { EntitlementsGetEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
+import type {
+  AddressBooksGetAddressBookItemsV1ApiResponse,
+  MembersGetMembershipV1ApiResponse,
+  MembersGetUsersV1ApiResponse,
+  SpaceCounterfactualSafesGetV1ApiResponse,
+  SpaceSafesGetV1ApiResponse,
+  SpacesGetOneV1ApiResponse,
+  SpacesGetV1ApiResponse,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { UsersGetWithWalletsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { toast } from '../../src/fixtures/step-up'
 import { LS_NAMESPACE } from '../../src/data/constants'
 
 /**
@@ -11,41 +30,20 @@ import { LS_NAMESPACE } from '../../src/data/constants'
  */
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
+const CHAIN_ID = '1'
 const SPACE_ID = '00000000-0000-0000-0000-0000000000bb'
 const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
+const SAFE_ACCOUNTS_URL = `/spaces/safe-accounts?spaceId=${SPACE_ID}`
 const STEP_UP_KEY = 'oidc_step_up'
 const AUTHORIZE_PATTERN = /\/v1\/auth\/oidc\/authorize/
+const SPACE_SAFES_PATTERN = /\/v1\/spaces\/[^/]+\/safes$/
+const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
 
-const SPACE = {
-  id: 1,
-  uuid: SPACE_ID,
-  name: 'Step-up Test Workspace',
-  status: 'ACTIVE',
-  safeCount: 1,
-  members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
-}
+const ELEVATION_REQUIRED_RESPONSE = { status: 403, json: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } }
 
-// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
-const LIVE_SUBSCRIPTION = {
-  id: 'sub_e2e',
-  customerId: 'cus_e2e',
-  upstreamCustomerId: 'cus_e2e',
-  plan: {
-    id: 'plan_e2e',
-    currentPrice: 0,
-    originalPrice: null,
-    paymentMethod: 'fiat',
-    currency: 'usd',
-    features: [],
-    type: 'standard',
-    product: null,
-  },
-  status: 'active',
-  createdAt: 0,
-  startAt: 0,
-  cancelledAt: null,
-  cancelAt: null,
-}
+const SESSION = { id: '1', authMethod: 'siwe', signerAddress: SIGNER } satisfies AuthGetMeV1ApiResponse
+
+const USER = { id: 1, status: 1, wallets: [{ id: 1, address: SIGNER }] } satisfies UsersGetWithWalletsV1ApiResponse
 
 const MEMBERSHIP = {
   id: 1,
@@ -55,21 +53,68 @@ const MEMBERSHIP = {
   invitedBy: null,
   createdAt: '',
   updatedAt: '',
-  user: { id: 1, status: 'ACTIVE' },
-}
+  user: { id: 1, status: 'ACTIVE', email: null, address: SIGNER },
+} satisfies MembersGetMembershipV1ApiResponse
+
+const MEMBERS = { members: [MEMBERSHIP] } satisfies MembersGetUsersV1ApiResponse
+
+const SPACE = {
+  uuid: SPACE_ID,
+  name: 'Step-up Test Workspace',
+  memberCount: 1,
+  safeCount: 1,
+  members: [
+    { role: 'ADMIN', name: 'Admin', status: 'ACTIVE', invitedBy: null, inviteExpiresAt: null, user: { id: 1 } },
+  ],
+} satisfies SpacesGetOneV1ApiResponse
+
+const SPACES = [SPACE] satisfies SpacesGetV1ApiResponse
+
+const SPACE_SAFES = { safes: { [CHAIN_ID]: [SAFE_ADDRESS] } } satisfies SpaceSafesGetV1ApiResponse
+
+// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
+const LIVE_SUBSCRIPTIONS = [
+  {
+    id: 'sub_e2e',
+    customerId: 'cus_e2e',
+    upstreamCustomerId: 'cus_e2e',
+    plan: {
+      id: 'plan_e2e',
+      currentPrice: 0,
+      originalPrice: null,
+      paymentMethod: 'fiat',
+      currency: 'usd',
+      features: [],
+      type: 'standard',
+      product: null,
+    },
+    status: 'active',
+    createdAt: 0,
+    startAt: 0,
+    cancelledAt: null,
+    cancelAt: null,
+  },
+] satisfies BillingGetSubscriptionsV1ApiResponse
+
+const NO_COUNTERFACTUAL_SAFES = { safes: {} } satisfies CounterfactualSafesGetV1ApiResponse &
+  SpaceCounterfactualSafesGetV1ApiResponse
 
 const ENTITLEMENTS = {
   plan: { id: 'plan_e2e', name: 'Business', cycleEndsAt: null, status: 'active' },
   entitlements: [],
-}
+} satisfies EntitlementsGetEntitlementsV1ApiResponse
+
+const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
+
+const PAYMENT_LINKS = [] satisfies BillingGetSpacePaymentLinksV1ApiResponse
 
 async function seedWorkspaceSession(page: Page): Promise<void> {
   await page.addInitScript(
-    ({ ns, spaceId }) => {
+    ({ ns, spaceId, sessionLifetimeMs }) => {
       window.localStorage.setItem(
         `${ns}auth`,
         JSON.stringify({
-          sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+          sessionExpiresAt: Date.now() + sessionLifetimeMs,
           landingSpaceHint: spaceId,
           isStoreHydrated: false,
           cfSafeSynced: false,
@@ -77,44 +122,38 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
         }),
       )
     },
-    { ns: LS_NAMESPACE, spaceId: SPACE_ID },
+    { ns: LS_NAMESPACE, spaceId: SPACE_ID, sessionLifetimeMs: SESSION_LIFETIME_MS },
   )
 
-  await page.route(/\/v1\/auth\/me(\?.*)?$/, (route) =>
-    route.fulfill({ json: { id: '1', authMethod: 'siwe', signerAddress: SIGNER } }),
-  )
-  await page.route(/\/v1\/users(\?.*)?$/, (route) =>
-    route.fulfill({ json: { id: 1, status: 1, wallets: [{ id: 1, address: SIGNER }] } }),
-  )
-  await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) =>
-    route.fulfill({ json: { members: SPACE.members } }),
-  )
-  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
-    route.fulfill({ json: { safes: { '1': [SAFE_ADDRESS] } } }),
-  )
+  await page.route(/\/v1\/auth\/me(\?.*)?$/, (route) => route.fulfill({ json: SESSION }))
+  await page.route(/\/v1\/users(\?.*)?$/, (route) => route.fulfill({ json: USER }))
+  await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: MEMBERS }))
+  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: SPACE_SAFES }))
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
-  await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
+  await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: SPACES }))
   await page.route(/\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/, (route) =>
-    route.fulfill({ json: [LIVE_SUBSCRIPTION] }),
+    route.fulfill({ json: LIVE_SUBSCRIPTIONS }),
   )
   // Session-scoped calls of the Workspace pages; unmocked, the gateway answers 403 and the app re-checks the session.
-  await page.route(/\/v1\/users\/counterfactual-safes(\?.*)?$/, (route) => route.fulfill({ json: { safes: {} } }))
+  await page.route(/\/v1\/users\/counterfactual-safes(\?.*)?$/, (route) =>
+    route.fulfill({ json: NO_COUNTERFACTUAL_SAFES }),
+  )
   await page.route(/\/v1\/spaces\/[^/]+\/counterfactual-safes(\?.*)?$/, (route) =>
-    route.fulfill({ json: { safes: {} } }),
+    route.fulfill({ json: NO_COUNTERFACTUAL_SAFES }),
   )
   await page.route(/\/v1\/spaces\/[^/]+\/membership(\?.*)?$/, (route) => route.fulfill({ json: MEMBERSHIP }))
   await page.route(/\/v1\/spaces\/[^/]+\/entitlements(\?.*)?$/, (route) => route.fulfill({ json: ENTITLEMENTS }))
-  await page.route(/\/v1\/spaces\/[^/]+\/address-book(\?.*)?$/, (route) =>
-    route.fulfill({ json: { spaceUuid: SPACE_ID, data: [] } }),
+  await page.route(/\/v1\/spaces\/[^/]+\/address-book(\?.*)?$/, (route) => route.fulfill({ json: ADDRESS_BOOK }))
+  await page.route(/\/v1\/billing\/spaces\/[^/]+\/payment-links(\?.*)?$/, (route) =>
+    route.fulfill({ json: PAYMENT_LINKS }),
   )
-  await page.route(/\/v1\/billing\/spaces\/[^/]+\/payment-links(\?.*)?$/, (route) => route.fulfill({ json: [] }))
 }
 
 async function gateSafeRemoval(page: Page): Promise<void> {
-  await page.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
+  await page.route(SPACE_SAFES_PATTERN, async (route) => {
     if (route.request().method() !== 'DELETE') return route.fallback()
 
-    return route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
+    return route.fulfill(ELEVATION_REQUIRED_RESPONSE)
   })
 }
 
@@ -137,15 +176,12 @@ async function stubCompletedChallenge(page: Page): Promise<void> {
 }
 
 async function openRemoveDialog(page: Page): Promise<void> {
-  await page.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
+  await page.goto(SAFE_ACCOUNTS_URL)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
   await page.getByRole('menuitem', { name: 'Remove from Workspace' }).click()
 }
 
 const readStepUpRecord = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STEP_UP_KEY)
-
-// Next.js renders its route announcer with role="alert" too, so a bare getByRole('alert') trips strict mode once a toast shows.
-const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
 
 test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
@@ -159,23 +195,23 @@ test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
     await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
 
-    await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
+    await safePage.goto(SAFE_ACCOUNTS_URL)
 
     await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
     await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
-    await expect(safePage.getByText('elevation_required')).toBeHidden()
+    await expect(safePage.getByText(ELEVATION_REQUIRED_ERROR)).toBeHidden()
   })
 
   test('that it reports an error when the replayed action fails', async ({ safePage }) => {
     await stubCompletedChallenge(safePage)
 
     let removalCalls = 0
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
+    await safePage.route(SPACE_SAFES_PATTERN, async (route) => {
       if (route.request().method() !== 'DELETE') return route.fallback()
 
       removalCalls += 1
       return removalCalls === 1
-        ? route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
+        ? route.fulfill(ELEVATION_REQUIRED_RESPONSE)
         : route.fulfill({ status: 500, json: { message: 'Internal error', statusCode: 500 } })
     })
 
