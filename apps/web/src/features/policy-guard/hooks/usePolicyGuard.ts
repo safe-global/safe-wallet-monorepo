@@ -35,6 +35,10 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const currentProvider = useWeb3ReadOnly()
   const targetQuery = useSafesGetSafeV1Query(target ?? skipToken, { pollingInterval: POLLING_INTERVAL })
   const { provider: targetProvider, error: targetProviderError } = useReadOnlyProvider(target?.chainId)
+  const currentSafeError = useMemo(
+    () => (currentSafe.safeError ? new Error(currentSafe.safeError) : undefined),
+    [currentSafe.safeError],
+  )
   const targetError = useMemo(
     () =>
       targetQuery.error
@@ -93,7 +97,7 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const currentRead = read?.readKey === readKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
   const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
-  const safeError = target && !safeLoaded && !safeLoading ? targetError : undefined
+  const safeError = !safeLoaded && !safeLoading ? (target ? targetError : currentSafeError) : undefined
   const providerError = target && shouldRead ? targetProviderError : undefined
   const error = safeError ?? providerError ?? (shouldRead && !hasRpc ? NO_RPC_ERROR : readError)
 

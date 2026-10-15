@@ -322,6 +322,24 @@ describe('usePolicyGuard', () => {
     })
   })
 
+  it('returns the error when the open Safe fails to load', () => {
+    jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+      safe: extendedSafeInfoBuilder().with({ chainId: '11155111' }).build(),
+      safeAddress: '0x3333333333333333333333333333333333333333',
+      safeLoaded: false,
+      safeLoading: false,
+      safeError: 'Failed to load Safe',
+    })
+    mockSlot(SLOT_EMPTY)
+    const { result, rerender } = renderHook(() => usePolicyGuard())
+    const firstError = result.current.error
+    rerender()
+
+    expect(firstError?.message).toBe('Failed to load Safe')
+    expect(result.current.error).toBe(firstError)
+    expect(result.current.isLoading).toBe(false)
+  })
+
   it('does not request another Safe without a target', () => {
     const query = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query')
     mockSafe({})
