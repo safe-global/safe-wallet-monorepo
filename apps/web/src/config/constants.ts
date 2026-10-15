@@ -13,6 +13,8 @@ export const IS_DEV = APP_ENV === 'development'
 // build because of its NEXT_PUBLIC_ prefix.
 export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
+// Set only by the isolated e2e build: Ledger talks to the Speculos emulator at this URL instead of over USB.
+export const LEDGER_EMULATOR_URL = process.env.NEXT_PUBLIC_LEDGER_EMULATOR_URL || ''
 
 // default chain ID's as provided to the environment
 export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains.sep)
