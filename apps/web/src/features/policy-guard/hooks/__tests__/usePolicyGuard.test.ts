@@ -6,6 +6,10 @@ import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import { skipToken } from '@reduxjs/toolkit/query'
+import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { POLLING_INTERVAL } from '@/config/constants'
+import * as readOnlyProvider from '../useReadOnlyProvider'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { getPolicyGuardAddress } from '../../services/policyEngineDeployments'
@@ -233,5 +237,109 @@ describe('usePolicyGuard', () => {
     const firstError = result.current.error
     rerender()
     expect(result.current.error).toBe(firstError)
+  })
+
+  it('does not request another Safe without a target', () => {
+    const query = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query')
+    mockSafe({})
+    mockSlot(SLOT_EMPTY)
+    renderHook(() => usePolicyGuard())
+    expect(query).toHaveBeenCalledWith(skipToken, expect.anything())
+  })
+
+  describe('with a target Safe', () => {
+    const TARGET = { chainId: '11155111', safeAddress: '0x3333333333333333333333333333333333333333' }
+
+    type QueryResult = ReturnType<typeof safesQueries.useSafesGetSafeV1Query>
+    const mockTargetQuery = (result: Partial<QueryResult>) =>
+      jest
+        .spyOn(safesQueries, 'useSafesGetSafeV1Query')
+        .mockReturnValue({ refetch: jest.fn(), ...result } as QueryResult)
+
+    const mockTargetProvider = (getStorage: jest.Mock) =>
+      jest
+        .spyOn(readOnlyProvider, 'useReadOnlyProvider')
+        .mockImplementation((chainId) => (chainId ? ({ getStorage } as unknown as JsonRpcProvider) : undefined))
+
+    const targetSafe = (overrides: Partial<ExtendedSafeInfo>) =>
+      extendedSafeInfoBuilder()
+        .with({ chainId: TARGET.chainId, version: '1.5.0', guard: null, ...overrides })
+        .build()
+
+    it('reads the target Safe, not the open one', async () => {
+      mockSafe({})
+      const currentGetStorage = mockSlot(SLOT_EMPTY)
+      const getStorage = jest.fn().mockResolvedValue(slotOf(GUARD))
+      mockTargetProvider(getStorage)
+      mockTargetQuery({ currentData: targetSafe({ guard: guardInfo(GUARD) }), isFetching: false })
+
+      const { result } = renderHook(() => usePolicyGuard(TARGET))
+
+      await waitFor(() => expect(result.current.state).toEqual({ status: 'known' }))
+      expect(getStorage).toHaveBeenCalledWith(TARGET.safeAddress, expect.any(String))
+      expect(currentGetStorage).not.toHaveBeenCalled()
+    })
+
+    it('polls the target Safe', () => {
+      mockSafe({})
+      mockTargetProvider(jest.fn().mockResolvedValue(SLOT_EMPTY))
+      const query = mockTargetQuery({ currentData: targetSafe({}), isFetching: false })
+      renderHook(() => usePolicyGuard(TARGET))
+      expect(query).toHaveBeenCalledWith(TARGET, { pollingInterval: POLLING_INTERVAL })
+    })
+
+    it('re-reads the module guard when the target Safe executes a transaction', async () => {
+      mockSafe({})
+      const getStorage = jest.fn().mockResolvedValue(SLOT_EMPTY)
+      mockTargetProvider(getStorage)
+      mockTargetQuery({ currentData: targetSafe({ txHistoryTag: '1' }), isFetching: false })
+      const { result, rerender } = renderHook(() => usePolicyGuard(TARGET))
+      await waitFor(() => expect(result.current.state).toEqual({ status: 'none' }))
+
+      getStorage.mockResolvedValue(slotOf(GUARD))
+      mockTargetQuery({ currentData: targetSafe({ txHistoryTag: '2', guard: guardInfo(GUARD) }), isFetching: false })
+      rerender()
+
+      await waitFor(() => expect(result.current.state).toEqual({ status: 'known' }))
+    })
+
+    it('is loading while the target Safe loads', () => {
+      mockSafe({})
+      mockTargetProvider(jest.fn().mockResolvedValue(SLOT_EMPTY))
+      mockTargetQuery({ currentData: undefined, isFetching: true })
+
+      const { result } = renderHook(() => usePolicyGuard(TARGET))
+
+      expect(result.current.isLoading).toBe(true)
+      expect(result.current.state).toBeUndefined()
+    })
+
+    it('returns the same error, keeping the original, when the target Safe fails to load', () => {
+      mockSafe({})
+      mockTargetProvider(jest.fn().mockResolvedValue(SLOT_EMPTY))
+      const rtkError = { status: 404, data: 'Not found' }
+      mockTargetQuery({ currentData: undefined, isFetching: false, isError: true, error: rtkError })
+
+      const { result, rerender } = renderHook(() => usePolicyGuard(TARGET))
+      const firstError = result.current.error
+      rerender()
+
+      expect(firstError).toBeInstanceOf(Error)
+      expect(firstError?.cause).toBe(rtkError)
+      expect(result.current.error).toBe(firstError)
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    it('reports unsupported for a target Safe below 1.5.0 without an RPC read', () => {
+      mockSafe({})
+      const getStorage = jest.fn().mockResolvedValue(SLOT_EMPTY)
+      mockTargetProvider(getStorage)
+      mockTargetQuery({ currentData: targetSafe({ version: '1.4.1' }), isFetching: false })
+
+      const { result } = renderHook(() => usePolicyGuard(TARGET))
+
+      expect(result.current.state).toEqual({ status: 'unsupported' })
+      expect(getStorage).not.toHaveBeenCalled()
+    })
   })
 })

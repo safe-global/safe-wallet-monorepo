@@ -1,17 +1,24 @@
 import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { type SafeState, useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { POLLING_INTERVAL } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
+import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getPolicyGuardAddress } from '../services/policyEngineDeployments'
 import { isSafeEligibleForAllowlist } from '../services/allowlistAvailability'
 import { resolvePolicyGuardState } from '../services/resolvePolicyGuardState'
 import { readModuleGuard } from '../services/readModuleGuard'
 import type { PolicyGuardState } from '../types'
+import { useReadOnlyProvider } from './useReadOnlyProvider'
+
+type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'>
 
 type ModuleGuardRead = { safeKey: string } & ({ moduleGuard: string } | { error: Error })
 
@@ -19,10 +26,41 @@ export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolea
 
 const NO_RPC_ERROR = new Error('No RPC is configured for this chain')
 
-/** Reads the open Safe; wrap in a SafeScopeProvider to read another Safe */
-export const usePolicyGuard = (): UsePolicyGuardResult => {
-  const { safe, safeAddress, safeLoaded, safeLoading } = useSafeInfo()
-  const web3ReadOnly = useWeb3ReadOnly()
+export type PolicyGuardTarget = { chainId: string; safeAddress: string }
+
+/** Reads the open Safe by default; pass a target to read any other Safe */
+export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult => {
+  const currentSafe = useSafeInfo()
+  const currentProvider = useWeb3ReadOnly()
+  const targetQuery = useSafesGetSafeV1Query(target ?? skipToken, { pollingInterval: POLLING_INTERVAL })
+  const targetProvider = useReadOnlyProvider(target?.chainId)
+  const targetError = useMemo(
+    () =>
+      targetQuery.error
+        ? new Error(getRtkQueryErrorMessage(targetQuery.error), { cause: targetQuery.error })
+        : undefined,
+    [targetQuery.error],
+  )
+
+  const {
+    safe,
+    safeAddress,
+    safeLoaded,
+    safeLoading,
+  }: {
+    safe: GuardedSafe
+    safeAddress: string
+    safeLoaded: boolean
+    safeLoading: boolean
+  } = target
+    ? {
+        safe: targetQuery.currentData ?? { chainId: target.chainId, version: null, guard: null, txHistoryTag: null },
+        safeAddress: target.safeAddress,
+        safeLoaded: !!targetQuery.currentData,
+        safeLoading: !targetQuery.currentData && targetQuery.isFetching,
+      }
+    : currentSafe
+  const web3ReadOnly = target ? targetProvider : currentProvider
   const chain = useChain(safe.chainId)
   const customRpc = useAppSelector(selectRpc)
   const policyGuardAddress = getPolicyGuardAddress(safe.chainId)
@@ -51,7 +89,8 @@ export const usePolicyGuard = (): UsePolicyGuardResult => {
   const currentRead = read?.safeKey === safeKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
   const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
-  const error = shouldRead && !hasRpc ? NO_RPC_ERROR : readError
+  const safeError = target && !safeLoaded && !safeLoading ? targetError : undefined
+  const error = safeError ?? (shouldRead && !hasRpc ? NO_RPC_ERROR : readError)
 
   const state = useMemo((): PolicyGuardState | undefined => {
     if (!safeLoaded) return
