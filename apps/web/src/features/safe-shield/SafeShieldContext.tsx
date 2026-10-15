@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useRef,
   useState,
@@ -55,6 +56,30 @@ type SafeShieldContextType = {
 
 const SafeShieldContext = createContext<SafeShieldContextType | null>(null)
 
+const isCritical = <T extends { severity: Severity }>(result: T | null | undefined): result is T =>
+  isSeverityHigherOrEqual(result?.severity, Severity.CRITICAL)
+
+type RiskAnalyses = {
+  threat: ThreatAnalysisResults | undefined
+  deadlock: DeadlockAnalysisResults | undefined
+  hasPoisoning: boolean
+  safeAnalysis: SafeAnalysisResult | null
+}
+
+/** The findings that need the user's risk confirmation, as stable keys. */
+function criticalFindingsOf({ threat, deadlock, hasPoisoning, safeAnalysis }: RiskAnalyses): string[] {
+  const primaryThreat = getPrimaryResult(threat?.THREAT || [])
+  // Deadlock results are keyed by Safe address; the highest severity across all of them counts.
+  const primaryDeadlock = getPrimaryResult(Object.values(deadlock || {}).flatMap((safe) => safe.DEADLOCK || []))
+
+  const findings: string[] = []
+  if (isCritical(primaryThreat)) findings.push(`threat:${primaryThreat.type}`)
+  if (isCritical(primaryDeadlock)) findings.push(`deadlock:${primaryDeadlock.type}`)
+  if (hasPoisoning) findings.push('address-poisoning')
+  if (isCritical(safeAnalysis)) findings.push(`safe:${safeAnalysis.type}`)
+  return findings
+}
+
 export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const safeTxContext = useContext(SafeTxContext)
   const [recipientAddresses, setRecipientAddresses] = useState<string[] | undefined>(undefined)
@@ -94,39 +119,24 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Safe-level analysis: untrusted Safe check
   const { safeAnalysis, addToTrustedList } = useUntrustedSafeAnalysis()
 
-  const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
-
-  const criticalFindings = useMemo(() => {
-    const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
-
-    const severity = primaryThreatResult?.severity
-    const hasCriticalThreat = isSeverityHigherOrEqual(severity, Severity.CRITICAL)
-
-    // Flatten address-keyed deadlock results to find the highest severity across all Safes
-    const allDeadlockResults = Object.values(deadlockResults || {}).flatMap((addr) => addr.DEADLOCK || [])
-    const primaryDeadlockResult = getPrimaryResult(allDeadlockResults)
-    const deadlockSeverity = primaryDeadlockResult?.severity
-    const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
-
-    // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
-    const findings = [
-      hasCriticalThreat ? `threat:${primaryThreatResult?.type}` : undefined,
-      hasCriticalDeadlock ? `deadlock:${primaryDeadlockResult?.type}` : undefined,
-      hasPoisoning ? 'address-poisoning' : undefined,
-      safeAnalysis?.severity === Severity.CRITICAL ? `safe:${safeAnalysis.type}` : undefined,
-    ]
-
-    return findings.filter((finding): finding is string => finding !== undefined)
-  }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
-
+  const criticalFindings = useMemo(
+    () => criticalFindingsOf({ threat: threatAnalysisResult, deadlock: deadlockResults, hasPoisoning, safeAnalysis }),
+    [threatAnalysisResult, deadlockResults, hasPoisoning, safeAnalysis],
+  )
   const needsRiskConfirmation = criticalFindings.length > 0
 
-  // The user confirms this transaction with these critical findings. Analyses can deliver later or as new objects,
-  // so only a change of the transaction or of the findings asks for the confirmation again.
-  const confirmedRiskKey = JSON.stringify([safeShieldTxKey, criticalFindings])
-  useEffect(() => {
-    setIsRiskConfirmed(false)
-  }, [confirmedRiskKey])
+  // A confirmation covers one transaction with one set of critical findings; any change asks again.
+  const riskKey = JSON.stringify([safeShieldTxKey, criticalFindings])
+  const [confirmedRiskKey, setConfirmedRiskKey] = useState<string>()
+  const isRiskConfirmed = confirmedRiskKey === riskKey
+  const setIsRiskConfirmed = useCallback<Dispatch<SetStateAction<boolean>>>(
+    (value) =>
+      setConfirmedRiskKey((confirmedKey) => {
+        const confirmed = typeof value === 'function' ? value(confirmedKey === riskKey) : value
+        return confirmed ? riskKey : undefined
+      }),
+    [riskKey],
+  )
 
   return (
     <SafeShieldContext.Provider

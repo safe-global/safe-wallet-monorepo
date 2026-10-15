@@ -277,7 +277,16 @@ describe('SafeShieldContext', () => {
           <SafeShieldProvider>{children}</SafeShieldProvider>
         </SafeTxContext.Provider>
       )
-      const rendered = renderHook(() => useSafeShield(), { wrapper })
+      // isRiskConfirmed of every render, to catch a render that shows a stale confirmation
+      const confirmations: boolean[] = []
+      const rendered = renderHook(
+        () => {
+          const shield = useSafeShield()
+          confirmations.push(shield.isRiskConfirmed)
+          return shield
+        },
+        { wrapper },
+      )
       act(() => {
         rendered.result.current.setIsRiskConfirmed(true)
       })
@@ -285,7 +294,7 @@ describe('SafeShieldContext', () => {
         deadlock = next
         rendered.rerender()
       }
-      return { ...rendered, deliver }
+      return { ...rendered, deliver, confirmations }
     }
 
     it('keeps the confirmation when a non-critical result arrives', () => {
@@ -312,6 +321,25 @@ describe('SafeShieldContext', () => {
 
       expect(result.current.needsRiskConfirmation).toBe(true)
       expect(result.current.isRiskConfirmed).toBe(false)
+    })
+
+    it('never renders a new critical finding as confirmed', () => {
+      const { deliver, confirmations } = renderConfirmed([undefined, undefined, true])
+      const rendersBefore = confirmations.length
+
+      deliver(DeadlockAnalysisBuilder.deadlockDetected())
+
+      expect(confirmations.slice(rendersBefore)).not.toContain(true)
+    })
+
+    it('keeps the confirmation of a transaction whose findings come back unchanged', () => {
+      const { result, deliver } = renderConfirmed(DeadlockAnalysisBuilder.deadlockDetected())
+
+      deliver([undefined, undefined, true])
+      expect(result.current.isRiskConfirmed).toBe(false)
+      deliver(DeadlockAnalysisBuilder.deadlockDetected())
+
+      expect(result.current.isRiskConfirmed).toBe(true)
     })
   })
 
