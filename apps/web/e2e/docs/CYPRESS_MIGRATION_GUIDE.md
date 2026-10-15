@@ -138,7 +138,7 @@ The same applies to `won't-migrate`: it is a legitimate and common outcome, but 
 
 Migration runs **one stage at a time**, easiest feature area first, and every stage lands as **two PRs**: a _migration PR_ that adds the Playwright specs, and a _deletion PR_ that removes the Cypress specs only after CI has run the new specs on `dev`. Do not open a PR that spans stages, and never delete Cypress specs in the PR that introduces their replacement.
 
-**Scope: 120 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
+**Scope: 119 specs.** The 31 Argos `visual/` specs are excluded — see [CYPRESS_PW_MIGRATION_STATUS.md](./CYPRESS_PW_MIGRATION_STATUS.md).
 
 ### Why staged
 
@@ -157,7 +157,7 @@ Counts are from `CYPRESS_PW_MIGRATION_STATUS.md`; consult it for exact membershi
 | 1   | **Pilot: landing**           | 1     | 7 lines, no page object, no wallet. Proves the loop.         | —                                          |
 | 2   | Assets & balances            | 9     | Mostly read-only; `balances.spec.ts` + `safeApiClient` exist | `assets.pages.js` (430)                    |
 | 3   | Tx history & details         | 14    | No wallet; `transactions.page.js` is only 96 lines           | `transactions.page.js` (96)                |
-| 4   | Safe loading & import/export | 7     | No wallet, localStorage-driven                               | `load_safe` (286), `import_export` (177)   |
+| 4   | Safe loading & import/export | 6     | No wallet, localStorage-driven                               | `load_safe` (286), `import_export` (177)   |
 | 5   | Navigation & chrome          | 9     | Extends `home.page.ts`; closes the dashboard gap             | `sidebar` (740), `dashboard` (249)         |
 | 6   | Address book & recipients    | 4     | Partly adjacent to the 3 `recipient-dropdown-*` specs        | `address_book.page.js` (243)               |
 | 7   | Owner management             | 6     | First heavily wallet-gated stage; tag `@critical`            | `owners.pages.js` (292)                    |
