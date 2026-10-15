@@ -21,7 +21,7 @@ import { useReadOnlyProvider } from './useReadOnlyProvider'
 
 type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'>
 
-type ModuleGuardRead = { safeKey: string } & ({ moduleGuard: string } | { error: Error })
+type ModuleGuardRead = { readKey: string } & ({ moduleGuard: string } | { error: Error })
 
 export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolean; error?: Error }
 
@@ -71,7 +71,8 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const customRpcUrl = chain ? customRpc?.[chain.chainId] : undefined
   const hasRpc = useMemo(() => !!chain && !!(customRpcUrl || getRpcServiceUrl(chain.rpcUri)), [chain, customRpcUrl])
 
-  const safeKey = `${safe.chainId}:${safeAddress}`
+  // A new transaction can change both slots, so a read only counts for the tx history it was made at
+  const readKey = `${safe.chainId}:${safeAddress}:${safe.txHistoryTag ?? ''}`
   const [retryCount, setRetryCount] = useState(0)
 
   // CGW Safe info has no module guard field yet, so it is read from the storage slot
@@ -79,25 +80,19 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
     () => {
       if (!shouldRead || !web3ReadOnly) return
       return readModuleGuard(web3ReadOnly, safeAddress).then(
-        (moduleGuard) => ({ safeKey, moduleGuard }),
-        (error) => ({ safeKey, error: asError(error) }),
+        (moduleGuard) => ({ readKey, moduleGuard }),
+        (error) => ({ readKey, error: asError(error) }),
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- txHistoryTag and retryCount only trigger a re-read
-    [shouldRead, web3ReadOnly, safeAddress, safeKey, safe.txHistoryTag, retryCount],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- retryCount only triggers a re-read
+    [shouldRead, web3ReadOnly, safeAddress, readKey, retryCount],
     false,
   )
 
-  // Data is kept across re-reads of the same Safe; a read for another Safe is ignored
-  const currentRead = read?.safeKey === safeKey ? read : undefined
+  // Data is kept across retries; a read for another Safe or an older tx history is ignored
+  const currentRead = read?.readKey === readKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
   const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
-
-  useEffect(() => {
-    if (!readError) return
-    const timer = setTimeout(() => setRetryCount((count) => count + 1), POLLING_INTERVAL)
-    return () => clearTimeout(timer)
-  }, [readError])
   const safeError = target && !safeLoaded && !safeLoading ? targetError : undefined
   const error = safeError ?? (shouldRead && !hasRpc ? NO_RPC_ERROR : readError)
 
@@ -111,6 +106,14 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
       policyGuardAddress,
     })
   }, [safeLoaded, isUnsupported, moduleGuard, policyGuardAddress, safe.guard])
+
+  // A partial result may come from an RPC node a block behind the setup transaction
+  const shouldRetry = !!readError || state?.status === 'partial'
+  useEffect(() => {
+    if (!shouldRetry) return
+    const timer = setTimeout(() => setRetryCount((count) => count + 1), POLLING_INTERVAL)
+    return () => clearTimeout(timer)
+  }, [shouldRetry, currentRead])
 
   return {
     state,

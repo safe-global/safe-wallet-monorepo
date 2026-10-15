@@ -276,6 +276,52 @@ describe('usePolicyGuard', () => {
     }
   })
 
+  describe('after the Safe executes a transaction', () => {
+    const safe = extendedSafeInfoBuilder()
+      .with({ chainId: '11155111', version: '1.5.0', guard: null, txHistoryTag: '1' })
+      .build()
+    const mockSafeInfo = (overrides: Partial<ExtendedSafeInfo>) =>
+      jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+        safe: { ...safe, ...overrides },
+        safeAddress: safe.address.value,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+
+    it('never pairs the new tx guard with the previous module guard read', async () => {
+      mockSafeInfo({})
+      const getStorage = mockSlot(SLOT_EMPTY)
+      const { result, rerender } = renderHook(() => usePolicyGuard())
+      await waitFor(() => expect(result.current.state).toEqual({ status: 'none' }))
+
+      getStorage.mockReturnValue(new Promise<string>(() => {}))
+      mockSafeInfo({ guard: guardInfo(GUARD), txHistoryTag: '2' })
+      rerender()
+
+      expect(result.current.state).toBeUndefined()
+      expect(result.current.isLoading).toBe(true)
+    })
+
+    it('re-reads a partial result in case the RPC node lags behind', async () => {
+      jest.useFakeTimers()
+      try {
+        mockSafeInfo({ guard: guardInfo(GUARD), txHistoryTag: '2' })
+        mockSlot(SLOT_EMPTY).mockResolvedValueOnce(SLOT_EMPTY).mockResolvedValue(slotOf(GUARD))
+        const { result } = renderHook(() => usePolicyGuard())
+        await waitFor(() => expect(result.current.state).toEqual({ status: 'partial', missingSlot: 'module' }))
+
+        await act(async () => {
+          jest.advanceTimersByTime(POLLING_INTERVAL)
+        })
+
+        await waitFor(() => expect(result.current.state).toEqual({ status: 'known' }))
+      } finally {
+        jest.useRealTimers()
+      }
+    })
+  })
+
   it('does not request another Safe without a target', () => {
     const query = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query')
     mockSafe({})
