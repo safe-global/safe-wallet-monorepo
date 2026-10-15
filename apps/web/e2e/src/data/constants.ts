@@ -104,6 +104,9 @@ export const TEST_ADDRESSES = {
   NON_OWNER: '0x1234567890123456789012345678901234567890',
   /** Zero address — for edge case tests */
   ZERO: '0x0000000000000000000000000000000000000000',
+  /** Placeholder accounts, e.g. for a Workspace that holds more Safes than a plan allows */
+  PLACEHOLDER_A: '0xa0000000000000000000000000000000000000a0',
+  PLACEHOLDER_B: '0xb0000000000000000000000000000000000000b0',
 } as const
 
 // ---------------------------------------------------------------------------

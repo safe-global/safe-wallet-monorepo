@@ -165,15 +165,46 @@ export async function createWorkspace(session: EmailSession, name: string): Prom
   return created
 }
 
-/** Stores the Workspace's plan in the local billing service, which returns once the gateway has applied it. */
-export async function storeSubscription(uuid: string, subscription: { status?: string } = {}): Promise<void> {
-  const url = `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+const billingSubscriptionsUrl = (uuid: string): string =>
+  `${new URL(CGW_BASE_URL).origin}/billing/__test/customers/${uuid}/subscriptions`
+
+const offersTrial = async (session: EmailSession, uuid: string): Promise<boolean> => {
+  const links = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/payment-links`)
+  return Array.isArray(links) && links.some((link: { trialPeriodDays?: number | null }) => link.trialPeriodDays != null)
+}
+
+/**
+ * Stores the Workspace's plan in the local billing service, and waits until the gateway has applied the webhook:
+ * a Workspace that had a plan is offered no trial.
+ */
+export async function storeSubscription(
+  session: EmailSession,
+  uuid: string,
+  subscription: { plan?: 'business' | 'starter'; status?: string } = {},
+): Promise<void> {
+  const url = billingSubscriptionsUrl(uuid)
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscription),
   })
   if (!response.ok) throw new Error(`POST ${url} returned ${response.status}: ${await response.text()}`)
+  await expect.poll(() => offersTrial(session, uuid)).toBe(false)
+}
+
+/** Leaves a Workspace the gateway has not read yet without a plan, as every new Workspace is in production. */
+export async function removeSubscription(uuid: string): Promise<void> {
+  const url = billingSubscriptionsUrl(uuid)
+  const response = await fetch(url, { method: 'DELETE' })
+  if (!response.ok) throw new Error(`DELETE ${url} returned ${response.status}: ${await response.text()}`)
+}
+
+/** The name of the Workspace's plan, as the gateway reports it; null without a subscription. */
+export async function planName(session: EmailSession, uuid: string): Promise<string | null> {
+  const subscriptions = await gatewayRequest(session, 'GET', `/v1/billing/spaces/${uuid}/subscriptions`)
+  if (!Array.isArray(subscriptions) || subscriptions.length === 0) return null
+  const [{ metadata }] = subscriptions as Array<{ metadata?: { planName?: string } }>
+  return metadata?.planName ?? null
 }
 
 /** The gateway's answer for a resource of the Workspace (`safes`, `members`, `address-book`), as text. */
