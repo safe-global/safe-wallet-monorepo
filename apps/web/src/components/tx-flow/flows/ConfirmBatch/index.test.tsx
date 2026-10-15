@@ -32,7 +32,7 @@ const draftBatchItem = (): DraftBatchItem => ({
 describe('ConfirmBatchFlow', () => {
   const setTxFlow = jest.fn()
 
-  const flow = (
+  const flow = () => (
     <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
       <ConfirmBatchFlow onSubmit={jest.fn()} />
     </TxModalContext.Provider>
@@ -45,17 +45,17 @@ describe('ConfirmBatchFlow', () => {
   it('keeps the flow open while the batch has transactions', () => {
     mockUseDraftBatch.mockReturnValue([draftBatchItem(), draftBatchItem()])
 
-    render(flow)
+    render(flow())
 
     expect(setTxFlow).not.toHaveBeenCalled()
   })
 
   it('closes the flow when the batch becomes empty on the review step', () => {
     mockUseDraftBatch.mockReturnValue([draftBatchItem()])
-    const { rerender } = render(flow)
+    const { rerender } = render(flow())
 
     mockUseDraftBatch.mockReturnValue([])
-    rerender(flow)
+    rerender(flow())
 
     expect(setTxFlow).toHaveBeenCalledWith(undefined)
   })
