@@ -27,6 +27,7 @@ import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hyper
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
+import PolicyGuardCheck from '../PolicyGuardCheck'
 
 export const SafeShieldContent = ({
   recipient,
@@ -117,6 +118,9 @@ export const SafeShieldContent = ({
           rounded-b-md (12px) = the parent's rounded-lg (16px) minus the 4px px-1/pb-1 inset, which
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
+        {/* The guard's verdict is a fact about this Safe, not an analysis, so it leads. */}
+        <PolicyGuardCheck safeTx={safeTx} />
+
         {showHypernativeInfo && (
           <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}

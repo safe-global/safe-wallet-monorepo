@@ -1,5 +1,7 @@
 import type { Address } from 'viem'
 import { PolicyType } from '@safe-global/store/gateway/policies/types'
+// One source of truth: the guard check in the transaction Copilot recognises the same deployments.
+import { SAFE_POLICY_GUARD_BY_DELAY } from '@safe-global/utils/services/policy-guard'
 
 /**
  * Policy-engine deployments, as the source for addresses CGW cannot report.
@@ -21,22 +23,6 @@ export type PolicyDeployments = {
   policies: Partial<Record<PolicyType, Address>>
 }
 
-/**
- * The guard is deployed once per configuration delay, so choosing a delay means choosing an
- * address. The 5-second one is what the wizards assume (see POLICY_GUARD_DELAY_SEC); the
- * others are here so a longer-delay deployment is a one-line change rather than a hunt.
- */
-export const SAFE_POLICY_GUARD_BY_DELAY: Record<number, Address> = {
-  0: '0x55c241591E12CE3c58491D02b737F12D3199ae95',
-  5: '0x5202B1ebE100812437d47eae769e155945fbba6a',
-  3600: '0xd2fB492adADBa5BcFb7FeBE25746fd5FdE090b20',
-  86400: '0x2d4527fD0E79ca1e533E3C7BBEF7e0668b700aED',
-}
-
-/**
- * The guard deployment in use. Changing this switches the guard address AND the delay the
- * Pending UI counts down, because both read it — they cannot drift apart.
- */
 export const GUARD_DELAY_SECONDS = 5
 
 /**
