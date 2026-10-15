@@ -10,7 +10,8 @@ import classNames from 'classnames'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useRouter } from 'next/router'
 import NextLink from 'next/link'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
@@ -30,19 +31,6 @@ const StakingBanner = ({
   const [_, setWidgetHidden] = useLocalStorage<boolean>(hideLocalStorageKey)
 
   if (!isStakingBannerVisible) return null
-
-  const onClick = () => {
-    trackEvent(OVERVIEW_EVENTS.OPEN_STAKING_WIDGET)
-  }
-
-  const onHide = () => {
-    setWidgetHidden(true)
-    trackEvent(OVERVIEW_EVENTS.HIDE_STAKING_BANNER)
-  }
-
-  const onLearnMore = () => {
-    trackEvent(OVERVIEW_EVENTS.OPEN_LEARN_MORE_STAKING_BANNER)
-  }
 
   return (
     <>
@@ -69,9 +57,9 @@ const StakingBanner = ({
               {LEARN_MORE_LINK && (
                 <>
                   {' '}
-                  <ExternalLink onClick={onLearnMore} href={LEARN_MORE_LINK}>
-                    Learn more
-                  </ExternalLink>
+                  <Track {...OVERVIEW_EVENTS.OPEN_LEARN_MORE_STAKING_BANNER}>
+                    <ExternalLink href={LEARN_MORE_LINK}>Learn more</ExternalLink>
+                  </Track>
                 </>
               )}
             </Typography>
@@ -79,28 +67,31 @@ const StakingBanner = ({
 
           <div className="flex flex-col items-center gap-4 md:flex-row md:items-end">
             <div>
-              <Button variant="ghost" onClick={onHide} size="sm" className="whitespace-nowrap">
-                Don&apos;t show again
-              </Button>
+              <Track {...OVERVIEW_EVENTS.HIDE_STAKING_BANNER}>
+                <Button variant="ghost" onClick={() => setWidgetHidden(true)} size="sm" className="whitespace-nowrap">
+                  Don&apos;t show again
+                </Button>
+              </Track>
             </div>
-            <Button
-              size="sm"
-              className={classNames(css.stakeButton, 'w-full')}
-              render={
-                <NextLink
-                  href={
-                    AppRoutes.stake && {
-                      pathname: AppRoutes.stake,
-                      query: safeLinkQuery,
+            <Track {...OVERVIEW_EVENTS.OPEN_STAKING_WIDGET}>
+              <Button
+                size="sm"
+                className={classNames(css.stakeButton, 'w-full')}
+                render={
+                  <NextLink
+                    href={
+                      AppRoutes.stake && {
+                        pathname: AppRoutes.stake,
+                        query: safeLinkQuery,
+                      }
                     }
-                  }
-                  rel="noreferrer"
-                  onClick={onClick}
-                />
-              }
-            >
-              Stake
-            </Button>
+                    rel="noreferrer"
+                  />
+                }
+              >
+                Stake
+              </Button>
+            </Track>
           </div>
         </div>
       </div>

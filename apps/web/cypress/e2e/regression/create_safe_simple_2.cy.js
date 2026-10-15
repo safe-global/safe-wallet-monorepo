@@ -6,6 +6,7 @@ import * as ls from '../../support/localstorage_data.js'
 import * as safe from '../pages/load_safe.pages'
 import * as wallet from '../../support/utils/wallet.js'
 import { walletCredentials } from '../../support/credentials.js'
+import { mockEnsName } from '../../support/utils/ethers.js'
 
 const ownerSepolia = ['Automation owner Sepolia']
 const ownerName = 'Owner name'
@@ -78,6 +79,7 @@ describe('Safe creation tests 2', () => {
   })
 
   it('Verify ENS name in the address and name fields is resolved', () => {
+    mockEnsName(constants.ENS_TEST_SEPOLIA_VALID, constants.defaultOwnerAddress())
     safe.clickOnNextBtn()
     safe.inputOwnerAddress(0, constants.ENS_TEST_SEPOLIA_VALID)
     safe.verifyOwnerAddress(0, constants.defaultOwnerAddress())

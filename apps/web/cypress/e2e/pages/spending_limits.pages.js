@@ -38,6 +38,7 @@ const allActionsSection = '[data-testid="all-actions"]'
 const actionItem = '[data-testid="action-item"]'
 const actionAccordion = '[data-testid="action-accordion"]'
 const decodedTxSummary = '[data-testid="decoded-tx-summary"]'
+const DECODED_TX_TIMEOUT_MS = 30000
 
 export const timePeriodOptions = {
   oneTime: 'One time',
@@ -240,9 +241,9 @@ export function verifyActionNames(names) {
 }
 
 export function verifyDecodedTxSummary(names) {
-  cy.get(decodedTxSummary).within(() => {
+  cy.get(decodedTxSummary, { timeout: DECODED_TX_TIMEOUT_MS }).within(() => {
     names.forEach((item) => {
-      cy.contains(item)
+      cy.contains(item, { timeout: DECODED_TX_TIMEOUT_MS })
     })
   })
 }

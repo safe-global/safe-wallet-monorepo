@@ -8,8 +8,6 @@ import NameInput from '@/components/common/NameInput'
 import { NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH, sanitizeName } from '@safe-global/utils/validation/names'
 import { AppRoutes } from '@/config/routes'
 import { PRIVACY_URL } from '@safe-global/utils/config/constants'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
@@ -42,7 +40,6 @@ function SpaceCreationModal({ onClose }: { onClose: () => void }): ReactElement 
 
       if (response.data) {
         const spaceId = response.data.uuid
-        trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: spaceId }, { workspace_id: spaceId })
         router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
         onClose()
 

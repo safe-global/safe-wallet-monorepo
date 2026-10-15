@@ -9,9 +9,11 @@ import useWallet from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { OnboardAPI } from '@web3-onboard/core'
 
-jest.mock('@/config/gateway', () => ({
-  GATEWAY_URL: 'https://safe-client.safe.global',
-}))
+jest.mock('@/config/gateway', () => {
+  const { gatewayUrl } = jest.requireActual('@/config/gateway')
+  const base = 'https://safe-client.safe.global'
+  return { GATEWAY_URL: base, gatewayUrl: (path: string) => gatewayUrl(path, base) }
+})
 
 jest.mock('@/hooks/wallets/useOnboard')
 jest.mock('@/hooks/wallets/useWallet')
