@@ -15,6 +15,11 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { getPolicyGuardAddress } from '../../services/policyEngineDeployments'
 import { usePolicyGuard } from '../usePolicyGuard'
 
+jest.mock('@safe-global/utils/config/constants', () => ({
+  ...jest.requireActual('@safe-global/utils/config/constants'),
+  INFURA_TOKEN: '',
+}))
+
 const GUARD = getPolicyGuardAddress('11155111')!
 const SLOT_EMPTY = `0x${'0'.repeat(64)}`
 const slotOf = (address: string) => `0x${'0'.repeat(24)}${address.slice(2).toLowerCase()}`
@@ -237,6 +242,17 @@ describe('usePolicyGuard', () => {
     const firstError = result.current.error
     rerender()
     expect(result.current.error).toBe(firstError)
+  })
+
+  it('returns an error, not endless loading, when the RPC needs an Infura token that is not set', () => {
+    mockChain([FEATURES.POLICY_RECIPIENT_ALLOWLIST], {
+      rpcUri: { authentication: 'API_KEY_PATH', value: 'https://sepolia.infura.io/v3/' },
+    })
+    mockSafe({})
+    jest.spyOn(web3ReadOnly, 'useWeb3ReadOnly').mockReturnValue(undefined)
+    const { result } = renderHook(() => usePolicyGuard())
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.error).toBeInstanceOf(Error)
   })
 
   it('does not request another Safe without a target', () => {

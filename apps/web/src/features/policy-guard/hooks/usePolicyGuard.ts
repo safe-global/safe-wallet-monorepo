@@ -7,6 +7,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { POLLING_INTERVAL } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
+import { getRpcServiceUrl } from '@/hooks/wallets/rpcServiceUrl'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useAppSelector } from '@/store'
 import { selectRpc } from '@/store/settingsSlice'
@@ -67,7 +68,8 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const eligibility = isSafeEligibleForAllowlist(safe, chain)
   const isUnsupported = !eligibility.eligible && eligibility.reason === 'version-unsupported'
   const shouldRead = safeLoaded && eligibility.eligible
-  const hasRpc = !!chain && (!!chain.rpcUri.value || !!customRpc?.[chain.chainId])
+  const customRpcUrl = chain ? customRpc?.[chain.chainId] : undefined
+  const hasRpc = useMemo(() => !!chain && !!(customRpcUrl || getRpcServiceUrl(chain.rpcUri)), [chain, customRpcUrl])
 
   const safeKey = `${safe.chainId}:${safeAddress}`
 
