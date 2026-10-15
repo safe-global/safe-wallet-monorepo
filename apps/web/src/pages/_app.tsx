@@ -12,7 +12,8 @@ import { Provider } from 'react-redux'
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
 import { BRAND_NAME } from '@/config/constants'
-import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
+import { useHydrateStore, useInitChains } from '@/store'
+import { getAppStore } from '@/services/appStore'
 import PageLayout from '@/components/common/PageLayout'
 import LaunchScreen from '@/components/common/LaunchScreen'
 import useLoadableStores from '@/hooks/useLoadableStores'
@@ -39,7 +40,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
+import { useInviteNotification, usePrototypeDarkMode, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -106,9 +107,6 @@ if (typeof window !== 'undefined') {
   initObservability([new DatadogProvider(), new MixpanelTracingProvider()])
 }
 
-const reduxStore = makeStore()
-setStoreInstance(reduxStore)
-
 // Safe-scoped notification + tracking hooks. Split out of InitApp so they can
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
@@ -130,7 +128,7 @@ const SafeScopedSubscriptions = (): null => {
 }
 
 const InitApp = (): ReactElement | null => {
-  useHydrateStore(reduxStore)
+  useHydrateStore(getAppStore())
   useInitChains()
   useAdjustUrl()
   useGtm()
@@ -183,8 +181,22 @@ const AppLaunchScreen = (): ReactElement | null => {
   return <LaunchScreen stepUpCaption={stepUpCaption} />
 }
 
+const PrototypeApp = ({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageProps'>): ReactElement => {
+  const [isDarkMode] = usePrototypeDarkMode()
+  return (
+    <ShadcnProvider dark={isDarkMode}>
+      <Component {...pageProps} />
+    </ShadcnProvider>
+  )
+}
+
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
+
+  if (router.pathname === '/prototypes/pending-queue')
+    return <PrototypeApp Component={Component} pageProps={pageProps} />
+
+  const reduxStore = getAppStore()
 
   return (
     <Provider store={reduxStore}>
