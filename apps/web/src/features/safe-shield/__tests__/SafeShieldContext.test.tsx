@@ -263,6 +263,58 @@ describe('SafeShieldContext', () => {
     expect(result.current.isRiskConfirmed).toBe(true)
   })
 
+  describe('risk confirmation after a late analysis result', () => {
+    const noDeadlock = { recipient: [undefined, undefined, false], contract: [undefined, undefined, false] }
+
+    // A critical threat needs the confirmation; the deadlock analysis arrives after the user confirmed.
+    function renderConfirmed(initialDeadlock: unknown) {
+      mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.CRITICAL))
+      let deadlock = initialDeadlock
+      mockUseCounterpartyAnalysis.mockImplementation(() => ({ ...noDeadlock, deadlock }))
+      const tx = buildSafeTransaction('0x1234')
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <SafeTxContext.Provider value={{ ...mockSafeTxContextValue, safeTx: tx }}>
+          <SafeShieldProvider>{children}</SafeShieldProvider>
+        </SafeTxContext.Provider>
+      )
+      const rendered = renderHook(() => useSafeShield(), { wrapper })
+      act(() => {
+        rendered.result.current.setIsRiskConfirmed(true)
+      })
+      const deliver = (next: unknown) => {
+        deadlock = next
+        rendered.rerender()
+      }
+      return { ...rendered, deliver }
+    }
+
+    it('keeps the confirmation when a non-critical result arrives', () => {
+      const { result, deliver } = renderConfirmed([undefined, undefined, true])
+
+      deliver(DeadlockAnalysisBuilder.nestedSafeWarning())
+
+      expect(result.current.needsRiskConfirmation).toBe(true)
+      expect(result.current.isRiskConfirmed).toBe(true)
+    })
+
+    it('keeps the confirmation when the same findings arrive as new objects', () => {
+      const { result, deliver } = renderConfirmed(DeadlockAnalysisBuilder.deadlockDetected())
+
+      deliver(DeadlockAnalysisBuilder.deadlockDetected())
+
+      expect(result.current.isRiskConfirmed).toBe(true)
+    })
+
+    it('asks again when a new critical finding arrives', () => {
+      const { result, deliver } = renderConfirmed([undefined, undefined, true])
+
+      deliver(DeadlockAnalysisBuilder.deadlockDetected())
+
+      expect(result.current.needsRiskConfirmation).toBe(true)
+      expect(result.current.isRiskConfirmed).toBe(false)
+    })
+  })
+
   it('should require risk confirmation for critical deadlock', async () => {
     mockUseThreatAnalysis.mockReturnValue([undefined, undefined, false])
     mockUseCounterpartyAnalysis.mockReturnValue({

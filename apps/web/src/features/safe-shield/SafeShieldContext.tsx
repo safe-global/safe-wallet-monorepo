@@ -96,7 +96,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
 
   const [isRiskConfirmed, setIsRiskConfirmed] = useState(false)
 
-  const { needsRiskConfirmation, primaryThreatSeverity } = useMemo(() => {
+  const criticalFindings = useMemo(() => {
     const primaryThreatResult = getPrimaryResult(threatAnalysisResult?.THREAT || [])
 
     const severity = primaryThreatResult?.severity
@@ -109,18 +109,24 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
     const hasCriticalDeadlock = isSeverityHigherOrEqual(deadlockSeverity, Severity.CRITICAL)
 
     // Include Safe-level analysis, deadlock and address-poisoning in risk confirmation
-    const needsRiskConfirmation =
-      hasCriticalThreat || hasCriticalDeadlock || hasPoisoning || safeAnalysis?.severity === Severity.CRITICAL
+    const findings = [
+      hasCriticalThreat ? `threat:${primaryThreatResult?.type}` : undefined,
+      hasCriticalDeadlock ? `deadlock:${primaryDeadlockResult?.type}` : undefined,
+      hasPoisoning ? 'address-poisoning' : undefined,
+      safeAnalysis?.severity === Severity.CRITICAL ? `safe:${safeAnalysis.type}` : undefined,
+    ]
 
-    return {
-      needsRiskConfirmation,
-      primaryThreatSeverity: severity,
-    }
+    return findings.filter((finding): finding is string => finding !== undefined)
   }, [threatAnalysisResult, deadlockResults, safeAnalysis, hasPoisoning])
 
+  const needsRiskConfirmation = criticalFindings.length > 0
+
+  // The user confirms this transaction with these critical findings. Analyses can deliver later or as new objects,
+  // so only a change of the transaction or of the findings asks for the confirmation again.
+  const confirmedRiskKey = JSON.stringify([safeShieldTxKey, criticalFindings])
   useEffect(() => {
     setIsRiskConfirmed(false)
-  }, [primaryThreatSeverity, safeShieldTxKey, safeAnalysis, deadlockResults, hasPoisoning])
+  }, [confirmedRiskKey])
 
   return (
     <SafeShieldContext.Provider
