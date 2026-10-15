@@ -14,7 +14,6 @@ type Cycle = 'month' | 'year'
 
 const READ_ONLY_NOTE = 'Only admins can change the plan. Ask an admin to upgrade, switch or change seats.'
 
-/** Billing-cycle toggle plus one card per visible tier; the Plans page frames it in a card, dialogs embed it. */
 export function PlanCatalog({
   tiers,
   onCompareFeatures,
@@ -22,9 +21,7 @@ export function PlanCatalog({
   ...actions
 }: {
   tiers: PlanTier[]
-  /** Opens and scrolls to the compare card. Without it, the link just jumps to the anchor. */
   onCompareFeatures?: () => void
-  /** Inside a modal: no card frame and no compare link, as the compare table isn't there. */
   embedded?: boolean
 } & PlanCardActions) {
   const [cycle, setCycle] = useState<Cycle>('month')
@@ -57,7 +54,6 @@ export function PlanCatalog({
         )}
       </div>
 
-      {/* One shared row track per card section (the cards subgrid into it), so rows align whatever wraps. */}
       <div className="group/plans flex flex-col gap-5 @4xl:grid @4xl:auto-cols-[minmax(0,1fr)] @4xl:grid-flow-col @4xl:grid-rows-[auto_auto_auto_1fr_auto] @4xl:gap-x-5 @4xl:gap-y-0">
         {visible.map((tier) => (
           <PlanCard

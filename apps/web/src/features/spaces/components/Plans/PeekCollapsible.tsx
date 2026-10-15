@@ -9,7 +9,6 @@ const HEIGHT_TRANSITION = {
 
 type Heights = { collapsed: number; full: number }
 
-/** Full content height, and the height down to the bottom of `peekUntil`. */
 const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObject<HTMLElement | null>) => {
   const [heights, setHeights] = useState<Heights>()
 
@@ -33,7 +32,6 @@ const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObj
   return heights
 }
 
-/** Collapses its content down to `peekUntil`, fading the cut under an expand button, and slides open to full height. */
 export default function PeekCollapsible({
   id,
   open,
@@ -49,7 +47,6 @@ export default function PeekCollapsible({
   /** The last element still visible while collapsed. */
   peekUntil: RefObject<HTMLElement | null>
   expandLabel: string
-  /** Applied to the clipping container. */
   className?: string
   children: ReactNode
 }) {

@@ -44,7 +44,6 @@ const CompareCell = ({ value }: { value: CompareValue }) => {
   return <>{value}</>
 }
 
-/** Opens the Guardian signup. */
 const AddOnLink = ({ label, onOpen }: { label: string; onOpen: () => void }) => (
   <Link
     render={<button type="button" />}
@@ -131,7 +130,6 @@ const CompareTableSection = ({
   onOpenAddOn: () => void
   lastPeekRowRef?: Ref<HTMLTableRowElement>
 }) => {
-  // Collapsed, the first section shows in full, the second peeks out under the fade and the rest is hidden.
   const isPeek = index === 1
   const isFoldable = index > 1
   const isFolded = isFoldable && !isExpanded
@@ -183,7 +181,6 @@ export default function CompareFeaturesCard({
   onExpandedChange,
   ref,
 }: {
-  /** Current plan, including free access. */
   currentPlanName?: string
   isExpanded: boolean
   onExpandedChange: (isExpanded: boolean) => void

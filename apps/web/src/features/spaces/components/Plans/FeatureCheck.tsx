@@ -1,6 +1,5 @@
 import { Check } from 'lucide-react'
 
-/** 20px check icon. */
 export const FeatureCheck = () => (
   <span
     aria-hidden

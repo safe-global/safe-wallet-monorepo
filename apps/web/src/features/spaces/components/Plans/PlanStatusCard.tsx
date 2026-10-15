@@ -19,7 +19,6 @@ export const _remaining = ({ used, quota }: Meter): number | null => (quota === 
 export const seatsTooltip = (tierName: string | undefined, quota: number | null | undefined) =>
   `${tierName ? `Your ${tierName} plan` : 'Your plan'} covers ${quota ?? 'unlimited'} Safe accounts. At ${quota ?? 'unlimited'}, remove one from this Workspace to add another. Safe accounts you leave out remain available in My accounts.`
 
-/** Active, or free access with days left for its whole length. */
 export const getCurrentBadge = (plan: PlanSummary | null): CurrentBadge | undefined => {
   if (!plan) return undefined
   if (plan.status === 'active') return { label: 'Active', variant: 'brand' }

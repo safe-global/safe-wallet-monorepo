@@ -18,7 +18,6 @@ export type PlanSeatOption = {
   features?: string[]
 }
 
-/** Card copy from the payment link's or subscription's metadata; a part is left out when its key is empty. */
 export type PlanCardCopy = { subtitle?: string; supportLevel?: string; supportDetail?: string }
 
 export type PlanTier = {

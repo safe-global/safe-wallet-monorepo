@@ -48,7 +48,6 @@ export const getPlanDescriptions = (metadata: Metadata): string[] => {
 
 const readText = (metadata: Metadata, key: string): string | undefined => metadata[key]?.trim() || undefined
 
-/** The card's subtitle and support line (`planSubtitle`, `planSupportLevel`, `planSupportDetail`). */
 export const getPlanCardCopy = (metadata: Metadata): PlanCardCopy => ({
   subtitle: readText(metadata, 'planSubtitle'),
   supportLevel: readText(metadata, 'planSupportLevel'),

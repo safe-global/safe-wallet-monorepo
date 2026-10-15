@@ -30,7 +30,6 @@ export const priceSuffix = (billingCycle: 'month' | 'year' | null): string => (b
 const monthlyEquivalent = (price: number, billingCycle: 'month' | 'year' | null): number =>
   billingCycle === 'year' ? price / 12 : price
 
-/** Mixpanel properties of "Safe Pro Plans Clicked": which control, and on which surface. */
 export const plansClickParams = (label: SAFE_PRO_PLANS_LABELS, location: PlanLocation) => ({
   [MixpanelEventParams.CTA]: label,
   [MixpanelEventParams.LOCATION]: location,
@@ -92,14 +91,12 @@ export const getChangeDirection = (current: CurrentPlan | undefined, pick: PlanP
   return next > now ? 'upgrade' : next < now ? 'downgrade' : 'change'
 }
 
-/** Same plan and Safe count, other billing cycle: the only thing that changes is how often it's billed. */
 const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.tier.name === current.name &&
   pick.tier.billingCycle !== null &&
   pick.tier.billingCycle !== current.billingCycle &&
   pick.option.label === current.seatsLabel
 
-/** The card button. "Manage plan" lives in the status card; Enterprise changes go through sales. */
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
   if (pick.tier.isCurrent) {
     if (pick.tier.name === ENTERPRISE_TIER.name) return { kind: 'account-team', label: 'Change via your account team' }
@@ -244,7 +241,6 @@ export const buildPlanTiers = (
   return [...tiers, ENTERPRISE_TIER].sort((a, b) => rank(a.name) - rank(b.name))
 }
 
-/** The seat option a card opens on: the user's pick, the price in force, else the Safe count in force on the other cycle. */
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
   const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
   return (
@@ -255,7 +251,6 @@ export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsL
   )
 }
 
-/** Tiers for the selected billing cycle. Keeps the current plan if the other cycle has no matching offer. */
 export const getVisibleTiers = (tiers: PlanTier[], cycle: 'month' | 'year'): PlanTier[] =>
   tiers.filter((tier) => {
     if (tier.billingCycle === null || tier.billingCycle === cycle) return true
@@ -269,13 +264,11 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
 
-/** Hide the static Enterprise card when Enterprise is the current plan. */
 export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {
   const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
   return hasCurrentEnterprise ? tiers.filter((tier) => tier !== ENTERPRISE_TIER) : tiers
 }
 
-/** Same totals as the launch page: €669/mo, or the full yearly amount per year. */
 export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): { headline: string; suffix: string } => {
   if (option.price === null) {
     return {
@@ -295,7 +288,6 @@ const percentFormat = new Intl.NumberFormat('en', {
   maximumFractionDigits: 1,
 })
 
-/** A card's yearly saving at the same Safe count; the counterpart card fills in the current plan's price, which the CGW leaves out. */
 export const getCardSaving = (
   tier: PlanTier,
   option: PlanSeatOption | undefined,

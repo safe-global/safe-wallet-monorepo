@@ -7,24 +7,19 @@ export const RECOMMENDED_PLAN = 'Business'
 
 type PlanName = (typeof PLAN_ORDER)[number]
 
-/** The Plans page anchor the plan catalog links to. */
 export const COMPARE_FEATURES_ID = 'compare-features'
 
-/** `true` is included, `false` is not; a string names what the plan gets. */
 export type CompareValue = boolean | string
 
 export type CompareRow = {
   feature: string
-  /** Unreleased: a "Soon" chip next to the feature name. */
   isComingSoon?: boolean
-  /** Partner add-on: a "Learn more" link next to the feature opens its signup. */
   isAddOn?: boolean
   values: Record<PlanName, CompareValue>
 }
 
 export type CompareSection = {
   title: string
-  /** Shown next to the title while the compare card is hovered. */
   hoverEmoji?: string
   rows: CompareRow[]
 }

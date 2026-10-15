@@ -7,7 +7,6 @@ export const SPACE_ID = 'uuid-1'
 export const DAY = 24 * 60 * 60
 export const now = () => Math.floor(Date.now() / 1000)
 
-// Staging Stripe catalog (customer group wallet_web), as the payment-links endpoint returns it, plus the card copy keys.
 const PLAN_METADATA = {
   Starter: {
     FEATURE_SPONSORED_TRANSACTIONS: '10',

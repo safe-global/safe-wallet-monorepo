@@ -31,7 +31,6 @@ const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
   subscribe: PlanCtaKind.CONTINUE_WITH_PLAN,
 }
 
-/** Mint line behind the support level that draws in while the card is hovered or focused. */
 const SUPPORT_HIGHLIGHT_CLASSES = [
   'absolute -inset-x-[0.08em] bottom-[calc(2px-0.06em)] -z-10 h-1 origin-left bg-mint',
   'scale-x-0 transition-transform duration-[450ms] ease-soft motion-reduce:transition-none',
@@ -49,7 +48,6 @@ const Seats = ({
   options: PlanSeatOption[]
   value: PlanSeatOption
   onChange: (option: PlanSeatOption) => void
-  /** Accessible name for the control, e.g. "Safe accounts for Business". */
   label?: string
 }) =>
   options.length > 1 ? (
@@ -77,21 +75,15 @@ const Seats = ({
   )
 
 export type PlanCardActions = {
-  /** Move to, or buy, the picked offer. */
   onSubscribe?: (pick: PlanPick) => void
-  /** Manage the current plan: the Stripe portal for billing details, invoices or cancellation. */
   onManage?: () => void
   isBusy?: boolean
   currentPlan?: CurrentPlan
-  /** A viewer who cannot act on the plan (a Workspace member who is not an admin): the cards show no buttons. */
   readOnly?: boolean
-  /** Where the catalog is shown, for analytics. */
   location: PlanLocation
-  /** Any plan button was clicked, before its action runs. */
   onCta?: (pick: PlanPick, cta: PlanCtaKindOf) => void
 }
 
-/** Outline link to sales, tracked by which card sent the user there. */
 const SalesCta = ({
   label,
   kind,
@@ -192,10 +184,8 @@ export const PlanCard = ({
   ...actions
 }: {
   tier: PlanTier
-  /** Safe count picked on this plan, on either billing cycle. */
   seatsLabel?: string
   onSeatsChange?: (label: string) => void
-  /** The same plan on the other billing cycle, to compare monthly and yearly prices. */
   counterpartTier?: PlanTier
   onSwitchToYearly?: () => void
 } & PlanCardActions) => {

@@ -70,7 +70,6 @@ export default function Plans({
         tierName={plan?.name}
         onManage={onManage}
         isManaging={isManaging}
-        // Trials with a card on file manage it in the portal too.
         canManage={!readOnly && (canManage || Boolean(currentPlan?.isTrialing && currentPlan.hasPaymentMethod))}
       />
       <PlanCatalog
