@@ -1,15 +1,14 @@
 import { useMemo } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query/react'
-import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
-import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { useAppSelector } from '@/store'
+import { selectRpc } from '@/store/settingsSlice'
 import { getPolicyGuardAddress } from '../services/policyEngineDeployments'
-import { isSafeVersionSupported } from '../services/allowlistAvailability'
+import { isSafeEligibleForAllowlist } from '../services/allowlistAvailability'
 import { resolvePolicyGuardState } from '../services/resolvePolicyGuardState'
 import { readModuleGuard } from '../services/readModuleGuard'
 import type { PolicyGuardState } from '../types'
@@ -18,32 +17,19 @@ type ModuleGuardRead = { safeKey: string } & ({ moduleGuard: string } | { error:
 
 export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolean; error?: Error }
 
-export type PolicyGuardTarget = { chainId: string; safeAddress: string }
+const NO_RPC_ERROR = new Error('No RPC is configured for this chain')
 
-/** Reads the open Safe by default; pass a target to read any other Safe */
-export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult => {
-  const currentSafe = useSafeInfo()
-  const currentProvider = useWeb3ReadOnly()
-  const {
-    currentData: targetSafe,
-    isFetching: targetSafeLoading,
-    isError: isTargetSafeError,
-  } = useSafesGetSafeV1Query(target ?? skipToken)
-  const targetChain = useChain(target?.chainId ?? '')
-  const targetProvider = useMemo(() => (targetChain ? createWeb3ReadOnly(targetChain) : undefined), [targetChain])
-
-  const { safe, safeAddress, safeLoaded, safeLoading } = target
-    ? {
-        safe: targetSafe ?? { chainId: target.chainId, version: undefined, guard: undefined, txHistoryTag: undefined },
-        safeAddress: target.safeAddress,
-        safeLoaded: !!targetSafe,
-        safeLoading: targetSafeLoading,
-      }
-    : currentSafe
-  const web3ReadOnly = target ? targetProvider : currentProvider
+/** Reads the open Safe; wrap in a SafeScopeProvider to read another Safe */
+export const usePolicyGuard = (): UsePolicyGuardResult => {
+  const { safe, safeAddress, safeLoaded, safeLoading } = useSafeInfo()
+  const web3ReadOnly = useWeb3ReadOnly()
+  const chain = useChain(safe.chainId)
+  const customRpc = useAppSelector(selectRpc)
   const policyGuardAddress = getPolicyGuardAddress(safe.chainId)
-  const isSupported = isSafeVersionSupported(safe.version)
-  const shouldRead = safeLoaded && !!policyGuardAddress && isSupported
+  const eligibility = isSafeEligibleForAllowlist(safe, chain)
+  const isUnsupported = !eligibility.eligible && eligibility.reason === 'version-unsupported'
+  const shouldRead = safeLoaded && eligibility.eligible
+  const hasRpc = !!chain && (!!chain.rpcUri.value || !!customRpc?.[chain.chainId])
 
   const safeKey = `${safe.chainId}:${safeAddress}`
 
@@ -56,7 +42,7 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
         (error) => ({ safeKey, error: asError(error) }),
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- txHistoryTag changes after each executed tx, which is how a new module guard shows up
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- txHistoryTag changes after each executed tx
     [shouldRead, web3ReadOnly, safeAddress, safeKey, safe.txHistoryTag],
     false,
   )
@@ -65,22 +51,22 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const currentRead = read?.safeKey === safeKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
   const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
-  const error = target && isTargetSafeError && !targetSafeLoading ? new Error('Failed to load the Safe') : readError
+  const error = shouldRead && !hasRpc ? NO_RPC_ERROR : readError
 
   const state = useMemo((): PolicyGuardState | undefined => {
-    if (!safeLoaded || !policyGuardAddress) return
-    if (!isSupported) return { status: 'unsupported' }
-    if (!moduleGuard) return
+    if (!safeLoaded) return
+    if (isUnsupported) return { status: 'unsupported' }
+    if (!moduleGuard || !policyGuardAddress) return
     return resolvePolicyGuardState({
       txGuard: safe.guard?.value ?? ZERO_ADDRESS,
       moduleGuard,
       policyGuardAddress,
     })
-  }, [safeLoaded, policyGuardAddress, isSupported, moduleGuard, safe.guard])
+  }, [safeLoaded, isUnsupported, moduleGuard, policyGuardAddress, safe.guard])
 
   return {
     state,
-    isLoading: safeLoading || (shouldRead && (!web3ReadOnly || loading || !currentRead)),
+    isLoading: safeLoading || (shouldRead && hasRpc && (!web3ReadOnly || loading || !currentRead)),
     error,
   }
 }

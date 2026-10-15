@@ -3,8 +3,7 @@ export type PolicyEngineContract =
 
 type Deployment = { networkAddresses: Record<string, string> }
 
-// Addresses the policy indexer watches (5s-delay guard); others are invisible to CGW.
-// Mirrors the safe-modules-deployments shape so the source can be swapped once WA-3042 publishes it.
+// The policy indexer's addresses: configurations against any other deployment are invisible to CGW
 const DEPLOYMENTS: Record<PolicyEngineContract, Deployment> = {
   SafePolicyGuard: { networkAddresses: { '11155111': '0x5202B1ebE100812437d47eae769e155945fbba6a' } },
   AllowPolicy: { networkAddresses: { '11155111': '0x92e94Af03982C2486dffa8DcBc5d069D33996eF2' } },
