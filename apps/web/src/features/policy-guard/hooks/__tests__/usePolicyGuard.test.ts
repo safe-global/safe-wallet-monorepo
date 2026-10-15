@@ -227,12 +227,12 @@ describe('usePolicyGuard', () => {
       expect(query).toHaveBeenCalledWith({ ...TARGET, txHistoryTag: '3' })
     })
 
-    it('polls the target Safe', () => {
+    it('polls the target Safe only while the tab is focused', () => {
       mockSafe()
       const query = mockTargetQuery({ currentData: buildSafe(), isFetching: false })
       mockModuleGuard({ currentData: ZERO_ADDRESS })
       renderHook(() => usePolicyGuard(TARGET))
-      expect(query).toHaveBeenCalledWith(TARGET, { pollingInterval: POLLING_INTERVAL })
+      expect(query).toHaveBeenCalledWith(TARGET, { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true })
     })
 
     it('is loading while the target Safe loads', () => {

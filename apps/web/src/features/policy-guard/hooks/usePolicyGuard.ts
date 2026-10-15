@@ -23,7 +23,10 @@ export type PolicyGuardTarget = { chainId: string; safeAddress: string }
 /** Reads the open Safe by default; pass a target to read any other Safe */
 export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult => {
   const currentSafe = useSafeInfo()
-  const targetQuery = useSafesGetSafeV1Query(target ?? skipToken, { pollingInterval: POLLING_INTERVAL })
+  const targetQuery = useSafesGetSafeV1Query(target ?? skipToken, {
+    pollingInterval: POLLING_INTERVAL,
+    skipPollingIfUnfocused: true,
+  })
   const currentSafeError = useMemo(
     () => (currentSafe.safeError ? new Error(currentSafe.safeError) : undefined),
     [currentSafe.safeError],
