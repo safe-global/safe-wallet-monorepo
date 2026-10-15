@@ -6,7 +6,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPolicyStatus } from '@safe-global/views/features/spaces/components/Policies/types'
+import { EDIT_POLICY_LABEL } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
 import type { GuardPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
+import { PolicyDrawerActions } from '../components/PolicyDrawerActions'
 import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
 
 const Section = ({ label, children }: { label: string; children: ReactNode }): ReactElement => (
@@ -89,8 +91,15 @@ const MultiSendBody = (): ReactElement => (
   </Section>
 )
 
+export type GuardPolicyDrawerProps = {
+  policy: GuardPolicy
+  onClose: () => void
+  /** Only a token allowlist can be edited; the other guard policies have nothing to change. */
+  onEdit?: () => void
+}
+
 /** The detail panel for a guard-enforced policy: the Safe it applies to, then what it permits. */
-const GuardPolicyDrawer = ({ policy, onClose }: { policy: GuardPolicy; onClose: () => void }): ReactElement => (
+const GuardPolicyDrawer = ({ policy, onClose, onEdit }: GuardPolicyDrawerProps): ReactElement => (
   <Drawer open onClose={onClose} ariaLabel={getPolicyLabel(policy)}>
     <PolicyDrawerHeader
       icon={getPolicyIcon(policy.type)}
@@ -108,6 +117,10 @@ const GuardPolicyDrawer = ({ policy, onClose }: { policy: GuardPolicy; onClose: 
         {policy.type === 'multisend' && <MultiSendBody />}
       </div>
     </DrawerBody>
+
+    {policy.type === 'token-allowlist' && onEdit && (
+      <PolicyDrawerActions actionLabel={EDIT_POLICY_LABEL} onClick={onEdit} variant="secondary" />
+    )}
   </Drawer>
 )
 

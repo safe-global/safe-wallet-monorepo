@@ -18,6 +18,8 @@ export type GuardPolicyFlowProps<T extends GuardPolicyBaseFormValues> = {
   ReviewTransactionComponent: typeof ReviewTransaction
   /** Step 1: the policy's form. */
   children: ReactNode
+  /** Defaults to the create title; the edit flow renames the step without forking the shell. */
+  stepTitle?: string
 }
 
 /**
@@ -33,6 +35,7 @@ const GuardPolicyFlow = <T extends GuardPolicyBaseFormValues>({
   initialData,
   ReviewTransactionComponent,
   children,
+  stepTitle = GUARD_POLICY_CREATE_STEP_TITLE,
 }: GuardPolicyFlowProps<T>): ReactElement => (
   <SafeScopeProvider initial={safe ? { chainId: safe.chainId, safeAddress: safe.address } : undefined}>
     <TxFlow
@@ -42,7 +45,7 @@ const GuardPolicyFlow = <T extends GuardPolicyBaseFormValues>({
       eventCategory={eventCategory}
       initialData={initialData}
     >
-      <TxFlowStep title={GUARD_POLICY_CREATE_STEP_TITLE} hideNonce>
+      <TxFlowStep title={stepTitle} hideNonce>
         {children}
       </TxFlowStep>
     </TxFlow>

@@ -2,6 +2,10 @@
 
 export const GUARD_POLICY_CREATE_STEP_TITLE = 'Create new policy'
 
+export const GUARD_POLICY_EDIT_STEP_TITLE = 'Edit policy'
+
+export const EDIT_POLICY_LABEL = 'Edit policy'
+
 export const GUARD_POLICY_REVIEW_STEP_TITLE = 'Confirm policy'
 
 export const GUARD_POLICY_NEXT_LABEL = 'Next'

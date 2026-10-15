@@ -11,6 +11,7 @@ import {
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
 import GuardPolicyDrawer from './GuardPolicyDrawer'
+import EditTokenAllowlistFlow from './ERC20TransferPolicy/EditFlow'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -50,6 +51,7 @@ import {
   type Policy,
   type PolicySafe,
   type SpendingLimitPolicy,
+  type TokenAllowlistPolicy,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 
 interface PoliciesProps {
@@ -156,6 +158,12 @@ const PoliciesOverview = ({
         />,
       )
     },
+    [setTxFlow],
+  )
+
+  // The panel stays open behind the flow, as the spending limit's edit does, so cancelling lands back on it.
+  const editTokenAllowlist = useCallback(
+    (policy: TokenAllowlistPolicy) => setTxFlow(<EditTokenAllowlistFlow policy={policy} />),
     [setTxFlow],
   )
 
@@ -322,7 +330,11 @@ const PoliciesOverview = ({
       />
 
       {openedPolicy && isGuardPolicy(openedPolicy) && (
-        <GuardPolicyDrawer policy={openedPolicy} onClose={closeDetails} />
+        <GuardPolicyDrawer
+          policy={openedPolicy}
+          onClose={closeDetails}
+          onEdit={openedPolicy.type === 'token-allowlist' ? () => editTokenAllowlist(openedPolicy) : undefined}
+        />
       )}
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (

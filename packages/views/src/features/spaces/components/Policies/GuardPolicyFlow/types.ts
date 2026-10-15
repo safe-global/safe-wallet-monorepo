@@ -25,6 +25,20 @@ export const createTokenAllowlistFormValues = (safe = ''): TokenAllowlistFormVal
 
 export const createMultiSendFormValues = (safe = ''): MultiSendPolicyFormValues => ({ safe })
 
+/**
+ * An existing allowlist as the form that would produce it. Editing is the same form with the
+ * token fixed, so the row's token is the only one and its recipients are the starting list.
+ */
+export const toTokenAllowlistFormValues = (
+  safe: string,
+  tokenAddress: string,
+  recipients: ReadonlyArray<{ address: string }>,
+): TokenAllowlistFormValues => ({
+  safe,
+  tokens: [{ address: tokenAddress }],
+  recipients: recipients.length > 0 ? recipients.map(({ address }) => ({ address })) : [{ address: '' }],
+})
+
 export const createSafeManagementFormValues = (
   functionIds: readonly string[],
   safe = '',

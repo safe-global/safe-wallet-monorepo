@@ -4,6 +4,7 @@ import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/com
 import { Button } from '@safe-global/views/components/ui/button'
 import type { SafeAccountEntry } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import { GUARD_POLICY_NEXT_LABEL } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { findSafeAccount } from '../SafeAccountSelector/utils'
 import SafeAccountField from '../SpendingLimitFlow/CreateStep/SafeAccountField'
 
@@ -48,8 +49,10 @@ const GuardPolicyForm = <T extends FieldValues>({
   children,
 }: GuardPolicyFormProps<T>): ReactElement => {
   const { handleSubmit, formState } = formMethods
+  // Editing is scoped to the policy's own Safe, which is already set and not re-validated here.
+  const isEditMode = useIsEditMode()
   const selectedSafe = findSafeAccount(accounts, safeId)
-  const isSafeBlocked = !selectedSafe || Boolean(selectedSafe.ineligibleReason)
+  const isSafeBlocked = !isEditMode && (!selectedSafe || Boolean(selectedSafe.ineligibleReason))
 
   return (
     <TxCard>
@@ -62,6 +65,7 @@ const GuardPolicyForm = <T extends FieldValues>({
             onRetry={onRetryAccounts}
             hasWallet={hasWallet}
             onSafeChange={onSafeChange}
+            readOnly={isEditMode}
             notice={null}
             id={`${testId}-safe-account`}
           />

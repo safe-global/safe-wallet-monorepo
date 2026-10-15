@@ -4,6 +4,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import AddressBookInput from '@/components/common/AddressBookInput'
+import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import TokenSelector from '../../SpendingLimitFlow/TokenSelector'
 import {
   ADD_RECIPIENT_LABEL,
@@ -33,6 +34,8 @@ const Section = ({ label, helper, children }: { label: string; helper: string; c
 
 /** The policy's own fields: the tokens it covers, then who may receive them. */
 const TokenAllowlistForm = (): ReactElement => {
+  // A row is one token's allowlist, so editing changes who may receive it, not which token.
+  const isEditMode = useIsEditMode()
   const { control, watch, setValue, trigger } = useFormContext<TokenAllowlistFormValues>()
   const tokens = useFieldArray({ control, name: 'tokens' })
   const recipients = useFieldArray({ control, name: 'recipients' })
@@ -56,10 +59,11 @@ const TokenAllowlistForm = (): ReactElement => {
                     void trigger('tokens')
                   }}
                   label={TOKEN_LABEL}
+                  disabled={isEditMode}
                   data-testid={`token-allowlist-token-${index}`}
                 />
               </div>
-              {tokens.fields.length > 1 && (
+              {!isEditMode && tokens.fields.length > 1 && (
                 <Button
                   type="button"
                   variant="ghost"
@@ -73,16 +77,18 @@ const TokenAllowlistForm = (): ReactElement => {
             </div>
           ))}
 
-          <Button
-            type="button"
-            variant="ghost"
-            className="self-start"
-            onClick={() => tokens.append({ address: '' })}
-            data-testid="add-token-btn"
-          >
-            <Plus className="size-4" aria-hidden />
-            {ADD_TOKEN_LABEL}
-          </Button>
+          {!isEditMode && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="self-start"
+              onClick={() => tokens.append({ address: '' })}
+              data-testid="add-token-btn"
+            >
+              <Plus className="size-4" aria-hidden />
+              {ADD_TOKEN_LABEL}
+            </Button>
+          )}
         </div>
       </Section>
 
