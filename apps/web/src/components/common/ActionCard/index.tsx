@@ -5,7 +5,6 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/notifications/error.svg'
-import { trackEvent } from '@/services/analytics'
 import type { AnalyticsEvent } from '@/services/analytics/types'
 import Track from '@/components/common/Track'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
@@ -83,37 +82,20 @@ const ActionButton = ({
     </>
   )
 
-  if (action.href) {
-    return (
-      <Button
-        variant="ghost"
-        size="sm"
-        className={ACTION_BUTTON_CLASSNAME}
-        data-testid={testId}
-        render={<a href={action.href} target={action.target} rel={action.rel} />}
-        onClick={trackingEvent ? () => trackEvent(trackingEvent) : undefined}
-      >
-        {label}
-      </Button>
-    )
-  }
-
-  return (
+  const button = (
     <Button
       variant="ghost"
       size="sm"
       className={ACTION_BUTTON_CLASSNAME}
       data-testid={testId}
-      onClick={() => {
-        if (trackingEvent) {
-          trackEvent(trackingEvent)
-        }
-        action.onClick?.()
-      }}
+      render={action.href ? <a href={action.href} target={action.target} rel={action.rel} /> : undefined}
+      onClick={action.href ? undefined : action.onClick}
     >
       {label}
     </Button>
   )
+
+  return trackingEvent ? <Track {...trackingEvent}>{button}</Track> : button
 }
 
 export const ActionCard = ({
