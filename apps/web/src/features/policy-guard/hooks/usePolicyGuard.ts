@@ -33,13 +33,12 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
     () => (currentSafe.safeError ? new Error(currentSafe.safeError) : undefined),
     [currentSafe.safeError],
   )
-  const targetError = useMemo(
-    () =>
-      targetQuery.error
-        ? new Error(getRtkQueryErrorMessage(targetQuery.error), { cause: targetQuery.error })
-        : undefined,
-    [targetQuery.error],
-  )
+  // CGW only serves deployed Safes, so a 404 means the target is counterfactual (not eligible), not an error
+  const targetError = useMemo(() => {
+    const error = targetQuery.error
+    if (!error || ('status' in error && error.status === 404)) return undefined
+    return new Error(getRtkQueryErrorMessage(error), { cause: error })
+  }, [targetQuery.error])
 
   const {
     safe,

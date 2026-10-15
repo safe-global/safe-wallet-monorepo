@@ -281,7 +281,7 @@ describe('usePolicyGuard', () => {
 
     it('returns the same error, keeping the original, when the target Safe fails to load', () => {
       mockSafe()
-      const rtkError = { status: 404, data: 'Not found' }
+      const rtkError = { status: 500, data: 'Server error' }
       mockTargetQuery({ currentData: undefined, isFetching: false, isError: true, error: rtkError })
       mockModuleGuard({})
       const { result, rerender } = renderHook(() => usePolicyGuard(TARGET))
@@ -291,6 +291,20 @@ describe('usePolicyGuard', () => {
       expect(firstError?.cause).toBe(rtkError)
       expect(result.current.error).toBe(firstError)
       expect(result.current.isLoading).toBe(false)
+    })
+
+    it('treats a target Safe CGW does not know as not deployed, not as an error', () => {
+      mockSafe()
+      mockTargetQuery({
+        currentData: undefined,
+        isFetching: false,
+        isError: true,
+        error: { status: 404, data: 'Not found' },
+      })
+      const { query } = mockModuleGuard({})
+      const { result } = renderHook(() => usePolicyGuard(TARGET))
+      expect(result.current).toEqual({ state: undefined, isLoading: false, error: undefined })
+      expect(query).toHaveBeenCalledWith(skipToken)
     })
 
     it('reports unsupported for a target Safe below v1.5.0 without a read', () => {
