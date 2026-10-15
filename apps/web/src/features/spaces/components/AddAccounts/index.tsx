@@ -328,13 +328,6 @@ const AddAccounts = ({
             setError(msg.replace(/:\s*Key\s*\(.*$/, ''))
             return
           }
-
-          safesToAdd.forEach(({ chainId, address }) => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_LINKED, label: spaceId },
-              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-            )
-          })
         }
 
         // Remove unchecked safes
@@ -351,13 +344,6 @@ const AddAccounts = ({
             )
             return
           }
-
-          safesToRemove.forEach(({ chainId, address }) => {
-            trackEvent(
-              { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
-              { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-            )
-          })
         }
 
         // Show success notification
