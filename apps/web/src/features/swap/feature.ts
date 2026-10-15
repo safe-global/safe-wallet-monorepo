@@ -8,7 +8,7 @@
  * 1. The feature flag FEATURES.NATIVE_SWAPS is enabled
  * 2. A consumer calls useLoadFeature(SwapFeature)
  */
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import type { SwapContract } from './contract'
 
 // Heavy components - code-split into separate chunks (CowSwap SDK is large)

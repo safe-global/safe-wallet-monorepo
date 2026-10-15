@@ -117,6 +117,9 @@ export default [
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+          ],
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)
             {
