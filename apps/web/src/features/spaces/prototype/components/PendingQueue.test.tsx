@@ -21,9 +21,22 @@ jest.mock('./PrototypeFrame', () => ({ PrototypeFrame: ({ children }: { children
 
 type TestUser = ReturnType<typeof renderWithUserEvent>['user']
 const openFilter = async (user: TestUser, section: string) => {
-  await user.click(screen.getByRole('button', { name: /^Filters/ }))
-  const trigger = screen.getByRole('button', { name: section })
-  if (trigger.getAttribute('aria-expanded') !== 'true') await user.click(trigger)
+  if (!screen.queryAllByRole('menu').length) await user.click(screen.getByRole('button', { name: /^Filter/ }))
+  await user.click(await screen.findByRole('menuitem', { name: section }))
+}
+const closeMenus = async (user: TestUser) => {
+  for (let i = 0; i < 3 && screen.queryAllByRole('menu').length; i++) await user.keyboard('{Escape}')
+}
+const toggleFilter = async (user: TestUser, section: string, ...options: string[]) => {
+  await openFilter(user, section)
+  for (const option of options)
+    fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: new RegExp(`^${option}`) }))
+  await closeMenus(user)
+}
+const chooseGrouping = async (user: TestUser, option: string) => {
+  await openFilter(user, 'Group by')
+  fireEvent.click(await screen.findByRole('menuitemradio', { name: option }))
+  await closeMenus(user)
 }
 
 const sectionHeader = (name: string) =>
@@ -49,7 +62,7 @@ describe('queue design exploration', () => {
     expect(table.getByRole('button', { name: 'Sign Send to Bitwave Payroll' })).toBeVisible()
     expect(table.getByRole('button', { name: 'Review Add signer Priya' })).toBeVisible()
     fireEvent.click(table.getByRole('button', { name: 'Execute Batch · 14 actions' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('Batch · 14 actions')
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Batch · 14 actions')
     expect(screen.queryByRole('button', { name: 'Execute in preview' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
     expect(table.getByRole('button', { name: 'Execute Batch · 14 actions' })).toBeInTheDocument()
@@ -70,8 +83,8 @@ describe('queue design exploration', () => {
     expect(table.queryByRole('button', { name: 'Sign Send to Bitwave Payroll' })).not.toBeInTheDocument()
     expect(table.queryByRole('button', { name: 'Replace or cancel Send to Bitwave Payroll' })).not.toBeInTheDocument()
     fireEvent.click(table.getByRole('button', { name: 'Review Send to Bitwave Payroll' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('Send to Bitwave Payroll')
-    expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Waiting on signatures' })).toBeDisabled()
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
+    expect(within(screen.getByRole('dialog')).getByRole('button', { name: 'Waiting on others' })).toBeDisabled()
   })
 
   it('keeps dependency inspection available when earlier proposals are filtered out', () => {
@@ -96,10 +109,13 @@ describe('queue design exploration', () => {
   it('keeps rows compact and details out of the table', () => {
     render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     expect(screen.getByRole('tabpanel', { name: 'Queue' })).toBeInTheDocument()
-    expect(screen.queryByText('What happens next')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('execution-reason')).not.toBeInTheDocument()
     fireEvent.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('What happens next')
-    fireEvent.click(screen.getByRole('button', { name: 'Workspace note' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Transaction summary' }))
+    expect(screen.getByTestId('execution-reason')).toHaveTextContent(
+      'Needs 1 more signature, including yours. It can execute once the threshold is reached.',
+    )
+    fireEvent.click(screen.getByRole('button', { name: 'Note' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('September contractor payouts')
   })
   it('shows competing proposals in the side panel', () => {
@@ -112,9 +128,7 @@ describe('queue design exploration', () => {
     const { user } = renderWithUserEvent(<PendingQueue />, {
       routerProps: { query: { groupBy: 'status', option: 'inbox' } },
     })
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'None' }))
+    await chooseGrouping(user, 'None')
     await user.keyboard('{Escape}')
     expect(screen.queryByRole('button', { name: /^(Collapse|Expand) / })).not.toBeInTheDocument()
     const proposalButtons = allPending().getAllByRole('button', { name: /^Open / })
@@ -139,14 +153,14 @@ describe('queue design exploration', () => {
     expect(screen.getAllByRole('table').map((table) => table.getAttribute('aria-label'))).toEqual([
       'Ready to execute transactions',
       'Ready to sign transactions',
-      'Waiting on signatures transactions',
-      'Waiting on transactions transactions',
+      'Waiting on others transactions',
+      'Blocked transactions',
     ])
     for (const [label, count] of [
-      ['Waiting on signatures', '1'],
+      ['Waiting on others', '1'],
       ['Ready to sign', '3'],
       ['Ready to execute', '1'],
-      ['Waiting on transactions', '1'],
+      ['Blocked', '1'],
     ]) {
       expect(sectionHeader(`Collapse ${label}`)).toHaveTextContent(count)
     }
@@ -160,21 +174,17 @@ describe('queue design exploration', () => {
   })
   it('filters every section by multiple selected Safe accounts', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    await openFilter(user, 'Safe account')
-    await user.click(screen.getByRole('checkbox', { name: 'Treasury Main' }))
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Safe account', 'Ops Payroll', 'Grants')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
     expect(screen.queryByRole('button', { name: 'Open Send to Bitwave Payroll' })).not.toBeInTheDocument()
     expect(sectionHeader('Collapse Ready to sign')).toHaveTextContent('1')
-    expect(sectionHeader('Collapse Waiting on transactions')).toHaveTextContent('0')
+    expect(sectionHeader('Collapse Blocked')).toHaveTextContent('0')
     expect(sectionHeader('Collapse Ready to execute')).toHaveTextContent('1')
-    await openFilter(user, 'Safe account')
-    await user.click(screen.getByRole('checkbox', { name: 'Ops Payroll' }))
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Safe account', 'Ops Payroll')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(1)
     expect(sectionHeader('Collapse Ready to execute')).toHaveTextContent('0')
     expect(sectionHeader('Collapse Ready to sign')).toHaveTextContent('0')
-    expect(sectionHeader('Collapse Waiting on transactions')).toHaveTextContent('0')
+    expect(sectionHeader('Collapse Blocked')).toHaveTextContent('0')
   })
   it('shows history and message placeholders and restores the queue when returning', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
@@ -191,9 +201,7 @@ describe('queue design exploration', () => {
   it('groups proposals by Safe in nonce order and preserves independent collapse states', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
+    await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
     expect(screen.getAllByRole('table')).toHaveLength(3)
     expect(
@@ -215,24 +223,18 @@ describe('queue design exploration', () => {
         name: /^Open /,
       }),
     ).toHaveLength(2)
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Status' }))
+    await chooseGrouping(user, 'Status')
     await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: 'Expand Ready to sign' })).toHaveAttribute('aria-expanded', 'false')
     expect(screen.getByRole('button', { name: 'Collapse Ready to execute' })).toHaveAttribute('aria-expanded', 'true')
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
+    await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
     expect(screen.getByRole('button', { name: 'Expand Treasury Main' })).toHaveAttribute('aria-expanded', 'false')
   })
   it('shows a flat list without headers and preserves filters and collapse states', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(screen.getByRole('button', { name: 'Collapse Ready to sign' }))
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'None' }))
+    await chooseGrouping(user, 'None')
     await user.keyboard('{Escape}')
     const table = within(screen.getByRole('table', { name: 'Pending transactions' }))
     expect(table.getAllByRole('button', { name: /^Open / })).toHaveLength(6)
@@ -240,23 +242,17 @@ describe('queue design exploration', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: 'Find a proposal' }), { target: { value: 'Lightbridge' } })
     expect(table.getAllByRole('button', { name: /^Open / })).toHaveLength(1)
     expect(table.getByRole('button', { name: 'Open Send to Lightbridge Ltd' }).closest('tr')).toHaveTextContent(
-      'Waiting on #42',
+      'Blocked by #42',
     )
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Status' }))
+    await chooseGrouping(user, 'Status')
     await user.keyboard('{Escape}')
     expect(sectionHeader('Expand Ready to sign')).toHaveTextContent('1')
   })
   it('applies account selection and search to Safe groups', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
+    await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
-    await openFilter(user, 'Safe account')
-    await user.click(screen.getByRole('checkbox', { name: 'Treasury Main' }))
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Safe account', 'Ops Payroll', 'Grants')
     expect(screen.queryByRole('table', { name: 'Treasury Main transactions' })).not.toBeInTheDocument()
     fireEvent.change(screen.getByRole('searchbox', { name: 'Find a proposal' }), {
       target: { value: 'Batch · 14 actions' },
@@ -281,24 +277,26 @@ describe('queue design exploration', () => {
   })
   it('keeps blocker details accessible while the state filter hides the blocker row', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    await openFilter(user, 'Status')
-    await user.click(screen.getByRole('combobox', { name: 'State' }))
-    await user.click(await screen.findByRole('option', { name: 'Waiting on transactions' }))
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Status', 'Blocked')
     expect(allPending().queryByRole('button', { name: 'Open Send to Bitwave Payroll' })).not.toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
     fireEvent.click(screen.getByRole('button', { name: 'Earlier transactions' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Send to Bitwave Payroll')
   })
-  it('keeps notes and signer names out of a grouped proposal row', () => {
+  it('shows outstanding signers inline on wide screens only and the note as an icon', () => {
+    const { unmount } = render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
+    const row = () => allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('tr')!
+    expect(row()).toHaveTextContent('1 more from you, Jonas, Lena')
+    expect(row()).not.toHaveTextContent('September contractor payouts')
+    expect(within(row()).getByRole('button', { name: 'Note for Send to Bitwave Payroll' })).toBeVisible()
+    unmount()
+    setViewport({ wide: false })
     render(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
-    const row = allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('tr')!
-    expect(row).not.toHaveTextContent('Note ·')
-    expect(row).not.toHaveTextContent('September contractor payouts')
-    expect(row).not.toHaveTextContent('Needs 1 more')
-    expect(row).not.toHaveTextContent('Not yet signed:')
-    expect(within(row).queryByRole('button', { name: /· (not )?signed$/ })).not.toBeInTheDocument()
-    expect(within(row).getByRole('button', { name: '2 of 3 signatures' })).toBeInTheDocument()
+    expect(row()).not.toHaveTextContent('1 more from')
+    expect(row()).not.toHaveTextContent('September contractor payouts')
+    expect(
+      within(row()).getByRole('button', { name: /^2 of 3 signatures, 1 more from you, Jonas, Lena$/ }),
+    ).toBeVisible()
   })
   it('shows the full off-chain note on hover and focus and opens review only on activation', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
@@ -319,36 +317,39 @@ describe('queue design exploration', () => {
   it('resets advanced transaction views when inspecting a dependency proposal', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
-    await user.click(screen.getByRole('button', { name: 'Transaction details' }))
     await user.click(screen.getByRole('button', { name: 'Advanced transaction data' }))
     await user.click(screen.getByRole('tab', { name: 'JSON' }))
     await user.click(screen.getByRole('button', { name: 'Earlier transactions' }))
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Send to Bitwave Payroll/ }))
     expect(screen.queryByRole('tab', { name: 'JSON' })).not.toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Transaction details' }))
     await user.click(screen.getByRole('button', { name: 'Advanced transaction data' }))
     expect(screen.getByRole('tab', { name: 'Data' })).toHaveAttribute('aria-selected', 'true')
   })
-  it('collapses panel sections independently and resets them for another proposal', async () => {
+  it('opens with every section collapsed and resets them for another proposal', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
-    await user.click(screen.getByRole('button', { name: 'Summary' }))
-    expect(screen.getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'false')
-    expect(screen.getByRole('button', { name: 'Transaction details' })).toHaveAttribute('aria-expanded', 'false')
+    for (const name of ['Transaction summary', 'Note', 'Details', 'Earlier transactions', 'Advanced transaction data'])
+      expect(screen.getByRole('button', { name })).toHaveAttribute('aria-expanded', 'false')
+    await user.click(screen.getByRole('button', { name: 'Details' }))
+    expect(screen.getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'true')
     await user.click(screen.getByRole('button', { name: 'Earlier transactions' }))
     await user.click(within(screen.getByRole('dialog')).getByRole('button', { name: /Send to Bitwave Payroll/ }))
-    expect(screen.getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'false')
     expect(screen.queryByRole('button', { name: 'Open in Safe' })).not.toBeInTheDocument()
-    expect(screen.queryByText(/Sample Safe address\. Full recipient/)).not.toBeInTheDocument()
   })
-  it('keeps audit and available actions outside the scrolling body when audit is collapsed', async () => {
+  it('keeps the expanded audit log and actions in the fixed footer while sections scroll', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     const footer = screen.getByTestId('proposal-fixed-footer')
-    const audit = within(footer).getByRole('button', { name: /Audit log/ })
+    const audit = within(footer).getByRole('button', { name: 'Signers' })
     expect(audit).toHaveAttribute('aria-expanded', 'true')
+    expect(within(footer).getByRole('list', { name: 'Signers' })).toHaveTextContent(
+      /^Created by Ana.*Ana0x7C21…D2e4Signed/,
+    )
+    expect(within(footer).getByRole('button', { name: 'Copy transaction link' })).toBeVisible()
+    expect(footer).not.toHaveTextContent('Can be executed once the threshold is reached.')
     expect(footer.closest('.overflow-y-auto')).toBeNull()
-    expect(footer.contains(screen.getByRole('button', { name: 'Summary' }))).toBe(false)
+    expect(footer.contains(screen.getByRole('button', { name: 'Details' }))).toBe(false)
     await user.click(audit)
     expect(audit).toHaveAttribute('aria-expanded', 'false')
     expect(within(footer).getByRole('button', { name: 'Review and execute' })).toBeEnabled()
@@ -361,9 +362,9 @@ describe('queue design exploration', () => {
     await user.click(screen.getByRole('button', { name: 'Review and sign' }))
     await user.click(screen.getByRole('button', { name: 'Sign in preview' }))
     expect(screen.getByRole('status')).toHaveTextContent('Signature added')
-    await user.click(screen.getByRole('button', { name: 'Workspace note' }))
+    await user.click(screen.getByRole('button', { name: 'Note' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('Q4 vendor payment for invoice #4471.')
-    expect(screen.getByRole('button', { name: 'Waiting on #42' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Blocked by #42' })).toBeDisabled()
   })
   it('executes after confirmation, unblocks the next nonce, and records history', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
@@ -383,11 +384,10 @@ describe('queue design exploration', () => {
     await user.click(screen.getByRole('button', { name: 'Replace or cancel' }))
     await user.click(screen.getByRole('button', { name: 'Propose on-chain cancellation' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('On-chain rejection')
-    await user.click(screen.getByRole('button', { name: 'Workspace note' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('No note was added to this proposal.')
+    expect(screen.queryByRole('button', { name: 'Note' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Close' }))
     await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
-    await user.click(screen.getByRole('button', { name: 'Workspace note' }))
+    await user.click(screen.getByRole('button', { name: 'Note' }))
     expect(screen.getByRole('dialog')).toHaveTextContent('September contractor payouts')
     await user.click(screen.getByRole('button', { name: 'Close' }))
     expect(allPending().getByRole('button', { name: 'Open On-chain rejection' })).toBeVisible()
@@ -400,7 +400,7 @@ describe('queue design exploration', () => {
   it('shows remaining signatures and owner names in the fraction tooltip without opening details', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     const row = allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }).closest('tr')!
-    const fraction = within(row).getByRole('button', { name: '2 of 3 signatures' })
+    const fraction = within(row).getByRole('button', { name: /^2 of 3 signatures/ })
     await user.hover(fraction)
     expect(await screen.findByText('1 more signature needed')).toBeVisible()
     expect(screen.getByText('Signed: Ana, Max')).toBeVisible()
@@ -414,7 +414,7 @@ describe('queue design exploration', () => {
     const network = within(row).getByRole('button', { name: 'Base' })
     act(() => network.focus())
     await user.tab()
-    expect(within(row).getByRole('button', { name: '2 of 2 signatures' })).toHaveFocus()
+    expect(within(row).getByRole('button', { name: /^2 of 2 signatures/ })).toHaveFocus()
     expect(await screen.findByText('Signature threshold met')).toBeVisible()
     expect(screen.queryByText(/^Not yet signed:/)).not.toBeInTheDocument()
   })
@@ -431,16 +431,16 @@ describe('queue design exploration', () => {
     expect(within(transfer).getByText('48.5 ETH').closest('td')).toContainElement(
       within(transfer).getByRole('img', { name: 'Send' }),
     )
-    expect(within(swap).getByText('200,000 USDC → ETH').closest('td')).toContainElement(
+    expect(within(swap).getByText('200,000 USDC → 62.4 ETH').closest('td')).toContainElement(
       within(swap).getByRole('img', { name: 'Swap' }),
     )
-    expect(within(settings).getByText('New signer').closest('td')).toContainElement(
+    expect(within(settings).getByText('New signer: Priya').closest('td')).toContainElement(
       within(settings).getByRole('img', { name: 'Update' }),
     )
     expect(within(settings).queryByText('Safe settings')).not.toBeInTheDocument()
     expect(within(transfer).getAllByText('#42')).toHaveLength(1)
     await user.click(within(transfer).getByRole('img', { name: 'Send' }))
-    expect(screen.getByRole('dialog')).toHaveTextContent('Send to Bitwave Payroll')
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
   })
   it('uses the selected proposal type in the review panel icon', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, {
@@ -456,28 +456,26 @@ describe('queue design exploration', () => {
     expect(within(row).getByRole('img', { name: 'Send' })).toBeVisible()
     expect(within(row).getByLabelText('Nonce 44')).toBeVisible()
     expect(within(row).getByText('Treasury Main')).toBeVisible()
-    expect(row).toHaveTextContent('Waiting on #42')
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
+    expect(row).toHaveTextContent('Blocked by #42')
+    await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
     const safe = within(screen.getByRole('table', { name: 'Treasury Main transactions' }))
     const groupedRow = safe.getByRole('button', { name: 'Open Send to Lightbridge Ltd' }).closest('tr')!
     expect(within(groupedRow).queryByText('Treasury Main')).not.toBeInTheDocument()
     expect(within(groupedRow).queryByText('Ethereum')).not.toBeInTheDocument()
     expect(within(groupedRow).getByLabelText('Nonce 44')).toBeVisible()
-    expect(groupedRow).toHaveTextContent('Waiting on #42')
+    expect(groupedRow).toHaveTextContent('Blocked by #42')
   })
-  it('opens mobile details full screen with collapsed audit and full-height actions', async () => {
+  it('opens mobile details full screen with the signers open and full-height actions', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { groupBy: 'status' } } })
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /^Filters/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filter/ })).toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     expect(screen.getByRole('dialog')).toHaveAttribute('data-mobile-full-screen', 'true')
-    expect(screen.getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByRole('button', { name: 'Transaction summary' })).toHaveAttribute('aria-expanded', 'false')
     const footer = within(screen.getByTestId('proposal-fixed-footer'))
-    expect(footer.getByRole('button', { name: /Audit log/ })).toHaveAttribute('aria-expanded', 'false')
+    expect(footer.getByRole('button', { name: 'Signers' })).toHaveAttribute('aria-expanded', 'true')
     const primary = footer.getByRole('button', { name: 'Review and execute' })
     expect(primary).toHaveClass('h-12', 'shrink-0')
     expect(primary).not.toHaveClass('flex-1')
@@ -487,26 +485,23 @@ describe('queue design exploration', () => {
   })
   it('filters by network and clears all filters back to the default flat table', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
-    await openFilter(user, 'Network')
-    await user.click(screen.getByRole('checkbox', { name: 'Ethereum' }))
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Network', 'Base', 'Arbitrum')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
     expect(allPending().queryByRole('button', { name: 'Open Send to Bitwave Payroll' })).not.toBeInTheDocument()
     fireEvent.change(screen.getByRole('searchbox', { name: 'Find a proposal' }), { target: { value: 'Deel' } })
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(1)
-    await user.click(screen.getByRole('button', { name: /^Filters/ }))
-    await user.click(screen.getByRole('button', { name: 'Clear all' }))
-    await user.keyboard('{Escape}')
+    await user.click(screen.getByRole('button', { name: 'Clear' }))
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toHaveValue('')
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(6)
     expect(screen.getByRole('table', { name: 'Pending transactions' })).toBeVisible()
   })
-  it('keeps the amount under the type and exposes a network label without inline note text', () => {
+  it('keeps the amount under the type and shows the network and a note icon on wide screens', () => {
     render(<PendingQueue />)
     const title = allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' })
     expect(title.closest('td')).toHaveTextContent('48.5 ETH')
-    expect(title.closest('tr')).not.toHaveTextContent('September contractor payouts')
+    expect(title.closest('td')).not.toHaveTextContent('September contractor payouts')
     expect(within(title.closest('tr')!).getByLabelText('Ethereum')).toBeVisible()
+    expect(title.closest('tr')).not.toHaveTextContent('September contractor payouts')
     expect(within(title.closest('tr')!).getByRole('button', { name: 'Note for Send to Bitwave Payroll' })).toBeVisible()
   })
   it('shows the full Safe address when hovering any part of the Safe cell', async () => {
@@ -556,9 +551,7 @@ describe('queue design exploration', () => {
     expect(signHeading.compareDocumentPosition(screen.getByRole('table', { name: 'Ready to sign transactions' }))).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING,
     )
-    await openFilter(user, 'Group by')
-    await user.click(screen.getByRole('combobox', { name: 'Group by' }))
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
+    await chooseGrouping(user, 'Safe')
     await user.keyboard('{Escape}')
     expect(screen.getAllByRole('table')).toHaveLength(3)
     const treasury = screen.getByRole('table', { name: 'Treasury Main transactions' })
@@ -583,7 +576,7 @@ describe('queue design exploration', () => {
     expect(title.closest('td')).toHaveClass('max-md:sticky', 'max-md:left-0', 'max-md:bg-card')
     expect(within(title.closest('tr')!).getAllByRole('cell')).toHaveLength(5)
     fireEvent.click(title.closest('tr')!)
-    expect(screen.getByRole('dialog')).toHaveTextContent('Send to Bitwave Payroll')
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
   })
   it('shows only the empty state when nothing is pending', () => {
     render(<PendingQueue />, { routerProps: { query: { scenario: 'empty' } } })
@@ -591,14 +584,13 @@ describe('queue design exploration', () => {
     expect(screen.queryByRole('table')).not.toBeInTheDocument()
     expect(screen.queryByText('No matching proposals')).not.toBeInTheDocument()
   })
-  it('collapses the audit log on short viewports and names no placeholder proposer', async () => {
+  it('keeps the signers open on short viewports and names no placeholder proposer', async () => {
     setViewport({ short: true })
     const { user } = renderWithUserEvent(<PendingQueue />)
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     const footer = within(screen.getByTestId('proposal-fixed-footer'))
-    expect(footer.getByRole('button', { name: /Audit log/ })).toHaveAttribute('aria-expanded', 'false')
-    await user.click(footer.getByRole('button', { name: /Audit log/ }))
-    expect(screen.getByTestId('proposal-fixed-footer')).toHaveTextContent('Created · 5h ago')
+    expect(footer.getByRole('button', { name: 'Signers' })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('proposal-fixed-footer')).toHaveTextContent('Created by Ana')
     expect(screen.getByRole('dialog')).not.toHaveTextContent('Proposer not supplied')
   })
   it('groups from the Safe and Status column headers, and switches from status to Safe groups', async () => {
@@ -613,19 +605,17 @@ describe('queue design exploration', () => {
     expect(screen.getAllByRole('table')).toHaveLength(3)
     expect(screen.getByRole('button', { name: 'Collapse Treasury Main' })).toBeVisible()
   })
-  it('shows a group-by chip beside Filters that switches grouping or returns to the default table', async () => {
+  it('shows grouping as an applied pill that returns to the default table when removed', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
-    expect(screen.queryByRole('combobox', { name: 'Grouped by' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: 'Group by status' }))
-    const chip = screen.getByRole('combobox', { name: 'Grouped by' })
-    expect(chip).toHaveTextContent('Status')
-    await user.click(chip)
-    await user.click(await screen.findByRole('option', { name: 'Safe' }))
-    expect(screen.getByRole('table', { name: 'Treasury Main transactions' })).toBeInTheDocument()
-    await user.click(screen.getByRole('button', { name: 'Remove grouping' }))
+    const applied = within(screen.getByRole('group', { name: 'Applied filters' }))
+    expect(applied.getByText('Group by:').parentElement).toHaveTextContent('Group by:Status')
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
+    await user.click(applied.getByRole('button', { name: 'Remove' }))
     expect(screen.getAllByRole('table')).toHaveLength(1)
     expect(screen.getByRole('table', { name: 'Pending transactions' })).toBeInTheDocument()
-    expect(screen.queryByRole('combobox', { name: 'Grouped by' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
   })
   describe('edge cases with many competing proposals', () => {
     const heavy = (query: Record<string, string> = {}) => ({
@@ -717,16 +707,73 @@ describe('queue design exploration', () => {
         .map((button) => button.getAttribute('aria-label')!.replace('Open ', ''))
     const dialog = () => within(screen.getByRole('dialog'))
 
-    it('summarises the transaction in the header', async () => {
+    it('summarises the transaction above the sections without repeating the amount', async () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
       await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
-      const meta = within(screen.getByRole('group', { name: 'Transaction summary' }))
-      expect(dialog().getAllByText('48.5 ETH')[0]).toBeVisible()
-      expect(meta.getByText('Treasury Main · Ethereum')).toBeVisible()
-      expect(meta.getByText('Ready to sign')).toBeVisible()
-      expect(meta.getByText('#42')).toBeVisible()
-      expect(meta.getByText('2/3 signatures')).toBeVisible()
-      expect(meta.getByText('3d ago')).toBeVisible()
+      await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
+      const summary = within(screen.getByRole('group', { name: 'Transaction summary' }))
+      expect(dialog().getAllByText('48.5 ETH')).toHaveLength(1)
+      expect(summary.getByText('Treasury Main · Ethereum')).toBeVisible()
+      expect(summary.getByText('Ready to sign')).toBeVisible()
+      expect(summary.getByText('#42')).toBeVisible()
+      expect(summary.getByText(/^[A-Z][a-z]{2} \d{1,2}, \d{4} - \d{1,2}:\d{2}:\d{2} [AP]M/)).toBeVisible()
+      expect(summary.getByText(/· 3d ago/)).toBeVisible()
+      expect(summary.getByText(/1 more from you, Jonas, Lena/)).toBeVisible()
+      const labels = summary.getAllByRole('term').map((term) => term.textContent)
+      expect(labels).toEqual(['Safe', 'To', 'Signatures', 'Nonce', 'Proposed', 'Status'])
+      expect(summary.getByRole('note')).toHaveTextContent('Needs 1 more signature, including yours.')
+      expect(summary.queryByText(/September contractor payouts/)).toBeNull()
+      expect(dialog().getByRole('button', { name: 'Note' })).toHaveAttribute('aria-expanded', 'false')
+      await user.click(dialog().getByRole('button', { name: 'Note' }))
+      expect(dialog().getByText(/September contractor payouts/)).toBeVisible()
+      expect(dialog().getByText(/Ana Reyes · 6 Oct, 09:15 · Off-chain, not verified/)).toBeVisible()
+    })
+    it('shows the position only in full screen, next to the drawer controls', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      const titles = rowTitles()
+      await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
+      expect(dialog().getByText(`1 of ${titles.length}`)).toHaveClass('sr-only')
+      await user.click(dialog().getByRole('button', { name: 'Expand to full screen' }))
+      expect(dialog().getByText(`1 of ${titles.length}`)).not.toHaveClass('sr-only')
+    })
+    it('repeats the row’s type and detail as the drawer title', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
+      expect(dialog().getByText('Send')).toBeVisible()
+      expect(dialog().getByText('48.5 ETH')).toBeVisible()
+      expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
+      await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
+      const summary = within(screen.getByRole('group', { name: 'Transaction summary' }))
+      expect(summary.getAllByRole('term').map((term) => term.textContent)).toContain('To')
+      expect(summary.getByText('Bitwave Payroll')).toBeVisible()
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
+      expect(dialog().getByText('Batch')).toBeVisible()
+      expect(dialog().getAllByText(/^14 actions/)).toHaveLength(1)
+    })
+    it('keeps the open sections and signers state while stepping with prev/next', async () => {
+      const { user } = renderWithUserEvent(<PendingQueue />)
+      const titles = rowTitles()
+      await user.click(allPending().getByRole('button', { name: `Open ${titles[0]}` }))
+      await user.click(dialog().getByRole('button', { name: 'Transaction summary' }))
+      await user.click(dialog().getByRole('button', { name: 'Details' }))
+      await user.click(within(screen.getByTestId('proposal-fixed-footer')).getByRole('button', { name: 'Signers' }))
+      await user.click(dialog().getByRole('button', { name: 'Next transaction' }))
+      expect(screen.getByRole('dialog')).toHaveAccessibleName(titles[1])
+      expect(dialog().getByRole('button', { name: 'Transaction summary' })).toHaveAttribute('aria-expanded', 'true')
+      expect(dialog().getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'true')
+      expect(dialog().getByRole('button', { name: 'Advanced transaction data' })).toHaveAttribute(
+        'aria-expanded',
+        'false',
+      )
+      expect(
+        within(screen.getByTestId('proposal-fixed-footer')).getByRole('button', { name: 'Signers' }),
+      ).toHaveAttribute('aria-expanded', 'false')
+      await user.keyboard('k')
+      expect(dialog().getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'true')
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      await user.click(allPending().getByRole('button', { name: `Open ${titles[1]}` }))
+      expect(dialog().getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'false')
     })
     it('steps through transactions in table order with buttons and J/K', async () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
@@ -771,21 +818,139 @@ describe('queue design exploration', () => {
       expect(dialog().queryByText(/ of \d+$/)).not.toBeInTheDocument()
     })
   })
-  it('filters by transaction type and shows the filter as active', async () => {
+  it('filters by transaction type and shows it as an applied filter', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'conflict-heavy' } } })
-    await openFilter(user, 'Type')
-    for (const type of ['Send', 'Receive', 'Swap', 'Update', 'On-chain rejection']) {
-      await user.click(screen.getByRole('checkbox', { name: type }))
-    }
-    await user.keyboard('{Escape}')
+    await toggleFilter(user, 'Type', 'Batch')
     const titles = allPending()
       .getAllByRole('button', { name: /^Open / })
       .map((button) => button.getAttribute('aria-label'))
     expect(titles).toEqual(['Open Batch · 46 actions', 'Open Batch · 14 actions'])
-    expect(screen.getByRole('button', { name: /^Filters/ })).toHaveTextContent('Active')
-    await user.click(screen.getByRole('button', { name: /^Filters/ }))
-    await user.click(screen.getByRole('button', { name: 'Clear all' }))
-    await user.keyboard('{Escape}')
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter 1 applied')
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Type:Batch')
+    await openFilter(user, 'Type')
+    expect(await screen.findByRole('menuitem', { name: 'Type' })).toHaveTextContent('TypeBatch')
+    await closeMenus(user)
+    await user.click(
+      within(screen.getByRole('group', { name: 'Applied filters' })).getByRole('button', { name: 'Remove' }),
+    )
+    expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
     expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(9)
+  })
+  it('opens the transaction from a shared link', () => {
+    render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Bitwave Payroll')
+  })
+  it('starts with no filters and narrows only when options are checked', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />)
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
+    expect(screen.queryByRole('group', { name: 'Applied filters' })).not.toBeInTheDocument()
+    await openFilter(user, 'Safe account')
+    const option = await screen.findByRole('menuitemcheckbox', { name: /^Treasury Main/ })
+    expect(option).toHaveAttribute('aria-checked', 'false')
+    expect(option).toHaveTextContent('Treasury Main3')
+    fireEvent.click(option)
+    expect(option).toHaveAttribute('aria-checked', 'true')
+    await closeMenus(user)
+    expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(3)
+  })
+  it('combines quick status chips and keeps them in sync with the Status menu', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'realistic' } } })
+    const quick = within(screen.getByRole('group', { name: 'Quick filters' }))
+    const ready = quick.getByRole('button', { name: /^Ready to execute/ })
+    const blocked = quick.getByRole('button', { name: /^Blocked/ })
+    const total = (button: HTMLElement) => Number(button.getAttribute('aria-label')?.replace(/\D/g, ''))
+    await user.click(ready)
+    await user.click(blocked)
+    expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(total(ready) + total(blocked))
+    expect(screen.getByRole('group', { name: 'Applied filters' })).toHaveTextContent('Status:Ready to execute, Blocked')
+    await openFilter(user, 'Status')
+    expect(await screen.findByRole('menuitemcheckbox', { name: /^Blocked/ })).toHaveAttribute('aria-checked', 'true')
+    await closeMenus(user)
+  })
+  it('groups from the menu without counting grouping as a filter', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />)
+    await chooseGrouping(user, 'Safe')
+    expect(screen.getByRole('table', { name: 'Treasury Main transactions' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Filter/ })).toHaveAccessibleName('Filter')
+  })
+  describe('realistic scenario', () => {
+    const renderRealistic = () =>
+      renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'realistic' } } })
+    const rowFor = (label: string) =>
+      allPending()
+        .getByRole('button', { name: `Open ${label}` })
+        .closest('tr')!
+
+    it('shows the RFC status words and a proposal pill', () => {
+      renderRealistic()
+      expect(rowFor('Send to Lightbridge Ltd')).toHaveTextContent('Blocked by #42')
+      expect(rowFor('Send to Bitwave Payroll')).toHaveTextContent('Ready to sign')
+      const [grant, unsigned] = allPending()
+        .getAllByRole('button', { name: 'Open Send to Atlas Labs' })
+        .map((button) => button.closest('tr')!)
+      expect(grant).toHaveTextContent('Waiting on others')
+      expect(within(grant).queryByText('Proposal')).toBeNull()
+      expect(unsigned).toHaveTextContent('Blocked by #8')
+      expect(within(unsigned).getByText('Proposal')).toBeVisible()
+    })
+    it('marks rows that need extra care and explains why', () => {
+      renderRealistic()
+      expect(
+        within(rowFor('Bridge ETH to Unknown network')).getByRole('button', { name: 'Warnings: Unknown network' }),
+      ).toBeVisible()
+      expect(within(rowFor('Batch · 2 actions')).queryByRole('button', { name: /^Warnings/ })).toBeNull()
+      expect(
+        within(rowFor('Enable module Zodiac Roles')).getByRole('button', {
+          name: 'Warnings: Changes who controls funds',
+        }),
+      ).toBeVisible()
+      expect(within(rowFor('Send to Bitwave Payroll')).queryByRole('button', { name: /^Warnings/ })).toBeNull()
+      expect(rowFor('Bridge ETH to Unknown network')).toHaveTextContent('0.04 ETH → Unknown network')
+    })
+    it('filters with the quick filters and shows a count on each', async () => {
+      const { user } = renderRealistic()
+      const quick = within(screen.getByRole('group', { name: 'Quick filters' }))
+      const blocked = quick.getByRole('button', { name: /^Blocked/ })
+      const count = Number(blocked.getAttribute('aria-label')?.replace(/\D/g, ''))
+      expect(count).toBeGreaterThan(0)
+      await user.click(blocked)
+      expect(blocked).toHaveAttribute('aria-pressed', 'true')
+      expect(allPending().getAllByRole('button', { name: /^Open / })).toHaveLength(count)
+      expect(allPending().getAllByText(/^Blocked by #/)).toHaveLength(count)
+      await user.click(blocked)
+      expect(blocked).toHaveAttribute('aria-pressed', 'false')
+      expect(allPending().getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(count)
+    })
+    it('leads with the summary and warnings, with type details collapsed below', async () => {
+      const { user } = renderRealistic()
+      await user.click(allPending().getByRole('button', { name: 'Open Bridge ETH to Unknown network' }))
+      const dialog = within(screen.getByRole('dialog'))
+      expect(dialog.getByRole('alert')).toHaveTextContent('Unknown network')
+      await user.click(dialog.getByRole('button', { name: 'Transaction summary' }))
+      expect(screen.getByTestId('execution-reason')).toHaveTextContent('Blocked by #42')
+      expect(dialog.getByRole('alert').compareDocumentPosition(dialog.getByRole('button', { name: 'Details' }))).toBe(
+        Node.DOCUMENT_POSITION_FOLLOWING,
+      )
+      expect(dialog.queryByText('Unknown network · chain 999')).toBeNull()
+      await user.click(dialog.getByRole('button', { name: 'Details' }))
+      expect(dialog.getByText('Unknown network · chain 999')).toBeVisible()
+      await user.click(screen.getByRole('button', { name: 'Next transaction' }))
+      expect(dialog.getByRole('button', { name: 'Details' })).toHaveAttribute('aria-expanded', 'true')
+      expect(dialog.getByText('Swap 1.2 WETH for 4,180 USDC')).toBeVisible()
+      expect(dialog.queryByRole('alert')).toBeNull()
+    })
+    it('lists who has signed in the footer, with a faded row for you', async () => {
+      const { user } = renderRealistic()
+      await user.click(allPending().getByRole('button', { name: 'Open Send to Bitwave Payroll' }))
+      const rows = within(screen.getByRole('list', { name: 'Signers' })).getAllByRole('listitem')
+      expect(rows).toHaveLength(4)
+      expect(rows[3]).toHaveTextContent(/^Dev \(you\).*Your signature needed$/)
+      const footer = within(screen.getByTestId('proposal-fixed-footer'))
+      expect(footer.getByText('2 of 3 required')).toBeVisible()
+      expect(footer.getByRole('button', { name: 'Copy transaction link' })).toBeVisible()
+      expect(screen.getByTestId('proposal-fixed-footer')).toHaveTextContent(
+        'Can be executed once the threshold is reached.',
+      )
+    })
   })
 })

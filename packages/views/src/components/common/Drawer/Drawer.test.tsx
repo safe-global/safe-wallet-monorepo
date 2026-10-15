@@ -162,6 +162,22 @@ describe('Drawer', () => {
     expect(screen.getByRole('button', { name: 'Expand to full screen' })).toBeInTheDocument()
     expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
   })
+  it('renders header actions with the current full-screen state', () => {
+    render(
+      <Drawer
+        open
+        resizable
+        onClose={jest.fn()}
+        ariaLabel="Actions drawer"
+        headerActions={({ fullScreen }) => <span>{fullScreen ? 'Full screen' : 'Panel'}</span>}
+      >
+        <DrawerBody>Body</DrawerBody>
+      </Drawer>,
+    )
+    expect(screen.getByText('Panel')).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
+    expect(screen.getByText('Full screen')).toBeVisible()
+  })
   it('clamps dragged width to the viewport and minimum and stops resizing on pointer up', () => {
     render(
       <Drawer open resizable onClose={jest.fn()}>

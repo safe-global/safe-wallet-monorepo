@@ -2,7 +2,9 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/router'
 import {
   ArrowUpRight,
-  ArrowDownLeft,
+  ArrowRightLeft,
+  FileCode2,
+  Network,
   Repeat2,
   Settings,
   CircleX,
@@ -13,13 +15,13 @@ import {
   PenLine,
   ListFilter,
   ListTree,
-  X,
   CircleHelp,
   Clock3,
   Copy,
   FlaskConical,
   LockKeyhole,
   StickyNote,
+  TriangleAlert,
   Users,
   Layers,
   ShieldCheck,
@@ -33,8 +35,19 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
-import { Popover, PopoverTrigger, PopoverContent } from '@safe-global/views/components/ui/popover'
-import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@safe-global/views/components/ui/dropdown-menu'
+import { Chip } from '@safe-global/views/components/ui/chip'
 import { Input } from '@safe-global/views/components/ui/input'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import {
@@ -60,16 +73,18 @@ import {
   AccordionContent,
 } from '@safe-global/views/components/ui/accordion'
 import { PrototypeFrame } from './PrototypeFrame'
-import { ProposalSummary, ProposalTransactionDetails, ProposalActivity } from './ProposalDetails'
+import { CopyTransactionLink, ProposalDetails, ProposalAdvanced, SignerList } from './ProposalDetails'
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '@safe-global/views/components/ui/table'
-import { Drawer, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from '@/components/common/Drawer'
+import { Drawer, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter, DrawerList } from '@/components/common/Drawer'
 import Identicon from '@/components/common/Identicon'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { formatDateTime } from '@safe-global/utils/utils/date'
 
 import {
   accounts as fixtureAccounts,
@@ -90,6 +105,13 @@ import {
   getTypeLabel,
   getRowAction,
   getStatusLabel,
+  getSignerSummary,
+  getWarnings,
+  WARNING_LABELS,
+  WARNING_DETAILS,
+  getExecutionReason,
+  getCreatedAt,
+  getCounterparty,
 } from '../services/model'
 import {
   applyPreviewAction,
@@ -103,31 +125,54 @@ import type { Direction, Filter, Persona, Proposal, Scenario } from '../types'
 
 const scenarios: { value: Scenario; label: string }[] = [
   { value: 'everyday', label: 'Everyday queue' },
+  { value: 'realistic', label: 'Realistic mix' },
   { value: 'conflict', label: 'Competing proposals' },
   { value: 'conflict-heavy', label: 'Many competing' },
   { value: 'gap', label: 'Missing dependency' },
   { value: 'partial', label: 'Partial loading' },
   { value: 'empty', label: 'Empty workspace' },
 ]
-const filters: { value: Filter; label: string }[] = [
-  { value: 'all', label: 'All statuses' },
-  { value: 'ready', label: 'Ready to execute' },
-  { value: 'sign', label: 'Ready to sign' },
-  { value: 'awaiting', label: 'Waiting on signatures' },
-  { value: 'waiting', label: 'Waiting on transactions' },
-]
+const STATUS_ORDER: Filter[] = ['ready', 'sign', 'awaiting', 'waiting']
+const QUICK_FILTERS: Filter[] = ['sign', 'ready', 'waiting']
+const STATUS_META: Record<Filter, { label: string; description: string; icon: LucideIcon; tone: string }> = {
+  ready: {
+    label: 'Ready to execute',
+    description: 'Fully signed and next in line',
+    icon: CircleCheck,
+    tone: 'bg-success-subtle text-success-strong',
+  },
+  sign: {
+    label: 'Ready to sign',
+    description: 'Proposals waiting for you to sign',
+    icon: PenLine,
+    tone: 'bg-success-subtle text-success-strong',
+  },
+  awaiting: {
+    label: 'Waiting on others',
+    description: 'Waiting on other signers',
+    icon: Users,
+    tone: 'bg-warning-subtle text-warning-strong',
+  },
+  waiting: {
+    label: 'Blocked',
+    description: 'Waiting on an earlier transaction',
+    icon: Clock3,
+    tone: 'bg-warning-subtle text-warning-strong',
+  },
+}
 
 const TYPE_ICONS: Record<TypeLabel, LucideIcon> = {
   Send: ArrowUpRight,
-  Receive: ArrowDownLeft,
   Swap: Repeat2,
+  Bridge: ArrowRightLeft,
   Batch: Layers,
+  Contract: FileCode2,
   Update: Settings,
+  Nested: Network,
   'On-chain rejection': CircleX,
 }
 const HISTORY_HOVER: Partial<Record<TypeLabel, string>> = {
   Send: 'group-hover/history:text-destructive group-focus-visible/history:text-destructive',
-  Receive: 'group-hover/history:text-success-strong group-focus-visible/history:text-success-strong',
 }
 
 function SafeIdentity({
@@ -157,10 +202,82 @@ function SafeIdentity({
   )
 }
 
-function PanelSection({ value, title, children }: { value: string; title: string; children: ReactNode }) {
+const APPLIED_PILL = 'h-7 bg-card pr-2.5 pl-3 shadow-xs transition-colors hover:bg-muted'
+type FilterSection = 'accounts' | 'networks' | 'types' | 'statuses'
+const inSelection = <T,>(selection: T[], value: T) => selection.length === 0 || selection.includes(value)
+const toggled = <T,>(selection: T[], value: T) =>
+  selection.includes(value) ? selection.filter((item) => item !== value) : [...selection, value]
+
+function FilterOption({
+  label,
+  checked,
+  count,
+  icon,
+  onToggle,
+}: {
+  label: string
+  checked: boolean
+  count: number
+  icon: ReactNode
+  onToggle: () => void
+}) {
+  return (
+    <DropdownMenuCheckboxItem
+      checked={checked}
+      onCheckedChange={onToggle}
+      className="group/option pr-2 [&>[data-slot=dropdown-menu-checkbox-item-indicator]]:hidden"
+    >
+      <span
+        aria-hidden="true"
+        className="flex size-4 shrink-0 items-center justify-center rounded border border-border opacity-0 group-data-[highlighted]/option:opacity-100 group-data-[checked]/option:border-primary group-data-[checked]/option:bg-primary group-data-[checked]/option:text-primary-foreground group-data-[checked]/option:opacity-100"
+      >
+        {/* The menu item recolours every child on focus; the check must stay white on the filled box. */}
+        {checked && <Check className="size-3 text-primary-foreground!" />}
+      </span>
+      <span className="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="text-xs tabular-nums text-muted-foreground">{count}</span>
+    </DropdownMenuCheckboxItem>
+  )
+}
+
+function FilterSectionTitle({ title, summary }: { title: string; summary?: string }) {
+  return (
+    <span className="flex flex-1 items-center gap-2 pr-2">
+      {title}
+      {summary && (
+        <>
+          <span className="size-1.5 rounded-full bg-success-strong" aria-hidden="true" />
+          <Badge variant="secondary" className="ml-auto font-normal" aria-hidden="true">
+            {summary}
+          </Badge>
+        </>
+      )}
+    </span>
+  )
+}
+
+function PanelSection({
+  value,
+  title,
+  meta,
+  children,
+}: {
+  value: string
+  title: string
+  meta?: ReactNode
+  children: ReactNode
+}) {
   return (
     <AccordionItem value={value}>
-      <AccordionTrigger>{title}</AccordionTrigger>
+      <AccordionTrigger>
+        <span className="flex items-center gap-2">
+          {title}
+          {meta}
+        </span>
+      </AccordionTrigger>
       <AccordionContent>
         <div className="space-y-3 pb-3">{children}</div>
       </AccordionContent>
@@ -176,8 +293,7 @@ export default function PendingQueue() {
 function PendingQueueView() {
   const router = useRouter()
   const isMobile = useIsMobile()
-  const isShortViewport = useMediaQuery('(max-height: 599px)')
-  const collapseAudit = isMobile || isShortViewport
+  const [auditOpen, setAuditOpen] = useState(true)
   const isWide = useMediaQuery('(min-width: 1280px)')
   const direction: Direction = router.query.option === 'inbox' ? 'inbox' : 'queues'
   const scenario = scenarios.find((item) => item.value === router.query.scenario)?.value ?? 'everyday'
@@ -190,17 +306,17 @@ function PendingQueueView() {
     router.query.groupBy === 'status' || router.query.groupBy === 'safe' ? router.query.groupBy : 'none',
   )
   const [collapsedSections, setCollapsedSections] = useState<string[]>([])
-  const [accountFilter, setAccountFilter] = useState<string[]>(accounts.map((account) => account.id))
+  const [accountFilter, setAccountFilter] = useState<string[]>([])
   const networks = [...new Set(accounts.map((account) => account.network))]
-  const [networkFilter, setNetworkFilter] = useState<string[]>(networks)
-  const [typeFilter, setTypeFilter] = useState<string[]>([...TYPE_LABELS])
+  const [networkFilter, setNetworkFilter] = useState<string[]>([])
+  const [typeFilter, setTypeFilter] = useState<string[]>([])
   const [search, setSearch] = useState('')
-  const [stateFilter, setStateFilter] = useState<Filter>('all')
+  const [stateFilter, setStateFilter] = useState<Filter[]>([])
   const [review, setReview] = useState<Proposal | null>(null)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
   const [replacement, setReplacement] = useState<{ recipient: string; amount: string } | null>(null)
-  const [reviewSections, setReviewSections] = useState<string[]>(['summary'])
+  const [reviewSections, setReviewSections] = useState<string[]>([])
   const [feedback, setFeedback] = useState('')
   const [copied, setCopied] = useState(false)
   const [replaceHover, setReplaceHover] = useState<string | null>(null)
@@ -222,16 +338,18 @@ function PendingQueueView() {
       `${count} ${count === 1 ? 'transaction' : 'transactions'} executed in this preview across ${executableBatches.length} ${executableBatches.length === 1 ? 'Safe' : 'Safes'}.`,
     )
   }
-  const scoped = items.filter((tx) => accountFilter.includes(tx.account))
-  const visible = scoped.filter(
-    (tx) =>
-      networkFilter.includes(getAccount(tx).network) &&
-      typeFilter.includes(getTypeLabel(tx)) &&
-      matchesFilter(tx, stateFilter, persona) &&
-      `${getTransactionLabel(tx)} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
-        .toLowerCase()
-        .includes(search.toLowerCase()),
-  )
+  // An empty selection means the section isn't filtering.
+  const passes = (tx: Proposal, skip?: FilterSection) =>
+    (skip === 'accounts' || inSelection(accountFilter, tx.account)) &&
+    (skip === 'networks' || inSelection(networkFilter, getAccount(tx).network)) &&
+    (skip === 'types' || inSelection(typeFilter, getTypeLabel(tx))) &&
+    (skip === 'statuses' || !stateFilter.length || stateFilter.some((status) => matchesFilter(tx, status, persona))) &&
+    `${getTransactionLabel(tx)} ${tx.recipient} ${tx.amount} ${tx.nonce} ${getAccount(tx).name}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  const visible = items.filter((tx) => passes(tx))
+  const optionCount = (skip: FilterSection, match: (tx: Proposal) => boolean) =>
+    items.filter((tx) => passes(tx, skip) && match(tx)).length
   const setOption = (changes: Record<string, string>) => {
     setReview(null)
     setFeedback('')
@@ -239,11 +357,14 @@ function PendingQueueView() {
       shallow: true,
     })
   }
-  const reviewTx = (tx: Proposal) => {
+  const reviewTx = (tx: Proposal, keepLayout = false) => {
     setReject(false)
     setPendingAction(null)
     setReplacement(null)
-    setReviewSections(['summary'])
+    if (!keepLayout) {
+      setReviewSections([])
+      setAuditOpen(true)
+    }
     setFeedback('')
     setReview(tx)
   }
@@ -277,12 +398,39 @@ function PendingQueueView() {
     )
   }
 
+  const statusLabel = (status: Filter) => STATUS_META[status].label
+  const appliedFilters = [
+    {
+      section: 'accounts' as const,
+      title: 'Safe',
+      values: accounts.filter((account) => accountFilter.includes(account.id)).map((account) => account.name),
+      clear: () => setAccountFilter([]),
+    },
+    { section: 'networks' as const, title: 'Network', values: networkFilter, clear: () => setNetworkFilter([]) },
+    { section: 'types' as const, title: 'Type', values: typeFilter, clear: () => setTypeFilter([]) },
+    {
+      section: 'statuses' as const,
+      title: 'Status',
+      values: stateFilter.map(statusLabel),
+      clear: () => setStateFilter([]),
+    },
+  ].filter((filter) => filter.values.length > 0)
+  const selectionSummary = (values: string[]) =>
+    values.length === 0 ? undefined : values.length === 1 ? values[0] : String(values.length)
+  const filterSummaries = {
+    accounts: selectionSummary(accountFilter),
+    networks: selectionSummary(networkFilter),
+    types: selectionSummary(typeFilter),
+    status: selectionSummary(stateFilter.map(statusLabel)),
+    grouping: groupBy === 'none' ? undefined : groupBy === 'safe' ? 'Safe' : 'Status',
+  }
+  const activeFilterCount = appliedFilters.length
   const resetFilters = () => {
-    setAccountFilter(accounts.map((account) => account.id))
-    setNetworkFilter(networks)
-    setTypeFilter([...TYPE_LABELS])
+    setAccountFilter([])
+    setNetworkFilter([])
+    setTypeFilter([])
     setSearch('')
-    setStateFilter('all')
+    setStateFilter([])
   }
   const groups: { id: string; title: string; subtitle: string; items: Proposal[]; next?: number }[] =
     direction === 'queues'
@@ -317,7 +465,7 @@ function PendingQueueView() {
   const sections = (
     groupBy === 'safe'
       ? accounts
-          .filter((account) => accountFilter.includes(account.id))
+          .filter((account) => inSelection(accountFilter, account.id))
           .map((account) => ({
             id: `safe-${account.id}`,
             category: 'safe',
@@ -337,18 +485,14 @@ function PendingQueueView() {
               items: groups.flatMap((group) => group.items),
             },
           ]
-        : filters
-            .filter((filter) => filter.value !== 'all')
-            .map((filter) => ({
-              id: `status-${filter.value}`,
-              category: filter.value,
-              label: filter.label,
-              next: undefined,
-              account: undefined,
-              items: groups
-                .flatMap((group) => group.items)
-                .filter((tx) => getPrimaryStatus(tx, persona) === filter.value),
-            }))
+        : STATUS_ORDER.map((status) => ({
+            id: `status-${status}`,
+            category: status,
+            label: STATUS_META[status].label,
+            next: undefined,
+            account: undefined,
+            items: groups.flatMap((group) => group.items).filter((tx) => getPrimaryStatus(tx, persona) === status),
+          }))
   ).map((section) => ({ ...section, items: clusterByNonce(section.items) }))
 
   const columns = [
@@ -367,7 +511,7 @@ function PendingQueueView() {
   const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
   const stepReview = (offset: number) => {
     const next = reviewIndex >= 0 ? reviewOrder[reviewIndex + offset] : undefined
-    if (next) reviewTx(next)
+    if (next) reviewTx(next, true)
   }
 
   useEffect(() => {
@@ -382,6 +526,15 @@ function PendingQueueView() {
     return () => document.removeEventListener('keydown', onKeyDown)
   })
 
+  const linkedTx = typeof router.query.tx === 'string' ? router.query.tx : undefined
+  const openedLink = useRef<string>(undefined)
+  useEffect(() => {
+    const linked = queue.items.find((tx) => tx.id === linkedTx)
+    if (!linked || openedLink.current === linkedTx) return
+    openedLink.current = linkedTx
+    setReview(linked)
+  }, [linkedTx, queue.items])
+
   useEffect(() => {
     document.querySelector('tr[data-state="selected"]')?.scrollIntoView?.({ block: 'nearest' })
   }, [review?.id])
@@ -389,56 +542,100 @@ function PendingQueueView() {
     Type: isWide ? 'w-56' : 'w-44',
     Safe: isWide ? 'w-[18%]' : 'w-[22%]',
     Network: 'w-16',
-    Signatures: 'w-24',
+    Signatures: isWide ? 'w-40' : 'w-24',
     Note: 'w-16',
     Action: 'w-24',
   }
 
-  const renderNote = (tx: Proposal) => (
-    <div className="space-y-2 rounded-lg bg-muted p-3">
-      <Badge variant="outline">
-        <LockKeyhole />
-        Off-chain note
-      </Badge>
-      <p className="text-sm leading-relaxed">{tx.note?.text ?? 'No note was added to this proposal.'}</p>
-      {tx.note && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          {tx.note.author} · {tx.note.date}
-        </p>
-      )}
-      <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-        Visible to Acme Inc members with access to {getAccount(tx).name}. This is the author’s context. It is not a
-        verified approval and is not part of the signed transaction.
-      </p>
-    </div>
-  )
-  const renderConditions = (tx: Proposal) => {
+  const renderWarnings = (tx: Proposal) =>
+    getWarnings(tx).map((warning) => (
+      <Alert key={warning} variant="warning" outlined={false}>
+        <AlertSeverityIcon variant="warning" />
+        <AlertTitle>{WARNING_LABELS[warning]}</AlertTitle>
+        <AlertDescription>{WARNING_DETAILS[warning]}</AlertDescription>
+      </Alert>
+    ))
+  const getSignerFootnote = (tx: Proposal) => {
+    const { missing } = getState(tx, persona)
+    if (tx.kind.type === 'swap' && tx.kind.expired)
+      return 'This order has expired. Reject this transaction and try again.'
+    if (tx.proposedBy && tx.signers.length === 0)
+      return 'This transaction was created by a proposer. Review it, then confirm or reject it.'
+    if (missing && tx.kind.type === 'rejection')
+      return 'This rejection can execute once the required approvals are collected.'
+    return missing ? 'Can be executed once the threshold is reached.' : undefined
+  }
+  const renderSummary = (tx: Proposal) => {
+    const counterparty = getCounterparty(tx)
+    const counterpartyRow = counterparty && { label: counterparty.label, content: counterparty.value }
     const state = getState(tx, persona)
     const account = getAccount(tx)
+    const conflicts = getConflicts(tx, items)
     return (
-      <ul className="space-y-2 rounded-lg bg-muted p-3 text-sm">
-        <li className="flex items-center gap-2">
-          {state.missing ? <Users className="size-4" /> : <Check className="size-4" />}
-          {state.missing
-            ? `${state.missing} more ${state.missing === 1 ? 'signature' : 'signatures'} needed`
-            : 'Signature threshold met'}
-          {tx.signers.includes('Dev') && ' · You signed'}
-        </li>
-        <li className="flex items-center gap-2">
-          {state.waiting ? <Clock3 className="size-4" /> : <Check className="size-4" />}
-          {state.waiting
-            ? `Execution waits for earlier nonces, starting at #${account.nextNonce}.`
-            : `Nonce #${tx.nonce} is next in this Safe.`}
-        </li>
-        {getConflicts(tx, items).length > 0 && (
-          <li className="flex items-center gap-2">
-            <ListFilter className="size-4" />A competing proposal uses this nonce. Only one can execute.
-          </li>
-        )}
-      </ul>
+      <div role="group" aria-label="Transaction summary">
+        <DrawerList
+          mobileStack
+          items={[
+            {
+              label: 'Safe',
+              content: (
+                <span className="flex min-w-0 items-center gap-2">
+                  <Identicon address={account.iconAddress} size={20} />
+                  <span className="truncate">
+                    {account.name} · {account.network}
+                  </span>
+                </span>
+              ),
+            },
+            ...(counterpartyRow ? [counterpartyRow] : []),
+            {
+              label: 'Signatures',
+              content: (
+                <span className="tabular-nums">
+                  {getSignatureCount(tx)}/{account.threshold}
+                  {state.missing > 0 && (
+                    <span className="text-muted-foreground"> · {getSignerSummary(tx, persona)}</span>
+                  )}
+                </span>
+              ),
+            },
+            { label: 'Nonce', content: <span className="tabular-nums">#{tx.nonce}</span> },
+            {
+              label: 'Proposed',
+              content: (
+                <span className="tabular-nums">
+                  {formatDateTime(getCreatedAt(tx))}
+                  <span className="text-muted-foreground"> · {tx.age}</span>
+                </span>
+              ),
+            },
+            {
+              label: 'Status',
+              content: (
+                <div className="flex flex-col md:items-end">
+                  <div className="flex flex-wrap items-center gap-1.5 md:justify-end">
+                    <Badge variant={getStatusTone(tx, persona)}>{getStatusLabel(tx, persona)}</Badge>
+                    {conflicts.length > 0 && (
+                      <Badge variant="warning">{conflicts.length + 1} competing proposals</Badge>
+                    )}
+                    {tx.proposedBy && tx.signers.length === 0 && <Badge variant="outline">Proposal</Badge>}
+                  </div>
+                </div>
+              ),
+            },
+          ]}
+        />
+        <Alert variant="info" outlined={false} role="note" className="mt-3" data-testid="execution-reason">
+          <AlertSeverityIcon variant="info" />
+          <AlertDescription>{getExecutionReason(tx, persona, items)}</AlertDescription>
+        </Alert>
+      </div>
     )
   }
 
+  const reviewState = review ? getState(review, persona) : undefined
+  const reviewConflicts = review ? getConflicts(review, items) : []
+  const signerFootnote = review ? getSignerFootnote(review) : undefined
   const ReviewIcon = TYPE_ICONS[review ? getTypeLabel(review) : 'Send']
   return (
     <div className="min-h-screen bg-secondary text-foreground">
@@ -539,175 +736,200 @@ function PendingQueueView() {
                   onChange={(event) => setSearch(event.target.value)}
                   onClear={() => setSearch('')}
                 />
-                {groupBy !== 'none' && (
-                  <div className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border bg-card pl-3 shadow-xs">
-                    <ListTree className="size-4 text-muted-foreground" aria-hidden="true" />
-                    <Select
-                      value={groupBy}
-                      items={{ status: 'Status', safe: 'Safe' }}
-                      onValueChange={(value) => value && setGroupBy(value)}
-                    >
-                      <SelectTrigger variant="ghost" size="sm" aria-label="Grouped by">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="status">Status</SelectItem>
-                        <SelectItem value="safe">Safe</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button
-                      size="icon-sm"
-                      variant="ghost-muted"
-                      className="ml-1"
-                      aria-label="Remove grouping"
-                      onClick={() => setGroupBy('none')}
-                    >
-                      <X />
-                    </Button>
+                {items.length > 0 && (
+                  <div role="group" aria-label="Quick filters" className="flex flex-wrap items-center gap-2">
+                    {QUICK_FILTERS.map((status) => {
+                      const filter = { value: status, ...STATUS_META[status] }
+                      const count = optionCount('statuses', (tx) => matchesFilter(tx, status, persona))
+                      const pressed = stateFilter.includes(status)
+                      const FilterIcon = filter.icon
+                      return (
+                        <Tooltip key={filter.value} delay={300}>
+                          <TooltipTrigger
+                            render={
+                              <button
+                                type="button"
+                                aria-pressed={pressed}
+                                aria-label={`${filter.label}, ${count}`}
+                                onClick={() => setStateFilter(toggled(stateFilter, filter.value))}
+                                className={`flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-md border bg-card pr-3 pl-1.5 text-sm shadow-xs outline-none transition-colors hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 ${pressed ? 'border-foreground' : 'border-border'}`}
+                              />
+                            }
+                          >
+                            <span
+                              className={`flex size-6 items-center justify-center rounded ${filter.tone}`}
+                              aria-hidden="true"
+                            >
+                              <FilterIcon className="size-3.5" strokeWidth={ICON_STROKE} />
+                            </span>
+                            {filter.label}
+                            <span className="tabular-nums text-muted-foreground">{count}</span>
+                          </TooltipTrigger>
+                          <TooltipContent>{filter.description}</TooltipContent>
+                        </Tooltip>
+                      )
+                    })}
                   </div>
                 )}
-                <Popover>
-                  <PopoverTrigger render={<Button variant="outline" />}>
+                <DropdownMenu>
+                  <DropdownMenuTrigger render={<Button variant="outline" />}>
                     <ListFilter />
-                    Filters
-                    {(accountFilter.length !== accounts.length ||
-                      networkFilter.length !== networks.length ||
-                      typeFilter.length !== TYPE_LABELS.length ||
-                      stateFilter !== 'all') && (
-                      <Badge variant="secondary" size="default" shape="pill">
-                        Active
+                    Filter
+                    {activeFilterCount > 0 && (
+                      <Badge variant="secondary" className="tabular-nums">
+                        {activeFilterCount}
+                        <span className="sr-only"> applied</span>
                       </Badge>
                     )}
-                  </PopoverTrigger>
-                  <PopoverContent align="end" className="w-80 max-w-[calc(100vw-2rem)]">
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-medium">Filters</span>
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => {
-                          resetFilters()
-                          setGroupBy('none')
-                        }}
-                      >
-                        Clear all
-                      </Button>
-                    </div>
-                    <Accordion multiple defaultValue={['accounts']}>
-                      <AccordionItem value="accounts">
-                        <AccordionTrigger>Safe account</AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-3 pb-3">
-                            {accounts.map((account) => (
-                              <label key={account.id} className="flex items-center gap-3 text-sm">
-                                <Checkbox
-                                  aria-label={account.name}
-                                  checked={accountFilter.includes(account.id)}
-                                  onCheckedChange={(checked) =>
-                                    setAccountFilter(
-                                      checked
-                                        ? [...accountFilter, account.id]
-                                        : accountFilter.filter((id) => id !== account.id),
-                                    )
-                                  }
-                                />
-                                {account.name}
-                              </label>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="networks">
-                        <AccordionTrigger>Network</AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-3 pb-3">
-                            {networks.map((network) => (
-                              <label key={network} className="flex items-center gap-3 text-sm">
-                                <Checkbox
-                                  aria-label={network}
-                                  checked={networkFilter.includes(network)}
-                                  onCheckedChange={(checked) =>
-                                    setNetworkFilter(
-                                      checked
-                                        ? [...networkFilter, network]
-                                        : networkFilter.filter((value) => value !== network),
-                                    )
-                                  }
-                                />
-                                {network}
-                              </label>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="types">
-                        <AccordionTrigger>Type</AccordionTrigger>
-                        <AccordionContent>
-                          <div className="space-y-3 pb-3">
-                            {TYPE_LABELS.map((type) => (
-                              <label key={type} className="flex items-center gap-3 text-sm">
-                                <Checkbox
-                                  aria-label={type}
-                                  checked={typeFilter.includes(type)}
-                                  onCheckedChange={(checked) =>
-                                    setTypeFilter(
-                                      checked ? [...typeFilter, type] : typeFilter.filter((value) => value !== type),
-                                    )
-                                  }
-                                />
-                                {type}
-                              </label>
-                            ))}
-                          </div>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="status">
-                        <AccordionTrigger>Status</AccordionTrigger>
-                        <AccordionContent>
-                          <Select
-                            value={stateFilter}
-                            items={filters}
-                            onValueChange={(value) => value && setStateFilter(value)}
-                          >
-                            <SelectTrigger id="state-filter" aria-label="State" className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {filters.map((filter) => (
-                                <SelectItem key={filter.value} value={filter.value}>
-                                  {filter.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </AccordionContent>
-                      </AccordionItem>
-                      <AccordionItem value="grouping">
-                        <AccordionTrigger>Group by</AccordionTrigger>
-                        <AccordionContent>
-                          <Select
-                            value={groupBy}
-                            items={{ none: 'None', status: 'Status', safe: 'Safe' }}
-                            onValueChange={(value) => value && setGroupBy(value)}
-                          >
-                            <SelectTrigger id="group-by" aria-label="Group by" className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="none">None</SelectItem>
-                              <SelectItem value="status">Status</SelectItem>
-                              <SelectItem value="safe">Safe</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </AccordionContent>
-                      </AccordionItem>
-                    </Accordion>
-                  </PopoverContent>
-                </Popover>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <FilterSectionTitle title="Safe account" summary={filterSummaries.accounts} />
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="w-64">
+                        {accounts.map((account) => (
+                          <FilterOption
+                            key={account.id}
+                            label={account.name}
+                            checked={accountFilter.includes(account.id)}
+                            count={optionCount('accounts', (tx) => tx.account === account.id)}
+                            icon={<Identicon address={account.iconAddress} size={16} />}
+                            onToggle={() => setAccountFilter(toggled(accountFilter, account.id))}
+                          />
+                        ))}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <FilterSectionTitle title="Network" summary={filterSummaries.networks} />
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="w-56">
+                        {networks.map((network) => {
+                          const chainId = accounts.find((account) => account.network === network)?.chainId
+                          return (
+                            <FilterOption
+                              key={network}
+                              label={network}
+                              checked={networkFilter.includes(network)}
+                              count={optionCount('networks', (tx) => getAccount(tx).network === network)}
+                              icon={
+                                <Avatar className="size-4">
+                                  <AvatarImage
+                                    src={`https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`}
+                                    alt=""
+                                  />
+                                  <AvatarFallback className="text-[10px]">{network[0]}</AvatarFallback>
+                                </Avatar>
+                              }
+                              onToggle={() => setNetworkFilter(toggled(networkFilter, network))}
+                            />
+                          )
+                        })}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <FilterSectionTitle title="Type" summary={filterSummaries.types} />
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="w-60">
+                        {TYPE_LABELS.map((type) => {
+                          const TypeIcon = TYPE_ICONS[type]
+                          return (
+                            <FilterOption
+                              key={type}
+                              label={type}
+                              checked={typeFilter.includes(type)}
+                              count={optionCount('types', (tx) => getTypeLabel(tx) === type)}
+                              icon={<TypeIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                              onToggle={() => setTypeFilter(toggled(typeFilter, type))}
+                            />
+                          )
+                        })}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <FilterSectionTitle title="Status" summary={filterSummaries.status} />
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="w-64">
+                        {STATUS_ORDER.map((status) => {
+                          const StatusIcon = STATUS_META[status].icon
+                          return (
+                            <FilterOption
+                              key={status}
+                              label={STATUS_META[status].label}
+                              checked={stateFilter.includes(status)}
+                              count={optionCount('statuses', (tx) => matchesFilter(tx, status, persona))}
+                              icon={<StatusIcon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />}
+                              onToggle={() => setStateFilter(toggled(stateFilter, status))}
+                            />
+                          )
+                        })}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuSub>
+                      <DropdownMenuSubTrigger>
+                        <FilterSectionTitle title="Group by" summary={filterSummaries.grouping} />
+                      </DropdownMenuSubTrigger>
+                      <DropdownMenuSubContent className="w-44">
+                        <DropdownMenuRadioGroup
+                          value={groupBy}
+                          onValueChange={(value) => setGroupBy(value as 'none' | 'status' | 'safe')}
+                        >
+                          <DropdownMenuRadioItem value="none">None</DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="status">Status</DropdownMenuRadioItem>
+                          <DropdownMenuRadioItem value="safe">Safe</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                      </DropdownMenuSubContent>
+                    </DropdownMenuSub>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button size="action" aria-label="New transaction">
                   New
                 </Button>
               </div>
+              {(appliedFilters.length > 0 || groupBy !== 'none') && (
+                <div role="group" aria-label="Applied filters" className="-mt-2 mb-5 flex flex-wrap items-center gap-2">
+                  {[
+                    ...appliedFilters,
+                    ...(groupBy === 'none'
+                      ? []
+                      : [
+                          {
+                            section: 'grouping',
+                            title: 'Group by',
+                            values: [groupBy === 'safe' ? 'Safe' : 'Status'],
+                            clear: () => setGroupBy('none'),
+                          },
+                        ]),
+                  ].map((filter) => (
+                    <Chip
+                      key={filter.section}
+                      variant="outline"
+                      size="lg"
+                      onDelete={filter.clear}
+                      className={APPLIED_PILL}
+                    >
+                      <span className="text-muted-foreground">{filter.title}:</span>
+                      {filter.values.length > 2
+                        ? `${filter.values.slice(0, 2).join(', ')} +${filter.values.length - 2}`
+                        : filter.values.join(', ')}
+                    </Chip>
+                  ))}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      resetFilters()
+                      setGroupBy('none')
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
               {!visible.length && (
                 <Empty className="rounded-2xl border border-border bg-card">
                   <EmptyHeader>
@@ -773,20 +995,18 @@ function PendingQueueView() {
                               </>
                             ) : (
                               <>
-                                <span
-                                  className={`flex size-6 shrink-0 items-center justify-center rounded-md ${section.category === 'ready' || section.category === 'sign' ? 'bg-success-subtle text-success-strong' : 'bg-warning-subtle text-warning-strong'}`}
-                                  aria-hidden="true"
-                                >
-                                  {section.category === 'ready' ? (
-                                    <CircleCheck className="size-4" strokeWidth={ICON_STROKE} />
-                                  ) : section.category === 'sign' ? (
-                                    <PenLine className="size-4" strokeWidth={ICON_STROKE} />
-                                  ) : section.category === 'waiting' ? (
-                                    <Clock3 className="size-4" strokeWidth={ICON_STROKE} />
-                                  ) : (
-                                    <Users className="size-4" strokeWidth={ICON_STROKE} />
-                                  )}
-                                </span>
+                                {section.category in STATUS_META &&
+                                  (() => {
+                                    const meta = STATUS_META[section.category as Filter]
+                                    return (
+                                      <span
+                                        className={`flex size-6 shrink-0 items-center justify-center rounded-md ${meta.tone}`}
+                                        aria-hidden="true"
+                                      >
+                                        <meta.icon className="size-4" strokeWidth={ICON_STROKE} />
+                                      </span>
+                                    )
+                                  })()}
                                 {section.label}
                                 <Badge variant="outline">{sectionItems.length}</Badge>
                               </>
@@ -885,6 +1105,30 @@ function PendingQueueView() {
                                       const status = getStatusLabel(tx, persona)
                                       const rowAction = getRowAction(tx, persona)
                                       const signatureCount = getSignatureCount(tx)
+                                      const warnings = getWarnings(tx)
+                                      const warningMarker = warnings.length > 0 && (
+                                        <Tooltip delay={150}>
+                                          <TooltipTrigger
+                                            aria-label={`Warnings: ${warnings.map((warning) => WARNING_LABELS[warning]).join(', ')}`}
+                                            className="flex shrink-0 items-center text-warning-strong"
+                                            onClick={(event) => {
+                                              event.stopPropagation()
+                                              reviewTx(tx)
+                                            }}
+                                          >
+                                            <TriangleAlert
+                                              className="size-4"
+                                              strokeWidth={ICON_STROKE}
+                                              aria-hidden="true"
+                                            />
+                                          </TooltipTrigger>
+                                          <TooltipContent>
+                                            {warnings.map((warning) => (
+                                              <p key={warning}>{WARNING_LABELS[warning]}</p>
+                                            ))}
+                                          </TooltipContent>
+                                        </Tooltip>
+                                      )
                                       const transactionIcon = (
                                         <span
                                           className="flex size-9 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground"
@@ -978,6 +1222,7 @@ function PendingQueueView() {
                                               >
                                                 <div className="flex min-w-0 items-center gap-1.5">
                                                   {openButton}
+                                                  {warningMarker}
                                                   {!isWide && noteButton}
                                                 </div>
                                               </TableCell>
@@ -1024,11 +1269,18 @@ function PendingQueueView() {
                                               <TableCell className="py-1">
                                                 <Tooltip delay={150}>
                                                   <TooltipTrigger
-                                                    aria-label={`${signatureCount} of ${account.threshold} signatures`}
-                                                    className="text-xs tabular-nums"
+                                                    aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
+                                                    className="max-w-full text-left text-xs tabular-nums"
                                                     onClick={(event) => event.stopPropagation()}
                                                   >
-                                                    {signatureCount}/{account.threshold}
+                                                    <span className="block">
+                                                      {signatureCount}/{account.threshold}
+                                                    </span>
+                                                    {isWide && (
+                                                      <span className="block max-w-36 truncate text-muted-foreground">
+                                                        {getSignerSummary(tx, persona)}
+                                                      </span>
+                                                    )}
                                                   </TooltipTrigger>
                                                   <TooltipContent>
                                                     <div className="space-y-1">
@@ -1055,8 +1307,11 @@ function PendingQueueView() {
                                                   >
                                                     {status}
                                                   </Badge>
+                                                  {tx.proposedBy && tx.signers.length === 0 && (
+                                                    <Badge variant="outline">Proposal</Badge>
+                                                  )}
                                                   {conflicts.length > 0 && groupSize < 2 && (
-                                                    <Badge variant="warning" size="default" shape="pill">
+                                                    <Badge variant="warning">
                                                       {conflicts.length + 1} competing proposals
                                                     </Badge>
                                                   )}
@@ -1069,15 +1324,22 @@ function PendingQueueView() {
                                                   >
                                                     #{tx.nonce}
                                                   </Badge>
-                                                  <Badge
-                                                    variant="outline"
-                                                    size="default"
-                                                    shape="pill"
-                                                    className="text-muted-foreground"
-                                                    aria-label={`Proposed ${tx.age}`}
-                                                  >
-                                                    {tx.age}
-                                                  </Badge>
+                                                  <Tooltip delay={150}>
+                                                    <TooltipTrigger
+                                                      render={
+                                                        <Badge
+                                                          variant="outline"
+                                                          size="default"
+                                                          shape="pill"
+                                                          className="text-muted-foreground"
+                                                          aria-label={`Proposed ${tx.age}`}
+                                                        >
+                                                          {tx.age}
+                                                        </Badge>
+                                                      }
+                                                    />
+                                                    <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
+                                                  </Tooltip>
                                                 </div>
                                               </TableCell>
                                               <TableCell className="text-right">
@@ -1280,50 +1542,55 @@ function PendingQueueView() {
           open={!!review}
           onClose={() => setReview(null)}
           ariaLabel={review ? getTransactionLabel(review) : undefined}
+          headerActions={({ fullScreen }) => (
+            <>
+              <Tooltip delay={150}>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="surface"
+                      size="icon"
+                      aria-label="Previous transaction"
+                      disabled={reviewIndex <= 0}
+                      onClick={() => stepReview(-1)}
+                    />
+                  }
+                >
+                  <ChevronUp />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Previous <Kbd>K</Kbd>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip delay={150}>
+                <TooltipTrigger
+                  render={
+                    <Button
+                      variant="surface"
+                      size="icon"
+                      aria-label="Next transaction"
+                      disabled={reviewIndex < 0 || reviewIndex >= reviewOrder.length - 1}
+                      onClick={() => stepReview(1)}
+                    />
+                  }
+                >
+                  <ChevronDown />
+                </TooltipTrigger>
+                <TooltipContent>
+                  Next <Kbd>J</Kbd>
+                </TooltipContent>
+              </Tooltip>
+              <span
+                className={fullScreen ? 'text-xs tabular-nums text-muted-foreground max-md:sr-only' : 'sr-only'}
+                aria-live="polite"
+              >
+                {reviewIndex >= 0 && `${reviewIndex + 1} of ${reviewOrder.length}`}
+              </span>
+            </>
+          )}
         >
           <DrawerHeader>
-            <div className="flex min-w-0 flex-1 flex-col gap-4">
-              <div className="flex h-9 items-center gap-2 md:pr-12">
-                <Tooltip delay={150}>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="surface"
-                        size="icon"
-                        aria-label="Previous transaction"
-                        disabled={reviewIndex <= 0}
-                        onClick={() => stepReview(-1)}
-                      />
-                    }
-                  >
-                    <ChevronUp />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Previous <Kbd>K</Kbd>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip delay={150}>
-                  <TooltipTrigger
-                    render={
-                      <Button
-                        variant="surface"
-                        size="icon"
-                        aria-label="Next transaction"
-                        disabled={reviewIndex < 0 || reviewIndex >= reviewOrder.length - 1}
-                        onClick={() => stepReview(1)}
-                      />
-                    }
-                  >
-                    <ChevronDown />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    Next <Kbd>J</Kbd>
-                  </TooltipContent>
-                </Tooltip>
-                <span className="text-xs tabular-nums text-muted-foreground" aria-live="polite">
-                  {reviewIndex >= 0 && `${reviewIndex + 1} of ${reviewOrder.length}`}
-                </span>
-              </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-4 pr-22 md:pr-36">
               {review && (
                 <div className="flex min-w-0 flex-col gap-3">
                   <div className="flex min-w-0 items-center gap-3">
@@ -1334,27 +1601,9 @@ function PendingQueueView() {
                       <ReviewIcon className="size-4" strokeWidth={ICON_STROKE} />
                     </span>
                     <div className="min-w-0">
-                      <DrawerTitle size="lg">{getTransactionLabel(review)}</DrawerTitle>
+                      <DrawerTitle size="lg">{getTypeLabel(review)}</DrawerTitle>
                       <p className="truncate text-xs tabular-nums text-muted-foreground">{getAmountLabel(review)}</p>
                     </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Transaction summary">
-                    <span className="mr-1 flex items-center gap-1.5 text-xs">
-                      <Identicon address={getAccount(review).iconAddress} size={16} />
-                      {getAccount(review).name} · {getAccount(review).network}
-                    </span>
-                    <Badge variant={getStatusTone(review, persona)} size="default" shape="pill">
-                      {getStatusLabel(review, persona)}
-                    </Badge>
-                    <Badge variant="outline" size="default" shape="pill" className="tabular-nums">
-                      #{review.nonce}
-                    </Badge>
-                    <Badge variant="outline" size="default" shape="pill" className="tabular-nums">
-                      {getSignatureCount(review)}/{getAccount(review).threshold} signatures
-                    </Badge>
-                    <Badge variant="outline" size="default" shape="pill" className="text-muted-foreground">
-                      {review.age}
-                    </Badge>
                   </div>
                 </div>
               )}
@@ -1362,142 +1611,183 @@ function PendingQueueView() {
           </DrawerHeader>
           <DrawerBody>
             {review && (
-              <Accordion multiple value={reviewSections} onValueChange={setReviewSections}>
-                <PanelSection value="summary" title="Summary">
-                  <ProposalSummary proposal={review} />
-                </PanelSection>
-                <PanelSection value="conditions" title="What happens next">
-                  {renderConditions(review)}
-                </PanelSection>
-                <PanelSection value="note" title="Workspace note">
-                  {renderNote(review)}
-                </PanelSection>
-                <PanelSection value="details" title="Transaction details">
-                  <ProposalTransactionDetails key={review.id} proposal={review} />
-                </PanelSection>
-                {getState(review, persona).waiting && (
-                  <PanelSection value="dependencies" title="Earlier transactions">
-                    {Array.from(
-                      { length: Math.min(review.nonce - getAccount(review).nextNonce, 10) },
-                      (_, i) => getAccount(review).nextNonce + i,
-                    ).map((nonce) => {
-                      const dependencies = items.filter((tx) => tx.account === review.account && tx.nonce === nonce)
-                      return (
-                        <div key={nonce} className="rounded-lg bg-muted p-3">
-                          <Typography variant="paragraph-small-medium">Nonce #{nonce}</Typography>
-                          {dependencies.length ? (
-                            dependencies.map((tx) => (
-                              <button
-                                key={tx.id}
-                                className="mt-2 flex w-full items-center justify-between gap-2 text-left text-sm hover:underline"
-                                onClick={() => reviewTx(tx)}
-                              >
-                                <span>{getTransactionLabel(tx)}</span>
-                                <Badge variant="secondary">
-                                  {tx.signers.length}/{getAccount(tx).threshold}
-                                </Badge>
-                              </button>
-                            ))
-                          ) : (
-                            <p className="mt-2 text-sm text-muted-foreground">
-                              No proposal found in available data. Refresh the queue before treating this as a nonce
-                              gap.
-                            </p>
-                          )}
-                        </div>
-                      )
-                    })}
+              <div className="flex flex-col gap-3">
+                {renderWarnings(review)}
+                <Accordion multiple value={reviewSections} onValueChange={setReviewSections}>
+                  <PanelSection value="summary" title="Transaction summary">
+                    {renderSummary(review)}
                   </PanelSection>
-                )}
-                {getConflicts(review, items).length > 0 && (
-                  <PanelSection value="conflicts" title="Competing proposals">
-                    <p className="text-sm text-muted-foreground">
-                      These proposals use the same nonce. Executing one makes the others invalid.
-                    </p>
-                    {getConflicts(review, items).map((tx) => (
-                      <button
-                        key={tx.id}
-                        className="flex w-full items-center justify-between gap-2 rounded-lg bg-muted p-3 text-left text-sm hover:underline"
-                        onClick={() => reviewTx(tx)}
-                      >
-                        <span>{getTransactionLabel(tx)}</span>
-                        <Badge variant="secondary">{tx.amount}</Badge>
-                      </button>
-                    ))}
-                  </PanelSection>
-                )}
-                {reject && (
-                  <PanelSection value="cancel" title="Replace or cancel">
-                    <p className="text-sm text-muted-foreground">
-                      A replacement or cancellation uses the same nonce. It needs signatures and on-chain execution
-                      before the original proposal becomes invalid.
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      disabled={persona !== 'owner' || !getAccount(review).owners.includes('Dev')}
-                      onClick={() => setReplacement({ recipient: review.recipient, amount: review.amount })}
-                    >
-                      Replace with another transaction
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      disabled={persona !== 'owner' || !getAccount(review).owners.includes('Dev')}
-                      onClick={() => proposeAlternative('cancellation')}
-                    >
-                      Propose on-chain cancellation
-                    </Button>
-                    {replacement && (
-                      <div className="space-y-3 rounded-lg bg-muted p-3">
-                        <p className="text-sm">
-                          Review the replacement summary. This prototype does not build a signable transaction.
+                  {review.note && (
+                    <PanelSection value="note" title="Note">
+                      <div className="space-y-2 rounded-lg bg-muted p-3">
+                        <p className="text-sm leading-relaxed">{review.note.text}</p>
+                        <p className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                          <LockKeyhole className="size-3" aria-hidden="true" />
+                          {review.note.author} · {review.note.date} · Off-chain, not verified
                         </p>
-                        {(['recipient', 'amount'] as const).map((field) => (
-                          <label key={field} className="block space-y-1 text-sm">
-                            <span>{field === 'recipient' ? 'Recipient' : 'Amount'}</span>
-                            <Input
-                              value={replacement[field]}
-                              onChange={(event) => setReplacement({ ...replacement, [field]: event.target.value })}
-                            />
-                          </label>
-                        ))}
-                        <Button
-                          disabled={!replacement.recipient.trim() || !replacement.amount.trim()}
-                          onClick={() => proposeAlternative('replacement')}
-                        >
-                          Propose replacement in preview
-                        </Button>
                       </div>
-                    )}
+                    </PanelSection>
+                  )}
+                  <PanelSection value="details" title="Details">
+                    <ProposalDetails key={review.id} proposal={review} />
                   </PanelSection>
-                )}
-              </Accordion>
+                  {reviewState?.waiting && (
+                    <PanelSection value="dependencies" title="Earlier transactions">
+                      {Array.from(
+                        { length: Math.min(review.nonce - getAccount(review).nextNonce, 10) },
+                        (_, i) => getAccount(review).nextNonce + i,
+                      ).map((nonce) => {
+                        const dependencies = items.filter((tx) => tx.account === review.account && tx.nonce === nonce)
+                        return (
+                          <div key={nonce} className="rounded-lg bg-muted p-3">
+                            <Typography variant="paragraph-small-medium">Nonce #{nonce}</Typography>
+                            {dependencies.length ? (
+                              dependencies.map((tx) => (
+                                <button
+                                  key={tx.id}
+                                  className="mt-2 flex w-full items-center justify-between gap-2 text-left text-sm hover:underline"
+                                  onClick={() => reviewTx(tx)}
+                                >
+                                  <span>{getTransactionLabel(tx)}</span>
+                                  <Badge variant="secondary">
+                                    {tx.signers.length}/{getAccount(tx).threshold}
+                                  </Badge>
+                                </button>
+                              ))
+                            ) : (
+                              <p className="mt-2 text-sm text-muted-foreground">
+                                No proposal found in available data. Refresh the queue before treating this as a nonce
+                                gap.
+                              </p>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </PanelSection>
+                  )}
+                  {reviewConflicts.length > 0 && (
+                    <PanelSection value="conflicts" title="Competing proposals">
+                      <p className="text-sm text-muted-foreground">
+                        These proposals use the same nonce. Executing one makes the others invalid.
+                      </p>
+                      {reviewConflicts.map((tx) => (
+                        <button
+                          key={tx.id}
+                          className="flex w-full items-center justify-between gap-2 rounded-lg bg-muted p-3 text-left text-sm hover:underline"
+                          onClick={() => reviewTx(tx)}
+                        >
+                          <span>{getTransactionLabel(tx)}</span>
+                          <Badge variant="secondary">{getAmountLabel(tx)}</Badge>
+                        </button>
+                      ))}
+                    </PanelSection>
+                  )}
+                  <PanelSection value="advanced" title="Advanced transaction data">
+                    <ProposalAdvanced key={review.id} proposal={review} />
+                  </PanelSection>
+                  {reject && (
+                    <PanelSection value="cancel" title="Replace or cancel">
+                      <p className="text-sm text-muted-foreground">
+                        A replacement or cancellation uses the same nonce. It needs signatures and on-chain execution
+                        before the original proposal becomes invalid.
+                      </p>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={persona !== 'owner' || !getAccount(review).owners.includes('Dev')}
+                        onClick={() => setReplacement({ recipient: review.recipient, amount: review.amount })}
+                      >
+                        Replace with another transaction
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={persona !== 'owner' || !getAccount(review).owners.includes('Dev')}
+                        onClick={() => proposeAlternative('cancellation')}
+                      >
+                        Propose on-chain cancellation
+                      </Button>
+                      {replacement && (
+                        <div className="space-y-3 rounded-lg bg-muted p-3">
+                          <p className="text-sm">
+                            Review the replacement summary. This prototype does not build a signable transaction.
+                          </p>
+                          {(['recipient', 'amount'] as const).map((field) => (
+                            <label key={field} className="block space-y-1 text-sm">
+                              <span>{field === 'recipient' ? 'Recipient' : 'Amount'}</span>
+                              <Input
+                                value={replacement[field]}
+                                onChange={(event) => setReplacement({ ...replacement, [field]: event.target.value })}
+                              />
+                            </label>
+                          ))}
+                          <Button
+                            disabled={!replacement.recipient.trim() || !replacement.amount.trim()}
+                            onClick={() => proposeAlternative('replacement')}
+                          >
+                            Propose replacement in preview
+                          </Button>
+                        </div>
+                      )}
+                    </PanelSection>
+                  )}
+                </Accordion>
+              </div>
             )}
           </DrawerBody>
-          <div className="shrink-0 border-t border-border bg-background" data-testid="proposal-fixed-footer">
+          <div className="@container shrink-0 border-t border-border bg-background" data-testid="proposal-fixed-footer">
             <DrawerFooter safeArea>
               {review && (
-                <Accordion
-                  key={`audit-${review.id}-${collapseAudit ? 'collapsed' : 'open'}`}
-                  defaultValue={collapseAudit ? [] : ['audit']}
-                >
-                  <AccordionItem value="audit">
-                    <AccordionTrigger>
-                      <span className="flex items-center gap-2">
-                        Audit log
+                <>
+                  <section aria-label="Signers">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        aria-hidden="true"
+                        className="flex cursor-pointer items-center gap-2 py-4 text-sm font-medium"
+                        onClick={() => setAuditOpen(!auditOpen)}
+                      >
+                        Signers
                         <Badge variant="outline">
-                          {getSignatureCount(review)}/{getAccount(review).threshold}
+                          {getSignatureCount(review)} of {getAccount(review).threshold} required
                         </Badge>
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="max-h-[24vh] overflow-y-auto overscroll-contain pb-3">
-                        <ProposalActivity proposal={review} persona={persona} compact />
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
+                      </button>
+                      <CopyTransactionLink proposal={review} />
+                      <button
+                        type="button"
+                        aria-label="Signers"
+                        aria-expanded={auditOpen}
+                        aria-controls="proposal-signers"
+                        className="flex flex-1 cursor-pointer items-center justify-end gap-3 self-stretch rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                        onClick={() => setAuditOpen(!auditOpen)}
+                      >
+                        {auditOpen ? (
+                          <ChevronUp className="size-4 text-muted-foreground" aria-hidden="true" />
+                        ) : (
+                          <ChevronDown className="size-4 text-muted-foreground" aria-hidden="true" />
+                        )}
+                      </button>
+                    </div>
+                    <div
+                      id="proposal-signers"
+                      hidden={!auditOpen}
+                      className="max-h-[24vh] space-y-3 overflow-y-auto overscroll-contain pb-3"
+                    >
+                      <SignerList proposal={review} persona={persona} />
+                      {signerFootnote && (
+                        <Alert
+                          variant="subtle"
+                          role="note"
+                          className="*:data-[slot=alert-description]:text-muted-foreground"
+                        >
+                          <AlertDescription>{signerFootnote}</AlertDescription>
+                        </Alert>
+                      )}
+                    </div>
+                  </section>
+                  <Separator className="mb-4" />
+                </>
               )}
               {feedback && (
                 <p role="status" className="mb-3 text-xs text-muted-foreground">
@@ -1545,8 +1835,8 @@ function PendingQueueView() {
                   </div>
                 </div>
               )}
-              {review && !pendingAction && (
-                <div className="flex flex-col gap-2 md:flex-row">
+              {review && reviewState && !pendingAction && (
+                <div className="flex flex-col gap-2 md:flex-row @2xl:justify-end">
                   <Button
                     variant="outline"
                     size={isMobile ? 'xl' : 'default'}
@@ -1560,23 +1850,17 @@ function PendingQueueView() {
                   </Button>
                   <Button
                     size={isMobile ? 'xl' : 'default'}
-                    className="w-full shrink-0 md:w-auto md:flex-1"
-                    disabled={!getState(review, persona).ready && !getState(review, persona).canSign}
+                    className="w-full shrink-0 md:w-auto md:flex-1 @2xl:min-w-56 @2xl:flex-none"
+                    disabled={!reviewState.ready && !reviewState.canSign}
                     onClick={() =>
                       setPendingAction(
-                        getState(review, persona).ready
-                          ? 'execute'
-                          : getState(review, persona).finalSignature
-                            ? 'signAndExecute'
-                            : 'sign',
+                        reviewState.ready ? 'execute' : reviewState.finalSignature ? 'signAndExecute' : 'sign',
                       )
                     }
                   >
-                    {getState(review, persona).ready || getState(review, persona).canSign
+                    {reviewState.ready || reviewState.canSign
                       ? getAction(review, persona)
-                      : getState(review, persona).waiting
-                        ? `Waiting on #${getAccount(review).nextNonce}`
-                        : 'Waiting on signatures'}
+                      : getStatusLabel(review, persona)}
                   </Button>
                 </div>
               )}

@@ -12,6 +12,8 @@ export type DrawerProps = {
   resizable?: boolean
   mobileFullScreen?: boolean
   ariaLabel?: string
+  /** Extra header buttons, placed left of the expand and close buttons. */
+  headerActions?: (state: { fullScreen: boolean }) => ReactNode
   children?: ReactNode
 }
 
@@ -22,6 +24,7 @@ export const Drawer = ({
   resizable = false,
   mobileFullScreen = false,
   ariaLabel,
+  headerActions,
   children,
 }: DrawerProps): ReactElement => {
   const [width, setWidth] = useState(size === 'lg' ? 700 : 440)
@@ -124,6 +127,14 @@ export const Drawer = ({
           >
             {fullScreen ? <Minimize2 /> : <Maximize2 />}
           </Button>
+        )}
+
+        {headerActions && (
+          <div
+            className={`absolute top-6 flex items-center gap-2 ${resizable && !mobileSurface ? 'right-30' : 'right-18'}`}
+          >
+            {headerActions({ fullScreen })}
+          </div>
         )}
 
         {/* Positioned by the Drawer rather than the header so every drawer has a close affordance */}

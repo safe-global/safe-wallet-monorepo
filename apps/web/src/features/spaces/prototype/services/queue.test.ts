@@ -36,7 +36,7 @@ describe('preview queue actions', () => {
   it('proposes cancellation without advancing nonce, removing the original, or copying its note', () => {
     const queue = createPreviewQueue('everyday')
     const result = proposePreviewAlternative(queue, 'treasury-42', 'owner', 'cancellation')
-    expect(result.proposal).toMatchObject({ nonce: 42, kind: 'cancellation', signers: ['Dev'], amount: '0 ETH' })
+    expect(result.proposal).toMatchObject({ nonce: 42, kind: { type: 'rejection' }, signers: ['Dev'], amount: '0 ETH' })
     expect(result.proposal?.note).toBeUndefined()
     expect(result.queue.items).toHaveLength(queue.items.length + 1)
     expect(result.queue.items.find((tx) => tx.id === 'treasury-42')).toEqual(
@@ -61,7 +61,8 @@ describe('preview queue actions', () => {
     expect(result.proposal).toMatchObject({
       recipient: 'Payee',
       amount: '1 ETH',
-      kind: 'replacement',
+      origin: 'replacement',
+      kind: { type: 'transfer' },
     })
     expect(result.proposal?.note).toBeUndefined()
   })
@@ -94,6 +95,7 @@ describe('preview queue actions', () => {
       nonce: 17 + index,
       recipient: 'Vendor',
       amount: '1 USDC',
+      kind: { type: 'transfer' },
       age: '1h ago',
       signers: ['Ana', 'Max'],
       eligible: true,
