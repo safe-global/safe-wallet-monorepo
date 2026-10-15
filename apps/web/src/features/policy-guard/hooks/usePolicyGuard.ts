@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { type SafeState, useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -72,6 +72,7 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const hasRpc = useMemo(() => !!chain && !!(customRpcUrl || getRpcServiceUrl(chain.rpcUri)), [chain, customRpcUrl])
 
   const safeKey = `${safe.chainId}:${safeAddress}`
+  const [retryCount, setRetryCount] = useState(0)
 
   // CGW Safe info has no module guard field yet, so it is read from the storage slot
   const [read, , loading] = useAsync<ModuleGuardRead>(
@@ -82,8 +83,8 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
         (error) => ({ safeKey, error: asError(error) }),
       )
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- txHistoryTag changes after each executed tx
-    [shouldRead, web3ReadOnly, safeAddress, safeKey, safe.txHistoryTag],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- txHistoryTag and retryCount only trigger a re-read
+    [shouldRead, web3ReadOnly, safeAddress, safeKey, safe.txHistoryTag, retryCount],
     false,
   )
 
@@ -91,6 +92,12 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const currentRead = read?.safeKey === safeKey ? read : undefined
   const moduleGuard = currentRead && 'moduleGuard' in currentRead ? currentRead.moduleGuard : undefined
   const readError = currentRead && 'error' in currentRead ? currentRead.error : undefined
+
+  useEffect(() => {
+    if (!readError) return
+    const timer = setTimeout(() => setRetryCount((count) => count + 1), POLLING_INTERVAL)
+    return () => clearTimeout(timer)
+  }, [readError])
   const safeError = target && !safeLoaded && !safeLoading ? targetError : undefined
   const error = safeError ?? (shouldRead && !hasRpc ? NO_RPC_ERROR : readError)
 

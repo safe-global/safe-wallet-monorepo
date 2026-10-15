@@ -1,6 +1,6 @@
 import type { JsonRpcProvider } from 'ethers'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
-import { renderHook, waitFor } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import * as useChains from '@/hooks/useChains'
@@ -253,6 +253,27 @@ describe('usePolicyGuard', () => {
     const { result } = renderHook(() => usePolicyGuard())
     expect(result.current.isLoading).toBe(false)
     expect(result.current.error).toBeInstanceOf(Error)
+  })
+
+  it('retries a failed module guard read', async () => {
+    jest.useFakeTimers()
+    try {
+      mockSafe({})
+      const getStorage = jest.fn().mockRejectedValueOnce(new Error('rpc down')).mockResolvedValue(SLOT_EMPTY)
+      mockProvider(getStorage)
+      const { result } = renderHook(() => usePolicyGuard())
+      await waitFor(() => expect(result.current.error).toBeDefined())
+
+      await act(async () => {
+        jest.advanceTimersByTime(POLLING_INTERVAL)
+      })
+
+      await waitFor(() => expect(result.current.state).toEqual({ status: 'none' }))
+      expect(result.current.error).toBeUndefined()
+      expect(getStorage).toHaveBeenCalledTimes(2)
+    } finally {
+      jest.useRealTimers()
+    }
   })
 
   it('does not request another Safe without a target', () => {
