@@ -22,3 +22,5 @@ export type PolicyGuardState =
 export type AllowlistIneligibilityReason = 'chain-not-enabled' | 'safe-not-deployed' | 'version-unsupported'
 
 export type AllowlistEligibility = { eligible: true } | { eligible: false; reason: AllowlistIneligibilityReason }
+
+export type PolicyGuardTarget = { chainId: string; safeAddress: string }
