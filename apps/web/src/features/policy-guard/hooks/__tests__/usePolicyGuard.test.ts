@@ -340,6 +340,14 @@ describe('usePolicyGuard', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
+  it('returns no state and skips RPC for a counterfactual Safe', () => {
+    mockSafe({ deployed: false })
+    const getStorage = mockSlot(SLOT_EMPTY)
+    const { result } = renderHook(() => usePolicyGuard())
+    expect(result.current).toEqual({ state: undefined, isLoading: false, error: undefined })
+    expect(getStorage).not.toHaveBeenCalled()
+  })
+
   it('does not request another Safe without a target', () => {
     const query = jest.spyOn(safesQueries, 'useSafesGetSafeV1Query')
     mockSafe({})

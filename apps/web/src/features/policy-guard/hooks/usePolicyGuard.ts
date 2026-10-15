@@ -19,7 +19,7 @@ import { readModuleGuard } from '../services/readModuleGuard'
 import type { PolicyGuardState } from '../types'
 import { useReadOnlyProvider } from './useReadOnlyProvider'
 
-type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'>
+type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'> & { deployed?: boolean }
 
 type ModuleGuardRead = { readKey: string } & ({ moduleGuard: string } | { error: Error })
 

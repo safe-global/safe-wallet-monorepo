@@ -22,6 +22,6 @@ export type PolicyGuardState =
   | { status: 'unknown'; foreignGuards: ForeignGuard[] }
   | { status: 'unsupported' }
 
-export type AllowlistIneligibilityReason = 'chain-not-enabled' | 'version-unsupported'
+export type AllowlistIneligibilityReason = 'chain-not-enabled' | 'safe-not-deployed' | 'version-unsupported'
 
 export type AllowlistEligibility = { eligible: true } | { eligible: false; reason: AllowlistIneligibilityReason }

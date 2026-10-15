@@ -81,4 +81,15 @@ describe('isSafeEligibleForAllowlist', () => {
       reason: 'chain-not-enabled',
     })
   })
+
+  it('reports safe-not-deployed for a counterfactual Safe', () => {
+    expect(isSafeEligibleForAllowlist({ version: '1.5.0', deployed: false }, sepolia)).toEqual({
+      eligible: false,
+      reason: 'safe-not-deployed',
+    })
+  })
+
+  it('treats a Safe without deployment info as deployed', () => {
+    expect(isSafeEligibleForAllowlist({ version: '1.5.0' }, sepolia)).toEqual({ eligible: true })
+  })
 })
