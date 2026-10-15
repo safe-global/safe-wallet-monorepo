@@ -33,6 +33,14 @@ describe('SettingsRail', () => {
     expect(screen.getByTestId('settings-rail-general')).toHaveAttribute('aria-current', 'page')
     expect(screen.getByTestId('settings-rail-account')).not.toHaveAttribute('aria-current')
     expect(screen.getByTestId('settings-rail-about')).not.toHaveAttribute('aria-current')
+    expect(screen.getByTestId('settings-rail-experimental')).not.toHaveAttribute('aria-current')
+  })
+
+  it('marks the experimental page as active', () => {
+    render(<SettingsRail activePage="experimental" />)
+
+    expect(screen.getByTestId('settings-rail-experimental')).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByTestId('settings-rail-general')).not.toHaveAttribute('aria-current')
   })
 
   it('updates the active page when activePage prop changes', () => {
@@ -51,10 +59,12 @@ describe('SettingsRail', () => {
     const general = parseHref(screen.getByTestId('settings-rail-general') as HTMLAnchorElement)
     const account = parseHref(screen.getByTestId('settings-rail-account') as HTMLAnchorElement)
     const about = parseHref(screen.getByTestId('settings-rail-about') as HTMLAnchorElement)
+    const experimental = parseHref(screen.getByTestId('settings-rail-experimental') as HTMLAnchorElement)
 
     expect(general).toEqual({ pathname: AppRoutes.spaces.settingsGeneral, spaceId: '42' })
     expect(account).toEqual({ pathname: AppRoutes.spaces.settingsAccount, spaceId: '42' })
     expect(about).toEqual({ pathname: AppRoutes.spaces.settingsAbout, spaceId: '42' })
+    expect(experimental).toEqual({ pathname: AppRoutes.spaces.settingsExperimental, spaceId: '42' })
   })
 
   it('omits the spaceId query when none is present in the router', () => {
