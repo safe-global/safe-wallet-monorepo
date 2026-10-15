@@ -340,9 +340,9 @@ describe('usePolicyGuard', () => {
         .mockReturnValue({ refetch: jest.fn(), ...result } as QueryResult)
 
     const mockTargetProvider = (getStorage: jest.Mock) =>
-      jest
-        .spyOn(readOnlyProvider, 'useReadOnlyProvider')
-        .mockImplementation((chainId) => (chainId ? ({ getStorage } as unknown as JsonRpcProvider) : undefined))
+      jest.spyOn(readOnlyProvider, 'useReadOnlyProvider').mockImplementation((chainId) => ({
+        provider: chainId ? ({ getStorage } as unknown as JsonRpcProvider) : undefined,
+      }))
 
     const targetSafe = (overrides: Partial<ExtendedSafeInfo>) =>
       extendedSafeInfoBuilder()
@@ -423,6 +423,18 @@ describe('usePolicyGuard', () => {
 
       expect(result.current.state).toEqual({ status: 'unsupported' })
       expect(getStorage).not.toHaveBeenCalled()
+    })
+
+    it('returns the error, not endless loading, when the target provider fails to load', () => {
+      mockSafe({})
+      const loadError = new Error('chunk failed')
+      jest.spyOn(readOnlyProvider, 'useReadOnlyProvider').mockReturnValue({ provider: undefined, error: loadError })
+      mockTargetQuery({ currentData: targetSafe({}), isFetching: false })
+
+      const { result } = renderHook(() => usePolicyGuard(TARGET))
+
+      expect(result.current.error).toBe(loadError)
+      expect(result.current.isLoading).toBe(false)
     })
   })
 })

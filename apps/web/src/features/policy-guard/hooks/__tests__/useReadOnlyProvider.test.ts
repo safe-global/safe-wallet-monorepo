@@ -6,9 +6,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { initialState as settingsInitialState } from '@/store/settingsSlice'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { logError } from '@/services/exceptions'
 import { useReadOnlyProvider } from '../useReadOnlyProvider'
 
 jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/services/exceptions', () => ({ logError: jest.fn() }))
 
 const mockCreate = createWeb3ReadOnly as jest.MockedFunction<typeof createWeb3ReadOnly>
 
@@ -32,7 +35,7 @@ describe('useReadOnlyProvider', () => {
   it('returns no provider without a chain', () => {
     mockChain()
     const { result } = renderHook(() => useReadOnlyProvider(undefined))
-    expect(result.current).toBeUndefined()
+    expect(result.current.provider).toBeUndefined()
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
@@ -41,7 +44,7 @@ describe('useReadOnlyProvider', () => {
     const provider = fakeProvider()
     mockCreate.mockReturnValue(provider)
     const { result } = renderHook(() => useReadOnlyProvider('11155111'))
-    await waitFor(() => expect(result.current).toBe(provider))
+    await waitFor(() => expect(result.current.provider).toBe(provider))
     expect(mockCreate).toHaveBeenCalledWith(chain, undefined)
   })
 
@@ -61,11 +64,11 @@ describe('useReadOnlyProvider', () => {
     mockChain()
     mockCreate.mockImplementation(fakeProvider)
     const { result } = renderHook(() => [useReadOnlyProvider('11155111'), useReadOnlyProvider('11155111')])
-    await waitFor(() => expect(result.current[0]).toBeDefined())
-    await waitFor(() => expect(result.current[1]).toBe(result.current[0]))
+    await waitFor(() => expect(result.current[0].provider).toBeDefined())
+    await waitFor(() => expect(result.current[1].provider).toBe(result.current[0].provider))
 
     const { result: later } = renderHook(() => useReadOnlyProvider('11155111'))
-    expect(later.current).toBe(result.current[0])
+    expect(later.current.provider).toBe(result.current[0].provider)
     expect(mockCreate).toHaveBeenCalledTimes(1)
   })
 
@@ -74,6 +77,18 @@ describe('useReadOnlyProvider', () => {
     mockCreate.mockReturnValue(undefined)
     const { result } = renderHook(() => useReadOnlyProvider('11155111'))
     await waitFor(() => expect(mockCreate).toHaveBeenCalled())
-    expect(result.current).toBeUndefined()
+    expect(result.current.provider).toBeUndefined()
+  })
+
+  it('logs and returns an error when the provider cannot be loaded', async () => {
+    mockChain()
+    const loadError = new Error('chunk failed')
+    mockCreate.mockImplementation(() => {
+      throw loadError
+    })
+    const { result } = renderHook(() => useReadOnlyProvider('11155111'))
+    await waitFor(() => expect(result.current.error).toBe(loadError))
+    expect(result.current.provider).toBeUndefined()
+    expect(logError).toHaveBeenCalledWith(ErrorCodes._654, loadError)
   })
 })
