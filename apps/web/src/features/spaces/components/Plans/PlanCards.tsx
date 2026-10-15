@@ -215,8 +215,7 @@ export const PlanCard = ({
 } & PlanCardActions) => {
   const { subtitle, supportLevel, supportDetail } = tier.copy ?? {}
   const isPrimary = tier.name === RECOMMENDED_PLAN
-  // Follows the plan, not the billing cycle, so the highlight stays when switching monthly/yearly.
-  const isCurrentPlan = tier.isCurrent || actions.currentPlan?.name === tier.name
+  const isCurrentPlan = Boolean(tier.isCurrent)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
   const price = option ? getPlanPrice(tier, option) : undefined
   const isYearly = tier.billingCycle === 'year'

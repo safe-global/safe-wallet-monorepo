@@ -75,7 +75,13 @@ describe('PlanCard', () => {
     )
     expect(screen.getByTestId('plan-current-badge')).toHaveTextContent('Current')
 
-    rerender(<PlanCard location={PlanLocation.PLANS_PAGE} tier={BUSINESS} />)
+    rerender(
+      <PlanCard
+        location={PlanLocation.PLANS_PAGE}
+        tier={{ ...BUSINESS, billingCycle: 'year' }}
+        currentPlan={businessPlan()}
+      />,
+    )
 
     expect(screen.queryByTestId('plan-current-badge')).not.toBeInTheDocument()
   })
