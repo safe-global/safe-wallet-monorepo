@@ -1,11 +1,22 @@
 import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
+import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { logError } from '@/services/exceptions'
 import type { RootState } from '@/store'
 import { gatewayApi } from '@/store/api/gateway'
 import { selectRpc } from '@/store/settingsSlice'
 import { getReadOnlyProvider } from '../services/getReadOnlyProvider'
-import { readModuleGuard } from '../services/readModuleGuard'
+
+// Loaded on first read: its RPC error helpers pull contract ABIs that the always-loaded hook must not
+const loadReadModuleGuard = () =>
+  import('../services/readModuleGuard').then(
+    ({ readModuleGuard }) => readModuleGuard,
+    (error) => {
+      logError(ErrorCodes._654, error)
+      throw error
+    },
+  )
 
 // txHistoryTag is part of the key so a new transaction starts a fresh read
 export type ModuleGuardArgs = { chainId: string; safeAddress: string; txHistoryTag: string }
@@ -22,6 +33,7 @@ export const moduleGuardApi = gatewayApi.injectEndpoints({
         try {
           const provider = await getReadOnlyProvider(chain, selectRpc(state)[chainId])
           if (!provider) return { error: new Error('No RPC is configured for this chain') }
+          const readModuleGuard = await loadReadModuleGuard()
           return { data: await readModuleGuard(provider, safeAddress) }
         } catch (error) {
           return { error: asError(error) }
