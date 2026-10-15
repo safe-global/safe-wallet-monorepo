@@ -1,8 +1,7 @@
-import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { type Chain, type RpcUri } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { JsonRpcProvider, BrowserProvider, type Eip1193Provider } from 'ethers'
-import { SAFE_APPS_INFURA_TOKEN } from '@safe-global/utils/config/constants'
+import { INFURA_TOKEN, SAFE_APPS_INFURA_TOKEN } from '@safe-global/utils/config/constants'
 import { getRpcEndpointInfo, rememberRpcEndpoint, WALLET_RPC_ENDPOINT_INFO } from './rpcEndpointInfo'
-import { formatRpcServiceUrl, getRpcServiceUrl } from './rpcServiceUrl'
 
 // Re-export stores from lightweight module for backwards compatibility
 export { setWeb3, useWeb3, getWeb3ReadOnly, setWeb3ReadOnly, useWeb3ReadOnly } from './web3ReadOnly'
@@ -16,7 +15,21 @@ import { getWeb3ReadOnly } from './web3ReadOnly'
  */
 const BATCH_MAX_COUNT = 3
 
-export { getRpcServiceUrl } from './rpcServiceUrl'
+// RPC helpers
+const formatRpcServiceUrl = ({ authentication, value }: RpcUri, token: string): string => {
+  const needsToken = authentication === 'API_KEY_PATH'
+
+  if (needsToken && !token) {
+    console.warn('Infura token not set in .env')
+    return ''
+  }
+
+  return needsToken ? `${value}${token}` : value
+}
+
+export const getRpcServiceUrl = (rpcUri: RpcUri): string => {
+  return formatRpcServiceUrl(rpcUri, INFURA_TOKEN)
+}
 
 export const createWeb3ReadOnly = (chain: Chain, customRpc?: string): JsonRpcProvider | undefined => {
   const url = customRpc || getRpcServiceUrl(chain.rpcUri)
