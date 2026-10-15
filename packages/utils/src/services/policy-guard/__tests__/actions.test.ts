@@ -1,4 +1,4 @@
-import { classifyGuardAction } from '../actions'
+import { classifyGuardAction, isGuardSelfCall } from '../actions'
 
 const SAFE = '0xB4117948d9977ad44b4dadBA5D6E7e3793b78e97'
 const TOKEN = '0x58e48F88bF943367f05F31164d2943FF4008EEc6'
@@ -49,5 +49,48 @@ describe('classifyGuardAction', () => {
 
   it('reports anything else as other', () => {
     expect(classifyGuardAction(tx({ data: '0xdeadbeef' }), SAFE)).toBe('other')
+  })
+})
+
+describe('isGuardSelfCall', () => {
+  const GUARD = '0x5202B1ebE100812437d47eae769e155945fbba6a'
+  const selfCall = (over: Record<string, unknown> = {}) => ({
+    to: GUARD,
+    value: 0n as string | bigint,
+    data: '0xa809eb8e',
+    operation: 0,
+    ...over,
+  })
+
+  // Confirmed against the guard on Sepolia: these three pass without a policy being consulted.
+  it.each([
+    ['requestConfiguration', '0xa809eb8e'],
+    ['applyConfiguration', '0xb9ba2798'],
+    ['invalidateRoot', '0x3eefdcce'],
+  ])('recognises %s as the Safe managing its own policies', (_name, selector) => {
+    expect(isGuardSelfCall(selfCall({ data: selector }), GUARD)).toBe(true)
+    expect(isGuardSelfCall(selfCall({ data: selector, to: GUARD.toLowerCase() }), GUARD)).toBe(true)
+  })
+
+  // The guard refuses these outright rather than exempting them, as Sepolia confirms.
+  it('does not exempt configureImmediately, which the guard refuses once it is enabled', () => {
+    expect(isGuardSelfCall(selfCall({ data: '0x8446dc43' }), GUARD)).toBe(false)
+  })
+
+  it('does not exempt a call carrying value', () => {
+    expect(isGuardSelfCall(selfCall({ value: 1n }), GUARD)).toBe(false)
+  })
+
+  it('does not exempt a delegatecall', () => {
+    expect(isGuardSelfCall(selfCall({ operation: 1 }), GUARD)).toBe(false)
+  })
+
+  // The same selector aimed anywhere else is an ordinary transaction.
+  it('does not exempt the same call to another contract', () => {
+    expect(isGuardSelfCall(selfCall({ to: '0x1111111111111111111111111111111111111111' }), GUARD)).toBe(false)
+  })
+
+  it('exempts nothing when the Safe runs no guard', () => {
+    expect(isGuardSelfCall(selfCall(), undefined)).toBe(false)
   })
 })

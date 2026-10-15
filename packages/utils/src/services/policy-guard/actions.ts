@@ -20,15 +20,42 @@ export const SAFE_MANAGEMENT_SELECTORS: readonly string[] = [
   '0xf08a0323', // setFallbackHandler(address)
 ]
 
-/** What a checked transaction is doing, as far as the policy engine is concerned. */
-export type GuardAction = 'erc20-transfer' | 'native-transfer' | 'multisend' | 'safe-management' | 'other'
-
-const OPERATION_DELEGATECALL = 1
-
 const selectorOf = (data: string | undefined): string =>
   data && data.length >= 10 ? data.slice(0, 10).toLowerCase() : '0x'
 
 const sameAddress = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+
+/**
+ * The calls the guard lets through without consulting a policy, so that policy management is never
+ * locked out by the policies themselves: requesting a configuration, applying a matured one, and
+ * invalidating a pending root. Each only bypasses the check as a plain zero-value CALL to the guard.
+ */
+const GUARD_SELF_CALL_SELECTORS: readonly string[] = [
+  '0xa809eb8e', // requestConfiguration(bytes32)
+  '0xb9ba2798', // applyConfiguration(Configuration[])
+  '0x3eefdcce', // invalidateRoot(bytes32)
+]
+
+/**
+ * Whether a transaction is the Safe managing its own policies.
+ *
+ * No policy governs these, so there is no verdict to report on them. Anything else aimed at the
+ * guard — `configureImmediately`, or any of these carrying value — the guard refuses outright.
+ */
+export const isGuardSelfCall = (
+  tx: { to: string; value: string | bigint; data: string; operation: number },
+  guardAddress: string | undefined,
+): boolean =>
+  !!guardAddress &&
+  sameAddress(tx.to, guardAddress) &&
+  tx.operation === 0 &&
+  BigInt(tx.value) === 0n &&
+  GUARD_SELF_CALL_SELECTORS.includes(selectorOf(tx.data))
+
+/** What a checked transaction is doing, as far as the policy engine is concerned. */
+export type GuardAction = 'erc20-transfer' | 'native-transfer' | 'multisend' | 'safe-management' | 'other'
+
+const OPERATION_DELEGATECALL = 1
 
 /**
  * Which of the actions the policy engine models a transaction is.

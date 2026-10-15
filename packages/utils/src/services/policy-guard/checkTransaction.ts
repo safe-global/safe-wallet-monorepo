@@ -95,7 +95,8 @@ const parseError = (data: string | undefined) => {
 const UNSUPPORTED_REASONS: Record<string, string> = {
   NonZeroGasPrice: 'The policy guard does not allow gas refunds, so a transaction with a gas price is refused.',
   NonZeroSafeTxGas: 'The policy guard requires safeTxGas to be zero so a failed transaction reverts atomically.',
-  GuardTargetDenied: 'The policy guard does not allow a transaction to target the guard itself.',
+  GuardTargetDenied:
+    'The policy guard only accepts a policy change it already holds — requesting, applying or invalidating one — and only with no value attached.',
   ModuleConfigurationDenied: 'Policies cannot be configured through a module transaction.',
 }
 
