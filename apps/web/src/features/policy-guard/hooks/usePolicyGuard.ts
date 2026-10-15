@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { type SafeState, useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -13,6 +13,8 @@ import { useGetModuleGuardQuery } from '../store/moduleGuardApi'
 import type { PolicyGuardState } from '../types'
 
 type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'> & { deployed?: boolean }
+
+const MAX_REREADS = 3
 
 export type UsePolicyGuardResult = { state?: PolicyGuardState; isLoading: boolean; error?: Error }
 
@@ -54,9 +56,10 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   const shouldRead = safeLoaded && eligibility.eligible
 
   // CGW Safe info has no module guard field yet, so it is read from the storage slot
-  const moduleGuardQuery = useGetModuleGuardQuery(
-    shouldRead ? { chainId: safe.chainId, safeAddress, txHistoryTag: safe.txHistoryTag ?? '' } : skipToken,
-  )
+  const readArgs = shouldRead
+    ? { chainId: safe.chainId, safeAddress, txHistoryTag: safe.txHistoryTag ?? '' }
+    : undefined
+  const moduleGuardQuery = useGetModuleGuardQuery(readArgs ?? skipToken)
   const moduleGuard = moduleGuardQuery.currentData
   const readError = moduleGuardQuery.isError ? (moduleGuardQuery.error as Error) : undefined
 
@@ -72,13 +75,19 @@ export const usePolicyGuard = (target?: PolicyGuardTarget): UsePolicyGuardResult
   }, [safeLoaded, isUnsupported, moduleGuard, policyGuardAddress, safe.guard])
 
   // A partial result may come from an RPC node a block behind the setup transaction
-  const shouldRetry = !!readError || state?.status === 'partial'
-  const { refetch, requestId } = moduleGuardQuery
+  const shouldReread = !!readError || state?.status === 'partial'
+  const readKey = readArgs ? `${readArgs.chainId}:${readArgs.safeAddress}:${readArgs.txHistoryTag}` : ''
+  const [rereads, setRereads] = useState({ readKey, count: 0 })
+  const rereadCount = rereads.readKey === readKey ? rereads.count : 0
+  const { refetch } = moduleGuardQuery
   useEffect(() => {
-    if (!shouldRetry) return
-    const timer = setTimeout(refetch, POLLING_INTERVAL)
+    if (!shouldReread || rereadCount >= MAX_REREADS) return
+    const timer = setTimeout(() => {
+      setRereads({ readKey, count: rereadCount + 1 })
+      refetch()
+    }, POLLING_INTERVAL)
     return () => clearTimeout(timer)
-  }, [shouldRetry, refetch, requestId])
+  }, [shouldReread, rereadCount, readKey, refetch])
 
   const safeError = !safeLoaded && !safeLoading ? (target ? targetError : currentSafeError) : undefined
 

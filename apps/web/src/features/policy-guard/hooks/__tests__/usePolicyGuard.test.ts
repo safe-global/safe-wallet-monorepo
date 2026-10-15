@@ -168,6 +168,33 @@ describe('usePolicyGuard', () => {
       expect(refetch).toHaveBeenCalledTimes(1)
     })
 
+    it('stops after three re-reads of a lasting error', () => {
+      mockSafe()
+      const { refetch } = mockModuleGuard({ isError: true, error: new Error('No RPC is configured for this chain') })
+      renderHook(() => usePolicyGuard())
+      for (let i = 0; i < 5; i++) act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+      expect(refetch).toHaveBeenCalledTimes(3)
+    })
+
+    it('stops after three re-reads of a Safe that really is partial', () => {
+      mockSafe({ guard: guardInfo(GUARD) })
+      const { refetch } = mockModuleGuard({ currentData: ZERO_ADDRESS })
+      renderHook(() => usePolicyGuard())
+      for (let i = 0; i < 5; i++) act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+      expect(refetch).toHaveBeenCalledTimes(3)
+    })
+
+    it('re-reads again after the next transaction', () => {
+      const safe = mockSafe({ guard: guardInfo(GUARD), txHistoryTag: '1' })
+      const { refetch } = mockModuleGuard({ currentData: ZERO_ADDRESS })
+      const { rerender } = renderHook(() => usePolicyGuard())
+      for (let i = 0; i < 4; i++) act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+      mockSafe({ guard: guardInfo(GUARD), txHistoryTag: '2', address: safe.address })
+      rerender()
+      act(() => jest.advanceTimersByTime(POLLING_INTERVAL))
+      expect(refetch).toHaveBeenCalledTimes(4)
+    })
+
     it('does not re-read a settled result', () => {
       mockSafe()
       const { refetch } = mockModuleGuard({ currentData: ZERO_ADDRESS })
