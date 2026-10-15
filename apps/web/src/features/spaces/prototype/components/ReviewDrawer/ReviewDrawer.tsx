@@ -40,7 +40,6 @@ import {
 import type { PreviewAction } from '../../services/queue'
 import type { Persona, Proposal } from '../../types'
 import { CopyTransactionLink, ProposalAdvanced, ProposalDetails, SignerList } from '../ProposalDetails'
-import { FeedbackButton, PENDING_QUEUE_FEEDBACK } from '../FeedbackButton'
 import { TYPE_ICONS } from '../shared'
 
 export type Replacement = { recipient: string; amount: string }
@@ -237,13 +236,6 @@ export function ReviewDrawer({
       ariaLabel={review ? getTransactionLabel(review) : undefined}
       headerActions={({ fullScreen }) => (
         <>
-          {review && (
-            <FeedbackButton
-              {...PENDING_QUEUE_FEEDBACK}
-              compact
-              context={`${getTransactionLabel(review)} · ${getAccount(review).name} #${review.nonce}`}
-            />
-          )}
           <StepButton direction="previous" disabled={position.index <= 0} onClick={() => onStep(-1)} />
           <StepButton
             direction="next"
@@ -260,7 +252,10 @@ export function ReviewDrawer({
       )}
     >
       <DrawerHeader>
-        <div className="flex min-w-0 flex-1 flex-col gap-4 pr-32 md:pr-46">
+        <div
+          className="flex min-w-0 flex-1 flex-col gap-4 pr-22 md:pr-36"
+          data-prototype-element="Review drawer header"
+        >
           {review && (
             <div className="flex min-w-0 items-center gap-3">
               <span
@@ -279,7 +274,7 @@ export function ReviewDrawer({
       </DrawerHeader>
       <DrawerBody>
         {review && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3" data-prototype-element="Review drawer">
             {getWarnings(review).map((warning) => (
               <Alert key={warning} variant="warning" outlined={false}>
                 <AlertSeverityIcon variant="warning" />
@@ -408,7 +403,11 @@ export function ReviewDrawer({
           </div>
         )}
       </DrawerBody>
-      <div className="@container shrink-0 border-t border-border bg-background" data-testid="proposal-fixed-footer">
+      <div
+        className="@container shrink-0 border-t border-border bg-background"
+        data-testid="proposal-fixed-footer"
+        data-prototype-element="Review drawer footer"
+      >
         <DrawerFooter safeArea>
           {review && (
             <>

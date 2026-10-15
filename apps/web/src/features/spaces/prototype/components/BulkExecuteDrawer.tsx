@@ -34,11 +34,11 @@ export function BulkExecuteDrawer({
         <DrawerTitle>Bulk execute</DrawerTitle>
       </DrawerHeader>
       <DrawerBody>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground" data-prototype-element="Bulk execute">
           Only fully signed transactions with consecutive nonces are included. Each Safe executes its batch as a
           separate transaction from your wallet.
         </p>
-        <div className="mt-4 space-y-3">
+        <div className="mt-4 space-y-3" data-prototype-element="Bulk execute">
           {batches.map((batch) => (
             <Card
               as="section"

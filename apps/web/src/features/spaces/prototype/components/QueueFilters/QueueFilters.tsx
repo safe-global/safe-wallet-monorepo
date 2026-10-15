@@ -90,7 +90,7 @@ type QueueFiltersProps = {
 
 export function QueueToolbar({ filters, accounts, persona, hasItems, groupBy, onGroupByChange }: QueueFiltersProps) {
   return (
-    <div className="mb-5 flex flex-wrap items-center gap-3">
+    <div className="mb-5 flex flex-wrap items-center gap-3" data-prototype-element="Filters">
       <SearchInput
         className="min-w-48 flex-1"
         aria-label="Find a proposal"
@@ -269,7 +269,12 @@ export function AppliedFilters({
   ]
   if (!pills.length) return null
   return (
-    <div role="group" aria-label="Applied filters" className="-mt-2 mb-5 flex flex-wrap items-center gap-2">
+    <div
+      role="group"
+      aria-label="Applied filters"
+      className="-mt-2 mb-5 flex flex-wrap items-center gap-2"
+      data-prototype-element="Applied filters"
+    >
       {pills.map((filter) => (
         <Chip key={filter.section} variant="outline" size="lg" onDelete={filter.clear} className={APPLIED_PILL}>
           <span className="text-muted-foreground">{filter.title}:</span>

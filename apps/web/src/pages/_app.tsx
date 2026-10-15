@@ -40,7 +40,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification, useSafeWorkspaceCheck } from '@/features/spaces'
+import { useInviteNotification, usePrototypeDarkMode, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -181,16 +181,20 @@ const AppLaunchScreen = (): ReactElement | null => {
   return <LaunchScreen stepUpCaption={stepUpCaption} />
 }
 
+const PrototypeApp = ({ Component, pageProps }: Pick<AppProps, 'Component' | 'pageProps'>): ReactElement => {
+  const [isDarkMode] = usePrototypeDarkMode()
+  return (
+    <ShadcnProvider dark={isDarkMode}>
+      <Component {...pageProps} />
+    </ShadcnProvider>
+  )
+}
+
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
   const safeKey = useChangedValue(router.query.safe?.toString())
 
-  if (router.pathname === '/prototypes/pending-queue') {
-    return (
-      <ShadcnProvider>
-        <Component {...pageProps} />
-      </ShadcnProvider>
-    )
-  }
+  if (router.pathname === '/prototypes/pending-queue')
+    return <PrototypeApp Component={Component} pageProps={pageProps} />
 
   const reduxStore = getAppStore()
 

@@ -143,4 +143,4 @@ export { default as SafeCardReadOnly } from './components/SafeAccounts/SafeCardR
 export { DashboardHeader } from './components/Dashboard/DashboardHeader'
 export { default as SpacesLogin } from './components/SpacesLogin'
 
-export { PendingQueuePrototype } from './prototype'
+export { PendingQueuePrototype, usePrototypeDarkMode } from './prototype'

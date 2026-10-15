@@ -6,3 +6,5 @@ export const PendingQueuePrototype: FeatureHandle<typeof implementation> = {
   useIsEnabled: () => process.env.NEXT_PUBLIC_IS_PRODUCTION !== 'true',
   load: () => import('./feature'),
 }
+
+export { usePrototypeDarkMode } from './hooks/usePrototypeDarkMode'

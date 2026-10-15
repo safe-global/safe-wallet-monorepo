@@ -124,7 +124,7 @@ export function QueueSection({
   const columns = getColumns(groupBy, isWide)
   const widths = columnWidths(isWide)
   return (
-    <section className="flex flex-col gap-2">
+    <section className="flex flex-col gap-2" data-prototype-element={grouped ? `Table (${section.label})` : 'Table'}>
       {grouped && (
         <SectionHeader
           section={section}

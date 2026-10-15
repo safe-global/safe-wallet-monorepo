@@ -954,3 +954,25 @@ describe('queue design exploration', () => {
     })
   })
 })
+
+describe('comment shortcut', () => {
+  it('enters comment mode on C and on Cmd+C when nothing is selected', () => {
+    render(<PendingQueue />)
+    fireEvent.keyDown(document, { key: 'c', metaKey: true })
+    expect(screen.getByText(/Click anywhere to pin a comment/)).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(screen.queryByText(/Click anywhere to pin a comment/)).not.toBeInTheDocument()
+    fireEvent.keyDown(document, { key: 'c' })
+    expect(screen.getByText(/Click anywhere to pin a comment/)).toBeInTheDocument()
+  })
+
+  it('leaves Cmd+C as copy while text is selected', () => {
+    render(<PendingQueue />)
+    const heading = screen.getByRole('heading', { name: 'Transactions' })
+    window.getSelection()?.selectAllChildren(heading)
+    fireEvent.keyDown(document, { key: 'c', metaKey: true })
+    expect(screen.queryByText(/Click anywhere to pin a comment/)).not.toBeInTheDocument()
+    window.getSelection()?.removeAllRanges()
+  })
+})

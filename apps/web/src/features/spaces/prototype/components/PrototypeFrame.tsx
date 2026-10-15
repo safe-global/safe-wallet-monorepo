@@ -11,11 +11,14 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from '@safe-global/views/components/ui/sidebar'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import SafeLogo from '@/components/common/SafeLogo'
 import { Button } from '@safe-global/views/components/ui/button'
-import { FeedbackButton, PENDING_QUEUE_FEEDBACK } from './FeedbackButton'
+import { usePrototypeDarkMode } from '../hooks/usePrototypeDarkMode'
 import { spacesMainNavigation, spacesSetupGroup } from '../../components/Sidebar/config'
 
 const navigation = [
@@ -26,6 +29,7 @@ const navigation = [
 
 export function PrototypeFrame({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isDarkMode, setDarkMode] = usePrototypeDarkMode()
   return (
     <SidebarProvider
       openMobile={mobileOpen}
@@ -86,6 +90,12 @@ export function PrototypeFrame({ children }: { children: ReactNode }) {
             </SidebarMenu>
           </SidebarGroup>
         </SidebarContent>
+        <SidebarFooter>
+          <Field orientation="horizontal" className="px-3 py-2 group-data-[collapsible=icon]:hidden">
+            <Switch id="prototype-dark-mode" checked={isDarkMode} onCheckedChange={setDarkMode} />
+            <FieldLabel htmlFor="prototype-dark-mode">Dark mode</FieldLabel>
+          </Field>
+        </SidebarFooter>
       </Sidebar>
       <div className="min-w-0 flex-1">
         <header className="@container flex flex-wrap items-start gap-y-2 px-6 pt-6 pb-4 bg-secondary dark:bg-background">
@@ -107,7 +117,6 @@ export function PrototypeFrame({ children }: { children: ReactNode }) {
             </Button>
           </div>
           <div className="ml-auto flex min-w-0 flex-wrap items-center gap-1 rounded-xl bg-card p-2 @max-[660px]:ml-0">
-            <FeedbackButton {...PENDING_QUEUE_FEEDBACK} />
             <Button variant="ghost" size="icon" disabled aria-label="Notifications unavailable in preview">
               <Bell />
             </Button>
