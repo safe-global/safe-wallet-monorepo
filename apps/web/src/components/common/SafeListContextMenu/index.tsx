@@ -26,7 +26,7 @@ import router from 'next/router'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useOwnersGetSafesByOwnerV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/owners'
 import { NestedSafesPopover } from '@/components/nested-safes/NestedSafesPopover'
-import { NESTED_SAFE_EVENTS } from '@/services/analytics/events/nested-safes'
+import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import { useHasFeature } from '@/hooks/useChains'
 import { useNestedSafesVisibility } from '@/hooks/useNestedSafesVisibility'
 
@@ -131,7 +131,7 @@ const SafeListContextMenu = ({
             !undeployedSafe &&
             nestedSafesForChain &&
             nestedSafesForChain.length > 0 && (
-              <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={trackingLabel}>
+              <Track {...NESTED_SAFE_EVENTS.OPEN_LIST} label={NESTED_SAFE_LABELS.sidebar}>
                 <DropdownMenuItem onClick={handleOpenModal(ModalType.NESTED_SAFES)}>
                   <NestedSafesIcon className="text-[var(--color-success-main)]" />
                   <span data-testid="nested-safes-btn">Nested Safes</span>
