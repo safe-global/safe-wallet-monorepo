@@ -4,6 +4,8 @@ import { FlaskConical, Info, SlidersHorizontal, User } from 'lucide-react'
 import { Fragment, type ReactElement } from 'react'
 import { cn } from '@safe-global/views/utils/cn'
 import { AppRoutes } from '@/config/routes'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 
 export type SettingsPageKey = 'general' | 'account' | 'about' | 'experimental'
 
@@ -16,6 +18,7 @@ type RailItem = {
 
 type RailGroup = {
   label?: string
+  isExperimental?: boolean
   items: RailItem[]
 }
 
@@ -44,6 +47,7 @@ const RAIL_GROUPS: RailGroup[] = [
   },
   {
     label: 'More',
+    isExperimental: true,
     items: [
       {
         key: 'experimental',
@@ -58,10 +62,12 @@ const RAIL_GROUPS: RailGroup[] = [
 const SettingsRail = ({ activePage }: { activePage: SettingsPageKey }) => {
   const router = useRouter()
   const spaceId = typeof router.query.spaceId === 'string' ? router.query.spaceId : undefined
+  const isExperimentalEnabled = useHasFeature(FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES)
+  const groups = RAIL_GROUPS.filter((group) => !group.isExperimental || isExperimentalEnabled)
 
   return (
     <aside className="sm:w-[220px] sm:shrink-0 sm:sticky sm:top-6 flex flex-row sm:flex-col gap-1 mb-4 sm:mb-0 overflow-x-auto">
-      {RAIL_GROUPS.map((group, groupIndex) => (
+      {groups.map((group, groupIndex) => (
         <Fragment key={group.label ?? groupIndex}>
           {group.label && (
             <div className="hidden sm:block mt-3 pt-4 px-3 pb-1 border-t border-border">

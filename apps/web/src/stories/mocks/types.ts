@@ -45,6 +45,8 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
+  /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
+  workspacesExperimentalFeatures?: boolean
 }
 
 /**

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory, type FeatureFlags } from '@/stories/mocks'
 // The settings index page only client-redirects to /spaces/settings/general, which no-ops
 // in Storybook — render the general settings page directly instead.
 import SpaceSettings from '@/pages/spaces/settings/general'
@@ -10,13 +10,13 @@ import SpaceSettingsExperimental from '@/pages/spaces/settings/experimental'
  * Manage Space name, description, and preferences.
  */
 
-const createSettingsSetup = (pathname: string) =>
+const createSettingsSetup = (pathname: string, features: FeatureFlags = {}) =>
   createMockStory({
     scenario: 'efSafe',
     wallet: 'connected',
     layout: 'fullPage',
     pathname,
-    features: { spaces: true },
+    features: { spaces: true, ...features },
     query: { spaceId: '1' },
   })
 
@@ -37,7 +37,7 @@ export const Default: Story = (() => {
 })()
 
 export const Experimental: Story = (() => {
-  const setup = createSettingsSetup('/spaces/settings/experimental')
+  const setup = createSettingsSetup('/spaces/settings/experimental', { workspacesExperimentalFeatures: true })
   return {
     parameters: { ...setup.parameters },
     decorators: [setup.decorator],
