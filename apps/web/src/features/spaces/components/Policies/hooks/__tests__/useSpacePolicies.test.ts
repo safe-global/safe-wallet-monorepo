@@ -32,6 +32,19 @@ jest.mock('@/store/api/gateway/spacePolicies', () => ({
   useSpacePoliciesGetPendingPoliciesV1Query: (...args: unknown[]) => mockPendingQuery(...args),
 }))
 
+// The hook reads the chain config only to name a native-transfer policy's coin.
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: () => ({
+    configs: [
+      {
+        chainId: '1',
+        nativeCurrency: { symbol: 'ETH', decimals: 18, logoUri: 'https://example.test/eth.png', name: 'Ether' },
+      },
+    ],
+  }),
+}))
+
 jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
 }))

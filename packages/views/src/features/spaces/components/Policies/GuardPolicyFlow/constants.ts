@@ -74,6 +74,10 @@ export const RECIPIENT_RESERVED_ERROR = 'This address cannot be a recipient'
 
 export const TOKEN_ALLOWLIST_CALLOUT_TITLE = 'Transfers are restricted to this allowlist'
 
+export const NATIVE_REVOKED_LABEL = 'No longer allowed'
+export const NATIVE_REVOKED_HELPER_TEXT =
+  'These recipients can currently receive the native coin. This policy removes that permission.'
+
 // ─── Batched transactions ───────────────────────────────────────────────────
 
 export const MULTISEND_EXPLAINER_TITLE = 'Every call in a batch is checked'

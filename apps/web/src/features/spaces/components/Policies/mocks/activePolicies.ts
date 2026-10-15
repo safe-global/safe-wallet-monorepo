@@ -111,3 +111,24 @@ export const mockSafeManagementDto = (overrides: Partial<ActivePolicyDto> = {}):
   data: {},
   ...overrides,
 })
+
+/** One allowed native recipient: the guard keys native transfers per recipient, not per token. */
+export const mockNativeTransferDto = (
+  recipient: string,
+  overrides: Partial<ActivePolicyDto> = {},
+): ActivePolicyDto => ({
+  type: 'native-transfer',
+  enforcement: {
+    via: 'guard',
+    guards: GUARD_SLOTS,
+    access: { target: recipient, selector: '0x00000000', operation: 'CALL' },
+  },
+  enabled: true,
+  safe: MOCK_SAFES.treasury,
+  data: {},
+  ...overrides,
+})
+
+/** The catch-all "any native transfer" entry the fallback flow sets, on the zero target. */
+export const mockNativeFallbackDto = (overrides: Partial<ActivePolicyDto> = {}): ActivePolicyDto =>
+  mockNativeTransferDto('0x0000000000000000000000000000000000000000', overrides)

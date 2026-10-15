@@ -1,5 +1,7 @@
 import { AbiCoder, Interface } from 'ethers'
 import type { Address } from 'viem'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { NO_SELECTOR } from '../../shared/accessSelector'
 import { buildTokenWithdrawBatch, type BuildTokenWithdrawBatchInput } from '../buildBatch'
 import {
   SAFE_SET_GUARD_ABI,
@@ -235,5 +237,97 @@ describe('buildTokenWithdrawBatch — validation (both paths)', () => {
         }),
       ),
     ).toThrow(/recipient address/i)
+  })
+})
+
+describe('buildTokenWithdrawBatch — the native coin', () => {
+  const NATIVE_POLICY: Address = '0x4444444444444444444444444444444444444444'
+  const nativeInput = (overrides: Partial<BuildTokenWithdrawBatchInput> = {}) =>
+    baseInput({
+      nativePolicyContract: NATIVE_POLICY,
+      allowlist: [
+        {
+          token: ZERO_ADDRESS as Address,
+          recipients: [
+            { address: R1, allowed: true },
+            { address: R2, allowed: true },
+          ],
+        },
+      ],
+      ...overrides,
+    })
+
+  // The guard keys native transfers by recipient, not by token: there is no transfer selector.
+  it('binds one access per recipient, with no selector and no payload', () => {
+    const { txs } = buildTokenWithdrawBatch(nativeInput())
+    const configs = decodeConfigs(txs[0].data)
+
+    expect(configs).toHaveLength(2)
+    expect(configs.map((config) => config[0].toLowerCase())).toEqual([R1.toLowerCase(), R2.toLowerCase()])
+
+    for (const [, selector, operation, policy, data] of configs) {
+      expect(selector).toBe(NO_SELECTOR)
+      expect(operation).toBe(0n)
+      expect(policy.toLowerCase()).toBe(NATIVE_POLICY.toLowerCase())
+      expect(data).toBe('0x')
+    }
+  })
+
+  // Separate accesses are not replaced by re-configuring, so a dropped recipient is cleared
+  // explicitly. The zero policy un-sets the access and the call falls to the Safe's fallback.
+  it('revokes a recipient dropped from the allowlist', () => {
+    const { txs } = buildTokenWithdrawBatch(
+      nativeInput({
+        allowlist: [{ token: ZERO_ADDRESS as Address, recipients: [{ address: R1, allowed: true }] }],
+        currentNativeRecipients: [R1, R2],
+      }),
+    )
+    const configs = decodeConfigs(txs[0].data)
+
+    expect(configs).toHaveLength(2)
+    const [granted, revoked] = configs
+
+    expect(granted[0].toLowerCase()).toBe(R1.toLowerCase())
+    expect(granted[3].toLowerCase()).toBe(NATIVE_POLICY.toLowerCase())
+
+    expect(revoked[0].toLowerCase()).toBe(R2.toLowerCase())
+    expect(revoked[3]).toBe(ZERO_ADDRESS)
+  })
+
+  it('revokes nothing when every current recipient is still allowed', () => {
+    const { txs } = buildTokenWithdrawBatch(nativeInput({ currentNativeRecipients: [R1, R2] }))
+    const configs = decodeConfigs(txs[0].data)
+
+    expect(configs).toHaveLength(2)
+    expect(configs.every(([, , , policy]) => policy.toLowerCase() === NATIVE_POLICY.toLowerCase())).toBe(true)
+  })
+
+  it('refuses to configure the native coin without a NativeTransferPolicy address', () => {
+    expect(() => buildTokenWithdrawBatch(nativeInput({ nativePolicyContract: undefined }))).toThrow(
+      /NativeTransferPolicy/i,
+    )
+  })
+
+  // One batch, two policy contracts: the ERC20 entry keeps its own encoding.
+  it('configures the native coin and an ERC20 token together', () => {
+    const { txs } = buildTokenWithdrawBatch(
+      nativeInput({
+        allowlist: [
+          { token: USDC, recipients: [{ address: R1, allowed: true }] },
+          { token: ZERO_ADDRESS as Address, recipients: [{ address: R1, allowed: true }] },
+        ],
+      }),
+    )
+    const configs = decodeConfigs(txs[0].data)
+
+    expect(configs).toHaveLength(2)
+    expect(configs[0][0].toLowerCase()).toBe(USDC.toLowerCase())
+    expect(configs[0][3].toLowerCase()).toBe(POLICY.toLowerCase())
+    expect(configs[1][0].toLowerCase()).toBe(R1.toLowerCase())
+    expect(configs[1][3].toLowerCase()).toBe(NATIVE_POLICY.toLowerCase())
+  })
+
+  it('does not need an ERC20 policy address when only the native coin is configured', () => {
+    expect(() => buildTokenWithdrawBatch(nativeInput({ policyContract: '' as Address }))).not.toThrow()
   })
 })

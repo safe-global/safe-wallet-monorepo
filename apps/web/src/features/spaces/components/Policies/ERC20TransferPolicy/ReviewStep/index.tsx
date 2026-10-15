@@ -6,16 +6,22 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import GuardPolicyCallout from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/Summary/GuardPolicyCallout'
 import SummaryCard from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/Summary/SummaryCard'
 import {
   APPLIES_TO_LABEL,
+  NATIVE_REVOKED_HELPER_TEXT,
+  NATIVE_REVOKED_LABEL,
   RECIPIENTS_LABEL,
   TOKENS_LABEL,
   TOKEN_ALLOWLIST_CALLOUT_TITLE,
   TOKEN_ALLOWLIST_COPY,
 } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
 import type { TokenAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/types'
+import { usePolicyContracts } from '../../shared/usePolicyContracts'
+import { isNativeTokenAddress } from '../../shared/erc20'
+import { useNativeAllowlistRecipients } from '../hooks/useNativeAllowlistRecipients'
 import GuardPolicyReview from '../../GuardPolicyFlow/GuardPolicyReview'
 import { buildGuardPolicy } from '../../GuardPolicyFlow/buildGuardPolicy'
 import { useGuardPolicyContracts } from '../../GuardPolicyFlow/hooks/useGuardPolicyContracts'
@@ -33,6 +39,24 @@ const ReviewTokenAllowlistPolicy = (props: ReviewTransactionProps): ReactElement
 
   const tokens = addresses(data?.tokens)
   const recipients = addresses(data?.recipients)
+  const coversNative = tokens.some((token) => isNativeTokenAddress(token))
+
+  // The native coin is bound to its own policy, per recipient, so the flow resolves both contracts.
+  const { policyContract: nativePolicyContract } = usePolicyContracts(
+    contracts.chainId,
+    contracts.safeAddress ?? '',
+    PolicyType.NativeTransfer,
+  )
+  const { recipients: currentNativeRecipients } = useNativeAllowlistRecipients(
+    contracts.chainId,
+    contracts.safeAddress ?? '',
+  )
+
+  const revoked = coversNative
+    ? currentNativeRecipients.filter(
+        (current) => !recipients.some((recipient) => recipient.toLowerCase() === current.toLowerCase()),
+      )
+    : []
 
   // The snapshot is what the Policies page names a pending request by, so it carries the token
   // metadata the selector already resolved rather than bare addresses.
@@ -51,6 +75,8 @@ const ReviewTokenAllowlistPolicy = (props: ReviewTransactionProps): ReactElement
     buildTokenWithdrawBatch({
       ...context,
       policyContract,
+      nativePolicyContract: nativePolicyContract as Address | undefined,
+      currentNativeRecipients,
       allowlist: tokens.map((token) => ({
         token,
         recipients: recipients.map((address) => ({ address, allowed: true })),
@@ -101,6 +127,25 @@ const ReviewTokenAllowlistPolicy = (props: ReviewTransactionProps): ReactElement
               ))}
             </div>
           </SummaryCard>
+
+          {revoked.length > 0 && (
+            <SummaryCard label={NATIVE_REVOKED_LABEL} data-testid="token-allowlist-summary-revoked">
+              <div className="flex flex-col gap-2">
+                <Typography variant="paragraph-mini" color="muted">
+                  {NATIVE_REVOKED_HELPER_TEXT}
+                </Typography>
+                {revoked.map((recipient) => (
+                  <EthHashInfo
+                    key={recipient}
+                    address={recipient}
+                    chainId={contracts.chainId}
+                    shortAddress={false}
+                    hasExplorer
+                  />
+                ))}
+              </div>
+            </SummaryCard>
+          )}
         </>
       }
     />

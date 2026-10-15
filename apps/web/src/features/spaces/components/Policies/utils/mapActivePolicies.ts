@@ -5,11 +5,14 @@ import type {
   SpendingLimitAllowanceDto,
   SpendingLimitPolicyDataDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
+import { NO_SELECTOR } from '../shared/accessSelector'
 import type {
   MultiSendPolicy,
   Policy,
   PolicyAllowance,
   ProposerPolicy,
+  PolicyTokenInfo,
   SafeManagementChange,
   SafeManagementPolicy,
   SpendingLimitPolicy,
@@ -169,6 +172,67 @@ const toSafeManagementRows = (dtos: ActivePolicyDto[]): SafeManagementPolicy[] =
   }))
 }
 
+/** Resolves a chain's native coin, which CGW does not send with a native-transfer policy. */
+export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefined
+
+/**
+ * A native-transfer policy on the zero target is the guard's catch-all, set by the fallback flow.
+ * Only a policy bound to a real recipient is part of an allowlist.
+ */
+const toNativeRecipient = (dto: ActivePolicyDto): string | null => {
+  if (dto.enforcement.via !== 'guard') return null
+
+  const { target, selector, operation } = dto.enforcement.access
+  if (operation !== 'CALL' || selector.toLowerCase() !== NO_SELECTOR) return null
+  if (target.toLowerCase() === ZERO_ADDRESS.toLowerCase()) return null
+
+  return target
+}
+
+/**
+ * The guard keys native transfers per recipient, so CGW reports one policy per allowed address.
+ * They are one allowlist to a reader, so they collapse into a single row for the native coin.
+ */
+const toNativeAllowlistRows = (
+  dtos: ActivePolicyDto[],
+  resolveNativeToken: NativeTokenResolver,
+): TokenAllowlistPolicy[] => {
+  const bySafe = new Map<string, { safe: ActivePolicyDto['safe']; enabled: boolean; recipients: string[] }>()
+
+  for (const dto of dtos) {
+    if (dto.type !== 'native-transfer') continue
+    const recipient = toNativeRecipient(dto)
+    if (!recipient) continue
+
+    const key = `${dto.safe.chainId}:${dto.safe.address.toLowerCase()}`
+    const group = bySafe.get(key)
+    if (group) {
+      group.recipients.push(recipient)
+      group.enabled = group.enabled && dto.enabled
+    } else {
+      bySafe.set(key, { safe: dto.safe, enabled: dto.enabled, recipients: [recipient] })
+    }
+  }
+
+  return [...bySafe.entries()].flatMap(([key, { safe, enabled, recipients }]) => {
+    const token = resolveNativeToken(safe.chainId)
+    // Without the chain config there is no symbol or decimals to name the coin by.
+    if (!token) return []
+
+    return [
+      {
+        id: `token-allowlist:native:${key}`,
+        type: 'token-allowlist' as const,
+        safe,
+        enforcement: { via: 'guard' as const },
+        enabled,
+        // The native policy carries no payload, so every listed recipient is permitted outright.
+        data: { token, recipients: recipients.map((address) => ({ address, permission: 'ALWAYS' as const })) },
+      },
+    ]
+  })
+}
+
 const toPolicies = (dto: ActivePolicyDto): Policy[] => {
   switch (dto.type) {
     case 'spending-limit': {
@@ -198,8 +262,12 @@ const toPolicies = (dto: ActivePolicyDto): Policy[] => {
  *   render, one whose data has another type's shape, and a spending limit whose allowances are all
  *   gone — deleting the last allowance leaves the module enabled, so the gateway keeps returning it.
  */
-export const mapActivePolicies = (dtos: ActivePolicyDto[]): Policy[] => [
+export const mapActivePolicies = (
+  dtos: ActivePolicyDto[],
+  resolveNativeToken: NativeTokenResolver = () => undefined,
+): Policy[] => [
   ...dtos.flatMap(toPolicies),
   // Grouped across the response rather than per DTO: one row holds every change a Safe permits.
   ...toSafeManagementRows(dtos).map((policy) => ({ ...policy, status: 'active' as const })),
+  ...toNativeAllowlistRows(dtos, resolveNativeToken).map((policy) => ({ ...policy, status: 'active' as const })),
 ]

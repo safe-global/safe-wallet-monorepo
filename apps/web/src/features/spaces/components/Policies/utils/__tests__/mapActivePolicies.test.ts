@@ -1,5 +1,8 @@
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {
   mockMultiSendDto,
+  mockNativeFallbackDto,
+  mockNativeTransferDto,
   mockProposerDto,
   mockSafeManagementDto,
   mockSpendingLimitDto,
@@ -216,5 +219,59 @@ describe('mapActivePolicies — guard-enforced policies', () => {
 
     expect(policies).toHaveLength(2)
     expect(policies[0].id).not.toBe(policies[1].id)
+  })
+})
+
+describe('mapActivePolicies — the native allowlist', () => {
+  const ETH = { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: 'https://example.test/eth.png' }
+  const resolveNative = () => ETH
+
+  it('collapses every allowed recipient into one row for the native coin', () => {
+    const policies = mapActivePolicies(
+      [mockNativeTransferDto(MOCK_ADDRESSES.alice), mockNativeTransferDto(MOCK_ADDRESSES.bob)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'token-allowlist') throw new Error('expected a token allowlist')
+
+    expect(policy.data.token).toEqual(ETH)
+    expect(policy.data.recipients.map((recipient) => recipient.address)).toEqual([
+      MOCK_ADDRESSES.alice,
+      MOCK_ADDRESSES.bob,
+    ])
+  })
+
+  // The zero-target entry is the fallback flow's "allow any native transfer", a different policy.
+  it('leaves the catch-all fallback out of the allowlist', () => {
+    expect(mapActivePolicies([mockNativeFallbackDto()], resolveNative)).toEqual([])
+  })
+
+  it('keeps the fallback out while still listing real recipients', () => {
+    const policies = mapActivePolicies(
+      [mockNativeFallbackDto(), mockNativeTransferDto(MOCK_ADDRESSES.alice)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(1)
+    const [policy] = policies
+    if (policy.type !== 'token-allowlist') throw new Error('expected a token allowlist')
+    expect(policy.data.recipients).toHaveLength(1)
+  })
+
+  // Without the chain config there is no symbol or decimals to name the coin by.
+  it('drops the row when the chain native currency is unknown', () => {
+    expect(mapActivePolicies([mockNativeTransferDto(MOCK_ADDRESSES.alice)], () => undefined)).toEqual([])
+  })
+
+  it('keeps an ERC20 allowlist and the native one as separate rows', () => {
+    const policies = mapActivePolicies(
+      [mockTokenAllowlistDto(), mockNativeTransferDto(MOCK_ADDRESSES.alice)],
+      resolveNative,
+    )
+
+    expect(policies).toHaveLength(2)
+    expect(policies.map((policy) => policy.id)).toEqual([...new Set(policies.map((policy) => policy.id))])
   })
 })

@@ -4,13 +4,11 @@ import { useFieldArray, useFormContext } from 'react-hook-form'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import TokenSelector from '../../SpendingLimitFlow/TokenSelector'
 import {
   ADD_RECIPIENT_LABEL,
   ADD_TOKEN_LABEL,
   DUPLICATE_RECIPIENT_ERROR,
-  NATIVE_TOKEN_REASON,
   RECIPIENTS_HELPER_TEXT,
   RECIPIENTS_LABEL,
   RECIPIENT_LABEL,
@@ -22,9 +20,6 @@ import {
   TOKEN_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/constants'
 import type { TokenAllowlistFormValues } from '@safe-global/views/features/spaces/components/Policies/GuardPolicyFlow/types'
-
-/** Stable reference: a new array each render would recompute the token list. */
-const NATIVE_TOKEN_ADDRESSES = [ZERO_ADDRESS]
 
 const Section = ({ label, helper, children }: { label: string; helper: string; children: ReactElement }) => (
   <div className="flex flex-col gap-1">
@@ -55,9 +50,6 @@ const TokenAllowlistForm = (): ReactElement => {
               <div className="grow">
                 <TokenSelector
                   value={tokenValues[index]?.address || undefined}
-                  // The native coin has no ERC-20 transfer selector, so this policy cannot restrict it.
-                  disabledAddresses={NATIVE_TOKEN_ADDRESSES}
-                  disabledAddressReason={NATIVE_TOKEN_REASON}
                   excludeAddresses={pickedTokens.filter((address) => address !== tokenValues[index]?.address)}
                   onChange={(address) => {
                     setValue(`tokens.${index}.address`, address ?? '', { shouldValidate: true, shouldDirty: true })
