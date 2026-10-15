@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import type { CurrentPlan, PlanSeatOption, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 import { PlanLocation } from '@/services/analytics/mixpanel-events'
-import { PlanCard } from '../PlanCards'
+import { PlanCard } from '../PlanCard'
 
 const businessPlan = (overrides: Partial<CurrentPlan> = {}): CurrentPlan => ({
   name: 'Business',
