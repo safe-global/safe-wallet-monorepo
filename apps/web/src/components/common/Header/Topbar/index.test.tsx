@@ -73,13 +73,15 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+const mockUseIsSafeOwner = jest.fn(() => false)
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
-  default: () => false,
+  default: () => mockUseIsSafeOwner(),
 }))
 
+const mockUseIsWalletProposer = jest.fn(() => false)
 jest.mock('@/hooks/useProposers', () => ({
-  useIsWalletProposer: () => false,
+  useIsWalletProposer: () => mockUseIsWalletProposer(),
 }))
 
 const mockIsSpaceRoute = jest.fn(() => true)
@@ -159,6 +161,8 @@ describe('Topbar', () => {
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseSafeAddress.mockReturnValue('')
+    mockUseIsSafeOwner.mockReturnValue(false)
+    mockUseIsWalletProposer.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -553,6 +557,46 @@ describe('Topbar', () => {
       mockUsePathname.mockReturnValue('/welcome')
       render(<Topbar />)
       expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('batch button role gating', () => {
+    const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
+    const BATCH_BUTTON_LABEL = 'Batch transactions'
+
+    beforeEach(() => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(SAFE_ADDRESS)
+    })
+
+    it.each([
+      { role: 'an owner', isSafeOwner: true, isProposer: false },
+      { role: 'a proposer who is also an owner', isSafeOwner: true, isProposer: true },
+      { role: 'a connected non-owner who is not a proposer', isSafeOwner: false, isProposer: false },
+    ])('shows the batch button to $role', ({ isSafeOwner, isProposer }) => {
+      mockUseIsSafeOwner.mockReturnValue(isSafeOwner)
+      mockUseIsWalletProposer.mockReturnValue(isProposer)
+
+      render(<Topbar />)
+
+      expect(screen.getByLabelText(BATCH_BUTTON_LABEL)).toBeInTheDocument()
+    })
+
+    it('hides the batch button from a proposer who is not an owner', () => {
+      mockUseIsWalletProposer.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the batch button from an owner when there is no Safe address', () => {
+      mockUseSafeAddress.mockReturnValue('')
+      mockUseIsSafeOwner.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
     })
   })
 
