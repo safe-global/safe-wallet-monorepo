@@ -183,8 +183,6 @@ export const isolatedSpecs = {
   'cypress/e2e/smoke/import_export_data.cy.js': { scenario: 'prepareImportDataScenario' },
   'cypress/e2e/smoke/landing.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/load_safe.cy.js': { scenario: 'prepareEnsFixtureScenario' },
-  'cypress/e2e/smoke/messages_offchain.cy.js': { scenario: 'prepareBasicScenario' },
-  'cypress/e2e/smoke/nfts.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/replace_owner.cy.js': { scenario: 'prepareBasicScenario' },
   'cypress/e2e/smoke/safe_selector.cy.js': { scenario: 'prepareBasicScenario', chains: [1] },
   'cypress/e2e/smoke/spending_limits.cy.js': { scenario: 'prepareEnsFixtureScenario' },
